@@ -1,9 +1,9 @@
 // BinaryTrees/BinaryTreeParentArrays split out of collections/src/families/core.ts (which mixed
-// every area) per https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// every area) per https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 -- the only two families in core.ts's "trees with nested elements" section carrying a
 // carrier ("BinaryTree" / "BinaryTreeParentArray"). FullKAryTrees/OrderedTrees moved in alongside
 // them (wire-carriers lane A-92): their carriers -- FullKAryTree, OrderedTree -- go NESTED, matching
-// BinaryTree's own shape (`integer | list<any>`, https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible,
+// BinaryTree's own shape (`integer | list<any>`, https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible,
 // #401), since both families' elements already are (kind "nested": KTree = 0 | KTree[], OrdTree
 // = OrdTree[]). The generic kernel math stays in collections/src/families/kernels*.ts.
 import type { EpsilFamily, FastKernel } from "../../../collections/src/families/epsil.ts";

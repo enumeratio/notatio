@@ -3,7 +3,7 @@ import { asNumbers } from "../../collections/tests/number-kernels.ts";
 import { entries } from "../src/families/binary-word-families.ts";
 
 // BinaryBracelets/KBracelets split out of collections/tests/binary-word-families.test.ts with the
-// family (§4 step 5, https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
+// family (§4 step 5, https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
 // -- same recipe: rank(unrank(p, r), p) === r, unranked elements are valid and distinct.
 // TernaryGrayCodes joined them here (wire-carriers lane A-91), now carrying "TernaryGrayCode".
 // StirlingPermutations joined too (wire-carriers lane A-92), now carrying "StirlingPermutation".

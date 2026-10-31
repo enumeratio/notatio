@@ -10,7 +10,7 @@
 // beats the O(x) sieve from about 10^4 (π(10^7) in under a millisecond against ten), so the
 // sieve is only the answer below `PRIME_SIEVE_LIMIT`. Past `PRIME_PI_LIMIT` callers decline
 // rather than grow the working set; prime-count.ts takes PrimePi further (Deléglise–Rivat).
-// Tracked at https://github.com/enumeratio/enumeratio/issues/205.
+// Tracked at https://github.com/enumeratio/notatio/issues/205.
 
 const SEGMENT = 1 << 17; // odd numbers per segment, one byte each
 

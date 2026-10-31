@@ -1,4 +1,4 @@
-// Markup to value through a registry (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §3):
+// Markup to value through a registry (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §3):
 // an example's `notatio` form, read with no engine and evaluated in one that declares only
 // what the markup names, means what the example means in the full engine; and so does the
 // same call qualified by its package's namespace (`Analytic.HurwitzZeta(…)`). The standard run

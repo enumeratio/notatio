@@ -129,7 +129,7 @@ const COUNTED = new Set(["AdicDigits", "AdicExpansion", "AdicSqrt"]);
 
 // A collection family's integer arguments are sizes, not values: resampling them near the
 // template's (up to ±1e6) builds enormous families. They're drawn from the family's own
-// declared params instead (https://github.com/enumeratio/enumeratio/wiki/Plausible §7), within a small work budget.
+// declared params instead (https://github.com/enumeratio/notatio/wiki/Plausible §7), within a small work budget.
 const FAMILIES = new Map<string, AnyFamily>(allFamilies.map((f) => [f.head, f]));
 const FAMILY_SIZE = 6;
 const FAMILY_BUDGET = 20_000n;

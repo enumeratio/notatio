@@ -135,7 +135,7 @@ function substitute(expr: unknown, bindings: ReadonlyMap<string, unknown>): unkn
 export interface TranscriptHost extends Element {
   transcriptFor(engine: ComputeEngine): Transcript;
   /**
-   * `Evaluator` (https://github.com/enumeratio/enumeratio/wiki/Computation, `dynamic-module-box.ts`): `"Local"`
+   * `Evaluator` (https://github.com/enumeratio/notatio/wiki/Computation, `dynamic-module-box.ts`): `"Local"`
    * (default, or absent) evaluates in-page as today; `"Worker"` routes a cell's
    * evaluation to the module's `evaluation` session instead (`evaluateRemote`,
    * below). Optional so a plain `TranscriptHost` (no `Evaluator` support at all)
@@ -146,7 +146,7 @@ export interface TranscriptHost extends Element {
    * Runs a cell's request in the module's kernel rather than this page's engine --
    * only present, and only called, when `evaluatorKind` is `"Worker"`. `signal`
    * aborts THIS call (the module's "stop" control / Escape); the worker itself may
-   * keep running in the background (https://github.com/enumeratio/enumeratio/wiki/Computation §5.3's own limit on what an
+   * keep running in the background (https://github.com/enumeratio/notatio/wiki/Computation §5.3's own limit on what an
    * abort can promise). `reset: true` means the session was hard-killed and
    * restarted -- earlier bindings are gone, surfaced by the module itself.
    */

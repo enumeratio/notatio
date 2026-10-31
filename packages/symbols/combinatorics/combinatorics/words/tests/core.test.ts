@@ -3,7 +3,7 @@ import { asNumbers } from "../../collections/tests/number-kernels.ts";
 import { entries } from "../src/families/core.ts";
 
 // Endofunctions split out of collections/src/families/core.ts (which mixed every area) --
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 (wire-carriers lane A-91) -- same recipe: for every rank r in [0, count),
 // valid(unrank(p, r), p) === true AND rank(unrank(p, r), p) === r.
 const PARAMS: Record<string, number[]> = {

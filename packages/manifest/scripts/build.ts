@@ -1,4 +1,4 @@
-// Assemble the manifest (https://github.com/enumeratio/enumeratio/wiki/Manifest) into src/generated/, which `vp pack` then
+// Assemble the manifest (https://github.com/enumeratio/notatio/wiki/Manifest) into src/generated/, which `vp pack` then
 // builds into dist/: each package's index from its records (scripts/package-index.ts), and
 // compute-engine's own heads from a bare engine, put together by src/assemble.ts. Loads no
 // package's code, so it sits at the bottom of the build graph.

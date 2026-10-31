@@ -1,5 +1,5 @@
 // What a library's version number must say, computed from what changed
-// (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.3): a range (`^1.2.0`) trusts it
+// (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.3): a range (`^1.2.0`) trusts it
 // when it pulls in a newer version, so it's checked, not declared. Diffs the surfaces a
 // published library carries: its names, their signatures, parameter names and attributes, their
 // definitions (pins), their examples, its notation's triggers, and its system range.

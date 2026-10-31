@@ -1,4 +1,4 @@
-// GCD for real bigints, tracked at https://github.com/enumeratio/enumeratio/issues/205:
+// GCD for real bigints, tracked at https://github.com/enumeratio/notatio/issues/205:
 // compute-engine's native GCD folds a plain Euclidean algorithm (`x, y = y, x % y`) over its
 // operands. `declare-gaussian.ts` already carries GCD into ℤ[i] when an operand is genuinely
 // complex, but a call where every operand is a real integer — the common case, and the

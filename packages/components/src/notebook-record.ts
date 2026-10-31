@@ -1,4 +1,4 @@
-// A notebook's record (https://github.com/enumeratio/enumeratio/wiki/Speculative-Sessions-as-Data):
+// A notebook's record (https://github.com/enumeratio/notatio/wiki/Speculative-Sessions-as-Data):
 // its cells as the reader left them, kept in IndexedDB so a reload or another tab shows the
 // same notebook. A notebook is reactive, so its state follows from its cells: the record holds
 // sources, not a history. Their last answers are kept too, but only to show at once: they're

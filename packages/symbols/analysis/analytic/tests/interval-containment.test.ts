@@ -6,7 +6,7 @@ import { NOT_RIGOROUS } from "../src/interval.ts";
 
 // A containment property test for every head interval.ts extends: `f(Interval(l, h))`, where
 // it doesn't decline, must be a superset of `{f(x) : x ∈ [l, h]}` — never an interval that
-// misses part of the true image (the enumeratio/enumeratio#113 §2 coordinator review bug:
+// misses part of the true image (the enumeratio/notatio#113 §2 coordinator review bug:
 // `Cos(Interval(-1, 4))` narrowed to the two endpoints' values instead of the true `[-1, 1]`,
 // because a naive derivative-sign check only finds one interior extremum, and this range
 // crosses two, π/2 and π). Random sub-intervals, deliberately including wide ones spanning

@@ -92,7 +92,7 @@ export const PLAN = enginePlan({ libraries: NAMES, available: AVAILABLE, include
 /**
  * Every declaration with the package that owns it, in order. The package is the directory
  * name, as the manifest names packages: what a step adds or re-signs is that package's
- * contribution (https://github.com/enumeratio/enumeratio/wiki/Manifest).
+ * contribution (https://github.com/enumeratio/notatio/wiki/Manifest).
  */
 export const PACKAGE_DECLARATIONS: readonly (readonly [pkg: string, declare: Declare])[] = PLAN.steps.map(
   ({ library, declare }) => [(library as Extra).package ?? library.name, declare as Declare] as const,

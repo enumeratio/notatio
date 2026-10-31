@@ -1,4 +1,4 @@
-// The terminal's pager over a table's rows (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §3):
+// The terminal's pager over a table's rows (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §3):
 // the visible rows only, a page as tall as the terminal, and a status line that says how much of
 // the count is known. A `Driver` like the control strip, so the same hosts feed it keys; it holds
 // the one `RowSource` and asks it for a range per move. Rows arrive asynchronously, so a key

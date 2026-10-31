@@ -1,4 +1,4 @@
-// Structural checks on the generated Julia-family harnesses (https://github.com/enumeratio/enumeratio/wiki/Benchmarking §4): no
+// Structural checks on the generated Julia-family harnesses (https://github.com/enumeratio/notatio/wiki/Benchmarking §4): no
 // kernel needed, just the emitted text. These check what a
 // fresh generation should contain.
 

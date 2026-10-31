@@ -1,5 +1,5 @@
 // Heads are declared once, and packages contribute signatures to them
-// (https://github.com/enumeratio/enumeratio/wiki/Speculative-Per-Package-Repos §2.3): the rule
+// (https://github.com/enumeratio/notatio/wiki/Speculative-Per-Package-Repos §2.3): the rule
 // that has to hold once the packages are repos of their own, where nothing can say "declare me
 // last". See src/owners.ts.
 

@@ -5,7 +5,7 @@
 // (`wantsCarrier`, `substituteRowPerHead`, and the bare/wrapped representations
 // `#representations` computes) rather than re-deriving it.
 //
-// Since https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5 (A-94), every carrier-bearing family
+// Since https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5 (A-94), every carrier-bearing family
 // comes out typed uniformly -- `declareCombinatorics` mints each area's carriers alongside its
 // families, unconditionally, so there is no "still bare" carrier family the way #385 left
 // IntegerPartitions/DyckPaths for a while, and the collection table no longer looks up a

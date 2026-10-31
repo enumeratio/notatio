@@ -51,5 +51,5 @@ import "@enumeratio/components";
 - [Components, one at a time](https://enumeratio.dev/docs/components/overview) — each component demoed live; `reference/*.stories.yaml`
   in this package back those pages.
 - [`frontend`](../frontend/README.md) — the symbol map, the vdom, and the Vue/React wrappers.
-- [Components and Symbols](https://github.com/enumeratio/enumeratio/wiki/Components-and-Symbols) — the design
+- [Components and Symbols](https://github.com/enumeratio/notatio/wiki/Components-and-Symbols) — the design
   linking a symbol to its element.

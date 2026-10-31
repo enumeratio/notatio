@@ -1,4 +1,4 @@
-// The terminal's drawer of laid-out boxes (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, §4):
+// The terminal's drawer of laid-out boxes (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, §4):
 // `layout` with cell metrics gives positioned text, rules and frames, and slots for the leaves;
 // this paints that onto character cells, frames and rules as box-drawing characters that join
 // where they meet, and a `GraphicsBox` leaf drawn by the figure drawer. Pure: boxes in, text out.

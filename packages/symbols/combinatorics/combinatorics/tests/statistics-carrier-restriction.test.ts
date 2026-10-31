@@ -79,7 +79,7 @@ const members = (expr: unknown): string[] => {
 test("the specification agrees with the fast kernel, element by element", () => {
   // A named restriction with a fast collection (`Derangements`, `OddCompositions`) is the same
   // family as filtering its base, in the base's order
-  // (https://github.com/enumeratio/enumeratio/wiki/Speculative-Restrictions), so filtering must
+  // (https://github.com/enumeratio/notatio/wiki/Speculative-Restrictions), so filtering must
   // reproduce it element by element.
   for (const restriction of RESTRICTIONS) {
     if (!ce.lookupDefinition(restriction.name)) continue;

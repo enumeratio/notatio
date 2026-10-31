@@ -8,7 +8,7 @@
 // cannot hold a live engine — this bakes the answer into a plain generated array, the same
 // pattern as `collect-defined-names.ts`. It is what lets `emit()` unwrap a carrier
 // CONSTRUCTOR call (`Permutation([2, 1, 3])`) to its contents (`[2, 1, 3]`) for an external
-// system whose own encoding is the bare structure — https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// system whose own encoding is the bare structure — https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5.
 //
 //   vp node packages/reference/scripts/collect-carrier-names.ts

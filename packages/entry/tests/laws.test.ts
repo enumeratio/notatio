@@ -1,6 +1,6 @@
 // Pins what the `laws:` shorthand vocabulary MEANS: a change to `expandLaw`'s output is a
 // change to every record that uses it, so this holds the shorthand and its expansion together
-// (https://github.com/enumeratio/enumeratio/wiki/Plausible §4.2 -- design §6's ForAll vocabulary).
+// (https://github.com/enumeratio/notatio/wiki/Plausible §4.2 -- design §6's ForAll vocabulary).
 
 import { expect, test } from "vite-plus/test";
 import { expandLaw, type LawContext, lawsFor } from "../src/laws.ts";

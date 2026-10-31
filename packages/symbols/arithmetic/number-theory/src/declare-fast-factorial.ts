@@ -1,5 +1,5 @@
 // Binary splitting for Factorial(n), tracked at
-// https://github.com/enumeratio/enumeratio/issues/205: native Factorial is a sequential
+// https://github.com/enumeratio/notatio/issues/205: native Factorial is a sequential
 // `result *= k` loop over bigints (same O(n · digits) shape as the native Fibonacci/LucasL
 // loops fast-recurrence.ts replaces); a balanced product tree does the same exact
 // multiplication in far fewer, far-better-balanced bigint multiplications.

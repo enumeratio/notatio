@@ -1,5 +1,5 @@
 // LabeledTrees split out of collections/src/families/core.ts (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5 -- wire-carriers lane A-92: it now
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5 -- wire-carriers lane A-92: it now
 // carries "LabeledTree", the edge set (its element already is one, kind "blocks"). Kept apart
 // from core.ts's nested-tree families (BinaryTrees/FullKAryTrees/OrderedTrees): a different kind
 // ("blocks" vs "nested"), no reason to share a file. RootedForests -- the family LabeledTrees sat

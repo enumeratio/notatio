@@ -1,4 +1,4 @@
-// The engine's half of a `TableViewBox` (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §2): a
+// The engine's half of a `TableViewBox` (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §2): a
 // `RowSource` over an ordered collection, answering rows by range. A kernel holds one per
 // registered handle; the page's own engine holds one where there is no kernel. The column,
 // carrier and filter logic is the collection table's, moved to the side that has the engine.

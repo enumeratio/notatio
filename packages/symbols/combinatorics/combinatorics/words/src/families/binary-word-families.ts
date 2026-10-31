@@ -1,5 +1,5 @@
 // BinaryBracelets/KBracelets split out of collections/src/families/binary-word-families.ts (which
-// mixed every area) per https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// mixed every area) per https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5. Judgment call: these two are the only families in that file carrying a `declared`
 // (Plausible) carrier -- "BinaryWord" and "Word", both words-area carriers -- while TriStrings and
 // PrimitiveBinaryStrings have none at all and so stay in collections per step 5 rule 4.

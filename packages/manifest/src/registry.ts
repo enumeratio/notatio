@@ -1,4 +1,4 @@
-// Names resolved through registries (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §3–§4):
+// Names resolved through registries (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §3–§4):
 // an engine gets only what an expression names, and nothing lists every name up front. A
 // registry is asked about one name at a time, and answers with the libraries that declare it
 // or an Epsil definition to declare. Qualified names (`Statistics.Mean`) are namespaces: a

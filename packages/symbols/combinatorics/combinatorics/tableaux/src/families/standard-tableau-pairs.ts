@@ -1,5 +1,5 @@
 // StandardTableauPairs moved out of collections/src/families/tableaux-plane.ts (§4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible):
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible):
 // it now carries "StandardTableauPair" (tuple<standard_tableau, standard_tableau>). Its element
 // (kind "nested", `[P, Q]`, each a tableau's rows) doesn't pack into that tuple as-is -- CE's
 // tuple type doesn't structurally accept a plain nested List -- so each slot is wrapped in its

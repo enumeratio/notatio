@@ -1,7 +1,7 @@
 // SemistandardTableaux, GelfandTsetlin, AlternatingSignMatrices, SkewStandardTableaux,
 // PlanePartitions and BoxedPlanePartitions split out of collections/src/families/tableaux-plane.ts
 // (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 -- every family in that file carrying a `declared.carrier` (all six do; none has a
 // top-level `carrier` yet). ShiftedStandardTableaux joined them (wire-carriers lane A-92): it
 // now carries the new "ShiftedStandardTableau" carrier (its element already is one, kind

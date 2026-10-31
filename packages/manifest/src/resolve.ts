@@ -1,4 +1,4 @@
-// An expression's code, resolved from the expression (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Engine):
+// An expression's code, resolved from the expression (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Engine):
 // the heads and symbols it names, the packages the manifest says declare them, and those
 // packages' own dependencies, declared into an engine in the host's order. Loads nothing
 // itself: a host lists its libraries and how to declare each.

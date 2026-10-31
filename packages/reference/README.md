@@ -3,7 +3,7 @@
 Structured, verified example data for compute-engine functions — the single source for
 reference pages and their tests. This is the loader and the crosswalk; the record format and
 types it loads live in [`entry`](../entry/README.md), and the record layout itself is AGENTS.md
-"Reference entries" plus [Examples as Data](https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data).
+"Reference entries" plus [Examples as Data](https://github.com/enumeratio/notatio/wiki/Examples-as-Data).
 
 Depends on nearly every symbol package (it documents their heads) and on
 [`oracle`](../oracle/README.md) and [`wolfram`](../wolfram/README.md) for cross-system checking — this is a
@@ -60,6 +60,6 @@ Reference examples are themselves the test data (AGENTS.md "Testing") — never 
 
 ## Next
 
-[Examples as Data](https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data) is the design this package implements. AGENTS.md
+[Examples as Data](https://github.com/enumeratio/notatio/wiki/Examples-as-Data) is the design this package implements. AGENTS.md
 "CI and deployment" covers where the gate ends and the oracle sweeps (advisory, nightly)
 begin.

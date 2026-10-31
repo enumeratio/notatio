@@ -1,5 +1,5 @@
 // Fast doubling for Fibonacci/LucasL, tracked at
-// https://github.com/enumeratio/enumeratio/issues/205 (the first cross-system bench run):
+// https://github.com/enumeratio/notatio/issues/205 (the first cross-system bench run):
 // native Fibonacci/LucasL are each an O(n) bigint-addition loop where fast doubling does the
 // same exact job in O(log n) bigint multiplications. Exact, never approximate; declines
 // (falls through to the native handler) past a documented size rather than pretend a budget

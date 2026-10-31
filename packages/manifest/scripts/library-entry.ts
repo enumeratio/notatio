@@ -1,5 +1,5 @@
 // A library's JavaScript entry, generated at pack time from its Epsil
-// (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2), so the package works as a plain
+// (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2), so the package works as a plain
 // library too. The Epsil stays the only source: this is derived from it, never edited.
 //
 //   - `declare(ce)` declares every definition into a compute-engine, under the heads the

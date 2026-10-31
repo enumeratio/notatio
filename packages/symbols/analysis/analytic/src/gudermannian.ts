@@ -23,7 +23,7 @@ import { type EvalOptions, isFiniteNum, wantsNumber } from "@enumeratio/ce-patch
 // this path the direction is clean): gd(z) -> DirectedInfinity(i) for even k,
 // DirectedInfinity(-i) for odd k. Checked numerically (this package's own complex Tanh/Arctan,
 // approaching each of k = -2..2 from both sides along the real axis) before writing the sign
-// pattern down; matches Wolfram's own DirectedInfinity(i) at k = 0 (enumeratio/enumeratio#478
+// pattern down; matches Wolfram's own DirectedInfinity(i) at k = 0 (enumeratio/notatio#478
 // landed `DirectedInfinity` on main since the first version of this file, which only had
 // undirected `ComplexInfinity` here).
 

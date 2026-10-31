@@ -2,7 +2,7 @@
 
 The enumeratio catalog as resolvable resources: lazy context namespaces, a search path, and
 the promotion ladder from namespaced to blessed to global
-([Namespaces](https://github.com/enumeratio/enumeratio/wiki/Namespaces)). Registering the whole catalog — hundreds of
+([Namespaces](https://github.com/enumeratio/notatio/wiki/Namespaces)). Registering the whole catalog — hundreds of
 collections, carriers, stats and maps — costs one map insert each; nothing here declares a
 compute-engine head until a name is actually promoted. Depends only on [`engine`](../engine/README.md).
 
@@ -22,7 +22,7 @@ Its heads (`Resource`) keep their reference entries under `reference/`.
   head is already declared) is asked of the engine, never recorded in the data.
 - **`lazy.ts`** — `prepare`/`applicationCandidates`/`rawParse`/`Install`: the resolve-before-evaluate
   loop — parse, find candidates, resolve async, declare, box — so the synchronous evaluator
-  is never asked to suspend ([Namespaces](https://github.com/enumeratio/enumeratio/wiki/Namespaces) §5.1).
+  is never asked to suspend ([Namespaces](https://github.com/enumeratio/notatio/wiki/Namespaces) §5.1).
 - **`latex.ts`** — `CATALOG_LATEX`/`RESOURCE_TRIGGER`/`LatexEntry`.
 - **`spelling.ts`** — `pascal`.
 
@@ -36,7 +36,7 @@ vp pack   # build dist (also: vp pack --watch)
 
 ## Next
 
-[Namespaces](https://github.com/enumeratio/enumeratio/wiki/Namespaces) has the full argument for lazy resolution, the rung
-model, and which names should become heads at all; [Symbols](https://github.com/enumeratio/enumeratio/wiki/Symbols) is the
+[Namespaces](https://github.com/enumeratio/notatio/wiki/Namespaces) has the full argument for lazy resolution, the rung
+model, and which names should become heads at all; [Symbols](https://github.com/enumeratio/notatio/wiki/Symbols) is the
 companion piece on what to do once a name is already Wolfram's, enforced by
 [`census`](../census/README.md).

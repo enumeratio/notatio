@@ -41,7 +41,7 @@ import {
 //
 // Slot (`#`, `#1`) is NOT declared here: Epsil's own pure-function literals already lower
 // `#`/`#1` to compute-engine's `Function`/parameter-symbol representation at parse time (see
-// `https://github.com/enumeratio/enumeratio/wiki/Syntax-and-Formats`), so there is no bare `Slot` head left to give meaning to
+// `https://github.com/enumeratio/notatio/wiki/Syntax-and-Formats`), so there is no bare `Slot` head left to give meaning to
 // on this engine — declaring one would just shadow that lowering.
 
 /** Wolfram 1-based position, negative counting from the end, to a positive 1-based index. */

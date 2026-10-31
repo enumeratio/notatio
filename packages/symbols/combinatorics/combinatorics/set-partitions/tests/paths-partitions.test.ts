@@ -5,7 +5,7 @@ import { asNumbers } from "../../collections/tests/number-kernels.ts";
 import { numberKernel } from "../../collections/src/families/types.ts";
 
 // RestrictedGrowthStrings split out of collections/tests/paths-partitions.test.ts with the family
-// (§4 step 5, https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
+// (§4 step 5, https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
 // -- same recipe: for every rank r in [0, count), valid(unrank(p, r), p) === true AND
 // rank(unrank(p, r), p) === r.
 const PARAMS: Record<string, number[]> = {

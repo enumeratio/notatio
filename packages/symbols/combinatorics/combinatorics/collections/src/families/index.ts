@@ -73,7 +73,7 @@ export * from "./types.ts";
 export * from "./epsil.ts";
 
 // Every `<area>...Entries` group below keeps the exact interior position its source file held
-// before that area's move -- https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5.
+// before that area's move -- https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5.
 const numberEntries = [
   ...partitionsCoreEntries,
   ...coreBeforeSurjections,
@@ -123,7 +123,7 @@ const numberEntries = [
 
 // Every family: a TS kernel in the bigint contract, or an Epsil definition whose kernel belongs
 // to an engine (`allKernels`). The Plausible and OEIS scripts read them. Order here is data-list
-// order only -- since https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// order only -- since https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5's `carrierTypes` removal (A-94), nothing declares this list as one call any more;
 // see `collectionsEntries` below and each area's own `declare<Area>` for what does.
 export const allFamilies: readonly AnyFamily[] = [

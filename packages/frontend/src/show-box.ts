@@ -1,4 +1,4 @@
-// `Show` lowered to a `GraphicsBox` (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, §3):
+// `Show` lowered to a `GraphicsBox` (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, §3):
 // the one contract every environment draws, whether a terminal, an SVG or the web element.
 //
 // A figure frame is a finite layer: its box lists every mark and link. A lattice is unbounded,

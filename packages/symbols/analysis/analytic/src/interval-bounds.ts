@@ -2,7 +2,7 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { operandsOf } from "@enumeratio/engine";
 
 // Rigorous endpoints for an interval image: the promise an `Interval` result makes is that
-// it CONTAINS every value the function takes on the input (enumeratio/enumeratio#113 §2 --
+// it CONTAINS every value the function takes on the input (enumeratio/notatio#113 §2 --
 // "rigorous containment", as Wolfram's `Interval` also promises). An exact endpoint (`1/2`,
 // `Sqrt(3)`, `Arctan(3)`) keeps that promise by being exactly right. An inexact one -- the
 // value at a float endpoint, or at a numerically located extremum -- keeps it by being

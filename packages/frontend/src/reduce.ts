@@ -6,7 +6,7 @@
 // print-native reading of a slider); a `Dynamic` becomes what it read; a GPU plot on a
 // surface without one is rasterized; a `Row` in a narrow column stacks. It runs before
 // `structuralOf`, so every backend downstream is unchanged.
-// See https://github.com/enumeratio/enumeratio/wiki/Rendering-Environments.
+// See https://github.com/enumeratio/notatio/wiki/Rendering-Environments.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 import { type ControlBoxHead, LAYOUT_HEADS, makeBoxes, PROSE_HEADS } from "@enumeratio/boxes";

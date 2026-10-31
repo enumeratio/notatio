@@ -1,5 +1,5 @@
 // Whether a library's new version number says what changed since its previous one
-// (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.3): the published surfaces diffed
+// (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.3): the published surfaces diffed
 // (`changesOf`), and the previous version's examples run against the new definitions, a
 // failing one being a break. Both versions are packed directories; the previous one is what
 // the host serves for it, unpacked.

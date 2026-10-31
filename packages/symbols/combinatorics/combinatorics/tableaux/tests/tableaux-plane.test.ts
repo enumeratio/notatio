@@ -8,7 +8,7 @@ import {
 } from "../src/families/tableaux-plane.ts";
 
 // Split out of collections/tests/tableaux-plane.test.ts with the families (§4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
 // -- StandardTableauPairs (no carrier) stayed there. ShiftedStandardTableaux joined this file
 // (wire-carriers lane A-92), now carrying "ShiftedStandardTableau". SkewPartitions moved earlier
 // to the partitions area; its tests are in partitions/tests/tableaux-plane.test.ts.

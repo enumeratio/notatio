@@ -8,7 +8,7 @@ depends on them, which is the cycle this package exists to break.
 A head's folder holds `index.md` (front matter plus a markdown body), `examples.tsv` (one
 hand-written row per example, in page order, with any pinned own forms as `<form>.<field>`
 columns), and each kernel's generated `examples.values.<system>.tsv`. See AGENTS.md "Reference entries" and
-[Examples as Data](https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data) for the format and what `id`, `known` and `source`
+[Examples as Data](https://github.com/enumeratio/notatio/wiki/Examples-as-Data) for the format and what `id`, `known` and `source`
 mean on an example.
 
 ## Entry points

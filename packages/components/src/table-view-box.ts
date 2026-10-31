@@ -1,4 +1,4 @@
-// <table-view-box>: the web's `TableViewBox` (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §3). A
+// <table-view-box>: the web's `TableViewBox` (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §3). A
 // fixed-height viewport (`contain: strict`, so the page around it never reflows) over a row
 // source it registers with the page's kernel. It draws only the rows in view plus an overscan,
 // caches them in aligned blocks, drops blocks far from the view (never the one holding focus),

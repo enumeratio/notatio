@@ -69,7 +69,7 @@ const ce = bareEngine();
 declareCombinatorics(ce);
 declareMaps(ce, constructorFor);
 
-/** Ids for a head's examples, from their captions (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §3). */
+/** Ids for a head's examples, from their captions (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §3). */
 const withIds = (examples: readonly { caption?: string }[]): ReferenceExample[] => {
   const taken = new Set<string>();
   return examples.map((e) => ({

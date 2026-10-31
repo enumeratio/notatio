@@ -1,7 +1,7 @@
 import { type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
 import { conform } from "@enumeratio/structures";
 
-// Set partitions of one ground set under refinement (https://github.com/enumeratio/enumeratio/wiki/Structures):
+// Set partitions of one ground set under refinement (https://github.com/enumeratio/notatio/wiki/Structures):
 // π ≤ σ when every block of π lies inside a block of σ, so the finest partition (all singletons)
 // is the bottom. A lattice, not a total order -- {{1,2},{3}} and {{1},{2,3}} are incomparable --
 // so `Min` is the meet (the common refinement: the non-empty pairwise block intersections) and

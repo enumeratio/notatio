@@ -1,4 +1,4 @@
-// A cell's side of a kernel (https://github.com/enumeratio/enumeratio/wiki/Speculative-Kernels-and-Front-Ends):
+// A cell's side of a kernel (https://github.com/enumeratio/notatio/wiki/Speculative-Kernels-and-Front-Ends):
 // it sends text and renders what comes back -- the value, its display as boxes, the parsed
 // input, its history line and its messages -- with no engine of its own. A `<DynamicModule
 // Evaluator -> Worker>` has a kernel of its own; every other cell on the page shares the

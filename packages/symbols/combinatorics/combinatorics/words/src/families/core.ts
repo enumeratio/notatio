@@ -1,5 +1,5 @@
 // Endofunctions split out of collections/src/families/core.ts (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 (wire-carriers lane A-91): its element (list<integer>) matches "Endofunction"'s shape
 // exactly, same as BinaryWords <-> BinaryWord in words.ts. BinaryStrings/LatticePaths stay in
 // collections per step 5 rule 4. Defined in Epsil: the tuples of n values over 1..n.

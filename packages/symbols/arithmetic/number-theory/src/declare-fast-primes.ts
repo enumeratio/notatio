@@ -1,4 +1,4 @@
-// PrimePi/NthPrime, tracked at https://github.com/enumeratio/enumeratio/issues/205: native
+// PrimePi/NthPrime, tracked at https://github.com/enumeratio/notatio/issues/205: native
 // PrimePi is an O(n) trial-division loop, and native NthPrime the same past an ever-growing
 // candidate. Both are exact, never approximate, and decline past their limit rather than run
 // for minutes (see the residues package: sieve.ts, prime-count.ts, nth-prime.ts):

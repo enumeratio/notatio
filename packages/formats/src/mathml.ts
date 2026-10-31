@@ -2,7 +2,7 @@
 // boxes (`makeBoxes`), and the boxes as MathML; a pure function of the MathJSON tree, so it
 // can be golden-tested. Read back, MathML is boxes (`parseMathML`), and boxes become an
 // expression through their LaTeX until MakeExpression reads them directly (see the Roadmap).
-// See https://github.com/enumeratio/enumeratio/wiki/Boxes.
+// See https://github.com/enumeratio/notatio/wiki/Boxes.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";

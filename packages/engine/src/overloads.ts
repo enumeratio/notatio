@@ -1,4 +1,4 @@
-// Overloads as data (https://github.com/enumeratio/enumeratio/wiki/Speculative-Overloads-as-Data):
+// Overloads as data (https://github.com/enumeratio/notatio/wiki/Speculative-Overloads-as-Data):
 // a package's extension of a head it doesn't own is a row in that head's table, which the
 // head dispatches from. Rows are ordered by what they are, never by who declared first, and
 // the head's signature is computed from them, never assigned.

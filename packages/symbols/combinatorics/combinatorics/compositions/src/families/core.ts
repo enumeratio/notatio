@@ -1,5 +1,5 @@
 // Compositions-area families split out of collections/src/families/core.ts (which mixed every
-// area) per https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// area) per https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5: IntegerCompositions and its two siblings. The generic kernel math they call stays in
 // collections/src/families/kernels*.ts — reused across areas, not compositions-specific machinery.
 //

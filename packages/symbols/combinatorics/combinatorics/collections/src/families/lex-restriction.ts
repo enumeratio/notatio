@@ -1,5 +1,5 @@
 // A restriction of a lex-ordered base, in the order the base gives it
-// (https://github.com/enumeratio/enumeratio/wiki/Speculative-Restrictions): the k-th member is
+// (https://github.com/enumeratio/notatio/wiki/Speculative-Restrictions): the k-th member is
 // the k-th element of the base, in its order, that the restriction contains. The base builds
 // its elements left to right; the restriction says only how many of its members start with a
 // given prefix. Unranking chooses each entry in turn, smallest first, skipping past the members

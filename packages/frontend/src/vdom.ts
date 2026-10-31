@@ -1,4 +1,4 @@
-// The AST as a vdom (https://github.com/enumeratio/enumeratio/wiki/Vdom): a MathJSON node `[head, ...args]` and a vdom node
+// The AST as a vdom (https://github.com/enumeratio/notatio/wiki/Vdom): a MathJSON node `[head, ...args]` and a vdom node
 // `{ tag, props, children }` are the same tree under a renaming, and this module is the
 // renaming both ways. `structuralOf` writes the expression out verbatim -- every head a
 // tag, every argument a child, a run of atoms as its tokens, as the markup reader reads

@@ -1,4 +1,4 @@
-// The arithmetic of a lazy grid's drawer (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §3): which rows
+// The arithmetic of a lazy grid's drawer (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §3): which rows
 // a viewport shows and asks for, the blocks they are cached in, which blocks to drop, and how a
 // scroll position maps to a row when the content is taller than a browser will scroll. Pure, so
 // the web element and the terminal pager share it and a test needs no document.

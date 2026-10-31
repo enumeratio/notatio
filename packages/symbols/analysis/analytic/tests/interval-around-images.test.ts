@@ -2,7 +2,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 
-// enumeratio/enumeratio#113 §2: images of an Interval. Here: a decline case. See
+// enumeratio/notatio#113 §2: images of an Interval. Here: a decline case. See
 // tagged-calculus.ts for the shared derivative-sign-and-bisection rule both directions of
 // this file share.
 

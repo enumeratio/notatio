@@ -12,7 +12,7 @@ start, and the declaration becomes a caption) or **sampled** (the body at a few 
 small multiples, the print-native reading of a slider); a `Dynamic` is read once; a GPU
 plot on paper is rasterized; a `Row` in a narrow column stacks. The web and a terminal
 have an engine and a way in, so there the expression is left alone. See
-`https://github.com/enumeratio/enumeratio/wiki/Rendering-Environments`.
+`https://github.com/enumeratio/notatio/wiki/Rendering-Environments`.
 
 Each card below reduces its expression for the environment you pick, and for the page's
 own when it prints.

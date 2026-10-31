@@ -1,6 +1,6 @@
 // Boxes: the presentation tree between an expression and its rendering. Plain JSON in
 // Wolfram's FullForm shape -- a leaf is a string (a token), a node is `[head, ...args]`,
-// a Wolfram list is an array and options are a trailing object. See https://github.com/enumeratio/enumeratio/wiki/Boxes.
+// a Wolfram list is an array and options are a trailing object. See https://github.com/enumeratio/notatio/wiki/Boxes.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 
@@ -71,12 +71,12 @@ export type BoxNode =
   | readonly ["TooltipBox", Box, Box, Options?]
   | readonly ["PaneSelectorBox", readonly (readonly [Box, Box])[], MathJsonExpression, Options?]
   // A scrolling grid over a row source held as an expression (`RowSource(…)`); the rows
-  // reach it by range, never as operands (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid).
+  // reach it by range, never as operands (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid).
   | readonly ["TableViewBox", MathJsonExpression, Options?]
   | readonly ["TagBox", Box, string, Options?]
   | readonly ["InterpretationBox", Box, MathJsonExpression, Options?]
   | readonly ["ErrorBox", Box]
-  // Graphics (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives). A primitive's
+  // Graphics (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives). A primitive's
   // geometry is its options, in the frame's coordinates; a mark is `TagBox`ed with its address,
   // a link with its members. A `GraphicsBox` holds its primitives as a list; a `GraphicsComplexBox` holds its coordinates, then its primitives, as Wolfram's do.
   | readonly ["GraphicsBox", readonly Box[], Options?]
@@ -89,11 +89,11 @@ export type BoxNode =
   | readonly ["PolygonBox", Options?]
   | readonly ["PolyhedronBox", Options?]
   | readonly ["InsetBox", Box, Options?]
-  // A pixel grid in the frame's coordinates (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, slice 7):
+  // A pixel grid in the frame's coordinates (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, slice 7):
   // `Colors` rows run from the bottom (`DataRange`'s least y) up, each left to right; a `Producer`
   // names what fills a raster not held (`ComplexPlot`).
   | readonly ["RasterBox", Options?]
-  // Space (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, slice 7): the same contract in three
+  // Space (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, slice 7): the same contract in three
   // dimensions. A primitive's geometry is its options; inside a `GraphicsComplex3DBox` a `Polygon3DBox`
   // or `Line3DBox` names its vertices by `Indices` into the complex's coordinates (its first operand).
   | readonly ["Graphics3DBox", readonly Box[], Options?]
@@ -102,11 +102,11 @@ export type BoxNode =
   | readonly ["Line3DBox", Options?]
   | readonly ["Point3DBox", Options?]
   | readonly ["CuboidBox", Options?]
-  // Prose (https://github.com/enumeratio/enumeratio/wiki/Speculative-Prose-Pipeline). Inside `TextData` a leaf is text, not a token.
+  // Prose (https://github.com/enumeratio/notatio/wiki/Speculative-Prose-Pipeline). Inside `TextData` a leaf is text, not a token.
   | readonly ["TextCell", Box, string, Options?]
   | readonly ["TextData", readonly Box[]]
   | readonly ["ButtonBox", Box, Options?]
-  // Interface boxes (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, slice 3). A `DynamicBox`
+  // Interface boxes (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, slice 3). A `DynamicBox`
   // holds an expression the environment re-evaluates when what it reads moves; a `DynamicModuleBox`
   // owns the scope its controls bind in; a control box binds one variable, `Dynamic(x)`, an
   // expression rather than a box as in Wolfram.

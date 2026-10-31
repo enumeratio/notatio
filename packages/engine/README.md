@@ -16,12 +16,12 @@ top of this one — it has no workspace dependencies of its own.
   expression to hold them.
 - **`src/messages.ts`** — `Head::code` messages: a head that declines to evaluate stays
   unevaluated (never `["Error", …]`) but can say why, with arguments spliced into a template.
-  See also [Syntax and Formats](https://github.com/enumeratio/enumeratio/wiki/Syntax-and-Formats).
+  See also [Syntax and Formats](https://github.com/enumeratio/notatio/wiki/Syntax-and-Formats).
 - **`src/deadline.ts`** — `withDeadline` / `checkpoint()`: a cooperative budget for loops
   (Pollard rho, baby-step giant-step) that never pass through compute-engine's own boxed
   deadline frame.
 - **`src/random.ts`** — the one `Random` head, drawing from a seeded stream per engine
-  ([Random](https://github.com/enumeratio/enumeratio/wiki/Random)); Wolfram's `RandomInteger` / `RandomVariate` rewrite to it.
+  ([Random](https://github.com/enumeratio/notatio/wiki/Random)); Wolfram's `RandomInteger` / `RandomVariate` rewrite to it.
 - **`src/latex.ts`** — the `LatexRule` hook: a library declares how a head reads and writes
   LaTeX as a `LatexDictionaryEntry` narrowed to the parser and serializer methods libraries
   call (`LatexReader`, `LatexWriter`); `latexEntries` is where it becomes compute-engine's own.
@@ -60,4 +60,4 @@ vp pack    # build dist (also: vp pack --watch)
 
 Reference entries and oracle goldens for heads that use this plumbing live in
 [`reference`](../reference/README.md). For the `Head::code` message convention and Epsil generally, see
-[Syntax and Formats](https://github.com/enumeratio/enumeratio/wiki/Syntax-and-Formats).
+[Syntax and Formats](https://github.com/enumeratio/notatio/wiki/Syntax-and-Formats).

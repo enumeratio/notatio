@@ -1,4 +1,4 @@
-// The terminal's drawer of a `GraphicsBox` (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives):
+// The terminal's drawer of a `GraphicsBox` (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives):
 // the boxes of a figure on a grid of character cells, with no layer code. Curves and points go
 // on braille cells (2 × 4 dots each, as `textPlot` does) with a point as `●`; a figure of
 // rectangles (a Young diagram) is ruled with box-drawing characters instead. Pure: boxes in,
