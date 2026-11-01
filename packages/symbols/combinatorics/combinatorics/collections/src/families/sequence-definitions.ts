@@ -1,8 +1,8 @@
 // The numeric sequences with no single closed form, defined in Epsil as fibers with no end whose elements
 // are their terms (kind "scalar"), as ./numeric-definitions.ts does for the closed-form ones: the linear
 // recurrences, the factorials and Catalan numbers (a term from the one before), Motzkin, Delannoy and
-// Schröder numbers (a sum), Bell, Fubini and partition numbers (a sum over all the terms before), and the
-// sequences of a number's binary digits. The TS kernels stay as the fast
+// Schröder numbers (a sum), Bell, Fubini and partition numbers (a sum over all the terms before), the
+// primorials (a product of primes found by trial division), and the sequences of a number's binary digits. The TS kernels stay as the fast
 // paths while a term is a safe integer, bar the `UNWIRED` ones (./numeric-definitions.ts); past that the
 // interpreter's exact integers answer (./epsil.ts).
 //
@@ -14,6 +14,7 @@
 import type { EpsilFamily } from "./epsil.ts";
 import { type FastReach, sequence, withDefinitions } from "./numeric-definitions.ts";
 import { add, and, at, equal, floorLog2, fold, iff, less, lets, mul, quotient, sub } from "./tables.ts";
+import { prime, primeBound } from "./scan-definitions.ts";
 import type { NumberKernel } from "./types.ts";
 
 type MathJSON = unknown;
@@ -362,6 +363,82 @@ const stern: EpsilFamily = (() => {
   };
 })();
 
+/** The candidates 2..`to` of a prime scan. */
+const candidates = (to: MathJSON): MathJSON => ["Range", 2, to, 1];
+
+/**
+ * The primorials p_1#, p_2#, … (2, 6, 30, …; the empty product 1 is no member), rank r being p_(r+1)#. A fold over
+ * the candidates k = 2..primeBound(n) carries (primes taken, their product, the rank of the product if it is `_x`),
+ * tests k for primality only while fewer than n primes are taken (the `If` is lazy), and past n leaves the state
+ * alone. The bound is that of PrimeNumbers' definition (./scan-definitions.ts), so n primes are always met; a
+ * state that falls short anyway is NaN, which the kernel refuses.
+ *
+ * Membership and rank walk until the product reaches `_x`, which needs at most N = ⌊log₂ x⌋/2 + 2 primes: for
+ * n ≥ 2, p_n# > 4^(n−1) (p_2# = 6 > 4, and each prime from the third on is at least 4), so p_N# > 2^(⌊log₂ x⌋ + 2) > x.
+ * tests/sequence-epsil.test.ts holds the bound against every term of the kernel up to the reach. A walk that ends
+ * short of `_x` is NaN as well.
+ */
+const primorials = (): EpsilFamily => {
+  const [state, k] = ["pm_s", "pm_k"];
+  const [taken, product, place] = [1, 2, 3].map((j) => at(state, j));
+  const unrank = lets(
+    [
+      ["pm_n", add("_r", 1), "integer"],
+      [
+        "pm_f",
+        fold(
+          iff(less(taken, "pm_n"), iff(prime(k), ["List", add(taken, 1), mul(product, k)], state), state),
+          state,
+          k,
+          ["List", 0, 1],
+          candidates(primeBound("pm_n")),
+        ),
+        "list<integer>",
+      ],
+    ],
+    iff(equal(at("pm_f", 1), "pm_n"), at("pm_f", 2), "NaN"),
+  );
+  const primes = lets([["pm_c", add(quotient(floorLog2("_x"), 2), 2), "integer"]], candidates(primeBound("pm_c")));
+  const step = iff(
+    ["GreaterEqual", product, "_x"],
+    state,
+    iff(
+      prime(k),
+      lets(
+        [["pm_q", mul(product, k), "integer"]],
+        ["List", add(taken, 1), "pm_q", iff(equal("pm_q", "_x"), taken, place)],
+      ),
+      state,
+    ),
+  );
+  const walked = lets(
+    [["pm_w", fold(step, state, k, ["List", 0, 1, -1], primes), "list<integer>"]],
+    iff(less(at("pm_w", 2), "_x"), "NaN", at("pm_w", 3)),
+  );
+  return {
+    head: "PrimorialNumbers",
+    paramCount: 0,
+    kind: "scalar",
+    params: [],
+    settle: true,
+    epsil: {
+      count: INFINITY,
+      unrank,
+      rank: iff(["GreaterEqual", "_x", 2], walked, -1),
+      valid: iff(["GreaterEqual", "_x", 2], ["GreaterEqual", walked, 0], "False"),
+    },
+    early: {
+      member: (x) => pastBits(x, PRIMORIAL_BITS),
+      rank: (x) => pastBits(x, PRIMORIAL_BITS),
+      unrank: (r) => (r > PRIMORIAL_REACH ? "decline" : undefined),
+    },
+  };
+};
+
+/** The ranks and bits of a primorial the interpreter answers in a second or so (measured: tests/sequence-epsil.test.ts). */
+const PRIMORIAL_REACH = 50;
+const PRIMORIAL_BITS = 200;
+
 const families: readonly EpsilFamily[] = [
   walked({ head: "FibonacciNumbers", seed: [0, 1], perBit: 2, maxBits: 2200, next: (t) => add(t(1), t(2)) }),
   walked({ head: "LucasNumbers", seed: [2, 1], from: 1, perBit: 2, maxBits: 2200, next: (t) => add(t(1), t(2)) }),
@@ -427,6 +504,7 @@ const families: readonly EpsilFamily[] = [
   byWeight("OdiousNumbers", 1),
   thueMorse,
   stern,
+  primorials(),
 ];
 
 /** The definitions, by head. */
@@ -458,6 +536,7 @@ const REACHES: Readonly<Record<string, FastReach>> = {
   ),
   FactorialNumbers: { bigTerms: true, unrank: 30_000 },
   DoubleFactorialNumbers: { bigTerms: true, unrank: 30_000 },
+  PrimorialNumbers: { bigTerms: true, unrank: 10_000 },
   SternDiatomicSequence: { rank: STERN_RANK_LIMIT },
 };
 
