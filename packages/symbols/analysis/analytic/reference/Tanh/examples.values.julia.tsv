@@ -5,6 +5,8 @@ stays-symbolic-even-at-0-same-as-sinh-and-cosh	enumeratio_ball(tanh, 0)	0.0
 a-float-argument-evaluates-directly-no-n-needed	enumeratio_ball(tanh, enumeratio_decimal("2.2"))	0.9757431300314515204143066680301146527813050340579887493150816739173344072137137	
 series-tanh-x-x-0-10			
 series-tanh-x-x-1-over-2-times-i-times-pi-3			
+series-tanh-at-i-pi-over-2-order-neg-1			
+tanh-artanh-1-is-1	enumeratio_ball(tanh, enumeratio_ball(_atanh, 1))	ball not finite	error
 arbitrary-precision-via-n	(enumeratio_ball(tanh, (11 // 5)))	0.9757431300314515204143066680301146527813050340579887493150816739173344072137137	
 evaluates-at-a-complex-argument	enumeratio_ball(tanh, enumeratio_complex(enumeratio_decimal("2.5"), 1))	(1.005548011895059983672932904319519725101743084960169346003924515180840715587515+0.01232213825582835354096963930861708995795799180031536934845749716777775580084546j)	
 interval-arithmetic-tanh-is-increasing-so-tanh-0			

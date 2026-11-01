@@ -4,6 +4,7 @@ digamma-neg-1	psi(-1)	ValueError: psi_eval(): simple pole	error
 a-floating-point-argument-evaluates-directly-to	psi(0.5)	-1.96351002602142	
 a-machine-precision-argument	psi(100.5)	4.60517435258185	
 psi-5-h-4-gamma-frac-25-12-gamma	psi(5)	-euler_gamma + 25/12	
+digamma-at-two-poles-compares-equal	enumeratio_equal(psi(-1), (psi(-12) + -1))		
 threads-over-a-list-reducing-each-positive	[psi(1), psi(2), psi(3)]	[-euler_gamma, -euler_gamma + 1, -euler_gamma + 3/2]	
 complex-arguments-should-evaluate-as-psi-m-does	psi((2.5 + 3*I))	1.28127391906623 + 0.979805315344560*I	
 psi-infty-infty-growing-like-ln-z	psi(oo)	psi(+Infinity)	disagree

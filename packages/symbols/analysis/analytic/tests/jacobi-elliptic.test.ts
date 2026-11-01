@@ -83,6 +83,18 @@ test("a genuinely complex m is declined (stays symbolic even under N())", () => 
   expect(r.operator).toBe("JacobiSN");
 });
 
+test("a phase the double kernel cannot vouch for is declined, on every pq head", () => {
+  // dn(1.1 - 7e5 i | 1e-12) = 0.99186268792364544527 - 0.01104987082074023840 i (mpmath,
+  // converged from 30 to 300 digits); the double kernel was off by 1.7e-6.
+  for (const head of ["JacobiDN", "JacobiCN", "JacobiSN", "JacobiND"]) {
+    expect(ce.box([head, ["Complex", 1.1, -700000], 1e-12]).N().operator).toBe(head);
+  }
+  // Mid-range parameters keep their digits.
+  const kept = ce.box(["JacobiDN", ["Complex", 1.1, -1000], 0.5]).N();
+  expect(kept.operator).not.toBe("JacobiDN");
+  expect(Number.isFinite(kept.re)).toBe(true);
+});
+
 // --- Identities ------------------------------------------------------------------
 
 test("sn^2 + cn^2 = 1 at a complex point", () => {

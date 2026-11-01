@@ -4,6 +4,7 @@ digamma-neg-1	PolyGamma[-1]	ComplexInfinity		\psi (-1)	\text{ComplexInfinity}
 a-floating-point-argument-evaluates-directly-to	PolyGamma[0.5]	-1.9635100260214235		\psi (0.5)	-1.96351	
 a-machine-precision-argument	PolyGamma[100.5]	4.605174352581845		\psi (100.5)	4.60517	
 psi-5-h-4-gamma-frac-25-12-gamma	PolyGamma[5]	25/12 - EulerGamma		\psi (5)	\frac{25}{12}-\gamma	
+digamma-at-two-poles-compares-equal	(PolyGamma[-1] == Plus[PolyGamma[-12], -1])					
 threads-over-a-list-reducing-each-positive	PolyGamma[List[1, 2, 3]]	{-EulerGamma, 1 - EulerGamma, 3/2 - EulerGamma}		\psi (\{1,2,3\})	\left\{-\gamma ,1-\gamma ,\frac{3}{2}-\gamma \right\}	
 complex-arguments-should-evaluate-as-psi-m-does	PolyGamma[Complex[2.5, 3]]	1.2812739190662308 + 0.9798053153445597*I		\psi (2.5\, +3 i)	1.28127\, +0.979805 i	
 psi-infty-infty-growing-like-ln-z	PolyGamma[Infinity]	Infinity		\psi (\infty )	\infty	

@@ -1,5 +1,6 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	enumeratio_n(jacobi_dc(RealField(200)("0.6"), RealField(200)("0.4")))	1.12478042691156	
+n-jacobidc-complex-u-at-m-1	enumeratio_n(jacobi_dc((8 * (2 + (sqrt(-14) / 2))), ((((1 + (-(sqrt(2) / 2))))^2) * (((1 + (sqrt(2) / -2)))^-2))))		
 m-less-than-0-via-the-imaginary-modulus	enumeratio_n(jacobi_dc(RealField(200)("0.3"), RealField(200)("-0.7")))	1.07993977008323	
 d-jacobidc-u-m-m	diff(jacobi_dc(SR.var("u"), SR.var("m")), SR.var("m"))	-1/2*((u + elliptic_e(arcsin(jacobi_sn(u, m)), m)/(m - 1))*jacobi_cn(u, m)*jacobi_sn(u, m) - jacobi_dn(u, m)*jacobi_sn(u, m)^2/(m - 1))/jacobi_cn(u, m) + 1/2*((u + elliptic_e(arcsin(jacobi_sn(u, m)), m)/(m - 1))*jacobi_dn(u, m)*jacobi_sn(u, m)/m - jacobi_cn(u, m)*jacobi_sn(u, m)^2/(m - 1))*jacobi_dn(u, m)/jacobi_cn(u, m)^2	disagree
 series-jacobidc-u-m-u-0-5	SR(jacobi_dc(SR.var("u"), SR.var("m"))).series(SR.var("u") == 0, 5 + 1)	1 + (-1/2*m + 1/2)*u^2 + (1/24*m^2 - 1/4*m + 5/24)*u^4 + Order(u^6)	

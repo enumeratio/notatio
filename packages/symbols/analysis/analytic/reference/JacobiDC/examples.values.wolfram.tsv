@@ -1,5 +1,6 @@
 id	in	out	tex.in	tex.out	verdict
 a-floating-point-argument-evaluates-directly-to	N[JacobiDC[0.6, 0.4]]	1.124780426911555	N[\text{dc}(0.6|0.4)]	1.12478	
+n-jacobidc-complex-u-at-m-1	N[JacobiDC[Times[8, Plus[2, Divide[Sqrt[-14], 2]]], Times[Power[Plus[1, Minus[Divide[Sqrt[2], 2]]], 2], Power[Plus[1, Divide[Sqrt[2], -2]], -2]]]]				
 m-less-than-0-via-the-imaginary-modulus	N[JacobiDC[0.3, -0.7]]	1.0799397700832252	N[\text{dc}(0.3|-0.7)]	1.07994	
 d-jacobidc-u-m-m	D[JacobiDC[u, m], m]	(((1 - m)*u - JacobiEpsilon[u, m])*JacobiNC[u, m]*JacobiSC[u, m])/(2*m)	\frac{\partial \text{dc}(u|m)}{\partial m}	\frac{((1-m) u-\mathcal{E}(u|m)) \text{nc}(u|m) \text{sc}(u|m)}{2 m}	
 series-jacobidc-u-m-u-0-5	Series[JacobiDC[u, m], List[u, 0, 5]]	SeriesData[u, 0, {1, 0, (1 - m)/2, 0, (5 - 6*m + m^2)/24}, 0, 6, 1]	\text{Series}[\text{dc}(u|m),\{u,0,5\}]	1+\frac{1}{2} (1-m) u^2+\frac{1}{24} \left(m^2-6 m+5\right) u^4+O\left(u^6\right)	

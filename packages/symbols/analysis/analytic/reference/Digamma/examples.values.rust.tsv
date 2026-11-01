@@ -4,6 +4,7 @@ digamma-neg-1	digamma(n(-1))	panic: non-finite result: -inf	error
 a-floating-point-argument-evaluates-directly-to	digamma(x(0.5))	-1.9635100260214242	
 a-machine-precision-argument	digamma(x(100.5))	4.605174352581845	
 psi-5-h-4-gamma-frac-25-12-gamma	digamma(n(5))	1.5061176684317983	
+digamma-at-two-poles-compares-equal	equal(digamma(n(-1)), (digamma(n(-12)) + n(-1)))		
 threads-over-a-list-reducing-each-positive	list(vec![digamma(n(1)), digamma(n(2)), digamma(n(3))])	[-0.5772156649015348, 0.42278433509846486, 0.922784335098465]	
 complex-arguments-should-evaluate-as-psi-m-does			
 psi-infty-infty-growing-like-ln-z			

@@ -56,7 +56,7 @@ generatingfunction-n-mod-4-n-x
 list-a-b-c-list-1-plus-neg-1-plus-range-1-10-mod			
 periodicity-a-bmod-n-a-kn-bmod-n-for-any-integer	enumeratio_equal(enumeratio_mod(17, 5), enumeratio_mod((17 + (3 * 5)), 5))	true	
 a-negative-modulus-gives-a-result-in-n-0	enumeratio_mod(-5, -3)	-2	
-the-remainder-of-quotient	enumeratio_equal(enumeratio_mod(enumeratio_complex(7, 5), enumeratio_complex(2, 1)), (enumeratio_complex(7, 5) - (enumeratio_complex(2, 1) * fdiv(ZZ(enumeratio_complex(7, 5)), ZZ(enumeratio_complex(2, 1))))))	complex argument	error
+the-remainder-of-quotient	enumeratio_equal(enumeratio_mod(enumeratio_complex(7, 5), enumeratio_complex(2, 1)), (enumeratio_complex(7, 5) - (enumeratio_complex(2, 1) * floor(ZZRingElem, QQ(enumeratio_complex(7, 5)) / QQ(enumeratio_complex(2, 1))))))	complex argument	error
 5-mod-3-eq-2-mod-3	enumeratio_equal(enumeratio_mod(5, 3), enumeratio_mod(2, 3))	true	
 2-mod-3-eq-8-mod-3	enumeratio_equal(enumeratio_mod(2, 3), enumeratio_mod(8, 3))	true	
 0-mod-1	enumeratio_mod(0, 1)	0	

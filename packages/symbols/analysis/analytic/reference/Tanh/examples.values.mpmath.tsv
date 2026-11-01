@@ -5,6 +5,8 @@ stays-symbolic-even-at-0-same-as-sinh-and-cosh	tanh(0)	0.0
 a-float-argument-evaluates-directly-no-n-needed	tanh(2.2)	0.975743130031451528927557962423
 series-tanh-x-x-0-10		
 series-tanh-x-x-1-over-2-times-i-times-pi-3		
+series-tanh-at-i-pi-over-2-order-neg-1		
+tanh-artanh-1-is-1	tanh(atanh(1))	1.0
 arbitrary-precision-via-n	(tanh((mpf(11)/5)))	0.97574313003145152041430666803
 evaluates-at-a-complex-argument	tanh(mpc(2.5, 1))	(1.00554801189505998367293290432 + 0.0123221382558283535409696393086j)
 interval-arithmetic-tanh-is-increasing-so-tanh-0		

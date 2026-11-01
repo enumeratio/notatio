@@ -270,12 +270,34 @@ const cxOf = (x: Expression): Cx => cx(x.re, x.im);
  */
 function argumentTooFarForDouble(ce: ComputeEngine, u: Expression, m: Expression): boolean {
   const K = ce.box(["EllipticK", m]).N();
-  if (Number.isFinite(K.re) && K.im === 0 && K.re > 0 && periodsExceedDouble(u.re, 4 * K.re)) return true;
+  const inside = m.im === 0 && m.re > 0 && m.re < 1;
+  if (Number.isFinite(K.re) && K.im === 0 && K.re > 0) {
+    if (periodsExceedDouble(u.re, 4 * K.re)) return true;
+    if (inside && phaseNoiseExceeds(u.re, K.re, 1 - m.re)) return true;
+  }
   if (u.im !== 0) {
     const K1 = ce.box(["EllipticK", ["Subtract", 1, m]]).N();
-    if (Number.isFinite(K1.re) && K1.im === 0 && K1.re > 0 && periodsExceedDouble(u.im, 4 * K1.re)) return true;
+    if (Number.isFinite(K1.re) && K1.im === 0 && K1.re > 0) {
+      if (periodsExceedDouble(u.im, 4 * K1.re)) return true;
+      if (inside && phaseNoiseExceeds(u.im, K1.re, m.re)) return true;
+    }
   }
   return false;
+}
+
+/** The largest relative error a double kernel may carry in a result before it declines. */
+const MAX_PHASE_ERROR = 1e-10;
+
+/**
+ * The AGM kernel for a real `v` at parameter μ (complement `mc` = 1 − μ, quarter period `K` = K(μ))
+ * carries the amplitude φ ≈ v·π/(2K), and rounds it by 2^-52·φ. dn sits near √mc where φ is odd
+ * multiples of π/2, so that absolute noise reaches the result divided by √mc. Measured against
+ * mpmath for dn(1.1 − iy, m): m = 1e-12, y = 7·10^5 is off by 1.7e-6 (1.6e-5 predicted);
+ * m = 1e-9, y = 1000 by 5e-9 (9e-10 predicted); m = 0.5, y = 7·10^5 by 2e-11 (2e-10 predicted).
+ * The period guard alone passes the first two, 12 000 and 22 periods out.
+ */
+function phaseNoiseExceeds(v: number, K: number, mc: number): boolean {
+  return (2 ** -52 * Math.abs(v) * Math.PI) / (2 * K * Math.sqrt(mc)) > MAX_PHASE_ERROR;
 }
 
 /** Declare one Jacobi `pq` head — its exact table (`exactSCDN`, works even without

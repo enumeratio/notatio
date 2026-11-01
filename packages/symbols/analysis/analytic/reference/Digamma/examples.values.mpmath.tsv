@@ -4,6 +4,7 @@ digamma-neg-1	digamma(-1)	ValueError: polygamma pole	error
 a-floating-point-argument-evaluates-directly-to	digamma(0.5)	-1.963510026021423479440976333	
 a-machine-precision-argument	digamma(100.5)	4.6051743525818452118686787856	
 psi-5-h-4-gamma-frac-25-12-gamma	digamma(5)	1.50611766843180047272682124325	
+digamma-at-two-poles-compares-equal	almosteq(digamma(-1), (digamma(-12) + -1), 1e-20)	ValueError: polygamma pole	error
 threads-over-a-list-reducing-each-positive	[digamma(1), digamma(2), digamma(3)]	[mpf('-0.577215664901532860606512090082402'), mpf('0.422784335098467139393487909917598'), mpf('0.922784335098467139393487909917598')]	
 complex-arguments-should-evaluate-as-psi-m-does	digamma(mpc(2.5, 3))	(1.28127391906623142714070538747 + 0.979805315344559637622394833544j)	
 psi-infty-infty-growing-like-ln-z	digamma(inf)	+inf	

@@ -1,5 +1,6 @@
 id	in	out	verdict
 1-factorial-eq-2	(not almosteq(1, 2, 1e-20))	True	
+1-vs-1-plus-127-times-10-pow-neg-32	(not almosteq(1, (1 + (127 * enumeratio_pow(10, -32))), 1e-20))	False	disagree
 3-over-2-factorial-eq-5-over-3	(not almosteq((mpf(3)/2), (mpf(5)/3), 1e-20))	True	
 3-factorial-eq-4-4-factorial-eq-5			
 abc-factorial-eq-abc	(not almosteq("abc", "ABC", 1e-20))	TypeError: cannot create mpf from 'ABC'	error

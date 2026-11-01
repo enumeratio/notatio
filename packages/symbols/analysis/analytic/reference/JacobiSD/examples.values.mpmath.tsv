@@ -1,5 +1,6 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	(ellipfun('sd', 0.3, m=-2))	(0.279301577474694574344993136138 + 0.0j)	
+n-jacobisd-with-a-division-by-zero-in-m	(ellipfun('sd', (2 * (1 + (mpmathify(sqrt(-2)) / -2))), m=(enumeratio_pow((2 + (-(mpmathify(sqrt(2)) / 2))), 2) * enumeratio_pow((1 + (mpmathify(sqrt(2)) / 0)), -2))))	ZeroDivisionError: 	error
 m-greater-than-1-via-the-reciprocal-modulus	(ellipfun('sd', 1.1, m=0.9))	1.26782176692066116554272793128	
 d-jacobisd-u-m-m			
 series-jacobisd-u-m-u-0-5			
