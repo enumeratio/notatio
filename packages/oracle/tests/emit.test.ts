@@ -1013,3 +1013,20 @@ test("a SymPy Product takes its iterator as a tuple, as Sum does", () => {
   const out = emit(["Product", "k", ["Limits", "k", 1, 5]] as MathJSON, "sympy");
   expect(out.ok && out.source).toContain('product(Symbol("k"), (Symbol("k"), 1, 5))');
 });
+
+test("mathlib4 tests a Finset as a Finset, not as the list it unwraps to", () => {
+  const finset = ["Finset", ["Tuple", 6, ["List", 1, 3, 4]]] as MathJSON;
+  const members = "(List.toFinset ([1, 3, 4] : List ℚ))";
+  expect(emit(["Max", finset] as MathJSON, "mathlib4")).toEqual({
+    ok: true,
+    source: `(Finset.max' ${members} (by decide +kernel))`,
+  });
+  expect(emit(["Min", finset] as MathJSON, "mathlib4")).toEqual({
+    ok: true,
+    source: `(Finset.min' ${members} (by decide +kernel))`,
+  });
+  expect(emit(["Max", ["List", 1, 3, 4]] as MathJSON, "mathlib4")).toEqual({
+    ok: true,
+    source: "(([1, 3, 4] : List ℚ).max?.get (by decide +kernel))",
+  });
+});

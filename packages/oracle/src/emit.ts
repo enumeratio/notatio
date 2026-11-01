@@ -36,6 +36,16 @@ export type Emitted =
 
 const isCall = (value: MathJSON): value is readonly MathJSON[] => Array.isArray(value) && typeof value[0] === "string";
 
+/** The members of `Finset(Tuple(n, List(…)))` (or `Finset(List(…))`), else undefined. */
+const finsetMembers = (node: MathJSON | undefined): readonly MathJSON[] | undefined => {
+  if (node === undefined || !isCall(node) || node[0] !== "Finset" || node.length !== 2) return undefined;
+  const contents = node[1] as MathJSON;
+  const list = isCall(contents) && contents[0] === "Tuple" && contents.length === 3 ? contents[2] : contents;
+  return isCall(list as MathJSON) && (list as readonly MathJSON[])[0] === "List"
+    ? (list as readonly MathJSON[]).slice(1)
+    : undefined;
+};
+
 /** compute-engine symbol constants, per system. */
 const CONSTANTS: Record<string, Partial<Record<System, string>>> = {
   Pi: { wolfram: "Pi", sympy: "pi", mpmath: "pi", sage: "pi", julia: "const_pi(RR)", rust: "x(std::f64::consts::PI)" },
@@ -989,6 +999,18 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
         return `enumeratio_stat(${JSON.stringify(object[0])}, ${walk(object[1] as MathJSON)}, ${JSON.stringify(name)})`;
       missing.push(`${head}/${operands.length}`);
       return "0";
+    }
+    // mathlib4 tests the largest or smallest member of a `Finset` as a Finset's: `Finset.max'`/`Finset.min'` of
+    // `List.toFinset` of its members (the generic carrier unwrap below would send the bare list, and the row
+    // would test List semantics). The nonemptiness proof fails on the empty Finset, which is ours NaN, so that
+    // row errors rather than defaulting, as the list binding does. Other heads over a Finset still take the list.
+    if (system === "mathlib4") {
+      const finset = (node: MathJSON | undefined): string | undefined => {
+        const members = finsetMembers(node);
+        return members && `(List.toFinset ([${members.map((member) => walk(member)).join(", ")}] : List ℚ))`;
+      };
+      const inner = (head === "Max" || head === "Min") && operands.length === 1 ? finset(operands[0]) : undefined;
+      if (inner !== undefined) return `(Finset.${head === "Max" ? "max'" : "min'"} ${inner} (by decide +kernel))`;
     }
     const mapping = mappingFor(head, operands.length, extra, system);
     let template = mapping?.emit[system];
