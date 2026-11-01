@@ -92,7 +92,7 @@ export function scan({ head, params = [], count = INFINITY, member, bound, reach
 // ---- Predicates, each by trial division. ----
 
 /** n ≥ 2 with no divisor from 2 to ⌊√n⌋. */
-const prime = (n: MathJSON): MathJSON =>
+export const prime = (n: MathJSON): MathJSON =>
   and(
     atLeast(n, 2),
     all((d) => ["NotEqual", mod(n, d), 0], upTo(2, root(n)), "pd"),
@@ -190,7 +190,7 @@ const smooth = (n: MathJSON): MathJSON => {
 /** The n-th prime is below n(ln n + ln ln n) for n ≥ 6 (Rosser and Schoenfeld, "Approximate formulas for
  *  some functions of prime numbers", Illinois J. Math. 6 (1962), (3.13)); the first five are at most 11.
  *  The one added covers a double's rounding of the product. */
-const primeBound = (n: MathJSON): MathJSON => {
+export const primeBound = (n: MathJSON): MathJSON => {
   const bound = (m: MathJSON): MathJSON =>
     iff(less(m, 6), 11, add(floor(mul(m, add(["Ln", m], ["Ln", ["Ln", m]]))), 1));
   // compute-engine 0.157 declines to compile a Floor whose operand combines a variable with an exact
