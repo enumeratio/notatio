@@ -523,9 +523,13 @@ for (const family of sequenceFamilies) {
       for (let r = 0; r < 60; r++) ranks.add(r);
       for (let r = Math.max(0, low - 3); r <= low + 3; r++) ranks.add(r);
       for (const r of [1234, 98765, 2 ** 30 + 1]) if (r <= low && holds(r)) ranks.add(r);
+      // A definition may stop short of the fast path's ranks (`early.unrank`): past them it declines, and the
+      // fast path alone answers (tests/sequence-epsil.test.ts holds its exact terms against references).
+      const reached = (r: bigint): boolean => family.early?.unrank?.(r, p) !== "decline";
       const members: Element[] = [];
       for (const r of [...ranks].toSorted((a, b) => a - b)) {
         const element = fast.unrank(p, BigInt(r));
+        if (!reached(BigInt(r))) continue;
         // The terms past the last a double holds are bigints the interpreter answers, each at some cost: the
         // first few past it and every twentieth rank are compared (tests/sequence-epsil.test.ts goes farther).
         if (typeof element === "bigint" && r > low + 6 && r % 30 !== 0) continue;
@@ -546,7 +550,7 @@ for (const family of sequenceFamilies) {
       }
       expect(rejected).toBeGreaterThan(0);
       // Where the fast path declines (a term past a double, a rank past its reach), the answer is Epsil's own.
-      if (!holds(high)) {
+      if (!holds(high) && reached(BigInt(high))) {
         const r = BigInt(high);
         const answer = fast.unrank(p, r);
         expect([where, answer]).toEqual([where, epsil.unrank(p, r)]);

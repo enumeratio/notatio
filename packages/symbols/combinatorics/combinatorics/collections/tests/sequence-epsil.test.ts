@@ -61,6 +61,29 @@ const littleSchroder = iterate([1n, 1n], (t) => {
   return ((6n * n - 3n) * back(t, 1) - (n - 2n) * back(t, 2)) / (n + 1n);
 });
 
+/** Bell numbers as the row sums of the Stirling numbers of the second kind, S(n, k) = S(n − 1, k − 1) + k S(n − 1, k). */
+const stirlingRows = (count: number): bigint[][] => {
+  const rows: bigint[][] = [[1n]];
+  while (rows.length < count) {
+    const prev = rows[rows.length - 1];
+    rows.push(Array.from({ length: prev.length + 1 }, (_, k) => (prev[k - 1] ?? 0n) + BigInt(k) * (prev[k] ?? 0n)));
+  }
+  return rows;
+};
+const bell: Terms = (count) => stirlingRows(count).map((row) => row.reduce((a, b) => a + b, 0n));
+/** Fubini numbers as Σ k! S(n, k): the ordered set partitions, by block count. */
+const fubini: Terms = (count) =>
+  stirlingRows(count).map((row) => {
+    let factorial = 1n;
+    return row.reduce((sum, s, k) => sum + s * (factorial *= BigInt(Math.max(k, 1))), 0n);
+  });
+/** Partition numbers as the table p(n, k) of partitions of n into parts of at most k, all additions. */
+const partitions: Terms = (count) => {
+  const ways = Array.from({ length: count }, (_, n) => (n === 0 ? 1n : 0n));
+  for (let part = 1; part < count; part++) for (let n = part; n < count; n++) ways[n] += ways[n - part];
+  return ways;
+};
+
 /** The first `count` terms of each sequence, from their recurrences (a different formula than the definitions'). */
 const TERMS: Record<string, Terms> = {
   FibonacciNumbers: iterate([0n, 1n], (t) => back(t, 1) + back(t, 2)),
@@ -81,6 +104,9 @@ const TERMS: Record<string, Terms> = {
       return sum;
     });
   },
+  BellNumbers: bell,
+  FubiniNumbers: fubini,
+  PartitionNumbers: partitions,
   CentralDelannoyNumbers: iterate([1n, 3n], (t) => {
     const n = BigInt(t.length);
     return (3n * (2n * n - 1n) * back(t, 1) - (n - 1n) * back(t, 2)) / n;
@@ -216,11 +242,18 @@ for (const head of definitions.keys()) {
     const places = firstPlaces(sequence);
 
     test(`${head}: terms and places on either side of 2^53 are exact`, () => {
-      for (const [name, kernel] of DEEP ? kernels(head) : kernels(head).slice(0, 1)) {
-        for (let r = Math.max(0, crossing - (DEEP ? 4 : 1)); r < crossing + (DEEP ? 3 : 2); r++) {
-          const x = sequence[r];
+      for (let r = Math.max(0, crossing - (DEEP ? 4 : 1)); r < crossing + (DEEP ? 3 : 2); r++) {
+        const x = sequence[r];
+        const ys = [x - 1n, x, x + 1n];
+        // Where the definition declines the rank, the fast path alone answers (the decline is held below).
+        const early = definitions.get(head)!.early;
+        const reached =
+          early?.unrank?.(BigInt(r), []) !== "decline" &&
+          ys.every((y) => early?.member?.(asTerm(y) as never, []) !== "decline");
+        const usable = kernels(head).filter(([name]) => name !== "Epsil" || reached);
+        for (const [name, kernel] of DEEP ? usable : usable.slice(0, 1)) {
           expect([name, r, kernel.unrank([], BigInt(r))]).toEqual([name, r, asTerm(x)]);
-          for (const y of [x - 1n, x, x + 1n]) {
+          for (const y of ys) {
             const place = places.get(y);
             expect([name, y, kernel.valid(asTerm(y), [])]).toEqual([name, y, place !== undefined]);
             expect([name, y, kernel.rank(asTerm(y), [])]).toEqual([name, y, BigInt(place ?? -1)]);
@@ -232,10 +265,14 @@ for (const head of definitions.keys()) {
     // Far out the terms are bigints of hundreds of digits: the first place of each, and the numbers beside it, are exact.
     test(`${head}: terms hundreds of digits long are exact, with their places`, () => {
       // A sum of binomials costs more the farther out it goes.
-      const summed = ["Motzkin", "Delannoy", "Schroder", "Schroeder"].some((name) => head.includes(name));
+      const summed = ["Motzkin", "Delannoy", "Schroder", "Schroeder", "Bell", "Fubini", "Partition"].some((name) =>
+        head.includes(name),
+      );
       const out = summed
         ? DEEP
-          ? [50, 120, 250, 399]
+          ? ["Bell", "Fubini", "Partition"].some((name) => head.includes(name))
+            ? [50, 120, 150]
+            : [50, 120, 250, 399]
           : [50]
         : DEEP
           ? [120, 250, 399, 1000, 1499]
@@ -282,6 +319,7 @@ for (const head of definitions.keys()) {
 test("the fast path answers ranks of thousands and tens of thousands, exactly", () => {
   for (const head of definitions.keys()) {
     if (bitwise(head) || head === "MotzkinNumbers") continue; // Motzkin's reference sums binomials, too slow this far out
+    if (["BellNumbers", "FubiniNumbers"].includes(head)) continue; // the kernels' own reach is a few hundred terms
     const r = head.includes("Factorial") ? 2000 : 3000;
     expect([head, full(head).unrank([], BigInt(r))]).toEqual([head, TERMS[head](r + 1)[r]]);
   }
@@ -320,6 +358,24 @@ test("Evil and odious numbers split the integers, and a negative number is neith
     expect([x, evil.valid(x, []), odious.valid(x, [])].slice(1).filter(Boolean).length).toBe(1);
 });
 
+// Values as the OEIS lists them (A000110, A000670, A000041), the last of each past 2^53 where the definition reaches.
+const LISTED: readonly (readonly [string, number, bigint])[] = [
+  ["BellNumbers", 25, 4638590332229999353n],
+  ["BellNumbers", 30, 846749014511809332450147n],
+  ["FubiniNumbers", 10, 102247563n],
+  ["PartitionNumbers", 100, 190569292n],
+  ["PartitionNumbers", 200, 3972999029388n],
+];
+
+test("Bell, Fubini and partition numbers at the values the OEIS lists", () => {
+  for (const [head, r, term] of LISTED) {
+    for (const [name, kernel] of kernels(head)) {
+      expect([head, name, r, kernel.unrank([], BigInt(r))]).toEqual([head, name, r, asTerm(term)]);
+      expect([head, name, r, kernel.rank(asTerm(term), [])]).toEqual([head, name, r, BigInt(r)]);
+    }
+  }
+});
+
 test("a negative rank is outside the fiber", () => {
   for (const head of definitions.keys()) {
     expect(() => epsil(head).unrank([], -1n), head).toThrow(RangeError);
@@ -335,9 +391,9 @@ test("a number that is not an integer, or not a number, is no member", () => {
 });
 
 // The definitions as the interpreter reads them, bypassing compiled code and the fast paths.
-test("the interpreted definitions give the same terms and places", async () => {
-  const { evaluateEpsil } = await import("@enumeratio/structures");
-  for (const [head, family] of definitions) {
+for (const [head, family] of definitions) {
+  test(`${head}: the interpreted definition gives the same terms and places`, async () => {
+    const { evaluateEpsil } = await import("@enumeratio/structures");
     const sequence = TERMS[head](24);
     const places = firstPlaces(sequence);
     sequence.slice(0, DEEP ? 9 : 5).forEach((term, r) => {
@@ -352,5 +408,5 @@ test("the interpreted definitions give the same terms and places", async () => {
       const member = head === "SternDiatomicSequence" ? true : places.has(BigInt(x));
       expect([head, x, evaluateEpsil(ce, family.epsil.valid, { _x: x })]).toEqual([head, x, member ? "True" : "False"]);
     }
-  }
-});
+  });
+}

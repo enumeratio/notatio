@@ -1,7 +1,8 @@
 // The numeric sequences with no single closed form, defined in Epsil as fibers with no end whose elements
 // are their terms (kind "scalar"), as ./numeric-definitions.ts does for the closed-form ones: the linear
 // recurrences, the factorials and Catalan numbers (a term from the one before), Motzkin, Delannoy and
-// Schröder numbers (a sum), and the sequences of a number's binary digits. The TS kernels stay as the fast
+// Schröder numbers (a sum), Bell, Fubini and partition numbers (a sum over all the terms before), and the
+// sequences of a number's binary digits. The TS kernels stay as the fast
 // paths while a term is a safe integer, bar the `UNWIRED` ones (./numeric-definitions.ts); past that the
 // interpreter's exact integers answer (./epsil.ts).
 //
@@ -12,7 +13,7 @@
 
 import type { EpsilFamily } from "./epsil.ts";
 import { type FastReach, sequence, withDefinitions } from "./numeric-definitions.ts";
-import { and, at, equal, floorLog2, fold, iff, less, lets, mul, quotient, sub, add } from "./tables.ts";
+import { add, and, at, equal, floorLog2, fold, iff, less, lets, mul, quotient, sub } from "./tables.ts";
 import type { NumberKernel } from "./types.ts";
 
 type MathJSON = unknown;
@@ -131,6 +132,114 @@ const summed = (head: string, maxBits: number, term: (r: MathJSON) => MathJSON, 
     unrank: (r) => (r > SUMMED_REACH ? "decline" : undefined),
   },
 });
+
+/**
+ * A sequence whose term is a sum over all the terms before it, from rank 1 on strictly increasing (the first two
+ * terms are 1, 1). A fold over the ranks `m` = 1.. joins the term at `m` to a list of the terms so far, whose entry
+ * j is the term at rank j − 1. The rank of `_x` is its first place in that list, grown until a term passes `_x`,
+ * which at most `bound` terms do (a bound on the rank of a term in the bits of `_x`): one fold covers them, where
+ * binary descent would redo the fold for each bit. The interpreter takes about a millisecond a step, and a term
+ * costs as many steps as its rank, so `reach` ranks is as far as unrank answers (a bigger rank is the fast path's).
+ */
+const remembered = (
+  head: string,
+  maxBits: number,
+  reach: number,
+  bound: MathJSON,
+  next: (m: MathJSON, terms: MathJSON) => MathJSON,
+  /** A number of the last rank of the fold, bound once outside it as `hs_n` for `next` to read (a step costs the
+   *  interpreter a millisecond): none by default. */
+  scale: (last: MathJSON) => MathJSON = () => 0,
+): EpsilFamily => {
+  const [terms, m, i, place] = ["hs_t", "hs_m", "hs_i", "hs_p"];
+  const grow = (last: MathJSON, pastX: MathJSON = "False"): MathJSON =>
+    lets(
+      [
+        ["hs_l", last, "integer"],
+        ["hs_n", scale("hs_l"), "integer"],
+      ],
+      fold(
+        iff(pastX, terms, ["Join", terms, ["List", next(m, terms)]]),
+        terms,
+        m,
+        ["List", 1],
+        ["Range", 1, "hs_l", 1],
+      ),
+    );
+  // The first rank whose term is `_x`, or -1.
+  const first = lets(
+    [
+      ["hs_b", bound, "integer"],
+      ["hs_all", grow("hs_b", ["Greater", at(terms, ["Length", terms]), "_x"]), "list<integer>"],
+    ],
+    fold(
+      iff(
+        less(i, ["Length", "hs_all"]),
+        iff(and(less(place, 0), equal(at("hs_all", add(i, 1)), "_x")), i, place),
+        place,
+      ),
+      place,
+      i,
+      -1,
+      ["Range", 0, "hs_b", 1],
+    ),
+  );
+  return {
+    head,
+    paramCount: 0,
+    kind: "scalar",
+    params: [],
+    epsil: {
+      count: INFINITY,
+      unrank: at(grow("_r"), add("_r", 1)),
+      rank: iff(["GreaterEqual", "_x", 0], first, -1),
+      valid: iff(["GreaterEqual", "_x", 0], ["GreaterEqual", first, 0], "False"),
+    },
+    early: {
+      member: (x) => pastBits(x, maxBits),
+      rank: (x) => pastBits(x, maxBits),
+      unrank: (r) => (r > reach ? "decline" : undefined),
+    },
+  };
+};
+
+/** Σ over j = 1..`upper` of `term(j)`. */
+const sumTo = (upper: MathJSON, term: (j: MathJSON) => MathJSON): MathJSON =>
+  fold(add("hs_a", term("hs_j")), "hs_a", "hs_j", 0, ["Range", 1, upper, 1]);
+
+/** At least the rank of the term `_x` of Bell or Fubini numbers: a term at rank n is at least 2^(n − 1). */
+const BITS_PLUS_THREE = add(floorLog2(add("_x", 2)), 3);
+/** The same for partitions: p(n) has about 3.7 √n bits, so a rank is under an eighth of the squared bits (held against
+ *  every term to n = 6000), with a dozen ranks to spare for the small ones. */
+const BITS_SQUARED = (() => {
+  const bits = add(floorLog2(add("_x", 2)), 4);
+  return add(quotient(mul(bits, bits), 8), 12);
+})();
+
+/** The greatest k of Euler's recurrence that a fold up to the rank `last` reaches: k(3k − 1)/2 ≤ last, that is
+ *  k ≤ (1 + √(24 last + 1))/6, which the floor of the root gives exactly for a small `last`. */
+const pentagonalReach = (last: MathJSON): MathJSON => quotient(add(1, floor(["Sqrt", add(mul(24, last), 1)])), 6);
+
+/**
+ * p(m) by Euler's pentagonal recurrence, p(m) = Σ (−1)^(k+1) (p(m − k(3k − 1)/2) + p(m − k(3k + 1)/2)), over the
+ * ks up to `hs_n`. A pair of terms is at most 2 p(m), so a double holds each partial sum exactly while p(m) is
+ * below 2^52.
+ */
+const pentagonal = (m: MathJSON, terms: MathJSON): MathJSON => {
+  const k = "pt_k";
+  // p(m − g), 0 where g exceeds m.
+  const back = (g: MathJSON): MathJSON => iff(["LessEqual", g, m], at(terms, add(sub(m, g), 1)), 0);
+  const [below, above] = [
+    ["Divide", mul(k, sub(mul(3, k), 1)), 2],
+    ["Divide", mul(k, add(mul(3, k), 1)), 2],
+  ];
+  return fold(add("pt_a", mul(sub(mul(2, ["Mod", k, 2]), 1), add(back(below), back(above)))), "pt_a", k, 0, [
+    "Range",
+    1,
+    "hs_n",
+    1,
+  ]);
+};
 
 const parity = (n: MathJSON): MathJSON => {
   const [state, bit] = ["bt_s", "bt_b"];
@@ -303,6 +412,17 @@ const families: readonly EpsilFamily[] = [
   // s(0) = 1, s(n) = S(n)/2
   summed("LittleSchroderNumbers", 700, (r) => iff(equal(r, 0), 1, ["Divide", schroder(r), 2]), true),
   summed("SchroederNumbers", 700, schroder),
+  // B(m) = Σ C(m − 1, j − 1) B(j − 1). Past rank 150 (641 bits) a term costs the interpreter seconds.
+  remembered("BellNumbers", 641, 150, BITS_PLUS_THREE, (m, terms) =>
+    sumTo(m, (j) => mul(["Binomial", sub(m, 1), sub(j, 1)], at(terms, j))),
+  ),
+  // F(m) = Σ_{k = 1..m} C(m, k) F(m − k), the term at j = m − k + 1; rank 150 has 952 bits.
+  remembered("FubiniNumbers", 952, 150, BITS_PLUS_THREE, (m, terms) =>
+    sumTo(m, (j) => mul(["Binomial", m, sub(j, 1)], at(terms, j))),
+  ),
+  // Rank 200 is the last the definition answers (p(200) has 42 bits): the fold's partial sums stay doubles
+  // there, and the interpreter takes seconds a term past it.
+  remembered("PartitionNumbers", 42, 200, BITS_SQUARED, pentagonal, pentagonalReach),
   byWeight("EvilNumbers", 0),
   byWeight("OdiousNumbers", 1),
   thueMorse,
@@ -331,6 +451,9 @@ const REACHES: Readonly<Record<string, FastReach>> = {
       "CentralDelannoyNumbers",
       "LittleSchroderNumbers",
       "SchroederNumbers",
+      "BellNumbers",
+      "FubiniNumbers",
+      "PartitionNumbers",
     ].map((head) => [head, { bigTerms: true, unrank: 100_000 }]),
   ),
   FactorialNumbers: { bigTerms: true, unrank: 30_000 },
