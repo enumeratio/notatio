@@ -2,6 +2,7 @@ import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { applyPatch, applyPatches, symbols as symbolsOf } from "./patch.ts";
 import { integratePolynomialPowers } from "./patches/integrate-polynomial-powers.ts";
 import { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
+import { agmComplex } from "./patches/agm-complex.ts";
 import { shapeOfUnknownElements } from "./patches/shape-of-unknown-elements.ts";
 import { solveDeclines } from "./patches/solve-declines.ts";
 import { solveDomains } from "./patches/solve-domains.ts";
@@ -188,6 +189,7 @@ export function symbols(): readonly string[] {
  *  every engine needs, whichever libraries it declares; applying them again is a no-op. */
 export function applyNativeHeadPatches(ce: ComputeEngine): void {
   for (const patch of [
+    agmComplex,
     solveDeclines,
     solveDomains,
     iteratorUpperBound,

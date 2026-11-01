@@ -1,3 +1,8 @@
 id	in	out	verdict
 agm-1-2	enumeratio_n(lambda: (agm(1, 2)), 20)	1.4567910310469068692	
 agm-1-neg-10	(agm(1, -10))	(1.31100746461300934263859229657 + 0.372421675115370330805438889647j)	disagree
+agm-1-2-plus-3i	enumeratio_n(lambda: (agm(1, mpc(2, 3))), 20)	(1.5993839921555199266+1.1970013371437024391j)	
+agm-1-neg-1p5-plus-3p5i	enumeratio_n(lambda: (agm(1, mpc(mpf("-1.5"), mpf("3.5")))), 20)	(0.40935972373543629010+1.7504384540310874765j)	
+agm-1-neg-10-plus-tiny-i	enumeratio_n(lambda: (agm(1, mpc(-10, mpf("1e-12")))), 20)	(1.3110074646130279818+0.37242167511526897373j)	disagree
+agm-1-neg-10-minus-tiny-i	enumeratio_n(lambda: (agm(1, mpc(-10, mpf("-1e-12")))), 20)	(1.3110074646130279818-0.37242167511526897373j)	disagree
+agm-1-neg-10-20	enumeratio_n(lambda: (agm(1, -10)), 20)	(1.3110074646130093426+0.37242167511537033081j)	disagree

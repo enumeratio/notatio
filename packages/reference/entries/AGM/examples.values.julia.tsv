@@ -1,3 +1,8 @@
 id	in	out	verdict
 agm-1-2	enumeratio_nshow(enumeratio_ball(agm, 1, 2), 20)	1.4567910310469068692e+00	
 agm-1-neg-10	(enumeratio_ball(agm, 1, -10))	(-2.462181891100572793559573126553048537304383234092495228940936287275860937942555-2.098317353043635162944067804996375157699511186930791135705184276294765184879394j)	disagree
+agm-1-2-plus-3i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_complex(2, 3)), 20)	(1.5993839921555199266e+00+1.1970013371437024391e+00j)	
+agm-1-neg-1p5-plus-3p5i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_complex(enumeratio_decimal("-1.5"), enumeratio_decimal("3.5"))), 20)	(4.0935972373543629010e-01+1.7504384540310874765e+00j)	
+agm-1-neg-10-plus-tiny-i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_complex(-10, enumeratio_decimal("1e-12"))), 20)	(-2.4621818911004281824e+00+2.0983173530438719791e+00j)	
+agm-1-neg-10-minus-tiny-i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_complex(-10, enumeratio_decimal("-1e-12"))), 20)	(-2.4621818911004281824e+00-2.0983173530438719791e+00j)	
+agm-1-neg-10-20	enumeratio_nshow(enumeratio_ball(agm, 1, -10), 20)	(-2.4621818911005727936e+00-2.0983173530436351629e+00j)	disagree
