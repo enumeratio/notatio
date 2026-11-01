@@ -6,6 +6,11 @@ summary: Arithmetic-geometric mean. AGM(z) is shorthand for AGM(1, z) (Fungrim c
 signatures:
   - call: AGM(complex | infinity, (complex | infinity)?) -> number
     description: as compute-engine declares it
+  - call: AGM(complex | infinity, (complex | infinity)?) -> number
+    description: As native, and keeps its digits past a double's off the positive reals (N(AGM(1, -10), 20)).
+    library: enumeratio-evaluation
+    type: (complex | infinity, (complex | infinity)?) -> number
+    overrides: compute-engine
 references:
   - system: wikipedia
     identity: Arithmetic–geometric mean
