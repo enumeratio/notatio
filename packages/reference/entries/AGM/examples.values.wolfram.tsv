@@ -1,2 +1,3 @@
 id	in	out	shown	tex.in	tex.out
 agm-1-2	N[ArithmeticGeometricMean[1, 2], 20]	1.45679103104690686918643238326508197497`20.	1.4567910310469068692	N[\text{agm}(1,2),20]	1.4567910310469068692
+agm-1-neg-10	N[ArithmeticGeometricMean[1, -10]]	-2.462181891100573 + 2.098317353043635*I		N[\text{agm}(1,-10)]	-2.46218+2.09832 i
