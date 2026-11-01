@@ -16,6 +16,7 @@ import {
   bind,
   count,
   equals,
+  distance,
   fold,
   forEach,
   greater,
@@ -184,6 +185,121 @@ const subpartitionCounts = (least: number): MathJSON =>
     ["Rest", x],
     forEach(upTo(add(largest, 1)), ["If", atLeastValue("i", least + 1), 1, 0]),
     subpartitionRow("a", least, "b"),
+  );
+/** Orbits on the edges of the complete graph: half of each part rounded down, plus the gcd of every pair of parts. */
+const edgeOrbits: MathJSON = add(
+  sumOver(positions, ["Divide", subtract(here, ["Mod", here, 2]), 2]),
+  pairwiseGreatestCommonDivisorSum,
+);
+/**
+ * Bulgarian solitaire on the multiplicity vector (entry j = how many parts equal j), which needs no sorting:
+ * every part loses a cell and a part of the old number of parts joins.
+ */
+const solitaireStart: MathJSON = forEach(upTo(total), count(positions, equals(at("p"), "j"), "p"), "j");
+const solitaireMoveOf = (state: MathJSON): MathJSON =>
+  forEach(
+    upTo(total),
+    add(["If", less("j", total), at(add("j", 1), state), 0], ["If", equals("j", ["Sum", state]), 1, 0]),
+    "j",
+  );
+/** After this many steps the orbit has surely reached its cycle: the pre-period is below size^2. */
+const solitaireSteps: MathJSON = ["Multiply", total, add(total, 1)];
+/** `steps` moves from `state`, none when `steps` is 0 (a bare `Range(1, 0)` counts down). */
+const solitaireAfter = (steps: MathJSON, state: MathJSON): MathJSON =>
+  fold(["Range", 1, steps, 1], state, solitaireMoveOf("a"));
+const sameState = (u: MathJSON, v: MathJSON): MathJSON =>
+  equals(["Sum", forEach(upTo(total), distance(at("j", u), at("j", v)), "j")], 0);
+/** The length of the cycle: the fewest steps (at most the size) that bring the state `c`, already on it, back to itself. */
+const solitairePeriod: MathJSON = ["Min", where(upTo(total), sameState(solitaireAfter("l", "c"), "c"), "l")];
+/** Steps before the cycle: the times the state differs from the one a period on, which walk together one step at a time. */
+const solitairePreperiod: MathJSON = bind(
+  "p",
+  solitairePeriod,
+  [
+    "Sum",
+    [
+      "At",
+      fold(
+        ["Range", 1, add(solitaireSteps, 1), 1],
+        ["List", solitaireStart, solitaireAfter("p", solitaireStart), ["List", 0]],
+        [
+          "List",
+          solitaireMoveOf(["At", "a", 1]),
+          solitaireMoveOf(["At", "a", 2]),
+          [
+            "List",
+            add(at(1, ["At", "a", 3]), [
+              "Min",
+              1,
+              ["Sum", forEach(upTo(total), distance(at("j", ["At", "a", 1]), at("j", ["At", "a", 2])), "j")],
+            ]),
+          ],
+        ],
+      ),
+      3,
+    ],
+  ],
+  "integer",
+);
+/** `body` with `c` bound to a state on the cycle. */
+const onSolitaireCycle = (body: MathJSON): MathJSON =>
+  bind("c", solitaireAfter(solitaireSteps, solitaireStart), body, "list<integer>");
+/**
+ * The partitions of the size dominated by this one, by a table over the rows of the candidate: entry (s, m) counts the
+ * non-increasing rows so far (zeros allowed, so every partition is one sequence) summing to s and ending at m. Row k may
+ * only bring the sum to at most the first k parts of this partition (padded with zeros). Entries are indexed from 1:
+ * row s + 1, column m + 1.
+ */
+const dominatedPartitionTable: MathJSON = fold(
+  upTo(total),
+  forEach(
+    upTo(add(total, 1)),
+    forEach(upTo(add(total, 1)), ["If", and(equals("r", 1), equals("c", add(total, 1))), 1, 0], "c"),
+    "r",
+  ),
+  forEach(
+    upTo(add(total, 1)),
+    forEach(
+      upTo(add(total, 1)),
+      [
+        "If",
+        and(
+          atMostValue("c", "r"),
+          atMostValue(
+            subtract("r", 1),
+            sumOver(["Range", 1, "b", 1], ["If", atMostValue("q", length()), at("q"), 0], "q"),
+          ),
+        ),
+        sumOver(["Range", "c", add(total, 1), 1], at("d", at(add(subtract("r", "c"), 1), "a")), "d"),
+        0,
+      ],
+      "c",
+    ),
+    "r",
+  ),
+);
+/**
+ * Permutations whose cube is a fixed permutation with `a` cycles of length `d`: a cycle of d is the cube of a d-cycle
+ * (unless 3 divides d), and three of them are the cube of a 3d-cycle in 2d^2 ways, over the unordered triples of cycles.
+ */
+const cubeRoots = (d: MathJSON, a: MathJSON): MathJSON =>
+  sumOver(
+    ["Range", 0, ["Divide", subtract(a, ["Mod", a, 3]), 3], 1],
+    [
+      "If",
+      or(greater(["Mod", d, 3], 0), equals(a, ["Multiply", 3, "s"])),
+      [
+        "Multiply",
+        [
+          "Divide",
+          factorialOf(a),
+          ["Multiply", factorialOf(subtract(a, ["Multiply", 3, "s"])), ["Power", 6, "s"], factorialOf("s")],
+        ],
+        ["Power", ["Multiply", 2, d, d], "s"],
+      ],
+      0,
+    ],
+    "s",
   );
 /** The parts before position i that are larger than part i: with the parts weakly decreasing, those that differ from it. */
 const largerPartsBefore: MathJSON = count(positions, and(less("j", "i"), greater(at("j"), here)), "j");
@@ -952,9 +1068,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
   stat(
     "EdgeOrbitCount",
     "Orbits of the complete graph's edges under a permutation with these cycle lengths: the sum of half the parts rounded down, plus the sum of gcd(part, part) over pairs.",
-    nonEmpty(
-      add(sumOver(positions, ["Divide", subtract(here, ["Mod", here, 2]), 2]), pairwiseGreatestCommonDivisorSum),
-    ),
+    nonEmpty(edgeOrbits),
   ),
 
   // Symmetric functions evaluated at k ones, k the number of parts.
@@ -1434,5 +1548,55 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "LowerCoverCountInDominanceOrder",
     "The partitions of the same size that this one covers in dominance order: the upper covers of its conjugate.",
     nonEmpty(upperCoversIn(conjugate)),
+  ),
+
+  // ── FindStat's integer-partition statistics, batch 5 ────────────────────────────────────
+
+  stat(
+    "InvariantGraphCount",
+    "The simple graphs on the points that a permutation of this cycle type maps to themselves: 2 to the number of edge orbits.",
+    nonEmpty(["Power", 2, edgeOrbits], 1),
+  ),
+  stat(
+    "CompleteHomogeneousSymmetricFunctionAtOne",
+    "The complete homogeneous symmetric function indexed by the partition, in as many variables as it has parts, all set to 1: the product of the multiset coefficients of the number of parts and each part.",
+    nonEmpty(["Product", forEach(positions, binomialOf(add(subtract(length(), 1), here), here))], 1),
+  ),
+  stat(
+    "PowerSumSymmetricFunctionAtOne",
+    "The power-sum symmetric function indexed by the partition, in as many variables as it has parts, all set to 1: the number of parts to its own power.",
+    nonEmpty(["Power", length(), length()], 1),
+  ),
+  stat(
+    "CubeRootCount",
+    "The permutations whose cube is a fixed permutation of this cycle type: the product over part sizes d, with a parts of size d, of the number of ways to take the cube root of each part of size d alone or of three together as a cycle of length 3d.",
+    nonEmpty(
+      [
+        "Product",
+        forEach(positions, ["If", startsOfRuns, cubeRoots(here, count(positions, equals(at("j"), here), "j")), 1]),
+      ],
+      1,
+    ),
+  ),
+  stat(
+    "DominatedPartitionCount",
+    "The partitions of the same size that this one dominates (partial sums of the parts at least those of the other), itself included.",
+    nonEmpty(bind("w", at(add(total, 1), dominatedPartitionTable), ["Sum", "w"], "list<integer>"), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "BulgarianSolitaireOrbitSize",
+    "The partitions that Bulgarian solitaire (remove the first column, insert it as a row) visits from this one, itself included.",
+    nonEmpty(onSolitaireCycle(add(solitairePreperiod, solitairePeriod)), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "BulgarianSolitairePreperiod",
+    "The steps of Bulgarian solitaire before this partition reaches the cycle it ends in.",
+    nonEmpty(onSolitaireCycle(solitairePreperiod)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
   ),
 ];

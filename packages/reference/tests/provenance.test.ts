@@ -1667,6 +1667,13 @@ const NOVEL = [
   "InjectivesOfEvenProjectiveDimension",
   "ModulesOfMaximalProjectiveDimension",
   "ModulesOfProjectiveDimensionAtMostOne",
+  "InvariantGraphCount",
+  "CompleteHomogeneousSymmetricFunctionAtOne",
+  "PowerSumSymmetricFunctionAtOne",
+  "CubeRootCount",
+  "BulgarianSolitaireOrbitSize",
+  "BulgarianSolitairePreperiod",
+  "DominatedPartitionCount",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because
