@@ -1,4 +1,4 @@
-// What declaring a library finds (https://github.com/enumeratio/enumeratio/wiki/Speculative-Per-Package-Repos
+// What declaring a library finds (https://github.com/enumeratio/notatio/wiki/Speculative-Per-Package-Repos
 // §4.1): each library's build writes its own (scripts/collect-declares.ts), and a host puts the
 // resolver's tables together from the libraries it has. The manifest reads records and loads no
 // code, so a head whose record doesn't say which package declares it is only known here.

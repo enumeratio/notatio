@@ -1,6 +1,6 @@
 // `Mod(f(args), m)` computed modulo m for the heads that have a cheap modular kernel, through
 // the registry in @enumeratio/engine (modular.ts: why the registry sits on the node, not on
-// `Mod`). Tracked at https://github.com/enumeratio/enumeratio/issues/205.
+// `Mod`). Tracked at https://github.com/enumeratio/notatio/issues/205.
 import { type Engine, type ModularArity, type ModularKernel, registerModularKernel } from "@enumeratio/engine";
 import { fibonacciMod, lucasLMod } from "./fast-recurrence.ts";
 import {

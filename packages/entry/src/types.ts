@@ -103,7 +103,7 @@ export interface ReferenceExample {
    */
   readonly group?: string;
   /**
-   * What the example is FOR (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §5). `demo` (the default) is shown
+   * What the example is FOR (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §5). `demo` (the default) is shown
    * on the reference page; `test` runs in the evaluation test and the scans like any other
    * example but is skipped by the page (a deep link still shows one): an edge case or a grid
    * point, too many or too minor to render. `aspirational`: `expected` is a result we claim
@@ -138,7 +138,7 @@ export interface BoxShape {
   readonly operands?: readonly unknown[];
 }
 
-/** What an example is for (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §5). */
+/** What an example is for (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §5). */
 export type ExampleRole = "demo" | "test" | "aspirational" | "triage";
 
 /** Where a Wolfram mismatch most likely comes from (see `ReferenceExample.triage`). */
@@ -159,11 +159,11 @@ export interface ReferenceSignature {
   readonly arity?: number;
   /**
    * This overload's compute-engine type, `(boxes, boxes, expression*) -> boxes`. The
-   * declaring package declares it from here (https://github.com/enumeratio/enumeratio/wiki/Manifest); a reference test checks
+   * declaring package declares it from here (https://github.com/enumeratio/notatio/wiki/Manifest); a reference test checks
    * the engine agrees.
    */
   readonly type?: string;
-  /** The library whose overlapping overload this one replaces (https://github.com/enumeratio/enumeratio/wiki/Manifest). */
+  /** The library whose overlapping overload this one replaces (https://github.com/enumeratio/notatio/wiki/Manifest). */
   readonly overrides?: string;
   /** The carriers this overload applies to (an operand's head is one of them), when it applies
    *  to nothing else: it matters only where one of them exists, so doesn't pull its package. */
@@ -198,7 +198,7 @@ export type Environment = "engine" | "browser" | "gpu" | "node" | "external";
  *
  * - `reference` authored by us as an Epsil expression — the interpretable specification
  *   (a definition is enumeratio's, whatever surface it is typed in), and the differential
- *   oracle for every other row (https://github.com/enumeratio/enumeratio/wiki/Namespaces §6)
+ *   oracle for every other row (https://github.com/enumeratio/notatio/wiki/Namespaces §6)
  * - `native`    authored by us in TypeScript — what actually runs; stored as a POINTER,
  *   because the source lives in the repo and a copy here would rot
  * - `compiled`  produced by a compute-engine compile target (numpy, glsl, wgsl, js);
@@ -255,7 +255,7 @@ export interface ReferenceBinding {
 
 /**
  * Why a head does NOT reduce further — it sits on the primitive frontier
- * (https://github.com/enumeratio/enumeratio/wiki/Namespaces §6.1). Every head either has a `reference` implementation or
+ * (https://github.com/enumeratio/notatio/wiki/Namespaces §6.1). Every head either has a `reference` implementation or
  * declares one of these; nothing is allowed to be silently irreducible.
  */
 export type PrimitiveReason =
@@ -270,7 +270,7 @@ export type PrimitiveReason =
 
 /**
  * A head's name in another system's own vocabulary, where that differs from ours -- the
- * hand-kept half of the crosswalk (https://github.com/enumeratio/enumeratio/wiki/Speculative-Symbol-Metadata). The mechanically
+ * hand-kept half of the crosswalk (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata). The mechanically
  * derived half (Fungrim identities, the oracle's per-arity mapping) lives in `bindings:` and
  * the generated crosswalk data; this is what a human had to type in.
  */
@@ -299,7 +299,7 @@ export interface ReferenceNames {
 }
 
 /**
- * A combinatorial map's law, checked at one element (https://github.com/enumeratio/enumeratio/wiki/Plausible §4.2) -- the
+ * A combinatorial map's law, checked at one element (https://github.com/enumeratio/notatio/wiki/Plausible §4.2) -- the
  * shorthand vocabulary written on a map's record (`@enumeratio/combinatorics`' own generator
  * writes it into `CombinatorialMap.laws`/`.orderIsomorphism` at build time; `checkLaws`
  * (@enumeratio/structures) reads that same shape, unchanged). `on` disambiguates a law that
@@ -411,7 +411,7 @@ export interface ReferenceEntry {
   readonly catalog?: readonly Reference[];
   /**
    * What `@enumeratio/catalog`'s `declareCatalog` needs to register this head as a resource
-   * (https://github.com/enumeratio/enumeratio/wiki/Speculative-Symbol-Metadata), moved here off the retired
+   * (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata), moved here off the retired
    * packages/catalog/src/catalog-data.ts. Presence is the kind: `grades` marks a catalogued
    * collection, `statOn`/
    * `mapOn` a statistic or map (its overload set), `catalogCarrier` a bare carrier -- a name
@@ -432,7 +432,7 @@ export interface ReferenceEntry {
   /**
    * Old names this head was declared under, oldest first -- a data alias, same idea as the
    * numerals systems' aliases. `@enumeratio/statistics`'s `blessedName` reads the generated
-   * table built from these, not this field directly (https://github.com/enumeratio/enumeratio/wiki/Speculative-Symbol-Metadata).
+   * table built from these, not this field directly (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata).
    */
   readonly formerly?: readonly string[];
   /**
@@ -440,7 +440,7 @@ export interface ReferenceEntry {
    * compute-engine symbol we neither extend nor document by hand, `carrier` for a domain.
    */
   readonly stub?: "engine" | "carrier";
-  /** Wolfram-style attributes; `HoldAll` is compute-engine's `lazy` (https://github.com/enumeratio/enumeratio/wiki/Manifest). */
+  /** Wolfram-style attributes; `HoldAll` is compute-engine's `lazy` (https://github.com/enumeratio/notatio/wiki/Manifest). */
   readonly attributes?: readonly SymbolAttribute[];
   /** A library symbol's definition, in Epsil: what packing makes its `definition.json` from. */
   readonly definition?: EpsilDefinition;
@@ -452,7 +452,7 @@ export interface ReferenceEntry {
 export type SymbolAttribute = "HoldAll";
 
 /**
- * A definition as its author writes it (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2):
+ * A definition as its author writes it (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2):
  * Epsil throughout. Packing parses it into `definition.json`, the body a `Function` over the
  * signature's parameter names, and fills each pin it can find.
  */
@@ -467,7 +467,7 @@ export interface EpsilDefinition {
   readonly requires?: Readonly<Record<string, string>>;
 }
 
-// --- the implementations record (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §2, §6) -----------------------
+// --- the implementations record (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §2, §6) -----------------------
 //
 // `reference/<Head>/examples.values.*.tsv` holds, per example id, every implementation's
 // rendering of it and, for other systems, their answer. Own forms ("epsil", "tex",
@@ -542,14 +542,14 @@ export type ExampleImplementations = Readonly<Record<string, SystemImplementatio
  */
 export type HeadImplementations = Readonly<Record<string, ExampleImplementations>>;
 
-// --- component stories (https://github.com/enumeratio/enumeratio/wiki/Vdom) ----------------------------------------------------
+// --- component stories (https://github.com/enumeratio/notatio/wiki/Vdom) ----------------------------------------------------
 //
 // A component's demos, as data, the same way a head's examples are: `packages/components/
 // reference/<Name>.stories.yaml` beside the element sources, one file per component, read and
 // written through the same `@enumeratio/entry` machinery. A story's payload is `expr`, a
 // MathJSON expression over the component's own head -- exactly what an example's `expr` is --
 // not a vdom tree: "a MathJSON node `[head, ...args]` and a vdom node `{ tag, props, children }`
-// are the same tree under a renaming" (https://github.com/enumeratio/enumeratio/wiki/Vdom), and the vdom is a RENDERING of the
+// are the same tree under a renaming" (https://github.com/enumeratio/notatio/wiki/Vdom), and the vdom is a RENDERING of the
 // expression (`structuralOf` / `vdomOf` in `@enumeratio/frontend`), never stored on its own.
 
 /** One demo on a component's reference page. */

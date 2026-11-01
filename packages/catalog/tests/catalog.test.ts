@@ -17,7 +17,7 @@ const engine = () => {
 
 test("the catalog is the measured shape, folded to names", () => {
   // Stats and maps are folded from (collection, stat) rows to NAMES with overload sets.
-  // If these move, https://github.com/enumeratio/enumeratio/wiki/Namespaces §1 is stale — that is the point of pinning them.
+  // If these move, https://github.com/enumeratio/notatio/wiki/Namespaces §1 is stale — that is the point of pinning them.
   expect(COLLECTIONS.length).toBe(288);
   expect(CARRIERS.length).toBe(93);
   // Folded to names: one row per stat name, however many carriers it is on.
@@ -76,7 +76,7 @@ test("a qualified resource evaluates, and composes with Count", () => {
 
 test("the curried spelling works at the MathJSON layer", () => {
   // [["Resource", "'X'"], n] canonicalises to Apply, and resolving to the head symbol is
-  // enough for it to apply. It does NOT parse from LaTeX — see https://github.com/enumeratio/enumeratio/wiki/Namespaces §3.1.
+  // enough for it to apply. It does NOT parse from LaTeX — see https://github.com/enumeratio/notatio/wiki/Namespaces §3.1.
   const ce = engine();
   expect(ce.box([["Resource", "'Subsets'"], 3] as never).evaluate().json).toEqual(
     ce.box(["Subsets", 3]).evaluate().json,

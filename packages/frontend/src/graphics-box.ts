@@ -1,4 +1,4 @@
-// A figure's display list as a `GraphicsBox` (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives):
+// A figure's display list as a `GraphicsBox` (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives):
 // plain boxes any environment draws with no layer code. Each mark is `TagBox`ed with its address
 // ("1,0"), each link with its members ("1,0;2,1"); the marks' places are the
 // `GraphicsComplexBox`'s coordinates, and a mark's resolved look on a `StyleBox` as `FaceForm` and `EdgeForm`.

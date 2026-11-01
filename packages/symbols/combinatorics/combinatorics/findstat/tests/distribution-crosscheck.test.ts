@@ -72,6 +72,10 @@ const tallyOf = (values: readonly number[]): Record<string, number> => {
   return out;
 };
 
+/** Same `{value: count}`, key by key: negative keys keep insertion order, so stringified tallies can differ. */
+const sameTally = (a: Record<string, number>, b: Record<string, number>): boolean =>
+  Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, n]) => b[k] === n);
+
 /** Ours: the call the distribution pane makes, read as `{value: count}`. */
 function ourTally(carrier: string, size: number, head: string): Record<string, number> | undefined {
   const [collection, argument] = COLLECTIONS[carrier]!;
@@ -130,8 +134,7 @@ function sweep(only?: readonly string[]): Report {
         }
         const theirs = tallyOf([...objects.values()]);
         compared.push(label);
-        if (JSON.stringify(ours) !== JSON.stringify(theirs))
-          disagreements[label] = { kind: "unclassified", note: "", ours, theirs };
+        if (!sameTally(ours, theirs)) disagreements[label] = { kind: "unclassified", note: "", ours, theirs };
       }
     }
   }

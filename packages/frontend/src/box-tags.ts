@@ -1,4 +1,4 @@
-// The web's one map from a box head to its tag (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, decision 2):
+// The web's one map from a box head to its tag (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, decision 2):
 // the head in kebab case, `RowBox` -> `row-box`, so web markup is the box tree itself and the
 // suffix meets the custom-element hyphen rule without a brand.
 

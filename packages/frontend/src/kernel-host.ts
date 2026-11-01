@@ -1,4 +1,4 @@
-// The notebook's side of a kernel (https://github.com/enumeratio/enumeratio/wiki/Speculative-Kernels-and-Front-Ends):
+// The notebook's side of a kernel (https://github.com/enumeratio/notatio/wiki/Speculative-Kernels-and-Front-Ends):
 // how a cell's text reads, what a session remembers, and how an answer is shown, as
 // `@enumeratio/evaluation`'s `createKernel` options. A cell's front end then sends text and
 // renders what comes back, with no engine of its own.

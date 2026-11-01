@@ -1,6 +1,6 @@
 // DyckPathsByHeight split out of collections/src/families/paths-partitions.ts (which mixed
 // lattice-paths and set-partitions families) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 -- the only lattice-path family there carrying a top-level `carrier` ("DyckPath").
 // DelannoyPaths/LukasiewiczPaths/MotzkinPathsByPeaks joined it (wire-carriers lane A-90): each
 // element (list<integer>) matches its carrier's shape (DelannoyPath/LukasiewiczPath/MotzkinPath)

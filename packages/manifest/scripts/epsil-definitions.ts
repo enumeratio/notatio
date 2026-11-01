@@ -1,5 +1,5 @@
 // A library symbol's definition as its author writes it, in Epsil in its record's front matter,
-// made into what `definition.json` holds (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2):
+// made into what `definition.json` holds (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2):
 //
 //   definition:
 //     signature: (n: integer, sides: integer?) -> integer

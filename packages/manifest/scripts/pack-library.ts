@@ -10,7 +10,7 @@
 // (epsil-definitions.ts; one without is read as written), writes each symbol's examples (from its record, `index.md` and
 // `examples.tsv`, less the aspirational and triage ones) as `examples.json` for the install check,
 // each symbol's mappings to the targets the package names as `mappings.json` (§4.4), and
-// writes the index (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2), and the package's
+// writes the index (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2), and the package's
 // JavaScript entry, `dist/index.js` and `dist/index.d.ts` (library-entry.ts).
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";

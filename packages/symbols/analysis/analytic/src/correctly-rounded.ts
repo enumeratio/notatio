@@ -18,7 +18,7 @@ import { declareCompile } from "@enumeratio/engine";
 // boundary, so the guard `g` doubles and the loop measures again. Agreement is evidence, not
 // proof: in principle both readings could be wrong the same way.
 //
-// A head that bounds its own error proves its digits instead (enumeratio/enumeratio#113,
+// A head that bounds its own error proves its digits instead (enumeratio/notatio#113,
 // step 3 (b); certified.ts lists them). On exact arguments its kernel returns an enclosure,
 // a ball that provably holds the value, at `d + g` digits: when both ends of it round to the
 // same `d` digits, every value between them does too, the true one among them. When they

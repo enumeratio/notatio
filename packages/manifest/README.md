@@ -2,7 +2,7 @@
 
 Every head we know — its packages, overloads and their types, parameter names, attributes
 and summary — assembled at build time from the reference records and a bare compute-engine
-([Manifest](https://github.com/enumeratio/enumeratio/wiki/Manifest)). It loads no package's own code: everything here is
+([Manifest](https://github.com/enumeratio/notatio/wiki/Manifest)). It loads no package's own code: everything here is
 knowable about a head without importing the package that declares it, which is what makes
 the resolver possible (below).
 
@@ -17,7 +17,7 @@ the resolver possible (below).
   (`src/resolve.ts`) — given an expression and a `Library` per package (host-supplied: the
   manifest doesn't know how to import anything), resolves the heads and symbols it names to
   the packages that declare them, widens to those packages' own dependencies, and declares
-  them into an engine in dependency order. See [Speculative Lazy Engine](https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Engine).
+  them into an engine in dependency order. See [Speculative Lazy Engine](https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Engine).
 - **`buildEngine` / `enginePlan` / `loadLibraries` / `dependedLibraries` / `DECLARE_ORDER` /
   `DECLARE_PREFERENCE`** (`src/engine.ts`) — an engine with the libraries asked for, the base
   (`evaluation`, `boxes`, `structures`) and what each requires, declared in the order `HIERARCHY`
@@ -44,7 +44,7 @@ the resolver possible (below).
   doesn't bring `semver`. `scripts/pack-library.ts <dir>` writes a package's index, its
   examples and its JavaScript entry.
 
-See [Speculative Vdom Markup](https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup).
+See [Speculative Vdom Markup](https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup).
 
 ## Commands
 
@@ -62,6 +62,6 @@ into the pack step.
 
 ## Next
 
-[Manifest](https://github.com/enumeratio/enumeratio/wiki/Manifest) has the design and what tightening a signature's types
+[Manifest](https://github.com/enumeratio/notatio/wiki/Manifest) has the design and what tightening a signature's types
 taught along the way. [`census`](../census/README.md) cross-checks the resulting namespace against
 Wolfram's.

@@ -1,4 +1,4 @@
-// Layout: boxes to a display list (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, §4).
+// Layout: boxes to a display list (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, §4).
 // Pure, with no DOM: positioned text runs, rules and rectangles, and slots, the rooms reserved for
 // a leaf the environment draws itself (a figure, a typeset math run). Layout never draws an
 // interactive thing; it reserves its room. The measures come from `Metrics`, so the same walk

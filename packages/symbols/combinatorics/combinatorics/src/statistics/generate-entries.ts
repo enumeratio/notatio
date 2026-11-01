@@ -126,7 +126,7 @@ const mergeDetails = (existing: readonly string[], generated: readonly string[])
 
 /** `existing`'s examples, plus any of `generated`'s whose id isn't already there — a union,
  *  never a replacement, so a curated example is never dropped for a generated one sharing its
- *  id (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §3: ids are stable per caption). */
+ *  id (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §3: ids are stable per caption). */
 const mergeExamples = (
   existing: readonly ReferenceExample[],
   generated: readonly ReferenceExample[],
@@ -176,7 +176,7 @@ interface Example {
   role?: "aspirational";
 }
 
-/** Ids for a head's examples, from their captions (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §3). */
+/** Ids for a head's examples, from their captions (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §3). */
 const withIds = (examples: readonly Example[]): ReferenceExample[] => {
   const taken = new Set<string>();
   return examples.map((e) => ({

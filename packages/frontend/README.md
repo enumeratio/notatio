@@ -45,14 +45,14 @@ GPU plot) and what the place it lands can do: a control with nothing to drive it
 pinned or sampled into small multiples, a GPU-only plot rasterizes on a surface without
 one, a `Row` in a narrow column stacks. It runs before `structuralOf`/`vdomOf`, so every
 backend downstream — Vue, React, the plain elements — sees the same reduced tree. See
-[Rendering Environments](https://github.com/enumeratio/enumeratio/wiki/Rendering-Environments).
+[Rendering Environments](https://github.com/enumeratio/notatio/wiki/Rendering-Environments).
 
 ## Where to go next
 
 - [`components`](../components/README.md) — the Lit custom elements built on this package.
 - [`/reference/component/`](https://enumeratio.dev/reference/component/) — every drawing symbol as a component,
   generated from these same sources.
-- [Components and Symbols](https://github.com/enumeratio/enumeratio/wiki/Components-and-Symbols) — the design
+- [Components and Symbols](https://github.com/enumeratio/notatio/wiki/Components-and-Symbols) — the design
   behind the symbol/component map.
-- [Vdom](https://github.com/enumeratio/enumeratio/wiki/Vdom) — the AST-as-vdom design.
+- [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom) — the AST-as-vdom design.
 - [Try it](docs/try-it.md) — the panel on symbol pages, and how a signature becomes controls.

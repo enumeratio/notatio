@@ -1,4 +1,4 @@
-// Partitions' own declare (https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5, A-94):
+// Partitions' own declare (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5, A-94):
 // its carriers (dominance order included, since it needs `integer_partition` declared), then the
 // families they type. `declareCombinatorics` calls this alongside the other nine areas'.
 import type { Engine } from "@enumeratio/engine";

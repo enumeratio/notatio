@@ -1,4 +1,4 @@
-// Combinatorics' own carrier declaration (https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4
+// Combinatorics' own carrier declaration (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4
 // steps 1 and 4): the aggregated carrier list, and the thin per-package call over
 // `@enumeratio/structures`' generic `declareCarriers` that every other carrier-owning package
 // (number-theory, residues, numerals, hypercomplex, frontend) also has. Unlike those, this one

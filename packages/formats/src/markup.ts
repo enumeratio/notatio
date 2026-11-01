@@ -1,4 +1,4 @@
-// The vdom as markup (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup):
+// The vdom as markup (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup):
 // FullForm written as JSX, read into MathJSON without knowing any symbol. Every rule is
 // about the shape of the markup, never about which head it is:
 //

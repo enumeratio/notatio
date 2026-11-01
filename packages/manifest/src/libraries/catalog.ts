@@ -1,4 +1,4 @@
-// Libraries as a catalog (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2): one
+// Libraries as a catalog (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2): one
 // exact version each, read from a host (npm by default), so a page fetches one small index per
 // namespace and then only the definitions an expression uses. Every definition is checked
 // against its pin before it is used.

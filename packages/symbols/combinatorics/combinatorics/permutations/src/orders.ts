@@ -1,7 +1,7 @@
 import { type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
 import { conform } from "@enumeratio/structures";
 
-// Permutations of one n under the weak order (https://github.com/enumeratio/enumeratio/wiki/Structures), Sage's
+// Permutations of one n under the weak order (https://github.com/enumeratio/notatio/wiki/Structures), Sage's
 // `permutohedron_lequal` with its default `side="right"`: p ≤ q when the inversion set of p is
 // contained in q's, where an inversion is a pair of VALUES a < b with b before a in the word.
 // (The left order compares pairs of positions instead: this order on inverses.) The identity is

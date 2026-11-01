@@ -38,7 +38,7 @@ test("the catalogue is mostly compute-engine's, and we know which part is not", 
   expect([...counts.values()].reduce((a, b) => a + b, 0)).toBe(entries.length);
   // Trails the actual count: heads move to extension (or override) as we widen them.
   // Interval/CenteredInterval/Around now genuinely diverge bare compute-engine's Sin, Cos,
-  // Tan, Sec, Csc, Sqrt, Sign, Exp and Arctan (enumeratio/enumeratio#113 §2);
+  // Tan, Sec, Csc, Sqrt, Sign, Exp and Arctan (enumeratio/notatio#113 §2);
   // All/Any/Count/Flatten now genuinely diverge it too (level arguments, infinite depth,
   // dimension permutation, any-head nesting — #113 §7); and #113's elementary backlog
   // (elementary-remaining.ts) moved Cos/Tan/Cot/Sec/Csc/Arccos/Arctan/Arcoth/Arcsch/Arsech/

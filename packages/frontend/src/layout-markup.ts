@@ -1,4 +1,4 @@
-// A closed layout as markup (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, §2): the grid of typeset
+// A closed layout as markup (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, §2): the grid of typeset
 // leaves an evaluated `Grid`, `Row` or `Column` of closed math draws as. The Out draws it in the browser
 // and a build writes it into the page ahead of that, so both come from here.
 

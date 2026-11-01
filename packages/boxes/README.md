@@ -46,7 +46,7 @@ toAscii(boxes); // "x^2"
 
 ## Where to go next
 
-- [Boxes](https://github.com/enumeratio/enumeratio/wiki/Boxes) — the design: what a box is, the
+- [Boxes](https://github.com/enumeratio/notatio/wiki/Boxes) — the design: what a box is, the
   head set, and the MakeExpression direction not yet built.
 - [`formats`](../formats/README.md) — MathMLForm, AsciiMath, and the rest of the format registry
   built on this package.

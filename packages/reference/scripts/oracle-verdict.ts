@@ -77,7 +77,7 @@ function bignum(expr: MathJSON): Approximate | undefined {
 export const show = (expr: MathJSON, residueClasses = false): string => {
   // A carrier constructor call prints as its contents — the Python-family systems' own
   // encoding is the bare structure, no head wrapper (structural.ts's `reduce` does the same
-  // unwrap for the Wolfram path; see https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5).
+  // unwrap for the Wolfram path; see https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5).
   if (Array.isArray(expr) && typeof expr[0] === "string" && CARRIER_NAMES.has(expr[0]) && expr.length === 2) {
     return show(expr[1] as MathJSON, residueClasses);
   }

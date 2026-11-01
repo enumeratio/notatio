@@ -1,4 +1,4 @@
-// A library's format (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2): the host's
+// A library's format (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2): the host's
 // package is the transport, the symbol index is ours. A package marks itself in `package.json`:
 //
 //   "enumeratio": { "namespace": "ada", "index": "./reference/index.json", "system": "0.x" }

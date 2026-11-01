@@ -58,5 +58,5 @@ the same in Node and a browser. `setRasterizer` installs the pixel-producing bac
   examples (InputForm, LaTeX, MathJSON, AsciiMath).
 - [`boxes`](../boxes/README.md) — the presentation tree these serializers and MathML/AsciiMath
   parsers are built on.
-- [Boxes](https://github.com/enumeratio/enumeratio/wiki/Boxes) — the design behind boxes and the
+- [Boxes](https://github.com/enumeratio/notatio/wiki/Boxes) — the design behind boxes and the
   formats built on them.

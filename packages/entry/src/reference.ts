@@ -32,7 +32,7 @@ export type ReferenceOrigin =
   /** Written on the entry itself. */
   | "entry"
   /** The hand-kept encyclopaedia rows on the head's own record (`references:`/`names:`
-   * in `<Head>/index.md`; https://github.com/enumeratio/enumeratio/wiki/Speculative-Symbol-Metadata). */
+   * in `<Head>/index.md`; https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata). */
   | "curated"
   /** The enumeratio catalog's own crosswalk (`base_reference`). */
   | "catalog"

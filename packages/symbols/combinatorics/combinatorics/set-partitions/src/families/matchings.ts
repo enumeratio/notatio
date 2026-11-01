@@ -1,7 +1,7 @@
 // NonCrossingPartitions/NonNestingPartitions/NonCrossingMatchings/NonNestingMatchings split out
 // of collections/src/families/paths-partitions.ts (which mixed lattice-paths and
 // set-partitions families) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5. All four already yield "blocks" (list<list<integer>>) -- exactly SetPartition's
 // shape -- so they are wired as RESTRICTIONS of SetPartition, not left bare: a non-crossing or
 // non-nesting partition (or perfect matching, read as 2-element blocks) is still a set

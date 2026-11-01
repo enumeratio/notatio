@@ -8,9 +8,9 @@ questions silently pass over. Depends on nearly everything; nothing depends back
 which is what lets it depend on everything (`reference` can't play this role itself: it's a
 dependency of the collections/statistics packages that type entries against it).
 
-Encodes the rule from [Symbols](https://github.com/enumeratio/enumeratio/wiki/Symbols) §2 (when a name is already Wolfram's,
+Encodes the rule from [Symbols](https://github.com/enumeratio/notatio/wiki/Symbols) §2 (when a name is already Wolfram's,
 what we do about it) and the `HarmonicNumber`-shaped check from
-[Roadmap](https://github.com/enumeratio/enumeratio/wiki/Roadmap) §1 (a head the transpiler will emit that the engine
+[Roadmap](https://github.com/enumeratio/notatio/wiki/Roadmap) §1 (a head the transpiler will emit that the engine
 doesn't actually answer).
 
 ## Entry points
@@ -34,7 +34,7 @@ doesn't actually answer).
 - **`RENAME_QUEUE`/`QueuedRename`** (`rename-queue.ts`) — a head declared under a spelling
   we've decided against, and what it should become; a test fails the moment a rename lands so
   the row comes out. Web-component tag renames are queued in
-  [Component Naming](https://github.com/enumeratio/enumeratio/wiki/Component-Naming) §4 instead, since they aren't engine heads.
+  [Component Naming](https://github.com/enumeratio/notatio/wiki/Component-Naming) §4 instead, since they aren't engine heads.
 
 ## Commands
 
@@ -53,5 +53,5 @@ right on every shape it takes.
 
 ## Next
 
-[Namespaces](https://github.com/enumeratio/enumeratio/wiki/Namespaces) and [Symbols](https://github.com/enumeratio/enumeratio/wiki/Symbols) are the two design docs this package
-enforces; [Manifest](https://github.com/enumeratio/enumeratio/wiki/Manifest) is what `contributions.ts` keeps in sync with.
+[Namespaces](https://github.com/enumeratio/notatio/wiki/Namespaces) and [Symbols](https://github.com/enumeratio/notatio/wiki/Symbols) are the two design docs this package
+enforces; [Manifest](https://github.com/enumeratio/notatio/wiki/Manifest) is what `contributions.ts` keeps in sync with.

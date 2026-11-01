@@ -52,6 +52,6 @@ links the issue.
 compute-engine checkout beside this repo, `~/Playground/@enumeratio/compute-engine`, with the
 `enumeratio` fork as its push remote; its branches hold only PRs we've sent that aren't
 merged. What a PR needs to land as sent is on the wiki's
-[Contributing](https://github.com/enumeratio/enumeratio/wiki/Contributing#upstreaming-to-compute-engine).
+[Contributing](https://github.com/enumeratio/notatio/wiki/Contributing#upstreaming-to-compute-engine).
 What we've asked for is the issues themselves:
 [compute-engine issues by enumeratio](https://github.com/cortex-js/compute-engine/issues?q=author%3Aenumeratio).

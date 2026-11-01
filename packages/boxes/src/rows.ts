@@ -1,4 +1,4 @@
-// What a `TableViewBox` asks of its rows (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §2):
+// What a `TableViewBox` asks of its rows (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §2):
 // a count that says how much it knows, and rows by range as boxes. Pure types and the arithmetic
 // every environment shares; whatever holds the collection (a kernel, the page's engine) implements them.
 

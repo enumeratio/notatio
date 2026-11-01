@@ -4,7 +4,7 @@
 //
 // RestrictedGrowthStrings and NonCrossingPartitions/NonNestingPartitions/NonCrossingMatchings/
 // NonNestingMatchings moved to set-partitions/src/families/{paths-partitions,matchings}.ts --
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5. The latter four now carry
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5. The latter four now carry
 // "SetPartition" (their "blocks" shape matches it exactly). DelannoyPaths/LukasiewiczPaths/
 // MotzkinPathsByPeaks moved to lattice-paths/src/families/paths-partitions.ts (wire-carriers
 // lane A-90): they now carry "DelannoyPath"/"LukasiewiczPath"/"MotzkinPath".

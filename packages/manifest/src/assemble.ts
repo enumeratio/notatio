@@ -1,4 +1,4 @@
-// The manifest assembled from each library's slice of it (https://github.com/enumeratio/enumeratio/wiki/Speculative-Per-Package-Repos
+// The manifest assembled from each library's slice of it (https://github.com/enumeratio/notatio/wiki/Speculative-Per-Package-Repos
 // §4.1): a library's index carries what its records say about the heads it documents, and the
 // tables every consumer reads (`SYMBOLS`, each package's declared symbols and example counts, the
 // notation entries) are put together from the indexes a distribution has. Here for the build, and
@@ -116,7 +116,7 @@ export function assembleManifest(indexes: readonly PackageIndex[], engine: Engin
 
   for (const [name, type] of engine.types) entry(name).overloads.push({ package: ENGINE, type });
 
-  // reference's own copy of a head is the canonical one (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §9), so
+  // reference's own copy of a head is the canonical one (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §9), so
   // its signature spells the parameter names when it has one.
   const ranked = [...records].toSorted((a, b) =>
     cmp(a.package === "reference" ? "0" : "1", b.package === "reference" ? "0" : "1"),
@@ -184,7 +184,7 @@ export function assembleManifest(indexes: readonly PackageIndex[], engine: Engin
     const own = (record.signatures ?? []).filter((row) => packageOf(row.library) === pkg && row.type !== undefined);
     const types = new Set(own.map((row) => row.type));
     if (types.size > 1) {
-      // One declared signature per head until dispatch can combine overloads (https://github.com/enumeratio/enumeratio/wiki/Manifest).
+      // One declared signature per head until dispatch can combine overloads (https://github.com/enumeratio/notatio/wiki/Manifest).
       throw new Error(`manifest: ${pkg} gives ${record.name} ${types.size} types; one per package for now`);
     }
     const table = declared.get(pkg) ?? {};

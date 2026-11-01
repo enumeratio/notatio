@@ -1,4 +1,4 @@
-// A table's side of a row source (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §3): register the
+// A table's side of a row source (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §3): register the
 // source with the page's kernel once, then ask for ranges by its handle, abort what a scroll has
 // moved on from. A page with no worker kernel runs the same host in the page's own engine, so the
 // element is the same either way.

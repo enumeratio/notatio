@@ -1,6 +1,6 @@
 # @enumeratio/structures
 
-Mathematical structure as compute-engine protocols ([Structures](https://github.com/enumeratio/enumeratio/wiki/Structures)): a
+Mathematical structure as compute-engine protocols ([Structures](https://github.com/enumeratio/notatio/wiki/Structures)): a
 generic head requires structure, a type conforms to it. `Min` works on anything with a total
 order, `Floor` on anything whose order has ticks, `Basis` on anything that is a
 finite-dimensional algebra — including a type declared in a notebook, as long as it says
@@ -49,5 +49,5 @@ vp pack   # build dist (also: vp pack --watch)
 
 ## Next
 
-Read [Structures](https://github.com/enumeratio/enumeratio/wiki/Structures) before adding a protocol or a generic head — it has
+Read [Structures](https://github.com/enumeratio/notatio/wiki/Structures) before adding a protocol or a generic head — it has
 the full table of which head needs which structure, and why.

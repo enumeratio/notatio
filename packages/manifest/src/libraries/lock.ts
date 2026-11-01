@@ -1,4 +1,4 @@
-// Version ranges to exact versions (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.2):
+// Version ranges to exact versions (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2):
 // a host asks for libraries by range, as npm does, and gets the exact versions
 // `catalog` reads, closed over the libraries they depend on. A lock keeps what was
 // chosen: a locked version stays while every range asking for it still admits it, so a page

@@ -1,4 +1,4 @@
-// A symbol's mappings (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.4): what it is
+// A symbol's mappings (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.4): what it is
 // tied to outside itself, for the targets a library says it tracks. Picked out of a head's
 // record: the references other sources give it, how other systems write it, and each
 // example as those systems write and answer it. What a library publishes as `mappings.json`.

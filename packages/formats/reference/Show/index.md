@@ -22,4 +22,4 @@ draws the primes of ℤ[√−5] over a grid every 10 units along each axis of t
 (`LatticeTiles`, `ArrayPlot`) style their elements by `ColorRules`, `ColorMixing` and
 `BoundaryStyle`; its options are Wolfram's (`GridLines`, `Axes`, `AspectRatio`, `ImageSize`) with
 `Selection` and `GestureHandling` added. The wiki's
-[Figures](https://github.com/enumeratio/enumeratio/wiki/Figures) page has the whole design.
+[Figures](https://github.com/enumeratio/notatio/wiki/Figures) page has the whole design.

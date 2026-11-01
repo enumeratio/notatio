@@ -1,6 +1,6 @@
 // Tournaments/LabeledGraphs/LabeledGraphsByEdges split out of
 // collections/src/families/tableaux-trees.ts (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 -- lane A-92: all three now carry a carrier ("Tournament" / "LabeledGraph"), so they
 // move out of collections per step 5's own rule (a family with NO carrier stays there; one WITH
 // one belongs in its area). `carrierParams: 1` prefixes `n` onto the carrier's Tuple argument

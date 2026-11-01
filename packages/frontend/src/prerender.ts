@@ -1,4 +1,4 @@
-// A cell answered ahead of time (https://github.com/enumeratio/enumeratio/wiki/Speculative-Kernels-and-Front-Ends §9):
+// A cell answered ahead of time (https://github.com/enumeratio/notatio/wiki/Speculative-Kernels-and-Front-Ends §9):
 // what a build writes into the page, so it shows before its scripts run, and what the cell
 // renders on load without asking its kernel. The answer and its display are the kernel's
 // own (`kernel-host.ts`'s `display`); the HTML is the host's typesetter's.

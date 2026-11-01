@@ -1,4 +1,4 @@
-// One entry point for the merged package (https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 3):
+// One entry point for the merged package (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 3):
 // carriers, then the families typed by them.
 //
 // Since §4 step 5's `carrierTypes` removal (A-94), this calls each area's own `declare<Area>`

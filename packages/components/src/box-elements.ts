@@ -1,4 +1,4 @@
-// Every box primitive is its own tag (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, decision 2), so
+// Every box primitive is its own tag (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, decision 2), so
 // the markup is the box tree and `:defined` holds for all of them. A box with no behavior of its
 // own is an empty element the stylesheet lays out; one that takes input or has a lifecycle
 // (`table-view-box`, a control) is its own module, loaded when a page uses it (`./lazy.ts`).

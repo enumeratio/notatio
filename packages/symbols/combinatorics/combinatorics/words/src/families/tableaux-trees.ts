@@ -1,6 +1,6 @@
 // ParkingFunctions/NonDecreasingParkingFunctions split out of
 // collections/src/families/tableaux-trees.ts (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5 (wire-carriers lane A-91): both now carry the "ParkingFunction" carrier
 // (list<integer>). NonDecreasingParkingFunctions' elements are a RESTRICTION of ParkingFunction's
 // shape (weakly increasing, not just any sequence in {1..n}) rather than a distinct carrier of

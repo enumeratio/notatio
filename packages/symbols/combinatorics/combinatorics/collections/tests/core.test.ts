@@ -18,7 +18,7 @@ import {
 // compositions/tests/core.test.ts, the lattice-paths-area ones (DyckPaths) to
 // lattice-paths/tests/core.test.ts, the trees-area ones (BinaryTrees) to
 // trees/tests/core.test.ts, and the set-partitions-area ones (Surjections, SetPartitions) to
-// set-partitions/tests/core.test.ts -- https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5.
+// set-partitions/tests/core.test.ts -- https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5.
 const PARAMS: Record<string, number[]> = {
   KSubsets: [5, 2],
   Tuples: [3, 2],

@@ -40,5 +40,5 @@ vp pack   # build dist (also: vp pack --watch)
 
 `tests/alignment.test.ts` is what enforces that a name shared with Wolfram is either the same
 function (belongs in `HEADS`) or a different one emitted under `FOREIGN` — see
-[Symbols](https://github.com/enumeratio/enumeratio/wiki/Symbols) for the reasoning. [`census`](../census/README.md)'s frontier scripts
+[Symbols](https://github.com/enumeratio/notatio/wiki/Symbols) for the reasoning. [`census`](../census/README.md)'s frontier scripts
 use this package's maps to find what Wolfram's docs call that we can't answer.

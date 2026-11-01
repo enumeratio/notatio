@@ -2,7 +2,7 @@
 // `<dynamic-module-box>` is an explicit one over its subtree; the PAGE is the implicit one,
 // so a `<slider-box name="k">` and a `<dynamic-box value="_k^2">` written
 // anywhere on a page, with no wrapper, still find each other -- the wrapper is only
-// for isolation, when two examples reuse a name (https://github.com/enumeratio/enumeratio/wiki/Vdom).
+// for isolation, when two examples reuse a name (https://github.com/enumeratio/notatio/wiki/Vdom).
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";

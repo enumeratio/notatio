@@ -607,7 +607,7 @@ function declareRelations(ce: Engine): void {
 
 // --- RandomVariate: Random over a distribution -------------------------------------------
 //
-// Every draw comes from the engine's one seeded stream (@enumeratio/engine, https://github.com/enumeratio/enumeratio/wiki/Random),
+// Every draw comes from the engine's one seeded stream (@enumeratio/engine, https://github.com/enumeratio/notatio/wiki/Random),
 // the same one `RandomInteger` and `Random` over a collection use, so `SeedRandom(n)` fixes
 // them all. A distribution is one more domain `Random` samples: this file registers the
 // sampler and the overload, and `RandomVariate` is its Wolfram spelling.

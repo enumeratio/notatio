@@ -1,4 +1,4 @@
-// The fs-based loader for the records (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §8 step 1). Reads each
+// The fs-based loader for the records (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §8 step 1). Reads each
 // `<package>/reference/<Head>/` folder (see @enumeratio/entry's record.ts), through
 // `@enumeratio/entry`'s strict reader, validated against its JSON Schema, and checks for `id`
 // collisions on a head shared between two packages (§9 "Shared heads").
@@ -59,7 +59,7 @@ export interface LoadResult {
  * Scan every package's record directory (see `recordDirs` in `@enumeratio/entry/node`) for head
  * folders (`<Head>/index.md`, `examples.tsv`, `examples.values.<system>.tsv`), parse and validate
  * each, and check that no two packages assign the same id to the same head
- * (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §3, §9).
+ * (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §3, §9).
  *
  * `packagesRoot` is normally the repo's `packages/` directory; a caller passes a fixture
  * directory in tests instead of scanning real data.
@@ -151,7 +151,7 @@ export function recordsRoot(from?: string): string {
 export const PACKAGES = recordsRoot();
 
 /**
- * One `LoadedHead` per name, for a head two packages document (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data
+ * One `LoadedHead` per name, for a head two packages document (https://github.com/enumeratio/notatio/wiki/Examples-as-Data
  * §9 "Shared heads"): reference's own copy when it has one, else the first package's by
  * path. The same precedence `referenceData()` uses to pick which entry a name resolves to --
  * a migration script edits THIS copy, not an arbitrary duplicate, or its write is invisible
@@ -300,7 +300,7 @@ export function oracleAgreementsOf(
 export const OWN_ENGINE = new Set(["statistics"]);
 
 /** The combinatorics area's maps (originally `@enumeratio/domains`, before it merged into
- * `@enumeratio/combinatorics` wholesale, and before ITS domains area was retired: https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible's
+ * `@enumeratio/combinatorics` wholesale, and before ITS domains area was retired: https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible's
  * step 1) -- the same carrier-typed-argument problem as `OWN_ENGINE`, but the merge means
  * `packageOf` can no longer single them out from the collections area by package name alone.
  * This is the (former) domains area's reference/ folder listing as of the merge; it moves

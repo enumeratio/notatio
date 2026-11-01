@@ -34,11 +34,11 @@ const latticePathsFamily = latticePaths({ head: "LatticePaths", params: ["_a", "
 // Kept separate from `entries` below only so collections/src/families/index.ts can splice
 // `latticePathsDyckPathsEntries` (DyckPaths) back in at the exact interior position it held
 // before the lattice-paths-area move — §4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible.
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible.
 // Kept separate from `entriesBeforeDyckPaths` below only so collections/src/families/index.ts
 // can splice `setPartitionsSurjectionsEntries` (Surjections) back in at the exact interior
 // position it held before the set-partitions-area move — §4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible.
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible.
 export const entriesBeforeSurjections: (NumberKernel | EpsilFamily)[] = [
   // ── subsets / multisets / tuples / functions / binary words ──
   subsetsFamily,
@@ -62,7 +62,7 @@ export const entriesBeforeDyckPaths: (NumberKernel | EpsilFamily)[] = [
 // Kept separate from the final `entries` export below only so collections/src/families/index.ts
 // can splice `treesCoreEntries` (BinaryTrees, BinaryTreeParentArrays) back in at the exact
 // interior position it held before the trees-area move — §4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible.
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible.
 // Kept separate from `entriesBeforeTrees` below only so collections/src/families/index.ts can
 // splice `setPartitionsCoreEntries` (SetPartitions, SetPartitionsIntoKBlocks, SetCompositions)
 // back in at the exact interior position it held before the set-partitions-area move — §4 step 5.

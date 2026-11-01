@@ -1,6 +1,6 @@
 // Moved here from @enumeratio/statistics (originally tests/coverage.test.ts) to break a
 // devDependency cycle: statistics -> catalog -> combinatorics -> statistics, once collections
-// and domains merged into combinatorics (https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible). The combinatorial statistics moved to
+// and domains merged into combinatorics (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible). The combinatorial statistics moved to
 // @enumeratio/combinatorics itself since (step 6b), which catalog already devDeps with no
 // cycle at all — but the test stays here, still the right home for a catalog-coverage check.
 import { STATS } from "../src/index.ts";

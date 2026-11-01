@@ -4,7 +4,7 @@ import { atDigits } from "./hurwitz-zeta-big.ts";
 // Ball arithmetic: a real number known to lie within `rad` of `mid` -- a measurement with
 // its error bar. Every operation returns a ball that contains every value the operation can
 // take on its argument balls, so a kernel written in these operations ends with a ball that
-// provably contains its true value, rounding and all (enumeratio/enumeratio#113, step 3 (b)).
+// provably contains its true value, rounding and all (enumeratio/notatio#113, step 3 (b)).
 //
 // `mid` is carried at BigDecimal's working precision and rounded to nearest, as the point
 // kernels round; the error that rounding makes is added to `rad`. BigDecimal's `+`, `−` and

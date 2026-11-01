@@ -1,4 +1,4 @@
-// The lazy grid's arithmetic (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid): windows, blocks,
+// The lazy grid's arithmetic (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid): windows, blocks,
 // eviction, and the scroll mapping when the content is taller than a browser will scroll.
 
 import type { RowCount } from "@enumeratio/boxes";

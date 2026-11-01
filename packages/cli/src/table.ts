@@ -1,5 +1,5 @@
 // A `CollectionTable` (or any `TableViewBox`) at the terminal, over the row source the engine
-// holds for it (https://github.com/enumeratio/enumeratio/wiki/Speculative-Lazy-Grid, §3). Where
+// holds for it (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid, §3). Where
 // nothing takes keys it is the pinned first page as a ruled grid with a `Skeleton` line for the
 // rest; the interactive pager is `pager.ts`.
 

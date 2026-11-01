@@ -1,4 +1,4 @@
-// The typeset leaf and the markup of a rendering (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, §2): a
+// The typeset leaf and the markup of a rendering (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, §2): a
 // math run is one `form-box` that holds its TeX, and the host typesets it. Apart from
 // `box-render.ts` because the front end's core, which loads no engine, draws a leaf too.
 

@@ -1,5 +1,5 @@
 // A result's display, as boxes, built where the definitions are: in the kernel that
-// evaluated it (https://github.com/enumeratio/enumeratio/wiki/Speculative-Kernels-and-Front-Ends §5),
+// evaluated it (https://github.com/enumeratio/notatio/wiki/Speculative-Kernels-and-Front-Ends §5),
 // so a front end renders it without an engine of its own. TraditionalForm is `makeBoxes`
 // with the notation the engine's packages registered; StandardForm and MatrixForm are, for
 // now, TeX leaves the engine writes (`FormBox(tex, "TeXForm")`).

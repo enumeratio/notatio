@@ -1,7 +1,7 @@
 # @enumeratio/plausible
 
 Seeded, size-aware generators for Plausible, the property sampler over our value spaces
-([Plausible](https://github.com/enumeratio/enumeratio/wiki/Plausible)), after Lean 4's Plausible: a `Gen` reads a random
+([Plausible](https://github.com/enumeratio/notatio/wiki/Plausible)), after Lean 4's Plausible: a `Gen` reads a random
 stream and a size, everything is seeded and printed so any run replays, and `streamFor` keys
 a stream per family (or per template) so one key's draws never depend on another key having
 run first. A leaf with no workspace dependencies — `collections`, [`reference`](../reference/README.md)
@@ -30,6 +30,6 @@ vp test
 ## Next
 
 The runner that derives sampling from what a space declares (rather than a hand list of
-families) is the point of [Plausible](https://github.com/enumeratio/enumeratio/wiki/Plausible) — read it before adding a new
+families) is the point of [Plausible](https://github.com/enumeratio/notatio/wiki/Plausible) — read it before adding a new
 family's generator. A test refuses a collection that doesn't meet the capability contract
 the design describes.

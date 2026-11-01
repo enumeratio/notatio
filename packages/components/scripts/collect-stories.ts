@@ -1,7 +1,7 @@
 // Rebuild `src/stories-data.ts` from every `reference/<Name>.stories.yaml` -- the component
 // reference pages read this file, not the YAML, the same way the crosswalk reads
 // `curated-data.ts` instead of parsing records at runtime (they run in the browser and the
-// site build, and cannot parse YAML there). A story's `expr` is the source of truth (https://github.com/enumeratio/enumeratio/wiki/Vdom: a MathJSON node and a vdom node are the same tree under a renaming); its source
+// site build, and cannot parse YAML there). A story's `expr` is the source of truth (https://github.com/enumeratio/notatio/wiki/Vdom: a MathJSON node and a vdom node are the same tree under a renaming); its source
 // panel shows it in several equivalent written forms, each derived here and pinned so the page
 // never re-derives one:
 //
@@ -12,7 +12,7 @@
 //   - `vdom`, the expression's own tree verbatim, as the vdom markup writes it
 //     (`@enumeratio/formats/markup`'s `markupOf`): every head a tag, every argument a child.
 //     It shows the AST shape
-//     https://github.com/enumeratio/enumeratio/wiki/Vdom is about, which `html` obscures the
+//     https://github.com/enumeratio/notatio/wiki/Vdom is about, which `html` obscures the
 //     moment a component maps an argument to an attribute (a chart's `data`, say).
 //
 // The live render on the page still goes through `vdomOf`/`toVNode` at runtime: that

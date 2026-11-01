@@ -1,4 +1,4 @@
-// The web's renderer of layout boxes (https://github.com/enumeratio/enumeratio/wiki/Speculative-Box-Primitives, §2):
+// The web's renderer of layout boxes (https://github.com/enumeratio/notatio/wiki/Speculative-Box-Primitives, §2):
 // `RowBox`, `GridBox`, `PanelBox`, `PaneBox` and `FrameBox` as their own tags (`row-box`), with no
 // behavior of their own. The head the author wrote rides on the node (a `Row` is a tagged
 // `RowBox`), and the stylesheet lays the DOM out with flex and grid, so the page keeps

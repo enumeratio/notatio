@@ -1,5 +1,5 @@
 // Every reference example's forms, as the printers and transpilers make them today, agree with
-// what its record pins (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §2):
+// what its record pins (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §2):
 // each other system's `in`, and our own forms' snapshots in examples.tsv -- any pinned `in` or
 // `out`, and every `back`/`backOut`, the round trips that lose something. A printer or
 // transpiler change shows up here as a data diff to commit, in the same PR. No kernel needed.

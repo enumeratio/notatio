@@ -1,4 +1,4 @@
-// Write the JSON Schema for the records and a library symbol's mappings (https://github.com/enumeratio/enumeratio/wiki/Examples-as-Data §4) to
+// Write the JSON Schema for the records and a library symbol's mappings (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §4) to
 // `schema/*.schema.json` (uncommitted; `build` runs this).
 //
 //   vp node packages/entry/scripts/generate-schema.ts

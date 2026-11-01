@@ -1,5 +1,5 @@
 // A published library's records, for a scan of the systems it tracks
-// (https://github.com/enumeratio/enumeratio/wiki/Speculative-Vdom-Markup §4.4): its heads, read from
+// (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.4): its heads, read from
 // the folder its index sits in, the targets its `enumeratio.mappings` names, and the mappings its
 // records' `origin: mapped` bindings make, by the name an expression calls each head (`ns.Name`).
 

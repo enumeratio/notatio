@@ -4,7 +4,7 @@ import { entries } from "../src/families/prufer-sequences.ts";
 import { LabeledTreeCount } from "../../tests/readings/kernels/collections-kernels-extra.ts";
 
 // Moved out of collections/tests/tableaux-trees.test.ts alongside the family (§4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible):
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible):
 // PruferSequences now carries "PruferSequence". These tests exercise the pure kernel; the
 // carrier wiring and the LabeledTree conversion are tested at the CE level in
 // tests/declare-combinatorics.test.ts and tests/prufer-conversion.test.ts.

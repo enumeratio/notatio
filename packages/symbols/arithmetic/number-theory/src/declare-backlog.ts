@@ -2,7 +2,7 @@ import { applyFunction, bigIntegerAt, operandsOf, symbolNameOf, type Engine, typ
 import { factorInteger, gcd as gcdBig, isqrt } from "@enumeratio/residues";
 import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
 
-// Heads new to compute-engine, from the Wolfram-sweep backlog (https://github.com/enumeratio/enumeratio/wiki/Symbols §4, issue
+// Heads new to compute-engine, from the Wolfram-sweep backlog (https://github.com/enumeratio/notatio/wiki/Symbols §4, issue
 // #113). Every one stays unevaluated — never approximate — when it cannot answer: a
 // non-integer, an out-of-range table lookup, or a search past what its guard allows.
 

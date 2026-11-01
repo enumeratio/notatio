@@ -10,7 +10,7 @@ import type { Resolver } from "./tagged-arithmetic.ts";
 // `Multiply`.
 //
 // Wolfram additionally rounds outward for a rigorous (interval-arithmetic) radius; that
-// rounding needs a kernel to pin (see backlog.json's note, and enumeratio/enumeratio#113
+// rounding needs a kernel to pin (see backlog.json's note, and enumeratio/notatio#113
 // §2), so it stays out of scope here — every example this covers uses exact endpoints, where
 // there is nothing to round.
 //

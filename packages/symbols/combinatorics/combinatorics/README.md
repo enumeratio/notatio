@@ -7,7 +7,7 @@ arithmetic, `At` by unranking — see
 [Ranking and unranking](docs/ranking-and-unranking.md) for what that buys you.
 
 Merged wholesale ahead of per-area carving
-([wiki](https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible)):
+([wiki](https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible)):
 today every area lives under this one package, subpath exports notwithstanding.
 
 ## Entry points

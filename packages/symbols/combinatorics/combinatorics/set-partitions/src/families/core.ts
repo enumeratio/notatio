@@ -1,6 +1,6 @@
 // Surjections, SetPartitions, SetPartitionsIntoKBlocks, SetCompositions and PerfectMatchings
 // split out of collections/src/families/core.ts (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5. PerfectMatchings, colocated with SetPartitions in core.ts's "set partitions /
 // matchings" section, now carries "SetPartition" too: its "blocks" shape (a matching's pairs)
 // is exactly SetPartition's shape (list<list<integer>>), so it is wired as a RESTRICTION of

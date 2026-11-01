@@ -1,5 +1,5 @@
 // DyckPaths split out of collections/src/families/core.ts (which mixed every area) per
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
 // §4 step 5. MotzkinPaths/SchroederPaths joined it (§4 step 5, wire-carriers lane A-90):
 // their element (list<integer>) matches MotzkinPath/SchroederPath's shape exactly, same as
 // DyckPaths <-> DyckPath. LatticePaths and FibonacciWords declare no carrier at all and stay in

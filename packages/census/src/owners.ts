@@ -1,4 +1,4 @@
-// Heads are declared once (https://github.com/enumeratio/enumeratio/wiki/Speculative-Per-Package-Repos §2.3).
+// Heads are declared once (https://github.com/enumeratio/notatio/wiki/Speculative-Per-Package-Repos §2.3).
 //
 // A head is declared by compute-engine, or by the package that introduces it. Every other
 // package that wants the head contributes to it: a row in its overload table, a widened

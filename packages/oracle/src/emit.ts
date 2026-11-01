@@ -1048,7 +1048,7 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
     }
     // A carrier CONSTRUCTOR call (`Permutation([2, 1, 3])`) with no mapping of its own: we
     // decide what counts as equivalent, and an external system's raw structure IS our
-    // carrier value — https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible
+    // carrier value — https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible
     // §4 step 5. Unwrap to the contents every carrier constructor is declared over exactly
     // one of (`declareConstructor`'s `(shape) -> type` signature; `contentsOf` reads the same
     // single operand) so the emitted source is the system's own plain list/tuple, not a

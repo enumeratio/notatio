@@ -196,7 +196,7 @@ export function reduce(expr: MathJSON, evaluate: (expr: MathJSON) => Leaf): Tree
   // A carrier CONSTRUCTOR call (`Permutation([2, 1, 3])`) reduces to its contents, exactly
   // like `emit.ts` unwraps it for an external system — we decide what counts as equivalent,
   // and an external system's raw structure IS our carrier value, with no head wrapper needed
-  // (https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5). A carrier is always
+  // (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5). A carrier is always
   // declared over exactly one operand (`declareConstructor`'s `(shape) -> type` signature,
   // same as `contentsOf`), so this is a plain, order-preserving unwrap, not a new comparison
   // rule — the same structural leniency `SEQUENCE_HEADS` already gives List vs. Tuple.

@@ -1,4 +1,4 @@
-// Trees' own declare (https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5, A-94): its
+// Trees' own declare (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5, A-94): its
 // carriers (LabeledTree and PruferSequence both live here, so the Prüfer-bijection constructor
 // overload can attach right after), then the families they type, then their statistics.
 import type { Engine } from "@enumeratio/engine";

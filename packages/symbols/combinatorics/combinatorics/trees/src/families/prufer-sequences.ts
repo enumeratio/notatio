@@ -1,5 +1,5 @@
 // PruferSequences split out of collections/src/families/tableaux-trees.ts (§4 step 5,
-// https://github.com/enumeratio/enumeratio/wiki/Speculative-Combinatorics-Layering-and-Plausible):
+// https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible):
 // it now carries "PruferSequence" -- a word, counted in its own right (n^(n-2)), not the edge
 // list the Prüfer bijection decodes to (that's LabeledTree's job: see
 // ../prufer-conversion.ts, a LabeledTree(...) constructor overload built with structures'
