@@ -553,6 +553,54 @@ const partitionsOf = (n: number, cap = n): number[][] =>
 const bulgarianMove = (l: Partition): number[] =>
   [...l.map((p) => p - 1), l.length].filter((p) => p > 0).toSorted((a, b) => b - a);
 
+/** Every permutation of 0..n-1, as arrays. */
+const allPermutations = (n: number): number[][] =>
+  n === 0
+    ? [[]]
+    : allPermutations(n - 1).flatMap((rest) =>
+        Array.from({ length: n }, (_, i) => [...rest.slice(0, i), n - 1, ...rest.slice(i)]),
+      );
+const cubeCounts = new Map<number, Map<string, number>>();
+/** How many permutations of 0..n-1 cube to each permutation, found by cubing them all. */
+const cubesOfSize = (n: number): Map<string, number> => {
+  let counts = cubeCounts.get(n);
+  if (!counts) {
+    counts = new Map();
+    for (const p of allPermutations(n)) {
+      const cube = p.map((_, i) => p[p[p[i]!]!]!).join();
+      counts.set(cube, (counts.get(cube) ?? 0) + 1);
+    }
+    cubeCounts.set(n, counts);
+  }
+  return counts;
+};
+/**
+ * Cube roots of a permutation of this cycle type: by cubing every permutation for small sizes, and beyond by the
+ * recurrence on one cycle of length d: it is the cube of a d-cycle alone (3 not dividing d), or of a 3d-cycle with two
+ * others of the same length, in 2d^2 ways.
+ */
+const cubeRoots = (l: Partition): number => {
+  if (sum(l) <= 8) return cubesOfSize(sum(l)).get(permutationOfCycleType(l).join()) ?? 0;
+  return product(
+    [...new Set(l)].map((d) => {
+      const roots = [1];
+      for (let a = 1; a <= l.filter((p) => p === d).length; a++)
+        roots[a] =
+          (d % 3 === 0 ? 0 : roots[a - 1]!) + (a >= 3 ? (((a - 1) * (a - 2)) / 2) * 2 * d * d * roots[a - 3]! : 0);
+      return roots[l.filter((p) => p === d).length]!;
+    }),
+  );
+};
+/** Bulgarian solitaire from a partition: the steps before the cycle and the cycle's length. */
+const solitaireOrbit = (l: Partition): { preperiod: number; period: number } => {
+  const seen = new Map<string, number>();
+  for (let state: number[] = [...l], step = 0; ; state = bulgarianMove(state), step++) {
+    const earlier = seen.get(state.join());
+    if (earlier !== undefined) return { preperiod: earlier, period: step - earlier };
+    seen.set(state.join(), step);
+  }
+};
+
 export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   PartRange: (l) => (l.length === 0 ? 0 : l[0]! - l.at(-1)!),
   ContainingRectangleShortSide: (l) => (l.length === 0 ? 0 : Math.min(l[0]!, l.length)),
@@ -767,4 +815,23 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   LowerCoverCountInDominanceOrder: (l) => (l.length === 0 ? 0 : upperCovers(conjugate(l))),
   BulgarianSolitairePreimageCount: (l) =>
     partitionsOf(sum(l)).filter((mu) => bulgarianMove(mu).join() === l.join()).length,
+
+  // The seventh batch.
+  InvariantGraphCount: (l) => 2 ** PARTITION_READINGS.EdgeOrbitCount!(l),
+  CompleteHomogeneousSymmetricFunctionAtOne: (l) => product(l.map((p) => binomial(l.length + p - 1, p))),
+  PowerSumSymmetricFunctionAtOne: (l) => product(l.map(() => l.length)),
+  CubeRootCount: cubeRoots,
+  DominatedPartitionCount: (l) => {
+    const partial = (mu: Partition, k: number) => sum(mu.slice(0, k));
+    return partitionsOf(sum(l)).filter(
+      (mu) =>
+        l.every((_, k) => partial(mu, k + 1) <= partial(l, k + 1)) &&
+        mu.every((_, k) => partial(mu, k + 1) <= partial(l, k + 1)),
+    ).length;
+  },
+  BulgarianSolitaireOrbitSize: (l) => {
+    const { preperiod, period } = solitaireOrbit(l);
+    return preperiod + period;
+  },
+  BulgarianSolitairePreperiod: (l) => solitaireOrbit(l).preperiod,
 };

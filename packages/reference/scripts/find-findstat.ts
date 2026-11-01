@@ -215,7 +215,7 @@ const CARRIERS: Readonly<Record<string, Carrier>> = {
   },
 };
 
-/** Definitions that cost n³ evaluations each; exhaustive still, over the smaller range. */
+/** Definitions that cost n³ evaluations each, or whose FindStat data stops short of the full range (sizes up to 7 to 9); exhaustive still, over the smaller range. */
 const CUBIC = new Set([
   "LongestIncreasingSubsequence",
   "LongestDecreasingSubsequence",
@@ -223,6 +223,10 @@ const CUBIC = new Set([
   "OccurrencesOf132",
   "NumberOfOccurrencesOf213",
   "StackSortable",
+  "InvariantGraphCount",
+  "CompleteHomogeneousSymmetricFunctionAtOne",
+  "PowerSumSymmetricFunctionAtOne",
+  "CubeRootCount",
 ]);
 
 // ── the query ─────────────────────────────────────────────────────────────────────────────

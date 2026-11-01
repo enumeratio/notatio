@@ -2492,6 +2492,48 @@ export const findstat: readonly FindStatMatch[] = [
     values: 272,
   },
   {
+    head: "InvariantGraphCount",
+    on: "IntegerPartition",
+    findstat: ["St000514"],
+    values: 65,
+  },
+  {
+    head: "CompleteHomogeneousSymmetricFunctionAtOne",
+    on: "IntegerPartition",
+    findstat: ["St001562"],
+    values: 44,
+  },
+  {
+    head: "PowerSumSymmetricFunctionAtOne",
+    on: "IntegerPartition",
+    findstat: ["St001563"],
+    values: 44,
+  },
+  {
+    head: "CubeRootCount",
+    on: "IntegerPartition",
+    findstat: ["St001364"],
+    values: 96,
+  },
+  {
+    head: "DominatedPartitionCount",
+    on: "IntegerPartition",
+    findstat: ["St000321"],
+    values: 139,
+  },
+  {
+    head: "BulgarianSolitaireOrbitSize",
+    on: "IntegerPartition",
+    findstat: ["St001914"],
+    values: 1200,
+  },
+  {
+    head: "BulgarianSolitairePreperiod",
+    on: "IntegerPartition",
+    findstat: ["St001912"],
+    values: 1200,
+  },
+  {
     head: "Height",
     on: "DyckPath",
     findstat: ["St000013"],
