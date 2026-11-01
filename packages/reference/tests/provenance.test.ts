@@ -188,6 +188,7 @@ const OVERRIDDEN = [
   // formula, and the decimal-digit-count identity), so Add is the corpus expression's own
   // outer head even though the divergence is Floor's.
   "Add",
+  "AGM",
   "AiryAi",
   "AiryAiPrime",
   "AiryBi",
