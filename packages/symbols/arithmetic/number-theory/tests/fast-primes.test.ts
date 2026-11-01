@@ -42,6 +42,24 @@ test("PrimePi past Lucy_Hedgehog's range counts combinatorially (BL-156)", () =>
   expect(run(["PrimePi", 2 ** 40])).toBe(41203088796);
 });
 
+test("PrimePi agrees across evaluate(), N() and the parse route at 10^11 (BL-156)", () => {
+  const boxed = ce.box(["PrimePi", 100000000000]);
+  expect(boxed.evaluate().json).toBe(4118054813);
+  expect(boxed.N().json).toBe(4118054813);
+  expect(ce.parse("\\operatorname{PrimePi}(100000000000)").evaluate().json).toBe(4118054813);
+});
+
+// 10^14 takes about 2.4 s here, so the standard run keeps to 10^13 above.
+test.runIf(process.env.DEEP_TESTS === "1")(
+  "PrimePi(10^14) through evaluate() and N(), OEIS A006880 (BL-156)",
+  () => {
+    const boxed = ce.box(["PrimePi", 10 ** 14]);
+    expect(boxed.evaluate().json).toBe(3204941750802);
+    expect(boxed.N().json).toBe(3204941750802);
+  },
+  600_000,
+);
+
 test("PrimePi/NthPrime past the exact tiers decline at once instead of grinding natively", () => {
   const start = Date.now();
   expect(ce.box(["PrimePi", 10 ** 16]).evaluate().operator).toBe("PrimePi");
