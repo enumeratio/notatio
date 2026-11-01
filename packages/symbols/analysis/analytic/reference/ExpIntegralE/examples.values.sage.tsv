@@ -10,6 +10,7 @@ large-integer-order-500000	exp_integral_e(500000, 2.5)	1.64169504737642e-7
 large-order-beside-an-underflowing-power	enumeratio_n(exp_integral_e(170, 100))	1.38101755696227e-46	
 large-order-at-a-negative-argument	enumeratio_n(exp_integral_e(170, -100))	3.98499081041185e41 - 7.35896604824112e33*I	
 n-expintegrale-340-neg-100	enumeratio_n(exp_integral_e(340, -100))	1.12672310040601e41 - 2.09404015351148e-34*I	
+n-expintegrale-neg-170-neg-2	enumeratio_n(exp_integral_e(-170, -2))		
 non-integer-order	exp_integral_e(0.5, 2.5)	0.0284142997092898	
 exact-arguments-under-n	enumeratio_n(exp_integral_e(1, 1))	0.219383934395520	
 n-expintegrale-1-plus-i-2-plus-3i	enumeratio_n(exp_integral_e((1 + 1*I), (2 + 3*I)))	-0.0189438305083736 + 0.0204437701028300*I	

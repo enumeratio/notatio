@@ -1,5 +1,6 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	(enumeratio_jacobi(:dc, enumeratio_decimal("0.6"), enumeratio_decimal("0.4")))	1.12478042691155514927345735592126039887608845121182621131056584756022096753309	
+n-jacobidc-complex-u-at-m-1	(enumeratio_jacobi(:dc, (8 * (2 + enumeratio_div(enumeratio_ball(sqrt, -14), 2))), (enumeratio_pow((1 + (-(enumeratio_div(enumeratio_ball(sqrt, 2), 2)))), 2) * enumeratio_pow((1 + enumeratio_div(enumeratio_ball(sqrt, 2), -2)), -2))))	ball not finite	error
 m-less-than-0-via-the-imaginary-modulus	(enumeratio_jacobi(:dc, enumeratio_decimal("0.3"), enumeratio_decimal("-0.7")))	1.079939770083225151718245711638467939467580392565182633479669351918017075985492	
 d-jacobidc-u-m-m			
 series-jacobidc-u-m-u-0-5			

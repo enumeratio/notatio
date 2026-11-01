@@ -5,6 +5,8 @@ stays-symbolic-even-at-0-same-as-sinh-and-cosh	tanh(n(0))	0.0
 a-float-argument-evaluates-directly-no-n-needed	tanh(x(2.2))	0.9757431300314515	
 series-tanh-x-x-0-10			
 series-tanh-x-x-1-over-2-times-i-times-pi-3			
+series-tanh-at-i-pi-over-2-order-neg-1			
+tanh-artanh-1-is-1	tanh(atanh(n(1)))		
 arbitrary-precision-via-n	nf(tanh(rational(n(11), n(5))))	0.9757431300314515	
 evaluates-at-a-complex-argument			
 interval-arithmetic-tanh-is-increasing-so-tanh-0			

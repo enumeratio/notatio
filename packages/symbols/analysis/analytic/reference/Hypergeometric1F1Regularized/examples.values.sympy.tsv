@@ -10,6 +10,7 @@ a-complex-argument-at-a-nonpositive-integer-b	N(hyper([1], [-1], (0.3 + -0.4*I))
 simplify-normal-series	simplify((series(hyper([(1 * (S(2)**-1))], [3], Symbol("x")) / gamma(3), Symbol("x"), oo, 3 + 1)).removeO())		
 n-hypergeometric1f1regularized-1-0-neg-1	N(hyper([-1], [0], -1) / gamma(0), 30)	0	disagree
 n-hypergeometric1f1regularized-1-0-0	N(hyper([-1], [0], 0) / gamma(0), 30)	0	
+n-hyp1f1regularized-neg-12-neg-1-neg-1	N(hyper([-12], [-1], -1) / gamma(-1), 30)	0	disagree
 n-hypergeometric1f1regularized-2-neg-4-2-50	N(hyper([2], [-4], 2) / gamma(-4), 30)	0	disagree
 n-hypergeometric1f1regularized-1-0-1-30	N(hyper([1], [0], 1) / gamma(0), 30)	0	disagree
 matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analytic_func(hyper([Rational(1, 2)], [1], Symbol("_mf")) / gamma(1), Symbol("_mf")).applyfunc(simplify).tolist()	[[exp(1/4)*besseli(0, 1/4), 0], [0, exp(1/4)*besseli(0, 1/4)]]	

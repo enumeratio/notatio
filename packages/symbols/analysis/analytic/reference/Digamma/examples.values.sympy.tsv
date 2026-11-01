@@ -4,6 +4,7 @@ digamma-neg-1	digamma(-1)	zoo
 a-floating-point-argument-evaluates-directly-to	digamma(0.5)	polygamma(0, 0.5)	
 a-machine-precision-argument	digamma(100.5)	polygamma(0, 100.5)	
 psi-5-h-4-gamma-frac-25-12-gamma	digamma(5)	25/12 - EulerGamma	
+digamma-at-two-poles-compares-equal	enumeratio_equal(digamma(-1), (digamma(-12) + -1))	True	disagree
 threads-over-a-list-reducing-each-positive	[digamma(1), digamma(2), digamma(3)]	[-EulerGamma, 1 - EulerGamma, 3/2 - EulerGamma]	
 complex-arguments-should-evaluate-as-psi-m-does	digamma((2.5 + 3*I))	polygamma(0, 2.5 + 3*I)	
 psi-infty-infty-growing-like-ln-z	digamma(oo)	oo	

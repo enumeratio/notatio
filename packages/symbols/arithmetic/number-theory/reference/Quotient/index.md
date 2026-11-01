@@ -55,7 +55,7 @@ bindings:
       on: 2026-10-16
   - origin: mapped
     form: julia
-    template: fdiv(ZZ($1), ZZ($2))
+    template: floor(ZZRingElem, QQ($1) / QQ($2))
     arity: 2
     threadArgOnly:
       - 1

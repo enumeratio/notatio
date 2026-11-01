@@ -16,6 +16,7 @@ series-hypergeometric0f1regularized-2-x-x-0-6	series(hyper([], [2], Symbol("x"))
 fullsimplify-normal-series	simplify((series(hyper([], [2], Symbol("x")) / gamma(2), Symbol("x"), oo, 3 + 1)).removeO())		
 n-hypergeometric0f1regularized-4-0-50	N(hyper([], [-4], 0) / gamma(-4), 30)	0	
 n-hypergeometric0f1regularized-0-0-2	N(hyper([], [0], 0) / gamma(0), 30)	0	
+n-hypergeometric0f1regularized-0-1-pole-of-b	N(hyper([], [0], 1) / gamma(0), 30)	0	disagree
 n-hypergeometric0f1regularized-0-neg-48-50	N(hyper([], [0], -48) / gamma(0), 30)	0	disagree
 n-hypergeometric0f1regularized-4-0-25	N(hyper([], [4], 0) / gamma(4), 30)	0.166666666666666666666666666667	
 matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analytic_func(hyper([], [Rational(1, 2)], Symbol("_mf")) / gamma(Rational(1, 2)), Symbol("_mf")).applyfunc(simplify).tolist()	[[cosh(sqrt(2))/sqrt(pi), 0], [0, cosh(sqrt(2))/sqrt(pi)]]	disagree

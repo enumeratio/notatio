@@ -6,6 +6,7 @@ the-first-20-terms-of-a-quadratic-irrational	ContinuedFraction[Sqrt[13], 20]	{3,
 20-terms-of-pi-past-the-13-term-double-precision	ContinuedFraction[Pi, 20]	{3, 7, 15, 1, 292, 1, 1, 1, 2, 1, 3, 1, 14, 2, 1, 1, 2, 2, 2, 2}	\text{ContinuedFraction}[\pi ,20]	\{3,7,15,1,292,1,1,1,2,1,3,1,14,2,1,1,2,2,2,2\}	
 a-quadratic-irrational-s-exact-expansion-is	ContinuedFraction[Sqrt[13]]	{3, {1, 1, 1, 1, 6}}	\text{ContinuedFraction}\left[\sqrt{13}\right]	\{3,\{1,1,1,1,6\}\}	
 sqrt-2-is-1-overline-2	ContinuedFraction[Sqrt[2]]	{1, {2}}	\text{ContinuedFraction}\left[\sqrt{2}\right]	\{1,\{2\}\}	
+a-periodic-tail-with-a-zero-partial-denominator	FromContinuedFraction[List[6, List[1, 1, -1, 1, -1]]]				
 e-s-pattern-1-2k-1	ContinuedFraction[E, 10]	{2, 1, 2, 1, 1, 4, 1, 1, 6, 1}	\text{ContinuedFraction}[e,10]	\{2,1,2,1,1,4,1,1,6,1\}	
 any-constant-compute-engine-can-evaluate	ContinuedFraction[EulerGamma, 10]	{0, 1, 1, 2, 1, 2, 1, 4, 3, 13}	\text{ContinuedFraction}[\gamma ,10]	\{0,1,1,2,1,2,1,4,3,13\}	
 a-floating-point-number-read-as-the-rational-it	ContinuedFraction[3.245]	{3, 4, 12}	\text{ContinuedFraction}[3.245]	\{3,4,12\}	disagree

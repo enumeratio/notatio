@@ -423,6 +423,14 @@ function autoKind(
     return "precision";
   // mpmath and SymPy refuse to order a complex number (`√-2` beside a real), where ours answers False.
   if (result.error !== undefined && ORDERING.test(theirs) && isOrderCall(sample)) return "domain";
+  // SymPy's MatrixFunction refuses an eigenvalue where the function has no analytic continuation (a pole of
+  // tan or sec, ErfInv outside its domain); ours holds the pole at its entry, or answers where it extends.
+  if (
+    result.error !== undefined &&
+    /Cannot evaluate the function because/.test(theirs) &&
+    callHeads(sample).has("MatrixFunction")
+  )
+    return hasNonAnswer(ours) ? "undefined-form" : "domain";
   // Julia's Arb balls report a pole anywhere in an array as one error for the whole array;
   // ours holds the pole at its element.
   if (system === "julia" && result.error !== undefined && /ball not finite/.test(theirs) && hasNonAnswer(ours))

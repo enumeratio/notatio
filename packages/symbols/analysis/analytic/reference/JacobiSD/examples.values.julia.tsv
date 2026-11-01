@@ -1,5 +1,6 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	(enumeratio_jacobi(:sd, enumeratio_decimal("0.3"), -2))	0.2793015774746945832715308864647303090456482249061732024429659020766180160562294	
+n-jacobisd-with-a-division-by-zero-in-m	(enumeratio_jacobi(:sd, (2 * (1 + enumeratio_div(enumeratio_ball(sqrt, -2), -2))), (enumeratio_pow((2 + (-(enumeratio_div(enumeratio_ball(sqrt, 2), 2)))), 2) * enumeratio_pow((1 + enumeratio_div(enumeratio_ball(sqrt, 2), 0)), -2))))	ball not finite	error
 m-greater-than-1-via-the-reciprocal-modulus	(enumeratio_jacobi(:sd, enumeratio_decimal("1.1"), enumeratio_decimal("0.9")))	1.267821766920661024094858958655090434270058031962836706371419063666994943852069	
 d-jacobisd-u-m-m			
 series-jacobisd-u-m-u-0-5			

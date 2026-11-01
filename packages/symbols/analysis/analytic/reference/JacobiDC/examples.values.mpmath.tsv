@@ -1,5 +1,6 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	(ellipfun('dc', 0.6, m=0.4))	1.12478042691155513390106826529	
+n-jacobidc-complex-u-at-m-1	(ellipfun('dc', (8 * (2 + (mpmathify(sqrt(-14)) / 2))), m=(enumeratio_pow((1 + (-(mpmathify(sqrt(2)) / 2))), 2) * enumeratio_pow((1 + (mpmathify(sqrt(2)) / -2)), -2))))	(1.0 + 0.0j)	
 m-less-than-0-via-the-imaginary-modulus	(ellipfun('dc', 0.3, m=-0.7))	(1.07993977008322514341608565764 + 0.0j)	
 d-jacobidc-u-m-m			
 series-jacobidc-u-m-u-0-5			

@@ -5,6 +5,7 @@ issquarefree-12	(mobius(abs(12)) != 0 if 12 != 0 else False)	False
 every-prime-is-squarefree	(mobius(abs(17)) != 0 if 17 != 0 else False)	True	
 issquarefree-20	(mobius(abs(20)) != 0 if 20 != 0 else False)	False	
 issquarefree-of-zero	(mobius(abs(0)) != 0 if 0 != 0 else False)	False	
+isprimepower-neg-13-and-issquarefree-17	And((abs(-13) > 1 and len(factorint(abs(-13))) == 1), (mobius(abs(17)) != 0 if 17 != 0 else False))	True	disagree
 threads-element-wise-over-a-list	[(mobius(abs(10)) != 0 if 10 != 0 else False), (mobius(abs(4)) != 0 if 4 != 0 else False), (mobius(abs(12)) != 0 if 12 != 0 else False)]	[True, False, False]	
 gaussian-integers-3-2i-is-a-gaussian-prime	(mobius(abs((3 + 2*I))) != 0 if (3 + 2*I) != 0 else False)	TypeError: n should be an integer	error
 gaussianintegers-true-2-i-1-i-2			

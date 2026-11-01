@@ -1,5 +1,6 @@
 id	section	role	expr	expected	caption	mpmath.kind	mpmath.note
 1-factorial-eq-2			[NotEqual, 1, 2]	True	Distinct integers are unequal		
+1-vs-1-plus-127-times-10-pow-neg-32		test	[NotEqual, 1, [Add, 1, [Multiply, 127, [Power, 10, -32]]]]	True		precision	The mpmath mapping compares with almosteq at 1e-20, so a difference of 1.27e-30 reads as equal (almosteq answers True, NotEqual False); compute-engine compares exact numbers exactly.
 3-over-2-factorial-eq-5-over-3	Scope		[NotEqual, [Rational, 3, 2], [Rational, 5, 3]]	True	Exact rationals are compared exactly		
 3-factorial-eq-4-4-factorial-eq-5	Scope		[And, [NotEqual, 3, 4], [NotEqual, 4, 5]]	True	Inequalities combine with logical And		
 abc-factorial-eq-abc	Scope		[NotEqual, "'abc'", "'ABC'"]	True	Strings compare case-sensitively	emit	almosteq takes numbers, and this compares two strings.

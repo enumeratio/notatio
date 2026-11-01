@@ -1,5 +1,6 @@
 id	in	out	tex.in	tex.out	verdict
 a-floating-point-argument-evaluates-directly-to	N[JacobiSD[0.3, -2]]	0.27930157747469464	N[\text{sd}(0.3|-2)]	0.279302	
+n-jacobisd-with-a-division-by-zero-in-m	N[JacobiSD[Times[2, Plus[1, Divide[Sqrt[-2], -2]]], Times[Power[Plus[2, Minus[Divide[Sqrt[2], 2]]], 2], Power[Plus[1, Divide[Sqrt[2], 0]], -2]]]]				
 m-greater-than-1-via-the-reciprocal-modulus	N[JacobiSD[1.1, 0.9]]	1.2678217669206608	N[\text{sd}(1.1|0.9)]	1.26782	
 d-jacobisd-u-m-m	D[JacobiSD[u, m], m]	(JacobiCD[u, m]*JacobiND[u, m]*((1 - m)*u - JacobiEpsilon[u, m] + m*JacobiDN[u, m]*JacobiSC[u, m]))/(2*(1 - m)*m)	\frac{\partial \text{sd}(u|m)}{\partial m}	\frac{\text{cd}(u|m) \text{nd}(u|m) (m \text{dn}(u|m) \text{sc}(u|m)-\mathcal{E}(u|m)+(1-m) u)}{2 (1-m) m}	
 series-jacobisd-u-m-u-0-5	Series[JacobiSD[u, m], List[u, 0, 5]]	SeriesData[u, 0, {1, 0, (-1 + 2*m)/6, 0, (1 - 16*m + 16*m^2)/120}, 1, 6, 1]	\text{Series}[\text{sd}(u|m),\{u,0,5\}]	u+\frac{1}{6} (2 m-1) u^3+\frac{1}{120} \left(16 m^2-16 m+1\right) u^5+O\left(u^6\right)	

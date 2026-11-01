@@ -6,6 +6,7 @@ the-first-20-terms-of-a-quadratic-irrational
 20-terms-of-pi-past-the-13-term-double-precision			
 a-quadratic-irrational-s-exact-expansion-is	list(continued_fraction(sqrt(13)))	ValueError: the length is infinite!	error
 sqrt-2-is-1-overline-2	list(continued_fraction(sqrt(2)))	ValueError: the length is infinite!	error
+a-periodic-tail-with-a-zero-partial-denominator	continued_fraction([6, [1, 1, -1, 1, -1]]).value()		
 e-s-pattern-1-2k-1			
 any-constant-compute-engine-can-evaluate			
 a-floating-point-number-read-as-the-rational-it	list(continued_fraction(3.245))	[3, 4, 12, 4]	

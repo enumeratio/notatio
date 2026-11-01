@@ -7,6 +7,7 @@ a-complex-argument-whose-continuation-passes-pi	log(gamma((-0.5422826240167642 +
 gammaln-at-a-pole-against-ln-gamma-at-another	enumeratio_equal(log(gamma(-17)), log(gamma(-2)))	True	
 gammaln-101-against-ln-200	enumeratio_equal(log(gamma(101)), log(factorial(200)))	False	
 gammaln-0p5-minus-11-i	log(gamma((0.5 + -11*I)))	-16.3598210615392 - 2.81426709612776*I	
+gammaln-neg-0p592-is-the-log-magnitude	log(gamma(-0.592))	1.30066548546165 + I*pi	inconclusive
 at-a-pole-of-gamma-compute-engine-gives-the-real	log(gamma(-1))	zoo	disagree
 complex-arguments-here-the-principal-ln-gamma-z	log(gamma((2.5 + 3*I)))	-1.47095461034884 + 2.8226156382608*I	
 a-huge-inexact-argument-should-still-evaluate	log(gamma(Float("1.0e1000")))	2.30158509299405e+1003	

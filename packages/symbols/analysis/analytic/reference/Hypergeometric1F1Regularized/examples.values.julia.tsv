@@ -10,6 +10,7 @@ a-complex-argument-at-a-nonpositive-integer-b	(enumeratio_ball(hypergeometric_1f
 simplify-normal-series		
 n-hypergeometric1f1regularized-1-0-neg-1	(enumeratio_ball(hypergeometric_1f1_regularized, -1, 0, -1))	1.0
 n-hypergeometric1f1regularized-1-0-0	(enumeratio_ball(hypergeometric_1f1_regularized, -1, 0, 0))	0.0
+n-hyp1f1regularized-neg-12-neg-1-neg-1	(enumeratio_ball(hypergeometric_1f1_regularized, -12, -1, -1))	711.3328210427689594356261022927689594356261022927689594356261022927689594356232
 n-hypergeometric1f1regularized-2-neg-4-2-50	enumeratio_nshow(enumeratio_ball(hypergeometric_1f1_regularized, 2, -4, 2), 50)	1.8915983613262464581709894299072020001741607860613e+03
 n-hypergeometric1f1regularized-1-0-1-30	enumeratio_nshow(enumeratio_ball(hypergeometric_1f1_regularized, 1, 0, 1), 30)	2.71828182845904523536028747135e+00
 matrixfunction-function		
