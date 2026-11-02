@@ -1680,6 +1680,16 @@ const NOVEL = [
   "BulgarianSolitaireOrbitSize",
   "BulgarianSolitairePreperiod",
   "DominatedPartitionCount",
+  "MaximalCycleDifference",
+  "LongestKOneTwoPattern",
+  "SmallestLeafLabel",
+  "LongestIncreasingSubsequenceCount",
+  "PrimeColumnSums",
+  "PrimeProductsMinusOne",
+  "PrimeProductsPlusOne",
+  "LongestArithmeticProgression",
+  "DiaconisGrahamDefect",
+  "InterpolatingPolynomialDegree",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

@@ -1952,6 +1952,221 @@ const FINDSTAT_PERMUTATION_STATISTICS_7: readonly Definition[] = [
   ),
 ];
 
+/** Whether m is prime, by trial division: at least 2 and no divisor d with 1 < d < m. */
+const isPrimeNumber = (m: MathJSON): MathJSON =>
+  and(atLeastValue(m, 2), equals(count(["Range", 2, m], and(less("d", m), equals(["Mod", m, "d"], 0)), "d"), 0));
+
+/** Whether position m lies in the cycle of position i: some power of p carries i to m. */
+const sameCycle = (i: MathJSON, m: MathJSON): MathJSON =>
+  greater(count(steps, equals(["Fold", ["Function", at("w"), "w", "t"], i, ["Range", 1, "k", 1]], m), "k"), 0);
+
+/** The length of a longest increasing subsequence among the later entries below p(i): the pile count. */
+const longestBelowAfter: MathJSON = [
+  "Count",
+  fold(
+    positions,
+    ["List"],
+    [
+      "If",
+      and(greater(visiting, "i"), less(at(visiting), here)),
+      [
+        "Apply",
+        [
+          "Function",
+          [
+            "If",
+            ["Greater", "k", ["Count", "a"]],
+            ["Join", "a", ["List", at(visiting)]],
+            ["ReplaceAt", "a", "k", at(visiting)],
+          ],
+          "k",
+        ],
+        ["Add", ["Count", ["Filter", "a", ["Function", ["Less", "t", at(visiting)], "t"]]], 1],
+      ],
+      "a",
+    ],
+  ),
+];
+
+/**
+ * The number of longest increasing subsequences. The fold carries, in one list of length 2n, the
+ * length of the longest increasing subsequence ending at each position (entries 1..n) and how many
+ * there are (entries n+1..2n); a position takes one more than the best below it, and the sum of the
+ * counts of the predecessors one shorter.
+ */
+const longestIncreasingSubsequenceCount: MathJSON = bind(
+  "r",
+  fold(positions, forEach(["Range", 1, ["Multiply", 2, length()]], 0, "w"), [
+    "Apply",
+    [
+      "Function",
+      [
+        "Apply",
+        ["Function", ["ReplaceAt", ["ReplaceAt", "a", visiting, "L"], add(length(), visiting), "c"], "c"],
+        [
+          "If",
+          equals("L", 1),
+          1,
+          [
+            "Sum",
+            forEach(
+              where(
+                positions,
+                and(and(less("j", visiting), less(at("j"), at(visiting))), equals(at("j", "a"), subtract("L", 1))),
+                "j",
+              ),
+              at(add(length(), "j"), "a"),
+              "j",
+            ),
+          ],
+        ],
+      ],
+      "L",
+    ],
+    add(
+      1,
+      max([
+        "Join",
+        ["List", 0],
+        forEach(where(positions, and(less("j", visiting), less(at("j"), at(visiting))), "j"), at("j", "a"), "j"),
+      ]),
+    ),
+  ]),
+  [
+    "Sum",
+    forEach(positions, [
+      "If",
+      equals(at("i", "r"), max(forEach(positions, at("j", "r"), "j"))),
+      at(add(length(), "i"), "r"),
+      0,
+    ]),
+  ],
+  "list<integer>",
+);
+
+/** The position of the value v. */
+const positionOfEntry = (v: MathJSON): MathJSON => sumOver(positions, ["If", equals(at("m"), v), "m", 0], "m");
+/** The entry t steps along the progression from p(i) with common difference d. */
+const progressionEntry = (t: MathJSON): MathJSON => add(here, ["Multiply", t, "d"]);
+/**
+ * Where the progression from p(i) with difference d stops: the least t at which its next entry is out of
+ * range or does not lie further right. Values are distinct, so each progression is forced.
+ */
+const progressionLength: MathJSON = [
+  "Min",
+  where(
+    ["Range", 1, length()],
+    or(
+      or(less(progressionEntry("t"), 1), greater(progressionEntry("t"), length())),
+      less(positionOfEntry(progressionEntry("t")), positionOfEntry(progressionEntry(subtract("t", 1)))),
+    ),
+    "t",
+  ),
+];
+
+/** The k-th finite difference of the entries, at position 1. */
+const finiteDifference = (k: MathJSON): MathJSON =>
+  sumOver(
+    ["Range", 0, k],
+    [
+      "Multiply",
+      ["Multiply", ["Binomial", k, "j"], ["If", equals(["Mod", subtract(k, "j"), 2], 0), 1, -1]],
+      at(add("j", 1)),
+    ],
+    "j",
+  );
+
+// The eighth batch: cycle spread, a leaf label of the increasing tree, longest-subsequence counts and
+// progressions, primes among position-value sums and products, and the Diaconis–Graham defect.
+const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
+  stat(
+    "MaximalCycleDifference",
+    "The largest difference between two elements of one cycle.",
+    nonEmpty(
+      max(forEach(positions, max(forEach(where(positions, sameCycle("i", "m"), "m"), distance("m", "i"), "m")))),
+    ),
+  ),
+  word(
+    "LongestKOneTwoPattern",
+    "The largest k such that p has an occurrence of k 1 2 ... (k-1): a first entry above an increasing run of later, smaller ones.",
+    nonEmpty(add(1, max(forEach(positions, longestBelowAfter))), 1),
+  ),
+  stat(
+    "SmallestLeafLabel",
+    "The smallest label of a leaf of the increasing binary tree of p: the least peak, an end counting as a peak.",
+    nonEmpty(
+      min(
+        forEach(
+          where(
+            positions,
+            and(
+              ["If", greater("i", 1), less(previous, here), "True"],
+              ["If", less("i", length()), greater(here, next), "True"],
+            ),
+          ),
+          here,
+        ),
+      ),
+    ),
+  ),
+  word(
+    "LongestIncreasingSubsequenceCount",
+    "The number of longest increasing subsequences of p.",
+    nonEmpty(longestIncreasingSubsequenceCount, 1),
+  ),
+  stat(
+    "PrimeColumnSums",
+    "Positions i with i + p(i) prime.",
+    nonEmpty(count(positions, isPrimeNumber(add("i", here)))),
+  ),
+  stat(
+    "PrimeProductsMinusOne",
+    "Positions i with i * p(i) - 1 prime.",
+    nonEmpty(count(positions, isPrimeNumber(subtract(["Multiply", "i", here], 1)))),
+  ),
+  stat(
+    "PrimeProductsPlusOne",
+    "Positions i with i * p(i) + 1 prime.",
+    nonEmpty(count(positions, isPrimeNumber(add(["Multiply", "i", here], 1)))),
+  ),
+  stat(
+    "LongestArithmeticProgression",
+    "The length of a longest subsequence whose entries form an arithmetic progression, of either sign.",
+    hasPair(
+      max(
+        forEach(
+          positions,
+          max(
+            forEach(
+              where(["Range", subtract(1, length()), subtract(length(), 1)], ["NotEqual", "d", 0], "d"),
+              progressionLength,
+              "d",
+            ),
+          ),
+        ),
+      ),
+      length(),
+    ),
+  ),
+  stat(
+    "DiaconisGrahamDefect",
+    "Half of the total displacement less the number of inversions and the reflection length.",
+    nonEmpty([
+      "Divide",
+      subtract(
+        subtract(sumOver(positions, distance(here, "i")), inversions),
+        subtract(length(), ["Count", cycleLeaders]),
+      ),
+      2,
+    ]),
+  ),
+  word(
+    "InterpolatingPolynomialDegree",
+    "The degree of the polynomial through the points (i, p(i)): the largest k with a nonzero k-th finite difference.",
+    nonEmpty(max(where(["Range", 0, subtract(length(), 1)], ["NotEqual", finiteDifference("k"), 0], "k"))),
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -2158,4 +2373,5 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_5,
   ...FINDSTAT_PERMUTATION_STATISTICS_6,
   ...FINDSTAT_PERMUTATION_STATISTICS_7,
+  ...FINDSTAT_PERMUTATION_STATISTICS_8,
 ];
