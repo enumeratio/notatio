@@ -30,9 +30,9 @@ import {
   insertionShape,
   readingWord,
   recordingRows,
+  rskPairRows,
 } from "../../tableaux/src/flat.ts";
 import { cactusEvacuationKernel } from "../../tableaux/src/promotion.ts";
-import { rskRows } from "../../tableaux/src/tableau.ts";
 import { rskInsertionKernel, rskRecordingKernel, rskShapeKernel } from "../../tableaux/src/rsk-kernels.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "./foata-bijection.ts";
 import { lehmerCode, majorCode, permutationOfLehmerCode, permutationOfMajorCode } from "./codes.ts";
@@ -320,7 +320,8 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     name: "Rsk",
     from: "permutation",
     to: "standard_tableau_pair",
-    body: rskRows,
+    body: rskPairRows("rs", "_raw", "Tuple"),
+    imageParts: ["StandardTableau", "StandardTableau"],
     summary: "The RSK correspondence: the insertion and recording tableaux, as a pair.",
     note: "Both tableaux share a shape (RskShape reads it off either), and each carries its own rows, so the pair alone determines them. A standard_tableau_pair is a tuple of two carriers — the first composite carrier anything here constructs.",
   },

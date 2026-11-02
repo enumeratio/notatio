@@ -168,8 +168,31 @@ export const insertionShape = (tag: string, word: MathJSON): MathJSON =>
   withInsertion(tag, word, false, (n, s) => forEach(upTo(rowCount(s, n, "fl_q")), at("fl_r", s), "fl_r"));
 
 /** Both the tableaux of `word`'s RSK pair, as the list of their rows. */
-export const rskPairRows = (tag: string, word: MathJSON): MathJSON =>
-  withInsertion(tag, word, true, (n, s) => ["List", rowsOfState(s, n, n), rowsOfState(s, n, add(n, times(n, n)))]);
+export const rskPairRows = (tag: string, word: MathJSON, head = "List"): MathJSON =>
+  withInsertion(tag, word, true, (n, s) => [head, rowsOfState(s, n, n), rowsOfState(s, n, add(n, times(n, n)))]);
+
+/** The capacity-layout state of the tableau whose rows are the bound name `rows` (a `list<list<integer>>`) with `n` a
+ *  bound name for its number of cells: the n row lengths, then n * n cells, zero past a row's end. A row beyond the
+ *  last has length 0. */
+export const capacityState = (tag: string, rows: string, n: string): MathJSON => {
+  const { j, r, c } = named(tag, ["j", "r", "c"] as const);
+  const present = (row: MathJSON): MathJSON => ["LessEqual", row, ["Length", rows]];
+  return [
+    "Join",
+    forEach(upTo(n), when(present(j), ["Length", at(j, rows)], 0), j),
+    forEach(
+      upTo(times(n, n)),
+      lets(
+        [
+          [r, add(["Floor", ["Divide", sub(j, 1), n]], 1), "integer"],
+          [c, add(["Mod", sub(j, 1), n], 1), "integer"],
+        ],
+        when(present(r), when(["LessEqual", c, ["Length", at(r, rows)]], at(c, at(r, rows)), 0), 0),
+      ),
+      j,
+    ),
+  ];
+};
 
 /** The row reading word of the insertion tableau of `word`: its rows from the bottom up, each left to right. */
 export const readingWord = (tag: string, word: MathJSON): MathJSON =>

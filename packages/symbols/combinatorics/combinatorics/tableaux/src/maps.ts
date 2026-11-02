@@ -2,12 +2,7 @@
 // `permutations/src/maps.ts`).
 
 import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
-import { inverseRsk } from "./families/rsk-pairs.ts";
-import { evacuation, insertionRows, inversePromotion, promotion } from "./flat.ts";
-
-/** The rows of one tableau of the pair: a pair's contents are two `StandardTableau(rows)`, and
- *  `At` doesn't see through the constructor, but a lambda argument does. */
-const rowsOf = (side: number): MathJSON => ["Apply", ["Function", ["At", "tb", 1], "tb"], ["At", "_raw", side]];
+import { capacityState, evacuation, insertionRows, inversePromotion, inverseRsk, promotion } from "./flat.ts";
 
 /** Rows must be nonempty and weakly shrinking: the carrier also holds the odd tableaux other families draw. */
 const tableauGuard: MathJSON = [
@@ -278,12 +273,19 @@ export const TABLEAUX_MAPS: readonly CombinatorialMap[] = [
     name: "ToPermutation",
     from: "standard_tableau_pair",
     to: "permutation",
-    body: bind(
-      "pp",
-      rowsOf(1),
-      bind("qq", rowsOf(2), inverseRsk("pp", "qq", ["Count", ["Flatten", "pp"]]) as MathJSON, "list<list<integer>>"),
-      "list<list<integer>>",
+    // The pair is read bare (`argumentParts`) and typed as its rows (`compiledFrom`): the carrier alias has no compiled type.
+    body: lets(
+      [
+        ["tp_pp", at(1), "list<list<integer>>"],
+        ["tp_qq", at(2), "list<list<integer>>"],
+        ["tp_n", ["Length", ["Flatten", "tp_pp"]], "integer"],
+        ["tp_p", capacityState("tp_a", "tp_pp", "tp_n"), "list<integer>"],
+        ["tp_q", capacityState("tp_b", "tp_qq", "tp_n"), "list<integer>"],
+      ],
+      inverseRsk("tp_r", "tp_p", "tp_q", "tp_n"),
     ),
+    argumentParts: ["StandardTableau", "StandardTableau"],
+    compiledFrom: "tuple<list<list<integer>>, list<list<integer>>>",
     summary: "The permutation an RSK pair comes from: inverse RSK.",
     note: "Unbumps the cell holding n in Q, then n − 1, and so on, each time reading a letter off the first row of P.",
   },
