@@ -6,6 +6,13 @@
 //   (when recording) the recording tableau's.
 // - Compact: a tableau's entries row by row, with its row lengths and each row's offset beside them. The shape
 //   never changes, so promotion walks a hole through it.
+//
+// Two rules for Epsil that runs interpreted:
+//
+// - Iterate over a RANGE and index; never fold or filter over a list taken out of the accumulator.
+//   `Filter(At(state, 1), …)` inside a fold step stays lazy and nothing downstream forces it, not even `Count`;
+//   the same selection as a `Fold` over `Range(1, Count(row))`, indexing with `At`, evaluates eagerly.
+// - When a list has to BE a value rather than a promise, build it with a fold: `Map` over a range stays lazy.
 
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import { at, lets, type MathJSON } from "../../src/map-helpers.ts";

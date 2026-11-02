@@ -11,7 +11,7 @@
 //
 // Two entries that lived here — CyclePartition and DescentComposition — are gone. Both had
 // been written, evaluated and REMOVED rather than shipped wrong, and both came back once the
-// two rules that broke them were known: iterate over a RANGE and index (tableau.ts), and
+// two rules that broke them were known: iterate over a RANGE and index (flat.ts), and
 // state the short cases, because `Range(1, 0)` and `Range(1, 1)` never evaluate.
 //
 // Neither was ever hard. They were written before the rules were understood, which is a
@@ -20,7 +20,7 @@
 // harder: the guard has to cover every stage of the pipeline, not just the outer result.
 //
 // The RSK entries are gone entirely. What blocked them was never the growing accumulator —
-// that works — but a laziness rule now documented in tableau.ts: iterate over a RANGE and
+// that works — but a laziness rule now documented in flat.ts: iterate over a RANGE and
 // index, never fold or filter over a list taken out of the accumulator. The recording tableau
 // then needed no new mechanism at all: comparing row lengths before and after says which row
 // grew, so the insertion logic stayed untouched.
