@@ -3278,6 +3278,42 @@ export const findstat: readonly FindStatMatch[] = [
     values: 64,
   },
   {
+    head: "InjectivesOfProjectiveDimensionTwo",
+    on: "DyckPath",
+    findstat: ["St001274"],
+    values: 196,
+  },
+  {
+    head: "ModulesOfProjectiveDimensionTwo",
+    on: "DyckPath",
+    findstat: ["St001232"],
+    values: 127,
+  },
+  {
+    head: "TwoDimensionalModulesOfProjectiveDimensionOne",
+    on: "DyckPath",
+    findstat: ["St001233"],
+    values: 196,
+  },
+  {
+    head: "ThreeDimensionalModulesOfProjectiveDimensionOne",
+    on: "DyckPath",
+    findstat: ["St001234"],
+    values: 196,
+  },
+  {
+    head: "SecondToLastInjectiveProjectiveDimension",
+    on: "DyckPath",
+    findstat: ["St001217"],
+    values: 196,
+  },
+  {
+    head: "SimpleSummandsOfSecondRadicalLayer",
+    on: "DyckPath",
+    findstat: ["St001480"],
+    values: 195,
+  },
+  {
     head: "Blocks",
     on: "SetPartition",
     findstat: ["St000105"],

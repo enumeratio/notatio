@@ -728,6 +728,13 @@ const modulesWhere = (test: (dimension: MathJSON) => MathJSON): MathJSON =>
       "v",
     ),
   );
+/** The modules of the given length (those the series' entry at their top allows) whose projective dimension passes `test`. */
+const modulesOfLengthWhere = (length: number, test: (dimension: MathJSON) => MathJSON): MathJSON =>
+  count(
+    where(upTo(vertexCount), atLeastValue(at("v", "series"), length), "v"),
+    test(projectiveDimension(subtract("v", 1), length)),
+    "v",
+  );
 
 export const DYCK_STATISTICS: readonly Definition[] = [
   stat("Height", "The greatest height the path reaches.", nonEmpty(["Max", profile])),
@@ -1604,5 +1611,37 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     "ModulesOfProjectiveDimensionAtMostOne",
     "The indecomposable modules of projective dimension at most one.",
     overSimples(modulesWhere((d) => atMostValue(d, 1))),
+  ),
+  stat(
+    "InjectivesOfProjectiveDimensionTwo",
+    "The indecomposable injective modules of projective dimension two.",
+    overSimplesAndInjectives(injectivesWhere((d) => equals(d, 2))),
+  ),
+  stat(
+    "ModulesOfProjectiveDimensionTwo",
+    "The indecomposable modules of projective dimension two.",
+    overSimples(modulesWhere((d) => equals(d, 2))),
+    "FindStat's St001232 is stated, and crawled, only for algebras of global dimension at most two; the count is the same definition on every path.",
+  ),
+  stat(
+    "TwoDimensionalModulesOfProjectiveDimensionOne",
+    "The indecomposable modules of dimension two and projective dimension one.",
+    overSimples(modulesOfLengthWhere(2, (d) => equals(d, 1))),
+  ),
+  stat(
+    "ThreeDimensionalModulesOfProjectiveDimensionOne",
+    "The indecomposable modules of dimension three and projective dimension one.",
+    overSimples(modulesOfLengthWhere(3, (d) => equals(d, 1))),
+  ),
+  stat(
+    "SecondToLastInjectiveProjectiveDimension",
+    "The projective dimension of the indecomposable injective module whose socle is the second-to-last simple module.",
+    overSimplesAndInjectives(at(subtract(vertexCount, 1), "injectiveDims")),
+    "FindStat's St001217, I[n-2] with the simples numbered 0 to n-1.",
+  ),
+  stat(
+    "SimpleSummandsOfSecondRadicalLayer",
+    "The simple summands of J^2/J^3 for the Jacobson radical J of the path's linear Nakayama algebra, one for each indecomposable projective of dimension at least three.",
+    nonEmpty(bindList("series", kupischSeries, count("series", atLeastValue("d", 3), "d"))),
   ),
 ];
