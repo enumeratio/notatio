@@ -16,6 +16,21 @@ import { carrierNameForType, registerCarrier, registerCollectionCarrier } from "
 /** The structural shape a carrier's values have, as a compute-engine type expression. */
 export type Shape = string;
 
+/**
+ * A carrier's flat reading: the same values as a list of integers, which compiled code takes where
+ * the nested shape (a tree as lists within lists) declines. The nested value stays the meaning; a
+ * map or statistic's `flat` body reads and writes the flat form, and the codec converts at the
+ * compiled boundary. Both directions decline (`undefined`) a value they can't carry exactly.
+ */
+export interface FlatCodec {
+  /** The flat form's type, e.g. `list<integer>`. */
+  readonly shape: Shape;
+  /** The nested value (plain JS, as `toJs` reads MathJSON) as its flat form. */
+  readonly encode: (nested: unknown) => unknown;
+  /** The nested value a flat form stands for. */
+  readonly decode: (flat: unknown) => unknown;
+}
+
 export interface Carrier {
   /** The carrier's name, singular — and the CONSTRUCTOR head's spelling. */
   readonly name: string;
@@ -48,6 +63,8 @@ export interface Carrier {
    *  this to unwrap a packed `Tuple` operand to the system-comparable part, rather than
    *  guessing from whether every slot happens to be a carrier call. */
   readonly carrierParams?: number;
+  /** The flat reading compiled code uses in place of the nested shape, where the carrier has one. */
+  readonly flat?: FlatCodec;
 }
 
 /**

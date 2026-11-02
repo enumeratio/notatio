@@ -13,6 +13,7 @@ import {
   treeOfParentArrayBody,
   treeOfParentArrayGuard,
 } from "./binary-tree.ts";
+import { leftRotationFlat, mirrorFlat, rightRotationFlat } from "./flat.ts";
 import {
   dyckPathOfOrderedTreeBody,
   leftBranchBinaryTreeBody,
@@ -62,6 +63,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "binary_tree",
     to: "binary_tree",
     body: mirrorBody,
+    flat: mirrorFlat,
     summary: "The left-right symmetry of a binary tree: every node's two subtrees swapped.",
     note: "FindStat's Mp00016, an involution. Conjugated by the Dyck-path bijection it is DecompositionReverse.",
   },
@@ -81,6 +83,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
         ["List", ["List", left("_raw"), left(right("_raw"))], right(right("_raw"))],
       ],
     ],
+    flat: leftRotationFlat,
     summary: "Rotate the root to the left: the right child becomes the root, the root its left child.",
     note: "FindStat's Mp00009. A tree whose root has no right child has nothing to rotate; FindStat then moves its left subtree to the right, as [., A], and so do we. That makes it a bijection on every size, inverse to RightRotation.",
   },
@@ -100,6 +103,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
         ["List", left(left("_raw")), ["List", right(left("_raw")), right("_raw")]],
       ],
     ],
+    flat: rightRotationFlat,
     summary: "Rotate the root to the right: the left child becomes the root, the root its right child.",
     note: "FindStat's Mp00019. A tree whose root has no left child has nothing to rotate; FindStat then moves its right subtree to the left, as [A, .], and so do we. That makes it a bijection on every size, inverse to LeftRotation.",
   },

@@ -17,6 +17,7 @@ import { symbolInfo } from "@enumeratio/manifest";
 import { declareMaps as declareMapsGeneric, evaluateDefinition, type Law } from "@enumeratio/structures";
 import { CARRIERS } from "./carriers.ts";
 import { COMPILED_MAPS } from "./compiled-maps.generated.js";
+import { FLAT } from "./flat.ts";
 import { composedDefinition, compositionSteps, fastDefinition, mapKey } from "./compiled.ts";
 import type { CombinatorialMap } from "./map-helpers.ts";
 import { MAP_LAWS } from "./maps-laws.generated.ts";
@@ -89,6 +90,11 @@ export function declareMaps(
         interpret: (contents) => evaluateDefinition(ce, map, contents),
         generated: COMPILED_MAPS[mapKey(map)],
         kernel: map.kernel,
+        flat: map.flat,
+        codecs: {
+          ...(FLAT[map.from] === undefined ? {} : { encode: FLAT[map.from] }),
+          ...(FLAT[map.to] === undefined ? {} : { decode: FLAT[map.to] }),
+        },
       });
     },
     // FindStat's map ids (`Mp00066`), as the map's record states them.

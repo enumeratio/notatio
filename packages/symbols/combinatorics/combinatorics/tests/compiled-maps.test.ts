@@ -8,6 +8,7 @@ import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 import { COMPILED_MAPS } from "../src/compiled-maps.generated.js";
 import { composedDefinition, compositionHash, compositionSteps, fastDefinition, mapKey } from "../src/compiled.ts";
+import { FLAT } from "../src/flat.ts";
 import { declareMaps, evaluateDefinition, MAPS } from "../src/maps.ts";
 import { evaluateTable } from "../scripts/compile-maps.ts";
 import { allElements, smallElements } from "../scripts/samples.ts";
@@ -48,6 +49,16 @@ test("the pinned maps are declared and not compiled", () => {
   }
 });
 
+// A map with a flat body is compiled from it (its entry carries the flat reading's carriers), whatever the nested
+// body does.
+test("the tree maps with a flat body are compiled from it", () => {
+  for (const name of ["Mirror", "LeftRotation", "RightRotation"]) {
+    const entry = COMPILED_MAPS[`${name}@binary_tree`];
+    expect(entry?.run, name).toBeDefined();
+    expect([entry?.flatIn, entry?.flatOut], name).toEqual(["binary_tree", "binary_tree"]);
+  }
+});
+
 // Families overlap, and the build's cross-checks cost per subject.
 test("each small element is sampled once", () => {
   const subjects = smallElements(ce, "Permutation").map((s) => JSON.stringify(s));
@@ -74,6 +85,11 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
     from: from.shape,
     to: to.shape,
     cache: false,
+    flat: map.flat,
+    codecs: {
+      ...(FLAT[map.from] === undefined ? {} : { encode: FLAT[map.from] }),
+      ...(FLAT[map.to] === undefined ? {} : { decode: FLAT[map.to] }),
+    },
     generated: COMPILED_MAPS[`${map.name}@${map.from}`],
     interpret: (contents) => {
       fallbacks++;

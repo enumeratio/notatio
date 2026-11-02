@@ -7,6 +7,8 @@
 // carrier) rather than head. Signatures are where the overloads live, so signatures are
 // what carries a definition.
 
+import { definitionHash } from "@enumeratio/engine/compiled";
+
 /**
  * A MathJSON expression, structurally. Declared here rather than imported from
  * `@enumeratio/entry`: a definitions package should not depend on the documentation
@@ -24,6 +26,9 @@ export interface Definition {
   readonly on: string;
   /** The defining expression, over `_x`. Evaluable: this IS the implementation. */
   readonly expr: MathJSON;
+  /** An optional compiled alternative to `expr`, over `_x` in the carrier's flat reading (`Carrier.flat`). `expr`
+   *  stays the meaning: the build holds the compiled flat expression to it (`agrees`). */
+  readonly flat?: unknown;
   /** What the statistic counts or measures, in one line. */
   readonly summary: string;
   /** A convention worth pinning — an indexing base, an edge case, a competing definition. */
@@ -44,6 +49,10 @@ export interface Definition {
 
 /** `head` at `carrier`, the key a signature-addressed lookup uses. */
 export const signatureOf = (definition: Definition): string => `${definition.head}@${definition.on}`;
+
+/** The hash a compiled entry of `definition` is stamped with: its meaning, and its flat alternative where it has one. */
+export const definitionKey = (definition: Definition): string =>
+  definitionHash(definition.flat === undefined ? definition.expr : { expr: definition.expr, flat: definition.flat });
 
 /** Index definitions by signature. Two definitions of one signature is a bug, not an overload. */
 export function bySignature(definitions: readonly Definition[]): Map<string, Definition> {

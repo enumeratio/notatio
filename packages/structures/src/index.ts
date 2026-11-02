@@ -36,6 +36,7 @@ export {
   declareCarrierElement,
   declareCarrierPlurals,
   declareCarriers,
+  type FlatCodec,
   type Shape,
   typeFor,
 } from "./carriers.ts";
