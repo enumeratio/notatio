@@ -362,7 +362,13 @@ const nakayama = (w: Word) => {
     .filter(([x, y]) => x === 0 || series[x - 1]! <= y)
     .map(([x, y]) => projectiveDimension(x, y));
   const all = modules.map(([x, y]) => projectiveDimension(x, y));
-  return { simple, injective, all, global: Math.max(...simple) };
+  const ofLength = (n: number) => modules.filter(([, y]) => y === n).map(([x, y]) => projectiveDimension(x, y));
+  // The injective module whose socle is the vertex: it ends there and cannot be lengthened to the left.
+  const injectiveAtSocle = (socle: number): number => {
+    const found = modules.find(([x, y]) => x + y - 1 === socle && (x === 0 || series[x - 1]! <= y));
+    return found ? projectiveDimension(...found) : 0;
+  };
+  return { series, simple, injective, all, ofLength, injectiveAtSocle, global: Math.max(...simple) };
 };
 const overNakayama =
   (body: (a: ReturnType<typeof nakayama>) => number) =>
@@ -406,6 +412,12 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
   InjectivesOfEvenProjectiveDimension: overNakayama((a) => countOf(a.injective, (d) => d % 2 === 0)),
   ModulesOfMaximalProjectiveDimension: overNakayama((a) => countOf(a.all, (d) => d === a.global)),
   ModulesOfProjectiveDimensionAtMostOne: overNakayama((a) => countOf(a.all, (d) => d <= 1)),
+  InjectivesOfProjectiveDimensionTwo: overNakayama((a) => countOf(a.injective, (d) => d === 2)),
+  ModulesOfProjectiveDimensionTwo: overNakayama((a) => countOf(a.all, (d) => d === 2)),
+  TwoDimensionalModulesOfProjectiveDimensionOne: overNakayama((a) => countOf(a.ofLength(2), (d) => d === 1)),
+  ThreeDimensionalModulesOfProjectiveDimensionOne: overNakayama((a) => countOf(a.ofLength(3), (d) => d === 1)),
+  SecondToLastInjectiveProjectiveDimension: overNakayama((a) => a.injectiveAtSocle(a.series.length - 2)),
+  SimpleSummandsOfSecondRadicalLayer: overNakayama((a) => countOf(a.series, (c) => c >= 3)),
   InjectivesOfMaximalProjectiveDimension: overNakayama((a) => countOf(a.injective, (d) => d === a.global)),
   Area: areaOf,
   Bounce: bounceOf,
