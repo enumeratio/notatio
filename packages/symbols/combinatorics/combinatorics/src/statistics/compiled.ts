@@ -4,7 +4,8 @@
 // their tables into one lookup, keyed by signature (`head@carrier`), which never collides
 // across areas. An entry is used only while its hash matches the definition, and only for a
 // subject and an answer that cross between MathJSON and JS exactly; everything else is
-// interpreted.
+// interpreted. A definition with a `flat` alternative is compiled from it where it compiles and
+// agrees (its entry carries the flat hash), and its subject is encoded to the carrier's flat reading first.
 
 import type { Engine } from "@enumeratio/engine";
 import { definitionHash, fromJs, type MathJSON, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
@@ -14,7 +15,8 @@ import { COMPILED as COMPOSITIONS_COMPILED } from "../../compositions/src/statis
 import { COMPILED as LATTICE_PATHS_COMPILED } from "../../lattice-paths/src/statistics.compiled.generated.js";
 import { COMPILED as SET_PARTITIONS_COMPILED } from "../../set-partitions/src/statistics.compiled.generated.js";
 import { COMPILED as TREES_COMPILED } from "../../trees/src/statistics.compiled.generated.js";
-import { type Definition, SUBJECT, signatureOf } from "./types.ts";
+import { FLAT_BY_NAME as FLAT } from "../flat.ts";
+import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 
 /** Every area's compiled table, merged. Add a spread here when an area's kernel moves in;
  *  nothing else in this file changes. */
@@ -34,10 +36,16 @@ export function compiledStatistic(
   definition: Definition,
 ): ((subject: unknown) => MathJSON | undefined) | undefined {
   const entry = COMPILED[signatureOf(definition)];
-  if (entry === undefined || entry.hash !== definitionHash(definition.expr)) return undefined;
+  if (entry === undefined) return undefined;
+  // An entry stamped with the flat alternative's hash was compiled from it, and takes the flat reading.
+  const flat = definition.flat !== undefined && entry.hash === definitionKey(definition);
+  if (!flat && entry.hash !== definitionHash(definition.expr)) return undefined;
+  const codec = flat ? FLAT[definition.on] : undefined;
+  if (flat && codec === undefined) return undefined;
   const sys = runtimeHelpers(ce);
   return (subject) => {
-    const value = toJs(subject);
+    const nested = toJs(subject);
+    const value = codec === undefined || nested === undefined ? nested : codec.encode(nested);
     if (value === undefined) return undefined;
     try {
       return fromJs(entry.run(sys, { [SUBJECT]: value }));

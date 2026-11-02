@@ -3,6 +3,7 @@
 // here in step 5.
 
 import type { Carrier } from "@enumeratio/structures";
+import { BINARY_TREE_FLAT } from "./flat.ts";
 
 export const TREES_CARRIERS: readonly Carrier[] = [
   {
@@ -11,6 +12,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
     shape: "integer | list<any>",
     id: "binary_tree",
     plural: "BinaryTrees",
+    flat: BINARY_TREE_FLAT,
   },
   {
     name: "BinaryTreeParentArray",

@@ -7,9 +7,9 @@
 import type { Engine } from "@enumeratio/engine";
 import { bareEngine } from "@enumeratio/engine/testing";
 import { compileTyped, definitionHash, fromJs, toJs } from "@enumeratio/engine/compiled";
-import { evaluateEpsil, evaluateEpsilRepeatedly } from "@enumeratio/structures";
-import type { Definition } from "./types.ts";
-import { SUBJECT, signatureOf } from "./types.ts";
+import { evaluateEpsil, evaluateEpsilRepeatedly, type FlatCodec } from "@enumeratio/structures";
+import { FLAT_BY_NAME } from "../flat.ts";
+import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 
 /** A memo of the slow, pure cross-check (the build's own: see scripts/verdicts.ts). */
 export interface Verdicts {
@@ -42,17 +42,28 @@ export function compiledDefinitionsFor(
   const compiled: CompiledDefinition[] = [];
   const disagreed: string[] = [];
   for (const definition of definitions.filter((d) => mine(signatureOf(d)))) {
-    const code = compileTyped(ce, definition.expr, { [SUBJECT]: shape });
-    if (code === undefined) continue;
     if (!subjects.has(definition.on)) subjects.set(definition.on, subjectsOf(ce, definition.on));
     const checked = subjects.get(definition.on)!.filter((s) => weightOf(s) <= (definition.checkWeight ?? Infinity));
-    const parts = { expr: definition.expr, code: code.code, subjects: checked };
-    const check = () => agrees(ce, definition, code.run, checked);
-    if (!verdicts.remember(parts, check, signatureOf(definition))) {
-      disagreed.push(signatureOf(definition));
-      continue;
+    // The flat alternative first, where the carrier has a flat reading; the nested definition after it.
+    const codec = definition.flat === undefined ? undefined : FLAT_BY_NAME[definition.on];
+    const flat = codec === undefined ? undefined : compileTyped(ce, definition.flat, { [SUBJECT]: codec.shape });
+    const nested = compileTyped(ce, definition.expr, { [SUBJECT]: shape });
+    let wrong = false;
+    for (const [code, hash, reading] of [
+      [flat, definitionKey(definition), codec],
+      [nested, definitionHash(definition.expr), undefined],
+    ] as const) {
+      if (code === undefined) continue;
+      const parts = { expr: definition.expr, flat: reading && definition.flat, code: code.code, subjects: checked };
+      const check = () => agrees(ce, definition, code.run, checked, reading);
+      if (verdicts.remember(parts, check, signatureOf(definition))) {
+        compiled.push({ signature: signatureOf(definition), hash, code: code.code });
+        wrong = false;
+        break;
+      }
+      wrong = true;
     }
-    compiled.push({ signature: signatureOf(definition), hash: definitionHash(definition.expr), code: code.code });
+    if (wrong) disagreed.push(signatureOf(definition));
   }
   return {
     compiled: compiled.toSorted((a, b) => (a.signature < b.signature ? -1 : a.signature > b.signature ? 1 : 0)),
@@ -71,9 +82,11 @@ function agrees(
   definition: Definition,
   run: (vars: Record<string, unknown>) => unknown,
   subjects: readonly unknown[],
+  codec?: FlatCodec,
 ): boolean {
   for (const subject of subjects) {
-    const value = toJs(subject);
+    const nested = toJs(subject);
+    const value = codec === undefined || nested === undefined ? nested : codec.encode(nested);
     if (value === undefined) continue;
     let answer;
     try {

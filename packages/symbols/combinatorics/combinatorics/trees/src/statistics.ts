@@ -7,6 +7,7 @@
 
 import { isLeaf as leafTest, recurse as recurseOver, self as callSelf } from "../../src/recursion.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
+import { binaryNodesFlat, heightFlat, leavesFlat, rightChildCountFlat, unaryNodesFlat } from "./flat.ts";
 import { add, and, count, equals, fold, forEach, less, subtract, x } from "../../src/statistics/vocabulary.ts";
 
 const isLeaf = leafTest as (tree: MathJSON) => MathJSON;
@@ -257,7 +258,7 @@ const chainAndPruning: MathJSON = recurse(
 /** The edges from the root down while a vertex has exactly one child. */
 const trunkLength: MathJSON = recurse(ifThen(equals(["Length", "t"], 1), add(1, self(["At", "t", 1])), 0), ["t"], x);
 
-export const TREE_STATISTICS: readonly Definition[] = [
+const NESTED_STATISTICS: readonly Definition[] = [
   // ── binary trees ──
   binary(
     "Height",
@@ -559,3 +560,18 @@ export const TREE_STATISTICS: readonly Definition[] = [
     subtract(add(edgesAlong(1), edgesAlong(-1)), trunkLength),
   ),
 ];
+
+/** The binary-tree statistics compiled from the tree's flat reading (flat.ts), by head. */
+const FLAT_STATISTICS: Readonly<Record<string, unknown>> = {
+  Height: heightFlat,
+  Leaves: leavesFlat,
+  UnaryNodes: unaryNodesFlat,
+  BinaryNodes: binaryNodesFlat,
+  RightChildCount: rightChildCountFlat,
+};
+
+export const TREE_STATISTICS: readonly Definition[] = NESTED_STATISTICS.map((definition) =>
+  definition.on === "BinaryTree" && FLAT_STATISTICS[definition.head] !== undefined
+    ? { ...definition, flat: FLAT_STATISTICS[definition.head] }
+    : definition,
+);

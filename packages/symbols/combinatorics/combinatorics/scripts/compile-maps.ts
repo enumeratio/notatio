@@ -6,6 +6,10 @@
 // differently from the interpreter on small elements of its source carrier is listed as
 // `interpreted`, so it isn't compiled on first use either.
 //
+// A map with a `flat` body (over its carriers' flat readings, `Carrier.flat`) has that compiled first, held
+// to the interpreter's answers on the nested definition: the entry then carries the flat hash and the carriers
+// it is encoded from and decoded to (`flatIn`, `flatOut`). A flat body that disagrees falls back to the nested body.
+//
 // A composition (`composedOf`) has no body of its own: when every map it applies has compiled code,
 // it gets an entry that runs those entries in turn, checked against the interpreter applying the
 // same maps' definitions. A composition with a step that has none is left interpreted.
@@ -15,9 +19,11 @@
 import { fileURLToPath } from "node:url";
 import type { Engine } from "@enumeratio/engine";
 import { bareEngine } from "@enumeratio/engine/testing";
-import { compileTyped, definitionHash, fromJs, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
+import { compileTyped, fromJs, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
+import type { FlatCodec } from "@enumeratio/structures";
 import { CARRIERS } from "../src/carriers.ts";
-import { compositionHash, compositionSteps, mapKey } from "../src/compiled.ts";
+import { bodyHash, compositionHash, compositionSteps, flatHash, mapKey } from "../src/compiled.ts";
+import { FLAT } from "../src/flat.ts";
 import { evaluateDefinition, MAPS } from "../src/maps.ts";
 import { noVerdicts, type Verdicts } from "../src/statistics/generate-compiled.ts";
 import { smallElements } from "./samples.ts";
@@ -30,6 +36,10 @@ export interface Entry {
   readonly hash: string;
   readonly body?: string;
   readonly guard?: string;
+  /** The carriers (type ids) whose flat readings the body takes its argument in and answers in: it was compiled
+   *  from the map's `flat` body, and `hash` is the flat hash. */
+  readonly flatIn?: string;
+  readonly flatOut?: string;
   /** A composition: the keys of the entries it runs in turn. */
   readonly steps?: readonly string[];
   /** A composition with no entry, and why. */
@@ -40,14 +50,24 @@ type MapDef = (typeof MAPS)[number];
 type Run = (vars: Record<string, unknown>) => unknown;
 
 /** Whether the compiled body (and guard) give the interpreter's answer on every subject the
- *  compiled code answers at all: the same image, or a decline where the guard declines. */
-function agrees(ce: Engine, map: MapDef, body: Run, guard: Run | undefined, subjects: readonly unknown[]): boolean {
+ *  compiled code answers at all: the same image, or a decline where the guard declines. A flat body is
+ *  fed the subject encoded and its image decoded, as at run time (`codecs`). */
+function agrees(
+  ce: Engine,
+  map: MapDef,
+  body: Run,
+  guard: Run | undefined,
+  subjects: readonly unknown[],
+  codecs: { encode?: FlatCodec; decode?: FlatCodec } = {},
+): boolean {
   for (const subject of subjects) {
-    const raw = toJs(subject);
+    const nested = toJs(subject);
+    const raw = nested === undefined || codecs.encode === undefined ? nested : codecs.encode.encode(nested);
     if (raw === undefined) continue;
     let answer;
     try {
-      const image = body({ _raw: raw });
+      const made = body({ _raw: raw });
+      const image = codecs.decode === undefined || made === undefined ? made : codecs.decode.decode(made);
       answer = fromJs(image);
       if (answer !== undefined && guard !== undefined && guard({ _raw: raw, _image: image }) !== true) answer = null;
     } catch {
@@ -105,14 +125,34 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const from = carrierOf.get(map.from);
     const to = carrierOf.get(map.to);
     if (from === undefined || to === undefined) return undefined;
+    const subjects = subjectsOf(from.name);
+    const key = mapKey(map);
+    // The flat body first, where the map has one; the nested body after it.
+    let wrong = false;
+    if (map.flat !== undefined) {
+      if (map.guard !== undefined) throw new Error(`${key} has a flat body and a guard`);
+      const codecs = { encode: from.flat, decode: to.flat };
+      const flat = compileTyped(ce, map.flat, { _raw: (from.flat ?? from).shape });
+      if (flat !== undefined) {
+        const shapes = [from.flat?.shape, to.flat?.shape];
+        const parts = { body: map.body, flat: map.flat, code: flat.code, shapes, subjects };
+        if (verdicts.remember(parts, () => agrees(ce, map, flat.run, undefined, subjects, codecs), key))
+          return {
+            key,
+            hash: flatHash(map),
+            body: flat.code,
+            ...(from.flat === undefined ? {} : { flatIn: from.type }),
+            ...(to.flat === undefined ? {} : { flatOut: to.type }),
+          };
+        wrong = true;
+      }
+    }
     const body = compileTyped(ce, map.body, { _raw: from.shape });
-    if (body === undefined) return undefined;
+    if (body === undefined) return wrong ? { key, hash: bodyHash(map) } : undefined;
     const guard =
       map.guard === undefined ? undefined : compileTyped(ce, map.guard, { _raw: from.shape, _image: to.shape });
     if (map.guard !== undefined && guard === undefined) return undefined;
-    const key = mapKey(map);
-    const hash = definitionHash({ body: map.body, guard: map.guard });
-    const subjects = subjectsOf(from.name);
+    const hash = bodyHash(map);
     const parts = { body: map.body, guard: map.guard, code: body.code, guardCode: guard?.code, subjects };
     if (!verdicts.remember(parts, () => agrees(ce, map, body.run, guard?.run, subjects), key)) return { key, hash };
     return { key, hash, body: body.code, ...(guard === undefined ? {} : { guard: guard.code }) };
@@ -141,8 +181,11 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
         key: mapKey(step),
         body: step.body,
         guard: step.guard,
+        flat: step.flat,
         code: entries[i]!.body,
         guardCode: entries[i]!.guard,
+        flatIn: entries[i]!.flatIn,
+        flatOut: entries[i]!.flatOut,
       })),
       subjects,
     };
@@ -183,6 +226,8 @@ function table(entries: readonly Entry[]): string {
             ? "    interpreted: true,"
             : `    run: (_SYS, _) => ${e.body},`,
         ...(e.guard === undefined ? [] : [`    guard: (_SYS, _) => ${e.guard},`]),
+        ...(e.flatIn === undefined ? [] : [`    flatIn: ${JSON.stringify(e.flatIn)},`]),
+        ...(e.flatOut === undefined ? [] : [`    flatOut: ${JSON.stringify(e.flatOut)},`]),
         "  },",
       ].join("\n"),
     )
@@ -191,17 +236,26 @@ function table(entries: readonly Entry[]): string {
 }
 
 /** What a composition's entry runs: its steps' entries in turn. The chain declines (the interpreter
- *  answers) at an image `fromJs` wouldn't take, a safe integer or lists of them, and at a failed guard. */
+ *  answers) at an image `fromJs` wouldn't take, a safe integer or lists of them, and at a failed guard.
+ *  A value stays in a carrier's flat reading (`form`) from one flat step to the next: it is decoded
+ *  where a step wants another reading and at the chain's end, and encoded where a step wants the flat one. */
 const COMPOSED = `const composed = (steps) => (_SYS, _) => {
   let raw = _._raw;
+  let form;
   for (const key of steps) {
     const step = COMPILED_MAPS[key];
+    if (step.flatIn !== form) {
+      if (form !== undefined) raw = FLAT[form].decode(raw);
+      if (raw !== undefined && step.flatIn !== undefined) raw = FLAT[step.flatIn].encode(raw);
+      if (raw === undefined) return undefined;
+    }
     const image = step.run(_SYS, { _raw: raw });
     if (!exact(image)) return undefined;
     if (step.guard !== undefined && step.guard(_SYS, { _raw: raw, _image: image }) !== true) return undefined;
     raw = image;
+    form = step.flatOut;
   }
-  return raw;
+  return form === undefined ? raw : FLAT[form].decode(raw);
 };
 const exact = (value) =>
   typeof value === "number" ? Number.isSafeInteger(value) : Array.isArray(value) && value.every(exact);`;
@@ -211,7 +265,9 @@ export type Generated = Record<string, { run: (sys: unknown, vars: Record<string
 /** The generated entries, executable. */
 export function evaluateTable(entries: readonly Entry[]): Generated {
   // oxlint-disable-next-line no-implied-eval -- the code is compute-engine's compiled output
-  return new Function(`${COMPOSED}\nconst COMPILED_MAPS = ${table(entries)};\nreturn COMPILED_MAPS;`)() as Generated;
+  return new Function("FLAT", `${COMPOSED}\nconst COMPILED_MAPS = ${table(entries)};\nreturn COMPILED_MAPS;`)(
+    FLAT,
+  ) as Generated;
 }
 
 function render(entries: readonly Entry[]): string {
@@ -220,6 +276,7 @@ function render(entries: readonly Entry[]): string {
 // matches its definition; see src/compiled.ts.
 // A definition that ignores its argument compiles to code that never reads it.
 /* eslint-disable no-unused-vars, unicorn/no-useless-spread */
+import { FLAT } from "./flat.ts";
 
 ${COMPOSED}
 
