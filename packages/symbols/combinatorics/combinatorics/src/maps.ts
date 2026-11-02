@@ -84,11 +84,13 @@ export function declareMaps(
         ce,
         body: map.body,
         guard: map.guard,
-        from: shapeOf.get(map.from),
+        from: map.compiledFrom ?? shapeOf.get(map.from),
         to: shapeOf.get(map.to),
         interpret: (contents) => evaluateDefinition(ce, map, contents),
         generated: COMPILED_MAPS[mapKey(map)],
         kernel: map.kernel,
+        argumentParts: map.argumentParts,
+        imageParts: map.imageParts,
       });
     },
     // FindStat's map ids (`Mp00066`), as the map's record states them.

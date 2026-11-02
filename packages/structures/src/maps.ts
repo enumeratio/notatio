@@ -55,6 +55,13 @@ export interface MapDeclaration {
   readonly composedOf?: readonly string[];
   /** Extra constructor arguments, for a carrier whose shape is a tuple. */
   readonly extra?: readonly unknown[];
+  /** The constructors of the parts of a tuple argument (`standard_tableau_pair` holds two `StandardTableau`s). The
+   *  body reads the parts' plain contents, so compiled code and the interpreter see the same value; a call to
+   *  such a map is never inlined, since its caller holds the constructed parts. */
+  readonly argumentParts?: readonly string[];
+  /** The same for a tuple image: the body makes the parts' plain contents (compiled code can't construct a carrier)
+   *  and the map's result wraps each in its constructor. */
+  readonly imageParts?: readonly string[];
   readonly summary: string;
   readonly note?: string;
   /** What Plausible checks on every element of every family over `from` (laws.ts). Beyond
@@ -290,7 +297,12 @@ export function declareMaps<M extends MapDeclaration>(
       const findstat = findstatFor?.(map, from) ?? [];
       // One closed expression (no guard to decline with, no composition, no extra arguments) is
       // what a definition calling this map can be compiled through.
-      const closed = map.body !== undefined && map.guard === undefined && map.extra === undefined;
+      const closed =
+        map.body !== undefined &&
+        map.guard === undefined &&
+        map.extra === undefined &&
+        map.argumentParts === undefined &&
+        map.imageParts === undefined;
       registerOperation(ce, "CombinatorialMap", from, {
         name: map.name,
         type: map.to,

@@ -19,6 +19,9 @@ export interface CombinatorialMap extends MapDeclaration {
    *  nested Epsil can't compile. `undefined` declines to the Epsil, which stays the meaning: tests/
    *  map-kernels.test.ts holds the two to the same answers. */
   readonly kernel?: (raw: never) => unknown;
+  /** The type the compiler gives `_raw`, for a carrier whose own shape is an alias it can't resolve
+   *  (`tuple<standard_tableau, standard_tableau>`): the plain contents the body reads once `argumentParts` is off. */
+  readonly compiledFrom?: string;
 }
 
 // Every Range here states its step: compute-engine counts DOWN when the end is below the start,

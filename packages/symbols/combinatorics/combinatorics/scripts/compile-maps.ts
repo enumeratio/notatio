@@ -17,7 +17,7 @@ import type { Engine } from "@enumeratio/engine";
 import { bareEngine } from "@enumeratio/engine/testing";
 import { compileTyped, definitionHash, fromJs, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
 import { CARRIERS } from "../src/carriers.ts";
-import { compositionHash, compositionSteps, mapKey } from "../src/compiled.ts";
+import { bareParts, compositionHash, compositionSteps, mapKey, wrapParts } from "../src/compiled.ts";
 import { evaluateDefinition, MAPS } from "../src/maps.ts";
 import { noVerdicts, type Verdicts } from "../src/statistics/generate-compiled.ts";
 import { smallElements } from "./samples.ts";
@@ -43,7 +43,9 @@ type Run = (vars: Record<string, unknown>) => unknown;
  *  compiled code answers at all: the same image, or a decline where the guard declines. */
 function agrees(ce: Engine, map: MapDef, body: Run, guard: Run | undefined, subjects: readonly unknown[]): boolean {
   for (const subject of subjects) {
-    const raw = toJs(subject);
+    // A tuple carrier's parts are read bare and its image wrapped, as `fastDefinition` does.
+    const bare = bareParts(map.argumentParts, subject);
+    const raw = toJs(bare);
     if (raw === undefined) continue;
     let answer;
     try {
@@ -54,10 +56,19 @@ function agrees(ce: Engine, map: MapDef, body: Run, guard: Run | undefined, subj
       continue;
     }
     if (answer === undefined) continue;
-    const expected = evaluateDefinition(ce, map, subject) ?? null;
-    if (JSON.stringify(answer) !== JSON.stringify(expected)) return false;
+    const expected = evaluateDefinition(ce, map, bare) ?? null;
+    if (JSON.stringify(wrapParts(map.imageParts, answer)) !== JSON.stringify(wrapParts(map.imageParts, expected)))
+      return false;
   }
   return true;
+}
+
+/** Elements of the tuple carrier `map` takes (its `argumentParts` set): the images of the small permutations under
+ *  the map into that carrier, which the families over it don't sample. */
+export function partSubjects(ce: Engine, map: MapDef, permutations: readonly unknown[]): unknown[] {
+  const maker = MAPS.find((m) => m.from === "permutation" && m.to === map.from && m.imageParts !== undefined);
+  if (maker === undefined) return [];
+  return permutations.map((permutation) => wrapParts(maker.imageParts, evaluateDefinition(ce, maker, permutation)));
 }
 
 /** What the interpreter gives for `subject` through `steps` in turn: their definitions, no compiled code. */
@@ -105,14 +116,17 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const from = carrierOf.get(map.from);
     const to = carrierOf.get(map.to);
     if (from === undefined || to === undefined) return undefined;
-    const body = compileTyped(ce, map.body, { _raw: from.shape });
+    const body = compileTyped(ce, map.body, { _raw: map.compiledFrom ?? from.shape });
     if (body === undefined) return undefined;
     const guard =
-      map.guard === undefined ? undefined : compileTyped(ce, map.guard, { _raw: from.shape, _image: to.shape });
+      map.guard === undefined
+        ? undefined
+        : compileTyped(ce, map.guard, { _raw: map.compiledFrom ?? from.shape, _image: to.shape });
     if (map.guard !== undefined && guard === undefined) return undefined;
     const key = mapKey(map);
     const hash = definitionHash({ body: map.body, guard: map.guard });
-    const subjects = subjectsOf(from.name);
+    const subjects =
+      map.argumentParts === undefined ? subjectsOf(from.name) : partSubjects(ce, map, subjectsOf("Permutation"));
     const parts = { body: map.body, guard: map.guard, code: body.code, guardCode: guard?.code, subjects };
     if (!verdicts.remember(parts, () => agrees(ce, map, body.run, guard?.run, subjects), key)) return { key, hash };
     return { key, hash, body: body.code, ...(guard === undefined ? {} : { guard: guard.code }) };
@@ -125,6 +139,9 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const steps = compositionSteps(MAPS, map);
     if (from === undefined) return skip(`no carrier ${map.from}`);
     if (steps === undefined) return skip("a step has no definition on the carrier before it");
+    // A chain reads its argument and hands back its image whole, with no constructors to take off or put on.
+    if (steps[0]!.argumentParts !== undefined || steps.at(-1)!.imageParts !== undefined)
+      return skip("the chain starts or ends at a tuple carrier whose parts are constructed");
     const entries = steps.map(entryOf);
     const missing = steps.filter((_, i) => entries[i]?.body === undefined).map(mapKey);
     if (missing.length > 0) return skip(`no compiled code: ${missing.join(", ")}`);
