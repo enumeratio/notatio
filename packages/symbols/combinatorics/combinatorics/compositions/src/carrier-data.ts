@@ -6,7 +6,7 @@ import type { Carrier } from "@enumeratio/structures";
 
 export const COMPOSITIONS_CARRIERS: readonly Carrier[] = [
   {
-    name: "Composition",
+    name: "IntegerComposition",
     type: "composition",
     shape: "list<integer>",
     id: "composition",

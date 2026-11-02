@@ -35,7 +35,7 @@ catalog:
 statOn:
   - Arrangement
   - BinaryWord
-  - Composition
+  - IntegerComposition
   - DecoratedPermutation
   - ParkingFunction
   - Permutation

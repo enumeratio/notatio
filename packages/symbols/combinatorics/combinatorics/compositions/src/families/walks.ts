@@ -33,7 +33,7 @@ const cap = add(n, 1);
 const inSet = (head: string, allows: (p: MathJSON) => MathJSON, tabulated = false): EpsilFamily =>
   partWalk({
     head,
-    carrier: "Composition",
+    carrier: "IntegerComposition",
     paramCount: 1,
     params: [n],
     total: n,
@@ -56,7 +56,7 @@ const bigWalk = (spec: PartWalk & Pick<EpsilFamily, "bigSamples">): EpsilFamily 
 
 /** What Plausible reads: counting and indexing run a DP table, polynomial in n and k. */
 const boundedDeclared: Declared = {
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   params: [
     { name: "size", role: "axis", min: 0 },
     { name: "k", role: "param", min: 0 },
@@ -66,7 +66,7 @@ const boundedDeclared: Declared = {
 
 export const partSizeBoundedCompositions: EpsilFamily = partWalk({
   head: "PartSizeBoundedCompositions",
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   declared: boundedDeclared,
   paramCount: 2,
   params: [n, k],
@@ -81,7 +81,7 @@ export const partCountBoundedCompositions: EpsilFamily = bigWalk({
   head: "PartCountBoundedCompositions",
   // 2^(n − 1) at k = n: past 2^53 from n = 55.
   bigSamples: [[55, 55]],
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   declared: boundedDeclared,
   paramCount: 2,
   params: [n, k],
@@ -101,7 +101,7 @@ export const carlitzCompositions: EpsilFamily = bigWalk({
   head: "CarlitzCompositions",
   // First past 2^53 at n = 68.
   bigSamples: [[68]],
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   paramCount: 1,
   params: [n],
   total: n,
@@ -135,7 +135,7 @@ export const zigzagCompositions: EpsilFamily = bigWalk({
   head: "ZigzagCompositions",
   // First past 2^53 at n = 82.
   bigSamples: [[82]],
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   paramCount: 1,
   params: [n],
   total: n,
@@ -256,7 +256,7 @@ const palindromeRankStep = lets(
 
 export const palindromicCompositions: EpsilFamily = {
   head: "PalindromicCompositions",
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   paramCount: 1,
   kind: "ints",
   params: [n],

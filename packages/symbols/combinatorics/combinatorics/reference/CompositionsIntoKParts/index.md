@@ -21,7 +21,7 @@ grades:
     role: axis
   - name: k
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 signatures:
   - call: CompositionsIntoKParts(...)
     description: Catalogued in the enumeratio database, with crosswalk rows in mathlib4, oeis, sage; not yet written up here.

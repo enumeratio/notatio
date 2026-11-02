@@ -5,7 +5,7 @@
 // answerable against a COMPLETE engine, and a library missing from the engine is a library
 // those questions pass over in silence. The catalog half (collections, domains, statistics)
 // was missing from the reference package's engine for a long time, and the checks there
-// were quietly not covering `Subsets`, `Area`, `Order`, `Composition` or `Word` at all.
+// were quietly not covering `Subsets`, `Area`, `Order`, `IntegerComposition` or `Word` at all.
 //
 // It is its own package rather than a file in `reference` because reference is a
 // DEPENDENCY of collections (which types its entries against it), so reference cannot

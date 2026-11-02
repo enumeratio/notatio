@@ -12,5 +12,5 @@ stub: carrier
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---

@@ -20,7 +20,7 @@ catalog:
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---
 
 - Count is $2^{\lfloor n/2 \rfloor}$ (A016116).

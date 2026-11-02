@@ -59,9 +59,9 @@ catalog:
   - system: findstat
     identity: St000769
     url: https://www.findstat.org/St000769
-    on: Composition
+    on: IntegerComposition
 statOn:
-  - Composition
+  - IntegerComposition
   - DyckPath
   - Permutation
   - StandardTableau

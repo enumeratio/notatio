@@ -16,9 +16,9 @@ catalog:
   - system: findstat
     identity: St000903
     url: https://www.findstat.org/St000903
-    on: Composition
+    on: IntegerComposition
 statOn:
-  - Composition
+  - IntegerComposition
   - CorePartition
   - IntegerPartition
 signatures:

@@ -31,7 +31,7 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   IntegerPartition: ["IntegerPartitions", (n) => n],
   DyckPath: ["DyckPaths", (n) => n],
   SetPartition: ["SetPartitions", (n) => n],
-  Composition: ["IntegerCompositions", (n) => n],
+  IntegerComposition: ["IntegerCompositions", (n) => n],
   BinaryTree: ["BinaryTrees", (n) => n],
   OrderedTree: ["OrderedTrees", (n) => n],
 };

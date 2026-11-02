@@ -20,7 +20,7 @@ catalog:
   - system: findstat
     identity: St000761
     url: https://www.findstat.org/St000761
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: St000245
     url: https://www.findstat.org/St000245
@@ -28,7 +28,7 @@ catalog:
 statOn:
   - Arrangement
   - AscentSequence
-  - Composition
+  - IntegerComposition
   - Permutation
   - Word
 ---

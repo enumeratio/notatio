@@ -78,7 +78,7 @@ describe("the cell frame", () => {
   });
 
   it("draws a composition as parts as wide as their value, picked anywhere over them", () => {
-    const layer = cells(["Composition", list(3, 1)]);
+    const layer = cells(["IntegerComposition", list(3, 1)]);
     expect(addressesOf(layer)).toEqual([
       [1, 1],
       [1, 2],
@@ -220,7 +220,7 @@ describe("Figure lowered to frames", () => {
   it("lowers each cell, tree and path kind to its Show", () => {
     expect(lowerFigure("partition", [3, 1])?.show).toContain("CellDiagram(IntegerPartition([3, 1]))");
     expect(lowerFigure("tableau", [2, 1])?.show).toContain("StandardTableau([[1, 2], [3]])");
-    expect(lowerFigure("composition", [2, 1])?.show).toContain("CellDiagram(Composition([2, 1]))");
+    expect(lowerFigure("composition", [2, 1])?.show).toContain("CellDiagram(IntegerComposition([2, 1]))");
     expect(lowerFigure("subset", [1, 3], { n: 6 })?.show).toContain("Subset([1, 3], 6)");
     expect(lowerFigure("tree", [2, 0, 0])?.show).toContain("TreeDiagram(PlaneTree([2, 0, 0]))");
     expect(lowerFigure("binary-tree", [1, 0, 0])?.show).toContain("PlaneTree([2, 0, 0])");

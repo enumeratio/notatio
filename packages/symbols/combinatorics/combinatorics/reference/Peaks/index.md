@@ -20,7 +20,7 @@ catalog:
   - system: findstat
     identity: St000768
     url: https://www.findstat.org/St000768
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: St000015
     url: https://www.findstat.org/St000015
@@ -31,7 +31,7 @@ catalog:
     on: DyckPath
 statOn:
   - ColoredMotzkinPath
-  - Composition
+  - IntegerComposition
   - DyckPath
   - KDyckPath
   - KMotzkinPath

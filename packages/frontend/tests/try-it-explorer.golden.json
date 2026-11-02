@@ -147,10 +147,6 @@
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "LabeledGraphsByEdges(_n, 2)"
   },
-  "LabeledTrees": {
-    "params": "{{n, 4}, 1, 6, 1, Slider}",
-    "value": "LabeledTrees(_n)"
-  },
   "LargestPartPartitions": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "LargestPartPartitions(_n, 2)"
@@ -290,10 +286,6 @@
   "RiordanPaths": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "RiordanPaths(_n)"
-  },
-  "RootedForests": {
-    "params": "{{n, 4}, 1, 6, 1, Slider}",
-    "value": "RootedForests(_n)"
   },
   "SchroederPaths": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",

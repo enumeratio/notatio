@@ -19,7 +19,7 @@ catalog:
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---
 
 - Count follows a shifted Fibonacci recurrence: $1, 0, 1, 1, 2, 3, 5, 8, …$.

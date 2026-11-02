@@ -11,9 +11,9 @@ catalog:
   - system: findstat
     identity: St000820
     url: https://www.findstat.org/St000820
-    on: Composition
+    on: IntegerComposition
 statOn:
-  - Composition
+  - IntegerComposition
   - SetPartition
 signatures:
   - call: RotationOrbitSize(partition)

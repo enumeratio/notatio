@@ -109,13 +109,13 @@ export const CARRIER_STATISTICS: readonly Definition[] = [
   },
   {
     head: "Descents",
-    on: "Composition",
+    on: "IntegerComposition",
     summary: "Positions i with c(i) > c(i+1).",
     expr: hasPair(count(adjacent, fallsAfter)),
   },
   {
     head: "PartsEqualOne",
-    on: "Composition",
+    on: "IntegerComposition",
     summary: "Parts equal to 1.",
     expr: nonEmpty(count(positions, equals(here, 1))),
   },

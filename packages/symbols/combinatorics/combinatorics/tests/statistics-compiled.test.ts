@@ -113,7 +113,7 @@ const SUBJECTS: Record<string, unknown[]> = {
   // already hold every statistic to an independent reading up to 6.
   Permutation: [0, 1, 2, 3, 4].flatMap(permutations).map(list),
   IntegerPartition: [0, 1, 2, 3, 4, 5, 6, 7].flatMap((n) => partitions(n)).map(list),
-  Composition: [0, 1, 2, 3, 4, 5, 6].flatMap(compositions).map(list),
+  IntegerComposition: [0, 1, 2, 3, 4, 5, 6].flatMap(compositions).map(list),
   DyckPath: [0, 1, 2, 3, 4].flatMap(dyckPaths).map(list),
   BinaryTree: [0, 1, 2, 3, 4, 5].flatMap(binaryTrees),
   OrderedTree: [1, 2, 3, 4, 5, 6].flatMap(orderedTrees),

@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+from-its-cut-word	Basic		[IntegerComposition, [BinaryWord, [List, 0, 1, 1, 0, 0]]]	[IntegerComposition, [List, 3, 1, 2]]	From its cut word, the inverse of [[CutWord]]

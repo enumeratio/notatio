@@ -1,7 +1,7 @@
 ---
 name: TransposeComposition
 domain: Combinatorial maps
-signature: TransposeComposition(Composition)
+signature: TransposeComposition(IntegerComposition)
 summary: "The conjugate composition: its ribbon shape transposed, the complement of the reverse."
 seeAlso:
   - Complement
@@ -10,11 +10,11 @@ catalog:
   - system: findstat
     identity: Mp00041
     url: https://www.findstat.org/Mp00041
-    on: Composition
+    on: IntegerComposition
 mapOn:
-  - Composition
+  - IntegerComposition
 signatures:
-  - call: TransposeComposition(Composition)
+  - call: TransposeComposition(IntegerComposition)
     description: "The conjugate composition: its ribbon shape transposed, the complement of the reverse."
     library: enumeratio-combinatorics
     type: (composition) -> composition
@@ -26,6 +26,6 @@ laws:
     on: composition
 ---
 
-- Takes a `Composition` and returns a `Composition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- Takes a `IntegerComposition` and returns a `IntegerComposition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - Defined as a COMPOSITION, applied right to left: [[Complement]] after [[Reverse]]. Each step goes through its own declared head, so every intermediate value is a properly constructed carrier.
 - FindStat's "conjugate" on compositions, named for TransposePartition and TransposeTableau: Conjugate is already the complex conjugate. hopf's ConjugateComposition is the same operation on a plain list of parts.

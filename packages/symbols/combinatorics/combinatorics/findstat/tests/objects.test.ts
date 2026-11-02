@@ -16,7 +16,7 @@ const L = (...items: unknown[]): unknown => ["List", ...items];
 
 test("a few objects per new carrier", () => {
   expect(readObject("BinaryWord", "0110")).toEqual(["BinaryWord", L(0, 1, 1, 0)]);
-  expect(readObject("Composition", "[2,1,1]")).toEqual(["Composition", L(2, 1, 1)]);
+  expect(readObject("IntegerComposition", "[2,1,1]")).toEqual(["IntegerComposition", L(2, 1, 1)]);
   expect(readObject("SignedPermutation", "[-2,1,3]")).toEqual(["SignedPermutation", L(-2, 1, 3)]);
   expect(readObject("BinaryTree", "[[.,.],[.,.]]")).toEqual(["BinaryTree", L(L(0, 0), L(0, 0))]);
   expect(readObject("OrderedTree", "[[],[[]]]")).toEqual(["OrderedTree", L(L(), L(L()))]);
@@ -31,7 +31,7 @@ test("a few objects per new carrier", () => {
 
 test("the empty objects", () => {
   expect(readObject("BinaryWord", "")).toEqual(["BinaryWord", L()]);
-  expect(readObject("Composition", "[]")).toEqual(["Composition", L()]);
+  expect(readObject("IntegerComposition", "[]")).toEqual(["IntegerComposition", L()]);
   expect(readObject("BinaryTree", ".")).toEqual(["BinaryTree", 0]);
   expect(readObject("OrderedTree", "[]")).toEqual(["OrderedTree", L()]);
   expect(readObject("StandardTableau", "[]")).toEqual(["StandardTableau", L()]);
@@ -51,7 +51,7 @@ test("a text that isn't the carrier's throws, and an unread carrier is undefined
 
 test("sizes are what the collections grow by", () => {
   expect(objectSize("BinaryWord", "0110")).toBe(4);
-  expect(objectSize("Composition", "[2,1,1]")).toBe(4);
+  expect(objectSize("IntegerComposition", "[2,1,1]")).toBe(4);
   expect(objectSize("BinaryTree", "[[.,.],.]")).toBe(2);
   expect(objectSize("BinaryTree", ".")).toBe(0);
   expect(objectSize("OrderedTree", "[[],[[]]]")).toBe(3);
@@ -92,7 +92,7 @@ test("a binary tree is oriented as our Dyck path conversion, FindStat's Mp00034"
 /** The collection of each size that our own carriers' elements are drawn from, and its size argument. */
 const FAMILY: Readonly<Record<string, [head: string, argument: (size: number) => number]>> = {
   BinaryWord: ["BinaryWords", (n) => n],
-  Composition: ["IntegerCompositions", (n) => n],
+  IntegerComposition: ["IntegerCompositions", (n) => n],
   SignedPermutation: ["SignedPermutations", (n) => n],
   BinaryTree: ["BinaryTrees", (n) => n],
   OrderedTree: ["OrderedTrees", (n) => n],

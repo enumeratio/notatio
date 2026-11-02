@@ -310,7 +310,7 @@ export const WORDS_MAPS: readonly CombinatorialMap[] = [
     summary: "Rotate the word one place to the right: the last letter moves to the front.",
   },
   {
-    name: "Composition",
+    name: "IntegerComposition",
     convert: true,
     from: "binary_word",
     to: "composition",
@@ -466,7 +466,7 @@ export const WORDS_MAPS: readonly CombinatorialMap[] = [
     body: codeCompositionBody,
     summary:
       "The composition whose code is the word with a 1 put in front: each 1 opens a part, of 1 plus the zeros after it.",
-    note: "FindStat's Mp00178, Sage's from_code. An injection one size up (the empty composition has no preimage); the inverse of CodeWord on the words that start with 1. Not Composition, whose word marks the cuts.",
+    note: "FindStat's Mp00178, Sage's from_code. An injection one size up (the empty composition has no preimage); the inverse of CodeWord on the words that start with 1. Not IntegerComposition, whose word marks the cuts.",
   },
   {
     name: "SupportDyckPath",

@@ -118,12 +118,12 @@ test("composition descents and parts equal to one", () => {
       : Array.from({ length: n }, (_, k) => k + 1).flatMap((p) => compositions(n - p).map((c) => [p, ...c]));
   const all = [1, 2, 3, 4, 5, 6].flatMap(compositions);
   check(
-    "Composition",
+    "IntegerComposition",
     "Descents",
     all.map((c) => [list(c), c.filter((p, i) => i > 0 && c[i - 1]! > p).length]),
   );
   check(
-    "Composition",
+    "IntegerComposition",
     "PartsEqualOne",
     all.map((c) => [list(c), c.filter((p) => p === 1).length]),
   );

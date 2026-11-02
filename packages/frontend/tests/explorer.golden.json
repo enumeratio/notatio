@@ -828,19 +828,7 @@
     "derived": true,
     "statistics": 0
   },
-  "LabeledTrees": {
-    "expr": "LabeledTrees(4)",
-    "template": "LabeledTrees({size})",
-    "size": {
-      "name": "n",
-      "min": 1,
-      "max": 6,
-      "start": 4
-    },
-    "columns": ["Leaves"],
-    "derived": true,
-    "statistics": 1
-  },
+  "LabeledTrees": null,
   "LargestPartPartitions": {
     "expr": "LargestPartPartitions(4, 2)",
     "template": "LargestPartPartitions({size}, 2)",
@@ -1546,19 +1534,7 @@
     "statistics": 2
   },
   "RookPlacements": null,
-  "RootedForests": {
-    "expr": "RootedForests(4)",
-    "template": "RootedForests({size})",
-    "size": {
-      "name": "n",
-      "min": 1,
-      "max": 6,
-      "start": 4
-    },
-    "columns": [],
-    "derived": true,
-    "statistics": 0
-  },
+  "RootedForests": null,
   "RootedUnlabeledTrees": {
     "expr": "RootedUnlabeledTrees(6)",
     "columns": ["Max"],

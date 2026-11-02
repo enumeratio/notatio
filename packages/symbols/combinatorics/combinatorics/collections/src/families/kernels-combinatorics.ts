@@ -306,7 +306,7 @@ export function IsSetPartitionOf(blocks: number[][], n: number, k?: number): boo
 
 // ─── ranks (element → 0-based index; exact inverses of the unranks above) ───────────────────────────────
 
-/** Composition → gap-cut mask (its rank). */
+/** IntegerComposition → gap-cut mask (its rank). */
 export function CompositionRank(parts: number[]): number {
   const cuts: number[] = [];
   let cum = 0;

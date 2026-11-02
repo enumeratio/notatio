@@ -27,11 +27,6 @@
     "CollatzTrajectory": null,
     "ColoredMotzkinPath": null,
     "ColoredPermutation": null,
-    "Composition": {
-      "collection": "IntegerCompositions",
-      "template": "IntegerCompositions({size})",
-      "maxSize": 6
-    },
     "ContinuedFraction": null,
     "CorePartition": null,
     "CycleDecomposition": {
@@ -77,6 +72,11 @@
     "IncreasingBinaryTree": {
       "collection": "IncreasingBinaryTrees",
       "template": "IncreasingBinaryTrees({size})",
+      "maxSize": 6
+    },
+    "IntegerComposition": {
+      "collection": "IntegerCompositions",
+      "template": "IntegerCompositions({size})",
       "maxSize": 6
     },
     "IntegerFactorization": null,

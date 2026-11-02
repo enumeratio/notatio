@@ -41,7 +41,7 @@ import {
   x,
 } from "../../src/statistics/vocabulary.ts";
 
-const on = "Composition";
+const on = "IntegerComposition";
 const stat = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
   head,
   on,

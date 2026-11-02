@@ -69,7 +69,7 @@ const READERS: Readonly<Record<string, Reader>> = {
     },
     size: (t) => t.length,
   },
-  Composition: { read: (t) => ["Composition", intList(t)], size: (t) => sum(ints(t)) },
+  IntegerComposition: { read: (t) => ["IntegerComposition", intList(t)], size: (t) => sum(ints(t)) },
   // Signs are on the values and the entries are 1..n, as ours.
   SignedPermutation: { read: (t) => ["SignedPermutation", intList(t)], size: (t) => ints(t).length },
   // Same orientation as ours: a node is [left, right] and the empty tree is 0. Size is the node count.
@@ -111,7 +111,7 @@ export const COLLECTION_CARRIER: Readonly<Record<string, string>> = {
   Cores: "CorePartition",
   "Set partitions": "SetPartition",
   "Ordered set partitions": "SetComposition",
-  "Integer compositions": "Composition",
+  "Integer compositions": "IntegerComposition",
   "Binary words": "BinaryWord",
   "Binary trees": "BinaryTree",
   "Ordered trees": "OrderedTree",

@@ -24,4 +24,4 @@ catalog:
 ---
 
 - A [[BinaryWords]] element.
-- `BinaryWord(subset)` is a subset's characteristic word: letter $i$ is 1 when $i$ is a member. [[Composition]] reads a word as cut positions instead.
+- `BinaryWord(subset)` is a subset's characteristic word: letter $i$ is 1 when $i$ is a member. [[IntegerComposition]] reads a word as cut positions instead.

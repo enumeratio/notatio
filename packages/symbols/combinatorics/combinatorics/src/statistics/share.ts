@@ -40,7 +40,7 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
   },
   {
     // A weak composition is a composition whose parts may be 0.
-    from: "Composition",
+    from: "IntegerComposition",
     to: { WeakComposition: ["LargestPart"] },
   },
 ];

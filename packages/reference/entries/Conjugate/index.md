@@ -20,7 +20,7 @@ catalog:
   - system: findstat
     identity: Mp00041
     url: https://www.findstat.org/Mp00041
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: Mp00202
     url: https://www.findstat.org/Mp00202
@@ -32,7 +32,7 @@ catalog:
     on: IntegerPartition
 stub: engine
 mapOn:
-  - Composition
+  - IntegerComposition
   - CorePartition
   - IntegerPartition
 names:

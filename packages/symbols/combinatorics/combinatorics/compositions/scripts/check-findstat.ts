@@ -18,7 +18,7 @@ import { COMPOSITION_STATISTICS } from "../src/statistics.ts";
 
 /** Our head -> FindStat ids, from the generated matches (`find-findstat.ts`), so there is one list. */
 const MATCHES: Record<string, string[]> = Object.fromEntries(
-  findstat.filter((m) => m.on === "Composition").map((m) => [m.head, [...m.findstat]]),
+  findstat.filter((m) => m.on === "IntegerComposition").map((m) => [m.head, [...m.findstat]]),
 );
 
 const [dir, ...pairs] = process.argv.slice(2);
@@ -31,7 +31,7 @@ const ce = bareEngine();
 const index = bySignature(COMPOSITION_STATISTICS);
 
 for (const [head, ids] of Object.entries(targets)) {
-  const definition = index.get(`${head}@Composition`);
+  const definition = index.get(`${head}@IntegerComposition`);
   if (!definition) throw new Error(`no definition ${head}`);
   for (const id of ids) {
     const data = (JSON.parse(readFileSync(`${dir}/${id}.json`, "utf8")) as { StatisticData: Record<string, number> })

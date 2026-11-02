@@ -9,7 +9,7 @@ catalog:
   - system: findstat
     identity: Mp00038
     url: https://www.findstat.org/Mp00038
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: Mp00064
     url: https://www.findstat.org/Mp00064
@@ -28,7 +28,7 @@ catalog:
     on: SignedPermutation
 mapOn:
   - BinaryWord
-  - Composition
+  - IntegerComposition
   - Permutation
   - SetComposition
   - SetPartition
@@ -68,5 +68,5 @@ laws:
 - FindStat's Mp00161.
 - Also takes a `SetComposition`, returning a `SetComposition`: The blocks in the opposite order.
 - FindStat's Mp00288.
-- Also takes a `Composition`, returning a `Composition`: The parts read backwards.
+- Also takes a `IntegerComposition`, returning a `IntegerComposition`: The parts read backwards.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: The word read backwards.

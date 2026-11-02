@@ -23,7 +23,7 @@ catalog:
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---
 
 - Count is the tetranacci number (A000078).

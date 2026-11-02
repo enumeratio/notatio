@@ -1,7 +1,7 @@
 ---
-name: Composition
+name: IntegerComposition
 domain: Collections
-signature: Composition(list)
+signature: IntegerComposition(list)
 summary: The singular-inhabitant constructor for a composition of an integer, as its parts.
 references:
   - system: wikipedia
@@ -11,7 +11,7 @@ references:
 catalogCarrier: true
 glyph: composition
 signatures:
-  - call: Composition(list)
+  - call: IntegerComposition(list)
     description: The singular-inhabitant constructor for a composition of an integer, as its parts.
     library: enumeratio-combinatorics
     type: ((list<integer>) -> composition) & ((binary_word) -> composition)
