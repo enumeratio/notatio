@@ -10,6 +10,7 @@ import { COMPILED_MAPS } from "../src/compiled-maps.generated.js";
 import { composedDefinition, compositionHash, compositionSteps, fastDefinition, mapKey } from "../src/compiled.ts";
 import { FLAT } from "../src/flat.ts";
 import { declareMaps, evaluateDefinition, MAPS } from "../src/maps.ts";
+import { rightRotationFlat } from "../trees/src/flat.ts";
 import { evaluateTable } from "../scripts/compile-maps.ts";
 import { allElements, smallElements } from "../scripts/samples.ts";
 
@@ -57,6 +58,27 @@ test("the tree maps with a flat body are compiled from it", () => {
     expect(entry?.run, name).toBeDefined();
     expect([entry?.flatIn, entry?.flatOut], name).toEqual(["binary_tree", "binary_tree"]);
   }
+});
+
+// With no generated entry (absent or stale) the flat body has not been checked by the build, so it is not used:
+// Mirror given another map's flat body still answers as its nested definition does.
+test("with no generated entry the flat body is not used", () => {
+  const mirror = MAPS.find((m) => m.name === "Mirror" && m.from === "binary_tree")!;
+  const tree = carrierByType.get("binary_tree")!;
+  const run = fastDefinition({
+    ce,
+    body: mirror.body,
+    from: tree.shape,
+    to: tree.shape,
+    cache: false,
+    flat: rightRotationFlat,
+    codecs: { encode: FLAT.binary_tree, decode: FLAT.binary_tree },
+    interpret: (contents) => evaluateDefinition(ce, mirror, contents),
+  });
+  const subjects = subjectsOf(tree.name).slice(0, 20);
+  expect(subjects.length).toBeGreaterThan(0);
+  for (const contents of subjects)
+    expect(run(contents), JSON.stringify(contents)).toEqual(evaluateDefinition(ce, mirror, contents));
 });
 
 // Families overlap, and the build's cross-checks cost per subject.

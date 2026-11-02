@@ -158,19 +158,7 @@ export function fastDefinition(options: {
   /** The codecs of those flat readings: `from`'s encodes the argument, `to`'s decodes the answer. */
   codecs?: Codecs;
 }): (contents: unknown) => MathJSON | undefined {
-  const {
-    ce,
-    body,
-    guard,
-    from,
-    to,
-    interpret,
-    cache = true,
-    generated,
-    kernel,
-    flat,
-    codecs: flatCodecs = {},
-  } = options;
+  const { ce, body, guard, from, to, interpret, cache = true, generated, kernel, flat } = options;
   const hash = definitionHash({ body, guard });
   const withFlat = flatHash({ body, guard, flat });
   type Ready = { body: Compiled; guard?: Compiled } & Codecs;
@@ -193,11 +181,8 @@ export function fastDefinition(options: {
     // Calls to our other definitions are expanded, so the compiler sees them too.
     const expand = (expression: unknown): unknown =>
       inlineCalls(expression, (carrier, head) => operationEpsil(ce, carrier, head));
-    // The flat alternative first, then the nested definition.
-    if (flat !== undefined && guard === undefined) {
-      const alternative = compileTyped(ce, expand(flat), { _raw: flatCodecs.encode?.shape ?? from });
-      if (alternative !== undefined) return { body: alternative, ...flatCodecs };
-    }
+    // Only the nested definition compiles here: a flat body is a different algorithm, so it runs only from
+    // generated code stamped with its hash, which the build's `agrees` has checked against the nested one.
     const main = compileTyped(ce, expand(body), { _raw: from });
     if (main === undefined) return null;
     if (guard === undefined) return { body: main };
