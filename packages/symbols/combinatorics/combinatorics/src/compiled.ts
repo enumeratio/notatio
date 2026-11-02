@@ -173,7 +173,7 @@ export function fastDefinition(options: {
     if (kernel !== undefined) {
       const input = toJs(contents);
       const image = input === undefined ? undefined : fromJs(kernel(input as never));
-      if (image !== undefined) return image;
+      if (image !== undefined) return wrapParts(imageParts, image) as MathJSON;
     }
     if (compiled === undefined) compiled = compile();
     const raw = compiled === null ? undefined : toJs(contents);

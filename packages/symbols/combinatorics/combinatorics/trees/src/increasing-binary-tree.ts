@@ -13,7 +13,7 @@
 // already builds, so FromPermutation has to build the same shape rather than the flat
 // by-value parent-array tuple this file built before (A-116).
 //
-// THE NEAREST-SMALLER-VALUE CHARACTERISATION. The rule from tableau.ts: iterate over a RANGE
+// THE NEAREST-SMALLER-VALUE CHARACTERISATION. The rule from flat.ts: iterate over a RANGE
 // and index, never fold or filter over a list carved out of the accumulator. The recursive
 // min-splitting has a direct, non-recursive characterisation — position i's parent is whichever
 // of its nearest smaller neighbour to the LEFT (L) and to the RIGHT (R) exists and is the
@@ -41,7 +41,7 @@ const overRange = (n: MathJSON, initial: MathJSON, step: MathJSON, accumulator: 
 ];
 
 /** `body` with `name` bound to `value` — a `let`, as a lambda applied to its argument. Same
- *  helper as map.ts / tableau.ts: a sub-term read more than once (here, each of the two
+ *  helper as map.ts / flat.ts: a sub-term read more than once (here, each of the two
  *  nearest-smaller scans) is computed once rather than rebuilt at every reference. */
 const bind = (name: string, value: MathJSON, body: MathJSON): MathJSON => ["Apply", ["Function", body, name], value];
 

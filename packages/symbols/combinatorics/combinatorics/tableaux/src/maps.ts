@@ -22,6 +22,98 @@ const tableauGuard: MathJSON = [
   ],
 ];
 
+/** Whether part `side` of the pair `_raw` is a standard tableau: entries 1..n each once, rows and columns increasing,
+ *  no empty row, and rows weakly shrinking (checked first in each column test, so the column read stays in range).
+ *  Each part is bound inside its own check: the interpreter leaves a predicate undecided when it reads a name bound
+ *  by an enclosing `bind` of another part. */
+const standardRows = (side: number): MathJSON => bind("sr_t", at(side), standardBody("sr_t"), "list<list<integer>>");
+
+const standardBody = (t: string): MathJSON => {
+  const row = (i: MathJSON): MathJSON => at(i, t);
+  const cell = (i: MathJSON, j: MathJSON): MathJSON => at(j, row(i));
+  const count = (over: MathJSON, test: MathJSON, variable: string): MathJSON => [
+    "Count",
+    ["Filter", over, ["Function", test, variable]],
+  ];
+  // The entries are 1..n each once when each of 1..n occurs exactly once among the n entries (`Sort` doesn't compile).
+  const onceEach: MathJSON = bind(
+    "sr_f",
+    ["Flatten", t],
+    [
+      "Equal",
+      count(
+        ["Range", 1, ["Length", "sr_f"], 1],
+        ["Equal", count("sr_f", ["Equal", "sr_x", "sr_v"], "sr_x"), 1],
+        "sr_v",
+      ),
+      ["Length", "sr_f"],
+    ],
+    "list<integer>",
+  );
+  return [
+    "And",
+    onceEach,
+    ["Equal", count(["Range", 1, ["Length", t], 1], ["LessEqual", ["Length", row("sr_i")], 0], "sr_i"), 0],
+    [
+      "Equal",
+      count(
+        ["Range", 1, ["Length", t], 1],
+        [
+          "Greater",
+          count(
+            ["Range", 1, ["Subtract", ["Length", row("sr_i")], 1], 1],
+            ["GreaterEqual", cell("sr_i", "sr_j"), cell("sr_i", ["Add", "sr_j", 1])],
+            "sr_j",
+          ),
+          0,
+        ],
+        "sr_i",
+      ),
+      0,
+    ],
+    [
+      "Equal",
+      count(
+        ["Range", 1, ["Subtract", ["Length", t], 1], 1],
+        [
+          "If",
+          ["Greater", ["Length", row(["Add", "sr_i", 1])], ["Length", row("sr_i")]],
+          "True",
+          [
+            "Greater",
+            count(
+              ["Range", 1, ["Length", row(["Add", "sr_i", 1])], 1],
+              ["GreaterEqual", cell("sr_i", "sr_k"), cell(["Add", "sr_i", 1], "sr_k")],
+              "sr_k",
+            ),
+            0,
+          ],
+        ],
+        "sr_i",
+      ),
+      0,
+    ],
+  ];
+};
+
+/** The row lengths of part `side` of the pair `_raw`. */
+const rowLengths = (side: number): MathJSON =>
+  bind(
+    "rl_t",
+    at(side),
+    forEach(["Range", 1, ["Length", "rl_t"], 1], ["Length", at("rl_i", "rl_t")], "rl_i"),
+    "list<list<integer>>",
+  );
+
+/** `_raw` is a valid RSK image: two standard tableaux of one shape. Outside it inverse RSK has no permutation. */
+// Staged with `If`, which is lazy: `And` evaluates every operand, and a read past the rows of a mismatched tableau is an error.
+const rskImageGuard: MathJSON = [
+  "If",
+  ["Equal", rowLengths(1), rowLengths(2)],
+  ["And", standardRows(1), standardRows(2)],
+  "False",
+];
+
 /** The number of entries. */
 const cells: MathJSON = ["Length", ["Flatten", "_raw"]];
 
@@ -284,6 +376,7 @@ export const TABLEAUX_MAPS: readonly CombinatorialMap[] = [
       ],
       inverseRsk("tp_r", "tp_p", "tp_q", "tp_n"),
     ),
+    guard: rskImageGuard,
     argumentParts: ["StandardTableau", "StandardTableau"],
     compiledFrom: "tuple<list<list<integer>>, list<list<integer>>>",
     summary: "The permutation an RSK pair comes from: inverse RSK.",
