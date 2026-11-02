@@ -4459,4 +4459,16 @@ export const findstat: readonly FindStatMatch[] = [
     findstat: ["St000816"],
     values: 511,
   },
+  {
+    head: "CompositionNakayamaGlobalDimension",
+    on: "Composition",
+    findstat: ["St001235"],
+    values: 63,
+  },
+  {
+    head: "DualImmaculateMonomialColumnSum",
+    on: "Composition",
+    findstat: ["St000817"],
+    values: 510,
+  },
 ];

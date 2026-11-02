@@ -269,6 +269,44 @@ function compositionTableaux(c: readonly number[]): number {
   return n === 0 ? 1 : found;
 }
 
+/**
+ * The global dimension of the linear Nakayama algebra of the composition, with modules as
+ * intervals [top, end) of vertices: the projective cover of [top, end) is [top, top + length of
+ * the series' entry), and the kernel of that cover is [end, top + entry).
+ */
+function nakayamaGlobalDimension(c: readonly number[]): number {
+  if (c.length === 0) return 0;
+  const series = [...c.flatMap((part) => Array.from({ length: part }, (_, i) => part + 1 - i)), 1];
+  const dimension = (top: number, end: number): number => {
+    const projectiveEnd = top + series[top]!;
+    return end === projectiveEnd ? 0 : 1 + dimension(end, projectiveEnd);
+  };
+  return Math.max(...series.map((_, vertex) => dimension(vertex, vertex + 1)));
+}
+
+/**
+ * The immaculate tableaux of the shape with a gapless content, by filling the rows one at a
+ * time: each row weakly increases, its first entry exceeds the one above it, and the entries used
+ * are exactly 1 .. k for some k.
+ */
+function dualImmaculateColumnSum(c: readonly number[]): number {
+  const n = sum(c);
+  if (n === 0) return 0;
+  const rows = (length: number, atLeast: number): number[][] =>
+    length === 0
+      ? [[]]
+      : indices(n - atLeast + 1).flatMap((offset) =>
+          rows(length - 1, atLeast + offset).map((rest) => [atLeast + offset, ...rest]),
+        );
+  const fill = (shape: readonly number[], above: number, used: ReadonlySet<number>): number => {
+    if (shape.length === 0) return [...used].every((entry) => entry <= used.size) ? 1 : 0;
+    return rows(shape[0]!, above + 1)
+      .map((row) => fill(shape.slice(1), row[0]!, new Set([...used, ...row])))
+      .reduce((a, b) => a + b, 0);
+  };
+  return fill(c, 0, new Set());
+}
+
 export type Reading = (c: readonly number[]) => number;
 
 export const COMPOSITION_READINGS: Record<string, Reading> = {
@@ -336,4 +374,6 @@ export const COMPOSITION_READINGS: Record<string, Reading> = {
   },
   InverseDescentParkingFunctionCount: (c) => (sum(c) === 0 ? 1 : parkingFiber(sum(c), c)),
   StandardCompositionTableauCount: compositionTableaux,
+  CompositionNakayamaGlobalDimension: nakayamaGlobalDimension,
+  DualImmaculateMonomialColumnSum: dualImmaculateColumnSum,
 };

@@ -1507,6 +1507,8 @@ const NOVEL = [
   "DyckPathsAboveBouncePathCount",
   "InverseDescentParkingFunctionCount",
   "StandardCompositionTableauCount",
+  "CompositionNakayamaGlobalDimension",
+  "DualImmaculateMonomialColumnSum",
   "TransposeComposition",
   "TouchComposition",
   "RiseComposition",
