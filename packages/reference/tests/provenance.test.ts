@@ -183,12 +183,12 @@ test("declaring our libraries changes nothing about vanilla compute-engine", () 
  * on; a name disappearing means an override that has silently stopped taking effect.
  */
 const OVERRIDDEN = [
+  "AGM",
   "Abs",
   // Not itself overridden -- two Floor examples are wrapped in a bare `Add` (Legendre's
   // formula, and the decimal-digit-count identity), so Add is the corpus expression's own
   // outer head even though the divergence is Floor's.
   "Add",
-  "AGM",
   "AiryAi",
   "AiryAiPrime",
   "AiryBi",
