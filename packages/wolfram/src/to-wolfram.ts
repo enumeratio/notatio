@@ -121,7 +121,6 @@ export const FOREIGN: Record<string, string> = {
   TemplateExpression: "a template hole holding an expression, evaluated when the template is applied",
   Area: "the area of a geometric region",
   Depth: "the number of indices needed to reach any part of an expression",
-  Composition: "a composition of functions, Composition[f, g]",
   Word: "the token specification used by Read and Find",
   Restricted: "an Interpreter form narrowed by a condition",
   // Ours is the carrier's plural type-space symbol (https://github.com/enumeratio/notatio/wiki/Domains §2 — Element(x,

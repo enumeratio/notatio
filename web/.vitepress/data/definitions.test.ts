@@ -21,7 +21,7 @@ test("every statistic prints a non-empty definition that reads back as its expre
     expect(errors, `${head} on ${on}: ${shown!.source}`).toEqual([]);
     expect(canonical(json), `${head} on ${on}`).toEqual(canonical(applied(expr)));
   }
-}, 30_000); // grows with the statistic count
+}, 120_000); // the first call prints every definition; a typed fold prints 10-20x slower than an untyped one
 
 test("every Epsil family prints each of its definitions", () => {
   for (const family of allFamilies.filter(isEpsilFamily)) {

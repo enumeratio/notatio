@@ -9,7 +9,7 @@ signatures:
   - call: NotEqual(any, any) -> boolean
     description: Inequality comparison (not equal to).
     library: enumeratio-adeles
-    type: (any, any) -> boolean
+    type: (any, any*) -> boolean
     overrides: compute-engine
     on:
       - Adele

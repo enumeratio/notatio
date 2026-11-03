@@ -41,7 +41,7 @@
     },
     {
       "cmd": "notatio -f numpy \"Sqrt(x^2 + 1)\"",
-      "out": "np.sqrt((float('nan') if x is None else x) ** 2 + 1)",
+      "out": "np.sqrt(x ** 2 + 1)",
       "code": 0
     },
     {
