@@ -250,3 +250,88 @@ export const rightBranchOrderedFlat: MathJSON = givenList(
     upTo(1, ["Multiply", 2, L]),
   ),
 );
+
+// ── statistics ───────────────────────────────────────────────────────────────────────────
+// Over `_x`, the Dyck word. A vertex is an up step, the root being none: `[]` is the word `[]`.
+
+const W = "_x";
+const wordLength = length(W);
+const wordPositions = upTo(1, wordLength);
+
+/** The heights after each step of the word, as a list. A step's height is twice the ups so far,
+ *  less the steps. */
+const wordHeights: MathJSON = map(
+  sub(["Multiply", 2, count(filter(upTo(1, "sq"), equal(at(W, "st"), 1), "st"))], "sq"),
+  "sq",
+  wordPositions,
+);
+
+/** `body` with `H` bound to the heights after each step. */
+const withHeights = (body: MathJSON): MathJSON => givenList("H", wordHeights, body);
+
+/** The positions of the leaves other than the root: a down step right after an up step. */
+const leafSteps: MathJSON = filter(
+  upTo(2, wordLength),
+  and(equal(at(W, "lp"), 0), equal(at(W, sub("lp", 1)), 1)),
+  "lp",
+);
+
+/** The edges on the path that always takes the first child (`first`), or the last: the run of ups
+ *  from the start, or of downs from the end. */
+const edgeRun = (first: boolean, tag: string): MathJSON => {
+  const [a, j] = [`${tag}a`, `${tag}j`];
+  const step = first ? at(W, j) : at(W, sub(add(wordLength, 1), j));
+  return fold(iff(and(equal(a, sub(j, 1)), equal(step, first ? 1 : 0)), j, a), a, j, 0, wordPositions);
+};
+
+/** The most edges on a path from the root: the highest the word climbs. */
+export const heightOrderedFlat: MathJSON = withHeights(
+  fold(iff(greater(at("H", "mj"), "ma"), at("H", "mj"), "ma"), "ma", "mj", 0, wordPositions),
+);
+
+/** The most vertices on a path from the root: one more than the height. */
+export const longestPathVertexCountOrderedFlat: MathJSON = add(heightOrderedFlat, 1);
+
+/** A leaf is a down step after an up step; the lone vertex has no steps and is one. */
+export const leavesOrderedFlat: MathJSON = add(count(leafSteps), iff(equal(wordLength, 0), 1, 0));
+
+/** The non-root vertices are the ups; the non-root leaves are the up-down pairs. */
+export const nonRootInternalNodesOrderedFlat: MathJSON = sub(
+  count(filter(wordPositions, equal(at(W, "np"), 1), "np")),
+  count(leafSteps),
+);
+
+/** The sum of the depths of the vertices: the heights after the up steps. */
+export const pathLengthOrderedFlat: MathJSON = withHeights(
+  fold(add("pa", iff(equal(at(W, "pj"), 1), at("H", "pj"), 0)), "pa", "pj", 0, wordPositions),
+);
+
+/** The edges on the leftmost path plus those on the rightmost. */
+export const boundaryLengthOrderedFlat: MathJSON = add(edgeRun(true, "bl"), edgeRun(false, "br"));
+
+/** The depth of the nearest leaf: the least height before a leaf's down step; the word's length
+ *  stands for none, so the lone vertex gives 0. */
+export const protectionNumberOrderedFlat: MathJSON = withHeights(
+  fold(
+    iff(and(equal(at(W, "qj"), 0), equal(at(W, sub("qj", 1)), 1)), ["Min", "qa", at("H", sub("qj", 1))], "qa"),
+    "qa",
+    "qj",
+    wordLength,
+    upTo(2, wordLength),
+  ),
+);
+
+/** The edges from the root while a vertex has exactly one child: the j such that the word starts
+ *  with j ups and no height from step j to step n - j falls below j. */
+export const trunkLengthOrderedFlat: MathJSON = withHeights(
+  count(
+    filter(
+      upTo(1, ["Divide", wordLength, 2]),
+      equal(["Min", map(at("H", "tm"), "tm", upTo("tj", sub(wordLength, "tj")))], "tj"),
+      "tj",
+    ),
+  ),
+);
+
+/** The leftmost and rightmost paths less the trunk they share. */
+export const boundaryLengthBeyondTrunkOrderedFlat: MathJSON = sub(boundaryLengthOrderedFlat, trunkLengthOrderedFlat);
