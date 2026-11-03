@@ -5,6 +5,9 @@
 import { compileTyped } from "@enumeratio/engine/compiled";
 import { bareEngine } from "@enumeratio/engine/testing";
 import { expect, test } from "vite-plus/test";
+import { interpretDefinition } from "../src/statistics/declare.ts";
+import { SUBJECT, signatureOf } from "../src/statistics/types.ts";
+import { TREE_STATISTICS } from "../trees/src/statistics.ts";
 import {
   BinaryTreeUnrank,
   DyckPathUnrank,
@@ -184,3 +187,34 @@ test(`Rotation and BinaryTree@ordered_tree at ${edges} edges`, () => {
   expect(treeOfDyckWord(rotated)).toEqual(rotate(bushy));
   expect(treeOfParentArray(parents)).toEqual(binaryLeft(bushy));
 });
+
+// ── statistics: the compiled flat body against the nested definition ─────────────────────
+
+const FLAT_STATISTIC_HEADS = [
+  "Height",
+  "LongestPathVertexCount",
+  "Leaves",
+  "NonRootInternalNodes",
+  "PathLength",
+  "BoundaryLength",
+  "ProtectionNumber",
+  "TrunkLength",
+  "BoundaryLengthBeyondTrunk",
+];
+
+/** The nested tree as MathJSON: a vertex is the list of its children. */
+const listOf = (t: Plane): unknown => ["List", ...t.map(listOf)];
+
+// The interpreter takes about 60 ms a tree: the standard run holds the trees of up to 4 edges, the nightly all of 7.
+const statisticEdges = DEEP ? 7 : 4;
+
+for (const head of FLAT_STATISTIC_HEADS)
+  test(`${head}@OrderedTree: the compiled flat body gives the nested definition's answer`, () => {
+    const definition = TREE_STATISTICS.find((d) => signatureOf(d) === `${head}@OrderedTree`)!;
+    expect(definition.flat, head).toBeDefined();
+    const compiled = compileTyped(ce, definition.flat as never, { [SUBJECT]: "list<integer>" })!;
+    for (const tree of allPlane(statisticEdges))
+      expect(compiled.run({ [SUBJECT]: word(tree) }), JSON.stringify(tree)).toBe(
+        interpretDefinition(ce, definition, ce.box(listOf(tree) as never)).json,
+      );
+  });
