@@ -30,6 +30,7 @@ const COST: Readonly<Record<string, number>> = {
   ZigzagCompositions: 120,
   BoxedPlanePartitions: 32,
   PartitionNumbers: 12,
+  PrimorialNumbers: 7,
   NonCrossingTrees: 22,
   CarlitzCompositions: 22,
   NonCrossingPartitions: 16,

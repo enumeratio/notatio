@@ -84,6 +84,25 @@ const partitions: Terms = (count) => {
   return ways;
 };
 
+/** The first `count` primes by a sieve of Eratosthenes, over a range doubled until it holds that many. */
+const firstPrimes = (count: number): bigint[] => {
+  for (let limit = 64; ; limit *= 2) {
+    const composite = new Uint8Array(limit + 1);
+    const primes: bigint[] = [];
+    for (let k = 2; k <= limit && primes.length < count; k++) {
+      if (composite[k] === 1) continue;
+      primes.push(BigInt(k));
+      for (let m = k * k; m <= limit; m += k) composite[m] = 1;
+    }
+    if (primes.length === count) return primes;
+  }
+};
+/** The primorials p_1#, p_2#, …: running products of the sieve's primes. */
+const primorials: Terms = (count) => {
+  let product = 1n;
+  return firstPrimes(count).map((p) => (product *= p));
+};
+
 /** The first `count` terms of each sequence, from their recurrences (a different formula than the definitions'). */
 const TERMS: Record<string, Terms> = {
   FibonacciNumbers: iterate([0n, 1n], (t) => back(t, 1) + back(t, 2)),
@@ -96,6 +115,7 @@ const TERMS: Record<string, Terms> = {
   FactorialNumbers: products((i) => i),
   DoubleFactorialNumbers: products((i) => 2n * i - 1n),
   CatalanNumbers: catalan,
+  PrimorialNumbers: primorials,
   MotzkinNumbers: (count) => {
     const cat = catalan(count + 1);
     return Array.from({ length: count }, (_, n) => {
@@ -190,7 +210,9 @@ test("the sequences are Epsil definitions with their TS kernels as fast paths, b
 for (const head of definitions.keys()) {
   const terms = TERMS[head];
   // Past the crossing the interpreter answers each rank in turn: the far-out checks below hold it to account.
-  const count = bitwise(head) ? ranksOf(head) : Math.min(ranksOf(head), crossingOf(head) + (DEEP ? 4 : 1));
+  // (The primorials' interpreted ranks cost a second each: their standard run stops at the last double.)
+  const beyond = head === "PrimorialNumbers" && !DEEP ? 0 : 1;
+  const count = bitwise(head) ? ranksOf(head) : Math.min(ranksOf(head), crossingOf(head) + (DEEP ? 4 : beyond));
 
   test(`${head}: the first terms, their first places and the numbers between`, () => {
     const sequence = terms(count);
@@ -244,7 +266,9 @@ for (const head of definitions.keys()) {
     test(`${head}: terms and places on either side of 2^53 are exact`, () => {
       for (let r = Math.max(0, crossing - (DEEP ? 4 : 1)); r < crossing + (DEEP ? 3 : 2); r++) {
         const x = sequence[r];
-        const ys = [x - 1n, x, x + 1n];
+        // The primorials' interpreted membership and rank cost a second each past 2^53: the standard run takes the
+        // unrank alone there (the far-out test below ranks one), and DEEP_TESTS the term and its neighbours.
+        const ys = head === "PrimorialNumbers" && r >= crossing && !DEEP ? [] : [x - 1n, x, x + 1n];
         // Where the definition declines the rank, the fast path alone answers (the decline is held below).
         const early = definitions.get(head)!.early;
         const reached =
@@ -268,17 +292,23 @@ for (const head of definitions.keys()) {
       const summed = ["Motzkin", "Delannoy", "Schroder", "Schroeder", "Bell", "Fubini", "Partition"].some((name) =>
         head.includes(name),
       );
-      const out = summed
-        ? DEEP
-          ? ["Bell", "Fubini", "Partition"].some((name) => head.includes(name))
-            ? [50, 120, 150]
-            : [50, 120, 250, 399]
-          : [50]
-        : DEEP
-          ? [120, 250, 399, 1000, 1499]
-          : ["PadovanSequence", "PerrinSequence"].includes(head)
-            ? [300]
-            : [120];
+      // The definition trial-divides, so it reaches 50 ranks (200 bits): rank 15 has 66 bits, rank 30 has 183.
+      const out =
+        head === "PrimorialNumbers"
+          ? DEEP
+            ? [15, 30, 50]
+            : [15]
+          : summed
+            ? DEEP
+              ? ["Bell", "Fubini", "Partition"].some((name) => head.includes(name))
+                ? [50, 120, 150]
+                : [50, 120, 250, 399]
+              : [50]
+            : DEEP
+              ? [120, 250, 399, 1000, 1499]
+              : ["PadovanSequence", "PerrinSequence"].includes(head)
+                ? [300]
+                : [120];
       for (const r of out) {
         const x = sequence[r];
         // The fast path passes on its own bigint terms; membership and places are the interpreter's.
@@ -374,6 +404,73 @@ test("Bell, Fubini and partition numbers at the values the OEIS lists", () => {
       expect([head, name, r, kernel.rank(asTerm(term), [])]).toEqual([head, name, r, BigInt(r)]);
     }
   }
+});
+
+// A002110, a(n) the product of the first n primes: the sequence starts at n = 1 here, so a(n) is the term at rank n − 1.
+// Ranks 12 and 13 straddle 2^53; the interpreter answers the last three.
+const A002110: readonly (readonly [number, bigint])[] = [
+  [0, 2n],
+  [1, 6n],
+  [5, 30030n],
+  [9, 6469693230n],
+  [12, 304250263527210n],
+  [13, 13082761331670030n],
+  [14, 614889782588491410n],
+  [15, 32589158477190044730n],
+  [16, 1922760350154212639070n],
+];
+
+test("primorial numbers at the values the OEIS lists, on either side of 2^53", () => {
+  for (const [r, term] of A002110) {
+    // A term past 2^53 costs the interpreter a second to rank and check: the standard run takes its unrank alone.
+    const interpreted = term > MAX_SAFE;
+    for (const [name, kernel] of kernels("PrimorialNumbers")) {
+      if (interpreted && !DEEP && name === "fast") continue;
+      expect([name, r, kernel.unrank([], BigInt(r))]).toEqual([name, r, asTerm(term)]);
+      if (interpreted && !DEEP) continue;
+      expect([name, r, kernel.rank(asTerm(term), [])]).toEqual([name, r, BigInt(r)]);
+      expect([name, r, kernel.valid(asTerm(term), [])]).toEqual([name, r, true]);
+    }
+  }
+  expect(A002110[4][1] <= MAX_SAFE && A002110[5][1] > MAX_SAFE).toBe(true);
+});
+
+test("primorial numbers: the empty product is no member, nor is a number between or beside two", () => {
+  for (const [name, kernel] of kernels("PrimorialNumbers")) {
+    for (const x of [-30, -1, 0, 1, 3, 12, 29, 31, 60, 209, 211, 2309, 2311]) {
+      expect([name, x, kernel.valid(x, [])]).toEqual([name, x, false]);
+      expect([name, x, kernel.rank(x, [])]).toEqual([name, x, -1n]);
+    }
+  }
+});
+
+test("primorial numbers: the primes a rank or a number needs are within the definition's range, every term of the kernel", () => {
+  // A number x of b = ⌊log₂ x⌋ + 1 bits is met or passed by the primorial of at most ⌊(b − 1)/2⌋ + 2 primes (the
+  // bound of the definition's rank and membership). Held against the first 400 primorials and each one's two neighbours.
+  const terms = primorials(400);
+  const floorLog2 = (x: bigint): number => x.toString(2).length - 1;
+  const primesNeeded = (x: bigint): number => terms.findIndex((term) => term >= x) + 1;
+  for (const term of terms)
+    for (const x of [term - 1n, term, term + 1n]) {
+      if (x < 2n) continue;
+      expect([x, primesNeeded(x) <= Math.floor(floorLog2(x) / 2) + 2]).toEqual([x, true]);
+    }
+});
+
+test("primorial numbers: the fast path answers to its reach, and Epsil alone stops at its own", () => {
+  const fast = full("PrimorialNumbers");
+  const reference = primorials(10_001);
+  for (const r of [100, 1234, 5000, 10_000]) expect([r, fast.unrank([], BigInt(r))]).toEqual([r, asTerm(reference[r])]);
+  expect(answer(() => fast.unrank([], 10_001n))).toBe("declined");
+  // The definition declines at once, and never answers a wrong term, past 50 ranks and 200 bits.
+  const epsilOnly = epsil("PrimorialNumbers");
+  expect(answer(() => epsilOnly.unrank([], 51n))).toBe("declined");
+  expect(answer(() => epsilOnly.valid(reference[50] as never, []))).toBe("declined");
+  expect(answer(() => epsilOnly.rank(reference[60] as never, []))).toBe("declined");
+  // The fast path takes a number of that size (a member, a rank to find) without the interpreter.
+  expect(fast.valid(reference[60] as never, [])).toBe(true);
+  expect(fast.rank(reference[60] as never, [])).toBe(60n);
+  expect(fast.valid((reference[60] + 1n) as never, [])).toBe(false);
 });
 
 test("a negative rank is outside the fiber", () => {
