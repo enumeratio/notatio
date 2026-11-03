@@ -15,6 +15,15 @@ import {
 } from "./binary-tree.ts";
 import { leftRotationFlat, mirrorFlat, rightRotationFlat } from "./flat.ts";
 import {
+  dyckPathOfOrderedFlat,
+  leftBranchBinaryFlat,
+  leftBranchOrderedFlat,
+  mirrorOrderedFlat,
+  rightBranchBinaryFlat,
+  rightBranchOrderedFlat,
+  rotationOrderedFlat,
+} from "./flat-ordered.ts";
+import {
   dyckPathOfOrderedTreeBody,
   leftBranchBinaryTreeBody,
   leftBranchOrderedTreeBody,
@@ -122,6 +131,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "binary_tree",
     to: "ordered_tree",
     body: leftBranchOrderedTreeBody,
+    flat: leftBranchOrderedFlat,
     summary:
       "A binary tree as an ordered tree with one more vertex: a left child becomes its parent's left brother, a right child its parent's last child.",
     note: "FindStat's Mp00010, Sage's to_ordered_tree_left_branch, a bijection from the binary trees with n nodes to the ordered trees with n edges. The inverse is BinaryTree(OrderedTree); RightBranchOrderedTree is the same with the roles of left and right exchanged.",
@@ -132,6 +142,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "binary_tree",
     to: "ordered_tree",
     body: rightBranchOrderedTreeBody,
+    flat: rightBranchOrderedFlat,
     summary:
       "A binary tree as an ordered tree with one more vertex: a right child becomes its parent's right brother, a left child its parent's first child.",
     note: "FindStat's Mp00015, Sage's to_ordered_tree_right_branch, a bijection. Its inverse is RightBranchBinaryTree. OrderedTree(BinaryTree) is the left-branch bijection, which is the constructor.",
@@ -141,6 +152,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "ordered_tree",
     to: "ordered_tree",
     body: mirrorOrderedBody,
+    flat: mirrorOrderedFlat,
     summary: "The left-right symmetry of an ordered tree: every node's children in the opposite order.",
     note: "FindStat's Mp00048, an involution.",
   },
@@ -150,6 +162,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "ordered_tree",
     to: "binary_tree",
     body: leftBranchBinaryTreeBody,
+    flat: leftBranchBinaryFlat,
     summary:
       "An ordered tree as a binary tree with one fewer node: a vertex's left brother becomes its left child, its last child its right child, and the root goes.",
     note: "FindStat's Mp00049, Sage's to_binary_tree_left_branch, the inverse of OrderedTree(BinaryTree). RightBranchBinaryTree is the same with the roles of left and right exchanged.",
@@ -160,6 +173,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "ordered_tree",
     to: "binary_tree",
     body: rightBranchBinaryTreeBody,
+    flat: rightBranchBinaryFlat,
     summary:
       "An ordered tree as a binary tree with one fewer node: a vertex's right brother becomes its right child, its first child its left child, and the root goes.",
     note: "FindStat's Mp00050, Sage's to_binary_tree_right_branch, the inverse of RightBranchOrderedTree. BinaryTree(OrderedTree) is the left-branch bijection, which is the constructor.",
@@ -170,6 +184,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "ordered_tree",
     to: "dyck_path",
     body: dyckPathOfOrderedTreeBody,
+    flat: dyckPathOfOrderedFlat,
     summary:
       "An ordered tree as the Dyck path of its depth-first contour: an up step into each child, a down step out.",
     note: "FindStat's Mp00051. The inverse of OrderedTree(DyckPath).",
@@ -180,6 +195,7 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     from: "ordered_tree",
     to: "ordered_tree",
     body: rotateOrderedBody,
+    flat: rotationOrderedFlat,
     summary: "Attach a leaf to the root, remove the leftmost leaf, and let the vertex it hung from become the root.",
     note: "FindStat's Mp00246, a bijection corresponding to rotating a polygon dissection.",
   },

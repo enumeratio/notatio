@@ -123,7 +123,11 @@ const childOf = (p: MathJSON, v: MathJSON, side: "left" | "right", tag: string):
   );
 
 /** `body` with `name` bound to the integer `value`. */
-const given = (name: string, value: MathJSON, body: MathJSON): MathJSON => ["Apply", ["Function", body, name], value];
+export const given = (name: string, value: MathJSON, body: MathJSON): MathJSON => [
+  "Apply",
+  ["Function", body, name],
+  value,
+];
 
 /** Mp00016: node k goes to n + 1 - k, so each entry is the mirrored entry of the mirrored position. */
 export const mirrorFlat: MathJSON = map(
