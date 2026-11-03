@@ -35,7 +35,7 @@ test("every map combinatorics declares is catalogued", () => {
 });
 
 test("a stat is one name defined on several carriers", () => {
-  expect(STATS.find((s) => s.name === "MajorIndex")?.on).toEqual([
+  expect([...(STATS.find((s) => s.name === "MajorIndex")?.on ?? [])].toSorted()).toEqual([
     "DyckPath",
     "IntegerComposition",
     "Permutation",

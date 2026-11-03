@@ -84,8 +84,8 @@ const leadersWhere = (also: (leader: MathJSON) => MathJSON): MathJSON => [
 /** `body` with `cy_n` the number of points. */
 const withSize = (walk: Walk, body: MathJSON): MathJSON => bind("cy_n", size(walk), body, "integer");
 
-/** `body` unless there are no points: the empty list. */
-const nonEmpty = (body: MathJSON): MathJSON => ["If", ["Equal", "cy_n", 0], ["List"], body];
+/** `body` unless there are no points: `empty`, the empty list unless `body` is not a list. */
+const nonEmpty = (body: MathJSON, empty: MathJSON = ["List"]): MathJSON => ["If", ["Equal", "cy_n", 0], empty, body];
 
 /** The cycle lengths in order of their leaders, over the cycles that satisfy `also`. */
 export const lengthsWhere = (also: (leader: MathJSON) => MathJSON = () => true): MathJSON => [
@@ -100,8 +100,12 @@ export const withLengths = (
   extreme: "Min" | "Max",
   also: (leader: MathJSON) => MathJSON,
   body: MathJSON,
+  empty: MathJSON = ["List"],
 ): MathJSON =>
-  withSize(walk, nonEmpty(withLabels(walk, extreme, bind("cy_lens", lengthsWhere(also), body, "list<integer>"))));
+  withSize(
+    walk,
+    nonEmpty(withLabels(walk, extreme, bind("cy_lens", lengthsWhere(also), body, "list<integer>")), empty),
+  );
 
 /** A list sorted largest-first, read back to front. */
 const descending = (list: string): MathJSON => [

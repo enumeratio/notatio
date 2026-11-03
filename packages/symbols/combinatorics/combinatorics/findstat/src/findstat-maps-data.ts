@@ -336,6 +336,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00048", rows: 1200, compared: 197, skipped: 0 }],
   },
   {
+    name: "BinaryTree",
+    from: "OrderedTree",
+    to: "BinaryTree",
+    findstat: [{ id: "Mp00049", rows: 1200, compared: 197, skipped: 0 }],
+  },
+  {
     name: "RightBranchBinaryTree",
     from: "OrderedTree",
     to: "BinaryTree",

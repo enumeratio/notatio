@@ -50,6 +50,7 @@ const unrank: MathJSON = lets(
           "ui",
           ["Join", degreesOfSequence("sq", N), zeros(sub(N, 2))],
           upTo(1, sub(N, 2)),
+          "list<integer>",
         ),
         "list<integer>",
       ],
@@ -107,6 +108,7 @@ const rank: MathJSON = at(
     "ri",
     ["Join", degrees, ["List", 0]],
     upTo(1, sub(N, 2)),
+    "list<integer>",
   ),
   add(N, 1),
 );
@@ -127,6 +129,7 @@ const peelsAway: MathJSON = at(
     "vi",
     ["Join", degrees, ["List", 1]],
     upTo(1, sub(N, 1)),
+    "list<integer>",
   ),
   add(N, 1),
 );

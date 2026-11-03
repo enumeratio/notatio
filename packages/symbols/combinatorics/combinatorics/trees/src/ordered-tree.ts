@@ -11,7 +11,8 @@ const empty = (forest: MathJSON): MathJSON => ["Equal", ["Length", forest], 0];
 const first = (forest: MathJSON): MathJSON => ["At", forest, 1];
 const last = (forest: MathJSON): MathJSON => ["At", forest, ["Length", forest]];
 const withoutFirst = (forest: MathJSON): MathJSON => ["Drop", forest, 1];
-const withoutLast = (forest: MathJSON): MathJSON => ["Take", forest, ["Subtract", ["Length", forest], 1]];
+// `Most`, not `Take(f, Length(f) - 1)`: as a recursive call's argument the Take count read the length as 0 (CE 0.176/0.177).
+const withoutLast = (forest: MathJSON): MathJSON => ["Most", forest];
 const left = (tree: MathJSON): MathJSON => ["At", tree, 1];
 const right = (tree: MathJSON): MathJSON => ["At", tree, 2];
 

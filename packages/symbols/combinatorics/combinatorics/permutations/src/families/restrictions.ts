@@ -711,6 +711,7 @@ const schroderTable = fold(
   "sk",
   ["List", 1],
   upTo(1, sub(n, 1)),
+  "list<integer>",
 );
 /** A cell's column: start j (0 ≤ j < filled), window bottom lo, and ⊕ (1) or ⊖ (2). */
 const sepColumn = (j: MathJSON, lo: MathJSON, kind: MathJSON): MathJSON =>
@@ -762,6 +763,7 @@ function sepSum(read: Read, plus: boolean, j: string, lo: string, s: string): Ma
     "sc",
     ["List", 0, add(n, 1), 0],
     upTo(1, rem),
+    "list<integer>",
   );
   return lets(
     [["sc0", at(run, 1), "integer"]],
@@ -1137,7 +1139,7 @@ const vexEntry = lets(
     ["vm", "vb", "integer"],
     [
       "vt0",
-      fold(iff(["LessEqual", ["Power", 2, sub("vk", 1)], "ve"], "vk", "vtk"), "vtk", "vk", 0, upTo(1, "vm")),
+      fold(iff(["LessEqual", ["Power", 2, sub("vk", 1)], "ve"], "vk", "vtk"), "vtk", "vk", 0, upTo(1, "vm"), "integer"),
       "integer",
     ],
     ["vs0", iff(equal("vt0", 0), 0, mul(2, sub("ve", ["Power", 2, sub("vt0", 1)]))), "integer"],
@@ -1199,6 +1201,7 @@ const vexTable = fold(
   "vb",
   ["List"],
   upTo(0, n),
+  "list<integer>",
 );
 /** Free values below v. */
 const freeUnder = (v: MathJSON): MathJSON => at("fr", v);

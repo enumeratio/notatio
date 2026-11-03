@@ -78,8 +78,10 @@ const settled = (output: unknown, expected: unknown, exact: boolean): unknown =>
   return output;
 };
 
-/** Blank the values of rules keyed by one of `keys`, wherever they sit in the tree. */
+/** Blank the values of rules keyed by one of `keys`, wherever they sit in the tree (and, for `t_n`, fresh parameters). */
 const masked = (node: unknown, keys: ReadonlySet<string>): unknown => {
+  // `t_n`: the fresh parameter of an underdetermined solution, `t` or `t_1`… by what ran before on the worker.
+  if (typeof node === "string") return keys.has("t_n") && /^t(_\d+)?$/.test(node) ? "…" : node;
   if (!Array.isArray(node)) return node;
   const key = typeof node[1] === "string" ? node[1].replace(/^'|'$/g, "") : undefined;
   if ((node[0] === "Tuple" || node[0] === "KeyValuePair") && key !== undefined && keys.has(key)) {

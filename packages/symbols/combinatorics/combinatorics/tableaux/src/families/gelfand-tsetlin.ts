@@ -85,7 +85,11 @@ const next = (cur: string, cap: string, lo: string, m: MathJSON): MathJSON => {
   );
   return lets(
     [["gn_at", raised, "integer"]],
-    iff(equal("gn_at", 0), cur, fold(["ReplaceAt", "gn_c", "gn_j", entry], "gn_c", "gn_j", cur, upTo(1, m))),
+    iff(
+      equal("gn_at", 0),
+      cur,
+      fold(["ReplaceAt", "gn_c", "gn_j", entry], "gn_c", "gn_j", cur, upTo(1, m), "list<integer>"),
+    ),
   );
 };
 
@@ -202,6 +206,7 @@ export const gelfandTsetlin: EpsilFamily = {
         "gu_t",
         join(list(at("gu_state", 1), 0), "gt_lo"),
         upTo(1, rowsAt(level)),
+        "list<integer>",
       );
       const step = lets(
         [["gu_flat", drop("gu_state", 1), "list<integer>"]],
@@ -223,7 +228,14 @@ export const gelfandTsetlin: EpsilFamily = {
         [
           [
             "gu_end",
-            fold(step, "gu_state", level, join(list("_r"), zeros(quotient(mul(n, add(n, 1)), 2))), upTo(1, n)),
+            fold(
+              step,
+              "gu_state",
+              level,
+              join(list("_r"), zeros(quotient(mul(n, add(n, 1)), 2))),
+              upTo(1, n),
+              "list<integer>",
+            ),
             "list<integer>",
           ],
         ],
@@ -233,7 +245,7 @@ export const gelfandTsetlin: EpsilFamily = {
     // Rank: the same walk, adding the triangles of each row before the row at each level.
     rank: (() => {
       const level = "gr_l";
-      const flat = fold(join("gr_f", at("_x", "gr_i")), "gr_f", "gr_i", list(), upTo(1, len));
+      const flat = fold(join("gr_f", at("_x", "gr_i")), "gr_f", "gr_i", list(), upTo(1, len), "list<integer>");
       const search = (target: string): MathJSON =>
         fold(
           iff(
@@ -252,6 +264,7 @@ export const gelfandTsetlin: EpsilFamily = {
           "gr_t",
           join(list(0, 0), "gt_lo"),
           upTo(1, rowsAt(level)),
+          "list<integer>",
         );
       return lets(
         [["gr_flat", flat, "list<integer>"]],
