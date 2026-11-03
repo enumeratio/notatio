@@ -32,7 +32,7 @@ signatures:
     type: ((set_composition) -> composition) & ((set_partition) -> composition)
 ---
 
-- Takes a `SetPartition` and returns a `Composition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- Takes a `SetPartition` and returns a `IntegerComposition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - FindStat's Mp00128. Lossy: which elements share a block is forgotten, so it is not a constructor overload.
-- Also takes a `SetComposition`, returning a `Composition`: The block sizes of a set composition, its blocks taken in order.
+- Also takes a `SetComposition`, returning a `IntegerComposition`: The block sizes of a set composition, its blocks taken in order.
 - FindStat's Mp00287. Lossy: which elements share a block is forgotten.

@@ -1,4 +1,4 @@
 id	section	role	expr	expected	caption
 count-carlitzcompositions-5	Basic		[Count, [CarlitzCompositions, 5]]	7	$Count(CarlitzCompositions(5)) = 7$
-first-element-of-carlitzcompositions-5	Basic		[At, [CarlitzCompositions, 5], 1]	[Composition, [List, 1, 3, 1]]	The first element in enumeration order
-every-element-of-carlitzcompositions-5		test	[Take, [CarlitzCompositions, 5], 7]	[List, [Composition, [List, 1, 3, 1]], [Composition, [List, 1, 4]], [Composition, [List, 2, 1, 2]], [Composition, [List, 2, 3]], [Composition, [List, 3, 2]], [Composition, [List, 4, 1]], [Composition, [List, 5]]]	
+first-element-of-carlitzcompositions-5	Basic		[At, [CarlitzCompositions, 5], 1]	[IntegerComposition, [List, 1, 3, 1]]	The first element in enumeration order
+every-element-of-carlitzcompositions-5		test	[Take, [CarlitzCompositions, 5], 7]	[List, [IntegerComposition, [List, 1, 3, 1]], [IntegerComposition, [List, 1, 4]], [IntegerComposition, [List, 2, 1, 2]], [IntegerComposition, [List, 2, 3]], [IntegerComposition, [List, 3, 2]], [IntegerComposition, [List, 4, 1]], [IntegerComposition, [List, 5]]]	

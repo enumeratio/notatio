@@ -113,12 +113,19 @@ const rowsTable = (() => {
       iff(equal(k, last), add(at(prev, add(k, 1)), 1), iff(["LessEqual", k, at(prev, 1)], 1, 0)),
     ),
   );
-  const cells = fold(["ReplaceAt", cur, add(k, 1), entry], cur, k, zeros(add(B, 1), fresh("z")), upTo(1, B));
+  const cells = fold(
+    ["ReplaceAt", cur, add(k, 1), entry],
+    cur,
+    k,
+    zeros(add(B, 1), fresh("z")),
+    upTo(1, B),
+    "list<integer>",
+  );
   const next = lets(
     [[prev, take(drop(acc, mul(sub(i, 1), add(B, 1))), add(B, 1)), "list<integer>"]],
     lets([[last, raised, "integer"]], ["ReplaceAt", cells, 1, iff(equal(last, 0), add(at(prev, 1), 1), at(prev, 1))]),
   );
-  return fold(join(acc, next), acc, i, zeros(add(B, 1), fresh("z")), upTo(1, sub(N, 1)));
+  return fold(join(acc, next), acc, i, zeros(add(B, 1), fresh("z")), upTo(1, sub(N, 1)), "list<integer>");
 })();
 
 /** U[l][ρ] for l = 0..a, layer by layer, a layer N entries (`rowTable`, rows l, columns ρ). */
@@ -195,7 +202,7 @@ const layersW = (ls: string, k: string): MathJSON => {
     ),
   );
   const last = map(iff(equal(lengthOf(i), at(ls, k)), 1, 0), i, upTo(0, sub(N, 1)));
-  return fold(join(acc, iff(equal(j, 0), last, finish)), acc, j, list(), upTo(0, sub(k, 1)));
+  return fold(join(acc, iff(equal(j, 0), last, finish)), acc, j, list(), upTo(0, sub(k, 1)), "list<integer>");
 };
 const finishAt = (layers: string, k: string, t: MathJSON, s: MathJSON): MathJSON =>
   at(layers, add(mul(sub(k, t), N), s, 1));
@@ -217,6 +224,7 @@ const unrank = (() => {
     lam,
     list(sub(at(st, 1), end), 0),
     upTo(1, cap),
+    "list<integer>",
   );
   const shapeStep = iff(
     equal(at(st, 2), 0),
@@ -245,7 +253,14 @@ const unrank = (() => {
       ),
     ),
   );
-  const shapePass = fold(shapeStep, st, t, join(list("_r", B), startGrid(), zeros(A, fresh("z"))), upTo(1, A));
+  const shapePass = fold(
+    shapeStep,
+    st,
+    t,
+    join(list("_r", B), startGrid(), zeros(A, fresh("z"))),
+    upTo(1, A),
+    "list<integer>",
+  );
 
   // The entries pass state: [rank left, the last row's number, the numbers of the rows (a)].
   const [q, u, w, rows, p1, layers, chosen, row, lens, picked, ways, j] = [
@@ -280,6 +295,7 @@ const unrank = (() => {
     w,
     list(at(q, 1), 0),
     block(at(lens, u)),
+    "list<integer>",
   );
   const entriesStep = iff(
     ["Greater", u, rows],
@@ -289,7 +305,14 @@ const unrank = (() => {
       join(list(at(row, 1), sub(at(row, 2), 1)), ["ReplaceAt", drop(q, 2), u, sub(at(row, 2), 1)]),
     ),
   );
-  const entriesPass = fold(entriesStep, q, u, join(list(at(p1, 1), sub(N, 1)), zeros(A, fresh("z"))), upTo(1, A));
+  const entriesPass = fold(
+    entriesStep,
+    q,
+    u,
+    join(list(at(p1, 1), sub(N, 1)), zeros(A, fresh("z"))),
+    upTo(1, A),
+    "list<integer>",
+  );
   const element = map(map(read(at(chosen, t), j), j, upTo(1, lengthOf(at(chosen, t)))), t, upTo(1, rows));
   return sides(
     lets(
@@ -328,7 +351,7 @@ const rank = (() => {
       advance(grid, cap, lam),
     ),
   );
-  const shapePass = fold(shapeStep, st, t, join(list(0), startGrid()), upTo(1, k));
+  const shapePass = fold(shapeStep, st, t, join(list(0), startGrid()), upTo(1, k), "list<integer>");
   // The number of the row x_t: the one of its block that reads the same.
   const numberOf = (row: MathJSON, len: MathJSON): MathJSON => {
     const [acc, s] = [fresh("a"), fresh("n")];
@@ -371,7 +394,7 @@ const rank = (() => {
           [[ls, map(length(at(x, t)), t, upTo(1, k)), "list<integer>"]],
           lets(
             [[layers, layersW(ls, k), "list<integer>"]],
-            at(fold(entriesStep, entriesSt, t, list(at(shapePass, 1), sub(N, 1)), upTo(1, k)), 1),
+            at(fold(entriesStep, entriesSt, t, list(at(shapePass, 1), sub(N, 1)), upTo(1, k), "list<integer>"), 1),
           ),
         ),
       ),

@@ -11,14 +11,14 @@ catalog:
   - system: findstat
     identity: Mp00315
     url: https://www.findstat.org/Mp00315
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: Mp00316
     url: https://www.findstat.org/Mp00316
     on: BinaryWord
 mapOn:
   - BinaryWord
-  - Composition
+  - IntegerComposition
   - Permutation
 laws:
   - bijection
@@ -44,7 +44,7 @@ signatures:
 
 - Takes a `Permutation` and returns a `Permutation` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - FindStat's Mp00175, Sage's foata_bijection_inverse. It sends the number of inversions to the major index.
-- Also takes a `Composition`, returning a `Composition`: The inverse of Foata's bijection on compositions: peel off the last part, rotate the blocks of the rest back.
+- Also takes a `IntegerComposition`, returning a `IntegerComposition`: The inverse of Foata's bijection on compositions: peel off the last part, rotate the blocks of the rest back.
 - FindStat's Mp00315.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: The inverse of Foata's bijection on words: peel off the last letter, rotate the blocks of the rest back.
 - FindStat's Mp00316.

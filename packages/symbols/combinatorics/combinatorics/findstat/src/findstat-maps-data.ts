@@ -110,7 +110,7 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "DescentComposition",
     from: "Permutation",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00071", rows: 1200, compared: 873, skipped: 0 }],
   },
   {
@@ -386,13 +386,13 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "TouchComposition",
     from: "DyckPath",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00100", rows: 1200, compared: 196, skipped: 0 }],
   },
   {
     name: "RiseComposition",
     from: "DyckPath",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00102", rows: 1200, compared: 196, skipped: 0 }],
   },
   {
@@ -686,7 +686,7 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "BlockSizeComposition",
     from: "SetPartition",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00128", rows: 1200, compared: 278, skipped: 0 }],
   },
   {
@@ -728,7 +728,7 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "BlockSizeComposition",
     from: "SetComposition",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00287", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
@@ -842,13 +842,13 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "PeakComposition",
     from: "StandardTableau",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00294", rows: 1200, compared: 119, skipped: 0 }],
   },
   {
     name: "ValleyComposition",
     from: "StandardTableau",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00295", rows: 1200, compared: 119, skipped: 0 }],
   },
   {
@@ -889,67 +889,67 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   },
   {
     name: "Reverse",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00038", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "Complement",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00039", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "TransposeComposition",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00041", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "CyclicShift",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00173", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "InverseCyclicShift",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00172", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "SortedPartition",
-    from: "Composition",
+    from: "IntegerComposition",
     to: "IntegerPartition",
     findstat: [{ id: "Mp00040", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "CodeWord",
-    from: "Composition",
+    from: "IntegerComposition",
     to: "BinaryWord",
     findstat: [{ id: "Mp00094", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "DeltaMorphism",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00133", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
     name: "FoataMajorToInversions",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00314", rows: 1023, compared: 63, skipped: 0 }],
   },
   {
     name: "FoataInversionsToMajor",
-    from: "Composition",
-    to: "Composition",
+    from: "IntegerComposition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00315", rows: 1023, compared: 63, skipped: 0 }],
   },
   {
     name: "CompositionBouncePath",
-    from: "Composition",
+    from: "IntegerComposition",
     to: "DyckPath",
     findstat: [{ id: "Mp00231", rows: 1200, compared: 63, skipped: 0 }],
   },
@@ -980,7 +980,7 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "RunComposition",
     from: "BinaryWord",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00097", rows: 1200, compared: 126, skipped: 0 }],
   },
   {
@@ -1058,7 +1058,7 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
   {
     name: "CodeComposition",
     from: "BinaryWord",
-    to: "Composition",
+    to: "IntegerComposition",
     findstat: [{ id: "Mp00178", rows: 1200, compared: 126, skipped: 0 }],
   },
   {

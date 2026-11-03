@@ -20,13 +20,35 @@ export const iff = (condition: MathJSON, then: MathJSON, otherwise: MathJSON): M
   then,
   otherwise,
 ];
+/** With `accumulatorType` the accumulator is typed (an untyped one reads as `unknown` to the compiler).
+ *  The compiler must prove the initial value and each step's result satisfy the type, so both go
+ *  through a typed binding, which is how a value is asserted into a type. */
 export const fold = (
   body: MathJSON,
   accumulator: string,
   variable: string,
   init: MathJSON,
   over: MathJSON,
-): MathJSON => ["Fold", ["Function", body, accumulator, variable], init, over];
+  accumulatorType?: string,
+): MathJSON => {
+  if (accumulatorType === undefined) return ["Fold", ["Function", body, accumulator, variable], init, over];
+  const type = `'${accumulatorType}'`;
+  const [start, step] = [`${accumulator}_init`, `${accumulator}_next`];
+  const asserted = (name: string, value: MathJSON): MathJSON => [
+    "Apply",
+    ["Function", name, ["Typed", name, type]],
+    value,
+  ];
+  return [
+    "Apply",
+    [
+      "Function",
+      ["Fold", ["Function", asserted(step, body), ["Typed", accumulator, type], variable], start, over],
+      ["Typed", start, type],
+    ],
+    init,
+  ];
+};
 export const map = (body: MathJSON, variable: string, over: MathJSON): MathJSON => [
   "Map",
   ["Function", body, variable],
@@ -168,7 +190,14 @@ export function colexDigits(
     ],
     ["ReplaceAt", ["ReplaceAt", state, 1, sub(left, choose(found, i))], add(i, 1), found],
   );
-  return fold(step, state, i, ["Join", ["List", "_r"], map(0, `${tag}_z`, upTo(1, digits))], ["Range", digits, 1, -1]);
+  return fold(
+    step,
+    state,
+    i,
+    ["Join", ["List", "_r"], map(0, `${tag}_z`, upTo(1, digits))],
+    ["Range", digits, 1, -1],
+    "list<integer>",
+  );
 }
 
 /** T(s, c) of a table from `rowTable` bound as `name`, starting `offset` cells in when several
@@ -206,6 +235,7 @@ export function primeQuotient(
       j,
       ["List", 0, p],
       upTo(1, bound),
+      "list<integer>",
     ),
     1,
   );

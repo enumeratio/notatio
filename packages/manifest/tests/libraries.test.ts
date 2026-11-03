@@ -160,9 +160,9 @@ test("a packed package is a plain library too: declare(ce), and compiled functio
   }
   const ada = await import(join(root, "node_modules/@ada/primes/dist/index.js"));
   const bob = await import(join(root, "node_modules/@bob/extra/dist/index.js"));
-  // Self-contained compiled code is exported; code needing compute-engine's runtime isn't.
+  // Self-contained compiled code is exported, a member call to a sibling included.
   expect(ada.Twice(21)).toBe(42);
-  expect(ada.Quad).toBeUndefined();
+  expect(ada.Quad(3)).toBe(12);
   const ce = new ComputeEngine();
   bob.declare(ce);
   expect(evaluate(ce, ["MemberCall", "bob", "'Octuple'", 2])).toBe(16);

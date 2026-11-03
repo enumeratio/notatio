@@ -314,7 +314,7 @@ const MAP_HEADS = new Set([
   "Complement",
   "Complement_",
   "ComposeApply",
-  "Composition",
+  "IntegerComposition",
   "ConjugacyClassRepresentative",
   "ConjugateAfterCycleType",
   "CutWord",

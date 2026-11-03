@@ -21,7 +21,7 @@ function compositions(n: number): number[][] {
 const upTo = (n: number): number[][] => Array.from({ length: n + 1 }, (_, k) => k).flatMap(compositions);
 
 const evaluate = (head: string, parts: readonly number[]): number =>
-  applyDefinition(ce, index.get(`${head}@Composition`)!, ce.box(["List", ...parts] as never)).re;
+  applyDefinition(ce, index.get(`${head}@IntegerComposition`)!, ce.box(["List", ...parts] as never)).re;
 
 test("every composition definition has an independent reading", () => {
   for (const { head } of COMPOSITION_STATISTICS) expect(COMPOSITION_READINGS[head], head).toBeDefined();
@@ -44,7 +44,7 @@ test("each head called on the carrier value gives the reading", () => {
   for (const [head, expected] of Object.entries(COMPOSITION_READINGS))
     for (const c of upTo(4))
       expect(
-        ce.box([head, ["Composition", ["List", ...c]]] as never).evaluate().re,
+        ce.box([head, ["IntegerComposition", ["List", ...c]]] as never).evaluate().re,
         `${head} ${JSON.stringify(c)}`,
       ).toBe(expected(c));
 });

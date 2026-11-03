@@ -34,7 +34,7 @@ catalog:
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 bindings:
   - origin: mapped
     form: mathlib4

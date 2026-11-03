@@ -20,7 +20,7 @@ catalog:
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---
 
 - Count is A023359.

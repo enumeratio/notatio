@@ -68,17 +68,6 @@
     "carrier": "ColoredPermutation",
     "reason": "no collection of sized elements on this carrier"
   },
-  "Composition": {
-    "carrier": "Composition",
-    "collection": "IntegerCompositions",
-    "template": "IntegerCompositions({size})",
-    "size": {
-      "min": 1,
-      "max": 6,
-      "start": 4
-    },
-    "glyph": "composition"
-  },
   "ContinuedFraction": {
     "carrier": "ContinuedFraction",
     "reason": "no collection of sized elements on this carrier"
@@ -209,6 +198,17 @@
       "max": 6,
       "start": 4
     }
+  },
+  "IntegerComposition": {
+    "carrier": "IntegerComposition",
+    "collection": "IntegerCompositions",
+    "template": "IntegerCompositions({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "glyph": "composition"
   },
   "IntegerFactorization": {
     "carrier": "IntegerFactorization",

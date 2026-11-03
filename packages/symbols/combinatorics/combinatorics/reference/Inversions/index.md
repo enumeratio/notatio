@@ -25,10 +25,10 @@ catalog:
   - system: findstat
     identity: St000766
     url: https://www.findstat.org/St000766
-    on: Composition
+    on: IntegerComposition
 statOn:
   - Arrangement
-  - Composition
+  - IntegerComposition
   - Permutation
   - PermutationCycles
 bindings:

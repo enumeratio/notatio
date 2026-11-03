@@ -7,13 +7,13 @@ The examples below write those `Show`s out, sized to the line.
 A frame's parts are addresses that rules color and a click picks, so every layer takes
 `ColorRules`, `BoundaryStyle` and `Selection`:
 
-| values                                                         | layer           | address                  | properties                                                          | parts                                                             | relations to the pick                                        |
-| -------------------------------------------------------------- | --------------- | ------------------------ | ------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
-| `Permutation`, `SetPartition`, `Diagram`                       | `StrandDiagram` | (slot, level)            | `In`, `Out`, `Through`, `Cap`, `Cup`, `Loop`, `Crossing`            | `Slot`, `Level`, `Block`, `Image`                                 | `SameBlock`, `Crosses`, `Adjacent`                           |
-| `IntegerPartition`, `StandardTableau`, `Composition`, `Subset` | `CellDiagram`   | (row, column)            | `Filled`, `Corner`, `InFirstRow`, `InFirstColumn`, `Entry`          | `Row`, `Column`, `Content`, `Hook`, `Arm`, `Leg`, `Entry`, `Part` | `SameRow`, `SameColumn`, `SameContent`, `Hook`, `Adjacent`   |
-| `PlaneTree`, `BinaryTree`                                      | `TreeDiagram`   | (depth, order)           | `Leaf`, `Root`, `Internal`                                          | `Depth`, `Order`, `Children`, `SubtreeSize`                       | `Ancestor`, `Descendant`, `Subtree`, `Sibling`, `Adjacent`   |
-| `DyckPath`, `LatticePath`                                      | `PathDiagram`   | (step, height) or (x, y) | `Peak`, `Valley`, `Return`, `Up`, `Down`; `East`, `North`, `Corner` | `Step`, `Height`, `X`, `Area`                                     | `SameHeight`, `SameColumn`, `Adjacent`, `Tunnel`             |
-| [polytopes](../../polytope/docs/polytope.md)                   | `PolytopeFaces` | (dimension, index)       | `Vertex`, `Edge`, `Ridge`, `Facet`, `Interior`, `Top`               | `Dimension`, `VertexCount`, `Valence`, `Index`, `Depth`           | `FaceOf`, `Cofaces`, `Incident`, `Adjacent`, `SameDimension` |
+| values                                                                | layer           | address                  | properties                                                          | parts                                                             | relations to the pick                                        |
+| --------------------------------------------------------------------- | --------------- | ------------------------ | ------------------------------------------------------------------- | ----------------------------------------------------------------- | ------------------------------------------------------------ |
+| `Permutation`, `SetPartition`, `Diagram`                              | `StrandDiagram` | (slot, level)            | `In`, `Out`, `Through`, `Cap`, `Cup`, `Loop`, `Crossing`            | `Slot`, `Level`, `Block`, `Image`                                 | `SameBlock`, `Crosses`, `Adjacent`                           |
+| `IntegerPartition`, `StandardTableau`, `IntegerComposition`, `Subset` | `CellDiagram`   | (row, column)            | `Filled`, `Corner`, `InFirstRow`, `InFirstColumn`, `Entry`          | `Row`, `Column`, `Content`, `Hook`, `Arm`, `Leg`, `Entry`, `Part` | `SameRow`, `SameColumn`, `SameContent`, `Hook`, `Adjacent`   |
+| `PlaneTree`, `BinaryTree`                                             | `TreeDiagram`   | (depth, order)           | `Leaf`, `Root`, `Internal`                                          | `Depth`, `Order`, `Children`, `SubtreeSize`                       | `Ancestor`, `Descendant`, `Subtree`, `Sibling`, `Adjacent`   |
+| `DyckPath`, `LatticePath`                                             | `PathDiagram`   | (step, height) or (x, y) | `Peak`, `Valley`, `Return`, `Up`, `Down`; `East`, `North`, `Corner` | `Step`, `Height`, `X`, `Area`                                     | `SameHeight`, `SameColumn`, `Adjacent`, `Tunnel`             |
+| [polytopes](../../polytope/docs/polytope.md)                          | `PolytopeFaces` | (dimension, index)       | `Vertex`, `Edge`, `Ridge`, `Facet`, `Interior`, `Top`               | `Dimension`, `VertexCount`, `Valence`, `Index`, `Depth`           | `FaceOf`, `Cofaces`, `Incident`, `Adjacent`, `SameDimension` |
 
 A polytope is no glyph, but the same kind of frame: its layer sits under a camera instead of a fixed view.
 
@@ -112,7 +112,7 @@ Written as a `Show`, a cell, tree or path figure is picked and styled the way a 
 tiles are: a click selects an address (shift-click adds more), and a rule's test reads the
 pick through a relation. `CellDiagram`, `TreeDiagram` and `PathDiagram` are the layers; with
 no rules they draw the look of the figure they stand for. Their data is an `IntegerPartition`,
-`StandardTableau`, `Composition`, `Subset`, `PlaneTree`, `BinaryTree`, `DyckPath` or
+`StandardTableau`, `IntegerComposition`, `Subset`, `PlaneTree`, `BinaryTree`, `DyckPath` or
 `LatticePath`. Cell addresses count from 1; tree and path addresses from 0.
 
 <Story title="Click a cell: its hook">

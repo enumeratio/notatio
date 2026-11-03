@@ -11,9 +11,9 @@ catalog:
   - system: findstat
     identity: St000904
     url: https://www.findstat.org/St000904
-    on: Composition
+    on: IntegerComposition
 statOn:
-  - Composition
+  - IntegerComposition
   - IntegerPartition
 signatures:
   - call: LargestMultiplicity(partition)

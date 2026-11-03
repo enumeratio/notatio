@@ -11,7 +11,7 @@ catalog:
   - system: findstat
     identity: Mp00173
     url: https://www.findstat.org/Mp00173
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: Mp00279
     url: https://www.findstat.org/Mp00279
@@ -22,7 +22,7 @@ catalog:
     on: SetComposition
 mapOn:
   - BinaryWord
-  - Composition
+  - IntegerComposition
   - Permutation
   - SetComposition
 signatures:
@@ -53,5 +53,5 @@ laws:
 - Takes a `Permutation` and returns a `Permutation` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - Also takes a `SetComposition`, returning a `SetComposition`: The first block moved to the end.
 - FindStat's Mp00292.
-- Also takes a `Composition`, returning a `Composition`: Rotate the parts one place to the left: the first part moves to the end.
+- Also takes a `IntegerComposition`, returning a `IntegerComposition`: Rotate the parts one place to the left: the first part moves to the end.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: Rotate the word one place to the left: the first letter moves to the end.

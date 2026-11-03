@@ -23,5 +23,5 @@ signatures:
     type: (binary_word) -> composition
 ---
 
-- Takes a `BinaryWord` and returns a `Composition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- Takes a `BinaryWord` and returns a `IntegerComposition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - FindStat's Mp00097, the delta morphism. Lossy: it forgets the first letter, so each composition has two words.

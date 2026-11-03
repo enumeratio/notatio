@@ -5,6 +5,7 @@
 import { bind, lets, type MathJSON as Expression } from "../../src/map-helpers.ts";
 import { cycleWord, plain, withLengths } from "./cycle-flat.ts";
 import { recurse, self } from "../../src/recursion.ts";
+import { fold } from "../../collections/src/families/tables.ts";
 
 type MathJSON = unknown;
 
@@ -30,27 +31,33 @@ export const decomposition = (p: MathJSON): MathJSON => [
   ["Range", 1, ["Length", p], 1],
 ];
 
-/** Where `i` goes: the point after it in its cycle, wrapping round; `otherwise` when none holds it. */
+/** Where `i` goes: the point after it in its cycle, wrapping round; `otherwise` when none holds it. The
+ *  accumulator is typed through a binding, as `fold` in collections/src/families/tables.ts does. */
 const successor = (cycles: MathJSON, i: MathJSON, otherwise: MathJSON = 0): MathJSON => [
-  "Fold",
+  "Apply",
   [
     "Function",
     [
       "Fold",
       [
         "Function",
-        ["If", ["Equal", ["At", "c", "k"], i], ["At", "c", ["Add", ["Mod", "k", ["Length", "c"]], 1]], "to"],
-        "to",
-        "k",
+        fold(
+          ["If", ["Equal", ["At", "c", "k"], i], ["At", "c", ["Add", ["Mod", "k", ["Length", "c"]], 1]], "to"],
+          "to",
+          "k",
+          "found",
+          ["Range", 1, ["Length", "c"], 1],
+          "integer",
+        ),
+        ["Typed", "found", "'integer'"],
+        ["Typed", "c", "'list<integer>'"],
       ],
-      "found",
-      ["Range", 1, ["Length", "c"], 1],
+      "start",
+      cycles,
     ],
-    "found",
-    "c",
+    ["Typed", "start", "'integer'"],
   ],
   otherwise,
-  cycles,
 ];
 
 // A fold rather than `Map`: a `Map` over an empty range stays lazy, and the guard compares it.
@@ -119,6 +126,7 @@ export const permutationOfCycleDecompositionGuard: MathJSON = [
             ] as Expression,
           ),
         ),
+        "True",
       ),
       "False",
     ],

@@ -776,13 +776,13 @@ export const MAP_READINGS: Readonly<Record<string, Reading>> = {
   "CyclicShift@BinaryWord": (w) => w.slice(1) + w.slice(0, 1),
   "InverseCyclicShift@BinaryWord": (w) => w.slice(-1) + w.slice(0, -1),
 
-  "Reverse@Composition": (c) => list(ints(c).toReversed()),
-  "Complement@Composition": (c) => list(complementComposition(ints(c))),
+  "Reverse@IntegerComposition": (c) => list(ints(c).toReversed()),
+  "Complement@IntegerComposition": (c) => list(complementComposition(ints(c))),
   // FindStat: the conjugate is the complement of the reversal.
-  "TransposeComposition@Composition": (c) => list(complementComposition(ints(c).toReversed())),
-  "CyclicShift@Composition": (c) => list([...ints(c).slice(1), ...ints(c).slice(0, 1)]),
-  "InverseCyclicShift@Composition": (c) => list([...ints(c).slice(-1), ...ints(c).slice(0, -1)]),
-  "SortedPartition@Composition": (c) => list(descending(ints(c))),
+  "TransposeComposition@IntegerComposition": (c) => list(complementComposition(ints(c).toReversed())),
+  "CyclicShift@IntegerComposition": (c) => list([...ints(c).slice(1), ...ints(c).slice(0, 1)]),
+  "InverseCyclicShift@IntegerComposition": (c) => list([...ints(c).slice(-1), ...ints(c).slice(0, -1)]),
+  "SortedPartition@IntegerComposition": (c) => list(descending(ints(c))),
 
   // Replace i by n + 1 - i, as FindStat's sage code does.
   "Complement@SetPartition": (p) => {
@@ -1103,9 +1103,9 @@ export const MAP_READINGS: Readonly<Record<string, Reading>> = {
   "FlagZerosToZeros@BinaryWord": (w) => wordText(flagZerosToZeros(letters(w))),
   "FoataMajorToInversions@BinaryWord": (w) => wordText(foataBijection(letters(w))),
   "FoataInversionsToMajor@BinaryWord": (w) => wordText(inverseFoataWord(letters(w))),
-  "FoataMajorToInversions@Composition": (c) => list(foataBijection(ints(c))),
-  "FoataInversionsToMajor@Composition": (c) => list(inverseFoataWord(ints(c))),
-  "CodeWord@Composition": (c) => wordText(ints(c).flatMap((part) => [1, ...range(2, part).map(() => 0)])),
+  "FoataMajorToInversions@IntegerComposition": (c) => list(foataBijection(ints(c))),
+  "FoataInversionsToMajor@IntegerComposition": (c) => list(inverseFoataWord(ints(c))),
+  "CodeWord@IntegerComposition": (c) => wordText(ints(c).flatMap((part) => [1, ...range(2, part).map(() => 0)])),
   "CodeComposition@BinaryWord": (w) => {
     const parts: number[] = [];
     for (const letter of [1, ...letters(w)]) {
@@ -1114,7 +1114,7 @@ export const MAP_READINGS: Readonly<Record<string, Reading>> = {
     }
     return list(parts);
   },
-  "DeltaMorphism@Composition": (c) => {
+  "DeltaMorphism@IntegerComposition": (c) => {
     const runs: number[] = [];
     ints(c).forEach((part, k) => {
       if (k > 0 && part === ints(c)[k - 1]) runs[runs.length - 1]!++;
@@ -1134,7 +1134,7 @@ export const MAP_READINGS: Readonly<Record<string, Reading>> = {
   "BlockSizeComposition@SetComposition": (p) => list(orderedBlocks(p).map((block) => block.length)),
   "UnderlyingSetPartition@SetComposition": (p) => blocksText(orderedBlocks(p).toSorted((a, b) => a[0]! - b[0]!)),
   "BlockConcatenation@SetComposition": (p) => list(orderedBlocks(p).flat()),
-  "CompositionBouncePath@Composition": (c) =>
+  "CompositionBouncePath@IntegerComposition": (c) =>
     list(ints(c).flatMap((part) => [...range(1, part).map(() => 1), ...range(1, part).map(() => 0)])),
 
   "Reverse@SignedPermutation": (p) => list(ints(p).toReversed()),

@@ -30,7 +30,7 @@ export const VALUE_FRAMES = {
   BraidClosure: "StrandDiagram",
   IntegerPartition: "CellDiagram",
   StandardTableau: "CellDiagram",
-  Composition: "CellDiagram",
+  IntegerComposition: "CellDiagram",
   Subset: "CellDiagram",
   PlaneTree: "TreeDiagram",
   BinaryTree: "TreeDiagram",
@@ -178,7 +178,7 @@ function expressionOf(
       return { head: VALUE_FRAMES.StandardTableau, layer: ["StandardTableau", list(rows)] };
     }
     case "composition":
-      return { head: VALUE_FRAMES.Composition, layer: ["Composition", list(value)] };
+      return { head: VALUE_FRAMES.IntegerComposition, layer: ["IntegerComposition", list(value)] };
     case "subset":
       return { head: VALUE_FRAMES.Subset, layer: ["Subset", list(value), n ?? Math.max(1, ...value)] };
     case "tree":

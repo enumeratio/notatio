@@ -162,6 +162,9 @@ export function compileBigint(
     for (const [name, type] of Object.entries(types)) ce.declare(name, type);
     ce.declare("BigRange", { signature: "(integer, integer) -> list<integer>" } as never);
     ce.declare("BigRangeBy", { signature: "(integer, integer, integer) -> list<integer>" } as never);
+    // Typed, so an `If` with a quotient in one branch has the same shape as the other: compute-engine
+    // declines a conditional whose branch shapes differ.
+    ce.declare("BigDivide", { signature: "(integer, integer) -> integer" } as never);
     const result = new BigIntTarget().compile(
       ce.box(lowered(expression) as never) as Expression,
       {

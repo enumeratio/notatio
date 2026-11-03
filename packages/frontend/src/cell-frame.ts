@@ -1,6 +1,6 @@
 // The cell frame: a layer for `Show` whose addresses are (row, column) cells of a Cartesian grid,
 // numbered from 1 and drawn with row 1 on top. A partition (`IntegerPartition`), a tableau
-// (`StandardTableau`), a composition (`Composition`) and a subset of 1…n (`Subset`) are all this
+// (`StandardTableau`), a composition (`IntegerComposition`) and a subset of 1…n (`Subset`) are all this
 // frame; the first two are ragged, so only the cells they have are addresses. A composition's
 // cells are its parts, drawn as wide as their value.
 //
@@ -81,7 +81,7 @@ function tableauModel(rows: readonly (readonly number[])[]): CellModel | string 
 }
 
 function compositionModel(parts: readonly number[]): CellModel | string {
-  if (!positive(parts)) return "Composition needs positive parts: Composition([2, 1]).";
+  if (!positive(parts)) return "IntegerComposition needs positive parts: IntegerComposition([2, 1]).";
   let start = 1;
   const cells = parts.map((p, k) => {
     const cell = { row: 1, column: k + 1, filled: true, entry: p, part: k + 1, width: p, start };
@@ -108,7 +108,7 @@ function subsetModel(members: readonly number[], n: number): CellModel | string 
   };
 }
 
-/** The model an expression names: `IntegerPartition`, `StandardTableau`, `Composition` or `Subset`. */
+/** The model an expression names: `IntegerPartition`, `StandardTableau`, `IntegerComposition` or `Subset`. */
 export function cellModelOf(node: Json): CellModel | string {
   const json = unwrapped(node);
   const head = headOf(json);
@@ -117,9 +117,9 @@ export function cellModelOf(node: Json): CellModel | string {
     const parts = intsOf(arg);
     return parts ? partitionModel(parts) : "IntegerPartition needs a list: IntegerPartition([3, 1]).";
   }
-  if (head === "Composition") {
+  if (head === "IntegerComposition") {
     const parts = intsOf(arg);
-    return parts ? compositionModel(parts) : "Composition needs a list: Composition([2, 1]).";
+    return parts ? compositionModel(parts) : "IntegerComposition needs a list: IntegerComposition([2, 1]).";
   }
   if (head === "StandardTableau" || head === "SemistandardTableau" || head === "Tableau") {
     const rows = headOf(arg) === "List" ? argsOf(arg).map(intsOf) : [];
@@ -136,7 +136,7 @@ export function cellModelOf(node: Json): CellModel | string {
     const n = carrier ? carrier.n : size === undefined ? Math.max(1, ...members) : intOf(size);
     return subsetModel(members, n ?? Number.NaN);
   }
-  return "CellDiagram needs IntegerPartition(…), StandardTableau(…), Composition(…), Subset(…) or Finset(…).";
+  return "CellDiagram needs IntegerPartition(…), StandardTableau(…), IntegerComposition(…), Subset(…) or Finset(…).";
 }
 
 /** Side of a cell's square, in cell widths: the rest is the gap between neighbors. */
@@ -163,7 +163,7 @@ export function cellLayer(model: CellModel): FigureLayer {
   const title = {
     partition: "Ferrers diagram",
     tableau: "Young tableau",
-    composition: "Composition",
+    composition: "IntegerComposition",
     subset: "Subset",
   }[model.kind];
 

@@ -22,7 +22,7 @@ catalog:
 grades:
   - name: n
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---
 
 - Count is the Fibonacci number $F_{n+1}$ (A000045, shifted).

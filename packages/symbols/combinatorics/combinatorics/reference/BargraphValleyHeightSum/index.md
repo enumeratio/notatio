@@ -7,9 +7,9 @@ catalog:
   - system: findstat
     identity: St000807
     url: https://www.findstat.org/St000807
-    on: Composition
+    on: IntegerComposition
 statOn:
-  - Composition
+  - IntegerComposition
 signatures:
   - call: BargraphValleyHeightSum(composition)
     description: The sum of the heights of the valleys of the bargraph.
@@ -17,6 +17,6 @@ signatures:
     type: (composition) -> number
 ---
 
-- Defined over `Composition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
-- Takes a `Composition` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
+- Defined over `IntegerComposition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
+- Takes a `IntegerComposition` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
 - A valley is a fall, level steps, then a rise (Deutsch and Elizalde, A bijection between bargraphs and Dyck paths).

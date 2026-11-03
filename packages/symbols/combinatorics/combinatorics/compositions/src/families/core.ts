@@ -33,7 +33,7 @@ const lengthOf = (x: MathJSON): MathJSON => ["Length", x];
 // A composition is cut after position i (i = 1..n − 1) or not. Lex on the parts puts earlier cuts
 // first (a smaller first part sorts first), so reading the cuts as a binary number with position 1
 // most significant, the rank r is 2^(n−1) − 1 minus that number. The cut word in the other order is
-// `BinaryWords(n − 1)` through `Composition(word)`. n = 0 has one (empty) composition.
+// `BinaryWords(n − 1)` through `IntegerComposition(word)`. n = 0 has one (empty) composition.
 const cutMask = sub(sub(["Power", 2, sub("_n", 1)], 1), "_r");
 const bitSet = (i: MathJSON): MathJSON => [
   "Equal",
@@ -50,7 +50,7 @@ const prefixSum = (i: MathJSON): MathJSON => fold(add("acc2", element("t")), "ac
 
 const integerCompositions: EpsilFamily = {
   head: "IntegerCompositions",
-  carrier: "Composition",
+  carrier: "IntegerComposition",
   paramCount: 1,
   kind: "ints",
   params: ["_n"],
@@ -140,7 +140,7 @@ function kSubsetComposition(head: string, total: MathJSON, offset: number, carri
   };
 }
 
-const compositionsIntoKParts = kSubsetComposition("CompositionsIntoKParts", "_n", 0, "Composition");
+const compositionsIntoKParts = kSubsetComposition("CompositionsIntoKParts", "_n", 0, "IntegerComposition");
 const weakCompositions = kSubsetComposition("WeakCompositions", add("_n", "_k"), -1);
 
 export const epsilEntries: readonly EpsilFamily[] = [integerCompositions, compositionsIntoKParts, weakCompositions];

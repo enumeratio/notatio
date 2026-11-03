@@ -15,10 +15,10 @@ catalog:
   - system: findstat
     identity: Mp00314
     url: https://www.findstat.org/Mp00314
-    on: Composition
+    on: IntegerComposition
 mapOn:
   - BinaryWord
-  - Composition
+  - IntegerComposition
   - Permutation
 laws:
   - bijection
@@ -44,7 +44,7 @@ signatures:
 
 - Takes a `Permutation` and returns a `Permutation` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - FindStat's Mp00067, Sage's foata_bijection. It sends the major index to the number of inversions; the inverse is FoataInversionsToMajor. Not the cycle-based Foata, which is FindStat's first fundamental transformation.
-- Also takes a `Composition`, returning a `Composition`: Foata's bijection on the word of parts: each part is put on the end of the image so far, which is cut into blocks, and every block is rotated one place right.
+- Also takes a `IntegerComposition`, returning a `IntegerComposition`: Foata's bijection on the word of parts: each part is put on the end of the image so far, which is cut into blocks, and every block is rotated one place right.
 - FindStat's Mp00314. An equal part counts as the smaller; it sends the major index to the number of inversions.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: Foata's bijection on words: each letter is put on the end of the image so far, which is cut into blocks, and every block is rotated one place right.
 - FindStat's Mp00096. With repeated letters an equal letter counts as the smaller, so it is the permutation map through standardization; it sends the major index to the number of inversions.

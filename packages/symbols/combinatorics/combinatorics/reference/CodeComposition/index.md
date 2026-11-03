@@ -23,5 +23,5 @@ signatures:
     type: (binary_word) -> composition
 ---
 
-- Takes a `BinaryWord` and returns a `Composition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- FindStat's Mp00178, Sage's from_code. An injection one size up (the empty composition has no preimage); the inverse of CodeWord on the words that start with 1. Not Composition, whose word marks the cuts.
+- Takes a `BinaryWord` and returns a `IntegerComposition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- FindStat's Mp00178, Sage's from_code. An injection one size up (the empty composition has no preimage); the inverse of CodeWord on the words that start with 1. Not IntegerComposition, whose word marks the cuts.

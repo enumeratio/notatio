@@ -5,7 +5,7 @@
 // move out of collections per step 5's own rule (a family with NO carrier stays there; one WITH
 // one belongs in its area). `carrierParams: 1` prefixes `n` onto the carrier's Tuple argument
 // alongside the edge list (`Tournament(n, edges)`); `m` (LabeledGraphsByEdges' second param)
-// stays out of the carrier, same as `Composition`'s own axis/param split.
+// stays out of the carrier, same as `IntegerComposition`'s own axis/param split.
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
 import { Binomial } from "../../../collections/src/families/kernels-combinatorics.ts";
 import { KSubsetCount, KSubsetUnrank, KSubsetRank } from "../../../collections/src/families/kernels-extra.ts";

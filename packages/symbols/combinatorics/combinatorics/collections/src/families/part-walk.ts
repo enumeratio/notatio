@@ -254,6 +254,7 @@ export function partWalk(spec: PartWalk): EpsilFamily {
     "pw_j",
     "pw_r",
     upTo(1, membersUpTo("pw_m")),
+    "integer",
   );
   // The state is [sum left, rank left, parts so far, those parts as digits in base total + 1].
   const setStep = iff(
@@ -275,7 +276,13 @@ export function partWalk(spec: PartWalk): EpsilFamily {
     ),
   );
   const unrankSet = lets(
-    [["pw_end", fold(setStep, "pw_u", "pw_i", list(total, "_r", 0, 0), upTo(1, total)), "list<integer>"]],
+    [
+      [
+        "pw_end",
+        fold(setStep, "pw_u", "pw_i", list(total, "_r", 0, 0), upTo(1, total), "list<integer>"),
+        "list<integer>",
+      ],
+    ],
     map(
       ["Mod", quotient(at("pw_end", 4), ["Power", base, sub(at("pw_end", 3), "pw_d")]), base],
       "pw_d",
@@ -293,7 +300,7 @@ export function partWalk(spec: PartWalk): EpsilFamily {
       sub("pw_m", "pw_x"),
     ),
   );
-  const rankSet = at(fold(rankSetStep, "pw_a", "pw_x", list(0, total), "_x"), 1);
+  const rankSet = at(fold(rankSetStep, "pw_a", "pw_x", list(0, total), "_x", "list<integer>"), 1);
   // Digits past 2^53 are the interpreter's alone (compiled code holds doubles), so a fiber that small keeps
   // the list state, which compiled code walks cheaply.
   const unrank =

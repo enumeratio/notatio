@@ -405,6 +405,7 @@ const matchStep = lets(
           "pw",
           ["List", 0, 0],
           upTo(1, mul(2, "_n")),
+          "list<integer>",
         ),
         2,
       ),
@@ -413,7 +414,14 @@ const matchStep = lets(
   ],
   ["ReplaceAt", ["ReplaceAt", "ps", "pp", "pq"], "pq", "pp"],
 );
-const matched: MathJSON = fold(matchStep, "ps", "pi", map(0, "pz0", upTo(1, mul(2, "_n"))), upTo(1, "_n"));
+const matched: MathJSON = fold(
+  matchStep,
+  "ps",
+  "pi",
+  map(0, "pz0", upTo(1, mul(2, "_n"))),
+  upTo(1, "_n"),
+  "list<integer>",
+);
 
 /** The partner of each of 1..2n, from the pairs in `_x` in any order. */
 export const partners: MathJSON = lets(

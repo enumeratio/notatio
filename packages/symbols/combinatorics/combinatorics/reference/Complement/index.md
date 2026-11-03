@@ -7,7 +7,7 @@ catalog:
   - system: findstat
     identity: Mp00039
     url: https://www.findstat.org/Mp00039
-    on: Composition
+    on: IntegerComposition
   - system: findstat
     identity: Mp00069
     url: https://www.findstat.org/Mp00069
@@ -30,7 +30,7 @@ catalog:
     on: SignedPermutation
 mapOn:
   - BinaryWord
-  - Composition
+  - IntegerComposition
   - Permutation
   - SetComposition
   - SetPartition
@@ -75,6 +75,6 @@ laws:
 - Also takes a `SetPartition`, returning a `SetPartition`: Each element i replaced by n + 1 - i: the set partition seen from the other end.
 - Also takes a `SetComposition`, returning a `SetComposition`: Each element i replaced by n + 1 - i, the blocks staying in their order.
 - FindStat's Mp00289.
-- Also takes a `Composition`, returning a `Composition`: The composition cut exactly where this one is not: its cut set complemented.
+- Also takes a `IntegerComposition`, returning a `IntegerComposition`: The composition cut exactly where this one is not: its cut set complemented.
 - Reverse then complement is TransposeComposition, and reversing commutes with complementing.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: Each letter swapped for the other: 0 for 1 and 1 for 0.

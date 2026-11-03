@@ -23,5 +23,5 @@ laws:
       to: IntegerCompositions
 ---
 
-- Takes a `Permutation` and returns a `Composition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- Takes a `Permutation` and returns a `IntegerComposition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - Its parts sum to n and its length is one more than Descents — another statistic readable off a map. Removed once for erroring on words with no descents; `Range(1, 0)` never evaluates, so the short case has to be stated.

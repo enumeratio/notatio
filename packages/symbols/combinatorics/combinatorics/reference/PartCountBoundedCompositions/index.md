@@ -26,7 +26,7 @@ grades:
     role: axis
   - name: k
     role: axis
-carrier: Composition
+carrier: IntegerComposition
 ---
 
 - Bounds how many parts there are; to bound the size of each part, see [[PartSizeBoundedCompositions]]. Exactly $k$ parts is [[CompositionsIntoKParts]].

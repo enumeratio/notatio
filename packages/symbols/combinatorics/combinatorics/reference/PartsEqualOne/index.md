@@ -4,7 +4,7 @@ domain: Partition statistics
 signature: PartsEqualOne(partition)
 summary: Parts equal to 1.
 statOn:
-  - Composition
+  - IntegerComposition
   - IntegerPartition
 signatures:
   - call: PartsEqualOne(partition)

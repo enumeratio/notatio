@@ -22,5 +22,5 @@ signatures:
     type: (standard_tableau) -> composition
 ---
 
-- Takes a `StandardTableau` and returns a `Composition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- Takes a `StandardTableau` and returns a `IntegerComposition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - FindStat's Mp00294. An entry is a descent when the next one sits in a lower row.

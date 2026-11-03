@@ -26,7 +26,7 @@ const rename = (r: Row, to: string): Row => ({ ...r, name: to });
 
 const universe = [
   item("Reverse", "Permutation"),
-  item("Reverse", "Composition"),
+  item("Reverse", "IntegerComposition"),
   item("SkipMe", "Permutation"),
   item("Sort", "Permutation"),
 ];
@@ -34,12 +34,12 @@ const everything = (): boolean => true;
 const full = assemble(universe, keyOf, new Map(), everything, match);
 
 test("a full run keeps unmatched maps out", () => {
-  expect(full.map((r) => keyOf(r))).toEqual(["Reverse@Permutation", "Reverse@Composition", "Sort@Permutation"]);
+  expect(full.map((r) => keyOf(r))).toEqual(["Reverse@Permutation", "Reverse@IntegerComposition", "Sort@Permutation"]);
 });
 
 test("rematching some heads over the committed rows equals a full run", () => {
   const previous = renamed(full, asKey, rename, []);
-  for (const heads of [["Reverse"], ["Sort", "SkipMe"], ["Reverse@Composition"], []]) {
+  for (const heads of [["Reverse"], ["Sort", "SkipMe"], ["Reverse@IntegerComposition"], []]) {
     const wanted = parseHeads(heads);
     const calls: string[] = [];
     const rows = assemble(
@@ -58,8 +58,8 @@ test("rematching some heads over the committed rows equals a full run", () => {
 });
 
 test("a bare head selects every carrier, head@carrier just one", () => {
-  expect(selected(parseHeads(["Reverse"]), "Reverse", "Composition")).toBe(true);
-  expect(selected(parseHeads(["Reverse@Permutation"]), "Reverse", "Composition")).toBe(false);
+  expect(selected(parseHeads(["Reverse"]), "Reverse", "IntegerComposition")).toBe(true);
+  expect(selected(parseHeads(["Reverse@Permutation"]), "Reverse", "IntegerComposition")).toBe(false);
   expect(parseHeads(["A,B", "C"])).toEqual(new Set(["A", "B", "C"]));
 });
 

@@ -28,6 +28,7 @@ const cartesianTree = (perm: string): MathJSON => {
     "cx",
     "co",
     upTo(add("co", 1), hi),
+    "integer",
   );
   const tree = fold(
     fold(

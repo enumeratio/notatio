@@ -170,7 +170,7 @@ const CARRIERS: Readonly<Record<string, Carrier>> = {
     spell: (w) => `[${(w as number[]).join(",")}]`,
     box: (ce, w) => list(ce, w as number[]),
   },
-  Composition: {
+  IntegerComposition: {
     domain: "Cc0006",
     collection: "Integer compositions",
     parse: (s) => JSON.parse(s),
