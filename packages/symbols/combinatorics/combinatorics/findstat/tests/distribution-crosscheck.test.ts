@@ -37,6 +37,7 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   IntegerComposition: ["IntegerCompositions", (n) => n],
   BinaryTree: ["BinaryTrees", (n) => n],
   OrderedTree: ["OrderedTrees", (n) => n],
+  StandardTableau: ["StandardTableaux", (n) => n],
 };
 
 type Kind = "unclassified" | "emit" | "convention" | "ours";

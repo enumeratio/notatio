@@ -88,6 +88,17 @@ function compositions(n: number): number[][] {
   for (let first = 1; first <= n; first++) for (const rest of compositions(n - first)) out.push([first, ...rest]);
   return out;
 }
+/** Every standard tableau with n cells, as rows: each entry goes on the end of a row that stays a partition. */
+function standardTableaux(n: number): number[][][] {
+  let all: number[][][] = [[]];
+  for (let entry = 1; entry <= n; entry++)
+    all = all.flatMap((t) =>
+      [...t.keys(), t.length]
+        .filter((r) => r === t.length || r === 0 || t[r]!.length < t[r - 1]!.length)
+        .map((r) => (r === t.length ? [...t, [entry]] : t.map((row, i) => (i === r ? [...row, entry] : row)))),
+    );
+  return all;
+}
 /** Every set partition of {1..n}, blocks in order of least element. */
 function setPartitions(n: number): number[][][] {
   if (n === 0) return [[]];
@@ -190,6 +201,17 @@ const CARRIERS: Readonly<Record<string, Carrier>> = {
     objects: setPartitions,
     spell: (blocks) => `{${(blocks as number[][]).map((b) => `{${b.join(",")}}`).join(",")}}`,
     box: (ce, blocks) => ce.box(["List", ...(blocks as number[][]).map((b) => ["List", ...b])] as never),
+  },
+  StandardTableau: {
+    // The id is not in the crawl; the offline `--crawl` route never reads it.
+    domain: "Cc0007",
+    collection: "Standard tableaux",
+    parse: (s) => JSON.parse(s),
+    sizes: [1, 2, 3, 4, 5, 6, 7],
+    small: [1, 2, 3, 4, 5, 6],
+    objects: standardTableaux,
+    spell: (t) => JSON.stringify(t),
+    box: (ce, t) => ce.box(["List", ...(t as number[][]).map((row) => ["List", ...row])] as never),
   },
   BinaryTree: {
     domain: "Cc0010",

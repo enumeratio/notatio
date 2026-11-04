@@ -3,6 +3,7 @@ import type { Engine } from "@enumeratio/engine";
 import { declareCarriers } from "@enumeratio/structures";
 import { declareFamilies } from "../../collections/src/families/declare.ts";
 import { liftFamily } from "../../collections/src/families/epsil.ts";
+import { declareStatistics } from "../../src/statistics/declare.ts";
 import { TABLEAUX_CARRIERS } from "./carrier-data.ts";
 import { declareDeleteFromTableau } from "./delete-from-tableau.ts";
 import {
@@ -13,6 +14,7 @@ import {
   tableauxPlaneShiftedStandardTableauxEntries,
   tableauxPlaneSkewStandardTableauxEntries,
 } from "./families/index.ts";
+import { TABLEAU_STATISTICS } from "./statistics.ts";
 
 export function declareTableaux(ce: Engine): void {
   declareCarriers(ce, TABLEAUX_CARRIERS, { plurals: false });
@@ -28,4 +30,6 @@ export function declareTableaux(ce: Engine): void {
       ...tableauxPlanePlanePartitionsEntries,
     ].map(liftFamily),
   );
+  // Its statistics, after its own carriers and families.
+  declareStatistics(ce, TABLEAU_STATISTICS);
 }
