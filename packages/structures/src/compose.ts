@@ -43,8 +43,8 @@ export function declareCompose(ce: ComputeEngine): void {
       const steps = ops.map(symbolNameOf).filter((name): name is string => name !== undefined);
       if (steps.length !== ops.length) return undefined;
       // A function value that closes over the step names. `_composed` is a bound parameter,
-      // not a wildcard: it never escapes this expression. Its type admits a list, so a list
-      // argument reaches the steps whole instead of being mapped over.
+      // not a wildcard: it never escapes this expression. Typed `any`, so a list argument
+      // reaches the steps whole instead of being mapped over.
       return ce.function("Function", [
         ce.function("ComposeApply", [
           ce.function(
@@ -53,7 +53,7 @@ export function declareCompose(ce: ComputeEngine): void {
           ),
           ce.symbol("_composed"),
         ]),
-        ce.function("Typed", [ce.symbol("_composed"), ce.string("any | list<any>")]),
+        ce.function("Typed", [ce.symbol("_composed"), ce.string("any")]),
       ]);
     },
   });

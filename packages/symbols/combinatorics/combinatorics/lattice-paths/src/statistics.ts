@@ -520,23 +520,27 @@ const pairCode = (p: MathJSON): MathJSON =>
 /** The invariant's descents (St001104) are the pairs p with a pair p+1 after it that breaks the pattern. */
 const invariantDescents: MathJSON = count(
   upTo(subtract(semilength, 1)),
-  bind(
-    "level",
-    subtract(
-      count(upTo(semilength), and(atMostValue("q", "p"), equals(pairCode("q"), 3)), "q"),
-      count(upTo(semilength), and(less("q", "p"), equals(pairCode("q"), 0)), "q"),
-    ),
+  or(
     or(
-      or(
-        and(
-          equals(pairCode("p"), 3),
-          or(equals(pairCode(add("p", 1)), 1), and(equals(pairCode(add("p", 1)), 0), greater("level", 1))),
+      and(
+        equals(pairCode("p"), 3),
+        or(
+          equals(pairCode(add("p", 1)), 1),
+          and(
+            equals(pairCode(add("p", 1)), 0),
+            greater(
+              subtract(
+                count(upTo(semilength), and(atMostValue("q", "p"), equals(pairCode("q"), 3)), "q"),
+                count(upTo(semilength), and(less("q", "p"), equals(pairCode("q"), 0)), "q"),
+              ),
+              1,
+            ),
+          ),
         ),
-        and(equals(pairCode("p"), 2), or(less(pairCode(add("p", 1)), 2), greater(pairCode(add("p", 1)), 2))),
       ),
-      and(equals(pairCode("p"), 1), equals(pairCode(add("p", 1)), 0)),
+      and(equals(pairCode("p"), 2), or(less(pairCode(add("p", 1)), 2), greater(pairCode(add("p", 1)), 2))),
     ),
-    "integer",
+    and(equals(pairCode("p"), 1), equals(pairCode(add("p", 1)), 0)),
   ),
   "p",
 );
@@ -1196,20 +1200,19 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     "SymmetryDegree",
     "The number of step pairs, counting inward from the ends, at which the path agrees in height with its mirror image.",
     nonEmpty(
-      bindList(
-        "v",
-        vertexProfile,
-        count(
-          upTo(semilength),
-          and(
-            equals(
-              ["At", "v", subtract(["Multiply", 2, "c"], 1)],
-              ["At", "v", add(subtract(length(), subtract(["Multiply", 2, "c"], 3)), 0)],
-            ),
-            equals(["At", "v", ["Multiply", 2, "c"]], ["At", "v", add(subtract(length(), ["Multiply", 2, "c"]), 2)]),
+      count(
+        upTo(semilength),
+        and(
+          equals(
+            ["At", vertexProfile, subtract(["Multiply", 2, "c"], 1)],
+            ["At", vertexProfile, add(subtract(length(), subtract(["Multiply", 2, "c"], 3)), 0)],
           ),
-          "c",
+          equals(
+            ["At", vertexProfile, ["Multiply", 2, "c"]],
+            ["At", vertexProfile, add(subtract(length(), ["Multiply", 2, "c"]), 2)],
+          ),
         ),
+        "c",
       ),
     ),
     'FindStat\'s "degree of symmetry".',

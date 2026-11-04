@@ -704,7 +704,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
   stat(
     "CellsOutsideLargestStaircase",
     "Cells of the diagram outside the largest staircase it contains.",
-    nonEmpty(bind("s", staircaseSide, subtract(total, ["Divide", ["Multiply", "s", add("s", 1)], 2]), "number")),
+    nonEmpty(subtract(total, ["Divide", ["Multiply", staircaseSide, add(staircaseSide, 1)], 2])),
   ),
   stat(
     "Aft",
@@ -1422,7 +1422,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
   stat(
     "RookPlacementCount",
     "The rook placements, of any number of rooks, on the Ferrers board of the diagram.",
-    nonEmpty(bind("r", rookNumbers, ["Sum", "r"], "list<integer>"), 1),
+    nonEmpty(["Sum", rookNumbers], 1),
   ),
   stat(
     "MaximalRookPlacementCount",
