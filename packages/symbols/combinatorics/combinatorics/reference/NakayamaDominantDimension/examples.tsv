@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[NakayamaDominantDimension, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	1			the step word $UUDDUD$
+the-step-word-uduudd			[NakayamaDominantDimension, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	1			the step word $UDUUDD$
+findstat-st000685-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'NakayamaDominantDimension'"]	1	1	FindStat St000685	FindStat's value for [1,0]
+findstat-st000685-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'NakayamaDominantDimension'"]	2	2	FindStat St000685	FindStat's value for [1,0,1,0]
+findstat-st000685-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'NakayamaDominantDimension'"]	1	1	FindStat St000685	FindStat's value for [1,1,0,0]

@@ -686,20 +686,56 @@ const projectiveDimension = (x0: MathJSON, y0: MathJSON): MathJSON => [
 ];
 /** The projective dimension of each simple module, vertex by vertex. */
 const simpleDimensions: MathJSON = forEach(upTo(vertexCount), projectiveDimension(subtract("v", 1), 1), "v");
-/** The projective dimension of each indecomposable injective module, by socle: the longest module ending there. */
-const injectiveDimensions: MathJSON = forEach(
-  upTo(vertexCount),
-  bindList(
-    "top",
-    [
-      "Min",
-      where(["Range", 0, subtract("v", 1), 1], greater(add("x", at(add("x", 1), "series")), subtract("v", 1)), "x"),
-    ],
-    projectiveDimension("top", subtract("v", "top")),
-    "integer",
+/** `dimension` of each indecomposable injective module, by socle: the longest module ending there. */
+const forInjectives = (dimension: (top: MathJSON, length: MathJSON) => MathJSON): MathJSON =>
+  forEach(
+    upTo(vertexCount),
+    bindList(
+      "top",
+      [
+        "Min",
+        where(["Range", 0, subtract("v", 1), 1], greater(add("x", at(add("x", 1), "series")), subtract("v", 1)), "x"),
+      ],
+      dimension("top", subtract("v", "top")),
+      "integer",
+    ),
+    "v",
+  );
+/** The projective dimension of each indecomposable injective module. */
+const injectiveDimensions: MathJSON = forInjectives(projectiveDimension);
+/** The series behind a 0, so that the first vertex's projective is never lengthened to its left. */
+const leftSeries: MathJSON = ["Join", ["List", 0], "series"];
+/**
+ * The codominant dimension of the module (x0, y0): the leading terms of its minimal projective
+ * resolution that are injective. The terms past the end are zero, so a projective-injective module
+ * counts every tick; the cap is the vertex count. Accumulator (top, length, count, still injective).
+ */
+const codominantDimension = (x0: MathJSON, y0: MathJSON): MathJSON => [
+  "At",
+  fold(
+    upTo(vertexCount),
+    ["List", x0, y0, 0, 1],
+    bindList(
+      "entry",
+      at(add(carried(1), 1), "series"),
+      bindList(
+        "flag",
+        ["Multiply", carried(4), ["If", atMostValue(at(add(carried(1), 1), "leftSeries"), "entry"), 1, 0]],
+        [
+          "If",
+          equals(carried(2), "entry"),
+          ["List", carried(1), carried(2), add(carried(3), "flag"), "flag"],
+          ["List", add(carried(1), carried(2)), subtract("entry", carried(2)), add(carried(3), "flag"), "flag"],
+        ],
+        "integer",
+      ),
+      "integer",
+    ),
   ),
-  "v",
-);
+  3,
+];
+/** The codominant dimension of each indecomposable injective module. */
+const injectiveCodominantDimensions: MathJSON = forInjectives(codominantDimension);
 /** `body`, reading the simples' projective dimensions as `dims` and the series as `series`. */
 const overSimples = (body: MathJSON): MathJSON =>
   nonEmpty(bindList("series", kupischSeries, bindList("dims", simpleDimensions, body)));
@@ -735,6 +771,31 @@ const modulesOfLengthWhere = (length: number, test: (dimension: MathJSON) => Mat
     test(projectiveDimension(subtract("v", 1), length)),
     "v",
   );
+/** `body`, reading the injectives' codominant dimensions as `codominantDims` besides `dims`, `injectiveDims` and `series`. */
+const overInjectiveCodominants = (body: MathJSON): MathJSON =>
+  nonEmpty(
+    bindList(
+      "series",
+      kupischSeries,
+      bindList(
+        "leftSeries",
+        leftSeries,
+        bindList(
+          "dims",
+          simpleDimensions,
+          bindList(
+            "injectiveDims",
+            injectiveDimensions,
+            bindList("codominantDims", injectiveCodominantDimensions, body),
+          ),
+        ),
+      ),
+    ),
+  );
+/** The vertices whose indecomposable injective module is not projective (projective dimension above 0); the first vertex's, a simple module, always is. */
+const nonProjectiveInjectives: MathJSON = where(upTo(vertexCount), greater(at("v", "injectiveDims"), 0), "v");
+/** The dominant dimension of the algebra, which equals its opposite's: the least codominant dimension of a non-projective injective. */
+const dominantDimension: MathJSON = ["Min", forEach(nonProjectiveInjectives, at("v", "codominantDims"), "v")];
 
 export const DYCK_STATISTICS: readonly Definition[] = [
   stat("Height", "The greatest height the path reaches.", nonEmpty(["Max", profile])),
@@ -1643,5 +1704,57 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     "SimpleSummandsOfSecondRadicalLayer",
     "The simple summands of J^2/J^3 for the Jacobson radical J of the path's linear Nakayama algebra, one for each indecomposable projective of dimension at least three.",
     nonEmpty(bindList("series", kupischSeries, count("series", atLeastValue("d", 3), "d"))),
+  ),
+  stat(
+    "NakayamaDominantDimension",
+    "The dominant dimension of the path's linear Nakayama algebra.",
+    overInjectiveCodominants(dominantDimension),
+    "FindStat's St000685. An algebra and its opposite have the same dominant dimension, which for the opposite is the least codominant dimension of a non-projective indecomposable injective module.",
+  ),
+  stat(
+    "NakayamaGlobalMinusDominantDimension",
+    "The global dimension less the dominant dimension of the path's linear Nakayama algebra.",
+    overInjectiveCodominants(subtract(globalDimension, dominantDimension)),
+  ),
+  stat(
+    "PeaksMinusNakayamaDominantDimension",
+    "The peaks of the path less the dominant dimension of its linear Nakayama algebra.",
+    overInjectiveCodominants(
+      subtract(count(upTo(subtract(length(), 1)), and(isUp("i"), isDown(nextIndex))), dominantDimension),
+    ),
+  ),
+  stat(
+    "InjectivesOfCodominantDimensionEqualToGlobalDimension",
+    "The indecomposable injective modules whose codominant dimension is the global dimension.",
+    overInjectiveCodominants(count("codominantDims", equals("d", globalDimension), "d")),
+    "A projective-injective module has infinite codominant dimension, so it is never counted.",
+  ),
+  stat(
+    "InjectivesOfCodominantDimensionAtLeastTwo",
+    "The indecomposable injective modules of codominant dimension at least two.",
+    overInjectiveCodominants(count("codominantDims", atLeastValue("d", 2), "d")),
+  ),
+  stat(
+    "NonProjectiveInjectiveCodominantDimensionSum",
+    "The sum of the codominant dimensions of the non-projective indecomposable injective modules.",
+    overInjectiveCodominants(floored(sumOver(nonProjectiveInjectives, at("v", "codominantDims"), "v"))),
+  ),
+  stat(
+    "ProjectiveMinusCodominantDimensionSum",
+    "The sum, over the non-projective indecomposable injective modules, of their projective dimension less their codominant dimension.",
+    overInjectiveCodominants(
+      floored(sumOver(nonProjectiveInjectives, subtract(at("v", "injectiveDims"), at("v", "codominantDims")), "v")),
+    ),
+  ),
+  stat(
+    "SimplesOfNonMaximalProjectiveDimension",
+    "The simple modules whose projective dimension is less than the global dimension.",
+    overSimples(simplesWhere((d) => less(d, globalDimension))),
+    "FindStat's St001170 counts the indecomposable injective modules whose socle is such a simple module: there is one injective for each simple socle.",
+  ),
+  stat(
+    "NonProjectiveInjectiveProjectiveDimensionSpread",
+    "The difference between the greatest and the least projective dimension of a non-projective indecomposable injective module.",
+    overSimplesAndInjectives(subtract(["Max", "injectiveDims"], ["Min", where("injectiveDims", greater("d", 0), "d")])),
   ),
 ];
