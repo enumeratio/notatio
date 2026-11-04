@@ -13,6 +13,7 @@ import {
   atLeastValue,
   atMostValue,
   bindList,
+  carried,
   count,
   equals,
   floored,
@@ -441,6 +442,95 @@ const standardCompositionTableaux: MathJSON = nonEmpty(
   1,
 );
 
+// ── the Nakayama algebra of the composition ──────────────────────────────────────────────
+
+/**
+ * The Kupisch series of the linear Nakayama algebra of the composition: each part c gives
+ * c + 1, c, ..., 2, and the series ends with 1. A module is (top vertex x, length y); it is
+ * projective when y is the series' entry at x, and otherwise its syzygy is (x + y, entry - y).
+ * Vertices count from 0, and there are n + 1 of them.
+ */
+const kupischSeries: MathJSON = [
+  "Join",
+  fold(x, list(), ["Join", "a", forEach(upTo("b"), subtract(add("b", 2), "t"), "t")]),
+  list(1),
+];
+/** The projective dimension of the module (x0, y0): syzygies taken until the module is projective. */
+const projectiveDimension = (x0: MathJSON, y0: MathJSON): MathJSON =>
+  at(
+    3,
+    fold(
+      upTo(add(total, 1)),
+      list(x0, y0, 0),
+      bindList(
+        "entry",
+        at(add(carried(1), 1), "series"),
+        [
+          "If",
+          equals(carried(2), "entry"),
+          list(carried(1), carried(2), carried(3)),
+          list(add(carried(1), carried(2)), subtract("entry", carried(2)), add(carried(3), 1)),
+        ],
+        "integer",
+      ),
+    ),
+  );
+/** The global dimension: the largest projective dimension of a simple module. */
+const nakayamaGlobalDimension: MathJSON = nonEmpty(
+  bindList("series", kupischSeries, [
+    "Max",
+    forEach(upTo(add(total, 1)), projectiveDimension(subtract("v", 1), 1), "v"),
+  ]),
+);
+
+// ── quasisymmetric change of basis ───────────────────────────────────────────────────────
+
+/**
+ * The dual immaculate function of the composition is the sum, over immaculate tableaux of its
+ * shape, of M at the tableau's content: rows weakly increase, the first column strictly
+ * increases, and the content (how often 1, 2, ... occur) has no gaps. So the column sum is the
+ * count of such tableaux. With entries in 1 .. m, row i takes its first entry a, then a weakly
+ * increasing row from m - a + 1 values, in C(m - a + c_i - 1, c_i - 1) ways, and the first
+ * entries climb. The state lists, for p = a + 1 (the virtual a = 0 starts it), the ways so far.
+ * Fillings using exactly j values follow by inclusion-exclusion, so the count with a gapless
+ * content is the sum over m of the fillings in 1 .. m times the sum over k from m to n of
+ * (-1)^(k-m) C(k, m).
+ */
+const fillingsWithin: MathJSON = [
+  "Sum",
+  fold(
+    x,
+    forEach(upTo(add("m", 1)), ["If", equals("p", 1), 1, 0], "p"),
+    forEach(
+      upTo(add("m", 1)),
+      [
+        "If",
+        equals("p", 1),
+        0,
+        [
+          "Multiply",
+          ["Binomial", add(subtract("m", "p"), visiting), subtract(visiting, 1)],
+          ["Sum", forEach(["Range", 1, ["Max", subtract("p", 1), 1]], at("q", "a"), "q")],
+        ],
+      ],
+      "p",
+    ),
+  ),
+];
+const dualImmaculateColumnSum: MathJSON = nonEmpty(
+  floored(
+    sumOver(
+      upTo(total),
+      [
+        "Multiply",
+        fillingsWithin,
+        sumOver(["Range", "m", total], ["Multiply", ["Power", -1, subtract("k", "m")], ["Binomial", "k", "m"]], "k"),
+      ],
+      "m",
+    ),
+  ),
+);
+
 export const COMPOSITION_STATISTICS: readonly Definition[] = [
   stat("LargestPart", "The largest part.", nonEmpty(max(x))),
   stat("FirstPart", "The first part.", nonEmpty(at(1))),
@@ -642,5 +732,17 @@ export const COMPOSITION_STATISTICS: readonly Definition[] = [
     "Standard composition tableaux of the shape: fillings of 1 .. n with rows decreasing, the first column increasing, and the triple rule.",
     standardCompositionTableaux,
     "Luoto, Mykytiuk and van Willigenburg, An introduction to quasisymmetric Schur functions (Definition 4.2.6).",
+  ),
+  stat(
+    "CompositionNakayamaGlobalDimension",
+    "The global dimension of the linear Nakayama algebra whose Kupisch series is c_1 + 1, ..., 2, c_2 + 1, ..., 2, ..., 1.",
+    nakayamaGlobalDimension,
+    "FindStat's St001235 (its Comp-Nakayama algebra): the largest projective dimension of a simple module.",
+  ),
+  stat(
+    "DualImmaculateMonomialColumnSum",
+    "The sum of the entries in the column of the composition in the matrix from the dual immaculate to the monomial quasisymmetric functions.",
+    dualImmaculateColumnSum,
+    "FindStat's St000817: the number of immaculate tableaux of the shape with any gapless content (Berg, Bergeron, Saliola, Serrano and Zabrocki).",
   ),
 ];

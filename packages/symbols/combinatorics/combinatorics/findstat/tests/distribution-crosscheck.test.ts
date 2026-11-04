@@ -24,6 +24,9 @@ const DEEP = process.env.DEEP_TESTS === "1";
 const CRAWL = process.env.FINDSTAT_CRAWL;
 const MAX_SIZE = DEEP ? Number(process.env.DEEP_SIZE ?? 6) : 5;
 const GOLDEN = new URL("./distribution-crosscheck.golden.json", import.meta.url);
+// A wrong path would otherwise fall back to the snapshot and pass having read no crawl.
+if (DEEP && CRAWL && !existsSync(`${CRAWL}/St000001.json`))
+  throw new Error(`FINDSTAT_CRAWL=${CRAWL} holds no statistics: it names <crawl>/StatisticsDatabase`);
 
 /** Our collection of each carrier, and its size argument for FindStat's size `n`. */
 const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: number) => number]>> = {

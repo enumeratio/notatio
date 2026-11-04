@@ -126,6 +126,28 @@ const shareshianWachs = (p: number[]): number =>
         ).length,
     ),
   );
+const isPrime = (m: number): boolean => m >= 2 && range(2, m - 1).every((d) => m % d !== 0);
+/** Every subsequence of p, by bit mask over the positions. */
+const subsequences = (p: number[]): number[][] =>
+  range(0, 2 ** p.length - 1).map((mask) => p.filter((_, i) => (mask >> i) & 1));
+const isIncreasing = (s: number[]): boolean => s.every((v, i) => i === 0 || s[i - 1]! < v);
+const isArithmetic = (s: number[]): boolean => s.every((v, i) => i < 2 || v - s[i - 1]! === s[1]! - s[0]!);
+/** The labels of the leaves of the increasing binary tree: split at the least entry and recurse on both sides. */
+const leafLabels = (w: number[]): number[] => {
+  if (w.length === 0) return [];
+  const root = w.indexOf(Math.min(...w));
+  const [left, right] = [w.slice(0, root), w.slice(root + 1)];
+  return left.length + right.length === 0 ? [w[root]!] : [...leafLabels(left), ...leafLabels(right)];
+};
+/** The rows of successive differences, down to the first row that is all zero (or a single entry). */
+const differenceRows = (p: number[]): number[][] => {
+  const rows = [p];
+  for (let last = p; last.some((v) => v !== 0) && last.length > 1;) {
+    last = last.slice(1).map((v, i) => v - last[i]!);
+    rows.push(last);
+  }
+  return rows;
+};
 
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
@@ -770,4 +792,39 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
       0,
     ),
   LargestGreatestCommonDivisorOfPositionAndValue: (p) => Math.max(0, ...p.map((v, i) => gcd(i + 1, v))),
+  MaximalCycleDifference: (p) => Math.max(0, ...cycles(p).map((c) => Math.max(...c) - Math.min(...c))),
+  LongestKOneTwoPattern: (p) =>
+    Math.max(
+      1,
+      ...subsequences(p)
+        .filter((s) => s.slice(1).every((v) => v < s[0]!) && isIncreasing(s.slice(1)))
+        .map((s) => s.length),
+    ),
+  SmallestLeafLabel: (p) => Math.min(...leafLabels(p), ...(p.length ? [] : [0])),
+  LongestIncreasingSubsequenceCount: (p) => {
+    const best = longestIncreasing(p);
+    return subsequences(p).filter((s) => isIncreasing(s) && s.length === best).length;
+  },
+  PrimeColumnSums: (p) => p.filter((v, i) => isPrime(i + 1 + v)).length,
+  PrimeProductsMinusOne: (p) => p.filter((v, i) => isPrime((i + 1) * v - 1)).length,
+  PrimeProductsPlusOne: (p) => p.filter((v, i) => isPrime((i + 1) * v + 1)).length,
+  LongestArithmeticProgression: (p) =>
+    Math.max(
+      Math.min(p.length, 1),
+      ...subsequences(p)
+        .filter(isArithmetic)
+        .map((s) => s.length),
+    ),
+  DiaconisGrahamDefect: (p) =>
+    (sum(p.map((v, i) => Math.abs(v - i - 1))) - inversionPairs(p).length - (p.length - cycles(p).length)) / 2,
+  InterpolatingPolynomialDegree: (p) =>
+    p.length === 0
+      ? 0
+      : differenceRows(p).length -
+        (p.length > 1 &&
+        differenceRows(p)
+          .at(-1)!
+          .every((v) => v === 0)
+          ? 2
+          : 1),
 };
