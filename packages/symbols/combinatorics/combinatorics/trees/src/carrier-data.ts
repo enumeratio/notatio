@@ -3,6 +3,8 @@
 // here in step 5.
 
 import type { Carrier } from "@enumeratio/structures";
+import { BINARY_TREE_FLAT } from "./flat.ts";
+import { ORDERED_TREE_FLAT } from "./flat-ordered.ts";
 
 export const TREES_CARRIERS: readonly Carrier[] = [
   {
@@ -11,6 +13,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
     shape: "integer | list<any>",
     id: "binary_tree",
     plural: "BinaryTrees",
+    flat: BINARY_TREE_FLAT,
   },
   {
     name: "BinaryTreeParentArray",
@@ -65,6 +68,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
     shape: "integer | list<any>",
     id: "ordered_tree",
     plural: "OrderedTrees",
+    flat: ORDERED_TREE_FLAT,
   },
   {
     name: "PhylogeneticTree",

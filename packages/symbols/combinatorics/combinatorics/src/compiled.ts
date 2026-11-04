@@ -4,7 +4,10 @@
 // while its hash matches the definition, else from compiling on first use. When the compiler
 // can't take a definition yet, or a result isn't one it can hand back exactly (only integers and
 // lists of them), the interpreter answers instead. tests/compiled-maps.test.ts holds the two to
-// the same answers.
+// the same answers. A map may also state a `flat` body over its carriers' flat readings
+// (`Carrier.flat`: a tree as its parent array, say), which is compiled in place of the nested
+// `body` when that declines; the arguments are encoded and the images decoded around it, and the
+// nested `body` stays the meaning.
 
 import type { Engine } from "@enumeratio/engine";
 import {
@@ -19,7 +22,8 @@ import {
   runtimeHelpers,
   toJs,
 } from "@enumeratio/engine/compiled";
-import { operationEpsil } from "@enumeratio/structures";
+import { type FlatCodec, operationEpsil } from "@enumeratio/structures";
+import { FLAT } from "./flat.ts";
 
 export { compileTyped, freshen, fromJs, toJs } from "@enumeratio/engine/compiled";
 
@@ -30,6 +34,10 @@ export interface GeneratedMap {
   readonly hash: string;
   readonly run?: GeneratedRun;
   readonly guard?: GeneratedRun;
+  /** The carriers (type ids) whose flat readings its code takes its argument in and answers in: it was compiled
+   *  from the map's `flat` body, whose hash it carries. */
+  readonly flatIn?: string;
+  readonly flatOut?: string;
   /** Its compiled code disagreed with the interpreter when generated: never compiled. */
   readonly interpreted?: true;
 }
@@ -41,6 +49,7 @@ export interface StepMap {
   readonly to: string;
   readonly body?: unknown;
   readonly guard?: unknown;
+  readonly flat?: unknown;
   readonly composedOf?: readonly string[];
 }
 
@@ -76,9 +85,18 @@ export function compositionSteps<M extends StepMap>(
   return carrier === map.to ? out : undefined;
 }
 
+/** The hash of a map's nested definition: what compiled code of its `body` is stamped with. */
+export const bodyHash = (map: Pick<StepMap, "body" | "guard">): string =>
+  definitionHash({ body: map.body, guard: map.guard });
+
+/** The hash of a map's definition with its flat alternative: what compiled code of its `flat` body is stamped
+ *  with. The same as `bodyHash` for a map with no `flat`. */
+export const flatHash = (map: Pick<StepMap, "body" | "guard" | "flat">): string =>
+  map.flat === undefined ? bodyHash(map) : definitionHash({ body: map.body, guard: map.guard, flat: map.flat });
+
 /** A composition's hash: its steps' definitions, so a change to any step voids what was compiled. */
 export const compositionHash = (steps: readonly StepMap[]): string =>
-  definitionHash(steps.map((step) => [mapKey(step), step.to, definitionHash({ body: step.body, guard: step.guard })]));
+  definitionHash(steps.map((step) => [mapKey(step), step.to, flatHash(step)]));
 
 /** A composition's generated chain as a function of its argument's contents, or `undefined` while the
  *  chain has no compiled form for these steps (none generated, a step interpreted, or a step edited
@@ -105,6 +123,21 @@ export function composedDefinition(options: {
   };
 }
 
+/** The codecs a compiled call converts through: the argument is encoded by one and the answer decoded by the other. */
+export interface Codecs {
+  readonly encode?: FlatCodec;
+  readonly decode?: FlatCodec;
+}
+
+/** The codecs of the carriers (type ids) a flat entry reads and answers in, or `undefined` when a named carrier has none. */
+export function codecsOf(from?: string, to?: string): Codecs | undefined {
+  const encode = from === undefined ? undefined : FLAT[from];
+  const decode = to === undefined ? undefined : FLAT[to];
+  return (from !== undefined && encode === undefined) || (to !== undefined && decode === undefined)
+    ? undefined
+    : { ...(encode === undefined ? {} : { encode }), ...(decode === undefined ? {} : { decode }) };
+}
+
 /** One map's definition as a function of its argument's contents: compiled where it compiles,
  *  interpreted otherwise. A pure definition's answers are cached across engines (`pureResult`);
  *  `cache: false` computes afresh, as a test comparing the two paths must. `undefined` declines
@@ -120,25 +153,36 @@ export function fastDefinition(options: {
   generated?: GeneratedMap;
   /** A verified fast path over the plain-JS contents, tried before compiling; `undefined` declines. */
   kernel?: (raw: never) => unknown;
+  /** The compiled alternative to `body` over the flat readings of `from` and `to` (those that have one). */
+  flat?: unknown;
+  /** The codecs of those flat readings: `from`'s encodes the argument, `to`'s decodes the answer. */
+  codecs?: Codecs;
 }): (contents: unknown) => MathJSON | undefined {
-  const { ce, body, guard, from, to, interpret, cache = true, generated, kernel } = options;
+  const { ce, body, guard, from, to, interpret, cache = true, generated, kernel, flat } = options;
   const hash = definitionHash({ body, guard });
-  let compiled: { body: Compiled; guard?: Compiled } | null | undefined;
-  const compile = (): { body: Compiled; guard?: Compiled } | null => {
-    if (generated !== undefined && generated.hash === hash) {
+  const withFlat = flatHash({ body, guard, flat });
+  type Ready = { body: Compiled; guard?: Compiled } & Codecs;
+  let compiled: Ready | null | undefined;
+  const compile = (): Ready | null => {
+    if (generated !== undefined && (generated.hash === hash || (flat !== undefined && generated.hash === withFlat))) {
       if (generated.interpreted === true || generated.run === undefined) return null;
       const sys = runtimeHelpers(ce);
       const run = generated.run;
       const check = generated.guard;
+      const codecs = generated.hash === hash ? {} : codecsOf(generated.flatIn, generated.flatOut);
+      if (codecs === undefined) return null;
       return {
         body: { run: (vars) => run(sys, vars) },
         ...(check === undefined ? {} : { guard: { run: (vars) => check(sys, vars) } }),
+        ...codecs,
       };
     }
     if (from === undefined || to === undefined) return null;
     // Calls to our other definitions are expanded, so the compiler sees them too.
     const expand = (expression: unknown): unknown =>
       inlineCalls(expression, (carrier, head) => operationEpsil(ce, carrier, head));
+    // Only the nested definition compiles here: a flat body is a different algorithm, so it runs only from
+    // generated code stamped with its hash, which the build's `agrees` has checked against the nested one.
     const main = compileTyped(ce, expand(body), { _raw: from });
     if (main === undefined) return null;
     if (guard === undefined) return { body: main };
@@ -152,10 +196,12 @@ export function fastDefinition(options: {
       if (image !== undefined) return image;
     }
     if (compiled === undefined) compiled = compile();
-    const raw = compiled === null ? undefined : toJs(contents);
+    const plain = compiled === null ? undefined : toJs(contents);
+    const raw = plain === undefined || compiled?.encode === undefined ? plain : compiled.encode.encode(plain);
     if (compiled !== null && raw !== undefined) {
       try {
-        const image = compiled.body.run({ _raw: raw });
+        const answer = compiled.body.run({ _raw: raw });
+        const image = compiled.decode === undefined || answer === undefined ? answer : compiled.decode.decode(answer);
         const json = fromJs(image);
         if (json !== undefined)
           return compiled.guard !== undefined && compiled.guard.run({ _raw: raw, _image: image }) !== true

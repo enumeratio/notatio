@@ -6,43 +6,34 @@ import { COMPILED } from "../src/statistics.compiled.generated.js";
 // definition that lands here is slower than the rest, so it should be a deliberate addition;
 // one that starts compiling should leave the list. Every one reads a nested tree (a binary tree
 // is 0 or [left, right], an ordered tree the list of its children's trees), and the compiler
-// has no reader for a subtree of unknown depth yet; only the root's own children compile.
+// has no reader for a subtree of unknown depth yet; only the root's own children compile. A
+// binary-tree statistic with a `flat` expression compiles from the tree's parent array instead
+// (trees/src/flat.ts): Height, Leaves, UnaryNodes, BinaryNodes and RightChildCount. An ordered-tree
+// statistic with a `flat` expression compiles from the tree's Dyck word (trees/src/flat-ordered.ts).
 const INTERPRETED = [
   "AutomorphismGroupSize",
-  "BinaryNodes",
-  "BoundaryLength",
-  "BoundaryLengthBeyondTrunk",
   "BoundaryNodes",
   "Breadth",
   "CollessIndex",
   "DistinctSubtrees",
   "DistinctSubtrees",
   "ExternalPathLength",
-  "Height",
-  "Height",
   "HookNumber",
   "InequivalentIncreasingTreeCount",
   "LargestOutDegree",
-  "Leaves",
-  "Leaves",
   "LeftSpine",
   "LeftSubtreeSize",
   "LinearExtensionCount",
   "LinearExtensionCount",
-  "LongestPathVertexCount",
   "MaximalLeftBranches",
   "NonBoundaryNodes",
   "NonRootBinaryNodes",
-  "NonRootInternalNodes",
   "OneProtectedNodeCount",
   "ParenthesisCodeValue",
   "PathLength",
-  "PathLength",
   "Pitchforks",
   "ProtectionNumber",
-  "ProtectionNumber",
   "PruningNumber",
-  "RightChildCount",
   "RightLeftLeftLeftPathCount",
   "RightLeftLeftPathCount",
   "RightRightLeftLeftPathCount",
@@ -57,9 +48,7 @@ const INTERPRETED = [
   "StrahlerNumber",
   "TreeFactorial",
   "TreeFactorial",
-  "TrunkLength",
   "TwoProtectedNodeCount",
-  "UnaryNodes",
   "VertexHeightSum",
 ];
 

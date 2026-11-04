@@ -4,11 +4,13 @@
 
 import { bareEngine } from "@enumeratio/engine/testing";
 import { applyComposition } from "@enumeratio/structures";
-import { expect, test } from "vite-plus/test";
+import { expect, test, vi } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 import { COMPILED_MAPS } from "../src/compiled-maps.generated.js";
 import { composedDefinition, compositionHash, compositionSteps, fastDefinition, mapKey } from "../src/compiled.ts";
+import { FLAT } from "../src/flat.ts";
 import { declareMaps, evaluateDefinition, MAPS } from "../src/maps.ts";
+import { rightRotationFlat } from "../trees/src/flat.ts";
 import { evaluateTable } from "../scripts/compile-maps.ts";
 import { allElements, smallElements } from "../scripts/samples.ts";
 
@@ -48,6 +50,79 @@ test("the pinned maps are declared and not compiled", () => {
   }
 });
 
+// A map with a flat body is compiled from it (its entry carries the flat reading's carriers), whatever the nested
+// body does.
+test("the tree maps with a flat body are compiled from it", () => {
+  for (const name of ["Mirror", "LeftRotation", "RightRotation"]) {
+    const entry = COMPILED_MAPS[`${name}@binary_tree`];
+    expect(entry?.run, name).toBeDefined();
+    expect([entry?.flatIn, entry?.flatOut], name).toEqual(["binary_tree", "binary_tree"]);
+  }
+});
+
+// The ordered tree maps with a flat body: the Dyck word in, and a Dyck word, a parent array or (DyckPath, whose
+// carrier has no flat reading) the nested value out.
+test("the ordered tree maps with a flat body are compiled from it", () => {
+  const flat: [string, string, string | undefined, string | undefined][] = [
+    ["Mirror", "ordered_tree", "ordered_tree", "ordered_tree"],
+    ["Rotation", "ordered_tree", "ordered_tree", "ordered_tree"],
+    ["DyckPath", "ordered_tree", "ordered_tree", undefined],
+    ["BinaryTree", "ordered_tree", "ordered_tree", "binary_tree"],
+    ["RightBranchBinaryTree", "ordered_tree", "ordered_tree", "binary_tree"],
+    ["OrderedTree", "binary_tree", "binary_tree", "ordered_tree"],
+    ["RightBranchOrderedTree", "binary_tree", "binary_tree", "ordered_tree"],
+  ];
+  for (const [name, from, flatIn, flatOut] of flat) {
+    const entry = COMPILED_MAPS[`${name}@${from}`];
+    expect(entry?.run, name).toBeDefined();
+    expect([entry?.flatIn, entry?.flatOut], name).toEqual([flatIn, flatOut]);
+  }
+});
+
+// DeBruijnMorselt is binary <-> ordered and back: its chain stays in the flat readings between the steps.
+test("DeBruijnMorselt runs flat, with one encode and one decode", () => {
+  const map = MAPS.find((m) => m.name === "DeBruijnMorselt" && m.from === "ordered_tree")!;
+  const steps = compositionSteps(MAPS, map)!;
+  expect(steps.map((step) => `${step.name}@${step.from}`)).toEqual([
+    "RightBranchBinaryTree@ordered_tree",
+    "OrderedTree@binary_tree",
+  ]);
+  const chain = composedDefinition({ ce, steps, generated: COMPILED_MAPS[mapKey(map)] })!;
+  const encode = vi.spyOn(FLAT["ordered_tree"]!, "encode");
+  const decode = vi.spyOn(FLAT["ordered_tree"]!, "decode");
+  const binaryEncode = vi.spyOn(FLAT["binary_tree"]!, "encode");
+  const binaryDecode = vi.spyOn(FLAT["binary_tree"]!, "decode");
+  try {
+    const tree = subjectsOf("OrderedTree").at(-1);
+    expect(chain(tree)).toEqual(evaluateDefinition(ce, steps[1]!, evaluateDefinition(ce, steps[0]!, tree)));
+    expect([encode.mock.calls.length, decode.mock.calls.length]).toEqual([1, 1]);
+    expect([binaryEncode.mock.calls.length, binaryDecode.mock.calls.length]).toEqual([0, 0]);
+  } finally {
+    vi.restoreAllMocks();
+  }
+});
+
+// With no generated entry (absent or stale) the flat body has not been checked by the build, so it is not used:
+// Mirror given another map's flat body still answers as its nested definition does.
+test("with no generated entry the flat body is not used", () => {
+  const mirror = MAPS.find((m) => m.name === "Mirror" && m.from === "binary_tree")!;
+  const tree = carrierByType.get("binary_tree")!;
+  const run = fastDefinition({
+    ce,
+    body: mirror.body,
+    from: tree.shape,
+    to: tree.shape,
+    cache: false,
+    flat: rightRotationFlat,
+    codecs: { encode: FLAT.binary_tree, decode: FLAT.binary_tree },
+    interpret: (contents) => evaluateDefinition(ce, mirror, contents),
+  });
+  const subjects = subjectsOf(tree.name).slice(0, 20);
+  expect(subjects.length).toBeGreaterThan(0);
+  for (const contents of subjects)
+    expect(run(contents), JSON.stringify(contents)).toEqual(evaluateDefinition(ce, mirror, contents));
+});
+
 // Families overlap, and the build's cross-checks cost per subject.
 test("each small element is sampled once", () => {
   const subjects = smallElements(ce, "Permutation").map((s) => JSON.stringify(s));
@@ -74,6 +149,11 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
     from: from.shape,
     to: to.shape,
     cache: false,
+    flat: map.flat,
+    codecs: {
+      ...(FLAT[map.from] === undefined ? {} : { encode: FLAT[map.from] }),
+      ...(FLAT[map.to] === undefined ? {} : { decode: FLAT[map.to] }),
+    },
     generated: COMPILED_MAPS[`${map.name}@${map.from}`],
     interpret: (contents) => {
       fallbacks++;

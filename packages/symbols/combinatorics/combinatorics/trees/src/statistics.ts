@@ -7,6 +7,18 @@
 
 import { isLeaf as leafTest, recurse as recurseOver, self as callSelf } from "../../src/recursion.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
+import {
+  boundaryLengthBeyondTrunkOrderedFlat,
+  boundaryLengthOrderedFlat,
+  heightOrderedFlat,
+  leavesOrderedFlat,
+  longestPathVertexCountOrderedFlat,
+  nonRootInternalNodesOrderedFlat,
+  pathLengthOrderedFlat,
+  protectionNumberOrderedFlat,
+  trunkLengthOrderedFlat,
+} from "./flat-ordered.ts";
+import { binaryNodesFlat, heightFlat, leavesFlat, rightChildCountFlat, unaryNodesFlat } from "./flat.ts";
 import { add, and, count, equals, fold, forEach, less, subtract, x } from "../../src/statistics/vocabulary.ts";
 
 const isLeaf = leafTest as (tree: MathJSON) => MathJSON;
@@ -257,7 +269,7 @@ const chainAndPruning: MathJSON = recurse(
 /** The edges from the root down while a vertex has exactly one child. */
 const trunkLength: MathJSON = recurse(ifThen(equals(["Length", "t"], 1), add(1, self(["At", "t", 1])), 0), ["t"], x);
 
-export const TREE_STATISTICS: readonly Definition[] = [
+const NESTED_STATISTICS: readonly Definition[] = [
   // ── binary trees ──
   binary(
     "Height",
@@ -559,3 +571,35 @@ export const TREE_STATISTICS: readonly Definition[] = [
     subtract(add(edgesAlong(1), edgesAlong(-1)), trunkLength),
   ),
 ];
+
+/** The binary-tree statistics compiled from the tree's flat reading (flat.ts), by head. */
+const FLAT_STATISTICS: Readonly<Record<string, unknown>> = {
+  Height: heightFlat,
+  Leaves: leavesFlat,
+  UnaryNodes: unaryNodesFlat,
+  BinaryNodes: binaryNodesFlat,
+  RightChildCount: rightChildCountFlat,
+};
+
+/** The ordered-tree statistics compiled from the tree's Dyck word (flat-ordered.ts), by head. */
+const ORDERED_FLAT_STATISTICS: Readonly<Record<string, unknown>> = {
+  Height: heightOrderedFlat,
+  LongestPathVertexCount: longestPathVertexCountOrderedFlat,
+  Leaves: leavesOrderedFlat,
+  NonRootInternalNodes: nonRootInternalNodesOrderedFlat,
+  PathLength: pathLengthOrderedFlat,
+  BoundaryLength: boundaryLengthOrderedFlat,
+  ProtectionNumber: protectionNumberOrderedFlat,
+  TrunkLength: trunkLengthOrderedFlat,
+  BoundaryLengthBeyondTrunk: boundaryLengthBeyondTrunkOrderedFlat,
+};
+
+const FLAT_BY_CARRIER: Readonly<Record<string, Readonly<Record<string, unknown>>>> = {
+  BinaryTree: FLAT_STATISTICS,
+  OrderedTree: ORDERED_FLAT_STATISTICS,
+};
+
+export const TREE_STATISTICS: readonly Definition[] = NESTED_STATISTICS.map((definition) => {
+  const flat = FLAT_BY_CARRIER[definition.on]?.[definition.head];
+  return flat !== undefined ? { ...definition, flat } : definition;
+});

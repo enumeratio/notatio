@@ -19,6 +19,11 @@ export interface CombinatorialMap extends MapDeclaration {
    *  nested Epsil can't compile. `undefined` declines to the Epsil, which stays the meaning: tests/
    *  map-kernels.test.ts holds the two to the same answers. */
   readonly kernel?: (raw: never) => unknown;
+  /** An optional compiled alternative to `body`, over the flat reading (`Carrier.flat`) of the `from` carrier and
+   *  answering in the flat reading of the `to` carrier, where a carrier has one (the others cross as they are).
+   *  The nested `body` stays the meaning: the build holds the compiled flat body to it (`agrees`). A map
+   *  with a `flat` has no `guard`. */
+  readonly flat?: unknown;
 }
 
 // Every Range here states its step: compute-engine counts DOWN when the end is below the start,
