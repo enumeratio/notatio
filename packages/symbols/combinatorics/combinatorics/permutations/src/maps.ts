@@ -30,10 +30,10 @@ import {
   insertionShape,
   readingWord,
   recordingRows,
+  rskPairRows,
 } from "../../tableaux/src/flat.ts";
 import { cactusEvacuationKernel } from "../../tableaux/src/promotion.ts";
-import { rskRows } from "../../tableaux/src/tableau.ts";
-import { rskInsertionKernel, rskRecordingKernel, rskShapeKernel } from "../../tableaux/src/rsk-kernels.ts";
+import { rskInsertionKernel, rskKernel, rskRecordingKernel, rskShapeKernel } from "../../tableaux/src/rsk-kernels.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "./foata-bijection.ts";
 import { lehmerCode, majorCode, permutationOfLehmerCode, permutationOfMajorCode } from "./codes.ts";
 import {
@@ -47,7 +47,7 @@ import {
 import { permutationOfCycleDecompositionBody, permutationOfCycleDecompositionGuard } from "./cycle-decomposition.ts";
 
 /** A fold over `1 .. n`, indexing rather than iterating a structure — the rule from
- *  tableau.ts, which is what makes these evaluate at all. */
+ *  flat.ts, which is what makes these evaluate at all. */
 const byIndex = (n: MathJSON, initial: MathJSON, step: MathJSON, accumulator: string, variable: string): MathJSON => [
   "Fold",
   ["Function", step, accumulator, variable],
@@ -375,7 +375,7 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     body: insertionRows("rs", "_raw"),
     kernel: rskInsertionKernel,
     summary: "The insertion tableau of the RSK correspondence.",
-    note: "Row insertion with bumping, as a fold over the word whose accumulator is the growing tableau, emitted as its rows. See tableau.ts for the indexing rule that makes it evaluate at all.",
+    note: "Row insertion with bumping, as a fold over the word whose accumulator is the growing tableau, emitted as its rows. See flat.ts for the indexing rule that makes it evaluate at all.",
   },
   {
     name: "RskShape",
@@ -399,7 +399,9 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     name: "Rsk",
     from: "permutation",
     to: "standard_tableau_pair",
-    body: rskRows,
+    body: rskPairRows("rs", "_raw", "Tuple"),
+    kernel: rskKernel,
+    imageParts: ["StandardTableau", "StandardTableau"],
     summary: "The RSK correspondence: the insertion and recording tableaux, as a pair.",
     note: "Both tableaux share a shape (RskShape reads it off either), and each carries its own rows, so the pair alone determines them. A standard_tableau_pair is a tuple of two carriers — the first composite carrier anything here constructs.",
   },
@@ -416,7 +418,7 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
       "list<integer>",
     ),
     summary: "The orbits, as a set partition of the positions.",
-    note: "Removed once for giving every position the same label. The cause was the laziness rule in tableau.ts — folding over a list taken out of the accumulator instead of indexing a range. Written by index it is right first time.",
+    note: "Removed once for giving every position the same label. The cause was the laziness rule in flat.ts — folding over a list taken out of the accumulator instead of indexing a range. Written by index it is right first time.",
   },
   {
     name: "DescentComposition",

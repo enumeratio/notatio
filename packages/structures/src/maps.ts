@@ -55,6 +55,13 @@ export interface MapDeclaration {
   readonly composedOf?: readonly string[];
   /** Extra constructor arguments, for a carrier whose shape is a tuple. */
   readonly extra?: readonly unknown[];
+  /** The constructors of the parts of a tuple argument (`standard_tableau_pair` holds two `StandardTableau`s). The
+   *  body reads the parts' plain contents, so compiled code and the interpreter see the same value; a call to
+   *  such a map is never inlined, since its caller holds the constructed parts. */
+  readonly argumentParts?: readonly string[];
+  /** The same for a tuple image: the body makes the parts' plain contents (compiled code can't construct a carrier)
+   *  and the map's result wraps each in its constructor. */
+  readonly imageParts?: readonly string[];
   readonly summary: string;
   readonly note?: string;
   /** What Plausible checks on every element of every family over `from` (laws.ts). Beyond
@@ -86,13 +93,19 @@ export function evaluateDefinition(
     const argument = ce.box(contents as never);
     called = ce.function("Apply", [functionOf(ce, map.body, argument.type.toString()), argument]);
   }
+  // A guard that doesn't name `_image` is checked first: a subject outside the domain can make the body itself error.
+  const early = map.guard !== undefined && !mentions(map.guard, "_image");
+  if (early && ce.box(fill(map.guard, contents) as never).evaluate().json !== "True") return undefined;
   const main = materialise(ce, called.evaluate());
-  if (map.guard !== undefined) {
+  if (map.guard !== undefined && !early) {
     const guard = fill(fill(map.guard, contents), main.json, "_image");
     if (ce.box(guard as never).evaluate().json !== "True") return undefined;
   }
   return main.json;
 }
+
+const mentions = (node: unknown, name: string): boolean =>
+  node === name || (Array.isArray(node) && node.some((operand) => mentions(operand, name)));
 
 /** Whether a body applies a function to itself, as `recurse` builds (`["self", "self", …]`). */
 const recurses = (node: unknown): boolean => Array.isArray(node) && (node[0] === "self" || node.some(recurses));
@@ -290,7 +303,12 @@ export function declareMaps<M extends MapDeclaration>(
       const findstat = findstatFor?.(map, from) ?? [];
       // One closed expression (no guard to decline with, no composition, no extra arguments) is
       // what a definition calling this map can be compiled through.
-      const closed = map.body !== undefined && map.guard === undefined && map.extra === undefined;
+      const closed =
+        map.body !== undefined &&
+        map.guard === undefined &&
+        map.extra === undefined &&
+        map.argumentParts === undefined &&
+        map.imageParts === undefined;
       registerOperation(ce, "CombinatorialMap", from, {
         name: map.name,
         type: map.to,

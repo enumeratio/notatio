@@ -53,6 +53,26 @@ export interface StepMap {
   readonly composedOf?: readonly string[];
 }
 
+/** A tuple carrier's `contents` with its parts' constructors removed: `Tuple(StandardTableau(a), StandardTableau(b))`
+ *  is `Tuple(a, b)`. Anything else is left as it is. */
+export function bareParts(parts: readonly string[] | undefined, contents: unknown): unknown {
+  if (parts === undefined || !Array.isArray(contents) || contents[0] !== "Tuple") return contents;
+  return [
+    "Tuple",
+    ...contents
+      .slice(1)
+      .map((part, i) => (Array.isArray(part) && part.length === 2 && part[0] === parts[i] ? part[1] : part)),
+  ];
+}
+
+/** A tuple image (a `Tuple` or the `List` compiled code hands back) with each part in its constructor, the inverse of
+ *  `bareParts`. An image of another size is left as it is, for the carrier's own check to refuse. */
+export function wrapParts(parts: readonly string[] | undefined, image: unknown): unknown {
+  if (parts === undefined || !Array.isArray(image) || (image[0] !== "Tuple" && image[0] !== "List")) return image;
+  if (image.length - 1 !== parts.length) return image;
+  return ["Tuple", ...image.slice(1).map((part, i) => [parts[i], part])];
+}
+
 /** The key a map is compiled under. */
 export const mapKey = (map: Pick<StepMap, "name" | "from">): string => `${map.name}@${map.from}`;
 
@@ -157,8 +177,24 @@ export function fastDefinition(options: {
   flat?: unknown;
   /** The codecs of those flat readings: `from`'s encodes the argument, `to`'s decodes the answer. */
   codecs?: Codecs;
+  /** The constructors of a tuple argument's and image's parts (`CombinatorialMap`): the body sees them bare. */
+  argumentParts?: readonly string[];
+  imageParts?: readonly string[];
 }): (contents: unknown) => MathJSON | undefined {
-  const { ce, body, guard, from, to, interpret, cache = true, generated, kernel, flat } = options;
+  const {
+    ce,
+    body,
+    guard,
+    from,
+    to,
+    interpret,
+    cache = true,
+    generated,
+    kernel,
+    flat,
+    argumentParts,
+    imageParts,
+  } = options;
   const hash = definitionHash({ body, guard });
   const withFlat = flatHash({ body, guard, flat });
   type Ready = { body: Compiled; guard?: Compiled } & Codecs;
@@ -189,11 +225,12 @@ export function fastDefinition(options: {
     const check = compileTyped(ce, expand(guard), { _raw: from, _image: to });
     return check === undefined ? null : { body: main, guard: check };
   };
-  const evaluate = (contents: unknown): MathJSON | undefined => {
+  const evaluate = (given: unknown): MathJSON | undefined => {
+    const contents = bareParts(argumentParts, given);
     if (kernel !== undefined) {
       const input = toJs(contents);
       const image = input === undefined ? undefined : fromJs(kernel(input as never));
-      if (image !== undefined) return image;
+      if (image !== undefined) return wrapParts(imageParts, image) as MathJSON;
     }
     if (compiled === undefined) compiled = compile();
     const plain = compiled === null ? undefined : toJs(contents);
@@ -206,12 +243,13 @@ export function fastDefinition(options: {
         if (json !== undefined)
           return compiled.guard !== undefined && compiled.guard.run({ _raw: raw, _image: image }) !== true
             ? undefined
-            : json;
+            : (wrapParts(imageParts, json) as MathJSON);
       } catch {
         // The interpreter answers below.
       }
     }
-    return interpret(contents) as MathJSON | undefined;
+    const answer = interpret(contents) as MathJSON | undefined;
+    return answer === undefined ? undefined : (wrapParts(imageParts, answer) as MathJSON);
   };
   let pure: boolean | undefined;
   return (contents) => {

@@ -7,11 +7,19 @@ import { applyComposition } from "@enumeratio/structures";
 import { expect, test, vi } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 import { COMPILED_MAPS } from "../src/compiled-maps.generated.js";
-import { composedDefinition, compositionHash, compositionSteps, fastDefinition, mapKey } from "../src/compiled.ts";
+import {
+  bareParts,
+  composedDefinition,
+  compositionHash,
+  compositionSteps,
+  fastDefinition,
+  mapKey,
+  wrapParts,
+} from "../src/compiled.ts";
 import { FLAT } from "../src/flat.ts";
 import { declareMaps, evaluateDefinition, MAPS } from "../src/maps.ts";
 import { rightRotationFlat } from "../trees/src/flat.ts";
-import { evaluateTable } from "../scripts/compile-maps.ts";
+import { evaluateTable, partSubjects } from "../scripts/compile-maps.ts";
 import { allElements, smallElements } from "../scripts/samples.ts";
 
 // The interpreter is the slow side of the comparison: a small sample in the standard run, more
@@ -33,12 +41,7 @@ test("the build compiled maps", () => {
 
 // Maps whose Epsil the compiler can't take, left to the interpreter on purpose: each is pinned here with its
 // reason, so one that starts to compile (or is dropped) shows up as a failure rather than going unnoticed.
-const INTERPRETED: Readonly<Record<string, string>> = {
-  "Rsk@permutation":
-    "its image is a pair of constructed tableaux (StandardTableau(rows)), which compiled code can't make",
-  "ToPermutation@standard_tableau_pair":
-    "its argument is a pair of constructed tableaux, which the compiled path's toJs doesn't read",
-};
+const INTERPRETED: Readonly<Record<string, string>> = {};
 
 test("the pinned maps are declared and not compiled", () => {
   for (const key of Object.keys(INTERPRETED)) {
@@ -146,7 +149,7 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
     ce,
     body: map.body,
     guard: map.guard,
-    from: from.shape,
+    from: map.compiledFrom ?? from.shape,
     to: to.shape,
     cache: false,
     flat: map.flat,
@@ -155,17 +158,29 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
       ...(FLAT[map.to] === undefined ? {} : { decode: FLAT[map.to] }),
     },
     generated: COMPILED_MAPS[`${map.name}@${map.from}`],
+    argumentParts: map.argumentParts,
+    imageParts: map.imageParts,
     interpret: (contents) => {
       fallbacks++;
       return evaluateDefinition(ce, map, contents);
     },
   });
-  const subjects = subjectsOf(from.name);
+  // The pair carrier's families aren't sampled: its subjects are the images of small permutations (words of at most
+  // three letters in the standard run: the interpreter's inverse RSK is slow).
+  const small = (words: unknown[]): unknown[] => words.filter((word) => DEEP || (word as unknown[]).length <= 4);
+  const subjects =
+    map.argumentParts !== undefined
+      ? partSubjects(ce, map, small(subjectsOf("Permutation")))
+      : map.imageParts !== undefined
+        ? small(subjectsOf(from.name))
+        : subjectsOf(from.name);
   const title = `${map.name} from ${map.from}: compiled agrees with interpreted`;
   for (let start = 0; start < subjects.length; start += CHUNK) {
     test(subjects.length > CHUNK ? `${title} (${start / CHUNK + 1})` : title, () => {
       for (const contents of subjects.slice(start, start + CHUNK))
-        expect(run(contents), JSON.stringify(contents)).toEqual(evaluateDefinition(ce, map, contents));
+        expect(run(contents), JSON.stringify(contents)).toEqual(
+          wrapParts(map.imageParts, evaluateDefinition(ce, map, bareParts(map.argumentParts, contents))),
+        );
     });
   }
   test(`${map.name} from ${map.from}: the generated code answers`, () => {

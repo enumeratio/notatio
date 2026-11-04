@@ -35,8 +35,10 @@ for (const map of MAPS.filter((m) => m.kernel !== undefined)) {
     : [1, 2, 3, 4].flatMap((n) => permutations(n));
   test(`${map.name}'s kernel on ${map.from} gives the Epsil's answers`, { timeout: 300_000 }, () => {
     for (const subject of subjects) {
-      const kernel = map.kernel!(subject as never);
-      expect(list(kernel as unknown[]), JSON.stringify(subject)).toEqual(evaluateDefinition(ce, map, list(subject)));
+      const kernel = list(map.kernel!(subject as never) as unknown[]) as unknown[];
+      // A tuple image: the Epsil builds a `Tuple` where the kernel's pair of lists is a `List` (`wrapParts` reads either).
+      const image = map.imageParts === undefined ? kernel : ["Tuple", ...kernel.slice(1)];
+      expect(image, JSON.stringify(subject)).toEqual(evaluateDefinition(ce, map, list(subject)));
     }
   });
 }
