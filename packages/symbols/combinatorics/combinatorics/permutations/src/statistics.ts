@@ -1410,11 +1410,9 @@ const FINDSTAT_PERMUTATION_STATISTICS_6: readonly Definition[] = [
     "FixedPointsBeforeLargestMovedPoint",
     "Fixed points smaller than the largest i with p(i) != i.",
     nonEmpty(
-      bind(
-        "m",
-        max(["Join", ["List", 0], where(positions, or(less(here, "i"), greater(here, "i")))]),
-        count(span(1, "m"), equals(here, "i")),
-        "number",
+      count(
+        span(1, max(["Join", ["List", 0], where(positions, or(less(here, "i"), greater(here, "i")))])),
+        equals(here, "i"),
       ),
     ),
   ),
