@@ -12,6 +12,7 @@ const SAMPLE: Record<string, unknown> = {
   OrderedTree: ["At", ["OrderedTrees", 3], 4],
   IntegerComposition: ["At", ["IntegerCompositions", 4], 5],
   StandardTableau: ["At", ["StandardTableaux", 5], 7],
+  BinaryWord: ["At", ["BinaryWords", 4], 5],
 };
 
 test("every statistic is callable by its bare head on each of its carriers", () => {
