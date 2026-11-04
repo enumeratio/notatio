@@ -25,12 +25,15 @@ import { core, cycles, headUsage, tower } from "../src/statistics/core.ts";
  * `Typed` entered with the Dyck-path rises, which bind a list once (`bind`) to filter it.
  * `Unique` entered with the distinct subtrees of the tree statistics.
  * `IndexOf` entered with the set-partition arc chains, which look up the arc leaving an element.
+ * `Binomial` entered with the finite differences of the interpolating polynomial and the dual immaculate column sum.
+ * `NotEqual` entered with the same polynomial's degree and the nonzero steps of an arithmetic progression.
  */
 const CORE = [
   "Abs",
   "Add",
   "And",
   "At",
+  "Binomial",
   "Contains",
   "Count",
   "Divide",
@@ -55,6 +58,7 @@ const CORE = [
   "Mod",
   "Most",
   "Multiply",
+  "NotEqual",
   "Or",
   "Power",
   "Product",
