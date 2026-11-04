@@ -518,14 +518,16 @@ const fillingsWithin: MathJSON = [
   ),
 ];
 const dualImmaculateColumnSum: MathJSON = nonEmpty(
-  sumOver(
-    upTo(total),
-    [
-      "Multiply",
-      fillingsWithin,
-      sumOver(["Range", "m", total], ["Multiply", ["Power", -1, subtract("k", "m")], ["Binomial", "k", "m"]], "k"),
-    ],
-    "m",
+  floored(
+    sumOver(
+      upTo(total),
+      [
+        "Multiply",
+        fillingsWithin,
+        sumOver(["Range", "m", total], ["Multiply", ["Power", -1, subtract("k", "m")], ["Binomial", "k", "m"]], "k"),
+      ],
+      "m",
+    ),
   ),
 );
 
