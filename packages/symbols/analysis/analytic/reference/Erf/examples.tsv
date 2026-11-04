@@ -2,7 +2,7 @@ id	section	role	expr	expected	caption	wolfram.kind	wolfram.note	sage.kind	sage.n
 erf-0			[Erf, 0]	0											
 erf-infinity			[Erf, Infinity]	1											
 erf-negativeinfinity			[Erf, NegativeInfinity]	-1										emit	Nemo's balls have no infinite point, so an infinite operand can't be put to Julia; the call is not asked.
-erf-complexinfinity			[Erf, ComplexInfinity]	Indeterminate	erf as z -> ComplexInfinity has no limit -- the approach direction decides it (1 real, i imaginary)	undefined-form	Wolfram spells the same decline as NaN from a numeric evaluation attempt; we stay exact with Indeterminate	undefined-form	Sage answers ComplexInfinity for erf(unsigned_infinity); ours answers Indeterminate (Wolfram holds Erf[ComplexInfinity]).						
+erf-complexinfinity			[Erf, ComplexInfinity]	NaN	erf as z -> ComplexInfinity has no limit -- the approach direction decides it (1 real, i imaginary)	undefined-form	Wolfram spells the same decline as NaN from a numeric evaluation attempt; we stay exact with Indeterminate	undefined-form	Sage answers ComplexInfinity for erf(unsigned_infinity); ours answers Indeterminate (Wolfram holds Erf[ComplexInfinity]).						
 a-floating-point-argument-evaluates-directly-to			[Erf, 0.5]	{num: "0.520499877813046537683"}	A floating-point argument evaluates directly to a high-precision decimal										
 a-machine-precision-argument			[Erf, 0.95]	{num: "0.820890807273277941908"}	A machine-precision argument										
 threads-element-wise-over-a-list-as-wolfram-s	Scope		[Erf, [List, 0, 1]]	[List, 0, [Erf, 1]]	Threads element-wise over a list, as Wolfram's Listable heads do										
