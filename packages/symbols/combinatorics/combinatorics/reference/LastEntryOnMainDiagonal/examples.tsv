@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-standard-tableau-1-2-4-3-6-5			[LastEntryOnMainDiagonal, [StandardTableau, [List, [List, 1, 2, 4], [List, 3, 6], [List, 5]]]]	6			the standard tableau $[[1,2,4],[3,6],[5]]$
+findstat-st000735-1	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2]]], "'LastEntryOnMainDiagonal'"]	1	1	FindStat St000735	FindStat's value for [[1,2]]
+findstat-st000735-2	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2, 3]]], "'LastEntryOnMainDiagonal'"]	1	1	FindStat St000735	FindStat's value for [[1,2,3]]
+findstat-st000735-3	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1], [List, 2]]], "'LastEntryOnMainDiagonal'"]	1	1	FindStat St000735	FindStat's value for [[1],[2]]

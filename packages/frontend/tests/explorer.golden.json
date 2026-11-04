@@ -1796,9 +1796,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "StarNumbers": {
     "expr": "Take(StarNumbers, 20)",
@@ -1866,9 +1871,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "SytTwoColumn": {
     "expr": "SytTwoColumn(4)",
@@ -1880,9 +1890,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "SytTwoRow": {
     "expr": "SytTwoRow(4)",
@@ -1894,9 +1909,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "TernaryGrayCodes": {
     "expr": "TernaryGrayCodes(4)",

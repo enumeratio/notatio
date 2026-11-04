@@ -80,6 +80,8 @@ jobs:
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/tree-statistics
       # Composition statistics over the larger compositions.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run compositions/tests/composition-statistics
+      # Tableau statistics over the larger tableaux.
+      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tableaux/tests/tableau-statistics
       # Permutation statistics over the larger permutations.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/permutation-statistics
       # The numeric sequences and predicate scans defined in Epsil, against references in bigints and sieves, farther out.

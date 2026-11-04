@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-standard-tableau-1-2-4-3-6-5			[PathLengthToLargestEntry, [StandardTableau, [List, [List, 1, 2, 4], [List, 3, 6], [List, 5]]]]	2			the standard tableau $[[1,2,4],[3,6],[5]]$
+findstat-st000744-1	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2]]], "'PathLengthToLargestEntry'"]	1	1	FindStat St000744	FindStat's value for [[1,2]]
+findstat-st000744-2	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2, 3]]], "'PathLengthToLargestEntry'"]	2	2	FindStat St000744	FindStat's value for [[1,2,3]]
+findstat-st000744-3	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1], [List, 2]]], "'PathLengthToLargestEntry'"]	1	1	FindStat St000744	FindStat's value for [[1],[2]]
