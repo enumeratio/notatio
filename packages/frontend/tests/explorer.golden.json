@@ -157,7 +157,7 @@
     "glyph": "nested-tree",
     "columns": ["BinaryNodes", "BoundaryNodes", "CollessIndex", "DistinctSubtrees"],
     "derived": true,
-    "statistics": 33
+    "statistics": 35
   },
   "BinaryWords": {
     "expr": "BinaryWords(4)",
@@ -1010,7 +1010,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "NonCrossingPartitions": {
     "expr": "NonCrossingPartitions(4)",
@@ -1024,7 +1024,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlockSizeSpan", "Blocks"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "NonCrossingPermutations": {
     "expr": "NonCrossingPermutations(4)",
@@ -1065,7 +1065,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "NonNestingPartitions": {
     "expr": "NonNestingPartitions(4)",
@@ -1079,7 +1079,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlockSizeSpan", "Blocks"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "OctagonalNumbers": {
     "expr": "Take(OctagonalNumbers, 20)",
@@ -1241,7 +1241,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "PerfectNumbers": {
     "expr": "Take(PerfectNumbers, 7)",
@@ -1529,7 +1529,7 @@
     "glyph": "set-partition",
     "columns": ["Successions"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "RiordanPaths": {
     "expr": "RiordanPaths(4)",
@@ -1644,7 +1644,7 @@
     "glyph": "set-partition",
     "columns": ["Length", "Max(Map(Length, _))"],
     "derived": false,
-    "statistics": 105
+    "statistics": 111
   },
   "SetPartitionsIntoKBlocks": {
     "expr": "SetPartitionsIntoKBlocks(4, 2)",
@@ -1658,7 +1658,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlockSizeSpan", "BlocksAndAntisingletons"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "SexyPrimes": {
     "expr": "Take(SexyPrimes, 20)",

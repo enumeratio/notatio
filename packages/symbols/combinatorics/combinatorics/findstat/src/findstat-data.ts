@@ -4124,6 +4124,42 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "CloserBeforeLargerPairs",
+    on: "SetPartition",
+    findstat: ["St000577"],
+    values: 1154,
+  },
+  {
+    head: "OccurrencesOf1Over2Over3Openers3Closers12",
+    on: "SetPartition",
+    findstat: ["St000583"],
+    values: 1155,
+  },
+  {
+    head: "SetPartitionDimension",
+    on: "SetPartition",
+    findstat: ["St000728"],
+    values: 1154,
+  },
+  {
+    head: "MinimalArcLength",
+    on: "SetPartition",
+    findstat: ["St000729"],
+    values: 1154,
+  },
+  {
+    head: "MaximalArcLength",
+    on: "SetPartition",
+    findstat: ["St000730"],
+    values: 1154,
+  },
+  {
+    head: "UnsplittableFactorCount",
+    on: "SetPartition",
+    findstat: ["St000823"],
+    values: 1154,
+  },
+  {
     head: "Height",
     on: "BinaryTree",
     findstat: ["St000050"],
@@ -4319,6 +4355,18 @@ export const findstat: readonly FindStatMatch[] = [
     head: "RightRightLeftRightPathCount",
     on: "BinaryTree",
     findstat: ["St000128"],
+    values: 625,
+  },
+  {
+    head: "RightForkRightLeftPatternCount",
+    on: "BinaryTree",
+    findstat: ["St000130"],
+    values: 625,
+  },
+  {
+    head: "ForkRightRightLeftPatternCount",
+    on: "BinaryTree",
+    findstat: ["St000132"],
     values: 625,
   },
   {
