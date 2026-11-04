@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[OnesMinusZeros, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	3			the word $110100111$
+findstat-st000878-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'OnesMinusZeros'"]	-1	-1	FindStat St000878	FindStat's value for 0
+findstat-st000878-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'OnesMinusZeros'"]	1	1	FindStat St000878	FindStat's value for 1
+findstat-st000878-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'OnesMinusZeros'"]	-2	-2	FindStat St000878	FindStat's value for 00

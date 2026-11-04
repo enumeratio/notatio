@@ -3,8 +3,10 @@ import type { Engine } from "@enumeratio/engine";
 import { declareCarriers } from "@enumeratio/structures";
 import { declareFamilies } from "../../collections/src/families/declare.ts";
 import { liftFamily } from "../../collections/src/families/epsil.ts";
+import { declareStatistics } from "../../src/statistics/declare.ts";
 import { WORDS_CARRIERS } from "./carrier-data.ts";
 import { binaryWordFamiliesEntries, coreEntries, tableauxTreesEntries, wordsEntries } from "./families/index.ts";
+import { WORD_STATISTICS } from "./statistics.ts";
 
 export function declareWords(ce: Engine): void {
   declareCarriers(ce, WORDS_CARRIERS, { plurals: false });
@@ -12,4 +14,6 @@ export function declareWords(ce: Engine): void {
     ce,
     [...coreEntries, ...wordsEntries, ...binaryWordFamiliesEntries, ...tableauxTreesEntries].map(liftFamily),
   );
+  // Its statistics, after its own carriers and families.
+  declareStatistics(ce, WORD_STATISTICS);
 }

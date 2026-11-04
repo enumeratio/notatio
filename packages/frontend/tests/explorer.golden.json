@@ -104,7 +104,7 @@
     "expr": "BinaryBracelets(6)",
     "columns": ["Descents", "Ascents"],
     "derived": false,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryNecklaces": {
     "expr": "BinaryNecklaces(4)",
@@ -115,9 +115,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryPalindromes": {
     "expr": "BinaryPalindromes(4)",
@@ -128,9 +128,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryTreeParentArrays": {
     "expr": "BinaryTreeParentArrays(4)",
@@ -168,9 +168,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryWordsByWeight": {
     "expr": "BinaryWordsByWeight(4, 2)",
@@ -181,9 +181,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "LeadingOnesCount"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BooleanAlgebra": null,
   "BooleanPermutations": {
@@ -478,9 +478,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "FibonacciCompositions": {
     "expr": "FibonacciCompositions(4)",
@@ -592,9 +592,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "HappyNumbers": {
     "expr": "Take(HappyNumbers, 20)",
@@ -890,9 +890,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "LuckyNumbers": {
     "expr": "Take(LuckyNumbers, 20)",
@@ -923,9 +923,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": [],
+    "columns": ["BalancedPrefixCount", "HammingWeight", "LongestRunOfOnes", "OddOneRunCount"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "MersennePrimes": {
     "expr": "Take(MersennePrimes, 8)",
@@ -1455,7 +1455,7 @@
     "expr": "PrimitiveBinaryStrings(6)",
     "columns": ["Descents", "Ascents"],
     "derived": false,
-    "statistics": 2
+    "statistics": 13
   },
   "PrimorialNumbers": {
     "expr": "Take(PrimorialNumbers, 20)",
@@ -1963,7 +1963,7 @@
     "expr": "TriStrings(6)",
     "columns": ["Descents", "Ascents"],
     "derived": false,
-    "statistics": 2
+    "statistics": 13
   },
   "TriangularCompositions": {
     "expr": "TriangularCompositions(4)",

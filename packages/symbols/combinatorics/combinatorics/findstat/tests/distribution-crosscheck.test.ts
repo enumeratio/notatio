@@ -35,6 +35,7 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   DyckPath: ["DyckPaths", (n) => n],
   SetPartition: ["SetPartitions", (n) => n],
   IntegerComposition: ["IntegerCompositions", (n) => n],
+  BinaryWord: ["BinaryWords", (n) => n],
   BinaryTree: ["BinaryTrees", (n) => n],
   OrderedTree: ["OrderedTrees", (n) => n],
 };

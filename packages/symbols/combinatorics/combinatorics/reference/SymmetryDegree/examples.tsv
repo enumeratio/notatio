@@ -1,6 +1,10 @@
 id	section	role	expr	expected	known	source	caption
 the-step-word-uuddud			[SymmetryDegree, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	1			the step word $UUDDUD$
 the-step-word-uduudd			[SymmetryDegree, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	1			the step word $UDUUDD$
+the-word-110100111			[SymmetryDegree, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	2			the word $110100111$
 findstat-st001523-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'SymmetryDegree'"]	1	1	FindStat St001523	FindStat's value for [1,0]
 findstat-st001523-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'SymmetryDegree'"]	2	2	FindStat St001523	FindStat's value for [1,0,1,0]
 findstat-st001523-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'SymmetryDegree'"]	2	2	FindStat St001523	FindStat's value for [1,1,0,0]
+findstat-st001524-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'SymmetryDegree'"]	0	0	FindStat St001524	FindStat's value for 0
+findstat-st001524-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'SymmetryDegree'"]	0	0	FindStat St001524	FindStat's value for 1
+findstat-st001524-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'SymmetryDegree'"]	1	1	FindStat St001524	FindStat's value for 00

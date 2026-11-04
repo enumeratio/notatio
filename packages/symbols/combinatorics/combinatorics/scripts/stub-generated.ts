@@ -16,6 +16,7 @@ const STUBS: Record<string, string> = {
   "../permutations/src/statistics.compiled.generated.js": "COMPILED",
   "../trees/src/statistics.compiled.generated.js": "COMPILED",
   "../set-partitions/src/statistics.compiled.generated.js": "COMPILED",
+  "../words/src/statistics.compiled.generated.js": "COMPILED",
 };
 
 for (const [path, name] of Object.entries(STUBS)) {
