@@ -206,20 +206,17 @@ export const readingWord = (tag: string, word: MathJSON): MathJSON =>
   withInsertion(tag, word, false, (n, s) =>
     lets(
       [[`${tag}_rows`, rowCount(s, n, "fl_q"), "integer"]],
-      [
-        "Fold",
-        [
-          "Function",
-          lets(
-            [["fl_bottom", sub(add(`${tag}_rows`, 1), "fl_r"), "integer"]],
-            ["Join", "fl_acc", forEach(upTo(at("fl_bottom", s)), cell(s, n, n, "fl_bottom", "fl_c"), "fl_c")],
-          ),
-          "fl_acc",
-          "fl_r",
-        ],
+      fold(
+        lets(
+          [["fl_bottom", sub(add(`${tag}_rows`, 1), "fl_r"), "integer"]],
+          ["Join", "fl_acc", forEach(upTo(at("fl_bottom", s)), cell(s, n, n, "fl_bottom", "fl_c"), "fl_c")],
+        ),
+        "fl_acc",
+        "fl_r",
         ["List"],
         upTo(`${tag}_rows`),
-      ],
+        LIST,
+      ),
     ),
   );
 
@@ -252,24 +249,21 @@ export const inverseRsk = (tag: string, p: string, q: string, n: MathJSON): Math
   const letter = (index: MathJSON): MathJSON => at(add(n, nn, index), s);
 
   // What leaves each row on the way up: u[1] the cell that left, u[t + 1] what row (row - t) gives up.
-  const climb: MathJSON = [
-    "Fold",
-    [
-      "Function",
-      lets(
-        [[m, sub(row, j), "integer"]],
-        [
-          "Join",
-          acc,
-          ["List", when(less(0, m), held(m, ["Count", keep(upTo(length(m)), less(held(m, i), at(j, acc)), i)]), 0)],
-        ],
-      ),
-      acc,
-      j,
-    ],
+  const climb: MathJSON = fold(
+    lets(
+      [[m, sub(row, j), "integer"]],
+      [
+        "Join",
+        acc,
+        ["List", when(less(0, m), held(m, ["Count", keep(upTo(length(m)), less(held(m, i), at(j, acc)), i)]), 0)],
+      ],
+    ),
+    acc,
+    j,
     ["List", held(row, length(row))],
     upTo(n),
-  ];
+    LIST,
+  );
 
   const step: MathJSON = lets(
     [
@@ -317,12 +311,14 @@ export const inverseRsk = (tag: string, p: string, q: string, n: MathJSON): Math
       [colOf, forEach(upTo(nn), add(["Mod", sub(j, 1), n], 1), j), "list<integer>"],
       [
         done,
-        [
-          "Fold",
-          ["Function", step, s, c],
+        fold(
+          step,
+          s,
+          c,
           forEach(upTo(add(n, nn, n)), when(["LessEqual", j, add(n, nn)], at(j, p), 0), j),
           upTo(n),
-        ],
+          LIST,
+        ),
         "list<integer>",
       ],
     ],
@@ -384,17 +380,14 @@ const compact = (table: string, body: MathJSON): MathJSON =>
       ["fl_lens", forEach(upTo("fl_rows"), ["Length", at("fl_r", table)], "fl_r"), "list<integer>"],
       [
         "fl_offs",
-        [
-          "Fold",
-          [
-            "Function",
-            ["Join", "fl_acc", ["List", add(at("fl_r", "fl_acc"), at("fl_r", "fl_lens"))]],
-            "fl_acc",
-            "fl_r",
-          ],
+        fold(
+          ["Join", "fl_acc", ["List", add(at("fl_r", "fl_acc"), at("fl_r", "fl_lens"))]],
+          "fl_acc",
+          "fl_r",
           ["List", 0],
           upTo("fl_rows"),
-        ],
+          LIST,
+        ),
         "list<integer>",
       ],
       ["fl_ent", ["Flatten", table], "list<integer>"],
@@ -427,10 +420,8 @@ const holeMoved = (value: MathJSON, row: MathJSON, column: MathJSON): MathJSON =
   );
 
 /** One step of a walk: `choose` gets the hole's row and column and says the next state. */
-const walk = (start: MathJSON, choose: MathJSON): MathJSON => [
-  "Fold",
-  [
-    "Function",
+const walk = (start: MathJSON, choose: MathJSON): MathJSON =>
+  fold(
     lets(
       [
         ["fl_row", at(add("fl_n", 1), "fl_s"), "integer"],
@@ -440,10 +431,10 @@ const walk = (start: MathJSON, choose: MathJSON): MathJSON => [
     ),
     "fl_s",
     "fl_step",
-  ],
-  start,
-  upTo("fl_n"),
-];
+    start,
+    upTo("fl_n"),
+    LIST,
+  );
 
 /** Promotion of the standard tableau `table` (a bound name): the hole starts at the largest entry and slides to the
  *  origin, pulling in the larger of the entry to its left and the one above it; the entries then all go up by one
