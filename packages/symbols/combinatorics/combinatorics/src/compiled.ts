@@ -181,8 +181,20 @@ export function fastDefinition(options: {
   argumentParts?: readonly string[];
   imageParts?: readonly string[];
 }): (contents: unknown) => MathJSON | undefined {
-  const { ce, body, guard, from, to, interpret, cache = true, generated, kernel, flat, argumentParts, imageParts } =
-    options;
+  const {
+    ce,
+    body,
+    guard,
+    from,
+    to,
+    interpret,
+    cache = true,
+    generated,
+    kernel,
+    flat,
+    argumentParts,
+    imageParts,
+  } = options;
   const hash = definitionHash({ body, guard });
   const withFlat = flatHash({ body, guard, flat });
   type Ready = { body: Compiled; guard?: Compiled } & Codecs;

@@ -22,7 +22,15 @@ import { bareEngine } from "@enumeratio/engine/testing";
 import { compileTyped, fromJs, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
 import type { FlatCodec } from "@enumeratio/structures";
 import { CARRIERS } from "../src/carriers.ts";
-import { bareParts, bodyHash, compositionHash, compositionSteps, flatHash, mapKey, wrapParts } from "../src/compiled.ts";
+import {
+  bareParts,
+  bodyHash,
+  compositionHash,
+  compositionSteps,
+  flatHash,
+  mapKey,
+  wrapParts,
+} from "../src/compiled.ts";
 import { FLAT } from "../src/flat.ts";
 import { evaluateDefinition, MAPS } from "../src/maps.ts";
 import { noVerdicts, type Verdicts } from "../src/statistics/generate-compiled.ts";
