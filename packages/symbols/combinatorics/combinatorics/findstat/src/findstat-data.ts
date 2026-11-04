@@ -2594,6 +2594,48 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "PartitionSize",
+    on: "IntegerPartition",
+    findstat: ["St000228"],
+    values: 139,
+  },
+  {
+    head: "CouplesAreForeverGrundyValue",
+    on: "IntegerPartition",
+    findstat: ["St000752"],
+    values: 288,
+  },
+  {
+    head: "RowRemovalGrundyValue",
+    on: "IntegerPartition",
+    findstat: ["St001055"],
+    values: 272,
+  },
+  {
+    head: "OrderedRefinementCount",
+    on: "IntegerPartition",
+    findstat: ["St000935"],
+    values: 547,
+  },
+  {
+    head: "RefinementCount",
+    on: "IntegerPartition",
+    findstat: ["St000345"],
+    values: 272,
+  },
+  {
+    head: "CoarseningCount",
+    on: "IntegerPartition",
+    findstat: ["St000346"],
+    values: 272,
+  },
+  {
+    head: "SingletonRefinementCount",
+    on: "IntegerPartition",
+    findstat: ["St000913"],
+    values: 288,
+  },
+  {
     head: "Height",
     on: "DyckPath",
     findstat: ["St000013"],

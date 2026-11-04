@@ -601,6 +601,69 @@ const solitaireOrbit = (l: Partition): { preperiod: number; period: number } => 
   }
 };
 
+/** The least nonnegative integer not in the set. */
+const leastMissing = (values: ReadonlySet<number>): number => {
+  let k = 0;
+  while (values.has(k)) k++;
+  return k;
+};
+const couplesValues: number[] = [0, 0, 0];
+/** Grundy value of one part in "Couples are forever": a part above 2 splits into two parts, a position is the nim-sum of its parts. */
+const couplesValue = (m: number): number => {
+  for (let k = couplesValues.length; k <= m; k++)
+    couplesValues[k] = leastMissing(
+      new Set(Array.from({ length: k - 1 }, (_, a) => couplesValues[a + 1]! ^ couplesValues[k - a - 1]!)),
+    );
+  return couplesValues[m]!;
+};
+const rowRemovalValues = new Map<string, number>();
+/** Grundy value of the game that cuts a row down to any length from the next row's up, searched move by move. */
+const rowRemovalValue = (l: Partition): number => {
+  const known = rowRemovalValues.get(l.join());
+  if (known !== undefined) return known;
+  const options = new Set<number>();
+  l.forEach((part, i) => {
+    for (let kept = l[i + 1] ?? 0; kept < part; kept++)
+      options.add(rowRemovalValue(l.map((p, k) => (k === i ? kept : p)).filter((p) => p > 0)));
+  });
+  const value = leastMissing(options);
+  rowRemovalValues.set(l.join(), value);
+  return value;
+};
+/** The partitions one split away (a part into two) or one merge away (two parts into one), as sorted distinct lists. */
+const distinctPartitions = (lists: number[][]): number[][] => [
+  ...new Map(lists.map((m) => [m.toSorted((a, b) => b - a).join(), m.toSorted((a, b) => b - a)])).values(),
+];
+const splitsOf = (l: Partition): number[][] =>
+  distinctPartitions(
+    l.flatMap((part, i) =>
+      Array.from({ length: Math.floor(part / 2) }, (_, a) => [...l.filter((_, k) => k !== i), a + 1, part - a - 1]),
+    ),
+  );
+const mergesOf = (l: Partition): number[][] =>
+  distinctPartitions(
+    l.flatMap((p, i) => l.slice(i + 1).map((q, k) => [...l.filter((_, m) => m !== i && m !== i + 1 + k), p + q])),
+  );
+/** Every partition reached from this one by the moves. */
+const reachedBy = (l: Partition, moves: (l: Partition) => number[][]): number => {
+  const seen = new Set([l.join()]);
+  for (let frontier: Partition[] = [l]; frontier.length > 0;) {
+    const next = frontier.flatMap(moves).filter((m) => !seen.has(m.join()));
+    frontier = distinctPartitions(next);
+    for (const m of frontier) seen.add(m.join());
+  }
+  return seen.size;
+};
+const chainCounts = new Map<string, number>();
+const splitChains = (l: Partition): number => {
+  const known = chainCounts.get(l.join());
+  if (known !== undefined) return known;
+  const next = splitsOf(l);
+  const chains = next.length === 0 ? 1 : sum(next.map(splitChains));
+  chainCounts.set(l.join(), chains);
+  return chains;
+};
+
 export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   PartRange: (l) => (l.length === 0 ? 0 : l[0]! - l.at(-1)!),
   ContainingRectangleShortSide: (l) => (l.length === 0 ? 0 : Math.min(l[0]!, l.length)),
@@ -834,4 +897,23 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
     return preperiod + period;
   },
   BulgarianSolitairePreperiod: (l) => solitaireOrbit(l).preperiod,
+
+  // The eighth batch.
+  PartitionSize: (l) => sum(l),
+  CouplesAreForeverGrundyValue: (l) => l.reduce((nim, p) => nim ^ couplesValue(p), 0),
+  RowRemovalGrundyValue: rowRemovalValue,
+  OrderedRefinementCount: (l) =>
+    partitionsOf(sum(l)).filter((mu) => {
+      let at = 0;
+      return (
+        l.every((part) => {
+          let block = 0;
+          while (block < part && at < mu.length) block += mu[at++]!;
+          return block === part;
+        }) && at === mu.length
+      );
+    }).length,
+  RefinementCount: (l) => reachedBy(l, splitsOf),
+  CoarseningCount: (l) => reachedBy(l, mergesOf),
+  SingletonRefinementCount: splitChains,
 };
