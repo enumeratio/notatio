@@ -149,6 +149,41 @@ const differenceRows = (p: number[]): number[][] => {
   return rows;
 };
 
+/** The leaf labels of the binary search tree, by inserting the entries one at a time. */
+const searchTreeLeaves = (p: number[]): number[] => {
+  type Node = { key: number; left?: Node; right?: Node };
+  let root: Node | undefined;
+  for (const key of p) {
+    if (!root) root = { key };
+    else {
+      let node = root;
+      for (;;) {
+        const side = key < node.key ? "left" : "right";
+        if (!node[side]) {
+          node[side] = { key };
+          break;
+        }
+        node = node[side]!;
+      }
+    }
+  }
+  const leaves = (node?: Node): number[] =>
+    !node ? [] : !node.left && !node.right ? [node.key] : [...leaves(node.left), ...leaves(node.right)];
+  return leaves(root);
+};
+/** Occurrences of a length-3 pattern with no other entry inside the rectangle of its first and last positions and least and greatest values. */
+const boxedOccurrences = (p: number[], pattern: number[]): number =>
+  pairs(p)
+    .flatMap(([i, j]) => range(j + 1, p.length - 1).map((k): [number, number, number] => [i, j, k]))
+    .filter(
+      (at) =>
+        matchesAt(p, at, pattern) &&
+        range(at[0] + 1, at[2] - 1).every(
+          (m) =>
+            at.includes(m) || p[m]! < Math.min(...at.map((a) => p[a]!)) || p[m]! > Math.max(...at.map((a) => p[a]!)),
+        ),
+    ).length;
+
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -827,4 +862,14 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
           .every((v) => v === 0)
           ? 2
           : 1),
+  MinimalCycleDifference: (p) =>
+    p.length === 0 ? 0 : Math.min(...cycles(p).map((c) => Math.max(...c) - Math.min(...c))),
+  NonFixedPoints: (p) => p.filter((v, i) => v !== i + 1).length,
+  LargestSearchTreeLeafLabel: (p) => Math.max(0, ...searchTreeLeaves(p)),
+  NormalizedLeafLabelSum: (p) => sum(leafLabels(p)) - p.length,
+  DescentsMinusOneUnlessFirstEntryOne: (p) => descents(p).length - (p.length > 0 && p[0] !== 1 ? 1 : 0),
+  PermutationBreadth: (p) =>
+    p.length < 2 ? 0 : Math.min(...pairs(p).map(([i, j]) => Math.abs(i - j) + Math.abs(p[i]! - p[j]!))),
+  BoxedOccurrencesOf123: (p) => boxedOccurrences(p, [1, 2, 3]),
+  BoxedOccurrencesOf132: (p) => boxedOccurrences(p, [1, 3, 2]),
 };

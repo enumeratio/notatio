@@ -41,6 +41,7 @@ import {
   add,
   carried,
   fold,
+  floored,
   forEach,
   subtract,
   visiting,
@@ -2076,6 +2077,12 @@ const finiteDifference = (k: MathJSON): MathJSON =>
     "j",
   );
 
+/** The positions of the leaves of the increasing binary tree: the peaks, an end counting as a peak. */
+const peakPositions: MathJSON = where(
+  positions,
+  and(["If", greater("i", 1), less(previous, here), "True"], ["If", less("i", length()), greater(here, next), "True"]),
+);
+
 // The eighth batch: cycle spread, a leaf label of the increasing tree, longest-subsequence counts and
 // progressions, primes among position-value sums and products, and the Diaconis–Graham defect.
 const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
@@ -2094,20 +2101,7 @@ const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
   stat(
     "SmallestLeafLabel",
     "The smallest label of a leaf of the increasing binary tree of p: the least peak, an end counting as a peak.",
-    nonEmpty(
-      min(
-        forEach(
-          where(
-            positions,
-            and(
-              ["If", greater("i", 1), less(previous, here), "True"],
-              ["If", less("i", length()), greater(here, next), "True"],
-            ),
-          ),
-          here,
-        ),
-      ),
-    ),
+    nonEmpty(min(forEach(peakPositions, here))),
   ),
   word(
     "LongestIncreasingSubsequenceCount",
@@ -2164,6 +2158,127 @@ const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
     "InterpolatingPolynomialDegree",
     "The degree of the polynomial through the points (i, p(i)): the largest k with a nonzero k-th finite difference.",
     nonEmpty(max(where(["Range", 0, subtract(length(), 1)], ["NotEqual", finiteDifference("k"), 0], "k"))),
+  ),
+];
+
+/** The largest earlier entry below p(i), else 0: the lower end of the interval p(i) splits in the search tree. */
+const searchTreeLower: MathJSON = max([
+  "Join",
+  ["List", 0],
+  forEach(where(["Range", 1, "i"], less(at("j"), here), "j"), at("j"), "j"),
+]);
+/** The smallest earlier entry above p(i), else n + 1. */
+const searchTreeUpper: MathJSON = min([
+  "Join",
+  ["List", add(length(), 1)],
+  forEach(where(["Range", 1, "i"], greater(at("j"), here), "j"), at("j"), "j"),
+]);
+/** Whether p(i) is a leaf of the binary search tree: no later entry falls between its neighbors among the earlier ones. */
+const isSearchTreeLeaf: MathJSON = bind(
+  "lo",
+  searchTreeLower,
+  bind(
+    "hi",
+    searchTreeUpper,
+    equals(count(positions, and(greater("k", "i"), and(greater(at("k"), "lo"), less(at("k"), "hi"))), "k"), 0),
+    "integer",
+  ),
+  "integer",
+);
+
+/** Occurrences of a pattern on i < j < k with no other entry in the rectangle of positions i..k and values lo..hi. */
+const boxedOccurrences = (
+  relation: (a: string, b: string, c: string) => MathJSON,
+  lowest: (a: string, b: string, c: string) => MathJSON,
+  highest: (a: string, b: string, c: string) => MathJSON,
+): MathJSON =>
+  sumOver(
+    positions,
+    sumOver(
+      ["Range", add("i", 1), length()],
+      count(
+        ["Range", add("j", 1), length()],
+        and(
+          relation("i", "j", "k"),
+          equals(
+            count(
+              positions,
+              and(
+                and(greater("m", "i"), less("m", "k")),
+                and(
+                  ["NotEqual", "m", "j"],
+                  and(greater(at("m"), lowest("i", "j", "k")), less(at("m"), highest("i", "j", "k"))),
+                ),
+              ),
+              "m",
+            ),
+            0,
+          ),
+        ),
+        "k",
+      ),
+      "j",
+    ),
+  );
+
+// The ninth batch: cycle spread, leaf labels of the search and increasing trees, breadth and boxed patterns.
+const FINDSTAT_PERMUTATION_STATISTICS_9: readonly Definition[] = [
+  stat(
+    "MinimalCycleDifference",
+    "The smallest, over the cycles, of the largest difference between two elements of a cycle.",
+    nonEmpty(
+      min(forEach(cycleLeaders, max(forEach(where(positions, sameCycle("i", "m"), "m"), distance("m", "i"), "m")))),
+    ),
+  ),
+  stat("NonFixedPoints", "Positions i with p(i) != i.", nonEmpty(count(positions, ["NotEqual", here, "i"]))),
+  word(
+    "LargestSearchTreeLeafLabel",
+    "The largest label of a leaf of the binary search tree of p, inserting p(1), ..., p(n) in order.",
+    nonEmpty(max(forEach(where(positions, isSearchTreeLeaf), here))),
+  ),
+  word(
+    "NormalizedLeafLabelSum",
+    "The sum of the leaf labels of the increasing binary tree of p, less n.",
+    nonEmpty(subtract(floored(sumOver(peakPositions, here)), length())),
+  ),
+  word(
+    "DescentsMinusOneUnlessFirstEntryOne",
+    "The number of descents of p, less one when p(1) is not 1.",
+    hasPair(subtract(count(adjacent, fallsAfter), ["If", equals(at(1), 1), 0, 1])),
+  ),
+  stat(
+    "PermutationBreadth",
+    "The least Manhattan distance |i - j| + |p(i) - p(j)| between two points of the permutation matrix.",
+    hasPair(
+      min(
+        forEach(
+          adjacent,
+          min(forEach(["Range", add("i", 1), length()], add(distance("i", "j"), distance(here, at("j"))), "j")),
+        ),
+      ),
+    ),
+  ),
+  word(
+    "BoxedOccurrencesOf123",
+    "Occurrences of 123 with no other entry positioned between the first and last and valued between them.",
+    hasTriple(
+      boxedOccurrences(
+        (i, j, k) => and(less(at(i), at(j)), less(at(j), at(k))),
+        (i) => at(i),
+        (_i, _j, k) => at(k),
+      ),
+    ),
+  ),
+  word(
+    "BoxedOccurrencesOf132",
+    "Occurrences of 132 with no other entry positioned between the first and last and valued between the least and greatest.",
+    hasTriple(
+      boxedOccurrences(
+        (i, j, k) => and(less(at(i), at(k)), less(at(k), at(j))),
+        (i) => at(i),
+        (_i, j) => at(j),
+      ),
+    ),
   ),
 ];
 
@@ -2374,4 +2489,5 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_6,
   ...FINDSTAT_PERMUTATION_STATISTICS_7,
   ...FINDSTAT_PERMUTATION_STATISTICS_8,
+  ...FINDSTAT_PERMUTATION_STATISTICS_9,
 ];
