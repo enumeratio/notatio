@@ -16,6 +16,7 @@ import {
   bindList,
   count,
   equals,
+  floored,
   fold,
   forEach,
   visiting,
@@ -434,6 +435,65 @@ const intertwiningNumber: MathJSON = pairsWhere((a, b) =>
 
 /** Guard for a definition that pairs elements of different blocks — needs at least two. */
 const hasTwoBlocks = (body: MathJSON): MathJSON => ["If", less(blockCount, 2), 0, body];
+
+/** The lengths of the arcs of block `b`: gaps between consecutive elements. Empty for a singleton. */
+const gaps = (b: MathJSON): MathJSON =>
+  forEach(["Range", 1, subtract(["Length", b], 1), 1], subtract(at(add("j", 1), b), at("j", b)), "j");
+/** The extreme (`Max` or `Min`) arc length over the blocks that have an arc, else `otherwise`. */
+const arcLengthExtreme = (extreme: "Max" | "Min", otherwise: MathJSON): MathJSON => [
+  "If",
+  less(arcCount, 1),
+  otherwise,
+  [extreme, forEach(["Filter", "_x", ["Function", greater(["Length", "b"], 1), "b"]], [extreme, gaps("b")], "b")],
+];
+
+/** The least element of block `k` above `m`, or n + 1 when the block ends by then. */
+const firstAbove = (k: MathJSON, m: MathJSON): MathJSON => [
+  "If",
+  greater(["Last", at(k)], m),
+  at(
+    add(floored(sumOver(["Range", 1, ["Length", at(k)]], ["If", atMostValue(at("j", at(k)), m), 1, 0], "j")), 1),
+    at(k),
+  ),
+  add(n, 1),
+];
+/**
+ * The split product glues block i of the left factor to block i of the right one, so a set
+ * partition splits after m exactly when its blocks, in order of least element, reach above m in
+ * that same order (blocks that don't reach last). It factors into one more than that many parts.
+ */
+const unsplittableFactors: MathJSON = nonEmpty([
+  "If",
+  less(n, 2),
+  1,
+  add(
+    1,
+    sumOver(
+      ["Range", 1, subtract(n, 1), 1],
+      [
+        "If",
+        less(blockCount, 2),
+        1,
+        [
+          "If",
+          equals(
+            floored(
+              sumOver(
+                ["Range", 1, subtract(blockCount, 1), 1],
+                ["If", greater(firstAbove("k", "m"), firstAbove(add("k", 1), "m")), 1, 0],
+                "k",
+              ),
+            ),
+            0,
+          ),
+          1,
+          0,
+        ],
+      ],
+      "m",
+    ),
+  ),
+]);
 
 const openerOf = (k: MathJSON): MathJSON => ["At", at(k), 1];
 const closerOf = (k: MathJSON): MathJSON => ["Last", at(k)];
@@ -973,6 +1033,11 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
     "Pairs a < b in different blocks with b the greatest element of its block.",
     pairsWhere((a, b) => and(differentBlocks(a, b), isCloser(b))),
   ),
+  stat(
+    "CloserBeforeLargerPairs",
+    "Pairs a < b in different blocks with a the greatest element of its block.",
+    pairsWhere((a, b) => and(differentBlocks(a, b), isCloser(a))),
+  ),
   // The same patterns with conditions on their positions (Chern-Diaconis-Kane-Rhoades).
   stat(
     "OccurrencesOf1Over2Over3Openers2Closers3",
@@ -988,6 +1053,11 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
     "OccurrencesOf13Over2Openers1Closers3Arc13",
     "Occurrences of the pattern 13/2 with 1 the least element of its block, 3 the greatest element of its block and 1 and 3 consecutive in one block.",
     constrainedOccurrences("13Over2", { openers: [1], closers: [3], arcs: [[1, 3]] }),
+  ),
+  stat(
+    "OccurrencesOf1Over2Over3Openers3Closers12",
+    "Occurrences of the pattern 1/2/3 with 3 the least element of its block and 1 and 2 the greatest elements of their blocks.",
+    constrainedOccurrences("1Over2Over3", { openers: [3], closers: [1, 2] }),
   ),
   stat(
     "OccurrencesOf1Over2Over3Openers1Closers3",
@@ -1159,6 +1229,30 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
     "FindStat's St000253. A set of arcs mutually crosses when all start before any ends; the longest such chain is found at each point between starts and ends.",
   ),
   stat("NestingNumber", "The largest number of arcs that mutually nest.", nestingNumber, "FindStat's St000254."),
+  stat(
+    "SetPartitionDimension",
+    "The sum of the lengths of the arcs, taking for each block its largest element minus its smallest.",
+    sumOverBlocks(blockSpan),
+    "FindStat's St000728; the arcs join consecutive elements of a block, so the lengths add up to the block's span.",
+  ),
+  stat(
+    "MinimalArcLength",
+    "The length of the shortest arc; the number of elements when there is no arc.",
+    nonEmpty(arcLengthExtreme("Min", n)),
+    "FindStat's St000729.",
+  ),
+  stat(
+    "MaximalArcLength",
+    "The length of the longest arc; 0 when there is no arc.",
+    nonEmpty(arcLengthExtreme("Max", 0)),
+    "FindStat's St000730.",
+  ),
+  stat(
+    "UnsplittableFactorCount",
+    "The number of unsplittable factors of the set partition under the split product.",
+    unsplittableFactors,
+    "FindStat's St000823. The split product of set partitions of m and n glues the i-th block of the first to the i-th block of the second, shifted by m.",
+  ),
   stat(
     "TopologicallyConnectedComponents",
     "The topologically connected components of the arc diagram: blocks joined when an arc of one crosses an arc of the other.",

@@ -136,6 +136,11 @@ const pathsStarting = (directions: readonly number[]): MathJSON => {
   return overNodes(walk("t", directions));
 };
 
+/** 1 when every subtree of `subtrees`, in order, is nonempty (each read only once the ones before it are), else 0. */
+const allNonempty = (subtrees: readonly MathJSON[]): MathJSON =>
+  subtrees.reduceRight<MathJSON>((rest, subtree) => ifThen(isLeaf(subtree), 0, rest), 1);
+const rightChild = right("t");
+
 // ── ordered trees ────────────────────────────────────────────────────────────────────────
 
 // `Max`/`Min` of a `Map` stay unevaluated inside a nested recursion (a vertex with two children
@@ -425,6 +430,19 @@ const NESTED_STATISTICS: readonly Definition[] = [
       pathsStarting(steps),
       "A contiguous pattern of nodes along one path, the subtrees off it anything.",
     ),
+  ),
+
+  binary(
+    "RightForkRightLeftPatternCount",
+    "The number of nodes whose right child has two children, the right one of which has a left child.",
+    overNodes(allNonempty([rightChild, left(rightChild), right(rightChild), left(right(rightChild))])),
+    "FindStat's St000130: the contiguous pattern [.,[[.,.],[[.,.],.]]], whose empty slots match any subtree.",
+  ),
+  binary(
+    "ForkRightRightLeftPatternCount",
+    "The number of nodes with two children whose right child's right child has a left child.",
+    overNodes(allNonempty([left("t"), rightChild, right(rightChild), left(right(rightChild))])),
+    "FindStat's St000132: the contiguous pattern [[.,.],[.,[[.,.],.]]], whose empty slots match any subtree.",
   ),
 
   // ── ordered trees ──

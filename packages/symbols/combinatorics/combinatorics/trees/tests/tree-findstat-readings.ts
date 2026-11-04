@@ -74,6 +74,24 @@ const boundaryPaths = (t: Binary): Set<string> => {
   return paths;
 };
 
+/** A contiguous pattern in FindStat's notation: "." matches any subtree, [l, r] a node whose subtrees match l and r. */
+type Pattern = "." | readonly [Pattern, Pattern];
+const matches = (s: Binary, pattern: Pattern): boolean =>
+  pattern === "." || (s !== 0 && matches(s[0], pattern[0]) && matches(s[1], pattern[1]));
+const PATTERNS: Record<string, Pattern> = {
+  RightForkRightLeftPatternCount: [
+    ".",
+    [
+      [".", "."],
+      [[".", "."], "."],
+    ],
+  ],
+  ForkRightRightLeftPatternCount: [
+    [".", "."],
+    [".", [[".", "."], "."]],
+  ],
+};
+
 const PATHS: Record<string, readonly (1 | 2)[]> = {
   RightRightPathCount: [2, 2],
   RightRightRightPathCount: [2, 2, 2],
@@ -130,6 +148,12 @@ export const BINARY_READINGS: Record<string, (t: Binary) => number> = {
   NonRootBinaryNodes: (t) => binarySubtrees(t).filter((s) => s !== t && s[0] !== 0 && s[1] !== 0).length,
   HookNumber: hooks,
   VertexHeightSum: (t) => sum(binarySubtrees(t).map(binaryHeight)),
+  ...Object.fromEntries(
+    Object.entries(PATTERNS).map(([head, pattern]) => [
+      head,
+      (t: Binary) => binarySubtrees(t).filter((s) => matches(s, pattern)).length,
+    ]),
+  ),
   ...Object.fromEntries(
     Object.entries(PATHS).map(([head, steps]) => [
       head,
