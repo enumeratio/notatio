@@ -1699,6 +1699,14 @@ const NOVEL = [
   "LongestArithmeticProgression",
   "DiaconisGrahamDefect",
   "InterpolatingPolynomialDegree",
+  "MinimalCycleDifference",
+  "NonFixedPoints",
+  "LargestSearchTreeLeafLabel",
+  "NormalizedLeafLabelSum",
+  "DescentsMinusOneUnlessFirstEntryOne",
+  "PermutationBreadth",
+  "BoxedOccurrencesOf123",
+  "BoxedOccurrencesOf132",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because
