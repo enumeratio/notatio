@@ -16,7 +16,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "AffinePermutations": null,
   "AllOnes": {
@@ -37,7 +37,7 @@
     "glyph": "permutation",
     "columns": ["Inversions", "CycleCount", "FixedPoints", "Adjacencies"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "AlternatingSignMatrices": {
     "expr": "AlternatingSignMatrices(4)",
@@ -85,14 +85,14 @@
     "glyph": "dyck",
     "columns": ["Area", "Height", "Returns", "AdjointInvariantDescents"],
     "derived": true,
-    "statistics": 134
+    "statistics": 143
   },
   "BaxterPermutations": {
     "expr": "BaxterPermutations(4)",
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "BellNumbers": {
     "expr": "Take(BellNumbers, 20)",
@@ -104,7 +104,7 @@
     "expr": "BinaryBracelets(6)",
     "columns": ["Descents", "Ascents"],
     "derived": false,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryNecklaces": {
     "expr": "BinaryNecklaces(4)",
@@ -115,9 +115,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryPalindromes": {
     "expr": "BinaryPalindromes(4)",
@@ -128,9 +128,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryTreeParentArrays": {
     "expr": "BinaryTreeParentArrays(4)",
@@ -157,7 +157,7 @@
     "glyph": "nested-tree",
     "columns": ["BinaryNodes", "BoundaryNodes", "CollessIndex", "DistinctSubtrees"],
     "derived": true,
-    "statistics": 33
+    "statistics": 35
   },
   "BinaryWords": {
     "expr": "BinaryWords(4)",
@@ -168,9 +168,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BinaryWordsByWeight": {
     "expr": "BinaryWordsByWeight(4, 2)",
@@ -181,9 +181,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "LeadingOnesCount"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "BooleanAlgebra": null,
   "BooleanPermutations": {
@@ -191,7 +191,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "BoundedPartPartitions": null,
   "BoxConfinedPartitions": null,
@@ -265,7 +265,7 @@
     "glyph": "permutation",
     "columns": ["Ascents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "CollatzTrajectories": null,
   "Collections": null,
@@ -297,7 +297,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "ContinuedFractions": null,
   "CorePartitions": null,
@@ -327,7 +327,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "MajorIndex", "Ascents"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "Cyclohedron": null,
   "DecoratedPermutations": null,
@@ -363,7 +363,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "MajorIndex"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "Dissections": null,
   "DistinctPartitions": {
@@ -378,7 +378,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "LargestPart", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 154
+    "statistics": 161
   },
   "DoubleFactorialNumbers": {
     "expr": "Take(DoubleFactorialNumbers, 20)",
@@ -405,7 +405,7 @@
     "glyph": "dyck",
     "columns": ["Height", "Area", "Returns"],
     "derived": false,
-    "statistics": 134
+    "statistics": 143
   },
   "DyckPathsByHeight": {
     "expr": "DyckPathsByHeight(4, 2)",
@@ -419,7 +419,7 @@
     "glyph": "dyck",
     "columns": ["Area", "Returns", "AdjointInvariantDescents", "AreaAboveBouncePath"],
     "derived": true,
-    "statistics": 134
+    "statistics": 143
   },
   "EgyptianFractions": null,
   "EmirpPrimes": {
@@ -453,7 +453,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "EvilNumbers": {
     "expr": "Take(EvilNumbers, 20)",
@@ -478,9 +478,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "FibonacciCompositions": {
     "expr": "FibonacciCompositions(4)",
@@ -520,7 +520,7 @@
     "glyph": "dyck",
     "columns": ["Area", "Height", "Returns", "AdjointInvariantDescents"],
     "derived": true,
-    "statistics": 134
+    "statistics": 143
   },
   "FiniteSetElements": null,
   "Finsets": null,
@@ -574,14 +574,14 @@
     "glyph": "dyck",
     "columns": ["Area", "Height", "Returns", "AdjointInvariantDescents"],
     "derived": true,
-    "statistics": 134
+    "statistics": 143
   },
   "GrassmannianPermutations": {
     "expr": "GrassmannianPermutations(4)",
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "GrayCodes": {
     "expr": "GrayCodes(4)",
@@ -592,9 +592,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "HappyNumbers": {
     "expr": "Take(HappyNumbers, 20)",
@@ -669,7 +669,7 @@
     "glyph": "partition",
     "columns": ["PartCount", "LargestPart", "DistinctParts", "DurfeeSquare"],
     "derived": false,
-    "statistics": 154
+    "statistics": 161
   },
   "Involutions": {
     "expr": "Involutions(4)",
@@ -683,7 +683,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "JacobsthalNumbers": {
     "expr": "Take(JacobsthalNumbers, 20)",
@@ -716,7 +716,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "FixedPoints", "MajorIndex"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "KDescentPermutations": {
     "expr": "KDescentPermutations(4, 2)",
@@ -730,7 +730,7 @@
     "glyph": "permutation",
     "columns": ["Inversions", "CycleCount", "FixedPoints", "MajorIndex"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "KDyckPaths": null,
   "KFreeIntegers": {
@@ -751,7 +751,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "FixedPoints", "MajorIndex", "Ascents"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "KLyndonWords": {
     "expr": "KLyndonWords(4, 2)",
@@ -853,7 +853,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "DurfeeSquare", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 154
+    "statistics": 161
   },
   "LehmerCodes": {
     "expr": "LehmerCodes(4)",
@@ -890,9 +890,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents", "Runs"],
+    "columns": ["Descents", "BalancedPrefixCount", "ChangeCount", "HammingWeight"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "LuckyNumbers": {
     "expr": "Take(LuckyNumbers, 20)",
@@ -923,9 +923,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": [],
+    "columns": ["BalancedPrefixCount", "HammingWeight", "LongestRunOfOnes", "OddOneRunCount"],
     "derived": true,
-    "statistics": 2
+    "statistics": 13
   },
   "MersennePrimes": {
     "expr": "Take(MersennePrimes, 8)",
@@ -996,7 +996,7 @@
     "glyph": "permutation",
     "columns": ["CycleCount", "FixedPoints"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "NonCrossingMatchings": {
     "expr": "NonCrossingMatchings(4)",
@@ -1010,7 +1010,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "NonCrossingPartitions": {
     "expr": "NonCrossingPartitions(4)",
@@ -1024,14 +1024,14 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlockSizeSpan", "Blocks"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "NonCrossingPermutations": {
     "expr": "NonCrossingPermutations(4)",
     "glyph": "permutation",
     "columns": ["CycleCount", "FixedPoints"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "NonCrossingTrees": {
     "expr": "NonCrossingTrees(3)",
@@ -1065,7 +1065,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "NonNestingPartitions": {
     "expr": "NonNestingPartitions(4)",
@@ -1079,7 +1079,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlockSizeSpan", "Blocks"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "OctagonalNumbers": {
     "expr": "Take(OctagonalNumbers, 20)",
@@ -1113,7 +1113,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "LargestPart", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 154
+    "statistics": 161
   },
   "OdiousNumbers": {
     "expr": "Take(OdiousNumbers, 20)",
@@ -1241,7 +1241,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "PerfectNumbers": {
     "expr": "Take(PerfectNumbers, 7)",
@@ -1282,7 +1282,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "PermutationsAvoiding132": {
     "expr": "PermutationsAvoiding132(4)",
@@ -1296,7 +1296,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "PermutationsAvoiding213": {
     "expr": "PermutationsAvoiding213(4)",
@@ -1310,7 +1310,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "PermutationsAvoiding231": {
     "expr": "PermutationsAvoiding231(4)",
@@ -1324,7 +1324,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "PermutationsAvoiding312": {
     "expr": "PermutationsAvoiding312(4)",
@@ -1338,7 +1338,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "PermutationsAvoiding321": {
     "expr": "PermutationsAvoiding321(4)",
@@ -1352,7 +1352,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions", "CycleCount", "FixedPoints"],
     "derived": true,
-    "statistics": 283
+    "statistics": 291
   },
   "PerniciousNumbers": {
     "expr": "Take(PerniciousNumbers, 20)",
@@ -1443,7 +1443,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "DurfeeSquare", "LargestPart", "PartCount"],
     "derived": true,
-    "statistics": 154
+    "statistics": 161
   },
   "PrimePowerNumbers": {
     "expr": "Take(PrimePowerNumbers, 20)",
@@ -1455,7 +1455,7 @@
     "expr": "PrimitiveBinaryStrings(6)",
     "columns": ["Descents", "Ascents"],
     "derived": false,
-    "statistics": 2
+    "statistics": 13
   },
   "PrimorialNumbers": {
     "expr": "Take(PrimorialNumbers, 20)",
@@ -1529,7 +1529,7 @@
     "glyph": "set-partition",
     "columns": ["Successions"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "RiordanPaths": {
     "expr": "RiordanPaths(4)",
@@ -1623,7 +1623,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "SetCompositions": {
     "expr": "SetCompositions(4)",
@@ -1644,7 +1644,7 @@
     "glyph": "set-partition",
     "columns": ["Length", "Max(Map(Length, _))"],
     "derived": false,
-    "statistics": 105
+    "statistics": 111
   },
   "SetPartitionsIntoKBlocks": {
     "expr": "SetPartitionsIntoKBlocks(4, 2)",
@@ -1658,7 +1658,7 @@
     "glyph": "set-partition",
     "columns": ["Antisingletons", "BlockMajorIndex", "BlockSizeSpan", "BlocksAndAntisingletons"],
     "derived": true,
-    "statistics": 105
+    "statistics": 111
   },
   "SexyPrimes": {
     "expr": "Take(SexyPrimes, 20)",
@@ -1693,7 +1693,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "Simplex": null,
   "SingletonSpecies": null,
@@ -1726,7 +1726,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "Inversions"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "SophieGermainPrimes": {
     "expr": "Take(SophieGermainPrimes, 20)",
@@ -1766,7 +1766,7 @@
     "glyph": "partition",
     "columns": ["LargestPart", "PartCount", "AlladiWeight", "ArmOfFirstCell"],
     "derived": true,
-    "statistics": 154
+    "statistics": 161
   },
   "SquarePyramidalNumbers": {
     "expr": "Take(SquarePyramidalNumbers, 20)",
@@ -1796,9 +1796,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "StarNumbers": {
     "expr": "Take(StarNumbers, 20)",
@@ -1854,7 +1859,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "MajorIndex", "Inversions", "CycleCount", "FixedPoints"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "SytHookShape": {
     "expr": "SytHookShape(4)",
@@ -1866,9 +1871,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "SytTwoColumn": {
     "expr": "SytTwoColumn(4)",
@@ -1880,9 +1890,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "SytTwoRow": {
     "expr": "SytTwoRow(4)",
@@ -1894,9 +1909,14 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "FirstColumnInitialSequenceLength",
+      "FirstEntryInLastRow",
+      "LastEntryInFirstRow"
+    ],
     "derived": true,
-    "statistics": 2
+    "statistics": 12
   },
   "TernaryGrayCodes": {
     "expr": "TernaryGrayCodes(4)",
@@ -1963,7 +1983,7 @@
     "expr": "TriStrings(6)",
     "columns": ["Descents", "Ascents"],
     "derived": false,
-    "statistics": 2
+    "statistics": 13
   },
   "TriangularCompositions": {
     "expr": "TriangularCompositions(4)",
@@ -1997,7 +2017,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "LargestPart", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 154
+    "statistics": 161
   },
   "TribonacciNumbers": {
     "expr": "Take(TribonacciNumbers, 20)",
@@ -2028,7 +2048,7 @@
     "glyph": "permutation",
     "columns": ["Descents", "MajorIndex"],
     "derived": false,
-    "statistics": 283
+    "statistics": 291
   },
   "Weak3Compositions": null,
   "WeakCompositionsIntoKParts": null,

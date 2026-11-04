@@ -368,7 +368,50 @@ const nakayama = (w: Word) => {
     const found = modules.find(([x, y]) => x + y - 1 === socle && (x === 0 || series[x - 1]! <= y));
     return found ? projectiveDimension(...found) : 0;
   };
-  return { series, simple, injective, all, ofLength, injectiveAtSocle, global: Math.max(...simple) };
+  const isInjective = (x: number, y: number): boolean => x === 0 || series[x - 1]! <= y;
+  // The injective hull of a module ending at the socle starts at the leftmost top that reaches it.
+  const hullTop = (socle: number): number => series.findIndex((entry, x) => x + entry > socle);
+  /** Leading terms of the minimal projective resolution that are injective; all of them (Infinity) if none is not. */
+  const codominantDimension = (top: number, length: number): number => {
+    let [x, y, terms] = [top, length, 0];
+    for (;;) {
+      if (!isInjective(x, series[x]!)) return terms;
+      terms++;
+      if (y === series[x]) return Infinity;
+      [x, y] = [x + y, series[x]! - y];
+    }
+  };
+  /** Leading terms of the minimal injective coresolution that are projective, by cosyzygies. */
+  const dominantDimension = (top: number, length: number): number => {
+    let [x, y, terms] = [top, length, 0];
+    for (;;) {
+      const hull = hullTop(x + y - 1);
+      if (x + y - hull !== series[hull]) return terms;
+      terms++;
+      if (x === hull) return Infinity;
+      [x, y] = [hull, x - hull];
+    }
+  };
+  const injectiveModules = modules.filter(([x, y]) => isInjective(x, y));
+  const nonProjectiveInjectiveModules = injectiveModules.filter(([x, y]) => y !== series[x]);
+  // The algebra's dominant dimension: the least over its projectives that are not injective.
+  const dominant = Math.min(
+    ...series.flatMap((entry, x) => (isInjective(x, entry) ? [] : [dominantDimension(x, entry)])),
+  );
+  return {
+    series,
+    simple,
+    injective,
+    all,
+    ofLength,
+    injectiveAtSocle,
+    global: Math.max(...simple),
+    dominant,
+    injectiveModules,
+    nonProjectiveInjectiveModules,
+    projectiveDimension,
+    codominantDimension,
+  };
 };
 const overNakayama =
   (body: (a: ReturnType<typeof nakayama>) => number) =>
@@ -419,6 +462,38 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
   SecondToLastInjectiveProjectiveDimension: overNakayama((a) => a.injectiveAtSocle(a.series.length - 2)),
   SimpleSummandsOfSecondRadicalLayer: overNakayama((a) => countOf(a.series, (c) => c >= 3)),
   InjectivesOfMaximalProjectiveDimension: overNakayama((a) => countOf(a.injective, (d) => d === a.global)),
+  NakayamaDominantDimension: overNakayama((a) => a.dominant),
+  NakayamaGlobalMinusDominantDimension: overNakayama((a) => a.global - a.dominant),
+  PeaksMinusNakayamaDominantDimension: (w) => (w.length === 0 ? 0 : peaksOf(w) - nakayama(w).dominant),
+  InjectivesOfCodominantDimensionEqualToGlobalDimension: overNakayama((a) =>
+    countOf(
+      a.injectiveModules.map(([x, y]) => a.codominantDimension(x, y)),
+      (d) => d === a.global,
+    ),
+  ),
+  InjectivesOfCodominantDimensionAtLeastTwo: overNakayama((a) =>
+    countOf(
+      a.injectiveModules.map(([x, y]) => a.codominantDimension(x, y)),
+      (d) => d >= 2,
+    ),
+  ),
+  NonProjectiveInjectiveCodominantDimensionSum: overNakayama((a) =>
+    sum(a.nonProjectiveInjectiveModules.map(([x, y]) => a.codominantDimension(x, y))),
+  ),
+  ProjectiveMinusCodominantDimensionSum: overNakayama((a) =>
+    sum(a.nonProjectiveInjectiveModules.map(([x, y]) => a.projectiveDimension(x, y) - a.codominantDimension(x, y))),
+  ),
+  // FindStat's St001170 counts injectives by the projective dimension of their socle.
+  SimplesOfNonMaximalProjectiveDimension: overNakayama((a) =>
+    countOf(
+      a.injectiveModules.map(([x, y]) => a.projectiveDimension(x + y - 1, 1)),
+      (d) => d < a.global,
+    ),
+  ),
+  NonProjectiveInjectiveProjectiveDimensionSpread: overNakayama((a) => {
+    const dimensions = a.nonProjectiveInjectiveModules.map(([x, y]) => a.projectiveDimension(x, y));
+    return Math.max(...dimensions) - Math.min(...dimensions);
+  }),
   Area: areaOf,
   Bounce: bounceOf,
   BounceCount: (w) => (w.length === 0 ? 0 : bouncePoints(w).length - 2),

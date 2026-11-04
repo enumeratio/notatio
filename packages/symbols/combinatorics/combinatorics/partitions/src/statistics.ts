@@ -465,6 +465,256 @@ const rotationFixedColorings: MathJSON = bind(
   "number",
 );
 
+/** The bitwise exclusive or of two nonnegative integers below 2^(size + 1): u + v - 2 (u and v), the common bits summed place by place. */
+const bitwiseXor = (u: MathJSON, v: MathJSON): MathJSON => {
+  const bitOf = (value: MathJSON): MathJSON => [
+    "Mod",
+    ["Divide", subtract(value, ["Mod", value, ["Power", 2, "k"]]), ["Power", 2, "k"]],
+    2,
+  ];
+  return subtract(add(u, v), [
+    "Multiply",
+    2,
+    sumOver(["Range", 0, total], ["Multiply", ["Power", 2, "k"], bitOf(u), bitOf(v)], "k"),
+  ]);
+};
+/** The nim-sum of a list of nonnegative integers. */
+const nimSum = (values: MathJSON): MathJSON => fold(values, 0, bitwiseXor("a", "b"));
+
+/**
+ * The Grundy values g(1) .. g(size) of "Couples are forever" on one part: a part above 2 splits into two parts,
+ * a position is worth the nim-sum of its parts, so g(m) is the least value missing from the nim-sums g(s) + g(m - s).
+ */
+const couplesGrundyTable: MathJSON = fold(
+  upTo(total),
+  forEach(upTo(total), 0),
+  forEach(upTo(total), [
+    "If",
+    equals("i", "b"),
+    [
+      "If",
+      less("b", 3),
+      0,
+      bind(
+        "s",
+        forEach(["Range", 1, subtract("b", 1)], bitwiseXor(at("j", "a"), at(subtract("b", "j"), "a")), "j"),
+        [
+          "Min",
+          forEach(
+            ["Range", 0, subtract("b", 1)],
+            ["If", equals(sumOver("s", ["If", equals("m", "k"), 1, 0], "m"), 0), "k", "b"],
+            "k",
+          ),
+        ],
+        "list<integer>",
+      ),
+    ],
+    at("i", "a"),
+  ]),
+);
+
+/** Staircase nim on the rows: a row loses cells down to the next row's length, so the differences are heaps whose coins fall one step; the nim-sum of the odd-numbered heaps is the Grundy value. */
+const oddStepHeaps: MathJSON = forEach(positions, [
+  "If",
+  equals(["Mod", "i", 2], 1),
+  ["If", equals("i", length()), here, subtract(here, at(add("i", 1)))],
+  0,
+]);
+
+/** Base for coding a partition of this size by its multiplicities: place j holds how many parts equal j. */
+const codeBase: MathJSON = add(total, 1);
+const placeValue = (j: MathJSON): MathJSON => ["Power", codeBase, j];
+/** How many parts equal j, read from the code. */
+const multiplicityIn = (code: MathJSON, j: MathJSON): MathJSON => [
+  "Mod",
+  ["Divide", subtract(code, ["Mod", code, placeValue(j)]), placeValue(j)],
+  codeBase,
+];
+const startCode: MathJSON = sumOver(positions, placeValue(here));
+/** Whole division of the nonnegative integer m by d. */
+const quotientOf = (m: MathJSON, d: MathJSON): MathJSON => ["Divide", subtract(m, ["Mod", m, d]), d];
+/** The splits and merges of a code are indexed by a pair (j, k) of numbers 1 .. size - 1, so size - 1 squared in all. */
+const movePairs: MathJSON = ["Power", subtract(total, 1), 2];
+/** The code after move `q` (from 0) applied to `code`, or `otherwise` when the move does not apply. Split: a part j >= 2 becomes a and j - a with a <= j - a. */
+const splitCode = (code: MathJSON, q: MathJSON, otherwise: MathJSON): MathJSON =>
+  bind(
+    "sj",
+    add(2, quotientOf(q, subtract(total, 1))),
+    bind(
+      "sa",
+      add(1, ["Mod", q, subtract(total, 1)]),
+      [
+        "If",
+        and(atMostValue(["Multiply", 2, "sa"], "sj"), atLeastValue(multiplicityIn(code, "sj"), 1)),
+        subtract(code, subtract(placeValue("sj"), add(placeValue("sa"), placeValue(subtract("sj", "sa"))))),
+        otherwise,
+      ],
+      "integer",
+    ),
+    "integer",
+  );
+/** Merge: two parts j and k (two distinct parts, or two of the same size) become one part j + k. */
+const mergeCode = (code: MathJSON, q: MathJSON): MathJSON =>
+  bind(
+    "mj",
+    add(1, quotientOf(q, subtract(total, 1))),
+    bind(
+      "mk",
+      add(1, ["Mod", q, subtract(total, 1)]),
+      bind(
+        "mneed",
+        ["If", equals("mj", "mk"), 2, 1],
+        [
+          "If",
+          and(
+            atMostValue(add("mj", "mk"), total),
+            and(atLeastValue(multiplicityIn(code, "mj"), "mneed"), atLeastValue(multiplicityIn(code, "mk"), "mneed")),
+          ),
+          add(subtract(code, add(placeValue("mj"), placeValue("mk"))), placeValue(add("mj", "mk"))),
+          code,
+        ],
+        "integer",
+      ),
+      "integer",
+    ),
+    "integer",
+  );
+/** The codes reached from a list of codes by one more move, itself kept, without repeats. */
+const reachedByMoves = (move: (code: MathJSON, q: MathJSON) => MathJSON): MathJSON => [
+  "Unique",
+  [
+    "Join",
+    "a",
+    forEach(
+      ["Range", 1, ["Multiply", length("a"), movePairs]],
+      bind(
+        "mc",
+        at(add(1, quotientOf(subtract("e", 1), movePairs)), "a"),
+        move("mc", ["Mod", subtract("e", 1), movePairs]),
+        "integer",
+      ),
+      "e",
+    ),
+  ],
+];
+/** The partitions that refine this one (itself included): every code reachable by splitting parts, one split fewer than the size at most. */
+const refinementCodes: MathJSON = fold(
+  ["Range", 1, subtract(total, 1), 1],
+  ["List", startCode],
+  reachedByMoves((code, q) => splitCode(code, q, code)),
+);
+/** The partitions this one refines (itself included): every code reachable by merging parts. */
+const coarseningCodes: MathJSON = fold(
+  ["Range", 1, subtract(total, 1), 1],
+  ["List", startCode],
+  reachedByMoves(mergeCode),
+);
+/**
+ * Chains of single splits from this partition to all ones, by levels: the accumulator holds the codes reached, then the
+ * number of chains to each, in one list (code 0, never a partition, takes the moves that do not apply). Each level has
+ * exactly one more part, so every chain takes size - length splits.
+ */
+const refinementChains: MathJSON = bind(
+  "levels",
+  fold(
+    ["Range", 1, subtract(total, length()), 1],
+    ["List", startCode, 1],
+    bind(
+      "half",
+      ["Divide", length("a"), 2],
+      bind(
+        "to",
+        forEach(
+          ["Range", 1, ["Multiply", "half", movePairs]],
+          splitCode(at(add(1, quotientOf(subtract("e", 1), movePairs)), "a"), ["Mod", subtract("e", 1), movePairs], 0),
+          "e",
+        ),
+        bind(
+          "next",
+          ["Unique", "to"],
+          [
+            "Join",
+            "next",
+            forEach(
+              "next",
+              [
+                "If",
+                equals("u", 0),
+                0,
+                sumOver(
+                  ["Range", 1, ["Multiply", "half", movePairs]],
+                  [
+                    "If",
+                    equals(at("e", "to"), "u"),
+                    at(add("half", add(1, quotientOf(subtract("e", 1), movePairs))), "a"),
+                    0,
+                  ],
+                  "e",
+                ),
+              ],
+              "u",
+            ),
+          ],
+          "list<integer>",
+        ),
+        "list<integer>",
+      ),
+      "integer",
+    ),
+  ),
+  sumOver(["Range", 1, ["Divide", length("levels"), 2]], at(add(["Divide", length("levels"), 2], "i"), "levels")),
+  "list<integer>",
+);
+
+/**
+ * The ordered refinements, by a table over the totals t = 0 .. size. Entry (t, m) counts the weakly decreasing sequences of
+ * parts summing to t and ending in m; a part m closes the total t from t - m, but only if no partial sum of this partition
+ * falls strictly between (the sequence cuts into blocks summing to the parts). Row 0 stands for "no part yet", a part of any size.
+ */
+const orderedRefinementTable: MathJSON = bind(
+  "pre",
+  forEach(positions, sumOver(["Range", 1, "i"], at("q"), "q")),
+  bind(
+    "w",
+    at(
+      add(total, 1),
+      fold(
+        upTo(total),
+        forEach(
+          upTo(add(total, 1)),
+          forEach(upTo(total), ["If", and(equals("r", 1), equals("c", total)), 1, 0], "c"),
+          "r",
+        ),
+        forEach(
+          upTo(add(total, 1)),
+          [
+            "If",
+            equals("r", add("b", 1)),
+            forEach(
+              upTo(total),
+              [
+                "If",
+                and(
+                  atMostValue("c", "b"),
+                  equals(sumOver("pre", ["If", and(greater("s", subtract("b", "c")), less("s", "b")), 1, 0], "s"), 0),
+                ),
+                sumOver(["Range", "c", total], at("m", at(add(subtract("b", "c"), 1), "a")), "m"),
+                0,
+              ],
+              "c",
+            ),
+            at("r", "a"),
+          ],
+          "r",
+        ),
+      ),
+    ),
+    ["Sum", "w"],
+    "list<integer>",
+  ),
+  "list<integer>",
+);
+
 export const PARTITION_STATISTICS: readonly Definition[] = [
   stat("LargestPart", "The largest part.", nonEmpty(largest)),
   stat(
@@ -1596,6 +1846,52 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "BulgarianSolitairePreperiod",
     "The steps of Bulgarian solitaire before this partition reaches the cycle it ends in.",
     nonEmpty(onSolitaireCycle(solitairePreperiod)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+
+  // ── FindStat's integer-partition statistics, batch 7 ────────────────────────────────────
+
+  stat("PartitionSize", "The sum of the parts.", nonEmpty(total)),
+  stat(
+    "CouplesAreForeverGrundyValue",
+    "The Grundy value of the game that splits a part above 2 into two parts: the nim-sum of the values of the parts, each the least value missing from the nim-sums over its splits.",
+    nonEmpty(bind("g", couplesGrundyTable, nimSum(forEach(positions, at(here, "g"))), "list<integer>")),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "RowRemovalGrundyValue",
+    "The Grundy value of the game that removes cells from the end of a row while the diagram stays a partition: staircase nim, the nim-sum of the differences of consecutive parts at odd positions.",
+    nonEmpty(nimSum(oddStepHeaps)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "OrderedRefinementCount",
+    "The partitions whose parts cut, in order, into consecutive blocks summing to the parts of this one.",
+    nonEmpty(orderedRefinementTable, 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "RefinementCount",
+    "The partitions that refine this one, whose parts subdivide to give theirs. Itself included.",
+    nonEmpty(["If", less(total, 2), 1, ["Length", refinementCodes]], 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "CoarseningCount",
+    "The partitions that coarsen this one, whose parts subdivide to give its. Itself included.",
+    nonEmpty(["If", less(total, 2), 1, ["Length", coarseningCodes]], 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "SingletonRefinementCount",
+    "The chains of single splits (a part into two) from this partition down to all ones.",
+    nonEmpty(["If", less(total, 2), 1, refinementChains], 1),
     undefined,
     TABLE_CHECK_WEIGHT,
   ),

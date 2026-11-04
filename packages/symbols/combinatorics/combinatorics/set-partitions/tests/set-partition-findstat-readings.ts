@@ -114,7 +114,68 @@ const crossingComponents = (p: SetPartition): number => {
   return p.filter((_, i) => find(i) === i).length;
 };
 
+const partitionsBySize = new Map<number, SetPartition[]>();
+/** Every set partition of 1..n, blocks in order of least element. */
+const partitionsOf = (n: number): SetPartition[] => {
+  let found = partitionsBySize.get(n);
+  if (found === undefined) {
+    found =
+      n === 0
+        ? [[]]
+        : partitionsOf(n - 1).flatMap((rest) => [
+            ...rest.map((_, b) => rest.map((block, k) => (k === b ? [...block, n] : block))),
+            [...rest, [n]],
+          ]);
+    partitionsBySize.set(n, found);
+  }
+  return found;
+};
+
+/**
+ * FindStat's split product: block i of the first factor joins block i of the second, shifted by
+ * the size of the first; the blocks the shorter factor lacks are left alone.
+ */
+const splitProduct = (first: SetPartition, second: SetPartition): SetPartition => {
+  const shift = size(first);
+  return Array.from({ length: Math.max(first.length, second.length) }, (_, i) => [
+    ...(first[i] ?? []),
+    ...(second[i] ?? []).map((e) => e + shift),
+  ]);
+};
+const keyOf = (p: SetPartition): string => JSON.stringify(p);
+
+const unsplittableBySize = new Map<number, Map<string, SetPartition>>();
+/** The set partitions of n that are no split product of smaller ones. */
+const unsplittable = (n: number): Map<string, SetPartition> => {
+  let found = unsplittableBySize.get(n);
+  if (found === undefined) {
+    found = new Map(partitionsOf(n).map((p) => [keyOf(p), p]));
+    for (let m = 1; m < n; m++)
+      for (const first of partitionsOf(m))
+        for (const second of partitionsOf(n - m)) found.delete(keyOf(splitProduct(first, second)));
+    unsplittableBySize.set(n, found);
+  }
+  return found;
+};
+/** The factors of the set partition: an unsplittable first factor, then the factors of the rest. */
+const factorCount = (p: SetPartition): number => {
+  const n = size(p);
+  if (n === 0) return 0;
+  if (unsplittable(n).has(keyOf(p))) return 1;
+  for (let m = 1; m < n; m++)
+    for (const first of unsplittable(m).values())
+      for (const rest of partitionsOf(n - m))
+        if (keyOf(splitProduct(first, rest)) === keyOf(p)) return 1 + factorCount(rest);
+  throw new Error(`${keyOf(p)} has no factorization`);
+};
+
 export const SET_PARTITION_READINGS: Readonly<Record<string, (p: SetPartition) => number>> = {
+  CloserBeforeLargerPairs: (p) => occurrences(p, [[1], [2]], [], [1]),
+  OccurrencesOf1Over2Over3Openers3Closers12: (p) => occurrences(p, [[1], [2], [3]], [3], [1, 2]),
+  SetPartitionDimension: (p) => sum(arcs(p).map(([a, b]) => b - a)),
+  MinimalArcLength: (p) => (arcs(p).length === 0 ? size(p) : Math.min(...arcs(p).map(([a, b]) => b - a))),
+  MaximalArcLength: (p) => (arcs(p).length === 0 ? 0 : Math.max(...arcs(p).map(([a, b]) => b - a))),
+  UnsplittableFactorCount: factorCount,
   CrossingNumber: (p) => largestMutualSet(p, crosses),
   NestingNumber: (p) => largestMutualSet(p, nests),
   TopologicallyConnectedComponents: crossingComponents,

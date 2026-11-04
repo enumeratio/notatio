@@ -204,6 +204,30 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00240", rows: 1200, compared: 873, skipped: 0 }],
   },
   {
+    name: "CycleAsOneLineNotation",
+    from: "Permutation",
+    to: "Permutation",
+    findstat: [{ id: "Mp00090", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
+    name: "SimionSchmidt",
+    from: "Permutation",
+    to: "Permutation",
+    findstat: [{ id: "Mp00068", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
+    name: "ToricPromotion",
+    from: "Permutation",
+    to: "Permutation",
+    findstat: [{ id: "Mp00310", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
+    name: "InverseToricPromotion",
+    from: "Permutation",
+    to: "Permutation",
+    findstat: [{ id: "Mp00309", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
     name: "Reverse",
     from: "SignedPermutation",
     to: "SignedPermutation",
@@ -1062,10 +1086,28 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00178", rows: 1200, compared: 126, skipped: 0 }],
   },
   {
+    name: "StandardPermutation",
+    from: "BinaryWord",
+    to: "Permutation",
+    findstat: [{ id: "Mp00336", rows: 1022, compared: 126, skipped: 0 }],
+  },
+  {
     name: "SupportDyckPath",
     from: "ParkingFunction",
     to: "DyckPath",
     findstat: [{ id: "Mp00056", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "LabelingPermutation",
+    from: "ParkingFunction",
+    to: "Permutation",
+    findstat: [{ id: "Mp00055", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "CarPermutation",
+    from: "ParkingFunction",
+    to: "Permutation",
+    findstat: [{ id: "Mp00053", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
     name: "FoataHan",

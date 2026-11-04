@@ -87,6 +87,7 @@ const OWN_SAMPLES: Record<string, { contents: unknown; caption: string }> = {
     contents: ["List", ["List", 1, 4], ["List", 2, 3]],
     caption: "the nesting $\\{1,4\\} \\mid \\{2,3\\}$",
   },
+  SimionSchmidt: { contents: ["List", 1, 2, 3], caption: "the identity $123$" },
 };
 
 function exampleFor(map: CombinatorialMap): { expr: unknown; expected: unknown; caption?: string }[] {
