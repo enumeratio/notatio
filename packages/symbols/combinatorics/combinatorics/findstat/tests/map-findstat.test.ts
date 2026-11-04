@@ -329,6 +329,13 @@ const IDS: Readonly<Record<string, string>> = {
   "AdinBagnoRoichman@DyckPath": "Mp00124",
   "Ringel@DyckPath": "Mp00201",
   "SupportDyckPath@ParkingFunction": "Mp00056",
+  "CycleAsOneLineNotation@Permutation": "Mp00090",
+  "SimionSchmidt@Permutation": "Mp00068",
+  "ToricPromotion@Permutation": "Mp00310",
+  "InverseToricPromotion@Permutation": "Mp00309",
+  "StandardPermutation@BinaryWord": "Mp00336",
+  "LabelingPermutation@ParkingFunction": "Mp00055",
+  "CarPermutation@ParkingFunction": "Mp00053",
 };
 
 test("every reading names the FindStat map it is", () => {
