@@ -42,9 +42,9 @@ doesn't actually answer).
 vp check
 vp test
 
-vp node packages/census/scripts/audit-head-map.ts          # rebuild head-map-audit-data.ts (gitignored; `build` runs it)
-vp node packages/census/scripts/collect-wolfram-frontier.ts # scrape Wolfram's docs examples for call forms and head gaps
-vp node packages/census/scripts/type-records.ts             # write each package's contribution into the reference records, then rebuild the manifest
+node packages/census/scripts/audit-head-map.ts          # rebuild head-map-audit-data.ts (gitignored; `build` runs it)
+node packages/census/scripts/collect-wolfram-frontier.ts # scrape Wolfram's docs examples for call forms and head gaps
+node packages/census/scripts/type-records.ts             # write each package's contribution into the reference records, then rebuild the manifest
 ```
 
 `audit-head-map.ts`'s `undeclared` list is gated by `tests/head-map-audit.test.ts`;

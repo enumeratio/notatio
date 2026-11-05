@@ -39,6 +39,6 @@ test("each record's typed rows say what its package does to the head", () => {
       if (!same) stale.push(`${head} (${c.pkg})`);
     }
   }
-  // Fix with `vp node packages/census/scripts/type-records.ts`.
+  // Fix with `node packages/census/scripts/type-records.ts`.
   expect(stale).toEqual([]);
 }, 60_000); // declares every package, several seconds on a CI runner

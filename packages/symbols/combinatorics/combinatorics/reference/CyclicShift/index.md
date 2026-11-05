@@ -34,7 +34,7 @@ signatures:
   - call: CyclicShift(Permutation)
     description: Rotate the word one place to the left.
     library: enumeratio-combinatorics
-    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((permutation) -> permutation) & ((set_composition) -> set_composition)
+    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((parking_function) -> parking_function) & ((permutation) -> permutation) & ((set_composition) -> set_composition)
 laws:
   - inverse: InverseCyclicShift
   - graded:

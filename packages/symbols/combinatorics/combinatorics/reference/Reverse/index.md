@@ -42,7 +42,7 @@ signatures:
   - call: Reverse(Permutation)
     description: The word read backwards.
     library: enumeratio-combinatorics
-    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((permutation) -> permutation) & ((set_composition) -> set_composition) & ((signed_permutation) -> signed_permutation)
+    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((parking_function) -> parking_function) & ((permutation) -> permutation) & ((set_composition) -> set_composition) & ((signed_permutation) -> signed_permutation)
     overrides: compute-engine
 laws:
   - involution

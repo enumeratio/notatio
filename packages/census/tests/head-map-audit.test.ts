@@ -10,7 +10,7 @@ import { expect, test } from "vite-plus/test";
 import { HEAD_MAP_AUDIT } from "../src/head-map-audit-data.ts";
 
 /** Heads already known to be undeclared, so today's run is green. A head lands here only
- *  when `vp node packages/census/scripts/audit-head-map.ts` puts it in the `undeclared`
+ *  when `node packages/census/scripts/audit-head-map.ts` puts it in the `undeclared`
  *  category — remove the line once the engine declares it, don't add one preemptively. */
 const ALLOWED_UNDECLARED: Record<string, string> = {
   C: "declared as a value, not an operator, but the head map emits it as a call",
