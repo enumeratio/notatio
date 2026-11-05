@@ -46,3 +46,60 @@ test("a surface with no real value says so instead of drawing only its title (S#
   await expect(box.locator(".notatio-error")).toBeVisible();
   await expect(box.locator(".notatio-error")).toContainText("no real value");
 });
+
+// --- 2-D Plot ranges (S#11) -------------------------------------------------------------------
+
+/** A graphics box's x-axis end labels: the first two numbers its SVG prints. */
+async function xEnds(box: Locator): Promise<number[]> {
+  await expect(box.locator("svg text").first()).toBeVisible({ timeout: 60_000 });
+  const texts = await box.locator("svg text").allTextContents();
+  return texts.slice(0, 2).map(Number);
+}
+
+test("the real slice on the Zeta page is drawn over its own range (S#11)", async ({ page }) => {
+  await page.goto("/reference/symbol/Zeta");
+  const box = page.locator('graphics-box[value*="zeta(x)"]').first();
+  await box.scrollIntoViewIfNeeded();
+  await expect.poll(() => xEnds(box), { timeout: 60_000 }).toEqual([-5, 5]);
+});
+
+test("the tangle's sine curve is drawn over [-3.1416, 3.1416] (S#11)", async ({ page }) => {
+  await page.goto("/playground/inspirations/tangle");
+  const box = page.locator('graphics-box[value*="Sin(_k * x)"]').first();
+  await box.scrollIntoViewIfNeeded();
+  await expect
+    .poll(async () => (await xEnds(box)).map((v) => Math.round(v * 100) / 100), { timeout: 60_000 })
+    .toEqual([-3.14, 3.14]);
+});
+
+// --- WebGPU ---------------------------------------------------------------------------------
+// Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
+// headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.
+const GPU_ARGS = [
+  "--enable-unsafe-webgpu",
+  "--use-webgpu-adapter=swiftshader",
+  "--enable-features=Vulkan",
+  "--use-angle=swiftshader",
+  "--enable-unsafe-swiftshader",
+];
+
+if (process.env["WEBGPU"]) test.use({ headless: false, launchOptions: { args: GPU_ARGS } });
+
+test.describe("on the GPU", () => {
+  test.skip(!process.env["WEBGPU"], "needs a headed browser with a WebGPU adapter: WEBGPU=1 xvfb-run -a …");
+
+  test("Plot3D with Gpu -> 100 compiles its shader and wears the GPU badge (E#7)", async ({ page }) => {
+    await page.goto("/reference/component/Plot3D#surface-evaluated-on-gpu");
+    const box = await surface(page, "Gpu -> 100");
+    await expect(box.locator(".graphics-3d-box-badge")).toHaveText("GPU");
+    // 100 x 100 samples, not the 25 x 25 of the CPU path: 99 x 99 quads.
+    await expect(box.locator("svg polygon")).toHaveCount(99 * 99 + 1, { timeout: 60_000 });
+  });
+
+  test("the Hurwitz surface on the GPU wears the badge and spans the same values (S#3)", async ({ page }) => {
+    await page.goto("/explore/zeta/");
+    const box = await surface(page, "HurwitzZeta(x, y), (x, 2, 5), (y, 0.35, 3), Gpu");
+    await expect(box.locator(".graphics-3d-box-badge")).toHaveText("GPU");
+    await expect.poll(() => box.locator("svg text").allTextContents()).toContain("5.7e-3");
+  });
+});

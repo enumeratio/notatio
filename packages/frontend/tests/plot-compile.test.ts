@@ -48,3 +48,11 @@ test("a plot of Sin(x) compiles to Math.sin on an engine with analytic declared"
   const plot = compilePlot(withAnalytic, ["Sin", "x"], { target: "javascript" });
   expect(plot.items[0]?.code).toBe("Math.sin(_.x)");
 });
+
+test("a WGSL plotFn defines every _gpu_ helper it calls", () => {
+  const plot = compilePlot(ce, ["Multiply", ["Sin", "x"], ["Cos", "y"]], { target: "wgsl", vars: ["x", "y"] });
+  const code = plot.items[0]!.code!;
+  const called = new Set(code.match(/_gpu_\w+(?=\()/g));
+  expect(called.size).toBeGreaterThan(0);
+  for (const name of called) expect(code).toMatch(new RegExp(`fn ${name}\\(`));
+});
