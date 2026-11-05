@@ -1028,7 +1028,7 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   StandardizedBiAlternatingInversionNumber: (p) =>
     (Math.floor(p.length / 2) ** 2 + sum(pairs(p).map(([y, x]) => (-1) ** (x + y) * Math.sign(p[x]! - p[y]!)))) / 2,
   MinimalInversionsEitherDirection: (p) => Math.min(inversionPairs(p).length, inversionPairs(p.toReversed()).length),
-  StatPrime: (p) =>
+  BabsonSteingrimssonStatisticPrime: (p) =>
     descents(p).length +
     sum(
       [
@@ -1037,7 +1037,7 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
         [3, 2, 1],
       ].map((q) => vincular(p, q, adjacentStart)),
     ),
-  StatDoublePrime: (p) =>
+  BabsonSteingrimssonStatisticDoublePrime: (p) =>
     descents(p).length +
     sum(
       [
@@ -1046,7 +1046,7 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
         [3, 2, 1],
       ].map((q) => vincular(p, q, adjacentEnd)),
     ),
-  HaglundHag: (p) => {
+  Hag: (p) => {
     const tops = indices(p).filter((i) => i + 1 < p[i]!);
     const rest = indices(p).filter((i) => i + 1 >= p[i]!);
     const subword = (at: number[]) => at.map((i) => p[i]!);

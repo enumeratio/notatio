@@ -1832,19 +1832,19 @@ export const findstat: readonly FindStatMatch[] = [
     values: 873,
   },
   {
-    head: "StatPrime",
+    head: "BabsonSteingrimssonStatisticPrime",
     on: "Permutation",
     findstat: ["St000796"],
     values: 1200,
   },
   {
-    head: "StatDoublePrime",
+    head: "BabsonSteingrimssonStatisticDoublePrime",
     on: "Permutation",
     findstat: ["St000797"],
     values: 1200,
   },
   {
-    head: "HaglundHag",
+    head: "Hag",
     on: "Permutation",
     findstat: ["St001671"],
     values: 1200,

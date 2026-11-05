@@ -2650,19 +2650,19 @@ const FINDSTAT_PERMUTATION_STATISTICS_11: readonly Definition[] = [
     "Inversions of p against those of its reverse.",
   ),
   word(
-    "StatPrime",
+    "BabsonSteingrimssonStatisticPrime",
     "Descents plus the occurrences of the vincular patterns 13-2, 31-2 and 32-1.",
     hasPair(add(count(adjacent, fallsAfter), occurrencesWithAdjacentStart([1, 3, 2], [3, 1, 2], [3, 2, 1]))),
     "FindStat's stat', after Babson and Steingrimsson.",
   ),
   word(
-    "StatDoublePrime",
+    "BabsonSteingrimssonStatisticDoublePrime",
     "Descents plus the occurrences of the vincular patterns 1-32, 3-12 and 3-21.",
     hasPair(add(count(adjacent, fallsAfter), occurrencesWithAdjacentEnd([1, 3, 2], [3, 1, 2], [3, 2, 1]))),
     "FindStat's stat'', after Babson and Steingrimsson.",
   ),
   stat(
-    "HaglundHag",
+    "Hag",
     "The excedance tops less their positions, plus the inversions among the excedance tops less those among the rest, plus the pairs k < i, over excedances i, with p(k) <= i.",
     nonEmpty(
       subtract(
@@ -2670,7 +2670,7 @@ const FINDSTAT_PERMUTATION_STATISTICS_11: readonly Definition[] = [
         blockInversions(isNonExcedanceAt),
       ),
     ),
-    "The inversions are within the subwords, as in Denert.",
+    "FindStat's Haglund hag. The inversions are within the subwords, as in Denert.",
   ),
   stat(
     "HalfPermanentOfIdentityPlusPermutation",

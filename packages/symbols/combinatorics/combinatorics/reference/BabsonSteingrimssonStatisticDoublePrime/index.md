@@ -1,7 +1,7 @@
 ---
-name: StatDoublePrime
+name: BabsonSteingrimssonStatisticDoublePrime
 domain: Permutation statistics
-signature: StatDoublePrime(p)
+signature: BabsonSteingrimssonStatisticDoublePrime(p)
 summary: Descents plus the occurrences of the vincular patterns 1-32, 3-12 and 3-21.
 catalog:
   - system: findstat
@@ -11,7 +11,7 @@ catalog:
 statOn:
   - Permutation
 signatures:
-  - call: StatDoublePrime(p)
+  - call: BabsonSteingrimssonStatisticDoublePrime(p)
     description: Descents plus the occurrences of the vincular patterns 1-32, 3-12 and 3-21.
     library: enumeratio-combinatorics
     type: (list<integer> | permutation) -> number
