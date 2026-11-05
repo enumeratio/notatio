@@ -155,6 +155,20 @@ test("scattered triples with N -> 3 are binned onto a 3 x 3 grid: 4 quads, axes 
   expect(labels).not.toContain("10");
 });
 
+// --- Inline notatio-out with format="latex" (S#10) -------------------------------------------------
+
+for (const value of ["e_1", "1 + 2e_1 + 3e_1e_2"]) {
+  test(`an inline notatio-out of the LaTeX ${value} draws it (S#10)`, async ({ page }) => {
+    await page.goto("/playground/inspirations/ganja");
+    const out = page.locator(`notatio-out[inline][format="latex"][value="${value}"]`);
+    await out.scrollIntoViewIfNeeded();
+    await expect(out).toBeVisible();
+    await expect.poll(async () => (await out.boundingBox())?.width ?? 0, { timeout: 60_000 }).toBeGreaterThan(8);
+    // Its math is typeset: an element, not an empty span.
+    await expect(out.locator(".katex, math, svg").first()).toBeAttached();
+  });
+}
+
 // --- WebGPU ---------------------------------------------------------------------------------
 // Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
 // headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.

@@ -1029,8 +1029,12 @@ export class NotatioOut extends LitElement {
     super.disconnectedCallback();
   }
 
-  /** What copying this Out puts on the clipboard: its InputForm, and its LaTeX. */
-  get expression(): { inputForm: string; latex: string } {
+  /**
+   * What copying this Out puts on the clipboard: its InputForm, and its LaTeX. Not `expression`:
+   * that names an element that stands for MathJSON (`isExpressive`), which a scope would adopt
+   * as an argument and move out of the page.
+   */
+  get copyForms(): { inputForm: string; latex: string } {
     return { inputForm: this._input, latex: this._latex };
   }
 
