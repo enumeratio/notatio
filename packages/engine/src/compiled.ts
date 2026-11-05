@@ -30,10 +30,20 @@ export function toJs(json: unknown): Js | undefined {
   return out;
 }
 
+const isRealComplex = (value: unknown): value is { re: number; im: 0 } =>
+  typeof value === "object" &&
+  value !== null &&
+  !Array.isArray(value) &&
+  typeof (value as { re?: unknown }).re === "number" &&
+  (value as { im?: unknown }).im === 0;
+
 /** The inverse of `toJs`; undefined for a value compiled code shouldn't have produced (a float
- *  where the interpreter would have kept a rational, say). */
+ *  where the interpreter would have kept a rational, say). A complex value with a zero imaginary
+ *  part is its real part: compiled code types a `Sum` over an untyped list as complex, and a
+ *  branch that answers a literal (`nonEmpty(["Sum", …], 1)` on `[]`) leaves it as `{ re: 1, im: 0 }`. */
 export function fromJs(value: unknown): MathJSON | undefined {
   if (typeof value === "number") return Number.isSafeInteger(value) ? value : undefined;
+  if (isRealComplex(value)) return fromJs(value.re);
   if (typeof value === "boolean") return value ? "True" : "False";
   if (!Array.isArray(value)) return undefined;
   const out: MathJSON[] = ["List"];

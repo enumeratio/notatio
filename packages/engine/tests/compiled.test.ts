@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import { compileExpression, inlineCalls, isCacheableDefinition } from "../src/compiled.ts";
+import { compileExpression, fromJs, inlineCalls, isCacheableDefinition } from "../src/compiled.ts";
 
 const ce = new ComputeEngine();
 const cacheable = (expression: unknown): boolean => isCacheableDefinition(ce, expression, { _x: "integer" });
@@ -30,4 +30,11 @@ test("a call to one of our definitions expands into it, without capturing the ar
 
 test("compileExpression gives a function of the free variables", () => {
   expect(compileExpression(ce.box(["Add", ["Multiply", "t", "t"], 1]))?.({ t: 3 })).toBe(10);
+});
+
+test("fromJs reads a complex value with a zero imaginary part as its real part", () => {
+  expect(fromJs({ re: 1, im: 0 })).toBe(1);
+  expect(fromJs([{ re: 2, im: 0 }, 3])).toEqual(["List", 2, 3]);
+  expect(fromJs({ re: 1, im: 1 })).toBeUndefined();
+  expect(fromJs({ re: 0.5, im: 0 })).toBeUndefined();
 });
