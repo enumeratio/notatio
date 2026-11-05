@@ -179,6 +179,27 @@ jobs:
       - if: matrix.shard == 1
         run: pnpm --filter @enumeratio/web run test:hydration
 
+  # The WebGPU stories: headless Chromium destroys a device whose canvas is configured, so these run
+  # headed, on a virtual display and a software adapter. Advisory, like the stories above.
+  component-stories-gpu:
+    name: component stories (WebGPU)
+    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+      - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
+        continue-on-error: true
+      - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts
+        working-directory: web
+        continue-on-error: true
+      - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU"
+        working-directory: web
+        env:
+          WEBGPU: "1"
+        continue-on-error: true
+
   # The Python ecosystem: every example with an mpmath or SymPy mapping, rescanned against the committed
   # records, including the special-function grid kept as hidden examples in its heads' YAML. Each
   # ecosystem is its own nightly job: they share nothing to install. The heavier lanes run weekly below.
