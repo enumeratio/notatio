@@ -11,12 +11,12 @@ import { curveOf, settled } from "./support.ts";
 /** Digit groups the printer adds (`1.202_056`) are not part of the value. */
 const plain = (s: string) => s.replace(/_/g, "");
 
-const INDEXES: { path: string; total: number; query: string; matches: number }[] = [
-  { path: "/reference/statistics/", total: 831, query: "IntegerPartition", matches: 162 },
-  { path: "/reference/maps/", total: 213, query: "Glaisher", matches: 2 },
-  { path: "/reference/collections/", total: 227, query: "Permutation", matches: 0 },
-  { path: "/reference/domains/", total: 75, query: "Permutation", matches: 0 },
+// An index grows with the catalogue, so its counter is read, not pinned.
+const FILTERED = [
+  { path: "/reference/statistics/", query: "IntegerPartition" },
+  { path: "/reference/maps/", query: "Glaisher" },
 ];
+const COUNTED = ["/reference/collections/", "/reference/domains/"];
 
 /** "N of M" from the index's counter. */
 async function counted(page: Page): Promise<{ shown: number; total: number }> {
@@ -26,32 +26,50 @@ async function counted(page: Page): Promise<{ shown: number; total: number }> {
   return { shown: Number(m![1].replace(/,/g, "")), total: Number(m![2].replace(/,/g, "")) };
 }
 
+/** The whole index, once the page shows it all. */
+async function wholeIndex(page: Page): Promise<number> {
+  let total = 0;
+  await expect(async () => {
+    const count = await counted(page);
+    expect(count.total).toBeGreaterThan(0);
+    expect(count.shown).toBe(count.total);
+    total = count.total;
+  }).toPass();
+  return total;
+}
+
 test.describe("index pages", () => {
-  for (const { path, total } of INDEXES.slice(0, 2)) {
+  for (const { path, query } of FILTERED) {
     test(`${path} filters by name and restores`, async ({ page }) => {
-      const query = INDEXES.find((i) => i.path === path)!;
       await page.goto(path);
       const filter = page.locator(".ref-cat-search");
+      const rows = page.locator(".ref-cat-table tbody tr");
       await expect(filter).toBeVisible();
-      await expect(async () => expect(await counted(page)).toEqual({ shown: total, total })).toPass();
-      await filter.fill(query.query);
-      await expect(async () => expect((await counted(page)).shown).toBe(query.matches)).toPass();
-      await expect(page.locator(".ref-cat-table tbody tr")).toHaveCount(query.matches);
+      const total = await wholeIndex(page);
+      await filter.fill(query);
+      await expect(async () => {
+        const { shown } = await counted(page);
+        expect(shown).toBeGreaterThan(0);
+        expect(shown).toBeLessThan(total);
+        await expect(rows).toHaveCount(shown);
+      }).toPass();
       await filter.fill("zzzqq");
-      await expect(page.locator(".ref-cat-table tbody tr")).toHaveCount(0);
+      await expect(rows).toHaveCount(0);
       await filter.fill("");
-      await expect(page.locator(".ref-cat-table tbody tr")).toHaveCount(total);
+      await expect(rows).toHaveCount(total);
     });
   }
 
-  for (const { path, total } of INDEXES.slice(2)) {
+  for (const path of COUNTED) {
     test(`${path} counts its entries`, async ({ page }) => {
       await page.goto(path);
-      await expect(async () => expect(await counted(page)).toEqual({ shown: total, total })).toPass();
+      const rows = page.locator(".ref-cat-table tbody tr");
+      const total = await wholeIndex(page);
+      await expect(rows).toHaveCount(total);
       await page.locator(".ref-cat-search").fill("zzzqq");
-      await expect(page.locator(".ref-cat-table tbody tr")).toHaveCount(0);
+      await expect(rows).toHaveCount(0);
       await page.locator(".ref-cat-search").fill("");
-      await expect(page.locator(".ref-cat-table tbody tr")).toHaveCount(total);
+      await expect(rows).toHaveCount(total);
     });
   }
 
