@@ -116,7 +116,7 @@ test("a vector plot is a plot box: the frame is options, the range data", () => 
   const box = plot(rotation, -2, 2, -1, 1, { n: 5 });
   expect(isPlotBox(box)).toBe(true);
   expect(box[0]).toBe("GraphicsBox");
-  expect(svgOf(box)).toContain('viewBox="0 0 340 200"');
+  expect(svgOf(box)).toContain('viewBox="0 0 340 326"'); // a 292 px square plot area
 });
 
 test("vector mode lowers to one ArrowBox per sample", () => {

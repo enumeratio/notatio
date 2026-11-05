@@ -155,7 +155,7 @@ test("autoLevels on a degenerate (flat) range yields nothing", () => {
 test("line contours draw one path per level with segments", () => {
   const { grid, xs, ys } = radialGrid(-2, 2, 20);
   const s = contourSvg(grid, xs, ys, { levels: [1, 2, 3], axes: false });
-  expect(s).toContain('viewBox="0 0 340 200"');
+  expect(s).toContain('viewBox="0 0 340 326"'); // a 292 px square plot area: 12 + 292 + 22 tall
   expect(count(s, "path")).toBe(3);
 });
 

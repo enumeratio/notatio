@@ -53,12 +53,16 @@ const numeric = (e: Expression): number | undefined => {
   return typeof re === "number" && Number.isFinite(re) ? re : undefined;
 };
 
-/** A bivariate expression as a WGSL `plotFn`; `zetaWGSL` comes first so the zeta heads resolve. */
+/**
+ * A bivariate expression as a WGSL `plotFn`; `zetaWGSL` comes first so the zeta heads resolve,
+ * then the target's helper preamble, which defines the `_gpu_*` functions the body calls
+ * (`_gpu_sin` for `Sin`).
+ */
 export function toWgslFn(expr: Expression, vx: string, vy: string): string | undefined {
   try {
-    const r = new WGSLTarget().compile(expr) as { success?: boolean; code?: string };
+    const r = new WGSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
     if (!r?.success || !r.code) return undefined;
-    return `${zetaWGSL}\nfn plotFn(${vx}: f32, ${vy}: f32) -> f32 { return ${r.code}; }`;
+    return `${zetaWGSL}\n${r.preamble ?? ""}\nfn plotFn(${vx}: f32, ${vy}: f32) -> f32 { return ${r.code}; }`;
   } catch {
     return undefined;
   }
@@ -90,8 +94,31 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
   return item;
 }
 
-/** `json` compiled as `spec` asks, on `ce`. */
+/**
+ * `json` compiled as `spec` asks, on `ce`. A plot's variables are real: its samplers pass numbers, and
+ * the GPU's real-only lowerings take no complex argument. So the names the expression leaves free are
+ * declared real, in a scope of their own, for this compile: an engine that already inferred them
+ * complex from an earlier use (`HurwitzZeta(x, y)` boxed once) would otherwise emit code reading a
+ * complex value from a number, or refuse a real-only lowering, by the order the page asked in.
+ */
 export function compilePlot(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): CompiledPlot {
+  ce.pushScope();
+  let names: string[];
+  try {
+    names = [...ce.box(json as never).unknowns];
+  } finally {
+    ce.popScope();
+  }
+  ce.pushScope();
+  try {
+    for (const name of names) ce.declare(name, "real");
+    return compileIn(ce, json, spec);
+  } finally {
+    ce.popScope();
+  }
+}
+
+function compileIn(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): CompiledPlot {
   const boxed = ce.box(json as never);
   const bound = Object.entries(spec.bindings ?? {});
   const expr = bound.length > 0 ? boxed.subs(Object.fromEntries(bound.map(([k, v]) => [k, ce.number(v)]))) : boxed;

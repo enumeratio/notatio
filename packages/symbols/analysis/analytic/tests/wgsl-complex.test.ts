@@ -231,3 +231,9 @@ test("poles come out huge and finite, never NaN", () => {
     expect(Number.isNaN(r) || Number.isNaN(i)).toBe(false);
   }
 });
+
+test("the Hurwitz kernels flag a sum whose terms dwarf it, for a host to hatch (S#5)", () => {
+  expect(zetaWGSL).toContain("var<private> uncertain: f32");
+  // Both sums that lose digits to cancellation vouch for their result before returning it.
+  expect(zetaWGSL.match(/vouch\(largest, /g)?.length).toBe(3);
+});

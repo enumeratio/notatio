@@ -129,6 +129,20 @@ export const plotArea = (width: number, height: number, titled: boolean): { plot
   plotH: height - marginTop(titled) - M_BOTTOM,
 });
 
+/**
+ * A field plot's `ImageSize`: `width` px wide (340 by default), and tall enough that the plot area is
+ * `aspect` times as high as it is wide. Wolfram's default `AspectRatio` for a contour, density, vector
+ * or stream plot is 1, so concentric circles draw as circles. An explicit `height` stands.
+ */
+export function fieldImageSize(
+  opts: { width?: number; height?: number; titled?: boolean; bar?: boolean },
+  aspect = 1,
+): [number, number] {
+  const width = opts.width ?? WIDTH;
+  const plotW = width - M_LEFT - (opts.bar ? M_RIGHT_BAR : M_RIGHT);
+  return [width, opts.height ?? Math.round(plotW * aspect + marginTop(opts.titled === true) + M_BOTTOM)];
+}
+
 const isSeriesList = (input: readonly PlotPoint[] | readonly PlotSeries[]): input is readonly PlotSeries[] =>
   input.length > 0 && "points" in input[0]!;
 

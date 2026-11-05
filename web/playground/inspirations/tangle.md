@@ -226,7 +226,7 @@ the collection's own order, and the glyph draws whichever one it lands on. No
 </template>
 <dynamic-module-box>
 <p>
-Permutation <knob-box name="k" value="1" min="1" max="24" /> of 4:
+Permutation <knob-box name="k" value="1" min="1" max="24" /> of 24:
 <graphics-box class="inline-figure" value='Show(StrandDiagram(Permutation(At(Permutations(Range(1, 4)), _k))), ImageSize -> [Automatic, 72], GestureHandling -> "none")' legend-at="none" />
 </p>
 </dynamic-module-box>

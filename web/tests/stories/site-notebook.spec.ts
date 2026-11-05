@@ -106,9 +106,7 @@ test.describe("/worksheet/", () => {
   });
 
   test("the curve is drawn over the range the sheet's view asks for", async ({ page }) => {
-    // BL-319 S#13 (with the plots lane's explicit-range finding): the sheet asks Plot for (x, -pi, pi) and
-    // Plot draws its default -6.28..6.28 instead, so the labels do not say the range the sheet chose.
-    test.fail();
+    // BL-319 S#13: the labels say the range the sheet chose, not Plot's default -6.28..6.28.
     await page.goto("/worksheet/");
     await expect(page.locator('.ws-cell[data-cell="1"] input[type=range]')).toBeVisible();
     const svg = page.locator("notatio-worksheet graphics-box svg[aria-label=plot]");
@@ -122,7 +120,9 @@ test.describe("/worksheet/", () => {
           .map(Number),
       );
     const curve = await curveOf(svg);
-    expect(curve.xRange).toEqual(requested);
+    // The range is read from the axis labels, which print three significant digits.
+    expect(curve.xRange[0]).toBeCloseTo(requested[0], 2);
+    expect(curve.xRange[1]).toBeCloseTo(requested[1], 2);
   });
 
   test("a new binding makes a slider, and a cell reading it follows the other slider", async ({ page }) => {

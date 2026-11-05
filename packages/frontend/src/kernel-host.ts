@@ -17,6 +17,8 @@ import { createRowsHost, type RowsRequest } from "./row-source.ts";
 import { renderingOf } from "./symbols.ts";
 import { Transcript } from "./transcript.ts";
 
+export { gpuShader } from "./code-forms.ts";
+
 /** The session a page's cells outside any notebook share: one scope, no `Out[n]` history. */
 export const PAGE_SESSION = "page";
 

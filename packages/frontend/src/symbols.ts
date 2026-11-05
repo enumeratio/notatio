@@ -195,13 +195,46 @@ export function toJsonData(node: Json): unknown {
 
 const json = (node: Json): string => JSON.stringify(toJsonData(node));
 
-/** A Wolfram iterator `(x, a, b)`: the variable and its range, or undefined. */
+/** A real constant as a number: a literal, or arithmetic over `Pi` and `ExponentialE` (`2*Pi`); else undefined. */
+function realOf(node: Json | undefined): number | undefined {
+  if (node === undefined) return undefined;
+  const n = numOf(node);
+  if (n !== undefined) return Number.isFinite(n) ? n : undefined;
+  const sym = symOf(node);
+  if (sym === "Pi") return Math.PI;
+  if (sym === "ExponentialE") return Math.E;
+  const ops = opsOf(node).map(realOf);
+  if (ops.length === 0 || ops.some((v) => v === undefined)) return undefined;
+  const [a, b] = ops as number[];
+  switch (headOf(node)) {
+    case "Negate":
+      return ops.length === 1 ? -a! : undefined;
+    case "Add":
+      return (ops as number[]).reduce((sum, v) => sum + v, 0);
+    case "Multiply":
+      return (ops as number[]).reduce((product, v) => product * v, 1);
+    case "Subtract":
+      return ops.length === 2 ? a! - b! : undefined;
+    case "Divide":
+      return ops.length === 2 && b !== 0 ? a! / b! : undefined;
+    default:
+      return undefined;
+  }
+}
+
+/** A range's end as the attribute text: a constant as its plain decimal (a reader of `domain` takes `Number`), else Epsil. */
+const endOf = (node: Json): string => {
+  const value = realOf(node);
+  return value === undefined ? epsil(node) : String(value);
+};
+
+/** A Wolfram iterator `(x, a, b)`, or `{x, a, b}` as Wolfram writes it: the variable and its range, or undefined. */
 function iterator(node: Json | undefined): { variable?: string; range?: string } {
-  const parts = tupleOf(node);
+  const parts = tupleOf(node) ?? (headOf(node) === "Set" ? opsOf(node) : undefined);
   if (parts === undefined) return {};
   const [first, lo, hi] = parts;
   const variable = symOf(first);
-  const range = lo !== undefined && hi !== undefined ? `${epsil(lo)},${epsil(hi)}` : undefined;
+  const range = lo !== undefined && hi !== undefined ? `${endOf(lo)},${endOf(hi)}` : undefined;
   return { variable, range };
 }
 

@@ -38,18 +38,13 @@
   "Binomial": {
     "panels": [
       {
-        "label": "ComplexPlot",
-        "aria": "Plot of Binomial(n, z) over the complex plane",
-        "params": "{{n, 1}, -10, 10, 0.05, Slider}",
-        "value": "ComplexPlot(Binomial(_n, z), {z, -4 - 4*I, 4 + 4*I})"
-      },
-      {
         "label": "real slice",
         "aria": "Plot of Re(Binomial(n, x)) over the real line",
         "params": "{{n, 1}, -10, 10, 0.05, Slider}",
         "value": "Plot(Re(Binomial(_n, x)), {x, -4, 4})"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Binomial"
   },
   "Moment": {
     "panels": [],

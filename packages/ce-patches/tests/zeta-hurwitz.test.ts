@@ -335,3 +335,60 @@ test("Zeta and HurwitzZeta at a negative non-integer a agree across routes", () 
   expect(p.re).toBeCloseTo(0.03962992396995794, 13);
   expect(p.im).toBeCloseTo(-0.20102299207474436, 13);
 });
+
+// --- Below the real axis (S#5) --------------------------------------------------------------
+// The double kernel is right there; the GPU's f32 sum is what loses the digits, and declines.
+
+test("ζ(s, a) with Im a < 0 matches mpmath", () => {
+  // [s, a, ζ(s, a)] from mpmath.zeta at 30 digits.
+  const oracle: [[number, number], [number, number], [number, number]][] = [
+    [
+      [1.5, 4],
+      [0.5, -1],
+      [-0.002455021728484458, -0.001333972909248365],
+    ],
+    [
+      [1.5, 4],
+      [2.5, -3],
+      [0.002491264777783314, 0.000651462327089306],
+    ],
+    [
+      [1.5, 12],
+      [1, -0.5],
+      [0.00869314600351185, -0.02030053047052606],
+    ],
+    [
+      [1.5, 12],
+      [3, -2],
+      [-4.371939676053645e-6, -1.740588976924719e-5],
+    ],
+    [
+      [0.5, 8],
+      [1.25, -1.5],
+      [5.257874695739397e-5, -6.318091435649647e-5],
+    ],
+    [
+      [2, 3],
+      [-0.5, -2],
+      [-2.916742747411044e-5, -0.0002889330283526963],
+    ],
+  ];
+  for (const [s, a, [re, im]] of oracle) {
+    const v = hurwitzZeta(cx(s[0], s[1]), cx(a[0], a[1]));
+    expect(Math.hypot(v.re - re, v.im - im) / Math.hypot(re, im)).toBeLessThan(1e-10);
+  }
+});
+
+test("ζ(s, conj a) = conj ζ(conj s, a)", () => {
+  for (const [s, a] of [
+    [cx(1.5, 4), cx(0.5, 1)],
+    [cx(1.5, 12), cx(3, 2)],
+    [cx(0.5, 8), cx(1.25, 1.5)],
+  ] as [Cx, Cx][]) {
+    const below = hurwitzZeta(s, cx(a.re, -a.im));
+    const mirrored = hurwitzZeta(cx(s.re, -s.im), a);
+    expect(Math.hypot(below.re - mirrored.re, below.im + mirrored.im) / Math.hypot(below.re, below.im)).toBeLessThan(
+      1e-10,
+    );
+  }
+});

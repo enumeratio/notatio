@@ -642,6 +642,13 @@ export class PlotView {
     if (this.#window !== undefined) this.#show(undefined);
   };
 
+  /** `0` returns a zoomed plot to its whole range, as a double-click does. */
+  #onKeyDown = (e: KeyboardEvent): void => {
+    if (e.key !== "0" || this.#window === undefined) return;
+    e.preventDefault();
+    this.#show(undefined);
+  };
+
   #onPointerMove = (e: PointerEvent): void => {
     if (this.#dragTo(e)) return;
     if (this.#polar || this.#field || this.#diagram || this.#charted) return;
@@ -663,7 +670,9 @@ export class PlotView {
   render(): unknown {
     return html`<span
       class="graphics-box-plot"
+      tabindex=${this.#zoomable ? "0" : nothing}
       style=${this.#window === undefined ? nothing : "cursor:grab"}
+      @keydown=${this.#onKeyDown}
       @pointermove=${this.#onPointerMove}
       @pointerleave=${this.#onPointerLeave}
       @pointerdown=${this.#onPointerDown}

@@ -42,6 +42,13 @@ half-plane reorganizes into a clean periodic lattice. That is the one real diffe
 between the two conventions, and with both drawn from the same $s$ it is the only thing
 that differs between the two pictures.
 
+**Hatched.** Below the real axis $\zeta(s, a)$ is far smaller than the terms it sums: for
+$\operatorname{Im}(s) = t$ the value is about $e^{-t|\arg a|}$ times its largest term (across the cut along
+$a \le 0$ the two sides differ by that factor). The GPU's `f32` sum cancels away its digits there, so the portrait declines: where the kernel finds its terms more than 100 times the sum it draws
+a grey hatch rather than a hue. The test against the `f64` kernel holds the drawn pixels to a relative
+error under 0.05 (a phase error under 0.05 rad) and finds the upper half never hatched; the CPU
+kernel, and the mpmath oracle it matches, are the way to read the hatched region.
+
 **s up the critical strip.** Play the $si$ slider: at large imaginary part the
 portrait develops the fine oscillatory texture that makes zeta on the critical line so
 delicate. (The GPU works in `f32`, so this is a portrait, not a proof — the CPU kernel and

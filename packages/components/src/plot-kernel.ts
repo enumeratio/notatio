@@ -152,7 +152,17 @@ export async function readEpsil(text: string): Promise<unknown> {
   return parsed.errors.length > 0 ? undefined : parsed.json;
 }
 
-const numberOf = (v: unknown): number => (typeof v === "number" ? v : Number.NaN);
+/** A sample's number: a real, or a complex value that is real up to rounding (a Hurwitz zeta of real arguments compiles to a complex kernel); `NaN` for any other. */
+const numberOf = (v: unknown): number => {
+  if (typeof v === "number") return v;
+  if (typeof v !== "object" || v === null) return Number.NaN;
+  const { re, im } = v as { re?: unknown; im?: unknown };
+  if (typeof re !== "number" || typeof im !== "number") return Number.NaN;
+  return Math.abs(im) <= REAL_TOLERANCE * Math.max(1, Math.abs(re)) ? re : Number.NaN;
+};
+
+/** How far a complex sample's imaginary part may stray from 0, relative to its size, and still read as real. */
+const REAL_TOLERANCE = 1e-12;
 
 /** An item with no compiled code, sampled by the page's engine: `subs`, then `N`, per sample. */
 async function engineSampler(item: CompiledItem): Promise<Sampler> {

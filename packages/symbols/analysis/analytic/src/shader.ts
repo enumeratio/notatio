@@ -43,6 +43,23 @@ fn ccos(z: vec2f) -> vec2f { return vec2f(cos(z.x) * cosh(z.y), -sin(z.x) * sinh
 fn csinh(z: vec2f) -> vec2f { return vec2f(sinh(z.x) * cos(z.y), cosh(z.x) * sin(z.y)); }
 fn ccosh(z: vec2f) -> vec2f { return vec2f(cosh(z.x) * cos(z.y), sinh(z.x) * sin(z.y)); }
 
+// Set to 1 by a kernel whose f32 sum is not worth drawing: its terms are far larger than the sum
+// itself, so the rounding in them is not small beside it. A host resets it before an expression and
+// reads it after (a portrait hatches the pixel); a compute pass may ignore it. Below the real axis
+// ζ(s, a) is e^(-Im(s)·|arg a|) times smaller than its terms, which is where this goes up.
+var<private> uncertain: f32 = 0.0;
+
+// The largest ratio of a sum's biggest term to the sum still drawn. Measured on the GPU (swiftshader
+// f32) against mpmath, ζ(s, a) for s = 1.5 + 4i, 12i, 24i and 0.5 + 8i, a over [-6, 6] × [-6, 6]: a
+// point drawn at 100 has relative error 1.2e-4 at the median and 2.6e-2 at most (0.03 rad of phase),
+// where the error was about 1.5e-4 times the ratio, so 1e3 would have drawn errors of 0.2 and more.
+// 40% of the half plane below the axis is past it at s = 1.5 + 4i, 70% at 12i; above it, none.
+const SUM_COND_LIMIT: f32 = 100.0;
+
+fn vouch(largest: f32, sum: vec2f) {
+  if (largest > SUM_COND_LIMIT * length(sum)) { uncertain = 1.0; }
+}
+
 // ζ(s, a). Euler–Maclaurin, except left of Re(s) = 0 near the real axis short of where its
 // direct terms end, which there cancel catastrophically: a shifts by an integer to 1 + h and
 // ζ(s, 1 + h) = Σₖ C(−s, k) hᵏ ζ(s + k), with ζ(s + k) from the functional equation left of
@@ -80,7 +97,11 @@ fn zetaNearOne(s: vec2f, h: vec2f) -> vec2f {
     if (hk.x == 0.0 && hk.y == 0.0) { break; }
     let f = vec2f(-s.x - f32(k) + 1.0, -s.y);
     // s = 1 − k, an integer: C(−s, k)·ζ(s + k) → −C(−s, k−1)/k, and the series ends.
-    if (f.x == 0.0 && f.y == 0.0) { return sum - cmul(c, hk) / f32(k); }
+    if (f.x == 0.0 && f.y == 0.0) {
+      let done = sum - cmul(c, hk) / f32(k);
+      vouch(largest, done);
+      return done;
+    }
     c = cmul(c, f) / f32(k);
     let t = cmul(cmul(c, hk), riemannZeta(vec2f(s.x + f32(k), s.y)));
     sum = sum + t;
@@ -90,6 +111,7 @@ fn zetaNearOne(s: vec2f, h: vec2f) -> vec2f {
       if (small == 2) { break; }
     } else { small = 0; }
   }
+  vouch(largest, sum);
   return sum;
 }
 
@@ -151,13 +173,20 @@ fn hurwitzEM(s: vec2f, a: vec2f) -> vec2f {
   let N = i32(clamp(ceil(emEdge(s) - a.x), 6.0, 96.0));
   let negS = -s;
   var sum = vec2f(0.0);
+  var largest = 0.0;
   for (var k = 0; k < N; k = k + 1) {
     let b = vec2f(a.x + f32(k), a.y);
-    if (!(b.x == 0.0 && b.y == 0.0)) { sum = sum + cpow(b, negS); }
+    if (!(b.x == 0.0 && b.y == 0.0)) {
+      let t = cpow(b, negS);
+      sum = sum + t;
+      largest = max(largest, length(t));
+    }
   }
   let z = vec2f(a.x + f32(N), a.y);
   let zNegS = cpow(z, negS);
-  sum = sum + cdiv(cpow(z, vec2f(1.0 - s.x, -s.y)), vec2f(s.x - 1.0, s.y));
+  let integral = cdiv(cpow(z, vec2f(1.0 - s.x, -s.y)), vec2f(s.x - 1.0, s.y));
+  largest = max(largest, length(integral));
+  sum = sum + integral;
   sum = sum + 0.5 * zNegS;
   var poch = s;
   var zpow = cdiv(zNegS, z);
@@ -169,6 +198,7 @@ fn hurwitzEM(s: vec2f, a: vec2f) -> vec2f {
     poch = cmul(poch, cmul(f1, f2));
     zpow = cmul(zpow, zinv2);
   }
+  vouch(largest, sum);
   return sum;
 }
 
