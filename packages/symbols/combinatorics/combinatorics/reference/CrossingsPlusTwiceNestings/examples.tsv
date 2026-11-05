@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-matching-1-4-mid-2-3-mid-5-6			[CrossingsPlusTwiceNestings, [PerfectMatching, [List, [List, 1, 4], [List, 2, 3], [List, 5, 6]]]]	2			the matching $\{1,4\} \mid \{2,3\} \mid \{5,6\}$
+findstat-st000043-1	Properties		[CombinatorialStat, [PerfectMatching, [List, [List, 1, 2]]], "'CrossingsPlusTwiceNestings'"]	0	0	FindStat St000043	FindStat's value for [(1,2)]
+findstat-st000043-2	Properties		[CombinatorialStat, [PerfectMatching, [List, [List, 1, 2], [List, 3, 4]]], "'CrossingsPlusTwiceNestings'"]	0	0	FindStat St000043	FindStat's value for [(1,2),(3,4)]
+findstat-st000043-3	Properties		[CombinatorialStat, [PerfectMatching, [List, [List, 1, 3], [List, 2, 4]]], "'CrossingsPlusTwiceNestings'"]	1	1	FindStat St000043	FindStat's value for [(1,3),(2,4)]

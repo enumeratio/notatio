@@ -18,6 +18,40 @@ const diagonals = (m: Matrix): number[][] => {
   });
 };
 
+/** The monotone triangle: row k lists the columns where the first k rows sum to 1, and the rank is its entries' sum less C(n + 2, 3). */
+const monotoneTriangleRank = (m: Matrix): number => {
+  const n = m.length;
+  const total = sum(
+    indices(n).map((k) =>
+      sum(
+        indices(n)
+          .filter((j) => sum(m.slice(0, k + 1).map((row) => row[j]!)) === 1)
+          .map((j) => j + 1),
+      ),
+    ),
+  );
+  return total - ((n + 2) * (n + 1) * n) / 6;
+};
+/** FindStat's St000067: the products over every pair of nonzero entries with i > k and j < l. */
+const inversionNumber = (m: Matrix): number => {
+  const nonzero = indices(m.length).flatMap((i) =>
+    indices(m.length)
+      .filter((j) => m[i]![j] !== 0)
+      .map((j) => [i, j]),
+  );
+  return sum(
+    nonzero.flatMap(([i, j]) =>
+      nonzero.filter(([k, l]) => i! > k! && j! < l!).map(([k, l]) => m[i!]![j!]! * m[k!]![l!]!),
+    ),
+  );
+};
+/** FindStat's St001981: the first z for which the z x z corner holds a nonzero entry, less 1. */
+const cornerZeroSquare = (m: Matrix): number => {
+  let z = 0;
+  while (!indices(z).some((i) => indices(z).some((j) => m[i]![j] !== 0))) z++;
+  return z - 1;
+};
+
 export type Reading = (m: Matrix) => number;
 
 export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
@@ -31,4 +65,13 @@ export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
   LastRowOnePosition: (m) => m[m.length - 1]!.indexOf(1) + 1,
   LastColumnOnePosition: (m) => columnOf(m, m.length - 1).indexOf(1) + 1,
   MaximalDiagonalSum: (m) => Math.max(...diagonals(m).map(sum)),
+  MaximalDiagonalNonzeroCount: (m) => Math.max(...diagonals(m).map((d) => d.filter((a) => a !== 0).length)),
+  DistinctDiagonalSumCount: (m) => new Set(diagonals(m).map(sum)).size,
+  NonzeroEntryCount: (m) => entries(m).filter((a) => a !== 0).length,
+  MainDiagonalSum: (m) => sum(indices(m.length).map((i) => m[i]![i]!)),
+  MinimalRowZeroCount: (m) => Math.min(...m.map((row) => row.filter((a) => a === 0).length)),
+  TopLeftZeroSquareSize: cornerZeroSquare,
+  AlternatingSignMatrixPosetRank: monotoneTriangleRank,
+  MatrixInversionNumber: inversionNumber,
+  PositiveMatrixInversionNumber: (m) => inversionNumber(m) - entries(m).filter((a) => a === -1).length,
 };

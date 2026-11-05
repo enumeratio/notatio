@@ -13,6 +13,7 @@ import {
   atLeastValue,
   atMostValue,
   bindList,
+  count,
   equals,
   floored,
   forEach,
@@ -20,6 +21,7 @@ import {
   length,
   less,
   max,
+  min,
   nonEmpty,
   or,
   positions,
@@ -247,25 +249,55 @@ const entriesEqual = (value: number): MathJSON =>
 /** The sum of `index` over the positions 1 .. side whose entry (read by `entry`) is 1: the position of the one in a row or column that holds exactly one. */
 const positionOfOne = (entry: (index: MathJSON) => MathJSON): MathJSON =>
   withCells(floored(sumOver(positions, ["If", equals(entry("i"), 1), "i", 0])));
-/** The positions 1 .. side whose diagonal entry equals `value`. */
-const diagonalEntries = (value: number): MathJSON =>
-  withCells(floored(sumOver(positions, ["If", equals(cell("i", "i"), value), 1, 0])));
+/** The positions 1 .. side whose diagonal entry equals `value`, for use inside `withCells`. */
+const diagonalCount = (value: number): MathJSON =>
+  floored(sumOver(positions, ["If", equals(cell("i", "i"), value), 1, 0]));
+const diagonalEntries = (value: number): MathJSON => withCells(diagonalCount(value));
+/** The sum of `term(i, i - d)` over the cells (i, i - d) of the diagonal d. */
+const diagonalTotal = (term: (row: MathJSON, column: MathJSON) => MathJSON): MathJSON =>
+  sumOver(positions, [
+    "If",
+    and(atLeastValue(subtract("i", "d"), 1), atMostValue(subtract("i", "d"), "side")),
+    term("i", subtract("i", "d")),
+    0,
+  ]);
+/** The diagonals' numbers d = 1 - side .. side - 1, from the bottom left corner to the top right. */
+const diagonalNumbers: MathJSON = ["Range", subtract(1, "side"), subtract("side", 1)];
 /** The sum of the entries on the diagonal of cells (i, i - d), the largest over d. */
-const diagonalSums: MathJSON = withCells(
+const diagonalSums: MathJSON = withCells(max(forEach(diagonalNumbers, floored(diagonalTotal(cell)), "d")));
+/** The number of nonzero entries on the diagonal of cells (i, i - d), the largest over d. */
+const diagonalNonzeroCounts: MathJSON = withCells(
   max(
     forEach(
-      ["Range", subtract(1, "side"), subtract("side", 1)],
-      floored(
-        sumOver(positions, [
-          "If",
-          and(atLeastValue(subtract("i", "d"), 1), atMostValue(subtract("i", "d"), "side")),
-          cell("i", subtract("i", "d")),
-          0,
-        ]),
-      ),
+      diagonalNumbers,
+      floored(diagonalTotal((row, column) => ["If", ["NotEqual", cell(row, column), 0], 1, 0])),
       "d",
     ),
   ),
+);
+/** The diagonal sums, each raised by side so that none is negative, counted without repeats. */
+const distinctDiagonalSums: MathJSON = withCells([
+  "Length",
+  ["Unique", forEach(diagonalNumbers, floored(add(diagonalTotal(cell), "side")), "d")],
+]);
+/** The cells numbered 1 .. side * side, row by row, as `cells` is read. */
+const cellNumbers: MathJSON = ["Range", 1, ["Multiply", "side", "side"]];
+/** The column of cell `u`. */
+const columnOfCell = (u: MathJSON): MathJSON => add(["Mod", subtract(u, 1), "side"], 1);
+/** The row of cell `u`. */
+const rowOfCell = (u: MathJSON): MathJSON => add(["Divide", subtract(u, columnOfCell(u)), "side"], 1);
+/** The sum of the entries above and to the right of cell `u`, a corner sum of the matrix, so never negative. */
+const entriesAboveRight = (u: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      cellNumbers,
+      ["If", and(less(rowOfCell("v"), rowOfCell(u)), greater(columnOfCell("v"), columnOfCell(u))), at("v", "cells"), 0],
+      "v",
+    ),
+  );
+/** Sum over the pairs of entries a(i, j) a(k, l) with i > k and j < l: each entry times the entries above and to its right. */
+const inversionTotal: MathJSON = floored(
+  sumOver(cellNumbers, ["Multiply", at("u", "cells"), entriesAboveRight("u")], "u"),
 );
 
 const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS: readonly Definition[] = [
@@ -298,6 +330,81 @@ const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS: readonly Definition[] = [
     "The largest sum of the entries along a diagonal.",
     diagonalSums,
     "The diagonals are the cells (i, j) with i - j fixed. A sum is floored at 0, which no sum of a corner cell falls below, so the largest is unchanged.",
+  ),
+  matrix(
+    "MaximalDiagonalNonzeroCount",
+    "The largest number of nonzero entries along a diagonal.",
+    diagonalNonzeroCounts,
+    "FindStat's St000892. The diagonals are those of MaximalDiagonalSum.",
+  ),
+  matrix(
+    "DistinctDiagonalSumCount",
+    "The number of distinct sums of the entries along a diagonal.",
+    distinctDiagonalSums,
+    "FindStat's St000893. A middle diagonal can sum below 0, so each sum is raised by the side before it is floored; raising every sum alike leaves the number of distinct ones.",
+  ),
+  matrix(
+    "NonzeroEntryCount",
+    "The number of nonzero entries.",
+    withCells(["Count", ["Filter", "cells", ["Function", ["NotEqual", "e", 0], "e"]]]),
+    "FindStat's St000890.",
+  ),
+  matrix(
+    "MainDiagonalSum",
+    "The sum of the entries on the main diagonal, its trace.",
+    withCells(subtract(diagonalCount(1), diagonalCount(-1))),
+    "FindStat's St000894. The entries are -1, 0 and 1, so the trace is the number of 1s on the diagonal less the number of -1s.",
+  ),
+  matrix(
+    "MinimalRowZeroCount",
+    "The fewest zeros in a row.",
+    withCells(min(forEach(positions, count(positions, equals(cell("i", "j"), 0), "j"), "i"))),
+    "FindStat's St001925.",
+  ),
+  matrix(
+    "TopLeftZeroSquareSize",
+    "The side of the largest square of zeros at the top left corner.",
+    withCells(
+      subtract(
+        min(
+          forEach(
+            cellNumbers,
+            ["If", ["NotEqual", at("u", "cells"), 0], max(["List", rowOfCell("u"), columnOfCell("u")]), "side"],
+            "u",
+          ),
+        ),
+        1,
+      ),
+    ),
+    "FindStat's St001981. The square of side z is all zeros exactly when z is below the largest of the row and column of every nonzero entry, so the side is the least such largest, less 1; an alternating sign matrix has a nonzero entry.",
+  ),
+  matrix(
+    "AlternatingSignMatrixPosetRank",
+    "Half the sum of (i - j)^2 a(i, j): the rank in the alternating sign matrix poset.",
+    withCells([
+      "Divide",
+      floored(
+        sumOver(
+          cellNumbers,
+          ["Multiply", ["Power", subtract(rowOfCell("u"), columnOfCell("u")), 2], at("u", "cells")],
+          "u",
+        ),
+      ),
+      2,
+    ]),
+    "FindStat's St000076, which gives this formula for the rank (the sum of the monotone triangle's entries less n + 2 choose 3). The sum is never negative.",
+  ),
+  matrix(
+    "MatrixInversionNumber",
+    "The sum of a(i, j) a(k, l) over the pairs of entries with i > k and j < l.",
+    withCells(inversionTotal),
+    "FindStat's St000067. On a permutation matrix it is the number of inversions.",
+  ),
+  matrix(
+    "PositiveMatrixInversionNumber",
+    "The inversion number less the number of entries equal to -1.",
+    withCells(subtract(inversionTotal, ["Count", ["Filter", "cells", ["Function", equals("e", -1), "e"]]])),
+    "FindStat's St000332.",
   ),
 ];
 

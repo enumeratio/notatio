@@ -8,7 +8,12 @@ catalog:
     identity: St000925
     url: https://www.findstat.org/St000925
     on: SetPartition
+  - system: findstat
+    identity: St000924
+    url: https://www.findstat.org/St000924
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: TopologicallyConnectedComponents(partition)

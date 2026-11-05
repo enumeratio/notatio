@@ -2881,6 +2881,13 @@ const entryPairs = (inclusive: boolean, relation: MathJSON): MathJSON =>
     sumOver(positions, count(positions, and(inclusive ? atLeastValue("j", "i") : greater("j", "i"), relation), "j")),
   );
 
+/** The inverse of the word at `k`: the position of the entry k or -k, negative when the entry is -k. The position is a floored sum over the entries equal to k in absolute value. */
+const inverseAt = (k: MathJSON): MathJSON => [
+  "Multiply",
+  subtract(1, ["Multiply", 2, count(positions, equals(here, ["Negate", k]), "i")]),
+  floored(sumOver(positions, ["If", equals(["Abs", here], k), "i", 0])),
+];
+
 const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
   signed("NegativeEntryCount", "The number of negative entries.", nonEmpty(negativeEntries)),
   signed("PositiveEntryCount", "The number of positive entries.", nonEmpty(count(positions, greater(here, 0)))),
@@ -2900,6 +2907,58 @@ const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
     "The number of negative entries plus twice the sum of the descents, a negative first entry counting as a descent at 0.",
     nonEmpty(add(negativeEntries, hasPair(floored(["Multiply", 2, sumOver(adjacent, ["If", fallsAfter, "i", 0])])))),
     "The descent at 0 adds 0 to the sum, so only the descents between entries weigh.",
+  ),
+  signed(
+    "FlagDescent",
+    "Twice the descents between entries, plus 1 when the first entry is negative.",
+    nonEmpty(add(["Multiply", 2, hasPair(count(adjacent, fallsAfter))], ["If", less(at(1), 0), 1, 0])),
+    "FindStat's St001893. The descent at 0 counts once, the others twice.",
+  ),
+  signed(
+    "FlagExcedance",
+    "Twice the excedances plus the negative entries.",
+    nonEmpty(add(["Multiply", 2, count(positions, greater(here, "i"))], negativeEntries)),
+    "FindStat's St001892. An excedance is an entry p(i) > i.",
+  ),
+  signed(
+    "FlagWeakExcedance",
+    "Twice the weak excedances plus the negative entries.",
+    nonEmpty(add(["Multiply", 2, count(positions, atLeastValue(here, "i"))], negativeEntries)),
+    "FindStat's St001817. A weak excedance is an entry p(i) >= i.",
+  ),
+  signed(
+    "PositiveBeforeLargerNegativePairCount",
+    "Pairs i < j with 0 < p(i) < -p(j): the occurrences of the signed pattern 1-2.",
+    nonEmpty(entryPairs(false, and(greater(here, 0), less(here, ["Negate", at("j")])))),
+    "FindStat's St001771. A positive entry followed, later, by a negative entry of larger absolute value.",
+  ),
+  signed(
+    "IncreasingPositivePairCount",
+    "Pairs i < j with 0 < p(i) < p(j): the occurrences of the signed pattern 12.",
+    nonEmpty(entryPairs(false, and(greater(here, 0), less(here, at("j"))))),
+    "FindStat's St001772. Both entries positive and increasing.",
+  ),
+  signed(
+    "PositiveBeforeNegativeCount",
+    "Twice the adjacent pairs of a positive entry followed by a negative one, plus 1 when the first entry is negative.",
+    nonEmpty(
+      add(
+        ["Multiply", 2, hasPair(count(adjacent, and(greater(here, 0), less(next, 0))))],
+        ["If", less(at(1), 0), 1, 0],
+      ),
+    ),
+    "FindStat's St001870 counts them in the word p(-n), ..., p(-1), p(1), ..., p(n) with p(-i) = -p(i): each adjacent pair twice, once reflected, and the pair across the middle when p(1) is negative.",
+  ),
+  signed(
+    "RightDescents",
+    "Indices 0 <= k < n with s(k) > s(k+1), where s is the inverse of p and s(0) = 0.",
+    nonEmpty(
+      add(
+        count(positions, equals(here, -1)),
+        hasPair(count(adjacent, greater(inverseAt("d"), inverseAt(add("d", 1))), "d")),
+      ),
+    ),
+    "FindStat's St001896: the left descents of the inverse. The inverse sends k to the position of k or -k, signed as the entry is.",
   ),
 ];
 
