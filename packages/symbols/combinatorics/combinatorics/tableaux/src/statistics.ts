@@ -10,6 +10,7 @@ import {
   add,
   at,
   atLeastValue,
+  atMostValue,
   bindList,
   equals,
   floored,
@@ -60,6 +61,9 @@ const overSuccessors = (test: MathJSON, weight: MathJSON = 1): MathJSON =>
 const successor = add("e", 1);
 const successorBelow = greater(rowOf(successor), rowOf("e"));
 const successorAbove = less(rowOf(successor), rowOf("e"));
+const successorNotBelow = atMostValue(rowOf(successor), rowOf("e"));
+/** Each entry e with a successor counts n - e, the entries from e + 1 on. */
+const entriesAfter = subtract(length("reading"), "e");
 
 /** The rows 1 .. d reach their own column; the cell (d, d) is the cells of the rows above it, then d along. */
 const diagonalLength = floored(sumOver(positions, ["If", atLeastValue(at("i", "lengths"), "i"), 1, 0]));
@@ -142,5 +146,30 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
     "NaturalMajorIndex",
     "The sum of the natural descents, the entries whose successor is in a strictly higher row.",
     cellsAtLeast(2, withRows(overSuccessors(successorAbove, "e"))),
+  ),
+  stat(
+    "NaturalComajorIndex",
+    "The sum of n - e over the natural descents e, the entries whose successor is in a strictly higher row.",
+    cellsAtLeast(2, withRows(overSuccessors(successorAbove, entriesAfter))),
+  ),
+  stat(
+    "Charge",
+    "The charge of the reading word: the sum of n - e over the entries e whose successor is not in a lower row.",
+    cellsAtLeast(2, withRows(overSuccessors(successorNotBelow, entriesAfter))),
+    "The reading word lists the rows from the bottom up, so e + 1 is to the right of e exactly when its row is not lower. The charge of a standard word adds, for each e with e + 1 to its right, the n - e entries from e + 1 on.",
+  ),
+  stat(
+    "Cocharge",
+    "The cocharge of the reading word: the sum of n - e over the entries e whose successor is in a lower row.",
+    cellsAtLeast(2, withRows(overSuccessors(successorBelow, entriesAfter))),
+    "The charge and the cocharge add to n(n - 1) / 2.",
+  ),
+  stat(
+    "WeightedSize",
+    "The sum of the leg lengths of the cells, the sum over the cells of their row counted from 0.",
+    nonEmpty(
+      bindList("lengths", lengths, floored(sumOver(positions, ["Multiply", subtract("i", 1), at("i", "lengths")]))),
+    ),
+    `FindStat's leg major index (St000336), a statistic of the shape; on a partition it is the same head. The empty tableau gives 0.`,
   ),
 ];

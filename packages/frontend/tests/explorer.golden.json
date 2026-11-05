@@ -1796,14 +1796,9 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [
-      "AdjacentSuccessorCount",
-      "FirstColumnInitialSequenceLength",
-      "FirstEntryInLastRow",
-      "LastEntryInFirstRow"
-    ],
+    "columns": ["AdjacentSuccessorCount", "Charge", "Cocharge", "FirstColumnInitialSequenceLength"],
     "derived": true,
-    "statistics": 12
+    "statistics": 16
   },
   "StarNumbers": {
     "expr": "Take(StarNumbers, 20)",
@@ -1871,14 +1866,9 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [
-      "AdjacentSuccessorCount",
-      "FirstColumnInitialSequenceLength",
-      "FirstEntryInLastRow",
-      "LastEntryInFirstRow"
-    ],
+    "columns": ["AdjacentSuccessorCount", "Charge", "Cocharge", "FirstColumnInitialSequenceLength"],
     "derived": true,
-    "statistics": 12
+    "statistics": 16
   },
   "SytTwoColumn": {
     "expr": "SytTwoColumn(4)",
@@ -1890,14 +1880,9 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [
-      "AdjacentSuccessorCount",
-      "FirstColumnInitialSequenceLength",
-      "FirstEntryInLastRow",
-      "LastEntryInFirstRow"
-    ],
+    "columns": ["AdjacentSuccessorCount", "Charge", "Cocharge", "FirstColumnInitialSequenceLength"],
     "derived": true,
-    "statistics": 12
+    "statistics": 16
   },
   "SytTwoRow": {
     "expr": "SytTwoRow(4)",
@@ -1909,14 +1894,9 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": [
-      "AdjacentSuccessorCount",
-      "FirstColumnInitialSequenceLength",
-      "FirstEntryInLastRow",
-      "LastEntryInFirstRow"
-    ],
+    "columns": ["AdjacentSuccessorCount", "Charge", "Cocharge", "FirstColumnInitialSequenceLength"],
     "derived": true,
-    "statistics": 12
+    "statistics": 16
   },
   "TernaryGrayCodes": {
     "expr": "TernaryGrayCodes(4)",

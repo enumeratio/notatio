@@ -1751,6 +1751,9 @@ const NOVEL = [
   "ModularMajorIndex",
   "NaturalDescentCount",
   "NaturalMajorIndex",
+  "NaturalComajorIndex",
+  "Charge",
+  "Cocharge",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

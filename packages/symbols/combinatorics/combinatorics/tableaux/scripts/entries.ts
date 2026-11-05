@@ -1,6 +1,8 @@
 // Standard-tableau statistics' generated reference entries (step 6b: one generator per area, generic
 // driver in `../../src/statistics/generate-entries.ts`). `scripts/collect-entries.ts` writes them
 // into `../../reference/`; `tests/statistics-generated.test.ts` checks they're current.
+// `WeightedSize` is also a partition head, so its record is hand-written and this area only
+// merges in `details` and `examples`.
 
 import { fileURLToPath } from "node:url";
 import type { GeneratedEntries } from "@enumeratio/entry/node";
@@ -25,5 +27,6 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: TABLEAUX_FRONTIER,
   samples: SAMPLES,
   declareArea: declareTableaux,
+  curatedHeads: ["WeightedSize"],
   dir: REFERENCE_DIR,
 });

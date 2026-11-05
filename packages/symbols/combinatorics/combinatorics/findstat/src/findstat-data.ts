@@ -4562,6 +4562,12 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1022,
   },
   {
+    head: "Descents",
+    on: "BinaryWord",
+    findstat: ["St000291"],
+    values: 2189,
+  },
+  {
     head: "LargestPart",
     on: "IntegerComposition",
     findstat: ["St000381"],
@@ -4884,5 +4890,29 @@ export const findstat: readonly FindStatMatch[] = [
     on: "StandardTableau",
     findstat: ["St001696"],
     values: 2408,
+  },
+  {
+    head: "NaturalComajorIndex",
+    on: "StandardTableau",
+    findstat: ["St001695"],
+    values: 1115,
+  },
+  {
+    head: "Charge",
+    on: "StandardTableau",
+    findstat: ["St000009"],
+    values: 2065,
+  },
+  {
+    head: "Cocharge",
+    on: "StandardTableau",
+    findstat: ["St000169"],
+    values: 2065,
+  },
+  {
+    head: "WeightedSize",
+    on: "StandardTableau",
+    findstat: ["St000336"],
+    values: 2065,
   },
 ];
