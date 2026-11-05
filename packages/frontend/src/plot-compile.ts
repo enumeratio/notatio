@@ -95,16 +95,23 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
 }
 
 /**
- * `json` compiled as `spec` asks, on `ce`. A surface's variables are real in the compiled shader, so they
- * are declared real here: an engine that already inferred them complex from an earlier use (a CPU
- * compile of `HurwitzZeta(x, y)`) would otherwise refuse a real-only lowering.
+ * `json` compiled as `spec` asks, on `ce`. A plot's variables are real: its samplers pass numbers, and
+ * the GPU's real-only lowerings take no complex argument. So the names the expression leaves free are
+ * declared real, in a scope of their own, for this compile: an engine that already inferred them
+ * complex from an earlier use (`HurwitzZeta(x, y)` boxed once) would otherwise emit code reading a
+ * complex value from a number, or refuse a real-only lowering, by the order the page asked in.
  */
 export function compilePlot(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): CompiledPlot {
-  const real = spec.target === "wgsl" ? (spec.vars ?? []) : [];
-  if (real.length === 0) return compileIn(ce, json, spec);
+  ce.pushScope();
+  let names: string[];
+  try {
+    names = [...ce.box(json as never).unknowns];
+  } finally {
+    ce.popScope();
+  }
   ce.pushScope();
   try {
-    for (const name of real) ce.declare(name, "real");
+    for (const name of names) ce.declare(name, "real");
     return compileIn(ce, json, spec);
   } finally {
     ce.popScope();

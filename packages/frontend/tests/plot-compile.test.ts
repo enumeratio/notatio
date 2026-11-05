@@ -50,8 +50,8 @@ test("a plot of Sin(x) compiles to Math.sin on an engine with analytic declared"
 });
 
 test("a WGSL plotFn defines every _gpu_ helper it calls", () => {
-  // Variables of no declared type take the NaN-guarded helpers.
-  const plot = compilePlot(ce, ["Multiply", ["Sin", "x"], ["Cos", "y"]], { target: "wgsl" });
+  // Γ has no WGSL builtin: the target's own helper, from its preamble.
+  const plot = compilePlot(ce, ["Multiply", ["Gamma", "x"], ["Gamma", "y"]], { target: "wgsl", vars: ["x", "y"] });
   const code = plot.items[0]!.code!;
   const called = new Set(code.match(/_gpu_\w+(?=\()/g));
   expect(called.size).toBeGreaterThan(0);
@@ -67,4 +67,16 @@ test("a surface compiles to WGSL after it compiled to JavaScript, its variables 
   compilePlot(engine, hurwitz, { target: "javascript", each: true });
   const plot = compilePlot(engine, hurwitz, { target: "wgsl", vars: ["x", "y"], each: true });
   expect(plot.items[0]!.code).toMatch(/fn plotFn\(x: f32, y: f32\) -> f32/);
+});
+
+test("a plot's code reads its variables as reals, whatever type the engine inferred for them before", () => {
+  const engine = new ComputeEngine();
+  declareAnalytic(engine);
+  // An earlier use left the names complex, as a kernel's session does.
+  engine.declare("x", "complex");
+  engine.declare("y", "complex");
+  const [item] = compilePlot(engine, ["HurwitzZeta", "x", "y"], { target: "javascript", each: true }).items;
+  // ζ(2, 3) = π²/6 − 1 − 1/4, from numbers in the scope.
+  const value = run(item!.code, { x: 2, y: 3 }) as { re: number };
+  expect(value.re).toBeCloseTo(Math.PI ** 2 / 6 - 1.25, 12);
 });
