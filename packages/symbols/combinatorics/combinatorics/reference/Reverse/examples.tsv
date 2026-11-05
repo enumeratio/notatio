@@ -4,3 +4,4 @@ the-signed-permutation-2-bar-3-1			[Reverse, [SignedPermutation, [List, 2, -3, 1
 the-set-composition-2-4-mid-1-mid-3			[Reverse, [SetComposition, [List, [List, 2, 4], [List, 1], [List, 3]]]]	[SetComposition, [List, [List, 3], [List, 1], [List, 2, 4]]]	the set composition $\{2,4\} \mid \{1\} \mid \{3\}$
 the-composition-2-1-3			[Reverse, [IntegerComposition, [List, 2, 1, 3]]]	[IntegerComposition, [List, 3, 1, 2]]	the composition $2 + 1 + 3$
 the-binary-word-01100			[Reverse, [BinaryWord, [List, 0, 1, 1, 0, 0]]]	[BinaryWord, [List, 0, 0, 1, 1, 0]]	the binary word $01100$
+the-parking-function-2113			[Reverse, [ParkingFunction, [List, 2, 1, 1, 3]]]	[ParkingFunction, [List, 3, 1, 1, 2]]	the parking function $2113$

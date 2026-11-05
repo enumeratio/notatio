@@ -20,9 +20,14 @@ catalog:
     identity: Mp00292
     url: https://www.findstat.org/Mp00292
     on: SetComposition
+  - system: findstat
+    identity: Mp00293
+    url: https://www.findstat.org/Mp00293
+    on: ParkingFunction
 mapOn:
   - BinaryWord
   - IntegerComposition
+  - ParkingFunction
   - Permutation
   - SetComposition
 signatures:
@@ -55,3 +60,4 @@ laws:
 - FindStat's Mp00292.
 - Also takes a `IntegerComposition`, returning a `IntegerComposition`: Rotate the parts one place to the left: the first part moves to the end.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: Rotate the word one place to the left: the first letter moves to the end.
+- Also takes a `ParkingFunction`, returning a `ParkingFunction`: Rotate the word one place to the left: the first entry moves to the end.

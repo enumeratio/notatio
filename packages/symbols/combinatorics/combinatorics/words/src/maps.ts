@@ -555,4 +555,25 @@ export const WORDS_MAPS: readonly CombinatorialMap[] = [
     summary: "Spot j holds the car that parks there, each car taking the first free spot at or after its preference.",
     note: "FindStat's Mp00053, Sage's cars_permutation. A surjection.",
   },
+  {
+    name: "CyclicShift",
+    from: "parking_function",
+    to: "parking_function",
+    body: rotatedLeft,
+    summary: "Rotate the word one place to the left: the first entry moves to the end.",
+  },
+  {
+    name: "InverseCyclicShift",
+    from: "parking_function",
+    to: "parking_function",
+    body: rotatedRight,
+    summary: "Rotate the word one place to the right: the last entry moves to the front.",
+  },
+  {
+    name: "Reverse",
+    from: "parking_function",
+    to: "parking_function",
+    body: reversedWord,
+    summary: "The word read backwards.",
+  },
 ];

@@ -26,9 +26,14 @@ catalog:
     identity: Mp00161
     url: https://www.findstat.org/Mp00161
     on: SignedPermutation
+  - system: findstat
+    identity: Mp00320
+    url: https://www.findstat.org/Mp00320
+    on: ParkingFunction
 mapOn:
   - BinaryWord
   - IntegerComposition
+  - ParkingFunction
   - Permutation
   - SetComposition
   - SetPartition
@@ -70,3 +75,4 @@ laws:
 - FindStat's Mp00288.
 - Also takes a `IntegerComposition`, returning a `IntegerComposition`: The parts read backwards.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: The word read backwards.
+- Also takes a `ParkingFunction`, returning a `ParkingFunction`: The word read backwards.
