@@ -55,8 +55,11 @@ const blocksWhere = (predicate: (size: MathJSON) => MathJSON): MathJSON => [
 // but its last element, its right ends all but its first. Plain integer lists index cheaply,
 // compiled or not, where a list of pairs would need its type proved at every `At`.
 
-const lefts: MathJSON = ["Flatten", ["Map", ["Function", ["Most", "b"], "b"], "_x"]];
-const rights: MathJSON = ["Flatten", ["Map", ["Function", ["Rest", "b"], "b"], "_x"]];
+const leftsOf: MathJSON = ["Flatten", ["Map", ["Function", ["Most", "b"], "b"], "_x"]];
+const rightsOf: MathJSON = ["Flatten", ["Map", ["Function", ["Rest", "b"], "b"], "_x"]];
+// Read as symbols, bound once per statistic by `withArcLists`.
+const lefts: MathJSON = "arcLefts";
+const rights: MathJSON = "arcRights";
 const arcCount: MathJSON = ["Length", lefts];
 
 /** [isCrossing, isNesting] for arc i against arc j, computed together so the shared terms —
@@ -81,7 +84,7 @@ const isCrossing = (i: MathJSON, j: MathJSON): MathJSON => at(1, pairFlags(i, j)
 const isNesting = (i: MathJSON, j: MathJSON): MathJSON => at(2, pairFlags(i, j));
 
 /** Guard for a definition that reads a PAIR of arcs — needs at least two. */
-const hasArcPair = (body: MathJSON): MathJSON => ["If", less(arcCount, 2), 0, body];
+const hasArcPair = (body: MathJSON): MathJSON => withArcLists(["If", less(arcCount, 2), 0, body]);
 const laterArcs: MathJSON = ["Range", add("i", 1), arcCount, 1];
 const allArcs: MathJSON = ["Range", 1, arcCount, 1];
 
@@ -107,7 +110,7 @@ const sumOverBlocks = (term: (block: MathJSON) => MathJSON): MathJSON =>
 const blockSpan = (b: MathJSON): MathJSON => subtract(["Last", b], ["At", b, 1]);
 
 /** Guard for a definition that reads arcs — needs at least one. */
-const hasArc = (body: MathJSON): MathJSON => ["If", less(arcCount, 1), 0, body];
+const hasArc = (body: MathJSON): MathJSON => withArcLists(["If", less(arcCount, 1), 0, body]);
 /** i and i+1 in one block: an arc of length 1. */
 const successions: MathJSON = hasArc(count(allArcs, equals(subtract(at("i", rights), at("i", lefts)), 1)));
 /** i and i+1 in one block, cyclically: also n with 1, i.e. the block holding 1 reaches n. */
@@ -148,8 +151,12 @@ const arcEndFrom: MathJSON = forEach(
   ["If", ["Contains", "arcLefts", "e"], at(["IndexOf", "arcLefts", "e"], "arcRights"), 0],
   "e",
 );
-/** `body` with the arcs' ends bound as lists of integers, as `arcEndFrom` reads them. */
-const withArcLists = (body: MathJSON): MathJSON => bindList("arcLefts", lefts, bindList("arcRights", rights, body));
+/** `body` with the arcs' ends bound as lists of integers, as `arcEndFrom` reads them. A function declaration:
+ *  `hasArc` below uses it while the module loads. */
+// Typed: Flatten loses its element type (CE#512, 0.179)
+function withArcLists(body: MathJSON): MathJSON {
+  return bindList("arcLefts", leftsOf, bindList("arcRights", rightsOf, body));
+}
 /**
  * The longest chain of arcs under `follows`, where `valid` says which arcs may take part. Arcs
  * are taken by their left end e in turn; the carried list holds, at entry e + 1, the longest
@@ -192,32 +199,28 @@ const longestArcChain = (
 const arcEnd = (e: MathJSON): MathJSON => at(e, "ends");
 /** Arcs that nest: the earlier one starts first and ends last. */
 const nestingNumber: MathJSON = hasArc(
-  withArcLists(
-    bindList(
-      "ends",
-      arcEndFrom,
-      longestArcChain(
-        (e) => greater(arcEnd(e), 0),
-        (earlier, e) => greater(arcEnd(earlier), arcEnd(e)),
-      ),
+  bindList(
+    "ends",
+    arcEndFrom,
+    longestArcChain(
+      (e) => greater(arcEnd(e), 0),
+      (earlier, e) => greater(arcEnd(earlier), arcEnd(e)),
     ),
   ),
 );
 /** Arcs that cross all at once: some point m has them all start at or before m and end after it. */
 const crossingNumber: MathJSON = hasArc(
-  withArcLists(
-    bindList(
-      "ends",
-      arcEndFrom,
-      max(
-        forEach(
-          ["Range", 1, subtract(groundSize, 1), 1],
-          longestArcChain(
-            (e) => and(atMostValue(e, "m"), greater(arcEnd(e), "m")),
-            (earlier, e) => less(arcEnd(earlier), arcEnd(e)),
-          ),
-          "m",
+  bindList(
+    "ends",
+    arcEndFrom,
+    max(
+      forEach(
+        ["Range", 1, subtract(groundSize, 1), 1],
+        longestArcChain(
+          (e) => and(atMostValue(e, "m"), greater(arcEnd(e), "m")),
+          (earlier, e) => less(arcEnd(earlier), arcEnd(e)),
         ),
+        "m",
       ),
     ),
   ),
@@ -227,7 +230,7 @@ const crossingNumber: MathJSON = hasArc(
  * of the other. Each block carries the least block index it can reach, and a pass pulls in the
  * labels across every crossing; the components are the blocks that keep their own index.
  */
-const arcComponents: MathJSON = [
+const arcComponentsBody: MathJSON = [
   "If",
   less(arcCount, 1),
   ["Length", "_x"],
@@ -304,6 +307,7 @@ const arcComponents: MathJSON = [
     ),
   ),
 ];
+const arcComponents: MathJSON = withArcLists(arcComponentsBody);
 
 const closerCountAbove = (closer: MathJSON): MathJSON => [
   "Count",
@@ -469,20 +473,26 @@ const blockMajorIndex: MathJSON = [
 ];
 const flattened: MathJSON = ["Flatten", "_x"];
 /** Plus, for each block ending before the next begins, the elements beyond the first in the blocks so far. */
-const flattenedMajorIndexVariant: MathJSON = add(majorIndexOf(flattened), [
-  "If",
-  less(blockCount, 2),
-  0,
-  sumOver(
-    ["Range", 1, subtract(blockCount, 1)],
-    [
-      "If",
-      less(["Last", at("i")], ["At", at(add("i", 1)), 1]),
-      sumOver(["Range", 1, blockCount], ["If", atMostValue("t", "i"), subtract(["Length", at("t")], 1), 0], "t"),
-      0,
-    ],
-  ),
-]);
+// Typed: Flatten loses its element type (CE#512, 0.179)
+const flattenedMajorIndex: MathJSON = bindList("flat", flattened, majorIndexOf("flat"));
+const flattenedMajorIndexVariant: MathJSON = bindList(
+  "flat",
+  flattened,
+  add(majorIndexOf("flat"), [
+    "If",
+    less(blockCount, 2),
+    0,
+    sumOver(
+      ["Range", 1, subtract(blockCount, 1)],
+      [
+        "If",
+        less(["Last", at("i")], ["At", at(add("i", 1)), 1]),
+        sumOver(["Range", 1, blockCount], ["If", atMostValue("t", "i"), subtract(["Length", at("t")], 1), 0], "t"),
+        0,
+      ],
+    ),
+  ]),
+);
 
 /** The least l for which the first l blocks hold exactly 1 .. m: their greatest element is their size. */
 const firstAtomicBlocks: MathJSON = [
@@ -498,7 +508,7 @@ const firstAtomicBlocks: MathJSON = [
 ];
 
 /** n - i summed over the arcs i = 1 .. A, less the arcs strictly over each element, plus the arcs strictly over each arc. */
-const depthIndex: MathJSON = [
+const depthIndex: MathJSON = withArcLists([
   "If",
   equals(arcCount, 0),
   0,
@@ -515,7 +525,7 @@ const depthIndex: MathJSON = [
     // arcs together span its last element less its first, and each arc has one element that is an end.
     subtract(["Sum", ["Map", ["Function", blockSpan("b"), "b"], "_x"]], arcCount),
   ),
-];
+]);
 
 const ascentTopsAfterSmaller: MathJSON = [
   "If",
@@ -865,7 +875,7 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
   stat(
     "FlattenedMajorIndex",
     "The major index of the permutation listing the blocks in order, each ascending.",
-    majorIndexOf(flattened),
+    flattenedMajorIndex,
   ),
   stat(
     "HuangRhoadesMajorIndex",
