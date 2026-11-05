@@ -1824,6 +1824,23 @@ const NOVEL = [
   "CylindricalTableauOverlap",
   "MinimalCylindricalInnerHeight",
   "SmallestCylindricShift",
+  "PropagatingNumber",
+  "EarlyCloserPairCount",
+  "MaximalNestingCount",
+  "NegativeEntryCount",
+  "PositiveEntryCount",
+  "TypeBInversionCount",
+  "NegativeSumPairCount",
+  "FlagMajorIndex",
+  "NegativeOneCount",
+  "PositiveOneCount",
+  "OnesOnMainDiagonal",
+  "ZerosOnMainDiagonal",
+  "FirstRowOnePosition",
+  "FirstColumnOnePosition",
+  "LastRowOnePosition",
+  "LastColumnOnePosition",
+  "MaximalDiagonalSum",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

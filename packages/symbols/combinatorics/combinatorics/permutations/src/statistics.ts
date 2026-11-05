@@ -2866,6 +2866,43 @@ const FINDSTAT_PERMUTATION_WINDOW_STATISTICS: readonly Definition[] = [
   ),
 ];
 
+// Signed permutations: `_x` is the one-line word of signed entries, a permutation of 1..n with a sign on each.
+const signed = (head: string, summary: string, expr: Definition["expr"], note?: string): Definition => ({
+  head,
+  on: "SignedPermutation",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+const negativeEntries = count(positions, less(here, 0));
+/** Pairs i < j (or i <= j when `inclusive`) whose entries satisfy `relation`, which reads p(i) and p(j) as `here` and `At(_x, j)`. */
+const entryPairs = (inclusive: boolean, relation: MathJSON): MathJSON =>
+  floored(
+    sumOver(positions, count(positions, and(inclusive ? atLeastValue("j", "i") : greater("j", "i"), relation), "j")),
+  );
+
+const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
+  signed("NegativeEntryCount", "The number of negative entries.", nonEmpty(negativeEntries)),
+  signed("PositiveEntryCount", "The number of positive entries.", nonEmpty(count(positions, greater(here, 0)))),
+  signed(
+    "TypeBInversionCount",
+    "Pairs i < j with p(i) > p(j), plus pairs i <= j with -p(i) > p(j).",
+    nonEmpty(add(entryPairs(false, greater(here, at("j"))), entryPairs(true, greater(["Negate", here], at("j"))))),
+    "The Coxeter length in type B (FindStat St001428).",
+  ),
+  signed(
+    "NegativeSumPairCount",
+    "Pairs i < j with p(i) + p(j) < 0.",
+    nonEmpty(entryPairs(false, less(add(here, at("j")), 0))),
+  ),
+  signed(
+    "FlagMajorIndex",
+    "The number of negative entries plus twice the sum of the descents, a negative first entry counting as a descent at 0.",
+    nonEmpty(add(negativeEntries, hasPair(floored(["Multiply", 2, sumOver(adjacent, ["If", fallsAfter, "i", 0])])))),
+    "The descent at 0 adds 0 to the sum, so only the descents between entries weigh.",
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -3076,5 +3113,6 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_9,
   ...FINDSTAT_PERMUTATION_STATISTICS_10,
   ...FINDSTAT_PERMUTATION_STATISTICS_11,
+  ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
   ...FINDSTAT_PERMUTATION_WINDOW_STATISTICS,
 ];

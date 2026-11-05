@@ -83,10 +83,9 @@ const READERS: Readonly<Record<string, Reader>> = {
   },
   // 1-based: entry i is the spot car i prefers, as ours.
   ParkingFunction: { read: (t) => ["ParkingFunction", intList(t)], size: (t) => ints(t).length },
-  // Ours reads a matching as the set partition of its 2-element blocks (PerfectMatchings yields
-  // SetPartitions, not the PerfectMatching carrier); size the number of points.
-  PerfectMatching: { read: (t) => ["SetPartition", pairs(t)], size: (t) => count(t, /\d+/g) },
-  // Rows of -1, 0, 1. Our AlternatingSignMatrices family yields the bare rows; this is the carrier's constructor on them.
+  // A matching is its 2-element blocks; size the number of points.
+  PerfectMatching: { read: (t) => ["PerfectMatching", pairs(t)], size: (t) => count(t, /\d+/g) },
+  // Rows of -1, 0, 1; size the number of rows. Our AlternatingSignMatrices family yields the bare rows; this is the carrier's constructor on them.
   AlternatingSignMatrix: {
     read: (t) => ["AlternatingSignMatrix", rows(t)],
     size: (t) => (JSON.parse(t) as number[][]).length,

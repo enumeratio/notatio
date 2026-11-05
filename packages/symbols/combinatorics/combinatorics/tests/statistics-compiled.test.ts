@@ -131,6 +131,56 @@ function standardTableaux(n: number): number[][][] {
   return all;
 }
 
+/** The perfect matchings of 2n points: each pair ascending, the pairs by least element. */
+function perfectMatchings(n: number): number[][][] {
+  const pair = (free: readonly number[]): number[][][] => {
+    if (free.length === 0) return [[]];
+    const [first, ...rest] = free;
+    return rest.flatMap((partner, i) =>
+      pair(rest.filter((_, j) => j !== i)).map((others) => [[first!, partner], ...others]),
+    );
+  };
+  return pair(Array.from({ length: 2 * n }, (_, i) => i + 1));
+}
+
+/** The permutations of 1..n with a sign on each entry. */
+function signedPermutations(n: number): number[][] {
+  return permutations(n).flatMap((p) =>
+    Array.from({ length: 2 ** n }, (_, mask) => p.map((v, i) => (mask & (1 << i) ? -v : v))),
+  );
+}
+
+/** The n x n alternating sign matrices: every row sums to 1, and the partial sums of each row and column are 0 or 1. */
+function alternatingSignMatrices(n: number): number[][][] {
+  const extend = (columns: readonly number[], rows: number[][]): number[][][] => {
+    if (rows.length === n) return columns.every((c) => c === 1) ? [rows] : [];
+    const found: number[][][] = [];
+    const fill = (column: number, row: number[], total: number): void => {
+      if (column === n) {
+        if (total === 1)
+          found.push(
+            ...extend(
+              columns.map((c, k) => c + row[k]!),
+              [...rows, row],
+            ),
+          );
+        return;
+      }
+      for (const entry of [-1, 0, 1]) {
+        const down = columns[column]! + entry;
+        const along = total + entry;
+        if (down >= 0 && down <= 1 && along >= 0 && along <= 1) fill(column + 1, [...row, entry], along);
+      }
+    };
+    fill(0, [], 0);
+    return found;
+  };
+  return extend(
+    Array.from({ length: n }, () => 0),
+    [],
+  );
+}
+
 /** Small subjects of each carrier, as MathJSON contents. */
 const SUBJECTS: Record<string, unknown[]> = {
   // Up to 4: the cubic statistics are slow to interpret, and the exhaustive sweeps elsewhere
@@ -144,6 +194,9 @@ const SUBJECTS: Record<string, unknown[]> = {
   OrderedTree: [1, 2, 3, 4, 5, 6].flatMap(orderedTrees),
   SetPartition: [0, 1, 2, 3, 4].flatMap(setPartitions).map((blocks) => list(blocks.map(list))),
   StandardTableau: [0, 1, 2, 3, 4, 5, 6].flatMap(standardTableaux).map((rows) => list(rows.map(list))),
+  PerfectMatching: [1, 2, 3, 4].flatMap(perfectMatchings).map((pairs) => list(pairs.map(list))),
+  SignedPermutation: [0, 1, 2, 3, 4].flatMap(signedPermutations).map(list),
+  AlternatingSignMatrix: [1, 2, 3, 4].flatMap(alternatingSignMatrices).map((rows) => list(rows.map(list))),
 };
 
 /** Statistics whose interpretation grows about threefold per size of partition: the largest size

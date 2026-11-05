@@ -9,5 +9,5 @@ signatures:
   - call: AlternatingSignMatrix(...)
     description: Catalogued in the enumeratio database; not yet written up here.
     library: enumeratio-combinatorics
-    type: (list<integer>) -> alternating_sign_matrix
+    type: (list<list<integer>>) -> alternating_sign_matrix
 ---

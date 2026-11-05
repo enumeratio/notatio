@@ -7,7 +7,8 @@ import { SET_PARTITION_STATISTICS } from "../src/statistics.ts";
 import { checkAgainstEngine, EXPECTED } from "./statistics-helpers.ts";
 
 test("every set-partition definition has an independent reading", () => {
-  for (const definition of SET_PARTITION_STATISTICS) expect(EXPECTED[definition.head], definition.head).toBeDefined();
+  for (const definition of SET_PARTITION_STATISTICS.filter((d) => d.on === "SetPartition"))
+    expect(EXPECTED[definition.head], definition.head).toBeDefined();
 });
 
 checkAgainstEngine([

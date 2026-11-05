@@ -43,7 +43,7 @@
     "expr": "AlternatingSignMatrices(4)",
     "columns": [],
     "derived": false,
-    "statistics": 0
+    "statistics": 9
   },
   "AmicableNumbers": null,
   "ArithmeticNumbers": {
@@ -1239,7 +1239,7 @@
       "start": 4
     },
     "glyph": "set-partition",
-    "columns": ["Antisingletons", "BlockMajorIndex", "BlocksAndAntisingletons", "BlocksWithEvenMinimum"],
+    "columns": [],
     "derived": true,
     "statistics": 111
   },
@@ -1682,9 +1682,9 @@
       "start": 4
     },
     "glyph": "signed-permutation",
-    "columns": ["Descents"],
+    "columns": ["Descents", "FlagMajorIndex", "TypeBInversionCount"],
     "derived": true,
-    "statistics": 2
+    "statistics": 9
   },
   "SignedSetCompositions": null,
   "SignedSubsets": null,

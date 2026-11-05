@@ -8,7 +8,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   {
     name: "AlternatingSignMatrix",
     type: "alternating_sign_matrix",
-    shape: "list<integer>",
+    shape: "list<list<integer>>",
     id: "alternating_sign_matrix",
     plural: "AlternatingSignMatrices",
   },

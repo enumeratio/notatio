@@ -29,8 +29,9 @@ const evaluate = (head: string, t: readonly (readonly number[])[]): number =>
   applyDefinition(ce, index.get(`${head}@StandardTableau`)!, ce.box(rowsOf(t) as never)).re;
 
 test("every tableau definition has an independent reading", () => {
-  for (const { head } of TABLEAU_STATISTICS) expect(TABLEAU_READINGS[head], head).toBeDefined();
-  expect(Object.keys(TABLEAU_READINGS).length).toBe(TABLEAU_STATISTICS.length);
+  const heads = TABLEAU_STATISTICS.filter((d) => d.on === "StandardTableau").map((d) => d.head);
+  for (const head of heads) expect(TABLEAU_READINGS[head], head).toBeDefined();
+  expect(Object.keys(TABLEAU_READINGS).length).toBe(heads.length);
 });
 
 for (const [head, expected] of Object.entries(TABLEAU_READINGS))

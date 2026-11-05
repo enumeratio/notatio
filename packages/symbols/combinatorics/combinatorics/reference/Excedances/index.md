@@ -20,9 +20,14 @@ catalog:
     identity: St000155
     url: https://www.findstat.org/St000155
     on: Permutation
+  - system: findstat
+    identity: St001864
+    url: https://www.findstat.org/St001864
+    on: SignedPermutation
 statOn:
   - DecoratedPermutation
   - Permutation
+  - SignedPermutation
 ---
 
 - Equidistributed with [[Descents]] over $S_n$: both are Eulerian statistics

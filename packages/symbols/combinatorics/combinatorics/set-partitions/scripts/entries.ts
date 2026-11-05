@@ -12,8 +12,17 @@ import { SET_PARTITION_STATISTICS } from "../src/statistics.ts";
 import { declareSetPartitions } from "../src/declare.ts";
 
 const SAMPLES: readonly Sample[] = [
-  { list: [[1, 3], [2]], caption: "the partition $\\{1,3\\} \\mid \\{2\\}$" },
-  { list: [[1], [2, 4], [3]], caption: "the partition $\\{1\\} \\mid \\{2,4\\} \\mid \\{3\\}$" },
+  { on: "SetPartition", list: [[1, 3], [2]], caption: "the partition $\\{1,3\\} \\mid \\{2\\}$" },
+  { on: "SetPartition", list: [[1], [2, 4], [3]], caption: "the partition $\\{1\\} \\mid \\{2,4\\} \\mid \\{3\\}$" },
+  {
+    on: "PerfectMatching",
+    list: [
+      [1, 4],
+      [2, 3],
+      [5, 6],
+    ],
+    caption: "the matching $\\{1,4\\} \\mid \\{2,3\\} \\mid \\{5,6\\}$",
+  },
 ];
 
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));

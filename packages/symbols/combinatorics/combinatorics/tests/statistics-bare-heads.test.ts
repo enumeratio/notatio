@@ -13,6 +13,10 @@ const SAMPLE: Record<string, unknown> = {
   IntegerComposition: ["At", ["IntegerCompositions", 4], 5],
   StandardTableau: ["At", ["StandardTableaux", 5], 7],
   BinaryWord: ["At", ["BinaryWords", 4], 5],
+  PerfectMatching: ["At", ["PerfectMatchings", 3], 7],
+  SignedPermutation: ["At", ["SignedPermutations", 3], 9],
+  // The family yields bare rows.
+  AlternatingSignMatrix: ["AlternatingSignMatrix", ["At", ["AlternatingSignMatrices", 3], 4]],
 };
 
 test("every statistic is callable by its bare head on each of its carriers", () => {

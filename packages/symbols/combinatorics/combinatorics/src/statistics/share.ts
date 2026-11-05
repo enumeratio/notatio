@@ -26,7 +26,7 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
   {
     // These read a value against its position, which an endofunction's or signed permutation's list has too.
     from: "Permutation",
-    to: { Endofunction: ["FixedPoints"], SignedPermutation: ["FixedPoints"] },
+    to: { Endofunction: ["FixedPoints"], SignedPermutation: ["Excedances", "FixedPoints", "WeakExcedances"] },
   },
   {
     // A set composition is a list of blocks, as a set partition is; the blocks' sizes read alike.
@@ -36,7 +36,19 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
   {
     // A perfect matching is a set partition into pairs.
     from: "SetPartition",
-    to: { PerfectMatching: ["Crossings", "Nestings"] },
+    to: {
+      PerfectMatching: [
+        "BlocksWithEvenMinimum",
+        "BlocksWithOddMinimum",
+        "CrossingNumber",
+        "Crossings",
+        "LargestOpener",
+        "NestingNumber",
+        "Nestings",
+        "Successions",
+        "TerminalClosers",
+      ],
+    },
   },
   {
     // A weak composition is a composition whose parts may be 0.

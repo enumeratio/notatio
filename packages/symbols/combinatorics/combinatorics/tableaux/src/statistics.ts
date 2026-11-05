@@ -225,6 +225,82 @@ const FINDSTAT_TABLEAU_STATISTICS_3: readonly Definition[] = [
   ),
 ];
 
+// ── alternating sign matrices ───────────────────────────────────────────────────────────
+//
+// `_x` is the rows of the matrix, entries -1, 0, 1. The entries are read as one list, row by row,
+// with `side` the number of rows: the entry in row r, column c is `cell(r, c)`.
+
+const matrix = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
+  head,
+  on: "AlternatingSignMatrix",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+const withCells = (body: MathJSON): MathJSON =>
+  nonEmpty(bindList("cells", reading, bindList("side", length(), body, "integer")));
+const cell = (row: MathJSON, column: MathJSON): MathJSON =>
+  at(add(["Multiply", subtract(row, 1), "side"], column), "cells");
+/** How many entries equal `value`. */
+const entriesEqual = (value: number): MathJSON =>
+  withCells(["Count", ["Filter", "cells", ["Function", equals("e", value), "e"]]]);
+/** The sum of `index` over the positions 1 .. side whose entry (read by `entry`) is 1: the position of the one in a row or column that holds exactly one. */
+const positionOfOne = (entry: (index: MathJSON) => MathJSON): MathJSON =>
+  withCells(floored(sumOver(positions, ["If", equals(entry("i"), 1), "i", 0])));
+/** The positions 1 .. side whose diagonal entry equals `value`. */
+const diagonalEntries = (value: number): MathJSON =>
+  withCells(floored(sumOver(positions, ["If", equals(cell("i", "i"), value), 1, 0])));
+/** The sum of the entries on the diagonal of cells (i, i - d), the largest over d. */
+const diagonalSums: MathJSON = withCells(
+  max(
+    forEach(
+      ["Range", subtract(1, "side"), subtract("side", 1)],
+      floored(
+        sumOver(positions, [
+          "If",
+          and(atLeastValue(subtract("i", "d"), 1), atMostValue(subtract("i", "d"), "side")),
+          cell("i", subtract("i", "d")),
+          0,
+        ]),
+      ),
+      "d",
+    ),
+  ),
+);
+
+const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS: readonly Definition[] = [
+  matrix("NegativeOneCount", "The number of entries equal to -1.", entriesEqual(-1)),
+  matrix("PositiveOneCount", "The number of entries equal to 1.", entriesEqual(1)),
+  matrix("OnesOnMainDiagonal", "The number of 1s on the main diagonal.", diagonalEntries(1)),
+  matrix("ZerosOnMainDiagonal", "The number of 0s on the main diagonal.", diagonalEntries(0)),
+  matrix(
+    "FirstRowOnePosition",
+    "The column of the unique 1 in the first row.",
+    positionOfOne((i) => cell(1, i)),
+  ),
+  matrix(
+    "FirstColumnOnePosition",
+    "The row of the unique 1 in the first column.",
+    positionOfOne((i) => cell(i, 1)),
+  ),
+  matrix(
+    "LastRowOnePosition",
+    "The column of the unique 1 in the last row.",
+    positionOfOne((i) => cell("side", i)),
+  ),
+  matrix(
+    "LastColumnOnePosition",
+    "The row of the unique 1 in the last column.",
+    positionOfOne((i) => cell(i, "side")),
+  ),
+  matrix(
+    "MaximalDiagonalSum",
+    "The largest sum of the entries along a diagonal.",
+    diagonalSums,
+    "The diagonals are the cells (i, j) with i - j fixed. A sum is floored at 0, which no sum of a corner cell falls below, so the largest is unchanged.",
+  ),
+];
+
 export const TABLEAU_STATISTICS: readonly Definition[] = [
   stat(
     "RowOfLargestEntry",
@@ -314,4 +390,5 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
     `FindStat's leg major index (St000336), a statistic of the shape; on a partition it is the same head. The empty tableau gives 0.`,
   ),
   ...FINDSTAT_TABLEAU_STATISTICS_3,
+  ...FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS,
 ];

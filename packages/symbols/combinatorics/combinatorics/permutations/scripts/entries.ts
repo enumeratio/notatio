@@ -22,8 +22,9 @@ import { declarePermutations } from "../src/declare.ts";
 import { DYCK_STATISTICS } from "../../lattice-paths/src/statistics.ts";
 
 const SAMPLES: readonly Sample[] = [
-  { list: [3, 1, 2], caption: "the one-line word $312$" },
-  { list: [2, 4, 1, 3], caption: "the one-line word $2413$" },
+  { on: "Permutation", list: [3, 1, 2], caption: "the one-line word $312$" },
+  { on: "Permutation", list: [2, 4, 1, 3], caption: "the one-line word $2413$" },
+  { on: "SignedPermutation", list: [2, -1, -3], caption: "the signed word $2\\,\\bar{1}\\,\\bar{3}$" },
 ];
 
 /** The heads with a hand-written record in `../../reference/`. */

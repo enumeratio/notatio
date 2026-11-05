@@ -21,11 +21,13 @@ import {
   forEach,
   visiting,
   greater,
+  length,
   less,
   max,
   min,
   nonEmpty,
   or,
+  positions,
   subtract,
   sumOver,
   where,
@@ -747,6 +749,61 @@ const rotationOrbitSize: MathJSON = [
   ),
 ];
 
+// ── perfect matchings ───────────────────────────────────────────────────────────────────
+//
+// A perfect matching is its pairs, each ascending and ordered by least element: the set partition
+// into 2-element blocks. `_x` is the list of pairs, so n = Length(_x) is the number of pairs and 2n
+// the number of points.
+
+const matched = (head: string, summary: string, expr: Definition["expr"], note?: string): Definition => ({
+  head,
+  on: "PerfectMatching",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+/** How many pairs satisfy `predicate`, which reads a pair as `b`. */
+const matchedPairsWhere = (predicate: MathJSON): MathJSON => ["Count", ["Filter", "_x", ["Function", predicate, "b"]]];
+
+const FINDSTAT_PERFECT_MATCHING_STATISTICS: readonly Definition[] = [
+  matched(
+    "PropagatingNumber",
+    "Pairs with one point among the first n and the other among the last n, for a matching of 2n points.",
+    matchedPairsWhere(and(atMostValue(["At", "b", 1], length()), less(length(), ["Last", "b"]))),
+  ),
+  matched(
+    "EarlyCloserPairCount",
+    "Pairs whose larger point is at most n + 1, for a matching of 2n points.",
+    matchedPairsWhere(atMostValue(["Last", "b"], add(length(), 1))),
+  ),
+  matched(
+    "MaximalNestingCount",
+    "The most pairs that nest one pair: the largest number of pairs (a, b) with a < c and d < b, over the pairs (c, d).",
+    nonEmpty(
+      bindList(
+        "openers",
+        firsts,
+        bindList(
+          "closers",
+          lasts,
+          max(
+            forEach(
+              positions,
+              count(
+                positions,
+                and(less(at("j", "openers"), at("i", "openers")), greater(at("j", "closers"), at("i", "closers"))),
+                "j",
+              ),
+              "i",
+            ),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001046.",
+  ),
+];
+
 export const SET_PARTITION_STATISTICS: readonly Definition[] = [
   stat("Blocks", "The number of blocks.", ["Length", "_x"]),
   stat("LargestBlock", "The size of the largest block.", nonEmpty(["Max", sizes])),
@@ -1259,4 +1316,5 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
     arcComponents,
     "FindStat's St000925. A singleton, which has no arc, is a component of its own.",
   ),
+  ...FINDSTAT_PERFECT_MATCHING_STATISTICS,
 ];

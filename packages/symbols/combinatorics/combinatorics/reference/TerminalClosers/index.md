@@ -8,7 +8,12 @@ catalog:
     identity: St001050
     url: https://www.findstat.org/St001050
     on: SetPartition
+  - system: findstat
+    identity: St000838
+    url: https://www.findstat.org/St000838
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: TerminalClosers(partition)
