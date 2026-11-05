@@ -74,9 +74,10 @@ word and binds a number, and the readout beside it computes from the number.
 <Story
   title="An Animator becomes a filmstrip">
 <template #description>
-Frames in a row, on the step grid; a print of a sweep.
+Frames in a row, on the step grid; a print of a sweep. A frame is a readout, so it is a
+<code>Dynamic</code>: only a <code>Dynamic</code> is evaluated for a page that prints.
 </template>
-<EnvironmentPreview expr='Row([Animator(t, (0, 1, 0.25)), Sin(Pi * t)])' />
+<EnvironmentPreview expr='Row([Animator(t, (0, 1, 0.25)), Dynamic(Sin(Pi * t))])' />
 </Story>
 
 <Story

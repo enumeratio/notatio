@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { html, LitElement, type PropertyValues } from "lit";
+import { html, LitElement, noChange, type PropertyValues } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import "./notatio-cell.ts";
 import "./dynamic-module-box.ts";
@@ -141,6 +141,8 @@ export class NotatioWorksheet extends LitElement {
   /** `#cellData`'s evaluated JSON, boxed -- cached by JSON text, since a slider redraws
    * only the cell it drives; every OTHER cell's box is unchanged from the last pass. */
   #boxedCache = new Map<string, Expression | null>();
+  /** The slider the pointer holds: a re-render leaves its thumb where the reader put it. */
+  #held: string | undefined;
   #deriveTimer: ReturnType<typeof setTimeout> | undefined;
   #lastDeriveAt = 0;
   /** How many points a curve cell evaluated to, for the elided readout. */
@@ -473,6 +475,9 @@ export class NotatioWorksheet extends LitElement {
     const cellEl = (event.target as Element | null)?.closest<HTMLElement>("[data-cell]");
     const id = cellEl ? Number(cellEl.dataset.cell) : Number.NaN;
     if (!Number.isFinite(id)) return;
+    // A cell re-evaluating under a dragged slider reports nothing until its answer lands; keep
+    // what it last said, or its binding's slider is torn out from under the pointer.
+    if (this.#live.has(id) && !detail.json && this.#cellData.has(id)) return;
     this.#cellData.set(id, {
       name: detail.name,
       jsonStr: detail.json ?? "",
@@ -617,9 +622,14 @@ export class NotatioWorksheet extends LitElement {
             min=${c.min}
             max=${c.max}
             step=${c.step}
-            .value=${String(c.value)}
+            .value=${this.#held === `${c.name}/${c.part}` ? noChange : String(c.value)}
+            @pointerdown=${() => (this.#held = `${c.name}/${c.part}`)}
+            @pointercancel=${() => (this.#held = undefined)}
             @input=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value)}
-            @change=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value, true)}
+            @change=${(e: Event) => {
+              this.#held = undefined;
+              this.#setControl(c, (e.target as HTMLInputElement).value, true);
+            }}
           /><span class="ws-slider-val">${formatValue(c.value, c.step)}</span></label
         >`,
       )}

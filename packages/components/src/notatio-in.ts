@@ -410,6 +410,13 @@ export class NotatioIn extends LitElement {
     this._editing = true;
   };
 
+  /** Focusing an input opens its editor: the typeset form has no caret to place. */
+  override focus(options?: FocusOptions): void {
+    if (this.readonly) return super.focus(options);
+    if (this._editing) this.#field?.focus(options);
+    else this.#edit();
+  }
+
   // A click edits; a drag that selected some of the formula is a selection, left alone.
   #onTypesetClick = (): void => {
     if (window.getSelection()?.isCollapsed === false) return;

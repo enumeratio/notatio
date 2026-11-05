@@ -265,6 +265,15 @@ export class PlotView {
       const scope = loaded.scope();
       Object.assign(scope, this.host.bindings);
       const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
+      // A symbol that is neither the plot variable nor bound would sample to nothing: say so.
+      const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
+      if (unbound.length > 0) {
+        this.#clear();
+        const names = unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
+        this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${unbound.length > 1 ? "have" : "has"} no value.</span>`;
+        this.host.requestUpdate();
+        return;
+      }
       // Each curve is code the kernel compiled, sampled per t: vastly faster than a subs()+N()
       // per sample, so a 1000-point sweep or an animated slider stays smooth.
       const at =
