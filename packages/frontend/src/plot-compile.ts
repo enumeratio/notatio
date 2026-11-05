@@ -94,8 +94,24 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
   return item;
 }
 
-/** `json` compiled as `spec` asks, on `ce`. */
+/**
+ * `json` compiled as `spec` asks, on `ce`. A surface's variables are real in the compiled shader, so they
+ * are declared real here: an engine that already inferred them complex from an earlier use (a CPU
+ * compile of `HurwitzZeta(x, y)`) would otherwise refuse a real-only lowering.
+ */
 export function compilePlot(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): CompiledPlot {
+  const real = spec.target === "wgsl" ? (spec.vars ?? []) : [];
+  if (real.length === 0) return compileIn(ce, json, spec);
+  ce.pushScope();
+  try {
+    for (const name of real) ce.declare(name, "real");
+    return compileIn(ce, json, spec);
+  } finally {
+    ce.popScope();
+  }
+}
+
+function compileIn(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): CompiledPlot {
   const boxed = ce.box(json as never);
   const bound = Object.entries(spec.bindings ?? {});
   const expr = bound.length > 0 ? boxed.subs(Object.fromEntries(bound.map(([k, v]) => [k, ce.number(v)]))) : boxed;

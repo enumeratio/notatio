@@ -50,9 +50,21 @@ test("a plot of Sin(x) compiles to Math.sin on an engine with analytic declared"
 });
 
 test("a WGSL plotFn defines every _gpu_ helper it calls", () => {
-  const plot = compilePlot(ce, ["Multiply", ["Sin", "x"], ["Cos", "y"]], { target: "wgsl", vars: ["x", "y"] });
+  // Variables of no declared type take the NaN-guarded helpers.
+  const plot = compilePlot(ce, ["Multiply", ["Sin", "x"], ["Cos", "y"]], { target: "wgsl" });
   const code = plot.items[0]!.code!;
   const called = new Set(code.match(/_gpu_\w+(?=\()/g));
   expect(called.size).toBeGreaterThan(0);
   for (const name of called) expect(code).toMatch(new RegExp(`fn ${name}\\(`));
+});
+
+test("a surface compiles to WGSL after it compiled to JavaScript, its variables real", () => {
+  const engine = new ComputeEngine();
+  declareAnalytic(engine);
+  const hurwitz = ["HurwitzZeta", "x", "y"];
+  // A page compiles an expression for the CPU, and again for the GPU, on one engine.
+  compilePlot(engine, hurwitz, { target: "wgsl", vars: ["x", "y"], each: true });
+  compilePlot(engine, hurwitz, { target: "javascript", each: true });
+  const plot = compilePlot(engine, hurwitz, { target: "wgsl", vars: ["x", "y"], each: true });
+  expect(plot.items[0]!.code).toMatch(/fn plotFn\(x: f32, y: f32\) -> f32/);
 });
