@@ -9,7 +9,7 @@
 
 import { defineConfig, devices } from "@playwright/test";
 
-const PORT = 5613;
+const PORT = Number(process.env.STORIES_PORT ?? 5613);
 
 export default defineConfig({
   testDir: ".",
