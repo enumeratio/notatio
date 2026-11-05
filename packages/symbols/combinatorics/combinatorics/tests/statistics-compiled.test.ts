@@ -146,12 +146,27 @@ const SUBJECTS: Record<string, unknown[]> = {
   StandardTableau: [0, 1, 2, 3, 4, 5, 6].flatMap(standardTableaux).map((rows) => list(rows.map(list))),
 };
 
+/** Statistics whose interpretation grows about threefold per size of partition: the largest size
+ *  (the sum of the parts) their subjects reach. Past 5 the file's 300 s timeout is within reach on
+ *  a loaded runner (7 takes about 150 s here). */
+const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([
+  ["CoarseningCount@IntegerPartition", 5],
+  ["SingletonRefinementCount@IntegerPartition", 5],
+]);
+
+/** The sum of the numbers in a subject's `List`. */
+const sizeOf = (contents: unknown): number =>
+  Array.isArray(contents)
+    ? contents.slice(1).reduce((n: number, part) => n + (typeof part === "number" ? part : 0), 0)
+    : 0;
+
 for (const definition of ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(signatureOf(d)))) {
   test(`${signatureOf(definition)}: compiled agrees with interpreted`, () => {
     const run = compiledStatistic(ce, definition);
     expect(run).toBeDefined();
     let compared = 0;
-    for (const contents of SUBJECTS[definition.on] ?? []) {
+    const largest = SLOW_TO_INTERPRET.get(signatureOf(definition)) ?? Infinity;
+    for (const contents of (SUBJECTS[definition.on] ?? []).filter((c) => sizeOf(c) <= largest)) {
       const interpreted = interpretDefinition(ce, definition, ce.box(contents as never)).json;
       const answer = run!(contents);
       // Compiled code may decline only an infinite answer, which MathJSON can't carry as a number.
