@@ -54,6 +54,23 @@ function indexSum(t: Tableau, side: "right" | "left"): number {
   }
   return total;
 }
+type Cell = readonly [number, number];
+const cellsOf = (t: Tableau): Cell[] => t.flatMap((row, r) => row.map((_, c): Cell => [r, c]));
+/** FindStat's attacking pairs (c, d): c strictly west of d in a row, or c in the row below d and strictly east of it. */
+const attackingPairs = (t: Tableau): [Cell, Cell][] =>
+  cellsOf(t).flatMap((c) =>
+    cellsOf(t)
+      .filter((d) => (c[0] === d[0] && c[1] < d[1]) || (c[0] === d[0] + 1 && c[1] > d[1]))
+      .map((d): [Cell, Cell] => [c, d]),
+  );
+/** FindStat's scan for the overlap of the cylindrical tableau: rows from the top as long as the first, pairing the i-th from the bottom. */
+const cylindricalOverlap = (t: Tableau): number => {
+  if (t.length === 0) return 0;
+  const width = t[0]!.length;
+  let d = 0;
+  while (d < t.length && t[d]!.length === width && t[0]![width - 1]! < t[t.length - 1 - d]![0]!) d++;
+  return d;
+};
 
 export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   // The first row whose largest entry beats those above it is the one holding n.
@@ -103,4 +120,32 @@ export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   // The sum of the leg lengths: the cells strictly below each cell in its column.
   WeightedSize: (t) =>
     sum(t.flatMap((row, r) => row.map((_, c) => t.slice(r + 1).filter((lower) => lower.length > c).length))),
+  AttackingPairCount: (t) => attackingPairs(t).length,
+  AttackingInversionCount: (t) => attackingPairs(t).filter(([c, d]) => t[c[0]]![c[1]]! > t[d[0]]![d[1]]!).length,
+  // FindStat's count: (i, j) and a cell (k, m) strictly southwest with the larger entry.
+  ShynarInversionCount: (t) => {
+    const conjugate = columns(t);
+    let found = 0;
+    for (const [i, row] of t.entries())
+      for (const [j, entry] of row.entries())
+        for (let m = 0; m < j; m++) for (let k = i + 1; k < conjugate[m]!.length; k++) if (entry < t[k]![m]!) found++;
+    return found;
+  },
+  // FindStat: the size less the number of descents.
+  AscentCountIncludingLargestEntry: (t) => size(t) - descents(t).length,
+  ShiftedNaturalComajorIndex: (t) =>
+    sum(naturalDescents(t).map((d) => size(t) - d)) + sum(t.map((row, i) => i * row.length)),
+  CylindricalTableauOverlap: cylindricalOverlap,
+  MinimalCylindricalInnerHeight: (t) => (t.length === 0 ? 0 : t.length - cylindricalOverlap(t)),
+  // FindStat's scan: the first shift from width - last row length at which the last row sits strictly under the first.
+  SmallestCylindricShift: (t) => {
+    if (t.length === 0) return 0;
+    const first = t[0]!;
+    const last = t.at(-1)!;
+    for (let shift = first.length - last.length; shift <= first.length; shift++) {
+      const overlap = Math.min(last.length, first.length - shift);
+      if (last.slice(0, overlap).every((entry, j) => entry < first[shift + j]!)) return shift;
+    }
+    throw new Error("no shift");
+  },
 };

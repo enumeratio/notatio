@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-standard-tableau-1-2-4-3-6-5			[ShynarInversionCount, [StandardTableau, [List, [List, 1, 2, 4], [List, 3, 6], [List, 5]]]]	4			the standard tableau $[[1,2,4],[3,6],[5]]$
+findstat-st000057-1	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1]]], "'ShynarInversionCount'"]	0	0	FindStat St000057	FindStat's value for [[1]]
+findstat-st000057-2	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2]]], "'ShynarInversionCount'"]	0	0	FindStat St000057	FindStat's value for [[1,2]]
+findstat-st000057-3	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2, 3]]], "'ShynarInversionCount'"]	0	0	FindStat St000057	FindStat's value for [[1,2,3]]

@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[SimplesOfTwoDimensionalSecondExtensionWithRegularModule, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	0			the step word $UUDDUD$
+the-step-word-uduudd			[SimplesOfTwoDimensionalSecondExtensionWithRegularModule, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	0			the step word $UDUUDD$
+findstat-st001221-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'SimplesOfTwoDimensionalSecondExtensionWithRegularModule'"]	0	0	FindStat St001221	FindStat's value for [1,0]
+findstat-st001221-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'SimplesOfTwoDimensionalSecondExtensionWithRegularModule'"]	0	0	FindStat St001221	FindStat's value for [1,0,1,0]
+findstat-st001221-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'SimplesOfTwoDimensionalSecondExtensionWithRegularModule'"]	0	0	FindStat St001221	FindStat's value for [1,1,0,0]

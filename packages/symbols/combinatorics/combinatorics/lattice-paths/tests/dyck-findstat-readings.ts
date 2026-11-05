@@ -408,9 +408,47 @@ const nakayama = (w: Word) => {
   const dominant = Math.min(
     ...series.flatMap((entry, x) => (isInjective(x, entry) ? [] : [dominantDimension(x, entry)])),
   );
+  type Interval = readonly [top: number, length: number];
+  const projectives = series.map((entry, x): Interval => [x, entry]);
+  // A map's image of length l is a quotient of (x, y), so has top x; inside (a, b) a submodule of length l has top a + b - l.
+  const homDimension = ([x, y]: Interval, [a, b]: Interval): number => {
+    let maps = 0;
+    for (let l = 1; l <= Math.min(y, b); l++) if (a + b - l === x) maps++;
+    return maps;
+  };
+  // Ext^1(M, N) from 0 -> Hom(M, N) -> Hom(P, N) -> Hom(syzygy, N) -> Ext^1(M, N) -> 0.
+  const extension = ([x, y]: Interval, target: Interval): number =>
+    homDimension([x + y, series[x]! - y], target) -
+    homDimension([x, series[x]!], target) +
+    homDimension([x, y], target);
+  const sumOverProjectives = (f: (target: Interval) => number): number => sum(projectives.map(f));
+  const extensionWithRegular = (m: Interval): number => sumOverProjectives((target) => extension(m, target));
+  const secondExtensionWithRegular = ([x, y]: Interval): number =>
+    y === series[x] ? 0 : extensionWithRegular([x + y, series[x]! - y]);
+  const radicals = projectives.map(([x, y]): Interval => [x + 1, y - 1]).filter(([, y]) => y > 0);
+  const squaredRadicals = projectives.map(([x, y]): Interval => [x + 2, y - 2]).filter(([, y]) => y > 0);
+  const projectiveSocles = projectives.map(([x, y]): Interval => [x + y - 1, 1]);
+  const quotients = projectives.map(([x, y]): Interval => [x, y - 1]).filter(([, y]) => y > 0);
+  const totalOver = (
+    left: readonly Interval[],
+    right: readonly Interval[],
+    f: (m: Interval, n: Interval) => number,
+  ): number => sum(left.flatMap((m) => right.map((n) => f(m, n))));
   return {
     series,
     modules,
+    simpleModules: modules.filter(([, y]) => y === 1),
+    projectives,
+    homDimension,
+    extension,
+    extensionWithRegular,
+    secondExtensionWithRegular,
+    radicals,
+    squaredRadicals,
+    projectiveSocles,
+    quotients,
+    totalOver,
+    isInjective,
     simple,
     injective,
     all,
@@ -565,6 +603,63 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
       (_, i) => i + 1 < forward.length && forward[i]! + 1 === forward[i + 1]! && backward[i]! - 1 === backward[i + 1]!,
     ).length;
   },
+  NonProjectiveInjectiveToNonInjectiveProjectiveHomDimension: overNakayama((a) =>
+    a.totalOver(
+      a.nonProjectiveInjectiveModules,
+      a.projectives.filter(([x, y]) => !a.isInjective(x, y)),
+      a.homDimension,
+    ),
+  ),
+  DualRegularModuleFirstExtensionDimension: overNakayama((a) =>
+    sum(a.injectiveModules.map((m) => a.extensionWithRegular(m))),
+  ),
+  RadicalEndomorphismDimension: overNakayama((a) => a.totalOver(a.radicals, a.radicals, a.homDimension)),
+  RadicalSelfExtensionDimension: overNakayama((a) => a.totalOver(a.radicals, a.radicals, a.extension)),
+  RadicalToSquaredRadicalExtensionDimension: overNakayama((a) =>
+    a.totalOver(a.radicals, a.squaredRadicals, a.extension),
+  ),
+  SocleToRadicalExtensionDimension: overNakayama((a) => a.totalOver(a.projectiveSocles, a.radicals, a.extension)),
+  RegularModuloSocleToRadicalExtensionDimension: overNakayama((a) => a.totalOver(a.quotients, a.radicals, a.extension)),
+  MaximalFirstExtensionWithRegularModule: overNakayama((a) =>
+    Math.max(...a.modules.map((m) => a.extensionWithRegular(m))),
+  ),
+  ModulesOfVanishingFirstExtensionWithRegularModule: overNakayama((a) =>
+    countOf(
+      a.modules.map((m) => a.extensionWithRegular(m)),
+      (d) => d === 0,
+    ),
+  ),
+  SimplesOfVanishingSecondExtensionWithRegularModule: overNakayama((a) =>
+    countOf(
+      a.simpleModules.map((m) => a.secondExtensionWithRegular(m)),
+      (d) => d === 0,
+    ),
+  ),
+  MaximalSecondExtensionOfSimplesWithRegularModule: overNakayama((a) =>
+    Math.max(...a.simpleModules.map((m) => a.secondExtensionWithRegular(m))),
+  ),
+  SimplesOfTwoDimensionalSecondExtensionWithRegularModule: overNakayama((a) =>
+    countOf(
+      a.simpleModules.map((m) => a.secondExtensionWithRegular(m)),
+      (d) => d === 2,
+    ),
+  ),
+  InjectivesOfNonVanishingSecondExtensionWithRegularModule: overNakayama((a) =>
+    countOf(
+      a.injectiveModules.map((m) => a.secondExtensionWithRegular(m)),
+      (d) => d > 0,
+    ),
+  ),
+  // One injective per simple socle; the projective-injectives are the projectives nothing longer ends beside.
+  InjectivesOfNonMaximalSocleProjectiveDimensionMinusProjectiveInjectives: overNakayama(
+    (a) => countOf(a.simple, (d) => d < a.global) - a.projectives.filter(([x, y]) => a.isInjective(x, y)).length,
+  ),
+  SocleSimplesOfVanishingFirstExtensionWithRegularModule: overNakayama((a) =>
+    countOf(
+      [...new Set(a.projectiveSocles.map(([x]) => x))].map((socle) => a.extensionWithRegular([socle, 1])),
+      (d) => d === 0,
+    ),
+  ),
   Area: areaOf,
   Bounce: bounceOf,
   BounceCount: (w) => (w.length === 0 ? 0 : bouncePoints(w).length - 2),

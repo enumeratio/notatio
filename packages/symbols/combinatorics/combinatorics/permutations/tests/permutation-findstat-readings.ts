@@ -253,6 +253,32 @@ const permanentOfIdentityPlusPermutation = (p: number[]): number => {
         );
   return expand(0, []);
 };
+/** FindStat's rix (St000461), by its recursion on the word. */
+const rix = (w: number[]): number => {
+  if (w.length === 0) return 0;
+  const k = w.length;
+  const i = w.indexOf(Math.max(...w)) + 1;
+  if (i === 1 && k > 1) return 0;
+  return i === k ? 1 + rix(w.slice(0, -1)) : rix(w.slice(i));
+};
+/** FindStat's aix (St000873): split at the leftmost minimum into alpha and beta. */
+const aix = (w: number[]): number => {
+  if (w.length === 0) return 0;
+  const j = w.indexOf(Math.min(...w));
+  const alpha = w.slice(0, j);
+  const beta = w.slice(j + 1);
+  if (alpha.length > 0 && beta.length > 0) return aix(alpha);
+  return alpha.length === 0 ? 1 + aix(beta) : 0;
+};
+/** FindStat's St000724: follow the smaller label from the root of the increasing tree down to a leaf. */
+const smallerChildLeaf = (w: number[]): number => {
+  if (w.length === 1) return w[0]!;
+  const a = Math.min(...w);
+  const j = w.indexOf(a);
+  const b = Math.min(...w.filter((v) => v !== a));
+  return w.indexOf(b) < j ? smallerChildLeaf(w.slice(0, j)) : smallerChildLeaf(w.slice(j + 1));
+};
+const leastCommonMultiple = (n: number): number => range(1, n).reduce((m, k) => (m * k) / gcd(m, k), 1);
 
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
@@ -1044,4 +1070,10 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
     const standard = rest.map((v) => rest.filter((w) => w <= v).length);
     return sum(fixed) - (fixed.length * (fixed.length + 1)) / 2 + sum(descents(standard));
   },
+  RecursiveEndMaximumCount: rix,
+  RecursiveStartMinimumCount: aix,
+  SmallerChildPathLeafLabel: (p) => (p.length === 0 ? 0 : smallerChildLeaf(p)),
+  // The sum of the fractions, times the least common multiple of 1 .. 2n.
+  ScaledReciprocalPositionValueSum: (p) =>
+    p.length === 0 ? 0 : Math.round(sum(p.map((v, i) => 1 / (i + 1 + v))) * leastCommonMultiple(2 * p.length)),
 };

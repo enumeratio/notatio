@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[DualRegularModuleFirstExtensionDimension, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	2			the step word $UUDDUD$
+the-step-word-uduudd			[DualRegularModuleFirstExtensionDimension, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	2			the step word $UDUUDD$
+findstat-st000951-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'DualRegularModuleFirstExtensionDimension'"]	1	1	FindStat St000951	FindStat's value for [1,0]
+findstat-st000951-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'DualRegularModuleFirstExtensionDimension'"]	0	0	FindStat St000951	FindStat's value for [1,0,1,0]
+findstat-st000951-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'DualRegularModuleFirstExtensionDimension'"]	3	3	FindStat St000951	FindStat's value for [1,1,0,0]

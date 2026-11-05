@@ -31,6 +31,26 @@ for (const [head, expected] of Object.entries(EXPECTED)) {
   });
 }
 
+// The scale lcm(1 .. 2n) passes 2^53 at n = 21 and the sum does at n = 20 for the identity: the compiled code
+// declines there and the interpreter answers exactly.
+test("ScaledReciprocalPositionValueSum is exact past the doubles", () => {
+  const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? a : gcd(b, a % b));
+  for (const n of [20, 22]) {
+    let scale = 1n;
+    for (let k = 1n; k <= BigInt(2 * n); k++) scale = (scale * k) / gcd(scale, k);
+    const p = Array.from({ length: n }, (_, i) => i + 1);
+    const expected = p.reduce((total, v, i) => total + scale / BigInt(i + 1 + v), 0n);
+    const answer = applyDefinition(
+      ce,
+      index.get("ScaledReciprocalPositionValueSum@Permutation")!,
+      ce.box(["List", ...p]),
+    );
+    expect(
+      String(answer.json && typeof answer.json === "object" ? (answer.json as { num: string }).num : answer.json),
+    ).toBe(String(expected));
+  }
+});
+
 // Larger permutations run nightly (DEEP_TESTS=1).
 test.skipIf(!process.env.DEEP_TESTS)(
   "every new permutation definition agrees over every permutation of 6 and 7",
