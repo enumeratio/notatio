@@ -13,6 +13,8 @@ const PORT = Number(process.env.STORIES_PORT ?? 5613);
 
 export default defineConfig({
   testDir: ".",
+  // gpu.spec.ts needs a headed browser and its own config (playwright.gpu.config.ts).
+  testIgnore: "gpu.spec.ts",
   // The first story's page load pays for transforming the whole element + compute-engine tree
   // from source (cold Vite dev transform); later ones reuse that cache and are fast. Generous
   // on purpose so a slow CI runner doesn't fail the smoke test over compile time.
