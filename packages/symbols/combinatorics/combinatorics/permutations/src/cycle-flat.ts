@@ -3,6 +3,7 @@
 // orbit), and a cycle is the points with one label. The only nested value is a result that is
 // itself a list of cycles (`cycleDecompositionOf`).
 
+import { fold } from "../../collections/src/families/tables.ts";
 import { bind, lets, type MathJSON } from "../../src/map-helpers.ts";
 
 /** The labels, bound by `withLabels` and read by the helpers below. */
@@ -115,10 +116,8 @@ const descending = (list: string): MathJSON => [
 ];
 
 /** The cumulative sums of `list`, entry m the sum of its first m entries. */
-const cumulative = (list: string): MathJSON => [
-  "Fold",
-  [
-    "Function",
+const cumulative = (list: string): MathJSON =>
+  fold(
     [
       "Join",
       "cu_acc",
@@ -129,10 +128,11 @@ const cumulative = (list: string): MathJSON => [
     ],
     "cu_acc",
     "cu_c",
-  ],
-  ["List"],
-  upTo(["Count", list]),
-];
+    ["List"],
+    upTo(["Count", list]),
+    // Typed accumulator: an untyped list seed no longer compiles (CE#511, 0.178)
+    "list<integer>",
+  ) as MathJSON;
 
 /** Each cycle written from its leader, cycles in the order of the leaders (ascending), as the one word of their
  *  points: position p is the (p - start of its block)-th image of its block's leader. The lengths are `cy_lens`. */

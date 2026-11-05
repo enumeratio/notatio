@@ -1034,6 +1034,8 @@ const ncCycleBlock = (i: MathJSON, j: MathJSON): MathJSON =>
           "ncx",
           ["List", 1, i],
           upTo(add(i, 1), ncHigh(i)),
+          // Typed accumulator: an untyped list seed no longer compiles (CE#511, 0.178)
+          "list<integer>",
         ),
         "list<integer>",
       ],
@@ -1089,6 +1091,8 @@ const ncRows = fold(
   "nck2",
   ["List"],
   upTo(0, sub(n, 1)),
+  // Typed accumulator: an untyped list seed no longer compiles (CE#511, 0.178)
+  "list<integer>",
 );
 
 const nonCrossingCycleSupportDefinitions: EpsilFamily = permutationRestriction({
