@@ -184,6 +184,33 @@ const boxedOccurrences = (p: number[], pattern: number[]): number =>
         ),
     ).length;
 
+/** The permutation of the entries' ranks: the standardization of a word. */
+const standardize = (w: number[]): number[] => w.map((v) => w.filter((u) => u < v).length + 1);
+const sameShape = (a: number[], b: number[]): boolean => standardize(a).join() === standardize(b).join();
+/** The suffix shifts i (1 <= i < n) at which the first n - i entries match the last n - i in relative order. */
+const overlapShifts = (p: number[]): number[] =>
+  range(1, p.length - 1).filter((i) => sameShape(p.slice(0, p.length - i), p.slice(i)));
+/** The values that stand between neighbors one apart, read from the second to the second-to-last position. */
+const verticalSeparators = (p: number[]): number[] =>
+  range(1, p.length - 2)
+    .filter((i) => Math.abs(p[i - 1]! - p[i + 1]!) === 1)
+    .map((i) => p[i]!);
+/** The restriction of p to the values at most k, in order. */
+const restrictedTo = (p: number[], k: number): number[] => p.filter((v) => v <= k);
+/** Every permutation reachable by reversing, complementing and inverting. */
+const symmetryClass = (p: number[]): number[][] => {
+  const seen = new Map<string, number[]>([[p.join(), p]]);
+  for (const todo = [p]; todo.length > 0;) {
+    const q = todo.pop()!;
+    for (const image of [q.toReversed(), q.map((v) => q.length + 1 - v), inverse(q)])
+      if (!seen.has(image.join())) {
+        seen.set(image.join(), image);
+        todo.push(image);
+      }
+  }
+  return [...seen.values()];
+};
+
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -872,4 +899,46 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
     p.length < 2 ? 0 : Math.min(...pairs(p).map(([i, j]) => Math.abs(i - j) + Math.abs(p[i]! - p[j]!))),
   BoxedOccurrencesOf123: (p) => boxedOccurrences(p, [1, 2, 3]),
   BoxedOccurrencesOf132: (p) => boxedOccurrences(p, [1, 3, 2]),
+  BinStatistic: (p) => sum(descents(p).map((i) => (i * (i + 1)) / 2)),
+  NonNegativeWalkSteps: (p) => {
+    const heights = range(0, p.length - 1).map((k) => sum(range(1, k).map((i) => (p[i - 1]! < p[i]! ? 1 : -1))));
+    return range(0, p.length - 2).filter((i) => heights[i]! >= 0 && heights[i + 1]! >= 0).length;
+  },
+  CycleMinimumExceedancesDeficiencies: (p) =>
+    sum(
+      cycles(p).map((c) => {
+        const rises = c.filter((v, k) => v < c[(k + 1) % c.length]!).length;
+        return Math.min(rises, c.length - rises);
+      }),
+    ),
+  Separators: (p) => {
+    const q = inverse(p);
+    return new Set([...verticalSeparators(p), ...verticalSeparators(q).map((v) => q[v - 1]!)]).size;
+  },
+  OverlapSetSize: (p) => overlapShifts(p).length,
+  ExteriorLength: (p) => (p.length < 2 ? 0 : p.length - Math.min(...overlapShifts(p))),
+  SimsunDoubleDescents: (p) =>
+    sum(
+      range(3, p.length).map(
+        (k) =>
+          range(0, k - 3).filter((i) => {
+            const r = restrictedTo(p, k);
+            return r[i]! > r[i + 1]! && r[i + 1]! > r[i + 2]!;
+          }).length,
+      ),
+    ),
+  SymmetryClassSize: (p) => symmetryClass(p).length,
+  PermutationGenus: (p) => {
+    const q = inverse(p);
+    const product = q.map((v) => (v % p.length) + 1);
+    return p.length === 0 ? 0 : (p.length + 1 - cycles(p).length - cycles(product).length) / 2;
+  },
+  PermutationBounce: (p) => {
+    const n = p.length;
+    if (n === 0) return 0;
+    const v = inverse(p);
+    const bounces = [v[0]!];
+    while (bounces[bounces.length - 1]! < n) bounces.push(Math.max(...v.slice(0, bounces[bounces.length - 1]! + 1)));
+    return sum(bounces.map((b) => n - b));
+  },
 };

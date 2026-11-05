@@ -1754,6 +1754,16 @@ const NOVEL = [
   "NaturalComajorIndex",
   "Charge",
   "Cocharge",
+  "BinStatistic",
+  "NonNegativeWalkSteps",
+  "CycleMinimumExceedancesDeficiencies",
+  "Separators",
+  "OverlapSetSize",
+  "ExteriorLength",
+  "SimsunDoubleDescents",
+  "SymmetryClassSize",
+  "PermutationGenus",
+  "PermutationBounce",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because
