@@ -358,10 +358,14 @@ const READINGS: Record<string, Reading> = {
     ),
     interpretAt: [3],
   },
-  VexillaryPermutations: lexRestriction([[0], [1], [2], [3], [4], [5], [6]], (x) => !contains4(x, "2143")),
+  // The interpreter takes seconds per call at these sizes, so the standard run reads a small one.
+  VexillaryPermutations: {
+    ...lexRestriction([[0], [1], [2], [3], [4], [5], [6]], (x) => !contains4(x, "2143")),
+    interpretAt: process.env.DEEP_TESTS ? [5] : [4],
+  },
   SeparablePermutations: {
     ...lexRestriction([[0], [1], [2], [3], [4], [5], [6]], (x) => !separates(x)),
-    interpretAt: process.env.DEEP_TESTS ? [5] : [3],
+    interpretAt: process.env.DEEP_TESTS ? [5] : [2],
   },
   ColoredPermutations: {
     params: [
@@ -455,7 +459,9 @@ test("the interpreter agrees with compiled code", () => {
     const bind = Object.fromEntries(family.params.map((name, i) => [name, p[i]]));
     const total = reading.count(p);
     expect(interpreted(family, "count", bind)).toBe(total);
-    for (const r of [0, Math.floor(total / 2), total - 1]) {
+    // The interpreter costs seconds a call: the standard run reads the first and last ranks, the full one the middle too.
+    const ranks = process.env.DEEP_TESTS ? [0, Math.floor(total / 2), total - 1] : [0, total - 1];
+    for (const r of new Set(ranks)) {
       const element = reading.unrank(p, r);
       expect(interpreted(family, "unrank", { ...bind, _r: r })).toEqual(list(element as unknown[]));
       expect(interpreted(family, "rank", { ...bind, _x: list(element as unknown[]) })).toBe(r);

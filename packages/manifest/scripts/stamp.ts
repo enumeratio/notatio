@@ -324,16 +324,45 @@ interface Memo {
 
 const tagOf = (engine: string): string => engine.slice(0, 12);
 
-/** A saved memo's answers under `code`, each with the engine it was checked on. */
-function readMemo(file: string, code: string): { memo: Partial<Memo>; usable: boolean } {
-  const memo = JSON.parse(readFileSync(file, "utf8")) as Partial<Memo>;
-  const usable = memo.code === code && memo.answers !== undefined && memo.engine !== undefined;
+/** The code generations a memo file keeps. Lanes on different bases share one store, and each
+ *  save would otherwise wipe the answers of the generation the others build. */
+export const MEMO_GENERATIONS = 3;
+
+/** What a memo file holds: the cost record, shared by every generation, and the generations, newest last. */
+interface MemoFile {
+  costs: Record<string, number>;
+  memos: Array<Omit<Memo, "costs">>;
+}
+
+/** A memo file's generations; a file from before generations (one memo, flat) reads as one. */
+function readMemoFile(file: string): MemoFile {
+  const raw = JSON.parse(readFileSync(file, "utf8")) as Partial<Memo> & Partial<MemoFile>;
+  if (Array.isArray(raw.memos)) return { costs: raw.costs ?? {}, memos: raw.memos };
+  const { code, engine, answers, verified } = raw;
+  const memos =
+    code !== undefined && engine !== undefined && answers !== undefined
+      ? [{ code, engine, answers, verified: verified ?? {} }]
+      : [];
+  return { costs: raw.costs ?? {}, memos };
+}
+
+/** A saved memo's answers under `code`, each with the engine it was checked on; `others` are the
+ *  file's other generations, which a save keeps. */
+function readMemo(
+  file: string,
+  code: string,
+): { memo: Partial<Memo>; usable: boolean; others: MemoFile["memos"]; last?: string } {
+  const saved = readMemoFile(file);
+  const found = saved.memos.find((m) => m.code === code);
+  const others = saved.memos.filter((m) => m.code !== code);
+  const memo: Partial<Memo> = { ...found, costs: saved.costs };
+  const usable = found !== undefined;
   if (usable) {
     memo.verified ??= {};
     // An answer with no record of its engine was made on the one the memo names.
     for (const key of Object.keys(memo.answers!)) memo.verified[key] ??= tagOf(memo.engine!);
   }
-  return { memo, usable };
+  return { memo, usable, others, last: others.at(-1)?.code };
 }
 
 /**
@@ -357,10 +386,10 @@ export function verdictCache(name: string, inputs: StepInputs): Verdicts {
   // Why answers were set aside, if they were.
   let discarded = "";
   try {
-    const { memo, usable } = readMemo(file, code);
+    const { memo, usable, last } = readMemo(file, code);
     before.costs = memo.costs ?? {};
     if (usable) Object.assign(before, { answers: memo.answers, verified: memo.verified });
-    else discarded = `code changed (${(memo.code ?? "none").slice(0, 8)} -> ${code.slice(0, 8)})`;
+    else discarded = `code changed (${(last ?? "none").slice(0, 8)} -> ${code.slice(0, 8)})`;
   } catch (error) {
     discarded = (error as NodeJS.ErrnoException).code === "ENOENT" ? `no memo at ${basename(file)}` : "memo unreadable";
   }
@@ -441,20 +470,23 @@ export function verdictCache(name: string, inputs: StepInputs): Verdicts {
       let answers = kept;
       let marks = verified;
       let times = { ...before.costs, ...costs };
+      let others: MemoFile["memos"] = [];
       try {
-        const { memo, usable } = readMemo(file, code);
-        if (usable) {
-          answers = pruned({ ...memo.answers, ...kept }, kept);
-          marks = { ...memo.verified, ...verified };
+        const saved = readMemo(file, code);
+        if (saved.usable) {
+          answers = pruned({ ...saved.memo.answers, ...kept }, kept);
+          marks = { ...saved.memo.verified, ...verified };
         }
-        times = { ...memo.costs, ...times };
+        others = saved.others;
+        times = { ...saved.memo.costs, ...times };
       } catch {
         // nothing to merge
       }
       marks = Object.fromEntries(Object.entries(marks).filter(([k]) => k in answers));
       mkdirSync(dirname(file), { recursive: true });
       const tmp = `${file}.${process.pid}.tmp`;
-      writeFileSync(tmp, JSON.stringify({ code, engine, answers, verified: marks, costs: times }));
+      const memos = [...others, { code, engine, answers, verified: marks }].slice(-MEMO_GENERATIONS);
+      writeFileSync(tmp, JSON.stringify({ costs: times, memos } satisfies MemoFile));
       renameSync(tmp, file);
       console.log(
         `verdicts ${name}: ${hits} reused` +
