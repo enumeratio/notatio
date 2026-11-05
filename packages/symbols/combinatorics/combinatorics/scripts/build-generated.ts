@@ -67,7 +67,10 @@ const compileInputs = {
   skip: (path: string) => generated.test(path) || path === at("reference"),
 };
 
+const seconds = (since: number): string => `${((Date.now() - since) / 1000).toFixed(1)}s`;
+
 // The compile steps import the stubs, so they count as outputs here.
+const quickStarted = Date.now();
 await cached(
   "quick",
   inputs,
@@ -76,6 +79,7 @@ await cached(
     for (const script of quick) execFileSync("node", [script], { cwd: dir, stdio: "inherit" });
   },
 );
+console.log(`quick: ${seconds(quickStarted)}`);
 
 const queue = [...compiles];
 const failures: unknown[] = [];
@@ -83,11 +87,13 @@ await Promise.all(
   Array.from({ length: jobs }, async () => {
     for (let step = queue.shift(); step !== undefined; step = queue.shift()) {
       const [script, output] = step;
+      const started = Date.now();
       try {
         // RECHECK_ALL runs every step whatever its stamp says (the nightly cross-check).
         if (process.env.RECHECK_ALL === "1") await run(script);
         else if (!(await cached(script, compileInputs, [at(output)], () => run(script))))
           console.log(`${script}: up to date`);
+        console.log(`${script}: ${seconds(started)}`);
       } catch (error) {
         failures.push(error);
       }

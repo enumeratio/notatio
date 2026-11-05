@@ -91,10 +91,14 @@ function agrees(
   return true;
 }
 
+/** The map from permutations into the tuple carrier `map` takes. */
+const makerOf = (map: MapDef): MapDef | undefined =>
+  MAPS.find((m) => m.from === "permutation" && m.to === map.from && m.imageParts !== undefined);
+
 /** Elements of the tuple carrier `map` takes (its `argumentParts` set): the images of the small permutations under
  *  the map into that carrier, which the families over it don't sample. */
 export function partSubjects(ce: Engine, map: MapDef, permutations: readonly unknown[]): unknown[] {
-  const maker = MAPS.find((m) => m.from === "permutation" && m.to === map.from && m.imageParts !== undefined);
+  const maker = makerOf(map);
   if (maker === undefined) return [];
   return permutations.map((permutation) => wrapParts(maker.imageParts, evaluateDefinition(ce, maker, permutation)));
 }
@@ -140,13 +144,29 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     return samples.get(carrier)!;
   };
 
+  // The interpreter's pass over every small permutation is the dearest step of a run that checks
+  // nothing. It reads only the maker's body and the permutations, both in the key, and the engine
+  // (the memo's own condition), so an answer made on this engine stands.
+  const parted = new Map<string, unknown[]>();
+  const partsOf = (map: MapDef): unknown[] => {
+    if (!parted.has(map.from)) {
+      const maker = makerOf(map);
+      const permutations = subjectsOf("Permutation");
+      const parts = { maker: maker && { body: maker.body, imageParts: maker.imageParts }, permutations };
+      parted.set(
+        map.from,
+        verdicts.remember(parts, () => partSubjects(ce, map, permutations)),
+      );
+    }
+    return parted.get(map.from)!;
+  };
+
   const single = (map: MapDef): Entry | undefined => {
     const from = carrierOf.get(map.from);
     const to = carrierOf.get(map.to);
     if (from === undefined || to === undefined) return undefined;
     const key = mapKey(map);
-    const subjects =
-      map.argumentParts === undefined ? subjectsOf(from.name) : partSubjects(ce, map, subjectsOf("Permutation"));
+    const subjects = map.argumentParts === undefined ? subjectsOf(from.name) : partsOf(map);
     // The flat body first, where the map has one; the nested body after it.
     let wrong = false;
     if (map.flat !== undefined) {
