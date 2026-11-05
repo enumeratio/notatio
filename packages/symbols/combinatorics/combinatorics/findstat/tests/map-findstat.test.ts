@@ -336,6 +336,9 @@ const IDS: Readonly<Record<string, string>> = {
   "StandardPermutation@BinaryWord": "Mp00336",
   "LabelingPermutation@ParkingFunction": "Mp00055",
   "CarPermutation@ParkingFunction": "Mp00053",
+  "CyclicShift@ParkingFunction": "Mp00293",
+  "InverseCyclicShift@ParkingFunction": "Mp00304",
+  "Reverse@ParkingFunction": "Mp00320",
 };
 
 test("every reading names the FindStat map it is", () => {

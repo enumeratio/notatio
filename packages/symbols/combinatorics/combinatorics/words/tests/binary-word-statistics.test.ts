@@ -4,7 +4,7 @@ import { declareCombinatorics } from "../../src/index.ts";
 import { applyDefinition } from "../../src/statistics/declare.ts";
 import { bySignature } from "../../src/statistics/types.ts";
 import { WORD_STATISTICS } from "../src/statistics.ts";
-import { WORD_READINGS } from "./binary-word-findstat-readings.ts";
+import { descentsOfWord, WORD_READINGS } from "./binary-word-findstat-readings.ts";
 
 // The whole library, as a page evaluates it.
 const ce = bareEngine();
@@ -35,4 +35,13 @@ test("each head called on the carrier value gives the reading", () => {
       expect(ce.box([head, ["BinaryWord", ["List", ...w]]] as never).evaluate().re, `${head} ${w.join("")}`).toBe(
         expected(w),
       );
+});
+
+// `Descents` is a permutation head that also reads a binary word through `CombinatorialStat` (FindStat's St000291).
+test("Descents on a binary word counts the factors 10, over every word of length 0..8", () => {
+  for (const w of upTo(8))
+    expect(
+      ce.box(["CombinatorialStat", ["BinaryWord", ["List", ...w]], "'Descents'"] as never).evaluate().re,
+      w.join(""),
+    ).toBe(descentsOfWord(w));
 });

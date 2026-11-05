@@ -1,6 +1,10 @@
 id	section	role	expr	expected	known	source	caption
 the-partition-4-2-1-of-7			[WeightedSize, [IntegerPartition, [List, 4, 2, 1]]]	4			the partition $4 + 2 + 1$ of $7$
 the-partition-3-3-1-of-7			[WeightedSize, [IntegerPartition, [List, 3, 3, 1]]]	5			the partition $3 + 3 + 1$ of $7$
+the-standard-tableau-1-2-4-3-6-5			[WeightedSize, [StandardTableau, [List, [List, 1, 2, 4], [List, 3, 6], [List, 5]]]]	4			the standard tableau $[[1,2,4],[3,6],[5]]$
 findstat-st000185-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 1]], "'WeightedSize'"]	0	0	FindStat St000185	FindStat's value for [1]
 findstat-st000185-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'WeightedSize'"]	0	0	FindStat St000185	FindStat's value for [2]
 findstat-st000185-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'WeightedSize'"]	0	0	FindStat St000185	FindStat's value for [3]
+findstat-st000336-1	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1]]], "'WeightedSize'"]	0	0	FindStat St000336	FindStat's value for [[1]]
+findstat-st000336-2	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2]]], "'WeightedSize'"]	0	0	FindStat St000336	FindStat's value for [[1,2]]
+findstat-st000336-3	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2, 3]]], "'WeightedSize'"]	0	0	FindStat St000336	FindStat's value for [[1,2,3]]

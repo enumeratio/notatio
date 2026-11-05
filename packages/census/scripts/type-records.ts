@@ -4,7 +4,7 @@
 // engine prints it, `overrides` naming who had the head before, `HoldAll` for `lazy`. A
 // head with no record gets a skeleton one, its summary marked for a person to write.
 //
-//   vp node packages/census/scripts/type-records.ts
+//   node packages/census/scripts/type-records.ts
 
 import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync } from "node:fs";

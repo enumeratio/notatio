@@ -2280,6 +2280,224 @@ const FINDSTAT_PERMUTATION_STATISTICS_9: readonly Definition[] = [
   ),
 ];
 
+/** The number of ascents among steps 1..i of the walk, an ascent being an up step. */
+const ascentsThrough = count(["Range", 1, "i", 1], less(at("j"), at(add("j", 1))), "j");
+
+/** The vertical-separator test at position s: interior, with the neighbors' values one apart. */
+const separatesAt = (s: MathJSON): MathJSON => [
+  "If",
+  and(atLeastValue(s, 2), atMostValue(s, subtract(length(), 1))),
+  equals(distance(at(subtract(s, 1)), at(add(s, 1))), 1),
+  "False",
+];
+/** The same test on the inverse at value t: the values just around t sit at positions one apart. */
+const separatesInverseAt = (t: MathJSON): MathJSON => [
+  "If",
+  and(atLeastValue(t, 2), atMostValue(t, subtract(length(), 1))),
+  equals(distance(positionOf(subtract(t, 1)), positionOf(add(t, 1))), 1),
+  "False",
+];
+
+/** -1, 0 or 1 as a is below, equal to or above b. */
+const comparison = (a: MathJSON, b: MathJSON): MathJSON => ["If", less(a, b), -1, ["If", greater(a, b), 1, 0]];
+/** Whether the first n - i entries and the last n - i entries are in the same relative order. */
+const sameOrderAfterShift: MathJSON = equals(
+  floored(
+    sumOver(
+      ["Range", 1, subtract(length(), "i"), 1],
+      count(
+        ["Range", 1, subtract(length(), "i"), 1],
+        and(greater("b", "a"), [
+          "NotEqual",
+          comparison(at("a"), at("b")),
+          comparison(at(add("a", "i")), at(add("b", "i"))),
+        ]),
+        "b",
+      ),
+      "a",
+    ),
+  ),
+  0,
+);
+
+/** n + 1 - v: the reflection of a position or value. */
+const reflected = (v: MathJSON): MathJSON => subtract(add(length(), 1), v);
+/** 1 when no position violates `differs`, i.e. a symmetry of the square fixes p; else 0. */
+const fixedBy = (differs: MathJSON): MathJSON => ["If", equals(count(positions, differs), 0), 1, 0];
+
+/** The cycles of the permutation list `q`: positions whose walk returns before meeting anything smaller. */
+const cyclesOf = (q: MathJSON): MathJSON =>
+  count(
+    positions,
+    equals(
+      [
+        "Fold",
+        [
+          "Function",
+          ["If", ["LessEqual", "w", 0], "w", ["If", equals("w", "i"), 0, ["If", less("w", "i"), -1, at("w", q)]]],
+          "w",
+          "k",
+        ],
+        at("i", q),
+        steps,
+      ],
+      0,
+    ),
+  );
+
+/** The bounce point after t bounces: from the first entry of the inverse, the greatest of the inverse's entries up to one past the last. */
+const bounceAfter = (inverseList: MathJSON): MathJSON => [
+  "Fold",
+  [
+    "Function",
+    ["If", less("w", length()), max(forEach(["Range", 1, add("w", 1), 1], at("j", inverseList), "j")), length()],
+    "w",
+    "s",
+  ],
+  at(1, inverseList),
+  ["Range", 1, "t", 1],
+];
+
+// The tenth batch: the walk of ascents and descents, separators and overlaps, symmetry classes, genus and bounce.
+const FINDSTAT_PERMUTATION_STATISTICS_10: readonly Definition[] = [
+  word(
+    "BinStatistic",
+    "The sum of the binomial coefficients (i + 1 choose 2) over the descents i.",
+    hasPair(sumOver(where(adjacent, fallsAfter), ["Divide", ["Multiply", "i", add("i", 1)], 2])),
+  ),
+  word(
+    "NonNegativeWalkSteps",
+    "Steps of the walk (up at an ascent, down at a descent) that begin and end at height at least 0.",
+    hasPair(count(adjacent, atLeastValue(subtract(["Multiply", 2, ascentsThrough], "i"), ["If", risesAfter, 1, 0]))),
+  ),
+  stat(
+    "CycleMinimumExceedancesDeficiencies",
+    "The sum over the cycles of the lesser of the number of exceedances and the number of the other points.",
+    nonEmpty(
+      floored(
+        sumOver(
+          cycleLeaders,
+          min([
+            "List",
+            count(positions, and(sameCycle("i", "m"), greater(at("m"), "m")), "m"),
+            count(positions, and(sameCycle("i", "m"), atMostValue(at("m"), "m")), "m"),
+          ]),
+        ),
+      ),
+    ),
+  ),
+  stat(
+    "Separators",
+    "The values v that are a vertical separator of p, or whose image under p^-1 is a vertical separator of p^-1.",
+    hasTriple(
+      count(
+        positions,
+        bind(
+          "s",
+          positionOf("v"),
+          bind("t", at(at("v")), or(separatesAt("s"), separatesInverseAt("t")), "integer"),
+          "integer",
+        ),
+        "v",
+      ),
+    ),
+  ),
+  word(
+    "OverlapSetSize",
+    "Shifts i < n for which the first n - i entries and the last n - i entries are in the same relative order.",
+    hasPair(count(adjacent, sameOrderAfterShift)),
+  ),
+  word(
+    "ExteriorLength",
+    "The longest proper prefix whose relative order is that of the suffix of the same length.",
+    hasPair(max(forEach(where(adjacent, sameOrderAfterShift), subtract(length(), "i")))),
+  ),
+  stat(
+    "SimsunDoubleDescents",
+    "Double descents in the restrictions of p to the values 1..k, over all k, counted with multiplicity.",
+    hasTriple(
+      sumOver(
+        positions,
+        sumOver(
+          where(positions, greater("j", "i"), "j"),
+          sumOver(
+            where(positions, greater("k", "j"), "k"),
+            [
+              "If",
+              and(greater(at("i"), at("j")), greater(at("j"), at("k"))),
+              [
+                "Max",
+                0,
+                subtract(
+                  min([
+                    "Join",
+                    ["List", add(length(), 1)],
+                    forEach(
+                      where(positions, and(and(greater("m", "i"), less("m", "k")), ["NotEqual", "m", "j"]), "m"),
+                      at("m"),
+                      "m",
+                    ),
+                  ]),
+                  at("i"),
+                ),
+              ],
+              0,
+            ],
+            "k",
+          ),
+          "j",
+        ),
+      ),
+    ),
+  ),
+  stat(
+    "SymmetryClassSize",
+    "The permutations reachable from p by inverse, reverse and complement: 8 over the symmetries that fix p.",
+    nonEmpty(
+      [
+        "Divide",
+        8,
+        [
+          "Add",
+          1,
+          fixedBy(["NotEqual", here, at(reflected("i"))]),
+          fixedBy(["NotEqual", here, reflected(here)]),
+          fixedBy(["NotEqual", at(reflected("i")), reflected(here)]),
+          fixedBy(["NotEqual", at(here), "i"]),
+          fixedBy(["NotEqual", at(here), reflected("i")]),
+          fixedBy(["NotEqual", at(reflected(here)), "i"]),
+          fixedBy(["NotEqual", at(reflected(here)), reflected("i")]),
+        ],
+      ],
+      1,
+    ),
+  ),
+  stat(
+    "PermutationGenus",
+    "The genus g with n + 1 - 2g the cycles of p plus the cycles of p^-1 composed with the long cycle.",
+    nonEmpty(
+      bind(
+        "q",
+        forEach(positions, positionOf(add(["Mod", "i", length()], 1))),
+        ["Divide", subtract(subtract(add(length(), 1), ["Count", cycleLeaders]), cyclesOf("q")), 2],
+        "list<integer>",
+      ),
+    ),
+  ),
+  stat(
+    "PermutationBounce",
+    "The sum of n - b over the bounce points b: the position of 1 in p, then the greatest position among the entries up to one past the last.",
+    nonEmpty(
+      bind(
+        "v",
+        forEach(positions, positionOf("m"), "m"),
+        floored(sumOver(["Range", 0, subtract(length(), 1), 1], subtract(length(), bounceAfter("v")), "t")),
+        "list<integer>",
+      ),
+    ),
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -2488,4 +2706,5 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_7,
   ...FINDSTAT_PERMUTATION_STATISTICS_8,
   ...FINDSTAT_PERMUTATION_STATISTICS_9,
+  ...FINDSTAT_PERMUTATION_STATISTICS_10,
 ];

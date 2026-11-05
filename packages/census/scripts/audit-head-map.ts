@@ -36,7 +36,7 @@
 // engine-native heads no reference page documents. A probe is checked by value, so it
 // settles a head the signature leaves undecided.
 //
-//   vp node packages/census/scripts/audit-head-map.ts
+//   node packages/census/scripts/audit-head-map.ts
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { CARRIERS } from "@enumeratio/combinatorics";
@@ -476,7 +476,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 // produce an answer for a representative sample on any of its overload arms
 // (\`unevaluated\`). Regenerate with:
 //
-//   vp node packages/census/scripts/audit-head-map.ts
+//   node packages/census/scripts/audit-head-map.ts
 //
 // An \`unevaluated\` entry with no \`sample\` means no arm of the signature gave anything
 // concrete to check — unverified, not cleared, so its absence from this list is not a claim

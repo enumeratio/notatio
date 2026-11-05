@@ -39,6 +39,22 @@ const naturalDescents = (t: Tableau): number[] =>
     return false;
   });
 
+/** The reading word: the rows from the bottom up, each left to right. */
+const readingWord = (t: Tableau): number[] => t.toReversed().flatMap((row) => [...row]);
+
+/** The Lascoux-Schuetzenberger indices: 0 for 1, then k + 1 adds 1 to k's when it lies on `side` of k. */
+function indexSum(t: Tableau, side: "right" | "left"): number {
+  const word = readingWord(t);
+  let index = 0;
+  let total = 0;
+  for (let k = 2; k <= word.length; k++) {
+    const goesRight = word.indexOf(k) > word.indexOf(k - 1);
+    if (goesRight === (side === "right")) index++;
+    total += index;
+  }
+  return total;
+}
+
 export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   // The first row whose largest entry beats those above it is the one holding n.
   RowOfLargestEntry: (t) => {
@@ -81,4 +97,10 @@ export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   ModularMajorIndex: (t) => (size(t) === 0 ? 0 : sum(descents(t)) % size(t)),
   NaturalDescentCount: (t) => naturalDescents(t).length,
   NaturalMajorIndex: (t) => sum(naturalDescents(t)),
+  NaturalComajorIndex: (t) => sum(naturalDescents(t).map((e) => size(t) - e)),
+  Charge: (t) => indexSum(t, "right"),
+  Cocharge: (t) => indexSum(t, "left"),
+  // The sum of the leg lengths: the cells strictly below each cell in its column.
+  WeightedSize: (t) =>
+    sum(t.flatMap((row, r) => row.map((_, c) => t.slice(r + 1).filter((lower) => lower.length > c).length))),
 };

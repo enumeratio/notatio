@@ -1110,6 +1110,24 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00053", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
+    name: "CyclicShift",
+    from: "ParkingFunction",
+    to: "ParkingFunction",
+    findstat: [{ id: "Mp00293", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "InverseCyclicShift",
+    from: "ParkingFunction",
+    to: "ParkingFunction",
+    findstat: [{ id: "Mp00304", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "Reverse",
+    from: "ParkingFunction",
+    to: "ParkingFunction",
+    findstat: [{ id: "Mp00320", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
     name: "FoataHan",
     from: "SignedPermutation",
     to: "SignedPermutation",

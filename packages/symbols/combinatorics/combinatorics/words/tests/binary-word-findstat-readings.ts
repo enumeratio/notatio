@@ -28,3 +28,7 @@ export const WORD_READINGS: Record<string, Reading> = {
   BalancedPrefixCount: (w) => prefixes(w).filter((p) => p !== "" && zeros(p) === ones(p)).length,
   SymmetryDegree: (w) => indices(Math.floor(w.length / 2)).filter((i) => w[i] === w[w.length - 1 - i]).length,
 };
+
+/** FindStat's St000291 for `Descents`, which is not a binary-word definition of its own: the occurrences of the factor 10. */
+export const descentsOfWord = (w: readonly number[]): number =>
+  w.filter((letter, i) => letter === 1 && w[i + 1] === 0).length;
