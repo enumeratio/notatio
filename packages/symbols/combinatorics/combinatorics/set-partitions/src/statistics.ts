@@ -765,6 +765,20 @@ const matched = (head: string, summary: string, expr: Definition["expr"], note?:
 /** How many pairs satisfy `predicate`, which reads a pair as `b`. */
 const matchedPairsWhere = (predicate: MathJSON): MathJSON => ["Count", ["Filter", "_x", ["Function", predicate, "b"]]];
 
+/** The sum over pairs i < j of `term(i, j)`, which reads the openers and closers of the matching's pairs as `openers` and `closers`. */
+const pairsOfPairs = (term: (earlier: MathJSON, later: MathJSON) => MathJSON): MathJSON =>
+  nonEmpty(
+    bindList(
+      "openers",
+      firsts,
+      bindList(
+        "closers",
+        lasts,
+        floored(sumOver(positions, sumOver(where(positions, greater("j", "i"), "j"), term("i", "j"), "j"))),
+      ),
+    ),
+  );
+
 const FINDSTAT_PERFECT_MATCHING_STATISTICS: readonly Definition[] = [
   matched(
     "PropagatingNumber",
@@ -801,6 +815,64 @@ const FINDSTAT_PERFECT_MATCHING_STATISTICS: readonly Definition[] = [
       ),
     ),
     "FindStat's St001046.",
+  ),
+  matched(
+    "ClosersBelowLargestOpener",
+    "The pairs whose larger point is below the largest opener, the larger point of the pair opening last.",
+    nonEmpty(subtract(max(firsts), length())),
+    "FindStat's St000840. Every other opener is below the largest, so the closers below it number the largest opener less the pairs.",
+  ),
+  matched(
+    "IdentityMatchingEdgeCount",
+    "Pairs {2k - 1, 2k}: the edges shared with the matching 12, 34, 56, ....",
+    matchedPairsWhere(and(equals(["Mod", ["At", "b", 1], 2], 1), equals(subtract(["Last", "b"], ["At", "b", 1]), 1))),
+    "FindStat's St001997. The identity matching is 12, 34, 56, ....",
+  ),
+  matched(
+    "MaximalRightCrossingCount",
+    "The most pairs (c, d) with a < c < b < d, over the pairs (a, b): arcs that cross a given arc at its right end.",
+    nonEmpty(
+      bindList(
+        "openers",
+        firsts,
+        bindList(
+          "closers",
+          lasts,
+          max(
+            forEach(
+              positions,
+              count(
+                positions,
+                and(
+                  and(less(at("i", "openers"), at("j", "openers")), less(at("j", "openers"), at("i", "closers"))),
+                  less(at("i", "closers"), at("j", "closers")),
+                ),
+                "j",
+              ),
+              "i",
+            ),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001047 counts these, though its title says arcs crossing a given arc: its code sweeps the closers and counts the arcs opened inside and still open, which leaves out the arcs crossing at the left end.",
+  ),
+  matched(
+    "AlignedPairCount",
+    "Pairs of pairs (a, b), (c, d) with a < b < c < d.",
+    pairsOfPairs((earlier, later) => ["If", less(at(earlier, "closers"), at(later, "openers")), 1, 0]),
+    "FindStat's St000719, its alignments. Any two pairs cross, nest or align, so the three counts sum to n choose 2.",
+  ),
+  matched(
+    "CrossingsPlusTwiceNestings",
+    "The crossings plus twice the nestings.",
+    pairsOfPairs((earlier, later) =>
+      add(
+        ["If", less(at(later, "openers"), at(earlier, "closers")), 1, 0],
+        ["If", less(at(later, "closers"), at(earlier, "closers")), 1, 0],
+      ),
+    ),
+    "FindStat's St000043. For a pair opening before another, the other opens inside it when it crosses or nests, and closes inside it when it nests, so 1 for the first and 2 for both.",
   ),
 ];
 

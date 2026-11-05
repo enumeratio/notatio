@@ -43,7 +43,7 @@
     "expr": "AlternatingSignMatrices(4)",
     "columns": [],
     "derived": false,
-    "statistics": 9
+    "statistics": 18
   },
   "AmicableNumbers": null,
   "ArithmeticNumbers": {
@@ -1682,9 +1682,9 @@
       "start": 4
     },
     "glyph": "signed-permutation",
-    "columns": ["Descents", "FlagMajorIndex", "TypeBInversionCount"],
+    "columns": ["Descents", "FlagDescent", "FlagExcedance", "FlagMajorIndex"],
     "derived": true,
-    "statistics": 9
+    "statistics": 16
   },
   "SignedSetCompositions": null,
   "SignedSubsets": null,

@@ -43,13 +43,50 @@ function maximalNestingCount(m: Matching): number {
   return w;
 }
 
+/** FindStat's St001047: sweep the points, keeping the open openers; at a closer, the open arcs opened after its opener. */
+function maximalRightCrossingCount(m: Matching): number {
+  let w = 0;
+  const active: number[] = [];
+  for (let i = 1; i <= points(m); i++) {
+    const j = partner(m, i);
+    if (j < i) {
+      w = Math.max(w, active.length - 1 - active.filter((o) => o < j).length);
+      active.splice(active.indexOf(j), 1);
+    } else active.push(i);
+  }
+  return w;
+}
+
+/** FindStat's St000924: pairs join when they cross, and the components are the classes. */
+function connectedComponents(m: Matching): number {
+  const label = m.map((_, i) => i);
+  const root = (i: number): number => (label[i] === i ? i : root(label[i]!));
+  m.forEach((p, i) => m.forEach((q, j) => crosses(p, q) && (label[root(i)] = root(j))));
+  return new Set(m.map((_, i) => root(i))).size;
+}
+
 export type Reading = (m: Matching) => number;
 
 export const PERFECT_MATCHING_READINGS: Record<string, Reading> = {
   PropagatingNumber: (m) => m.filter(([a, b]) => a <= m.length && m.length < b).length,
   EarlyCloserPairCount: (m) => m.filter(([, b]) => b <= m.length + 1).length,
   MaximalNestingCount: maximalNestingCount,
+  // St000840: the closers below the largest opener.
+  ClosersBelowLargestOpener: (m) => {
+    const largest = Math.max(...m.map(([a]) => a));
+    return m.filter(([, b]) => b < largest).length;
+  },
+  // St001997: the edges among 12, 34, 56, ....
+  IdentityMatchingEdgeCount: (m) => m.filter(([a, b]) => a % 2 === 1 && b === a + 1).length,
+  MaximalRightCrossingCount: maximalRightCrossingCount,
+  // St000719, over the pairs sorted by least element: a pair that ends before the next begins.
+  AlignedPairCount: (m) => sum(m.map(([, b], i) => m.slice(i + 1).filter(([c]) => b < c).length)),
+  // St000043: the crossings and twice the nestings.
+  CrossingsPlusTwiceNestings: (m) =>
+    sum(m.map((p, i) => m.slice(i + 1).filter((q) => crosses(p, q)).length)) +
+    2 * sum(m.map((p, i) => m.slice(i + 1).filter((q) => nests(p, q)).length)),
   // Statistics of set partitions that matchings share.
+  TopologicallyConnectedComponents: connectedComponents,
   Successions: (m) => Array.from({ length: points(m) }, (_, i) => i + 1).filter((p) => partner(m, p) === p + 1).length,
   BlocksWithOddMinimum: (m) => m.filter(([a]) => a % 2 === 1).length,
   BlocksWithEvenMinimum: (m) => m.filter(([a]) => a % 2 === 0).length,
@@ -62,4 +99,13 @@ export const PERFECT_MATCHING_READINGS: Record<string, Reading> = {
 };
 
 /** The heads defined on the matching carrier; the rest are set-partition statistics the carrier shares. */
-export const DEFINED_ON_MATCHINGS = ["EarlyCloserPairCount", "MaximalNestingCount", "PropagatingNumber"];
+export const DEFINED_ON_MATCHINGS = [
+  "AlignedPairCount",
+  "ClosersBelowLargestOpener",
+  "CrossingsPlusTwiceNestings",
+  "EarlyCloserPairCount",
+  "IdentityMatchingEdgeCount",
+  "MaximalNestingCount",
+  "MaximalRightCrossingCount",
+  "PropagatingNumber",
+];

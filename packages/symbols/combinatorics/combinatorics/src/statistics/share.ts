@@ -47,6 +47,7 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
         "Nestings",
         "Successions",
         "TerminalClosers",
+        "TopologicallyConnectedComponents",
       ],
     },
   },
