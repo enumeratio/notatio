@@ -801,6 +801,114 @@ const nonProjectiveInjectives: MathJSON = where(upTo(vertexCount), greater(at("v
 /** The dominant dimension of the algebra, which equals its opposite's: the least codominant dimension of a non-projective injective. */
 const dominantDimension: MathJSON = ["Min", forEach(nonProjectiveInjectives, at("v", "codominantDims"), "v")];
 
+// ── homomorphisms and extensions between interval modules ─────────────────────────────────
+// A module (top x, length y) has the composition factors x .. x+y-1. Two such modules have at
+// most a one-dimensional space of maps: a map is fixed by its image, which is a quotient of the
+// first and a submodule of the second, and the image's length is forced by where the second ends.
+/** dim Hom((x, y), (a, b)): 1 when l = a + b - x lies between 1 and both lengths, else 0. */
+const homDimension = (x: MathJSON, y: MathJSON, a: MathJSON, b: MathJSON): MathJSON => {
+  const image = subtract(add(a, b), x);
+  return ["Max", 0, ["Min", 1, image, add(subtract(["Min", y, b], image), 1)]];
+};
+/** dim Ext^1((x, y), (a, b)): Hom(syzygy, N) less Hom(projective cover, N) plus Hom(M, N), from Hom(-, N) on 0 -> syzygy -> cover -> M -> 0. */
+const firstExtensionDimension = (x: MathJSON, y: MathJSON, a: MathJSON, b: MathJSON): MathJSON => {
+  const entry = at(add(x, 1), "series");
+  return add(
+    subtract(homDimension(add(x, y), subtract(entry, y), a, b), homDimension(x, entry, a, b)),
+    homDimension(x, y, a, b),
+  );
+};
+/** dim Ext^1((x, y), A) for the regular module A, the sum of the indecomposable projectives. */
+const firstExtensionWithRegular = (x: MathJSON, y: MathJSON): MathJSON =>
+  floored(sumOver(upTo(vertexCount), firstExtensionDimension(x, y, subtract("w", 1), at("w", "series")), "w"));
+/** dim Ext^2((x, y), A) = dim Ext^1(syzygy, A); a zero syzygy has its top clamped to a real vertex. */
+const secondExtensionWithRegular = (x: MathJSON, y: MathJSON): MathJSON =>
+  bindList(
+    "syzygyTop",
+    ["Min", add(x, y), semilength],
+    firstExtensionWithRegular("syzygyTop", subtract(at(add(x, 1), "series"), y)),
+    "integer",
+  );
+
+/** A set of modules as parallel lists of tops and lengths, bound by `overModuleSets` as `<name>Tops` and `<name>Lengths`. */
+type ModuleSet = readonly [name: string, tops: MathJSON, lengths: MathJSON];
+const vertexIndices: MathJSON = upTo(vertexCount);
+/** The radicals of the indecomposable projectives; the last projective is simple, so its radical is zero and left out. */
+const radicals: ModuleSet = [
+  "radical",
+  forEach(upTo(semilength), "v", "v"),
+  forEach(upTo(semilength), subtract(at("v", "series"), 1), "v"),
+];
+/** The squares of those radicals, lengths floored at 0 where a projective is too short to have one. */
+const squaredRadicals: ModuleSet = [
+  "squaredRadical",
+  forEach(upTo(semilength), add("v", 1), "v"),
+  forEach(upTo(semilength), ["Max", subtract(at("v", "series"), 2), 0], "v"),
+];
+/** The socles of the indecomposable projectives: simple modules, repeated when projectives share one. */
+const projectiveSocles: ModuleSet = [
+  "projectiveSocle",
+  forEach(vertexIndices, subtract(add("w", at("w", "series")), 2), "w"),
+  forEach(vertexIndices, 1, "w"),
+];
+/** The indecomposable projectives modulo their socles. */
+const projectivesModuloSocle: ModuleSet = [
+  "quotient",
+  forEach(vertexIndices, subtract("w", 1), "w"),
+  forEach(vertexIndices, subtract(at("w", "series"), 1), "w"),
+];
+const projectiveModules: ModuleSet = [
+  "projective",
+  forEach(vertexIndices, subtract("w", 1), "w"),
+  forEach(vertexIndices, at("w", "series"), "w"),
+];
+const injectiveModules: ModuleSet = [
+  "injective",
+  forInjectives((top) => top),
+  forInjectives((_top, injectiveLength) => injectiveLength),
+];
+/** `body` over the series with each module set's tops and lengths bound, and the left-shifted series too when `left` is set. */
+const overModuleSets = (sets: readonly ModuleSet[], body: MathJSON, left = false): MathJSON => {
+  const withSets = sets.reduceRight<MathJSON>(
+    (inner, [name, tops, lengths]) => bindList(`${name}Tops`, tops, bindList(`${name}Lengths`, lengths, inner)),
+    body,
+  );
+  return nonEmpty(bindList("series", kupischSeries, left ? bindList("leftSeries", leftSeries, withSets) : withSets));
+};
+/** The total of `term` over every pair of a module in the first set and one in the second. */
+const pairTotal = (
+  left: ModuleSet,
+  right: ModuleSet,
+  term: (x: MathJSON, y: MathJSON, a: MathJSON, b: MathJSON) => MathJSON,
+): MathJSON => {
+  const [leftName, rightName] = [left[0], right[0]];
+  return floored(
+    sumOver(
+      upTo(["Length", `${leftName}Tops`]),
+      floored(
+        sumOver(
+          upTo(["Length", `${rightName}Tops`]),
+          term(
+            at("i", `${leftName}Tops`),
+            at("i", `${leftName}Lengths`),
+            at("j", `${rightName}Tops`),
+            at("j", `${rightName}Lengths`),
+          ),
+          "j",
+        ),
+      ),
+      "i",
+    ),
+  );
+};
+/** The total first-extension dimension from the modules of one set to those of another. */
+const pairExtensions = (left: ModuleSet, right: ModuleSet): MathJSON =>
+  overModuleSets(left === right ? [left] : [left, right], pairTotal(left, right, firstExtensionDimension));
+/** `body` over the series alone. */
+const overSeries = (body: MathJSON): MathJSON => nonEmpty(bindList("series", kupischSeries, body));
+/** Ext^2 with the regular module of each simple module, vertex by vertex: the syzygy of the simple at v - 1 is (v, series_v - 1). */
+const simpleSecondExtensions: MathJSON = forEach(vertexIndices, secondExtensionWithRegular(subtract("v", 1), 1), "v");
+
 /** The top of the longest module ending at the vertex `socle` (counting from 0): its injective hull's top. */
 const hullTop = (socle: MathJSON): MathJSON => [
   "Min",
@@ -2000,5 +2108,169 @@ export const DYCK_STATISTICS: readonly Definition[] = [
       ),
     ),
     "FindStat's St001189, the simple modules of dominant and codominant dimension zero in the Nakayama algebra. Two consecutive vertices are twins when they have the same closed neighborhood.",
+  ),
+  stat(
+    "NonProjectiveInjectiveToNonInjectiveProjectiveHomDimension",
+    "The dimension of the homomorphisms from the direct sum of the non-projective indecomposable injective modules to the direct sum of the non-injective indecomposable projective modules.",
+    overModuleSets(
+      [injectiveModules, projectiveModules],
+      pairTotal(injectiveModules, projectiveModules, (top, moduleLength, projectiveTop, projectiveLength) => [
+        "Multiply",
+        [
+          "Multiply",
+          ["If", equals(moduleLength, at(add(top, 1), "series")), 0, 1],
+          ["If", greater(at(add(projectiveTop, 1), "leftSeries"), projectiveLength), 1, 0],
+        ],
+        homDimension(top, moduleLength, projectiveTop, projectiveLength),
+      ]),
+      true,
+    ),
+    "FindStat's St000687. A projective is injective when the projective before it is no longer than it.",
+  ),
+  stat(
+    "DualRegularModuleFirstExtensionDimension",
+    "The dimension of the first extensions of the direct sum of the indecomposable injective modules by the regular module.",
+    overSeries(floored(["Sum", forInjectives(firstExtensionWithRegular)])),
+    "FindStat's St000951: the dimension of Ext^1(D(A), A). Ext^1 of an interval module is read off the maps from its syzygy and its projective cover.",
+  ),
+  stat(
+    "RadicalEndomorphismDimension",
+    "The dimension of the endomorphisms of the Jacobson radical of the path's linear Nakayama algebra.",
+    overModuleSets([radicals], pairTotal(radicals, radicals, homDimension)),
+    "FindStat's St001228. The radical is the sum of the radicals of the indecomposable projectives.",
+  ),
+  stat(
+    "RadicalSelfExtensionDimension",
+    "The dimension of the first extensions of the Jacobson radical by itself.",
+    pairExtensions(radicals, radicals),
+    "FindStat's St001225.",
+  ),
+  stat(
+    "RadicalToSquaredRadicalExtensionDimension",
+    "The dimension of the first extensions of the Jacobson radical by its square.",
+    pairExtensions(radicals, squaredRadicals),
+    "FindStat's St001229.",
+  ),
+  stat(
+    "SocleToRadicalExtensionDimension",
+    "The dimension of the first extensions of the socle of the regular module by the Jacobson radical.",
+    pairExtensions(projectiveSocles, radicals),
+    "FindStat's St001227.",
+  ),
+  stat(
+    "RegularModuloSocleToRadicalExtensionDimension",
+    "The dimension of the first extensions of the regular module modulo its socle by the Jacobson radical.",
+    pairExtensions(projectivesModuloSocle, radicals),
+    "FindStat's St001254.",
+  ),
+  stat(
+    "MaximalFirstExtensionWithRegularModule",
+    "The greatest dimension of the first extensions of an indecomposable module by the regular module.",
+    overSeries([
+      "Max",
+      forEach(
+        upTo(["Multiply", vertexCount, vertexCount]),
+        bind(
+          "v",
+          add(["Divide", subtract(subtract("k", 1), ["Mod", subtract("k", 1), vertexCount]), vertexCount], 1),
+          bind(
+            "y",
+            add(["Mod", subtract("k", 1), vertexCount], 1),
+            ["If", atMostValue("y", at("v", "series")), firstExtensionWithRegular(subtract("v", 1), "y"), 0],
+            "integer",
+          ),
+          "integer",
+        ),
+        "k",
+      ),
+    ]),
+    "FindStat's St001210, over the pairs (v, y) of an indecomposable module as one list: a nested maximum would not evaluate.",
+  ),
+  stat(
+    "ModulesOfVanishingFirstExtensionWithRegularModule",
+    "The indecomposable modules with no first extension by the regular module.",
+    overSeries(
+      floored(
+        sumOver(
+          vertexIndices,
+          count(
+            forEach(upTo(["Max", at("v", "series"), 1]), firstExtensionWithRegular(subtract("v", 1), "y"), "y"),
+            equals("d", 0),
+            "d",
+          ),
+          "v",
+        ),
+      ),
+    ),
+    "FindStat's St001213. Every indecomposable module is (top v - 1, length 1 .. the series' entry at v).",
+  ),
+  stat(
+    "SimplesOfVanishingSecondExtensionWithRegularModule",
+    "The simple modules with no second extension by the regular module.",
+    overSeries(count(simpleSecondExtensions, equals("d", 0), "d")),
+    "FindStat's St001211.",
+  ),
+  stat(
+    "MaximalSecondExtensionOfSimplesWithRegularModule",
+    "The greatest dimension of the second extensions of a simple module by the regular module.",
+    overSeries(["Max", simpleSecondExtensions]),
+    "FindStat's St001192.",
+  ),
+  stat(
+    "SimplesOfTwoDimensionalSecondExtensionWithRegularModule",
+    "The simple modules whose second extensions by the regular module have dimension two.",
+    overSeries(count(simpleSecondExtensions, equals("d", 2), "d")),
+    "FindStat's St001221.",
+  ),
+  stat(
+    "InjectivesOfNonVanishingSecondExtensionWithRegularModule",
+    "The indecomposable injective modules with a nonzero second extension by the regular module.",
+    overSeries(count(forInjectives(secondExtensionWithRegular), greater("d", 0), "d")),
+    "FindStat's St001216.",
+  ),
+  stat(
+    "InjectivesOfNonMaximalSocleProjectiveDimensionMinusProjectiveInjectives",
+    "The indecomposable injective modules whose socle has projective dimension less than the global dimension, less the indecomposable projective-injective modules.",
+    nonEmpty(
+      bindList(
+        "series",
+        kupischSeries,
+        bindList(
+          "leftSeries",
+          leftSeries,
+          bindList(
+            "dims",
+            simpleDimensions,
+            subtract(
+              simplesWhere((d) => less(d, globalDimension)),
+              count(vertexIndices, atMostValue(at("v", "leftSeries"), at("v", "series")), "v"),
+            ),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001164. An indecomposable projective is injective when the one before it is no longer than it.",
+  ),
+  stat(
+    "SocleSimplesOfVanishingFirstExtensionWithRegularModule",
+    "The simple modules in the socle of the regular module that have no first extension by the regular module.",
+    overSeries(
+      floored(
+        sumOver(
+          vertexIndices,
+          [
+            "Multiply",
+            [
+              "Min",
+              1,
+              floored(sumOver(vertexIndices, ["If", equals(add("w", at("w", "series")), add("v", 1)), 1, 0], "w")),
+            ],
+            ["If", equals(firstExtensionWithRegular(subtract("v", 1), 1), 0), 1, 0],
+          ],
+          "v",
+        ),
+      ),
+    ),
+    "FindStat's St001483. A simple module is in the socle when some indecomposable projective ends at it.",
   ),
 ];

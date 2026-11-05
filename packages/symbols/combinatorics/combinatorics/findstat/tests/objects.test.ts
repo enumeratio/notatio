@@ -37,8 +37,8 @@ test("the empty objects", () => {
   expect(readObject("StandardTableau", "[]")).toEqual(["StandardTableau", L()]);
 });
 
-test("a perfect matching is read as the set partition of its pairs", () => {
-  expect(readObject("PerfectMatching", "[(1,4),(2,3)]")).toEqual(["SetPartition", L(L(1, 4), L(2, 3))]);
+test("a perfect matching is read as its pairs", () => {
+  expect(readObject("PerfectMatching", "[(1,4),(2,3)]")).toEqual(["PerfectMatching", L(L(1, 4), L(2, 3))]);
 });
 
 test("a text that isn't the carrier's throws, and an unread carrier is undefined", () => {

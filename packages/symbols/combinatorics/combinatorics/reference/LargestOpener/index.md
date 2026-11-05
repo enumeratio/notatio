@@ -8,7 +8,12 @@ catalog:
     identity: St000839
     url: https://www.findstat.org/St000839
     on: SetPartition
+  - system: findstat
+    identity: St000841
+    url: https://www.findstat.org/St000841
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: LargestOpener(partition)

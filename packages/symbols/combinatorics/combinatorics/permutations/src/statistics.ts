@@ -2715,6 +2715,194 @@ const FINDSTAT_PERMUTATION_STATISTICS_11: readonly Definition[] = [
   ),
 ];
 
+// The tenth batch: statistics defined by recursion on a window of the word. Each fold carries the
+// window `lo .. hi`, and where there is one a running total, as a list of integers. Every step
+// shrinks a non-empty window, so n steps settle any word; an empty window (lo > hi) stays as it is.
+const windowLow = carried(1);
+const windowHigh = carried(2);
+const windowEntries: MathJSON = forEach(["Range", windowLow, windowHigh, 1], at("j"), "j");
+/** The position in the window of the entry with value `value`; entries are distinct. */
+const windowPositionOf = (value: MathJSON): MathJSON =>
+  floored(sumOver(["Range", windowLow, windowHigh, 1], ["If", equals(at("j"), value), "j", 0], "j"));
+/** `step` while the window is non-empty, the accumulator unchanged once it is empty. */
+const whileWindow = (step: MathJSON): MathJSON => ["If", greater(windowLow, windowHigh), "a", step];
+const emptyWindow = (total: MathJSON): MathJSON => ["List", 1, 0, total];
+
+/** rix: the window's maximum at its end counts one and drops it; at its start ends the walk; else the walk goes on right of it. */
+const recursiveEndMaximumCount: MathJSON = [
+  "At",
+  fold(
+    positions,
+    ["List", 1, length(), 0],
+    whileWindow(
+      bind(
+        "top",
+        max(windowEntries),
+        bind(
+          "peak",
+          windowPositionOf("top"),
+          [
+            "If",
+            equals("peak", windowHigh),
+            ["List", windowLow, subtract(windowHigh, 1), add(carried(3), 1)],
+            [
+              "If",
+              equals("peak", windowLow),
+              emptyWindow(carried(3)),
+              ["List", add("peak", 1), windowHigh, carried(3)],
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+    ),
+  ),
+  3,
+];
+
+/** aix: the window's minimum at its start counts one and drops it; at its end ends the walk; else the walk goes on left of it. */
+const recursiveStartMinimumCount: MathJSON = [
+  "At",
+  fold(
+    positions,
+    ["List", 1, length(), 0],
+    whileWindow(
+      bind(
+        "bottom",
+        min(windowEntries),
+        bind(
+          "low",
+          windowPositionOf("bottom"),
+          [
+            "If",
+            equals("low", windowLow),
+            ["List", add(windowLow, 1), windowHigh, add(carried(3), 1)],
+            [
+              "If",
+              equals("low", windowHigh),
+              emptyWindow(carried(3)),
+              ["List", windowLow, subtract("low", 1), carried(3)],
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+    ),
+  ),
+  3,
+];
+
+/** The window `lo .. hi` of the path in the increasing tree that follows the smaller child, down to one entry. */
+const smallerChildPathWindow: MathJSON = fold(
+  positions,
+  ["List", 1, length()],
+  [
+    "If",
+    atLeastValue(windowLow, windowHigh),
+    "a",
+    bind(
+      "smallest",
+      min(windowEntries),
+      bind(
+        "low",
+        windowPositionOf("smallest"),
+        bind(
+          "runnerUp",
+          min(
+            forEach(
+              ["Range", windowLow, windowHigh, 1],
+              ["If", equals(at("j"), "smallest"), add(length(), 1), at("j")],
+              "j",
+            ),
+          ),
+          [
+            "If",
+            less(windowPositionOf("runnerUp"), "low"),
+            ["List", windowLow, subtract("low", 1)],
+            ["List", add("low", 1), windowHigh],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+  ],
+);
+
+const FINDSTAT_PERMUTATION_WINDOW_STATISTICS: readonly Definition[] = [
+  stat(
+    "RecursiveEndMaximumCount",
+    "FindStat's rix: the number of times, peeling the word, the maximum of what is left is its last entry.",
+    nonEmpty(recursiveEndMaximumCount),
+    "Recursively: the maximum last counts one and the rest is the word without it; the maximum first ends the walk; otherwise the walk goes on with the entries after the maximum (St000461).",
+  ),
+  stat(
+    "RecursiveStartMinimumCount",
+    "FindStat's aix: the number of times, peeling the word, the minimum of what is left is its first entry.",
+    nonEmpty(recursiveStartMinimumCount),
+    "Recursively: the minimum first counts one and the rest is the word without it; the minimum last ends the walk; otherwise the walk goes on with the entries before the minimum (St000873).",
+  ),
+  stat(
+    "SmallerChildPathLeafLabel",
+    "The label of the leaf reached from the root of the increasing binary tree of p by always following the child with the smaller label.",
+    nonEmpty(at(["At", smallerChildPathWindow, 1])),
+    "The root of a window is its minimum, and the smaller child is the root of the side holding the second smallest entry (St000724).",
+  ),
+  stat(
+    "ScaledReciprocalPositionValueSum",
+    "The sum of 1/(i + p(i)) times the least common multiple of 1 .. 2n, an integer.",
+    nonEmpty(
+      bind(
+        "scale",
+        fold(["Range", 1, ["Multiply", 2, length()], 1], 1, ["LCM", "a", "b"]),
+        floored(sumOver(positions, ["Divide", "scale", add("i", here)])),
+        "integer",
+      ),
+    ),
+    "Each term is an integer, since i + p(i) is at most 2n and divides the scale (St001293).",
+  ),
+];
+
+// Signed permutations: `_x` is the one-line word of signed entries, a permutation of 1..n with a sign on each.
+const signed = (head: string, summary: string, expr: Definition["expr"], note?: string): Definition => ({
+  head,
+  on: "SignedPermutation",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+const negativeEntries = count(positions, less(here, 0));
+/** Pairs i < j (or i <= j when `inclusive`) whose entries satisfy `relation`, which reads p(i) and p(j) as `here` and `At(_x, j)`. */
+const entryPairs = (inclusive: boolean, relation: MathJSON): MathJSON =>
+  floored(
+    sumOver(positions, count(positions, and(inclusive ? atLeastValue("j", "i") : greater("j", "i"), relation), "j")),
+  );
+
+const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
+  signed("NegativeEntryCount", "The number of negative entries.", nonEmpty(negativeEntries)),
+  signed("PositiveEntryCount", "The number of positive entries.", nonEmpty(count(positions, greater(here, 0)))),
+  signed(
+    "TypeBInversionCount",
+    "Pairs i < j with p(i) > p(j), plus pairs i <= j with -p(i) > p(j).",
+    nonEmpty(add(entryPairs(false, greater(here, at("j"))), entryPairs(true, greater(["Negate", here], at("j"))))),
+    "The Coxeter length in type B (FindStat St001428).",
+  ),
+  signed(
+    "NegativeSumPairCount",
+    "Pairs i < j with p(i) + p(j) < 0.",
+    nonEmpty(entryPairs(false, less(add(here, at("j")), 0))),
+  ),
+  signed(
+    "FlagMajorIndex",
+    "The number of negative entries plus twice the sum of the descents, a negative first entry counting as a descent at 0.",
+    nonEmpty(add(negativeEntries, hasPair(floored(["Multiply", 2, sumOver(adjacent, ["If", fallsAfter, "i", 0])])))),
+    "The descent at 0 adds 0 to the sum, so only the descents between entries weigh.",
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -2925,4 +3113,6 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_9,
   ...FINDSTAT_PERMUTATION_STATISTICS_10,
   ...FINDSTAT_PERMUTATION_STATISTICS_11,
+  ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
+  ...FINDSTAT_PERMUTATION_WINDOW_STATISTICS,
 ];

@@ -13,8 +13,18 @@ import { declareTableaux } from "../src/declare.ts";
 
 const SAMPLES: readonly Sample[] = [
   {
+    on: "StandardTableau",
     list: [[1, 2, 4], [3, 6], [5]],
     caption: "the standard tableau $[[1,2,4],[3,6],[5]]$",
+  },
+  {
+    on: "AlternatingSignMatrix",
+    list: [
+      [0, 1, 0],
+      [1, -1, 1],
+      [0, 1, 0],
+    ],
+    caption: "the alternating sign matrix $[[0,1,0],[1,-1,1],[0,1,0]]$",
   },
 ];
 

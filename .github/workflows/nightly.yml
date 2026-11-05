@@ -84,6 +84,8 @@ jobs:
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run tableaux/tests/tableau-statistics
       # Permutation statistics over the larger permutations.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/permutation-statistics
+      # Signed-permutation, alternating-sign-matrix and perfect-matching statistics over the next size up.
+      - run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/signed-permutation-statistics tableaux/tests/alternating-sign-matrix-statistics set-partitions/tests/perfect-matching-statistics
       # The numeric sequences and predicate scans defined in Epsil, against references in bigints and sieves, farther out.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run collections/tests/numeric-epsil.test.ts collections/tests/sequence-epsil.test.ts collections/tests/scan-epsil.test.ts
 

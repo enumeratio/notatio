@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-signed-word-2-bar-1-bar-3			[TypeBInversionCount, [SignedPermutation, [List, 2, -1, -3]]]	7			the signed word $2\,\bar{1}\,\bar{3}$
+findstat-st001428-1	Properties		[CombinatorialStat, [SignedPermutation, [List, 1]], "'TypeBInversionCount'"]	0	0	FindStat St001428	FindStat's value for [1]
+findstat-st001428-2	Properties		[CombinatorialStat, [SignedPermutation, [List, -1]], "'TypeBInversionCount'"]	1	1	FindStat St001428	FindStat's value for [-1]
+findstat-st001428-3	Properties		[CombinatorialStat, [SignedPermutation, [List, 1, 2]], "'TypeBInversionCount'"]	0	0	FindStat St001428	FindStat's value for [1,2]

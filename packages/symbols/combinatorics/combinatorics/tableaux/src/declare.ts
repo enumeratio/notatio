@@ -1,6 +1,6 @@
 // Tableaux' own declare (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5, A-94).
 import type { Engine } from "@enumeratio/engine";
-import { declareCarriers } from "@enumeratio/structures";
+import { declareCarriers, registerCollectionCarrier } from "@enumeratio/structures";
 import { declareFamilies } from "../../collections/src/families/declare.ts";
 import { liftFamily } from "../../collections/src/families/epsil.ts";
 import { declareStatistics } from "../../src/statistics/declare.ts";
@@ -30,6 +30,8 @@ export function declareTableaux(ce: Engine): void {
       ...tableauxPlanePlanePartitionsEntries,
     ].map(liftFamily),
   );
+  // The family yields bare rows, so `CombinatorialStat` is told which carrier they are.
+  registerCollectionCarrier(ce, "AlternatingSignMatrices", "AlternatingSignMatrix");
   // Its statistics, after its own carriers and families.
   declareStatistics(ce, TABLEAU_STATISTICS);
 }

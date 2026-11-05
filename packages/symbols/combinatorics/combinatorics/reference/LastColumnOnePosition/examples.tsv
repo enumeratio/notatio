@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-alternating-sign-matrix-0-1-0-1-1-1-0-1-0			[LastColumnOnePosition, [AlternatingSignMatrix, [List, [List, 0, 1, 0], [List, 1, -1, 1], [List, 0, 1, 0]]]]	2			the alternating sign matrix $[[0,1,0],[1,-1,1],[0,1,0]]$
+findstat-st000200-1	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 1]]], "'LastColumnOnePosition'"]	1	1	FindStat St000200	FindStat's value for [[1]]
+findstat-st000200-2	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 0, 1], [List, 1, 0]]], "'LastColumnOnePosition'"]	1	1	FindStat St000200	FindStat's value for [[0,1],[1,0]]
+findstat-st000200-3	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 1, 0], [List, 0, 1]]], "'LastColumnOnePosition'"]	2	2	FindStat St000200	FindStat's value for [[1,0],[0,1]]

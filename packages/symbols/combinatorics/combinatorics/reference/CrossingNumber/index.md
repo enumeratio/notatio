@@ -8,7 +8,12 @@ catalog:
     identity: St000253
     url: https://www.findstat.org/St000253
     on: SetPartition
+  - system: findstat
+    identity: St001590
+    url: https://www.findstat.org/St001590
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: CrossingNumber(partition)

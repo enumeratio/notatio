@@ -8,7 +8,12 @@ catalog:
     identity: St001151
     url: https://www.findstat.org/St001151
     on: SetPartition
+  - system: findstat
+    identity: St000746
+    url: https://www.findstat.org/St000746
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: BlocksWithOddMinimum(partition)

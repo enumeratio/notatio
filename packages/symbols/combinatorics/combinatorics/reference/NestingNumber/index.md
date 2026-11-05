@@ -8,7 +8,12 @@ catalog:
     identity: St000254
     url: https://www.findstat.org/St000254
     on: SetPartition
+  - system: findstat
+    identity: St001589
+    url: https://www.findstat.org/St001589
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: NestingNumber(partition)

@@ -39,6 +39,10 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   BinaryTree: ["BinaryTrees", (n) => n],
   OrderedTree: ["OrderedTrees", (n) => n],
   StandardTableau: ["StandardTableaux", (n) => n],
+  // FindStat's matching size is its points; ours is its pairs.
+  PerfectMatching: ["PerfectMatchings", (n) => n / 2],
+  SignedPermutation: ["SignedPermutations", (n) => n],
+  AlternatingSignMatrix: ["AlternatingSignMatrices", (n) => n],
 };
 
 type Kind = "unclassified" | "emit" | "convention" | "ours";

@@ -8,9 +8,14 @@ catalog:
     identity: St000213
     url: https://www.findstat.org/St000213
     on: Permutation
+  - system: findstat
+    identity: St001863
+    url: https://www.findstat.org/St001863
+    on: SignedPermutation
 statOn:
   - DecoratedPermutation
   - Permutation
+  - SignedPermutation
 signatures:
   - call: WeakExcedances(p)
     description: Positions with p(i) >= i.

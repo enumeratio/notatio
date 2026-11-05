@@ -129,6 +129,56 @@ function orderedTrees(n: number): unknown[][] {
   return out;
 }
 
+/** Every perfect matching of 1..points, each pair (smaller, larger) and the pairs by smaller element. */
+function perfectMatchings(points: number): number[][][] {
+  const pair = (free: readonly number[]): number[][][] => {
+    if (!free.length) return [[]];
+    const [first, ...rest] = free;
+    return rest.flatMap((partner, i) =>
+      pair(rest.filter((_, j) => j !== i)).map((others) => [[first!, partner], ...others]),
+    );
+  };
+  return pair(Array.from({ length: points }, (_, i) => i + 1));
+}
+/** Every signed permutation of 1..n: a permutation with a sign on each entry. */
+function signedPermutations(n: number): number[][] {
+  return permutations(n).flatMap((p) =>
+    Array.from({ length: 2 ** n }, (_, mask) => p.map((v, i) => (mask & (1 << i) ? -v : v))),
+  );
+}
+/** Every n x n alternating sign matrix: the column sums after each row are a 0/1 vector, and each row alternates +1, -1 from its first to last nonzero entry. */
+function alternatingSignMatrices(n: number): number[][][] {
+  const rowsFrom = (sums: readonly number[], rows: number[][]): number[][][] => {
+    if (rows.length === n) return sums.every((s) => s === 1) ? [rows] : [];
+    const out: number[][][] = [];
+    const fill = (column: number, row: number[], total: number): void => {
+      if (column === n) {
+        if (total === 1)
+          out.push(
+            ...rowsFrom(
+              sums.map((s, c) => s + row[c]!),
+              [...rows, row],
+            ),
+          );
+        return;
+      }
+      for (const entry of [-1, 0, 1]) {
+        const sum = sums[column]! + entry;
+        const next = total + entry;
+        // A row's partial sums stay 0 or 1, and so do the columns'.
+        if (sum < 0 || sum > 1 || next < 0 || next > 1) continue;
+        fill(column + 1, [...row, entry], next);
+      }
+    };
+    fill(0, [], 0);
+    return out;
+  };
+  return rowsFrom(
+    Array.from({ length: n }, () => 0),
+    [],
+  );
+}
+
 interface Carrier {
   /** FindStat's collection id. */
   readonly domain: string;
@@ -234,6 +284,41 @@ const CARRIERS: Readonly<Record<string, Carrier>> = {
     objects: orderedTrees,
     spell: (t) => JSON.stringify(t),
     box: (ce, t) => ce.box(orderedJson(t) as never),
+  },
+  PerfectMatching: {
+    // The id is not in the crawl; the offline `--crawl` route never reads it.
+    domain: "",
+    collection: "Perfect matchings",
+    // FindStat writes [(1,2),(3,4)].
+    parse: (s) => JSON.parse(s.replaceAll("(", "[").replaceAll(")", "]")),
+    // By points, as FindStat does: [(1,2)] has two.
+    sizes: [2, 4, 6],
+    small: [2, 4],
+    objects: perfectMatchings,
+    spell: (pairs) => `[${(pairs as number[][]).map(([a, b]) => `(${a},${b})`).join(",")}]`,
+    box: (ce, pairs) => ce.box(["List", ...(pairs as number[][]).map((p) => ["List", ...p])] as never),
+  },
+  SignedPermutation: {
+    // The id is not in the crawl; the offline `--crawl` route never reads it.
+    domain: "",
+    collection: "Signed permutations",
+    parse: (s) => JSON.parse(s),
+    sizes: [1, 2, 3, 4],
+    small: [1, 2, 3],
+    objects: signedPermutations,
+    spell: (p) => `[${(p as number[]).join(",")}]`,
+    box: (ce, p) => list(ce, p as number[]),
+  },
+  AlternatingSignMatrix: {
+    // The id is not in the crawl; the offline `--crawl` route never reads it.
+    domain: "",
+    collection: "Alternating sign matrices",
+    parse: (s) => JSON.parse(s),
+    sizes: [1, 2, 3, 4, 5],
+    small: [1, 2, 3, 4],
+    objects: alternatingSignMatrices,
+    spell: (rows) => JSON.stringify(rows),
+    box: (ce, rows) => ce.box(["List", ...(rows as number[][]).map((row) => ["List", ...row])] as never),
   },
 };
 
@@ -398,6 +483,14 @@ const previous = renamed(
   flag("--rename").map(parseRename),
 );
 const matches = assemble(universe, signatureOf, previous, rematch, (d) => fresh.get(signatureOf(d)));
+// A head shared with another carrier (`Crossings` on a perfect matching) has a committed row but no
+// definition of its own on this one: carry the row over, after the last row of its carrier.
+const heldHeads = new Set(ALL_STATISTICS.map((d) => d.head));
+const universeSignatures = new Set(universe.map(signatureOf));
+for (const [signature, row] of previous) {
+  if (universeSignatures.has(signature) || !heldHeads.has(row.head)) continue;
+  matches.splice(matches.findLastIndex((m) => m.on === row.on) + 1, 0, row);
+}
 
 if (!only) {
   await writeFormatted(
