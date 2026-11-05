@@ -10,19 +10,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "AGM(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AGM(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower AGM"
   },
   "Abundance": {
     "axis": {
@@ -53,19 +48,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "AiryAi(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AiryAi(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower AiryAi"
   },
   "AiryAiPrime": {
     "axis": {
@@ -78,19 +68,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "AiryAiPrime(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AiryAiPrime(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower AiryAiPrime"
   },
   "AiryBi": {
     "axis": {
@@ -103,19 +88,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "AiryBi(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AiryBi(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower AiryBi"
   },
   "AiryBiPrime": {
     "axis": {
@@ -128,19 +108,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "AiryBiPrime(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AiryBiPrime(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower AiryBiPrime"
   },
   "AlgebraicNumberNorm": {
     "axis": {
@@ -225,19 +200,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}; {{p2, 1}, -10, 10, 0.05, Slider}; {{p3, 1}, -10, 10, 0.05, Slider}; {{p4, 1}, -10, 10, 0.05, Slider}; {{p5, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "AppellF1(p1, p2, p3, p4, p5, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AppellF1(p1, p2, p3, p4, p5, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower AppellF1"
   },
   "Arctan2": {
     "axis": {
@@ -268,19 +238,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Arg(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Arg(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Arg"
   },
   "Argument": {
     "axis": {
@@ -293,19 +258,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Argument(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Argument(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Argument"
   },
   "Around": {
     "axis": {
@@ -336,19 +296,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "BarnesG(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(BarnesG(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower BarnesG"
   },
   "BellY": {
     "axis": {
@@ -409,19 +364,14 @@
     "params": "{{order, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "BesselI(order, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(BesselI(order, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower BesselI"
   },
   "BesselJ": {
     "axis": {
@@ -434,19 +384,14 @@
     "params": "{{order, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "BesselJ(order, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(BesselJ(order, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower BesselJ"
   },
   "BesselJZero": {
     "axis": {
@@ -477,19 +422,14 @@
     "params": "{{order, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "BesselK(order, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(BesselK(order, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower BesselK"
   },
   "BesselY": {
     "axis": {
@@ -502,19 +442,14 @@
     "params": "{{order, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "BesselY(order, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(BesselY(order, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower BesselY"
   },
   "Beta": {
     "axis": {
@@ -563,19 +498,14 @@
     "params": "{{n, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Binomial(n, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Binomial(n, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Binomial"
   },
   "CarlsonRC": {
     "axis": {
@@ -774,19 +704,14 @@
     "params": "{{n, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Choose(n, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Choose(n, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Choose"
   },
   "ClausenCl": {
     "axis": {
@@ -889,19 +814,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "CosIntegral(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(CosIntegral(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower CosIntegral"
   },
   "CoshIntegral": {
     "axis": {
@@ -914,19 +834,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "CoshIntegral(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(CoshIntegral(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower CoshIntegral"
   },
   "Counit": {
     "axis": {
@@ -1023,19 +938,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "DedekindEta(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(DedekindEta(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower DedekindEta"
   },
   "DedekindSum": {
     "axis": {
@@ -1084,19 +994,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Digamma(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Digamma(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Digamma"
   },
   "DigammaFunctionZero": {
     "axis": {
@@ -1163,19 +1068,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "DirichletBeta(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(DirichletBeta(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower DirichletBeta"
   },
   "DirichletCharacter": {
     "axis": {
@@ -1206,19 +1106,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "DirichletEta(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(DirichletEta(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower DirichletEta"
   },
   "DirichletL": {
     "axis": {
@@ -1267,19 +1162,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Divide(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Divide(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Divide"
   },
   "DivisorSigma": {
     "axis": {
@@ -1334,19 +1224,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "EisensteinE(p1, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(EisensteinE(p1, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower EisensteinE"
   },
   "EisensteinG": {
     "axis": {
@@ -1413,19 +1298,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "EllipticE(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(EllipticE(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower EllipticE"
   },
   "EllipticF": {
     "axis": {
@@ -1438,19 +1318,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "EllipticF(p1, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(EllipticF(p1, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower EllipticF"
   },
   "EllipticK": {
     "axis": {
@@ -1463,19 +1338,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "EllipticK(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(EllipticK(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower EllipticK"
   },
   "EllipticPi": {
     "axis": {
@@ -1488,19 +1358,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "EllipticPi(p1, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(EllipticPi(p1, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower EllipticPi"
   },
   "EllipticTheta": {
     "axis": {
@@ -1585,19 +1450,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Erfc(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Erfc(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Erfc"
   },
   "Erfi": {
     "axis": {
@@ -1610,19 +1470,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Erfi(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Erfi(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Erfi"
   },
   "EulerPhi": {
     "axis": {
@@ -1737,19 +1592,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "ExpIntegralEi(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(ExpIntegralEi(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower ExpIntegralEi"
   },
   "Factorial": {
     "axis": {
@@ -1871,19 +1721,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "FresnelC(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(FresnelC(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower FresnelC"
   },
   "FresnelS": {
     "axis": {
@@ -1896,19 +1741,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "FresnelS(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(FresnelS(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower FresnelS"
   },
   "Gamma": {
     "axis": {
@@ -1946,19 +1786,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "GammaLn(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(GammaLn(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower GammaLn"
   },
   "GammaRegularized": {
     "axis": {
@@ -1971,19 +1806,14 @@
     "params": "{{a, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "GammaRegularized(a, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(GammaRegularized(a, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower GammaRegularized"
   },
   "Grade": {
     "axis": {
@@ -2357,19 +2187,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}; {{p2, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Hypergeometric1F1(p1, p2, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Hypergeometric1F1(p1, p2, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Hypergeometric1F1"
   },
   "Hypergeometric1F1Regularized": {
     "axis": {
@@ -2400,19 +2225,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}; {{p2, 1}, -10, 10, 0.05, Slider}; {{p3, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Hypergeometric2F1(p1, p2, p3, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Hypergeometric2F1(p1, p2, p3, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Hypergeometric2F1"
   },
   "Hypergeometric2F1Regularized": {
     "axis": {
@@ -2509,19 +2329,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Im(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Im(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Im"
   },
   "Imaginary": {
     "axis": {
@@ -2534,19 +2349,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Imaginary(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Imaginary(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Imaginary"
   },
   "InCompleteBasis": {
     "axis": {
@@ -3159,19 +2969,14 @@
     "params": "{{p1, 1}, -10, 10, 0.05, Slider}; {{p2, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "JacobiTheta(p1, p2, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(JacobiTheta(p1, p2, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower JacobiTheta"
   },
   "JacobiZN": {
     "axis": {
@@ -3292,19 +3097,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "LambertW(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(LambertW(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower LambertW"
   },
   "Lb": {
     "axis": {
@@ -3487,19 +3287,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Log(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Log(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Log"
   },
   "Log10": {
     "axis": {
@@ -3548,19 +3343,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "LogBarnesG(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(LogBarnesG(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower LogBarnesG"
   },
   "LogGamma": {
     "axis": {
@@ -3573,19 +3363,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "LogGamma(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(LogGamma(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower LogGamma"
   },
   "LogIntegral": {
     "axis": {
@@ -3598,19 +3383,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "LogIntegral(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(LogIntegral(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower LogIntegral"
   },
   "Lucas": {
     "axis": {
@@ -4128,19 +3908,14 @@
     "params": "{{a, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Pochhammer(a, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Pochhammer(a, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Pochhammer"
   },
   "PolyGamma": {
     "axis": {
@@ -4352,19 +4127,14 @@
     "params": "{{n, 1}, -10, 10, 0.05, Slider}; {{k, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "QBinomial(n, k, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(QBinomial(n, k, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower QBinomial"
   },
   "QFactorial": {
     "axis": {
@@ -4377,19 +4147,14 @@
     "params": "{{n, 1}, -10, 10, 0.05, Slider}",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "QFactorial(n, z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(QFactorial(n, x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower QFactorial"
   },
   "QPochhammer": {
     "axis": {
@@ -4564,19 +4329,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Re(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Re(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Re"
   },
   "Real": {
     "axis": {
@@ -4589,19 +4349,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Real(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Real(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Real"
   },
   "RealAbs": {
     "axis": {
@@ -4903,19 +4658,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "SinIntegral(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(SinIntegral(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower SinIntegral"
   },
   "Sinc": {
     "axis": {
@@ -4928,19 +4678,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Sinc(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Sinc(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Sinc"
   },
   "SinhIntegral": {
     "axis": {
@@ -4953,19 +4698,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "SinhIntegral(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(SinhIntegral(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower SinhIntegral"
   },
   "SloaneA": {
     "axis": {
@@ -5231,19 +4971,14 @@
     "params": "",
     "views": [
       {
-        "head": "ComplexPlot",
-        "variable": "z",
-        "window": "{z, -4 - 4*I, 4 + 4*I}",
-        "body": "Trigamma(z)"
-      },
-      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(Trigamma(x))",
         "note": "real slice"
       }
-    ]
+    ],
+    "reason": "the complex plot cannot lower Trigamma"
   },
   "UnitBox": {
     "axis": {

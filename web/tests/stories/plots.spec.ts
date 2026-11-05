@@ -47,6 +47,20 @@ test("a surface with no real value says so instead of drawing only its title (S#
   await expect(box.locator(".notatio-error")).toContainText("no real value");
 });
 
+// --- Symbol pages (S#4) ---------------------------------------------------------------------------
+
+for (const head of ["BesselJ", "AiryAi"]) {
+  test(`${head}'s page never shows the complex plot's raw status text (S#4)`, async ({ page }) => {
+    await page.goto(`/reference/symbol/${head}`);
+    // Its real slice draws, and no portrait is offered that the GPU emitter cannot lower.
+    const plot = page.locator("graphics-box[data-plot]").first();
+    await plot.scrollIntoViewIfNeeded();
+    await expect(plot.locator("svg").first()).toBeVisible({ timeout: 60_000 });
+    await expect(page.locator("notatio-complex-plot")).toHaveCount(0);
+    await expect(page.getByText("No complex GPU lowering")).toHaveCount(0);
+  });
+}
+
 // --- 2-D Plot ranges (S#11) -------------------------------------------------------------------
 
 /** A graphics box's x-axis end labels: the first two numbers its SVG prints. */
