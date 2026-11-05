@@ -106,6 +106,9 @@ const MEMORY_BYTES = 512 * 1024 * 1024;
 // without piling up enough worker memory at once to matter.
 const CONCURRENCY = 3;
 
+/** Whether a value is the symbol `Aborted`: what a call cut off by its time limit answers. */
+const isAborted = (value: unknown): boolean => value === "Aborted";
+
 const id = (entryName: string, exampleId: string): string => `${entryName}/${exampleId}`;
 
 // `CASE_ORDER_SEED=<n>` runs the cases in a seeded random order. No case's answer may depend
@@ -143,15 +146,28 @@ async function runGroup(group: ReturnType<typeof named>, setup: string): Promise
       .map((example) => ({ id: id(entry.name, example.id), input: example.expr })),
   );
   const cases = seed === undefined ? inOrder : shuffled(inOrder, Number(seed));
-  const results = await runCases(cases, {
+  const options = {
     setup,
     timeMs: TIME_MS,
     memoryBytes: MEMORY_BYTES,
     // A lazy collection's `expected` is its elements, not the call.
     materialize: true,
-    concurrency: CONCURRENCY,
-  });
+  };
+  const results = await runCases(cases, { ...options, concurrency: CONCURRENCY });
   const resultById = new Map(results.map((result) => [result.id, result]));
+
+  // The worker stops a call cooperatively at `timeMs` and answers the symbol `Aborted` as an
+  // ordinary value, so a case that ran long under load looks like a wrong answer. Such a case
+  // runs again alone, one worker, under the same cap: a real runaway trips again and fails as a
+  // timeout, a case that was only starved by its neighbors gets its answer.
+  const expectedAborted = new Map(
+    group.flatMap((e) => e.examples.map((x) => [id(e.name, x.id), isAborted(x.expected)])),
+  );
+  const starved = cases.filter((c) => {
+    const result = resultById.get(c.id);
+    return result?.outcome === "Evaluated" && isAborted(result.value) && !expectedAborted.get(c.id);
+  });
+  for (const retried of await runCases(starved, { ...options, concurrency: 1 })) resultById.set(retried.id, retried);
 
   for (const entry of group) {
     for (const example of entry.examples) {
@@ -168,7 +184,7 @@ async function runGroup(group: ReturnType<typeof named>, setup: string): Promise
         if (result.outcome === "Error") {
           throw new Error(`evaluation raised: ${result.reason}`);
         }
-        if (result.outcome === "Aborted") {
+        if (result.outcome === "Aborted" || (isAborted(result.value) && !isAborted(example.expected))) {
           throw new Error(`exceeded the ${TIME_MS}ms/${MEMORY_BYTES}-byte cap — tighten the example or raise the cap`);
         }
 
