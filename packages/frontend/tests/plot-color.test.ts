@@ -155,3 +155,15 @@ test("every gradient fits the shader's stop table, in the space it blends in", (
   }
   expect(gradientUniform(gradientNamed("phase"))[MAX_STOPS * 4 + 1]).toBe(0);
 });
+
+test("a portrait resets the kernels' uncertainty flag per pixel and hatches a value they decline (S#5)", () => {
+  const shader = portraitShader("hurwitz(prm.p[0].xy, z)");
+  const reset = shader.indexOf("uncertain = 0.0;");
+  const value = shader.indexOf("let polar = ");
+  const hatch = shader.indexOf("if (uncertain > 0.5)");
+  expect(reset).toBeGreaterThan(-1);
+  expect(reset).toBeLessThan(value);
+  expect(hatch).toBeGreaterThan(value);
+  // A declined pixel returns before it is colored.
+  expect(hatch).toBeLessThan(shader.indexOf("let logMag = polar.z;"));
+});

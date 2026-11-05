@@ -206,6 +206,40 @@ test("pressing 0 on a zoomed 2-D plot returns it to its whole range, as the Plot
 // --- WebGPU ---------------------------------------------------------------------------------
 // Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
 // headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.
+// Copies each presented WebGPU canvas texture to a buffer, so `window.__grab(canvas)` reads its pixels:
+// a screenshot of a WebGPU canvas is blank.
+const CAPTURE_CANVAS = `// init script: makes WebGPU canvases readable by copying each presented texture to a buffer
+(()=>{
+ if(!window.GPUCanvasContext) return;
+ const P=GPUCanvasContext.prototype;
+ const conf=P.configure, gct=P.getCurrentTexture;
+ const ctxs=new Set();
+ P.configure=function(cfg){this.__cfg=cfg;this.__dev=cfg.device;ctxs.add(this);return conf.call(this,{...cfg,usage:(cfg.usage||0x10)|0x01|0x04|0x10});};
+ P.getCurrentTexture=function(){const t=gct.call(this);this.__tex=t;this.__pending=true;return t;};
+ const sub=GPUQueue.prototype.submit;
+ window.__pix=new WeakMap();
+ GPUQueue.prototype.submit=function(cmds){
+  sub.call(this,cmds);
+  for(const c of ctxs){
+   if(!c.__pending||!c.__tex) continue;
+   const dev=c.__dev; if(dev.queue!==this) continue;
+   const t=c.__tex; c.__pending=false;
+   try{
+    const w=t.width,h=t.height,bpr=Math.ceil(w*4/256)*256;
+    const buf=dev.createBuffer({size:bpr*h,usage:GPUBufferUsage.MAP_READ|GPUBufferUsage.COPY_DST});
+    const enc=dev.createCommandEncoder();enc.copyTextureToBuffer({texture:t},{buffer:buf,bytesPerRow:bpr},[w,h]);
+    sub.call(this,[enc.finish()]);
+    const fmt=t.format;
+    buf.mapAsync(GPUMapMode.READ).then(()=>{const src=new Uint8Array(buf.getMappedRange().slice(0));const out=new Uint8ClampedArray(w*h*4);
+      for(let y=0;y<h;y++)for(let x=0;x<w;x++){const s=y*bpr+x*4,d=(y*w+x)*4;if(fmt.startsWith('bgra')){out[d]=src[s+2];out[d+1]=src[s+1];out[d+2]=src[s];}else{out[d]=src[s];out[d+1]=src[s+1];out[d+2]=src[s+2];}out[d+3]=255;}
+      window.__pix.set(c.canvas,{w,h,out,n:(window.__pix.get(c.canvas)?.n||0)+1});buf.unmap();buf.destroy()}).catch(e=>console.log('capture fail '+e));
+   }catch(e){console.log('capture err '+e)}
+  }
+ };
+ window.__grab=(canvas)=>{const r=window.__pix.get(canvas);if(!r)return null;const c=document.createElement('canvas');c.width=r.w;c.height=r.h;c.getContext('2d').putImageData(new ImageData(r.out,r.w,r.h),0,0);return c.toDataURL('image/png')};
+})();
+`;
+
 const GPU_ARGS = [
   "--enable-unsafe-webgpu",
   "--use-webgpu-adapter=swiftshader",
@@ -232,5 +266,115 @@ test.describe("on the GPU", () => {
     const box = await surface(page, "HurwitzZeta(x, y), (x, 2, 5), (y, 0.35, 3), Gpu");
     await expect(box.locator(".graphics-3d-box-badge")).toHaveText("GPU");
     await expect.poll(() => box.locator("svg text").allTextContents()).toContain("5.7e-3");
+  });
+
+  /** `hurwitz(s, a)` on the GPU and the double-precision kernel, over a grid of a: both values, and whether the shader declined. */
+  async function hurwitzGrid(page: Page, s: [number, number], step: number, span: number) {
+    return page.evaluate(
+      async ([sr, si, step, span]) => {
+        const { zetaWGSL } = await import(
+          "/@fs/home/user/work/fxplot/packages/symbols/analysis/analytic/src/shader.ts" as string
+        );
+        const cpu = await import(
+          "/@fs/home/user/work/fxplot/packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts" as string
+        );
+        const points: number[][] = [];
+        for (let y = -span; y <= span; y += step)
+          for (let x = -span; x <= span; x += step) points.push([sr!, si!, x + 0.013, y - 0.0071]);
+        const n = points.length;
+        const code = `${zetaWGSL}
+@group(0) @binding(0) var<storage, read> inp : array<vec4f>;
+@group(0) @binding(1) var<storage, read_write> outp : array<vec4f>;
+@compute @workgroup_size(1) fn main(@builtin(global_invocation_id) g : vec3u) {
+  let p = inp[g.x]; uncertain = 0.0; let v = hurwitz(p.xy, p.zw); outp[g.x] = vec4f(v, uncertain, 0.0);
+}`;
+        const adapter = await navigator.gpu.requestAdapter();
+        const device = await adapter!.requestDevice();
+        const pipeline = device.createComputePipeline({
+          layout: "auto",
+          compute: { module: device.createShaderModule({ code }), entryPoint: "main" },
+        });
+        const input = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+        device.queue.writeBuffer(input, 0, new Float32Array(points.flat()));
+        const output = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+        const read = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+        const bind = device.createBindGroup({
+          layout: pipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: { buffer: input } },
+            { binding: 1, resource: { buffer: output } },
+          ],
+        });
+        const encoder = device.createCommandEncoder();
+        const pass = encoder.beginComputePass();
+        pass.setPipeline(pipeline);
+        pass.setBindGroup(0, bind);
+        pass.dispatchWorkgroups(n);
+        pass.end();
+        encoder.copyBufferToBuffer(output, 0, read, 0, n * 16);
+        device.queue.submit([encoder.finish()]);
+        await read.mapAsync(GPUMapMode.READ);
+        const gpu = new Float32Array(read.getMappedRange().slice(0));
+        return points.map(([sr, si, ar, ai], i) => {
+          const exact = cpu.hurwitzZeta({ re: sr, im: si }, { re: ar, im: ai }) as { re: number; im: number };
+          const err = Math.hypot(gpu[4 * i]! - exact.re, gpu[4 * i + 1]! - exact.im) / Math.hypot(exact.re, exact.im);
+          return { a: [ar, ai], err, declined: gpu[4 * i + 2]! > 0.5 };
+        });
+      },
+      [s[0], s[1], step, span] as const,
+    );
+  }
+
+  for (const si of [4, 12]) {
+    test(`the GPU HurwitzZeta kernel at s = 1.5 + ${si}i agrees with the CPU kernel wherever it draws (S#5)`, async ({
+      page,
+    }) => {
+      await page.goto("/explore/zeta/phase-portrait");
+      const grid = await hurwitzGrid(page, [1.5, si], 0.5, 6);
+      const drawn = grid.filter((p) => !p.declined && Number.isFinite(p.err));
+      // Above the real axis every point is drawn, below it the kernel declines where its sum has lost the digits.
+      expect(grid.filter((p) => p.a[1]! > 0 && p.declined)).toEqual([]);
+      expect(grid.filter((p) => p.a[1]! < 0 && p.declined).length).toBeGreaterThan(0);
+      expect(drawn.length).toBeGreaterThan(grid.length / 3);
+      // A drawn value is within 0.05 of the exact one: no terraces of noise below the axis.
+      for (const p of drawn) expect(p.err).toBeLessThan(0.05);
+    });
+  }
+
+  test("the HurwitzZeta portrait hatches what the kernel declines below the real axis, and nothing above it (S#5)", async ({
+    page,
+  }) => {
+    await page.addInitScript(CAPTURE_CANVAS);
+    await page.goto("/explore/zeta/phase-portrait");
+    const canvas = page.locator('notatio-complex-plot[value^="HurwitzZeta"] canvas').first();
+    await canvas.scrollIntoViewIfNeeded();
+    const share = async () =>
+      canvas.evaluate(async (c: HTMLCanvasElement) => {
+        const url = (window as unknown as { __grab(c: HTMLCanvasElement): string | null }).__grab(c);
+        if (!url) return undefined;
+        const img = new Image();
+        img.src = url;
+        await img.decode();
+        const flat = document.createElement("canvas");
+        flat.width = img.width;
+        flat.height = img.height;
+        const ctx = flat.getContext("2d")!;
+        ctx.drawImage(img, 0, 0);
+        const data = ctx.getImageData(0, 0, img.width, img.height).data;
+        // The view is centered on the real axis: the top half of the canvas is Im a > 0.
+        const half = Math.floor(img.height / 2);
+        const grey = [0, 0];
+        for (let y = 0; y < img.height; y++)
+          for (let x = 0; x < img.width; x++) {
+            const k = 4 * (y * img.width + x);
+            const [r, g, b] = [data[k]!, data[k + 1]!, data[k + 2]!];
+            if (Math.max(r, g, b) - Math.min(r, g, b) <= 2 && r >= 40 && r <= 95) grey[y < half ? 0 : 1]!++;
+          }
+        return { above: grey[0]! / (half * img.width), below: grey[1]! / ((img.height - half) * img.width) };
+      });
+    await expect.poll(share, { timeout: 90_000 }).toBeDefined();
+    const { above, below } = (await share())!;
+    expect(above).toBeLessThan(0.01);
+    expect(below).toBeGreaterThan(0.1);
   });
 });
