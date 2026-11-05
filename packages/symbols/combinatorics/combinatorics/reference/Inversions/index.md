@@ -7,7 +7,7 @@ signatures:
   - call: Inversions(p)
     description: the inversion count of a one-line permutation $p$
     library: enumeratio-combinatorics
-    type: (composition | list | permutation) -> integer | number
+    type: (binary_word | composition | list | permutation) -> integer | number
 seeAlso:
   - MajorIndex
   - Descents
@@ -23,11 +23,16 @@ catalog:
     url: https://www.findstat.org/St000018
     on: Permutation
   - system: findstat
+    identity: St000293
+    url: https://www.findstat.org/St000293
+    on: BinaryWord
+  - system: findstat
     identity: St000766
     url: https://www.findstat.org/St000766
     on: IntegerComposition
 statOn:
   - Arrangement
+  - BinaryWord
   - IntegerComposition
   - Permutation
   - PermutationCycles

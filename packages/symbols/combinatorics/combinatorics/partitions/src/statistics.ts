@@ -17,6 +17,7 @@ import {
   count,
   equals,
   distance,
+  floored,
   fold,
   forEach,
   greater,
@@ -301,6 +302,110 @@ const cubeRoots = (d: MathJSON, a: MathJSON): MathJSON =>
     ],
     "s",
   );
+/**
+ * Hurwitz's count of genus-0 factorizations: (n + c - 2)! n^(c-3) prod p^p / (p-1)! for n cells in c parts. The power of n
+ * goes to the numerator or the denominator by the sign of c - 3, so the quotient is of integers.
+ */
+const hurwitzNumber: MathJSON = [
+  "Divide",
+  [
+    "Multiply",
+    factorialOf(add(total, subtract(length(), 2))),
+    ["Power", total, ["Max", subtract(length(), 3), 0]],
+    ["Product", forEach(positions, ["Power", here, here])],
+  ],
+  [
+    "Multiply",
+    ["Power", total, ["Max", subtract(3, length()), 0]],
+    ["Product", forEach(positions, factorialOf(subtract(here, 1)))],
+  ],
+];
+/**
+ * The Catalan numbers C(0), ..., C(largest part) as a list, by C(m) = sum of C(k) C(m - 1 - k): only sums and products of
+ * positive integers, so a value past 2^53 reaches the answer and the compiled code declines, never rounds.
+ */
+const catalanTable: MathJSON = fold(
+  upTo(largest),
+  ["List", 1],
+  [
+    "Join",
+    "a",
+    [
+      "List",
+      sumOver(upTo(["Length", "a"]), ["Multiply", at("i", "a"), at(subtract(["Length", "a"], subtract("i", 1)), "a")]),
+    ],
+  ],
+);
+/**
+ * The distinct sub-multisets of the parts, as one index t = 1 .. T in a mixed radix with a digit per run of equal parts: the
+ * digit of a run (how many of its parts are taken) is floor((t - 1) / stride) mod (run length + 1), the stride being the product
+ * of (run length + 1) over the runs of larger parts. A part is taken when its place within its run is at most its run's digit.
+ * These read the bound lists `m` (the length of each part's run), `r` (its place in the run) and `s` (its run's stride).
+ */
+const endsRunAt = (j: MathJSON): MathJSON => equals(at(j, "r"), at(j, "m"));
+const runLengths: MathJSON = forEach(positions, count(positions, equals(at("j"), here), "j"));
+const placesInRun: MathJSON = forEach(positions, count(upTo("i"), equals(at("j"), here), "j"));
+const runStrides: MathJSON = forEach(positions, [
+  "Product",
+  forEach(positions, ["If", and(greater(at("j"), here), endsRunAt("j")), add(at("j", "m"), 1), 1], "j"),
+]);
+const submultisetCount: MathJSON = [
+  "Product",
+  forEach(positions, ["If", endsRunAt("j"), add(at("j", "m"), 1), 1], "j"),
+];
+/** floor(a / b) for integers, without `Floor`. */
+const quotient = (a: MathJSON, b: MathJSON): MathJSON => ["Divide", subtract(a, ["Mod", a, b]), b];
+const takenAt = (i: MathJSON): MathJSON => [
+  "If",
+  atMostValue(at(i, "r"), ["Mod", quotient(subtract("t", 1), at(i, "s")), add(at(i, "m"), 1)]),
+  1,
+  0,
+];
+/** How many parts up to position i the sub-multiset t takes: the rank of position i among them, when it is taken. */
+const takenRankAt = (i: MathJSON): MathJSON => floored(["Sum", forEach(upTo(i), takenAt("j"), "j")]);
+/**
+ * 1 when the sub-multiset t fails to dominate its conjugate, else 0: for some k the first k taken parts sum to less than the
+ * first k parts of the conjugate, which sum to min(part, k) over the taken parts.
+ */
+const failsToDominateConjugate: MathJSON = [
+  "Min",
+  1,
+  floored([
+    "Sum",
+    forEach(
+      upTo(total),
+      [
+        "If",
+        less(
+          floored([
+            "Sum",
+            forEach(positions, ["Multiply", takenAt("i"), here, ["If", atMostValue(takenRankAt("i"), "k"), 1, 0]]),
+          ]),
+          floored(["Sum", forEach(positions, ["Multiply", takenAt("i"), ["Min", here, "k"]])]),
+        ),
+        1,
+        0,
+      ],
+      "k",
+    ),
+  ]),
+];
+const nonDominatingSubmultisets: MathJSON = bind(
+  "m",
+  runLengths,
+  bind(
+    "r",
+    placesInRun,
+    bind(
+      "s",
+      runStrides,
+      floored(["Sum", forEach(upTo(submultisetCount), failsToDominateConjugate, "t")]),
+      "list<integer>",
+    ),
+    "list<integer>",
+  ),
+  "list<integer>",
+);
 /** The parts before position i that are larger than part i: with the parts weakly decreasing, those that differ from it. */
 const largerPartsBefore: MathJSON = count(positions, and(less("j", "i"), greater(at("j"), here)), "j");
 
@@ -1672,7 +1777,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
   stat(
     "RookPlacementCount",
     "The rook placements, of any number of rooks, on the Ferrers board of the diagram.",
-    nonEmpty(["Sum", rookNumbers], 1),
+    nonEmpty(bind("r", rookNumbers, ["Sum", "r"], "list<integer>"), 1),
   ),
   stat(
     "MaximalRookPlacementCount",
@@ -1893,6 +1998,27 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "The chains of single splits (a part into two) from this partition down to all ones.",
     nonEmpty(["If", less(total, 2), 1, refinementChains], 1),
     undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+
+  // ── FindStat's integer-partition statistics, batch 8 ────────────────────────────────────
+
+  stat(
+    "HurwitzNumber",
+    "Hurwitz's number for the partition: (n + c - 2)! n^(c-3) times the product of p^p / (p-1)! over its c parts p, n being its size.",
+    nonEmpty(hurwitzNumber),
+  ),
+  stat(
+    "MonotoneHurwitzNumber",
+    "The monotone factorizations of genus zero of a permutation of this cycle type into transpositions: the product of the Catalan numbers C(p - 1) over the parts p.",
+    nonEmpty(bind("c", catalanTable, ["Product", forEach(positions, at(here, "c"))], "list<integer>"), 1),
+    "The cycles factor independently, and the larger entries of the transpositions, weakly increasing, fix how the factors interleave.",
+  ),
+  stat(
+    "NonDominatingSubmultisetCount",
+    "The distinct sub-multisets of the parts that, read as partitions, do not dominate their own conjugate.",
+    nonEmpty(nonDominatingSubmultisets),
+    "FindStat calls the sub-multisets subpartitions. The partitions with none are the wide ones.",
     TABLE_CHECK_WEIGHT,
   ),
 ];

@@ -433,17 +433,27 @@ const occurrencesOfPatterns = (...patterns: (readonly number[])[]): MathJSON => 
   return atLeast(size, loop(0));
 };
 
-/** Occurrences of a vincular pattern whose first two entries are adjacent: i, i + 1, then any k > i + 1. */
-const occurrencesWithAdjacentStart = (pattern: readonly number[]): MathJSON => {
+/** Occurrences of a vincular pattern (any of `patterns`) whose first two entries are adjacent: i, i + 1, then any k > i + 1. */
+const occurrencesWithAdjacentStart = (...patterns: (readonly number[])[]): MathJSON => {
   const n = length();
   return atLeast(
     3,
     sumOver(
       ["Range", 1, subtract(n, 2)],
-      count(["Range", add("i", 2), n], orderedAs(pattern, [at("i"), at(add("i", 1)), at("k")]), "k"),
+      count(["Range", add("i", 2), n], orderedAsAny(patterns, [at("i"), at(add("i", 1)), at("k")]), "k"),
     ),
   );
 };
+/** Occurrences of a vincular pattern (any of `patterns`) whose last two entries are adjacent: any i < j, then j, j + 1. */
+const occurrencesWithAdjacentEnd = (...patterns: (readonly number[])[]): MathJSON =>
+  atLeast(
+    3,
+    sumOver(
+      ["Range", 2, subtract(length(), 1)],
+      count(["Range", 1, subtract("j", 1)], orderedAsAny(patterns, [at("i"), at("j"), at(add("j", 1))]), "i"),
+      "j",
+    ),
+  );
 
 /** Occurrences whose first entry is p(1), the other two anywhere after it: j < k. */
 const occurrencesFromFirstEntry = (pattern: readonly number[]): MathJSON => {
@@ -1566,16 +1576,6 @@ const FINDSTAT_PERMUTATION_STATISTICS_6: readonly Definition[] = [
   ),
 ];
 
-/** Occurrences of a vincular pattern whose last two entries are adjacent: any i, then j, j + 1. */
-const occurrencesWithAdjacentEnd = (pattern: readonly number[]): MathJSON =>
-  atLeast(
-    3,
-    sumOver(
-      ["Range", 2, subtract(length(), 1)],
-      count(["Range", 1, subtract("j", 1)], orderedAs(pattern, [at("i"), at("j"), at(add("j", 1))]), "i"),
-      "j",
-    ),
-  );
 /** The descents: the vincular pattern (21). */
 const adjacentDescents: MathJSON = hasPair(count(adjacent, fallsAfter));
 
@@ -2498,6 +2498,223 @@ const FINDSTAT_PERMUTATION_STATISTICS_10: readonly Definition[] = [
   ),
 ];
 
+/** Pairs i < j with p(i) < p(j), the later entry above the earlier one. */
+const nonInversionPairs: MathJSON = sumOver(positions, count(span(add("i", 1), length()), less(here, at("j")), "j"));
+/** Pairs i < j with p(i) < p(j) whose distance j - i has the given parity. */
+const nonInversionsAtParity = (parity: number): MathJSON =>
+  sumOverPairs(and(less(here, at("j")), equals(["Mod", subtract("j", "i"), 2], parity)), 1);
+
+/** The excedance tops less their positions, summed. */
+const excedanceDifferences: MathJSON = floored([
+  "Sum",
+  forEach(where(positions, isExcedanceAt("i")), subtract(here, "i")),
+]);
+/** Pairs k < i, over the excedances i, with p(k) <= i. */
+const excedanceBlockers: MathJSON = sumOver(
+  where(positions, isExcedanceAt("i")),
+  count(span(1, subtract("i", 1)), atMostValue(at("k"), "i"), "k"),
+);
+
+/**
+ * The length of the leading increasing factor of the hook factorization. Factors are cut from the right,
+ * each starting at the last descent top at least two before the previous cut; the fold's state is the
+ * latest cut, starting past the end.
+ */
+const hookPrefixLength: MathJSON = subtract(
+  fold(["Range", subtract(length(), 1), 1, -1], add(length(), 1), [
+    "If",
+    and(atMostValue(visiting, subtract("a", 2)), greater(at(visiting), at(add(visiting, 1)))),
+    visiting,
+    "a",
+  ]),
+  1,
+);
+/** The inversions inside the hook factors, carrying (cut, total) and adding the new factor's inversions at each cut. */
+const hookInversionSum: MathJSON = [
+  "At",
+  fold(
+    ["Range", subtract(length(), 1), 1, -1],
+    ["List", add(length(), 1), 0],
+    bind(
+      "e",
+      subtract(carried(1), 1),
+      [
+        "If",
+        and(atMostValue(visiting, subtract("e", 1)), greater(at(visiting), at(add(visiting, 1)))),
+        [
+          "List",
+          visiting,
+          add(carried(2), sumOver(span(visiting, "e"), count(span(add("i", 1), "e"), greater(here, at("j")), "j"))),
+        ],
+        "a",
+      ],
+      "integer",
+    ),
+  ),
+  2,
+];
+
+/** The most entries on the stack while the word is read, each entry first popping the larger ones: the most right-to-left minima of a prefix. */
+const stackHeight: MathJSON = max(forEach(positions, count(span(1, "i"), equals(at("k"), min(slice("k", "i"))), "k")));
+
+/** The word without its fixed points: the zeroed word with the zeros dropped. */
+const derangementWord: MathJSON = where(fixedPointsZeroed, ["NotEqual", "v", 0], "v");
+const fixedPointCount: MathJSON = count(positions, equals(here, "i"));
+
+// The eleventh batch: Lehmer-code and Bruhat counts, vincular sums, the hook factorization, the fixed-point
+// major index and a few small counts.
+const FINDSTAT_PERMUTATION_STATISTICS_11: readonly Definition[] = [
+  word(
+    "LexicographicRank",
+    "The position of p among the permutations of its size in lexicographic order, counting from 1.",
+    nonEmpty(
+      add(
+        1,
+        floored(
+          sumOver(positions, [
+            "Multiply",
+            count(span(add("i", 1), length()), less(at("j"), here), "j"),
+            factorial(subtract(length(), "i")),
+          ]),
+        ),
+      ),
+      1,
+    ),
+    "One more than the Lehmer code read as a number in the factorial base.",
+  ),
+  word(
+    "NonAttackingNeighbors",
+    "Positions i with |p(i) - p(i+1)| > 1.",
+    hasPair(count(adjacent, greater(distance(here, next), 1))),
+    "Kings on adjacent columns that do not attack each other.",
+  ),
+  word(
+    "StaircaseSizeOfCode",
+    "The largest k with a subsequence of the Lehmer code whose j-th entry from the right is at least j.",
+    nonEmpty(
+      bind(
+        "c",
+        forEach(positions, count(span(add("i", 1), length()), less(at("j"), here), "j")),
+        fold(["Range", length(), 1, -1], 0, ["If", greater(at(visiting, "c"), "a"), add("a", 1), "a"]),
+        "list<integer>",
+      ),
+    ),
+    "Scanning the code from the right and taking each entry that exceeds the count so far is optimal.",
+  ),
+  word(
+    "BruhatLowerCovers",
+    "Pairs i < j with p(i) > p(j) and no entry between them valued between p(j) and p(i).",
+    hasPair(
+      sumOver(
+        adjacent,
+        count(
+          span(add("i", 1), length()),
+          and(
+            greater(here, at("j")),
+            equals(
+              count(span(add("i", 1), subtract("j", 1)), and(greater(at("k"), at("j")), less(at("k"), here)), "k"),
+              0,
+            ),
+          ),
+          "j",
+        ),
+      ),
+    ),
+    "The boxed occurrences of 21.",
+  ),
+  word(
+    "TailPairsOfOccurrencesOf321",
+    "Pairs j < k with p(j) > p(k) and some entry before j above p(j), the positions of the 2 and the 1 of the occurrences of 321.",
+    nonEmpty(
+      sumOver(
+        where(positions, less(here, max(upToHere))),
+        count(span(add("i", 1), length()), less(at("j"), here), "j"),
+      ),
+    ),
+  ),
+  word(
+    "StandardizedBiAlternatingInversionNumber",
+    "Half of floor(n/2)^2 plus the signed inversions, each pair i < j weighted by (-1)^(i+j).",
+    hasPair(
+      add(
+        ["Divide", ["Multiply", halfFloor(length()), add(halfFloor(length()), 1)], 2],
+        subtract(nonInversionsAtParity(0), nonInversionsAtParity(1)),
+      ),
+    ),
+    "Half of the sum of (-1)^(i+j) sgn(p(j) - p(i)) over i < j, shifted by floor(n/2)^2.",
+  ),
+  word(
+    "MinimalInversionsEitherDirection",
+    "The smaller of the number of inversions and the number of non-inversions.",
+    hasPair(min(["List", inversions, nonInversionPairs])),
+    "Inversions of p against those of its reverse.",
+  ),
+  word(
+    "StatPrime",
+    "Descents plus the occurrences of the vincular patterns 13-2, 31-2 and 32-1.",
+    hasPair(add(count(adjacent, fallsAfter), occurrencesWithAdjacentStart([1, 3, 2], [3, 1, 2], [3, 2, 1]))),
+    "FindStat's stat', after Babson and Steingrimsson.",
+  ),
+  word(
+    "StatDoublePrime",
+    "Descents plus the occurrences of the vincular patterns 1-32, 3-12 and 3-21.",
+    hasPair(add(count(adjacent, fallsAfter), occurrencesWithAdjacentEnd([1, 3, 2], [3, 1, 2], [3, 2, 1]))),
+    "FindStat's stat'', after Babson and Steingrimsson.",
+  ),
+  stat(
+    "HaglundHag",
+    "The excedance tops less their positions, plus the inversions among the excedance tops less those among the rest, plus the pairs k < i, over excedances i, with p(k) <= i.",
+    nonEmpty(
+      subtract(
+        add(add(excedanceDifferences, blockInversions(isExcedanceAt)), excedanceBlockers),
+        blockInversions(isNonExcedanceAt),
+      ),
+    ),
+    "The inversions are within the subwords, as in Denert.",
+  ),
+  stat(
+    "HalfPermanentOfIdentityPlusPermutation",
+    "Half the permanent of the identity matrix plus the permutation matrix, which is 2 to the power of the cycles less one.",
+    nonEmpty(["Power", 2, subtract(["Count", cycleLeaders], 1)]),
+  ),
+  word(
+    "HookFactorizationPrefixLength",
+    "The length of the leading increasing factor p of the hook factorization p t1 ... tk.",
+    atLeast(2, hookPrefixLength, length()),
+    "Hook factors are cut from the right, each from a descent top.",
+  ),
+  word(
+    "HookFactorInversions",
+    "The inversions summed over the hook factors t1, ..., tk of p.",
+    atLeast(2, hookInversionSum),
+    "Called lec.",
+  ),
+  word(
+    "PermutationTreeHeight",
+    "The height of the rooted tree from inserting the entries one by one, the most entries on the stack of ancestors.",
+    nonEmpty(stackHeight),
+  ),
+  stat(
+    "FixedPointMajorIndex",
+    "The sum of the fixed points less the triangular number of their count, plus the major index of the word without its fixed points.",
+    nonEmpty(
+      add(
+        subtract(
+          ["Sum", where(positions, equals(here, "i"))],
+          ["Divide", ["Multiply", fixedPointCount, add(fixedPointCount, 1)], 2],
+        ),
+        bind(
+          "d",
+          derangementWord,
+          ["Sum", forEach(where(span(1, subtract(length("d"), 1)), greater(at("i", "d"), at(add("i", 1), "d"))), "i")],
+          "list<integer>",
+        ),
+      ),
+    ),
+    "Called maf.",
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -2707,4 +2924,5 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_8,
   ...FINDSTAT_PERMUTATION_STATISTICS_9,
   ...FINDSTAT_PERMUTATION_STATISTICS_10,
+  ...FINDSTAT_PERMUTATION_STATISTICS_11,
 ];
