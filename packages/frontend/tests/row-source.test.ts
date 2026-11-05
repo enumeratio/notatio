@@ -42,11 +42,7 @@ test("a finite source with At is exact and answers any range", async () => {
   expect(source.count()).toEqual({ kind: "exact", n: 24n });
   const batch = await source.rows([1n, 4n], [0, source.columns.length]);
   expect(batch.start).toBe(1n);
-  expect(batch.rows.map((r) => textOf(r[0]))).toEqual([
-    "Permutation([1, 2, 3, 4])",
-    "Permutation([1, 2, 4, 3])",
-    "Permutation([1, 3, 2, 4])",
-  ]);
+  expect(batch.rows.map((r) => textOf(r[0]))).toEqual(["[1, 2, 3, 4]", "[1, 2, 4, 3]", "[1, 3, 2, 4]"]);
   const tail = await source.rows([23n, 30n], [0, 1]);
   expect(tail.rows).toHaveLength(2);
   expect(tail.end).toBe(true);
@@ -57,9 +53,9 @@ test("SymmetricGroup(25) is counted exactly and jumps to its last row", async ()
   const total = 15511210043330985984000000n;
   expect(source.count()).toEqual({ kind: "exact", n: total });
   const last = await source.rows([total, total + 1n], [0, 1]);
-  expect(textOf(last.rows[0]?.[0])).toBe(`Permutation([${Array.from({ length: 25 }, (_, i) => 25 - i).join(", ")}])`);
+  expect(textOf(last.rows[0]?.[0])).toBe(`[${Array.from({ length: 25 }, (_, i) => 25 - i).join(", ")}]`);
   const first = await source.rows([1n, 2n], [0, 1]);
-  expect(textOf(first.rows[0]?.[0])).toContain("Permutation([1, 2, 3");
+  expect(textOf(first.rows[0]?.[0])).toContain("[1, 2, 3");
   // Past the end there is nothing, and the batch says so.
   const past = await source.rows([total + 1n, total + 3n], [0, 1]);
   expect(past.rows).toEqual([]);

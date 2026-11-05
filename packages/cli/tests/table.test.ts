@@ -54,7 +54,7 @@ async function lastPage(input: string): Promise<{ text: string; wrote: string }>
 
 it("reaches the last row with G, on the real source", async () => {
   const { text, wrote } = await lastPage("CollectionTable(SymmetricGroup(8))");
-  expect(text).toContain("40320 │ Permutation([8, 7, 6, 5, 4, 3, 2, 1])");
+  expect(text).toContain("40320 │ [8, 7, 6, 5, 4, 3, 2, 1]");
   expect(text).toContain("of 40,320");
   expect(wrote).toContain("q quit");
 });

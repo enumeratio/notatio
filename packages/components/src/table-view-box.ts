@@ -53,6 +53,10 @@ const DEFAULT_PAGE = 20;
 const INDEX_MIN_EM = 3.5;
 const INDEX_MAX_EM = 9;
 const ELEMENT_MIN_EM = 6;
+/** How far below or above the viewport a table may be and still ask the kernel for its rows. */
+const NEAR_PX = 400;
+/** Past this many characters a cell's column may cut it, so it carries its text as a tooltip. */
+const TITLE_MIN_CHARS = 6;
 
 interface Block {
   /** The rows of the block asked for, over the display columns `cols`; short at the source's end. */
@@ -82,12 +86,20 @@ function drawCell(el: HTMLElement, box: Box | undefined, numeric: boolean): void
     el.textContent = "";
   } else if (typeof box === "string") {
     el.textContent = box;
+    cutTitle(el);
   } else if (box[0] === "TagBox" && box[2] === "Glyph" && typeof box[1] === "string") {
     // A glyph is an SVG the kernel drew; nothing a reader typed reaches it.
     el.innerHTML = box[1];
   } else {
     el.textContent = toText(box);
+    cutTitle(el);
   }
+}
+
+/** A cell cut short by its column still gives its whole text, as a tooltip. */
+function cutTitle(el: HTMLElement): void {
+  const shown = el.textContent ?? "";
+  if (shown.length > TITLE_MIN_CHARS) el.title = shown;
 }
 
 export class TableViewBox extends HTMLElement {
@@ -143,6 +155,7 @@ export class TableViewBox extends HTMLElement {
   #expected: number | undefined;
   #headers: readonly string[] = [];
   #resizeObserver: ResizeObserver | undefined;
+  #watch: IntersectionObserver | undefined;
 
   connectedCallback(): void {
     this.#build();
@@ -157,6 +170,7 @@ export class TableViewBox extends HTMLElement {
 
   disconnectedCallback(): void {
     this.#resizeObserver?.disconnect();
+    this.#watch?.disconnect();
     this.#inflight?.controller.abort();
     this.#client?.release();
     this.#client = undefined;
@@ -326,6 +340,9 @@ export class TableViewBox extends HTMLElement {
     this.#stalled = undefined;
     this.#count = { kind: "atLeast", n: 0n, growing: true };
     this.#top = this.#initialTop();
+    // A new source starts at its first row, directly under the header, however far the old one was scrolled.
+    this.#sub = 0;
+    this.#syncScroll();
     this.#active = { index: this.#top, col: 0 };
     this.#drawHeader();
     this.#applySize();
@@ -343,6 +360,10 @@ export class TableViewBox extends HTMLElement {
       return;
     }
     if (source === null) return;
+    // A table the reader has not scrolled near asks the kernel for nothing: the kernel does one
+    // thing at a time, so a page of tables would make the first one wait on the rest.
+    await this.#whenNear();
+    if (generation !== this.#generation) return;
     this.#client = openRowsClient();
     try {
       const reply = await this.#client.register(source);
@@ -361,6 +382,24 @@ export class TableViewBox extends HTMLElement {
     } catch (error) {
       if (generation === this.#generation) this.#fail(error instanceof Error ? error.message : String(error));
     }
+  }
+
+  /** Resolves once the table is within `NEAR_PX` of the viewport (at once where there is no observer). */
+  #whenNear(): Promise<void> {
+    this.#watch?.disconnect();
+    if (typeof IntersectionObserver === "undefined") return Promise.resolve();
+    return new Promise((resolve) => {
+      const watch = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          watch.disconnect();
+          resolve();
+        },
+        { rootMargin: `${NEAR_PX}px` },
+      );
+      watch.observe(this);
+      this.#watch = watch;
+    });
   }
 
   #fail(message: string): void {
@@ -403,6 +442,20 @@ export class TableViewBox extends HTMLElement {
 
   get #area(): { px: number; scaled: boolean } {
     return this.#paged ? { px: this.#pageSize * this.#rowPx, scaled: false } : scrollAreaPx(this.#extent, this.#rowPx);
+  }
+
+  /** Whether `top` is the furthest the view goes, so the last row ends the viewport. */
+  #atEnd(top: bigint): boolean {
+    const end = endOf(this.#count);
+    return !this.#paged && end !== undefined && top >= end - BigInt(this.#visible);
+  }
+
+  /**
+   * How far the rows are drawn up from their first row's top when the view is at its end: the
+   * visible count rounds up, so a whole row more than fits would otherwise end below the viewport.
+   */
+  #endShift(): number {
+    return Math.max(0, this.#visible * this.#rowPx - (this.#viewport.clientHeight - this.#rowPx));
   }
 
   #clampTop(top: bigint): bigint {
@@ -460,7 +513,12 @@ export class TableViewBox extends HTMLElement {
 
   #syncScroll(): void {
     if (this.#paged) return;
-    const top = scrollTopFor(this.#top, this.#area, this.#extent, this.#rowPx, this.#visible);
+    const area = this.#area;
+    // The area is a header row taller than its rows; a view at the end rests at the browser's maximum.
+    const top =
+      !area.scaled && this.#atEnd(this.#top)
+        ? Math.max(0, this.#viewport.scrollHeight - this.#viewport.clientHeight)
+        : scrollTopFor(this.#top, area, this.#extent, this.#rowPx, this.#visible);
     if (Math.abs(this.#viewport.scrollTop - top) >= 1) {
       this.#viewport.scrollTop = top;
       // The browser may clamp the write; what it kept is what to expect back.
@@ -511,19 +569,24 @@ export class TableViewBox extends HTMLElement {
     if (!this.isConnected) return;
     const visible = this.#visible;
     const area = this.#area;
-    const height = `${area.px}px`;
+    // The sticky header row takes the first row of the viewport, so the area is a row taller than the rows.
+    const height = `${this.#paged ? area.px : area.px + this.#rowPx}px`;
     if (this.#space.style.height !== height) {
       this.#space.style.height = height;
       this.#syncScroll();
     }
     this.#layer.style.height = `${this.#viewport.clientHeight}px`;
     this.#top = this.#clampTop(this.#top);
-    const view: IndexRange = this.#paged
-      ? [this.#top, this.#top + BigInt(this.#pageSize)]
-      : windowOf(this.#top, visible, this.#count);
+    // Until the kernel has answered there are no rows to number: the footer says it is loading.
+    const view: IndexRange = !this.#registered
+      ? [this.#top, this.#top]
+      : this.#paged
+        ? [this.#top, this.#top + BigInt(this.#pageSize)]
+        : windowOf(this.#top, visible, this.#count);
     const above = this.#top - view[0];
     this.#furthest = view[1] - 1n > this.#furthest ? view[1] - 1n : this.#furthest;
-    this.#rowsEl.style.transform = `translateY(${-(Number(above) * this.#rowPx + this.#sub)}px)`;
+    const shift = this.#atEnd(this.#top) ? Math.max(this.#sub, this.#endShift()) : this.#sub;
+    this.#rowsEl.style.transform = `translateY(${-(Number(above) * this.#rowPx + shift)}px)`;
 
     const cols = this.#colWindow();
     const wanted = new Set<bigint>();
@@ -617,8 +680,9 @@ export class TableViewBox extends HTMLElement {
     const settled = count.kind === "exact";
     const to = last < this.#top ? this.#top : last;
     // A long index is written in scientific form so the line fits; the full text is the title.
-    this.#status.textContent = statusText(this.#top, to, total, true);
-    this.#status.title = statusText(this.#top, to, total);
+    const loading = !this.#registered && this.#error === "";
+    this.#status.textContent = loading ? "loading…" : statusText(this.#top, to, total, true);
+    this.#status.title = loading ? "" : statusText(this.#top, to, total);
     // The index column fits the rows shown, not the count: a long index is cut short, never the other columns.
     const digits = (last > this.#top ? last : this.#top).toString().length;
     const idx = Math.min(INDEX_MAX_EM, Math.max(INDEX_MIN_EM, digits * 0.6 + 1.4));
@@ -903,7 +967,7 @@ table-view-box {
   font-variant-numeric: tabular-nums;
 }
 .tvb-num { text-align: right; font-variant-numeric: tabular-nums; }
-.tvb-cell svg { height: 1.6em; width: auto; display: inline-block; vertical-align: middle; }
+.tvb-cell svg { height: 1.6em; width: auto; max-width: 100%; display: inline-block; vertical-align: middle; }
 .tvb-sortable { cursor: pointer; text-decoration: underline dotted var(--vp-c-divider, #bbb); text-underline-offset: 3px; }
 .tvb-sortable:hover, .tvb-sortable[aria-sort="ascending"], .tvb-sortable[aria-sort="descending"] { color: var(--vp-c-brand-1, #3451b2); }
 .tvb-foot {
