@@ -49,7 +49,7 @@ export class NotatioComplexPlot extends LitElement {
     var: { type: String },
     /** Centre of the view in the complex plane, as `re,im`. Dragging pans it. */
     center: { type: String },
-    /** Half-width of the view. Scrolling zooms it. */
+    /** The height of the view, in the complex plane: its vertical span. Its width is that times the canvas's aspect ratio. Scrolling zooms it. */
     extent: { type: Number },
     /** Dim everything outside this radius; 0 masks nothing. */
     mask: { type: Number },

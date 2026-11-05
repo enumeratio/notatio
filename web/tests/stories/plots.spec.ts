@@ -169,6 +169,40 @@ for (const value of ["e_1", "1 + 2e_1 + 3e_1e_2"]) {
   });
 }
 
+// --- Prose that disagrees with its own figure (S#12, E#17) --------------------------------------------
+
+test("the tangle's permutation knob says it walks 24 permutations (S#12)", async ({ page }) => {
+  await page.goto("/playground/inspirations/tangle");
+  const sentence = page.locator('dynamic-module-box:has(knob-box[max="24"]) p', { hasText: "Permutation" }).first();
+  await sentence.scrollIntoViewIfNeeded();
+  await expect(sentence).toContainText("of 24", { timeout: 60_000 });
+  await expect(sentence).not.toContainText(/of 4\b/);
+});
+
+test("pressing 0 on a zoomed 2-D plot returns it to its whole range, as the Plot page says (E#17)", async ({
+  page,
+}) => {
+  await page.goto("/reference/component/Plot#story/a-cubic");
+  const box = page.locator('[id="story/a-cubic"] graphics-box').first();
+  await box.scrollIntoViewIfNeeded();
+  const labels = () => box.locator("svg text").allTextContents();
+  await expect.poll(async () => (await labels()).length, { timeout: 60_000 }).toBeGreaterThan(1);
+  const whole = await labels();
+  // Zoom in on the plot with ctrl + wheel.
+  const rect = (await box.locator("svg").first().boundingBox())!;
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  await page.keyboard.down("Control");
+  for (let i = 0; i < 5; i++) await page.mouse.wheel(0, -200);
+  await page.keyboard.up("Control");
+  await expect.poll(labels).not.toEqual(whole);
+  // The plot takes the key from the keyboard, as a reader tabbing to it does.
+  await box.locator(".graphics-box-plot").focus();
+  await page.keyboard.press("0");
+  // With the pointer off the plot, its hover readout is not among the labels.
+  await page.mouse.move(0, 0);
+  await expect.poll(labels).toEqual(whole);
+});
+
 // --- WebGPU ---------------------------------------------------------------------------------
 // Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
 // headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.
