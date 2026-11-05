@@ -263,6 +263,7 @@ export class GraphicsBoxElement extends LitElement {
   #h = 2;
   #queued = false;
   #ro: ResizeObserver | undefined;
+  #fittedWidth = "";
   #build = 0;
   #rebuilds = 0;
 
@@ -455,6 +456,7 @@ export class GraphicsBoxElement extends LitElement {
       this.#producer = producer;
       this.#layer = layer;
       this.#layerKey = key;
+      this.#fitWidth(layer);
       // A new layer's points are other points: start from what the variable holds, if anything.
       this._selection = [];
       this.#writtenSelection = "";
@@ -1152,6 +1154,29 @@ export class GraphicsBoxElement extends LitElement {
     const h = Array.isArray(size) && size[0] === "List" ? Number(size[2]) : Number.NaN;
     const sized = /^\[\s*[^,\]]+,\s*(\d+(?:\.\d+)?)\s*\]$/.exec(this.imageSize.trim());
     return (Number.isFinite(h) && h > 0 ? h : 0) || Number(sized?.[1]) || Number(this.height) || 480;
+  }
+
+  /** The width `ImageSize -> [w, h]` asks for (a number), if any. */
+  get #askedWidth(): number {
+    const size = this.#options.get("ImageSize");
+    const w = Array.isArray(size) && size[0] === "List" ? Number(size[1]) : Number.NaN;
+    const sized = /^\[\s*(\d+(?:\.\d+)?)\s*,/.exec(this.imageSize.trim());
+    return (Number.isFinite(w) && w > 0 ? w : 0) || Number(sized?.[1]) || 0;
+  }
+
+  /**
+   * An `ImageSize` figure is as wide as its height asks: `[w, h]` gives `w`, `[Automatic, h]` the
+   * layer's own aspect at height `h`. Without it the stage's absolute canvases collapse the inline
+   * box to zero width. A width the author wrote in `style` is kept.
+   */
+  #fitWidth(layer: ShowLayer): void {
+    const sized = this.#options.has("ImageSize") || this.imageSize.trim() !== "";
+    if (!sized || (this.style.width && this.style.width !== this.#fittedWidth)) return;
+    const wide = homeView(layer, 1e-9).extent * 1e-9;
+    const tall = homeView(layer, 1e9).extent;
+    const width = this.#askedWidth || (tall > 0 ? Math.round((this.#height * wide) / tall) : 0);
+    this.#fittedWidth = width > 0 ? `${width}px` : "";
+    this.style.width = this.#fittedWidth;
   }
 
   protected override render(): unknown {

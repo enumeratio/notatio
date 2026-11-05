@@ -175,7 +175,8 @@ function withOptionAttributes(
       attributes.axis = "y";
       continue;
     }
-    const text = optionText(value);
+    // An animator runs unless told `AnimationRunning -> False`, so its `False` is written out.
+    const text = name === "AnimationRunning" && value === false ? "false" : optionText(value);
     if (text !== undefined) attributes[optionAttribute(name)] = text;
   }
   return attributes;

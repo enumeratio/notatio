@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { html, LitElement, type PropertyValues } from "lit";
+import { html, LitElement, noChange, type PropertyValues } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import "./notatio-cell.ts";
 import "./dynamic-module-box.ts";
@@ -141,6 +141,26 @@ export class NotatioWorksheet extends LitElement {
   /** `#cellData`'s evaluated JSON, boxed -- cached by JSON text, since a slider redraws
    * only the cell it drives; every OTHER cell's box is unchanged from the last pass. */
   #boxedCache = new Map<string, Expression | null>();
+  /** The slider the pointer holds: a re-render leaves its thumb where the reader put it. */
+  #held: string | undefined;
+  /** The range a held slider began its drag on, by `name/part`. */
+  #frozen = new Map<string, ControlRange>();
+  /** Hold a slider until the pointer lets go, wherever it lets go: a press that moves nothing fires no `change`. */
+  #hold(c: WorksheetControl): void {
+    const key = `${c.name}/${c.part}`;
+    this.#held = key;
+    // A default range follows the value, so a drag would rescale its own track (64 in -100..100,
+    // then 24 in -50..50); the range the drag began on stays until the pointer lets go.
+    this.#frozen.set(key, { min: c.min, max: c.max, step: c.step });
+    const release = (): void => {
+      this.#held = undefined;
+      this.#frozen.clear();
+      window.removeEventListener("pointerup", release, true);
+      window.removeEventListener("pointercancel", release, true);
+    };
+    window.addEventListener("pointerup", release, true);
+    window.addEventListener("pointercancel", release, true);
+  }
   #deriveTimer: ReturnType<typeof setTimeout> | undefined;
   #lastDeriveAt = 0;
   /** How many points a curve cell evaluated to, for the elided readout. */
@@ -473,6 +493,9 @@ export class NotatioWorksheet extends LitElement {
     const cellEl = (event.target as Element | null)?.closest<HTMLElement>("[data-cell]");
     const id = cellEl ? Number(cellEl.dataset.cell) : Number.NaN;
     if (!Number.isFinite(id)) return;
+    // A cell re-evaluating under a dragged slider reports nothing until its answer lands; keep
+    // what it last said, or its binding's slider is torn out from under the pointer.
+    if (this.#live.has(id) && !detail.json && this.#cellData.has(id)) return;
     this.#cellData.set(id, {
       name: detail.name,
       jsonStr: detail.json ?? "",
@@ -538,7 +561,8 @@ export class NotatioWorksheet extends LitElement {
           type: cell.domain,
           letterConventions: true,
         });
-        controls.push(...made);
+        // An author's range is already fixed; a default one is held while its slider is.
+        controls.push(...made.map((c) => (cell.range ? c : { ...c, ...this.#frozen.get(`${c.name}/${c.part}`) })));
         if (made.some((c) => c.integer)) this.#integerNames.add(data.name);
         continue;
       }
@@ -617,9 +641,13 @@ export class NotatioWorksheet extends LitElement {
             min=${c.min}
             max=${c.max}
             step=${c.step}
-            .value=${String(c.value)}
+            .value=${this.#held === `${c.name}/${c.part}` ? noChange : String(c.value)}
+            @pointerdown=${() => this.#hold(c)}
             @input=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value)}
-            @change=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value, true)}
+            @change=${(e: Event) => {
+              this.#held = undefined;
+              this.#setControl(c, (e.target as HTMLInputElement).value, true);
+            }}
           /><span class="ws-slider-val">${formatValue(c.value, c.step)}</span></label
         >`,
       )}

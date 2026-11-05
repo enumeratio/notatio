@@ -114,8 +114,9 @@ export function structuralOf(expr: Json): StructuralNode {
       continue;
     }
     const sym = typeof value === "string" ? value : (value as { sym?: unknown }).sym;
-    if (sym === "False") continue;
-    attributes[attr] = sym === "True" ? "true" : (stringOf(value) ?? serializeExpression(value));
+    if (sym === "False" && name !== "AnimationRunning") continue; // an animator runs unless told `False`
+    attributes[attr] =
+      sym === "True" ? "true" : sym === "False" ? "false" : (stringOf(value) ?? serializeExpression(value));
   }
   return { tag: tagOf(head), attributes, children };
 }
