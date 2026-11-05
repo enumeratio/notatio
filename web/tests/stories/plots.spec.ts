@@ -86,6 +86,47 @@ test("the tangle's sine curve is drawn over [-3.1416, 3.1416] (S#11)", async ({ 
     .toEqual([-3.14, 3.14]);
 });
 
+// --- Field plot frames (E#8) ---------------------------------------------------------------------
+// The default AspectRatio of a contour, density, vector or stream plot is 1, so its plot area is square.
+
+/** The ratio of the plot area's width to its height, from the clip rectangle the marks sit in. */
+async function frameRatio(card: Locator): Promise<number> {
+  const rect = card.locator("graphics-box svg clipPath rect").first();
+  await expect(rect).toBeAttached({ timeout: 60_000 });
+  const [w, h] = await rect.evaluate((r) => [Number(r.getAttribute("width")), Number(r.getAttribute("height"))]);
+  return (w! - 6) / h!;
+}
+
+for (const [component, story] of [
+  ["ContourPlot", "concentric-circles"],
+  ["DensityPlot", "saddle-colour-bar"],
+  ["VectorPlot", "rigid-rotation"],
+  ["VectorPlot", "rotation-as-streamlines"],
+] as const) {
+  test(`${component}: ${story} has a square frame (E#8)`, async ({ page }) => {
+    await page.goto(`/reference/component/${component}#story/${story}`);
+    const card = page.locator(`[id="story/${story}"]`);
+    await card.scrollIntoViewIfNeeded();
+    expect(await frameRatio(card)).toBeCloseTo(1, 1);
+  });
+}
+
+test("ContourPlot: concentric circles are drawn as circles (E#8)", async ({ page }) => {
+  await page.goto("/reference/component/ContourPlot#story/concentric-circles");
+  const card = page.locator('[id="story/concentric-circles"]');
+  await card.scrollIntoViewIfNeeded();
+  const rings = card.locator("graphics-box svg g[clip-path] path");
+  await expect(rings.first()).toBeAttached({ timeout: 60_000 });
+  const ratios = await rings.evaluateAll((paths) =>
+    paths.map((p) => {
+      const box = (p as SVGGraphicsElement).getBBox();
+      return box.width / box.height;
+    }),
+  );
+  expect(ratios.length).toBeGreaterThan(1);
+  for (const ratio of ratios) expect(ratio).toBeCloseTo(1, 1);
+});
+
 // --- WebGPU ---------------------------------------------------------------------------------
 // Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
 // headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.

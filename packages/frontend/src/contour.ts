@@ -7,7 +7,7 @@
 
 import { type Box, type BoxNode, graphics, line, type OptionValue, raster, style, tag } from "@enumeratio/boxes";
 import { niceTicks } from "./plot.ts";
-import { renderPlot } from "./plot-box.ts";
+import { fieldImageSize, renderPlot } from "./plot-box.ts";
 import { type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 
 export interface ContourPoint {
@@ -183,13 +183,21 @@ export function fieldFrame(
   grid: Grid,
   xs: readonly number[],
   ys: readonly number[],
-  opts: { width?: number; height?: number; axes?: boolean; xLabel?: string; yLabel?: string; title?: string },
+  opts: {
+    width?: number;
+    height?: number;
+    axes?: boolean;
+    legend?: boolean;
+    xLabel?: string;
+    yLabel?: string;
+    title?: string;
+  },
   ready: boolean,
 ): Record<string, OptionValue> {
   const nx = grid[0]?.length ?? 0;
   const ny = grid.length;
   const options: Record<string, OptionValue> = {
-    ImageSize: [opts.width ?? 340, opts.height ?? 200],
+    ImageSize: fieldImageSize({ ...opts, titled: Boolean(opts.title), bar: opts.legend === true }),
     Axes: false,
     Frame: opts.axes !== false,
     ScalingFunctions: ["linear", "linear"],
