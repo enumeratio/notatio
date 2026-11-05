@@ -801,6 +801,136 @@ const nonProjectiveInjectives: MathJSON = where(upTo(vertexCount), greater(at("v
 /** The dominant dimension of the algebra, which equals its opposite's: the least codominant dimension of a non-projective injective. */
 const dominantDimension: MathJSON = ["Min", forEach(nonProjectiveInjectives, at("v", "codominantDims"), "v")];
 
+/** The top of the longest module ending at the vertex `socle` (counting from 0): its injective hull's top. */
+const hullTop = (socle: MathJSON): MathJSON => [
+  "Min",
+  where(["Range", 0, socle, 1], greater(add("x", at(add("x", 1), "series")), socle), "x"),
+];
+/**
+ * The injective dimension of the module (x0, y0): cosyzygies taken until the module is injective.
+ * The cosyzygy of a module in its hull (top, length) is (hull top, module top - hull top).
+ */
+const injectiveDimension = (x0: MathJSON, y0: MathJSON): MathJSON => [
+  "At",
+  fold(
+    upTo(vertexCount),
+    ["List", x0, y0, 0],
+    bindList(
+      "socle",
+      subtract(add(carried(1), carried(2)), 1),
+      bindList(
+        "hull",
+        hullTop("socle"),
+        [
+          "If",
+          equals(carried(1), "hull"),
+          ["List", carried(1), carried(2), carried(3)],
+          ["List", "hull", subtract(carried(1), "hull"), add(carried(3), 1)],
+        ],
+        "integer",
+      ),
+      "integer",
+    ),
+  ),
+  3,
+];
+/**
+ * The dominant dimension of the module (x0, y0): the leading terms of its minimal injective
+ * coresolution that are projective. The terms past the end are zero, so an injective module whose
+ * hull is projective counts every tick; the cap is the vertex count. Accumulator (top, length,
+ * count, still projective); the zero module has length 0.
+ */
+const dominantDimensionOfModule = (x0: MathJSON, y0: MathJSON): MathJSON => [
+  "At",
+  fold(
+    upTo(vertexCount),
+    ["List", x0, y0, 0, 1],
+    bindList(
+      "socle",
+      ["Max", subtract(add(carried(1), carried(2)), 1), 0],
+      bindList(
+        "hull",
+        hullTop("socle"),
+        bindList(
+          "flag",
+          [
+            "Multiply",
+            carried(4),
+            [
+              "If",
+              or(equals(carried(2), 0), equals(at(add("hull", 1), "series"), subtract(add("socle", 1), "hull"))),
+              1,
+              0,
+            ],
+          ],
+          [
+            "If",
+            equals(carried(2), 0),
+            ["List", carried(1), 0, add(carried(3), "flag"), "flag"],
+            ["List", "hull", subtract(carried(1), "hull"), add(carried(3), "flag"), "flag"],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+  ),
+  3,
+];
+/** `body`, reading the series as `series` and the named values of the Nakayama algebra, each bound in order. */
+const overNakayama = (bindings: readonly (readonly [string, MathJSON])[], body: MathJSON): MathJSON =>
+  nonEmpty(
+    bindList(
+      "series",
+      kupischSeries,
+      bindings.reduceRight((inner, [name, value]) => bindList(name, value, inner), body),
+    ),
+  );
+const simpleProjectiveDimensions = ["dims", simpleDimensions] as const;
+/** `body` over the modules; the interpreter leaves a module-wise fold unevaluated unless `dims` is bound too. */
+const overModules = (body: MathJSON): MathJSON => overNakayama([simpleProjectiveDimensions], body);
+/** The injective dimension of each simple module, vertex by vertex. */
+const simpleInjectiveDimensions = [
+  "simpleInjectiveDims",
+  forEach(upTo(vertexCount), injectiveDimension(subtract("v", 1), 1), "v"),
+] as const;
+/** The injective dimension of each indecomposable projective module, vertex by vertex. */
+const projectiveInjectiveDimensions = [
+  "projectiveInjectiveDims",
+  forEach(upTo(vertexCount), injectiveDimension(subtract("v", 1), at("v", "series")), "v"),
+] as const;
+/** The dominant dimension of each simple module, vertex by vertex. */
+const simpleDominantDimensions = [
+  "simpleDominantDims",
+  forEach(upTo(vertexCount), dominantDimensionOfModule(subtract("v", 1), 1), "v"),
+] as const;
+/** Every indecomposable module is (top v, length y) for y up to the series' entry at v, floored at 1 so `Range` stays a list. */
+const moduleLengths: MathJSON = upTo(["Max", at("v", "series"), 1]);
+/** `body` for the projective and injective dimensions of the module (top v, length y), bound as `projective` and `injective`. */
+const forModules = (body: MathJSON): MathJSON =>
+  bindList(
+    "projective",
+    projectiveDimension(subtract("v", 1), "y"),
+    bindList("injective", injectiveDimension(subtract("v", 1), "y"), body, "integer"),
+    "integer",
+  );
+/** The indecomposable modules whose projective and injective dimensions pass `test`. */
+const modulesWhereBoth = (test: (projective: MathJSON, injective: MathJSON) => MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      upTo(vertexCount),
+      ["Sum", forEach(moduleLengths, forModules(["If", test("projective", "injective"), 1, 0]), "y")],
+      "v",
+    ),
+  );
+/** The greatest sum of the projective and injective dimensions over the indecomposable modules. */
+const modulesGreatestDimensionSum: MathJSON = [
+  "Max",
+  forEach(upTo(vertexCount), ["Max", forEach(moduleLengths, forModules(add("projective", "injective")), "y")], "v"),
+];
+const simplesCountWhere = (test: MathJSON): MathJSON => count(upTo(vertexCount), test, "v");
+
 export const DYCK_STATISTICS: readonly Definition[] = [
   stat("Height", "The greatest height the path reaches.", nonEmpty(["Max", profile])),
 
@@ -1759,5 +1889,116 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     "NonProjectiveInjectiveProjectiveDimensionSpread",
     "The difference between the greatest and the least projective dimension of a non-projective indecomposable injective module.",
     overSimplesAndInjectives(subtract(["Max", "injectiveDims"], ["Min", where("injectiveDims", greater("d", 0), "d")])),
+  ),
+
+  // Projective, injective and dominant dimensions of the modules of the path's linear Nakayama algebra.
+  stat(
+    "ProjectivesOfMaximalInjectiveDimension",
+    "The indecomposable projective modules whose injective dimension is the global dimension.",
+    overNakayama(
+      [simpleProjectiveDimensions, projectiveInjectiveDimensions],
+      count("projectiveInjectiveDims", equals("d", globalDimension), "d"),
+    ),
+    "FindStat's St000999.",
+  ),
+  stat(
+    "SimplesOfEqualProjectiveAndInjectiveDimension",
+    "The simple modules whose projective dimension equals their injective dimension.",
+    overNakayama(
+      [simpleProjectiveDimensions, simpleInjectiveDimensions],
+      simplesCountWhere(equals(at("v", "dims"), at("v", "simpleInjectiveDims"))),
+    ),
+  ),
+  stat(
+    "ModulesOfMaximalProjectiveAndInjectiveDimension",
+    "The indecomposable modules whose projective and injective dimensions both equal the global dimension.",
+    overModules(
+      modulesWhereBoth((projective, injective) =>
+        and(equals(projective, globalDimension), equals(injective, projective)),
+      ),
+    ),
+  ),
+  stat(
+    "ModulesOfProjectiveAndInjectiveDimensionAtMostOne",
+    "The indecomposable modules whose projective and injective dimensions are both at most one.",
+    overModules(
+      modulesWhereBoth((projective, injective) => and(atMostValue(projective, 1), atMostValue(injective, 1))),
+    ),
+  ),
+  stat(
+    "ModulesOfProjectiveOrInjectiveDimensionAtMostOne",
+    "The indecomposable modules whose projective dimension or injective dimension is at most one.",
+    overModules(modulesWhereBoth((projective, injective) => or(atMostValue(projective, 1), atMostValue(injective, 1)))),
+  ),
+  stat(
+    "ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo",
+    "The indecomposable modules whose projective and injective dimensions are both at least two.",
+    overModules(
+      modulesWhereBoth((projective, injective) => and(atLeastValue(projective, 2), atLeastValue(injective, 2))),
+    ),
+  ),
+  stat(
+    "MaximalSimpleProjectiveAndInjectiveDimensionSum",
+    "The greatest sum of the projective and the injective dimension of a simple module.",
+    overNakayama(
+      [simpleProjectiveDimensions, simpleInjectiveDimensions],
+      ["Max", forEach(upTo(vertexCount), add(at("v", "dims"), at("v", "simpleInjectiveDims")), "v")],
+    ),
+  ),
+  stat(
+    "MaximalModuleProjectiveAndInjectiveDimensionSum",
+    "The greatest sum of the projective and the injective dimension of an indecomposable module.",
+    overModules(modulesGreatestDimensionSum),
+  ),
+  stat(
+    "SimplesOfSmallInjectiveDimensionOrPositiveDominantDimension",
+    "The simple modules whose injective dimension is at most one or whose dominant dimension is at least one.",
+    overNakayama(
+      [simpleInjectiveDimensions, simpleDominantDimensions],
+      simplesCountWhere(
+        or(atMostValue(at("v", "simpleInjectiveDims"), 1), atLeastValue(at("v", "simpleDominantDims"), 1)),
+      ),
+    ),
+  ),
+  stat(
+    "SimplesOfDominantDimensionEqualToGlobalDimension",
+    "The simple modules whose dominant dimension is the global dimension.",
+    overNakayama(
+      [simpleProjectiveDimensions, simpleDominantDimensions],
+      count("simpleDominantDims", equals("d", globalDimension), "d"),
+    ),
+  ),
+  stat(
+    "SimplesOfDominantDimensionAtLeastThree",
+    "The simple modules whose dominant dimension is at least three.",
+    overNakayama([simpleDominantDimensions], count("simpleDominantDims", atLeastValue("d", 3), "d")),
+  ),
+  stat(
+    "MaximalSimpleDominantDimension",
+    "The greatest dominant dimension of a simple module.",
+    overNakayama([simpleDominantDimensions], ["Max", "simpleDominantDims"]),
+  ),
+  stat(
+    "UnitIntervalGraphTwinVertices",
+    "The twin vertices of the path's unit interval graph: the indices where the next up step and the next down step each follow directly.",
+    atLeast(
+      4,
+      bindList(
+        "ups",
+        where(positions, isUp("i")),
+        bindList(
+          "downs",
+          where(positions, isDown("i")),
+          count(
+            upTo(subtract(semilength, 1)),
+            and(
+              equals(at(add("i", 1), "ups"), add(at("i", "ups"), 1)),
+              equals(at(add("i", 1), "downs"), add(at("i", "downs"), 1)),
+            ),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001189, the simple modules of dominant and codominant dimension zero in the Nakayama algebra. Two consecutive vertices are twins when they have the same closed neighborhood.",
   ),
 ];

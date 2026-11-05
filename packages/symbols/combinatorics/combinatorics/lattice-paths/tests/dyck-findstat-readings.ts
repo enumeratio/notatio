@@ -392,6 +392,16 @@ const nakayama = (w: Word) => {
       [x, y] = [hull, x - hull];
     }
   };
+  /** Cosyzygies taken until the module is its own injective hull. */
+  const injectiveDimension = (top: number, length: number): number => {
+    let [x, y, steps] = [top, length, 0];
+    for (;;) {
+      const hull = hullTop(x + y - 1);
+      if (hull === x) return steps;
+      [x, y] = [hull, x - hull];
+      steps++;
+    }
+  };
   const injectiveModules = modules.filter(([x, y]) => isInjective(x, y));
   const nonProjectiveInjectiveModules = injectiveModules.filter(([x, y]) => y !== series[x]);
   // The algebra's dominant dimension: the least over its projectives that are not injective.
@@ -400,6 +410,7 @@ const nakayama = (w: Word) => {
   );
   return {
     series,
+    modules,
     simple,
     injective,
     all,
@@ -411,6 +422,10 @@ const nakayama = (w: Word) => {
     nonProjectiveInjectiveModules,
     projectiveDimension,
     codominantDimension,
+    dominantDimension,
+    injectiveDimension,
+    projectives: series.map((entry, x): [number, number] => [x, entry]),
+    simples: series.map((_, x): [number, number] => [x, 1]),
   };
 };
 const overNakayama =
@@ -494,6 +509,62 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
     const dimensions = a.nonProjectiveInjectiveModules.map(([x, y]) => a.projectiveDimension(x, y));
     return Math.max(...dimensions) - Math.min(...dimensions);
   }),
+  ProjectivesOfMaximalInjectiveDimension: overNakayama((a) =>
+    countOf(
+      a.projectives.map(([x, y]) => a.injectiveDimension(x, y)),
+      (d) => d === a.global,
+    ),
+  ),
+  SimplesOfEqualProjectiveAndInjectiveDimension: overNakayama(
+    (a) => a.simples.filter(([x, y]) => a.projectiveDimension(x, y) === a.injectiveDimension(x, y)).length,
+  ),
+  ModulesOfMaximalProjectiveAndInjectiveDimension: overNakayama(
+    (a) =>
+      a.modules.filter(([x, y]) => a.projectiveDimension(x, y) === a.global && a.injectiveDimension(x, y) === a.global)
+        .length,
+  ),
+  ModulesOfProjectiveAndInjectiveDimensionAtMostOne: overNakayama(
+    (a) => a.modules.filter(([x, y]) => a.projectiveDimension(x, y) <= 1 && a.injectiveDimension(x, y) <= 1).length,
+  ),
+  ModulesOfProjectiveOrInjectiveDimensionAtMostOne: overNakayama(
+    (a) => a.modules.filter(([x, y]) => a.projectiveDimension(x, y) <= 1 || a.injectiveDimension(x, y) <= 1).length,
+  ),
+  ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo: overNakayama(
+    (a) => a.modules.filter(([x, y]) => a.projectiveDimension(x, y) >= 2 && a.injectiveDimension(x, y) >= 2).length,
+  ),
+  MaximalSimpleProjectiveAndInjectiveDimensionSum: overNakayama((a) =>
+    Math.max(...a.simples.map(([x, y]) => a.projectiveDimension(x, y) + a.injectiveDimension(x, y))),
+  ),
+  MaximalModuleProjectiveAndInjectiveDimensionSum: overNakayama((a) =>
+    Math.max(...a.modules.map(([x, y]) => a.projectiveDimension(x, y) + a.injectiveDimension(x, y))),
+  ),
+  SimplesOfSmallInjectiveDimensionOrPositiveDominantDimension: overNakayama(
+    (a) => a.simples.filter(([x, y]) => a.injectiveDimension(x, y) <= 1 || a.dominantDimension(x, y) >= 1).length,
+  ),
+  SimplesOfDominantDimensionEqualToGlobalDimension: overNakayama(
+    (a) => a.simples.filter(([x, y]) => a.dominantDimension(x, y) === a.global).length,
+  ),
+  SimplesOfDominantDimensionAtLeastThree: overNakayama(
+    (a) => a.simples.filter(([x, y]) => a.dominantDimension(x, y) >= 3).length,
+  ),
+  MaximalSimpleDominantDimension: overNakayama((a) =>
+    Math.max(...a.simples.map(([x, y]) => a.dominantDimension(x, y))),
+  ),
+  // Alexandersson's reading of St001189: consecutive area sequence entries rise by one while those of the reversed path fall by one.
+  UnitIntervalGraphTwinVertices: (w) => {
+    const area = (steps: Word): number[] => {
+      let height = 0;
+      return steps.flatMap((s) => {
+        height += s === 1 ? 1 : -1;
+        return s === 1 ? [height - 1] : [];
+      });
+    };
+    const forward = area(w);
+    const backward = area(w.toReversed().map((s) => 1 - s)).toReversed();
+    return forward.filter(
+      (_, i) => i + 1 < forward.length && forward[i]! + 1 === forward[i + 1]! && backward[i]! - 1 === backward[i + 1]!,
+    ).length;
+  },
   Area: areaOf,
   Bounce: bounceOf,
   BounceCount: (w) => (w.length === 0 ? 0 : bouncePoints(w).length - 2),
