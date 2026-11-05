@@ -142,6 +142,19 @@ for (const [url, shader] of [
   });
 }
 
+// --- ListPlot3D of scattered points (E#12) ---------------------------------------------------------
+
+test("scattered triples with N -> 3 are binned onto a 3 x 3 grid: 4 quads, axes 0 to 2 (E#12)", async ({ page }) => {
+  await page.goto("/reference/component/ListPlot3D#story/scattered-triples-surfaced");
+  const box = page.locator('[id="story/scattered-triples-surfaced"] graphics-3d-box').first();
+  await box.scrollIntoViewIfNeeded();
+  // The floor is one polygon, and each cell of the 3 x 3 grid's mesh another.
+  await expect(box.locator("svg polygon")).toHaveCount(1 + 4, { timeout: 60_000 });
+  const labels = await box.locator("svg text").allTextContents();
+  expect(labels).toContain("2");
+  expect(labels).not.toContain("10");
+});
+
 // --- WebGPU ---------------------------------------------------------------------------------
 // Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
 // headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.
