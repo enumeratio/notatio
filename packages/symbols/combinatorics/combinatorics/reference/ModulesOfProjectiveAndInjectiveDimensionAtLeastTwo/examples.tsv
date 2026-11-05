@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	0			the step word $UUDDUD$
+the-step-word-uduudd			[ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	0			the step word $UDUUDD$
+findstat-st001140-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo'"]	0	0	FindStat St001140	FindStat's value for [1,0]
+findstat-st001140-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo'"]	0	0	FindStat St001140	FindStat's value for [1,0,1,0]
+findstat-st001140-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'ModulesOfProjectiveAndInjectiveDimensionAtLeastTwo'"]	0	0	FindStat St001140	FindStat's value for [1,1,0,0]
