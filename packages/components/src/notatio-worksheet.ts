@@ -143,6 +143,24 @@ export class NotatioWorksheet extends LitElement {
   #boxedCache = new Map<string, Expression | null>();
   /** The slider the pointer holds: a re-render leaves its thumb where the reader put it. */
   #held: string | undefined;
+  /** The range a held slider began its drag on, by `name/part`. */
+  #frozen = new Map<string, ControlRange>();
+  /** Hold a slider until the pointer lets go, wherever it lets go: a press that moves nothing fires no `change`. */
+  #hold(c: WorksheetControl): void {
+    const key = `${c.name}/${c.part}`;
+    this.#held = key;
+    // A default range follows the value, so a drag would rescale its own track (64 in -100..100,
+    // then 24 in -50..50); the range the drag began on stays until the pointer lets go.
+    this.#frozen.set(key, { min: c.min, max: c.max, step: c.step });
+    const release = (): void => {
+      this.#held = undefined;
+      this.#frozen.clear();
+      window.removeEventListener("pointerup", release, true);
+      window.removeEventListener("pointercancel", release, true);
+    };
+    window.addEventListener("pointerup", release, true);
+    window.addEventListener("pointercancel", release, true);
+  }
   #deriveTimer: ReturnType<typeof setTimeout> | undefined;
   #lastDeriveAt = 0;
   /** How many points a curve cell evaluated to, for the elided readout. */
@@ -543,7 +561,8 @@ export class NotatioWorksheet extends LitElement {
           type: cell.domain,
           letterConventions: true,
         });
-        controls.push(...made);
+        // An author's range is already fixed; a default one is held while its slider is.
+        controls.push(...made.map((c) => (cell.range ? c : { ...c, ...this.#frozen.get(`${c.name}/${c.part}`) })));
         if (made.some((c) => c.integer)) this.#integerNames.add(data.name);
         continue;
       }
@@ -623,8 +642,7 @@ export class NotatioWorksheet extends LitElement {
             max=${c.max}
             step=${c.step}
             .value=${this.#held === `${c.name}/${c.part}` ? noChange : String(c.value)}
-            @pointerdown=${() => (this.#held = `${c.name}/${c.part}`)}
-            @pointercancel=${() => (this.#held = undefined)}
+            @pointerdown=${() => this.#hold(c)}
             @input=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value)}
             @change=${(e: Event) => {
               this.#held = undefined;

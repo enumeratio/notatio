@@ -171,12 +171,16 @@ export class NotatioSlider extends LitElement {
   }
 
   #watchView(): void {
-    if (!this.autoplay || this.#inView !== undefined || typeof IntersectionObserver === "undefined") {
+    if (!this.autoplay) {
+      this.#inView?.disconnect();
+      this.#inView = undefined;
+      this.#sweep.stop();
       return;
     }
+    if (this.#inView !== undefined || typeof IntersectionObserver === "undefined") return;
     this.#inView = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) this.#sweep.start();
+        if (entry?.isIntersecting) this.#sweep.autoStart();
         else this.#sweep.stop();
       },
       { threshold: 0.5 },

@@ -41,6 +41,17 @@ sin t = <dynamic-box value="N(Sin(_t))" digits="3" />, h = <dynamic-box value="_
 </Story>
 
 <Story
+  title="A held Animator element">
+<template #description>
+<code>animation-running="false"</code> is <code>AnimationRunning -> False</code>: the animator waits to be played.
+</template>
+<dynamic-module-box>
+<animator-box name="t" value="0" min="0" max="6.28" step="0.05" interval="40" animation-running="false" />
+sin t = <dynamic-box value="N(Sin(_t))" digits="3" />
+</dynamic-module-box>
+</Story>
+
+<Story
   title="Slider2D">
 <template #description>
 <code>Slider2D</code>: a point on a square. The binding is the list <code>[x, y]</code>

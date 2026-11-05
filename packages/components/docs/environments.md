@@ -81,6 +81,14 @@ Frames in a row, on the step grid; a print of a sweep. A frame is a readout, so 
 </Story>
 
 <Story
+  title="A held Animator">
+<template #description>
+<code>AnimationRunning -> False</code> keeps an Animator still until it is played.
+</template>
+<EnvironmentPreview expr='Row([Animator(t, (0, 1, 0.25), AnimationRunning -> False), Dynamic(Sin(Pi * t))])' env="web" />
+</Story>
+
+<Story
   title="A Locator becomes a mark">
 <template #description>
 A pinned <code>Locator</code> is drawn as an <code>Epilog</code> point on the plot it sat

@@ -164,6 +164,48 @@ test("an animator plays by default, as Wolfram's Animator does", async ({ page }
   await expect.poll(() => readout.innerText()).not.toBe(first);
 });
 
+/** True when the animator's readout holds still for `ms`, then moves once its button is pressed. */
+async function holdsUntilPlayed(animator: Locator, ms = 2500): Promise<void> {
+  await animator.scrollIntoViewIfNeeded();
+  const play = animator.locator("button.control-play");
+  await expect(play).toBeVisible({ timeout: 120_000 });
+  const slider = animator.locator("input[type=range]");
+  const first = await slider.inputValue();
+  await animator.page().waitForTimeout(ms);
+  expect(await slider.inputValue()).toBe(first);
+  await expect(play).toHaveAttribute("aria-pressed", "false");
+  await play.click();
+  await expect.poll(() => slider.inputValue()).not.toBe(first);
+}
+
+test.describe("AnimationRunning -> False", () => {
+  test("an animator element with animation-running=false waits to be played", async ({ page }) => {
+    await page.goto("/docs/components/controls");
+    await holdsUntilPlayed(story(page, "a-held-animator-element").locator("animator-box"));
+  });
+
+  // The preview remounts its tree when the engine arrives, so the card is held to what the
+  // element is told; the element's own behavior is the first test.
+  test("an Animator's option reaches its element, held or not", async ({ page }) => {
+    await page.goto("/docs/components/environments");
+    const card = story(page, "a-held-animator");
+    const animator = card.locator("animator-box");
+    await expect(animator).toHaveAttribute("animation-running", "false", { timeout: 120_000 });
+    await card.locator(".env-source").fill("Row([Animator(t, (0, 1, 0.25)), Dynamic(Sin(Pi * t))])");
+    await expect(animator).not.toHaveAttribute("animation-running", /.*/);
+  });
+});
+
+test.describe("prefers-reduced-motion: reduce", () => {
+  test.use({ reducedMotion: "reduce" });
+
+  test("an animator does not sweep on its own, and its play button still works", async ({ page }) => {
+    await page.goto("/docs/components/controls");
+    const animator = story(page, "animator-and-verticalslider").locator("animator-box");
+    await holdsUntilPlayed(animator);
+  });
+});
+
 // --- 2, 6. the worksheet --------------------------------------------------------------------
 
 test.describe("the worksheet", () => {
@@ -196,6 +238,52 @@ test.describe("the worksheet", () => {
     const after = Number(await slider.inputValue());
     expect(after).toBeGreaterThan(before);
     expect(after).toBeGreaterThan(min + (max - min) * 0.7);
+  });
+
+  test("a press that moves nothing leaves the thumb following the binding", async ({ page }) => {
+    await page.goto("/worksheet/");
+    const slider = page.locator(".ws-slider input[type=range]").first();
+    await expect(slider).toBeVisible({ timeout: 120_000 });
+    const box = await boxOf(slider);
+    const at = await slider.inputValue();
+    // Press on the thumb and let go off the input: no value change, so no `change` event.
+    const lo = Number(await slider.getAttribute("min"));
+    const fraction = (Number(at) - lo) / (Number(await slider.getAttribute("max")) - lo);
+    const thumbX = box.x + 8 + (box.width - 16) * fraction; // a 16 px thumb travels the rest of the track
+    await page.mouse.move(thumbX, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(thumbX, box.y - 80);
+    await page.mouse.up();
+    expect(await slider.inputValue()).toBe(at);
+    // Type a new binding in the first cell (`a := 2`).
+    const cell = page.locator("[data-cell]").first();
+    await cell.locator("notatio-in").first().click();
+    const field = cell.locator("notatio-in math-field").first();
+    await expect(field).toBeVisible({ timeout: 60_000 });
+    await field.focus();
+    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.type("a:=3", { delay: 80 });
+    await expect.poll(() => field.evaluate((f) => (f as HTMLInputElement).value)).toMatch(/coloneq.*3/);
+    await page.keyboard.press("Enter");
+    await expect.poll(() => slider.inputValue(), { timeout: 30_000 }).toBe("3");
+  });
+
+  test("a default range holds still while its slider is dragged", async ({ page }) => {
+    await page.goto("/explore/fractals/");
+    const slider = page.locator(".ws-slider input[type=range]").nth(1); // n := 64, in -100..100
+    await expect(slider).toBeVisible({ timeout: 120_000 });
+    await slider.scrollIntoViewIfNeeded();
+    const box = await boxOf(slider);
+    expect(await slider.getAttribute("min")).toBe("-100");
+    await page.mouse.move(box.x + box.width * 0.82, box.y + box.height / 2);
+    await page.mouse.down();
+    for (let i = 1; i <= 10; i++) {
+      await page.mouse.move(box.x + box.width * (0.82 - 0.04 * i), box.y + box.height / 2, { steps: 8 });
+      await page.waitForTimeout(300);
+      expect([await slider.getAttribute("min"), await slider.getAttribute("max")]).toEqual(["-100", "100"]);
+    }
+    await page.mouse.up();
+    expect(Number(await slider.inputValue())).toBeLessThan(40);
   });
 
   test("+ cell adds a cell the reader can see and type in", async ({ page }) => {

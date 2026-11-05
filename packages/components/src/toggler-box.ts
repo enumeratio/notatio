@@ -216,7 +216,7 @@ export class NotatioToggler extends LitElement {
     }
     this.#inView = new IntersectionObserver(
       ([entry]) => {
-        if (entry?.isIntersecting) this.#sweep.start();
+        if (entry?.isIntersecting) this.#sweep.autoStart();
         else this.#sweep.stop();
       },
       { threshold: 0.5 },
