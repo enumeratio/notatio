@@ -196,7 +196,12 @@ const SUBJECTS: Record<string, unknown[]> = {
   StandardTableau: [0, 1, 2, 3, 4, 5, 6].flatMap(standardTableaux).map((rows) => list(rows.map(list))),
   PerfectMatching: [1, 2, 3, 4].flatMap(perfectMatchings).map((pairs) => list(pairs.map(list))),
   SignedPermutation: [0, 1, 2, 3, 4].flatMap(signedPermutations).map(list),
-  AlternatingSignMatrix: [1, 2, 3, 4].flatMap(alternatingSignMatrices).map((rows) => list(rows.map(list))),
+  // The build's own samples have no matrices (the family has no carrier). All to size 4; deep, all of size 5
+  // and every fourth of size 6 (7436 in all, too many to interpret within the file's timeout).
+  AlternatingSignMatrix: [
+    ...[1, 2, 3, 4].flatMap(alternatingSignMatrices),
+    ...(DEEP ? [...alternatingSignMatrices(5), ...alternatingSignMatrices(6).filter((_, i) => i % 4 === 0)] : []),
+  ].map((rows) => list(rows.map(list))),
 };
 
 /** Statistics whose interpretation grows about threefold per size of partition: the largest size

@@ -483,6 +483,14 @@ const previous = renamed(
   flag("--rename").map(parseRename),
 );
 const matches = assemble(universe, signatureOf, previous, rematch, (d) => fresh.get(signatureOf(d)));
+// A head shared with another carrier (`Crossings` on a perfect matching) has a committed row but no
+// definition of its own on this one: carry the row over, after the last row of its carrier.
+const heldHeads = new Set(ALL_STATISTICS.map((d) => d.head));
+const universeSignatures = new Set(universe.map(signatureOf));
+for (const [signature, row] of previous) {
+  if (universeSignatures.has(signature) || !heldHeads.has(row.head)) continue;
+  matches.splice(matches.findLastIndex((m) => m.on === row.on) + 1, 0, row);
+}
 
 if (!only) {
   await writeFormatted(
