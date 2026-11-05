@@ -10,6 +10,8 @@ import type { KernelOptions, KernelSession, KernelSource } from "@enumeratio/eva
 import { parseExpression } from "@enumeratio/formats/expression";
 import { toInputForm } from "@enumeratio/formats/inputform";
 import { type CodeForm, codeForms } from "./code-forms.ts";
+
+export { gpuShader } from "./code-forms.ts";
 import { type DisplayBoxes, displayBoxes } from "./display.ts";
 import { compilePlot, type PlotCompileSpec } from "./plot-compile.ts";
 import { boundName } from "./reactive.ts";

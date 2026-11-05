@@ -7,7 +7,7 @@ import { type MathJsonExpression, serializeEpsil } from "@cortex-js/compute-engi
 import { collectMessages, type Message } from "@enumeratio/engine";
 import { normalizeInputForm, toInputForm } from "@enumeratio/formats/inputform";
 import { parseExpression } from "@enumeratio/formats/expression";
-import { boundName, elideResult, gpuShader, latexOf, substitutedForm } from "@enumeratio/frontend/core";
+import { boundName, elideResult, latexOf, substitutedForm } from "@enumeratio/frontend/core";
 import type { TranscriptHost } from "./notatio-out.ts";
 
 /**
@@ -182,7 +182,7 @@ export async function codeSources(engine: ComputeEngine, json: unknown): Promise
     } catch {
       // not compilable to JavaScript
     }
-    out.gpushader = gpuShader(expr);
+    out.gpushader = (await import("@enumeratio/frontend/kernel-host")).gpuShader(expr);
   } catch {
     // compute-engine module unavailable
   }
