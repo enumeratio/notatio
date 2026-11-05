@@ -41,8 +41,8 @@ const RENDER_CHECKS: Readonly<Record<string, (el: Locator) => Promise<void>>> = 
     // land short of it, so each try scrolls to it first. Measured on dell-arcade at load 6: rows
     // 12-30 s after the card is visible (the kernel declares its libraries first), and 31-50 s for
     // SymmetricGroup(20), SymmetricGroup(25) and Permutations(25), whose rows past 2^53 are
-    // interpreted at about 0.12 s each. The old 30 s failed the nightly. This is the most the
-    // test's own 180 s leaves after the page load; a runner four times slower may still miss it on those three.
+    // interpreted at about 0.12 s each. This is the most the test's own 180 s leaves after the
+    // page load; a runner four times slower may still miss it on those three (BL-330).
     await expect(async () => {
       await el.scrollIntoViewIfNeeded();
       await expect(

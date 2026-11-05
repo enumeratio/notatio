@@ -55,6 +55,8 @@ const INDEX_MAX_EM = 9;
 const ELEMENT_MIN_EM = 6;
 /** How far below or above the viewport a table may be and still ask the kernel for its rows. */
 const NEAR_PX = 400;
+/** Past this many characters a cell's column may cut it, so it carries its text as a tooltip. */
+const TITLE_MIN_CHARS = 6;
 
 interface Block {
   /** The rows of the block asked for, over the display columns `cols`; short at the source's end. */
@@ -97,7 +99,7 @@ function drawCell(el: HTMLElement, box: Box | undefined, numeric: boolean): void
 /** A cell cut short by its column still gives its whole text, as a tooltip. */
 function cutTitle(el: HTMLElement): void {
   const shown = el.textContent ?? "";
-  if (shown.length > 6) el.title = shown;
+  if (shown.length > TITLE_MIN_CHARS) el.title = shown;
 }
 
 export class TableViewBox extends HTMLElement {
