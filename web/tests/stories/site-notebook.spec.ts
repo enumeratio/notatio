@@ -134,21 +134,16 @@ test.describe("/worksheet/", () => {
       const before = await page.locator(".ws-cell").count();
       await page.getByRole("button", { name: "+ cell" }).click();
       await expect(page.locator(".ws-cell")).toHaveCount(before + 1);
-      await page.locator(".ws-cell").last().locator(".notatio-static").first().focus();
-      await page.keyboard.press("Enter");
-      // MathLive mounts after Enter; keys typed before it has focus are lost.
-      await expect(page.locator("math-field:focus")).toBeAttached();
+      // A new cell opens in the editor with focus; MathLive mounts a moment later, and keys
+      // typed before it has focus are lost.
+      await expect(page.locator(".ws-cell").last().locator("math-field")).toBeFocused();
       await page.keyboard.type(typed, { delay: 80 });
       await page.keyboard.press("Enter");
     };
     await add("c:=3");
     // c := 3 gets a slider at 3.00.
     await expect(cellWith("c := 3").locator(".ws-slider-val")).toHaveText("3.00");
-    await page.locator(".ws-cell").last().locator(".notatio-static").first().focus();
-    await page.keyboard.press("Enter");
-    await expect(page.locator("math-field:focus")).toBeAttached();
-    await page.keyboard.type("a*c+b", { delay: 80 });
-    await page.keyboard.press("Enter");
+    await add("a*c+b");
     // a * c + b = 2 * 3 + 1 = 7.
     const product = cellWith("a * c + b").locator("notatio-out");
     await expect(product).toHaveAttribute("input-form", "7");

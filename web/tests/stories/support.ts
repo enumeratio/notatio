@@ -154,7 +154,10 @@ export async function hoverCell(page: Page, grid: CellGrid, row: number, col: nu
   await page.mouse.move(box.x + grid.x0 + (col + 0.5) * grid.pitch, box.y + grid.y0 + (row + 0.5) * grid.pitch);
 }
 
-/** Cells of `canvas` whose color is within `slack` of `rgb`, as the count of separate blobs (4-connected). */
+/**
+ * Cells of `canvas` whose color is within `slack` of `rgb`, as the count of separate blobs (4-connected).
+ * Only pixels that are visibly painted count: a seam pixel at alpha 1 reads back as white and shows nothing.
+ */
 export function countBlobs(canvas: Locator, rgb: [number, number, number], slack = 12): Promise<number> {
   return canvas.evaluate(
     (c: HTMLCanvasElement, [target, tol]: [[number, number, number], number]) => {
@@ -163,7 +166,7 @@ export function countBlobs(canvas: Locator, rgb: [number, number, number], slack
       const on = new Uint8Array(w * h);
       for (let i = 0; i < w * h; i++)
         on[i] =
-          d[i * 4 + 3] > 0 &&
+          d[i * 4 + 3] >= 128 &&
           Math.abs(d[i * 4] - target[0]) <= tol &&
           Math.abs(d[i * 4 + 1] - target[1]) <= tol &&
           Math.abs(d[i * 4 + 2] - target[2]) <= tol

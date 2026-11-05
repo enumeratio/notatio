@@ -260,7 +260,8 @@ test.describe("the worksheet", () => {
     await cell.locator("notatio-in").first().click();
     const field = cell.locator("notatio-in math-field").first();
     await expect(field).toBeVisible({ timeout: 60_000 });
-    await field.focus();
+    // The element is visible before MathLive upgrades it; a keystroke sent earlier lands on the page.
+    await expect(field).toBeFocused({ timeout: 60_000 });
     await page.keyboard.press("ControlOrMeta+A");
     await page.keyboard.type("a:=3", { delay: 80 });
     await expect.poll(() => field.evaluate((f) => (f as HTMLInputElement).value)).toMatch(/coloneq.*3/);
