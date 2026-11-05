@@ -249,6 +249,9 @@ const CUBIC = new Set([
   "CompleteHomogeneousSymmetricFunctionAtOne",
   "PowerSumSymmetricFunctionAtOne",
   "CubeRootCount",
+  "HurwitzNumber",
+  "MonotoneHurwitzNumber",
+  "NonDominatingSubmultisetCount",
 ]);
 
 // ── the query ─────────────────────────────────────────────────────────────────────────────

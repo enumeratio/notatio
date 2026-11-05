@@ -664,6 +664,55 @@ const splitChains = (l: Partition): number => {
   return chains;
 };
 
+/** Hurwitz's formula (n + c - 2)! n^(c-3) prod p^p / (p-1)!, exactly: the power of n on the side it belongs. */
+const hurwitzNumber = (l: Partition): number => {
+  let [numerator, denominator] = [bigFactorial(sum(l) + l.length - 2), 1n];
+  for (const p of l) [numerator, denominator] = [numerator * BigInt(p) ** BigInt(p), denominator * bigFactorial(p - 1)];
+  if (l.length >= 3) numerator *= BigInt(sum(l)) ** BigInt(l.length - 3);
+  else denominator *= BigInt(sum(l)) ** BigInt(3 - l.length);
+  return Number(numerator / denominator);
+};
+/** The cycles of a permutation of 0..n-1 given as an image list. */
+const cycleCount = (p: readonly number[]): number => {
+  const seen = new Set<number>();
+  let cycles = 0;
+  for (let start = 0; start < p.length; start++) {
+    if (seen.has(start)) continue;
+    cycles++;
+    for (let at = start; !seen.has(at); at = p[at]!) seen.add(at);
+  }
+  return cycles;
+};
+/**
+ * Factorizations of a permutation into transpositions (a b), a < b, with b weakly decreasing as they are peeled off: each one
+ * must split a cycle, since the number of transpositions is the size less the number of cycles.
+ */
+const monotoneFactorizations = (p: readonly number[], steps: number, bound: number): number => {
+  if (steps === 0) return p.every((image, i) => image === i) ? 1 : 0;
+  let total = 0;
+  for (let b = 1; b < bound; b++)
+    for (let a = 0; a < b; a++) {
+      const swapped = p.map((image) => (image === a ? b : image === b ? a : image));
+      if (cycleCount(swapped) === cycleCount(p) + 1) total += monotoneFactorizations(swapped, steps - 1, b + 1);
+    }
+  return total;
+};
+/** C(n) by C(n+1) = sum of C(i) C(n-i). */
+const catalanByRecurrence = (n: number): number => {
+  const c = [1];
+  for (let m = 1; m <= n; m++) c[m] = sum(Array.from({ length: m }, (_, i) => c[i]! * c[m - 1 - i]!));
+  return c[n]!;
+};
+/** The distinct sub-multisets of the parts that do not dominate their own conjugate, by choosing parts and discarding repeats. */
+const nonDominatingSubmultisets = (l: Partition): number => {
+  const distinct = new Set<string>();
+  for (let mask = 0; mask < 1 << l.length; mask++) distinct.add(l.filter((_, i) => (mask >> i) & 1).join());
+  return [...distinct].filter((key) => {
+    const mu = key === "" ? [] : key.split(",").map(Number);
+    return !dominates(mu, conjugate(mu));
+  }).length;
+};
+
 export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   PartRange: (l) => (l.length === 0 ? 0 : l[0]! - l.at(-1)!),
   ContainingRectangleShortSide: (l) => (l.length === 0 ? 0 : Math.min(l[0]!, l.length)),
@@ -916,4 +965,16 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   RefinementCount: (l) => reachedBy(l, splitsOf),
   CoarseningCount: (l) => reachedBy(l, mergesOf),
   SingletonRefinementCount: splitChains,
+
+  // The ninth batch.
+  HurwitzNumber: (l) => (l.length === 0 ? 0 : hurwitzNumber(l)),
+  MonotoneHurwitzNumber: (l) => {
+    // By counting every factorization for small sizes; beyond, the cycles factor alone, a p-cycle in C(p-1) ways.
+    if (sum(l) <= 8) {
+      const p = permutationOfCycleType(l);
+      return monotoneFactorizations(p, p.length - l.length, p.length);
+    }
+    return product(l.map((p) => catalanByRecurrence(p - 1)));
+  },
+  NonDominatingSubmultisetCount: nonDominatingSubmultisets,
 };

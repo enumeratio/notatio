@@ -18,8 +18,8 @@ catalog:
     url: https://www.findstat.org/St000903
     on: IntegerComposition
 statOn:
-  - IntegerComposition
   - CorePartition
+  - IntegerComposition
   - IntegerPartition
 signatures:
   - call: DistinctParts(partition)

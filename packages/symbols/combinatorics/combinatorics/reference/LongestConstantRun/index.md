@@ -8,13 +8,18 @@ catalog:
     identity: St000899
     url: https://www.findstat.org/St000899
     on: IntegerComposition
+  - system: findstat
+    identity: St000982
+    url: https://www.findstat.org/St000982
+    on: BinaryWord
 statOn:
+  - BinaryWord
   - IntegerComposition
 signatures:
   - call: LongestConstantRun(composition)
     description: The length of the longest run of equal parts.
     library: enumeratio-combinatorics
-    type: (composition) -> number
+    type: (binary_word | composition) -> number
 ---
 
 - Defined over `IntegerComposition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -31,8 +31,8 @@ catalog:
     on: DyckPath
 statOn:
   - ColoredMotzkinPath
-  - IntegerComposition
   - DyckPath
+  - IntegerComposition
   - KDyckPath
   - KMotzkinPath
   - MotzkinPath

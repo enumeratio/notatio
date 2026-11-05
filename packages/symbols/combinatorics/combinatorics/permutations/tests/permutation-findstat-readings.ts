@@ -211,6 +211,49 @@ const symmetryClass = (p: number[]): number[][] => {
   return [...seen.values()];
 };
 
+/** The 0-based rank of p among the permutations of its size in lexicographic order: the first entry picks a block of (n - 1)! words. */
+const lexicographicRankFrom0 = (p: number[]): number =>
+  p.length === 0
+    ? 0
+    : (p[0]! - 1) * factorial(p.length - 1) + lexicographicRankFrom0(p.slice(1).map((v) => (v > p[0]! ? v - 1 : v)));
+/** The hook factorization p t1 ... tk, cut from the right: each factor runs from the nearest descent top, scanning left over ascents, to the end of what remains. */
+const hookFactorization = (w: number[]): { prefix: number[]; hooks: number[][] } => {
+  const hooks: number[][] = [];
+  let end = w.length;
+  for (;;) {
+    let i = end - 1;
+    while (i > 0 && w[i - 1]! < w[i]!) i--;
+    if (i <= 0) break;
+    hooks.unshift(w.slice(i - 1, end));
+    end = i - 1;
+  }
+  return { prefix: w.slice(0, end), hooks };
+};
+/** The height of the tree built by inserting the entries in turn: each pops the larger ones off the branch from the root 0, then joins it. */
+const insertionTreeHeight = (p: number[]): number => {
+  const branch = [0];
+  let height = 0;
+  for (const v of p) {
+    while (branch.at(-1)! > v) branch.pop();
+    branch.push(v);
+    height = Math.max(height, branch.length);
+  }
+  return p.length === 0 ? 0 : height - 1;
+};
+/** The permanent of the identity matrix plus the permutation matrix of p, expanded along the rows. */
+const permanentOfIdentityPlusPermutation = (p: number[]): number => {
+  const entry = (r: number, c: number) => (r === c ? 1 : 0) + (p[r] === c + 1 ? 1 : 0);
+  const expand = (row: number, used: number[]): number =>
+    row === p.length
+      ? 1
+      : sum(
+          indices(p)
+            .filter((c) => !used.includes(c))
+            .map((c) => entry(row, c) * expand(row + 1, [...used, c])),
+        );
+  return expand(0, []);
+};
+
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -940,5 +983,65 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
     const bounces = [v[0]!];
     while (bounces[bounces.length - 1]! < n) bounces.push(Math.max(...v.slice(0, bounces[bounces.length - 1]! + 1)));
     return sum(bounces.map((b) => n - b));
+  },
+  LexicographicRank: (p) => 1 + lexicographicRankFrom0(p),
+  NonAttackingNeighbors: (p) => consecutiveGaps(p).filter((gap) => gap > 1).length,
+  StaircaseSizeOfCode: (p) => {
+    const code = p.map((v, i) => after(p, i).filter((w) => w < v).length);
+    return Math.max(
+      ...subsequences(code)
+        .filter((s) => s.every((c, k) => c >= s.length - k))
+        .map((s) => s.length),
+    );
+  },
+  BruhatLowerCovers: (p) =>
+    pairs(p).filter(([i, j]) => p[i]! > p[j]! && range(i + 1, j - 1).every((m) => p[m]! > p[i]! || p[m]! < p[j]!))
+      .length,
+  TailPairsOfOccurrencesOf321: (p) =>
+    pairs(p).filter(([j, k]) => p[j]! > p[k]! && range(0, j - 1).some((i) => p[i]! > p[j]!)).length,
+  StandardizedBiAlternatingInversionNumber: (p) =>
+    (Math.floor(p.length / 2) ** 2 + sum(pairs(p).map(([y, x]) => (-1) ** (x + y) * Math.sign(p[x]! - p[y]!)))) / 2,
+  MinimalInversionsEitherDirection: (p) => Math.min(inversionPairs(p).length, inversionPairs(p.toReversed()).length),
+  StatPrime: (p) =>
+    descents(p).length +
+    sum(
+      [
+        [1, 3, 2],
+        [3, 1, 2],
+        [3, 2, 1],
+      ].map((q) => vincular(p, q, adjacentStart)),
+    ),
+  StatDoublePrime: (p) =>
+    descents(p).length +
+    sum(
+      [
+        [1, 3, 2],
+        [3, 1, 2],
+        [3, 2, 1],
+      ].map((q) => vincular(p, q, adjacentEnd)),
+    ),
+  HaglundHag: (p) => {
+    const tops = indices(p).filter((i) => i + 1 < p[i]!);
+    const rest = indices(p).filter((i) => i + 1 >= p[i]!);
+    const subword = (at: number[]) => at.map((i) => p[i]!);
+    const blockers = sum(tops.map((i) => range(0, i - 1).filter((k) => p[k]! <= i + 1).length));
+    return (
+      sum(tops.map((i) => p[i]! - (i + 1))) +
+      inversionPairs(subword(tops)).length -
+      inversionPairs(subword(rest)).length +
+      blockers
+    );
+  },
+  HalfPermanentOfIdentityPlusPermutation: (p) => (p.length === 0 ? 0 : permanentOfIdentityPlusPermutation(p) / 2),
+  HookFactorizationPrefixLength: (p) => hookFactorization(p).prefix.length,
+  HookFactorInversions: (p) => sum(hookFactorization(p).hooks.map((hook) => inversionPairs(hook).length)),
+  PermutationTreeHeight: insertionTreeHeight,
+  FixedPointMajorIndex: (p) => {
+    const fixed = indices(p)
+      .filter((i) => p[i] === i + 1)
+      .map((i) => i + 1);
+    const rest = p.filter((v, i) => v !== i + 1);
+    const standard = rest.map((v) => rest.filter((w) => w <= v).length);
+    return sum(fixed) - (fixed.length * (fixed.length + 1)) / 2 + sum(descents(standard));
   },
 };

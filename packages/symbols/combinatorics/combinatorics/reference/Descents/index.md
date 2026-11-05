@@ -39,8 +39,8 @@ catalog:
 statOn:
   - Arrangement
   - BinaryWord
-  - IntegerComposition
   - DecoratedPermutation
+  - IntegerComposition
   - ParkingFunction
   - Permutation
   - SignedPermutation

@@ -12,6 +12,7 @@ import {
   carried,
   count,
   equals,
+  fallsAfter,
   floored,
   fold,
   greater,
@@ -25,6 +26,7 @@ import {
   subtract,
   sumOver,
   visiting,
+  where,
   x,
 } from "../../src/statistics/vocabulary.ts";
 
@@ -65,6 +67,29 @@ const oddOneRuns: MathJSON = result(
 );
 
 const longestOneRun: MathJSON = result(fold(x, list(0, 0), list(runAfter, ["Max", carried(2), runAfter])));
+
+/** Leading zeros: the state is whether every letter so far is a 0, and how many there were. */
+const leadingZeros: MathJSON = result(
+  fold(
+    x,
+    list(1, 0),
+    list(times(carried(1), subtract(1, visiting)), add(carried(2), times(carried(1), subtract(1, visiting)))),
+  ),
+);
+
+/** The longest run of equal letters; the state is the previous letter, the run ending here and the longest run. */
+const constantRunAfter: MathJSON = ["If", equals(visiting, carried(1)), add(carried(2), 1), 1];
+const longestConstantRun: MathJSON = at(
+  3,
+  fold(x, list(-1, 0, 0), list(visiting, constantRunAfter, ["Max", carried(3), constantRunAfter])),
+);
+
+/** The longest factor whose neighboring letters all differ; the state is as for the constant runs. */
+const alternatingRunAfter: MathJSON = ["If", equals(visiting, carried(1)), 1, add(carried(2), 1)];
+const longestAlternatingFactor: MathJSON = at(
+  3,
+  fold(x, list(-1, 0, 0), list(visiting, alternatingRunAfter, ["Max", carried(3), alternatingRunAfter])),
+);
 
 /** The zeros less the ones among the letters so far, with the 0 as a step up. */
 const heightAfter: MathJSON = add(carried(1), subtract(1, times(2, visiting)));
@@ -117,5 +142,23 @@ export const WORD_STATISTICS: readonly Definition[] = [
     "SymmetryDegree",
     "The positions i up to half the length where the letters i and n + 1 - i agree.",
     nonEmpty(count(positions, and(atMostValue(times(2, "i"), k), equals(here, mirrored)))),
+  ),
+  stat("Ascents", "Positions i with w(i) < w(i+1).", hasPair(count(adjacent, risesAfter))),
+  stat(
+    "Inversions",
+    "Pairs i < j with w(i) > w(j).",
+    hasPair(sumOver(adjacent, count(["Range", add("i", 1), k, 1], greater(here, at("j")), "j"))),
+  ),
+  stat("MajorIndex", "The sum of the positions i with w(i) > w(i+1).", hasPair(["Sum", where(adjacent, fallsAfter)])),
+  stat("LongestConstantRun", "The length of the longest run of equal letters.", longestConstantRun),
+  stat(
+    "LongestAlternatingFactor",
+    "The length of the longest factor in which every two neighboring letters differ.",
+    longestAlternatingFactor,
+  ),
+  stat(
+    "FirstOnePositionAfterAppendedOne",
+    "The position of the first 1 once a 1 is appended to the word: one more than the leading zeros.",
+    add(leadingZeros, 1),
   ),
 ];

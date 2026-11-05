@@ -17,8 +17,8 @@ catalog:
     url: https://www.findstat.org/St000147
     on: IntegerPartition
 statOn:
-  - IntegerComposition
   - CorePartition
+  - IntegerComposition
   - IntegerPartition
   - PlanePartition
   - WeakComposition
