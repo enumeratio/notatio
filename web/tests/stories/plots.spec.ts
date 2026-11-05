@@ -127,6 +127,21 @@ test("ContourPlot: concentric circles are drawn as circles (E#8)", async ({ page
   for (const ratio of ratios) expect(ratio).toBeCloseTo(1, 1);
 });
 
+// --- GPUShaderForm (S#8, E#11) --------------------------------------------------------------------
+
+for (const [url, shader] of [
+  ["/docs/components/out#gpushaderform", /fn plotFn\(/],
+  ["/playground/inspirations/compute-engine", /fn plotFn\(/],
+  ["/reference/formats/output/wgsl", /@fragment/],
+] as const) {
+  test(`GPUShaderForm on ${url} shows the shader, not a dash`, async ({ page }) => {
+    await page.goto(url);
+    const out = page.locator('notatio-out[form="gpushader"]').first();
+    await out.scrollIntoViewIfNeeded();
+    await expect(out).toContainText(shader, { timeout: 90_000 });
+  });
+}
+
 // --- WebGPU ---------------------------------------------------------------------------------
 // Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
 // headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.

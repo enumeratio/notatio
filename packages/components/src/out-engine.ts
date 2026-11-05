@@ -7,7 +7,7 @@ import { type MathJsonExpression, serializeEpsil } from "@cortex-js/compute-engi
 import { collectMessages, type Message } from "@enumeratio/engine";
 import { normalizeInputForm, toInputForm } from "@enumeratio/formats/inputform";
 import { parseExpression } from "@enumeratio/formats/expression";
-import { boundName, elideResult, latexOf, substitutedForm } from "@enumeratio/frontend/core";
+import { boundName, elideResult, gpuShader, latexOf, substitutedForm } from "@enumeratio/frontend/core";
 import type { TranscriptHost } from "./notatio-out.ts";
 
 /**
@@ -182,35 +182,9 @@ export async function codeSources(engine: ComputeEngine, json: unknown): Promise
     } catch {
       // not compilable to JavaScript
     }
-    out.gpushader = await gpuShader(expr);
+    out.gpushader = gpuShader(expr);
   } catch {
     // compute-engine module unavailable
   }
   return out;
-}
-
-// GPUShaderForm: the whole shader one of our GPU paths would run for this expression,
-// not just the expression's WGSL. One unknown is a complex variable, so the phase
-// portrait's fragment shader (<notatio-complex-plot>); one or two reals, the plot grid's
-// compute shader (gpu-eval). Anything neither path takes has no shader form.
-async function gpuShader(expr: { unknowns: ReadonlyArray<string> }): Promise<string | undefined> {
-  const unknowns = [...expr.unknowns].toSorted();
-  if (unknowns.length === 0 || unknowns.length > 2) return undefined;
-  try {
-    if (unknowns.length === 1) {
-      const [{ emitComplexWGSL }, { portraitShader }] = await Promise.all([
-        import("@enumeratio/analytic"),
-        import("@enumeratio/frontend"),
-      ]);
-      const emitted = emitComplexWGSL((expr as unknown as { json: unknown }).json as never, unknowns[0]);
-      if (emitted) return portraitShader(emitted.code);
-    }
-    const { computeShader, toWgslFn } = await import("@enumeratio/frontend");
-    // A lone unknown still gets a two-parameter plot function; the second is unused.
-    const [vx, vy = vx === "y" ? "x" : "y"] = unknowns;
-    const fn = toWgslFn(expr as never, vx, vy);
-    return fn ? computeShader(fn) : undefined;
-  } catch {
-    return undefined;
-  }
 }
