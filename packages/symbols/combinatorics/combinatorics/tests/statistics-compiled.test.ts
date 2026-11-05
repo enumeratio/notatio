@@ -205,12 +205,10 @@ const SUBJECTS: Record<string, unknown[]> = {
 };
 
 /** Statistics whose interpretation grows about threefold per size of partition: the largest size
- *  (the sum of the parts) their subjects reach. Past 5 the file's 300 s timeout is within reach on
- *  a loaded runner (7 takes about 150 s here). */
-const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([
-  ["CoarseningCount@IntegerPartition", 5],
-  ["SingletonRefinementCount@IntegerPartition", 5],
-]);
+ *  (the sum of the parts) their subjects reach in the standard run, every size under DEEP_TESTS.
+ *  Chains of single splits take about 15 s here at size 6, so past 5 a loaded runner is within
+ *  reach of the file's timeout. */
+const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([["SingletonRefinementCount@IntegerPartition", 5]]);
 
 /** The sum of the numbers in a subject's `List`. */
 const sizeOf = (contents: unknown): number =>
@@ -223,7 +221,7 @@ for (const definition of ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(si
     const run = compiledStatistic(ce, definition);
     expect(run).toBeDefined();
     let compared = 0;
-    const largest = SLOW_TO_INTERPRET.get(signatureOf(definition)) ?? Infinity;
+    const largest = DEEP ? Infinity : (SLOW_TO_INTERPRET.get(signatureOf(definition)) ?? Infinity);
     for (const contents of (SUBJECTS[definition.on] ?? []).filter((c) => sizeOf(c) <= largest)) {
       const interpreted = interpretDefinition(ce, definition, ce.box(contents as never)).json;
       const answer = run!(contents);
