@@ -462,7 +462,6 @@ const nakayama = (w: Word) => {
     codominantDimension,
     dominantDimension,
     injectiveDimension,
-    projectives: series.map((entry, x): [number, number] => [x, entry]),
     simples: series.map((_, x): [number, number] => [x, 1]),
   };
 };

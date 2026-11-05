@@ -1903,6 +1903,7 @@ export const findstat: readonly FindStatMatch[] = [
     findstat: ["St001293"],
     values: 1200,
   },
+  {
     head: "LargestPart",
     on: "IntegerPartition",
     findstat: ["St000147"],
