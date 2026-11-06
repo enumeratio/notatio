@@ -811,9 +811,14 @@
       "max": 6,
       "start": 4
     },
-    "columns": [],
+    "columns": [
+      "AlbertsonIndex",
+      "BridgeCount",
+      "ChromaticNumber",
+      "CliqueNumber"
+    ],
     "derived": true,
-    "statistics": 0
+    "statistics": 39
   },
   "LabeledGraphsByEdges": {
     "expr": "LabeledGraphsByEdges(4, 2)",
@@ -824,9 +829,14 @@
       "max": 6,
       "start": 4
     },
-    "columns": [],
+    "columns": [
+      "AlbertsonIndex",
+      "ConnectedInducedSubgraphCount",
+      "CutVertexCount",
+      "DegreeTwoVertexCount"
+    ],
     "derived": true,
-    "statistics": 0
+    "statistics": 39
   },
   "LabeledTrees": {
     "expr": "LabeledTrees(4)",
