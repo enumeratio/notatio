@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[LuckyCars, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	3			the parking function $[2,1,1,4,2]$
+findstat-st000135-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'LuckyCars'"]	1	1	FindStat St000135	FindStat's value for [1]
+findstat-st000135-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'LuckyCars'"]	1	1	FindStat St000135	FindStat's value for [1,1]
+findstat-st000135-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'LuckyCars'"]	2	2	FindStat St000135	FindStat's value for [1,2]

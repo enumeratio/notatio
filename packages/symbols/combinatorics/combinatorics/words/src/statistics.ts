@@ -35,6 +35,7 @@ import {
   risesAfter,
   subtract,
   sumOver,
+  upTo,
   visiting,
   where,
   x,
@@ -213,7 +214,7 @@ const repeatedFactors = (copies: number): MathJSON =>
     ),
   );
 
-export const WORD_STATISTICS: readonly Definition[] = [
+const BINARY_WORD_STATISTICS: readonly Definition[] = [
   stat("HammingWeight", "The number of ones.", ones),
   stat("LeadingOnesCount", "The number of ones before the first 0.", leadingOnes),
   stat(
@@ -681,3 +682,132 @@ export const WORD_STATISTICS: readonly Definition[] = [
     "FindStat's St001436. The shifts are compared as binary numerals, which orders words of one length lexicographically; the table starts with a numeral above every shift's.",
   ),
 ];
+
+// ── parking functions ────────────────────────────────────────────────────────────────────
+//
+// `_x` is the preferences: car i prefers spot `_x(i)`, and the spots are 1 .. n.
+
+const parkingStat = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
+  head,
+  on: "ParkingFunction",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+
+/** 1 when spot `s` is taken once the first `m` cars have parked, else 0: the cars preferring a spot of a stretch `a .. s` park in it or past it, so `s` is taken exactly when some stretch ending at `s` holds at least as many of those preferences as it has spots. */
+const spotTaken = (m: MathJSON, s: MathJSON): MathJSON => [
+  "If",
+  atLeastValue(
+    max(
+      forEach(
+        upTo(s),
+        subtract(
+          floored(
+            sumOver(
+              positions,
+              ["If", and(atMostValue("j", m), and(atLeastValue(at("j"), "a"), atMostValue(at("j"), s))), 1, 0],
+              "j",
+            ),
+          ),
+          subtract(add(s, 1), "a"),
+        ),
+        "a",
+      ),
+    ),
+    0,
+  ),
+  1,
+  0,
+];
+/** Car i's spot is free when it arrives: the cars before it have not taken the spot it prefers. */
+const carIsLucky: MathJSON = ["If", equals(spotTaken(subtract("i", 1), at("i")), 0), 1, 0];
+/** How far car i drives on from its preferred spot: the offset of the first free spot at or after it. */
+const carDisplacement: MathJSON = min(
+  forEach(
+    ["Range", 0, subtract(length(), at("i"))],
+    ["If", equals(spotTaken(subtract("i", 1), add(at("i"), "t")), 0), "t", length()],
+    "t",
+  ),
+);
+/** The entries before position i that are at least the entry at i. */
+const earlierNotSmaller: MathJSON = floored(
+  sumOver(positions, ["If", and(less("j", "i"), atLeastValue(at("j"), at("i"))), 1, 0], "j"),
+);
+const entriesWhere = (test: MathJSON): MathJSON => floored(sumOver(positions, ["If", test, 1, 0], "j"));
+/** The first i + 1 entries rise strictly: none of the first i neighboring pairs fails to. */
+const prefixIsIncreasing: MathJSON = equals(
+  floored(sumOver(adjacent, ["If", and(atMostValue("j", "i"), atLeastValue(at("j"), at(add("j", 1)))), 1, 0], "j")),
+  0,
+);
+
+const PARKING_FUNCTION_STATISTICS: readonly Definition[] = [
+  parkingStat(
+    "LuckyCars",
+    "The cars that park in the spot they prefer.",
+    nonEmpty(floored(sumOver(positions, carIsLucky))),
+    "FindStat's St000135.",
+  ),
+  parkingStat(
+    "TotalParkingDisplacement",
+    "The sum, over the cars, of the spots they drive past: the sum of i - p(i).",
+    nonEmpty(floored(sumOver(positions, subtract("i", at("i"))))),
+    "FindStat's St000188, which is also the area of the Dyck path of the parking function. Each car's displacement is its spot less its preference and the spots are 1 .. n, so the total is n (n + 1) / 2 less the preferences' sum.",
+  ),
+  parkingStat(
+    "MaximalParkingDisplacement",
+    "The most spots any car drives past its preferred spot.",
+    nonEmpty(max(forEach(positions, carDisplacement))),
+    "FindStat's St000943.",
+  ),
+  parkingStat(
+    "SumLessLength",
+    "The sum of the preferences less their number.",
+    nonEmpty(subtract(floored(["Sum", x]), length())),
+    "FindStat's St000540.",
+  ),
+  parkingStat(
+    "CriticalLeftToRightMaxima",
+    "The entries p that are left to right maxima with exactly p - 1 entries smaller and n - p larger.",
+    nonEmpty(
+      floored(
+        sumOver(positions, [
+          "If",
+          and(
+            and(equals(earlierNotSmaller, 0), equals(entriesWhere(less(at("j"), at("i"))), subtract(at("i"), 1))),
+            equals(entriesWhere(greater(at("j"), at("i"))), subtract(length(), at("i"))),
+          ),
+          1,
+          0,
+        ]),
+      ),
+    ),
+    "FindStat's St000942. A left to right maximum is larger than every entry before it.",
+  ),
+  parkingStat(
+    "Deficiencies",
+    "Positions i with p(i) < i.",
+    nonEmpty(count(positions, less(here, "i"))),
+    "FindStat's St001905.",
+  ),
+  parkingStat(
+    "InitialIncreasingSegmentLength",
+    "The length of the initial strictly increasing segment.",
+    hasPair(add(1, floored(sumOver(adjacent, ["If", prefixIsIncreasing, 1, 0]))), length()),
+    "FindStat's St001904. The first i + 1 entries increase exactly when none of the first i neighboring pairs fails to rise.",
+  ),
+  parkingStat(
+    "Ties",
+    "Positions i with p(i) = p(i+1).",
+    hasPair(count(adjacent, equals(here, next))),
+    "FindStat's St001947.",
+  ),
+  parkingStat(
+    "CenterSize",
+    "The length of the longest subsequence a(1), ..., a(k) with a(i) <= i.",
+    nonEmpty(fold(x, 0, add("a", ["If", atMostValue("b", add("a", 1)), 1, 0]))),
+    "FindStat's St001937. Taking each entry that fits the next index is the longest such subsequence.",
+  ),
+];
+
+export const WORD_STATISTICS: readonly Definition[] = [...BINARY_WORD_STATISTICS, ...PARKING_FUNCTION_STATISTICS];

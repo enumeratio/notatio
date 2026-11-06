@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[TotalParkingDisplacement, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	5			the parking function $[2,1,1,4,2]$
+findstat-st000188-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'TotalParkingDisplacement'"]	0	0	FindStat St000188	FindStat's value for [1]
+findstat-st000188-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'TotalParkingDisplacement'"]	1	1	FindStat St000188	FindStat's value for [1,1]
+findstat-st000188-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'TotalParkingDisplacement'"]	0	0	FindStat St000188	FindStat's value for [1,2]

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-plane-partition-4-3-1-3-1-1			[BoxCount, [PlanePartition, [List, [List, 4, 3, 1], [List, 3, 1], [List, 1]]]]	13			the plane partition $[[4,3,1],[3,1],[1]]$
+findstat-st001422-1	Properties		[CombinatorialStat, [PlanePartition, [List, [List, 1]]], "'BoxCount'"]	1	1	FindStat St001422	FindStat's value for [[1]]
+findstat-st001422-2	Properties		[CombinatorialStat, [PlanePartition, [List, [List, 2]]], "'BoxCount'"]	2	2	FindStat St001422	FindStat's value for [[2]]
+findstat-st001422-3	Properties		[CombinatorialStat, [PlanePartition, [List, [List, 3]]], "'BoxCount'"]	3	3	FindStat St001422	FindStat's value for [[3]]

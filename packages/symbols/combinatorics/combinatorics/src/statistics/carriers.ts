@@ -8,7 +8,6 @@ import {
   adjacent,
   and,
   at,
-  atLeastValue,
   bind,
   count,
   equals,
@@ -72,9 +71,6 @@ const unaryVertices: MathJSON = recurse(
   x,
 );
 
-/** The row `i` of a plane partition, `_x` being its rows. */
-const row: MathJSON = at("i");
-
 export const CARRIER_STATISTICS: readonly Definition[] = [
   {
     head: "Descents",
@@ -94,18 +90,6 @@ export const CARRIER_STATISTICS: readonly Definition[] = [
     on: "StandardTableau",
     summary: "The sum of the descents of the tableau.",
     expr: hasSuccessor(["Sum", descentEntries]),
-  },
-  {
-    head: "LargestPart",
-    on: "PlanePartition",
-    summary: "The largest entry: the corner of the array.",
-    expr: nonEmpty(["Max", ["Flatten", x]]),
-  },
-  {
-    head: "Trace",
-    on: "PlanePartition",
-    summary: "The sum of the diagonal entries.",
-    expr: nonEmpty(["Sum", forEach(where(positions, atLeastValue(length(row), "i")), at("i", row))]),
   },
   {
     head: "Descents",

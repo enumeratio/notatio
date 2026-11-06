@@ -8,13 +8,18 @@ catalog:
     identity: St000759
     url: https://www.findstat.org/St000759
     on: IntegerPartition
+  - system: findstat
+    identity: St001449
+    url: https://www.findstat.org/St001449
+    on: PlanePartition
 statOn:
   - IntegerPartition
+  - PlanePartition
 signatures:
   - call: SmallestMissingPart(partition)
     description: The smallest positive integer that is not a part.
     library: enumeratio-combinatorics
-    type: (integer_partition) -> number
+    type: (integer_partition | plane_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

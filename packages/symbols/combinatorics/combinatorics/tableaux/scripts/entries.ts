@@ -26,6 +26,24 @@ const SAMPLES: readonly Sample[] = [
     ],
     caption: "the alternating sign matrix $[[0,1,0],[1,-1,1],[0,1,0]]$",
   },
+  {
+    on: "PlanePartition",
+    list: [[4, 3, 1], [3, 1], [1]],
+    caption: "the plane partition $[[4,3,1],[3,1],[1]]$",
+  },
+];
+
+// These heads are also partition heads, which own their records.
+const SHARED_WITH_PARTITIONS = [
+  "DistinctParts",
+  "EvenParts",
+  "LargestPart",
+  "LargestRepeatedPart",
+  "MultiplicityOfSmallestPart",
+  "OddParts",
+  "PartCount",
+  "PartRange",
+  "SmallestMissingPart",
 ];
 
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));
@@ -37,6 +55,8 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: TABLEAUX_FRONTIER,
   samples: SAMPLES,
   declareArea: declareTableaux,
+  carrierNames: { PlanePartition: { subjectName: "planePartition", domain: "Plane partition statistics" } },
   curatedHeads: ["WeightedSize"],
   dir: REFERENCE_DIR,
+  omitHeads: SHARED_WITH_PARTITIONS,
 });

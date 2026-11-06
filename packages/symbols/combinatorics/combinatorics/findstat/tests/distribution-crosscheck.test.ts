@@ -43,6 +43,10 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   PerfectMatching: ["PerfectMatchings", (n) => n / 2],
   SignedPermutation: ["SignedPermutations", (n) => n],
   AlternatingSignMatrix: ["AlternatingSignMatrices", (n) => n],
+  // FindStat's parking functions of size n are the lists of length n.
+  ParkingFunction: ["ParkingFunctions", (n) => n],
+  // FindStat's plane partition size is its boxes, the sum of the entries, as ours.
+  PlanePartition: ["PlanePartitions", (n) => n],
 };
 
 type Kind = "unclassified" | "emit" | "convention" | "ours";

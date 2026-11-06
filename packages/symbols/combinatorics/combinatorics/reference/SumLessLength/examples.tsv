@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[SumLessLength, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	5			the parking function $[2,1,1,4,2]$
+findstat-st000540-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'SumLessLength'"]	0	0	FindStat St000540	FindStat's value for [1]
+findstat-st000540-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'SumLessLength'"]	0	0	FindStat St000540	FindStat's value for [1,1]
+findstat-st000540-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'SumLessLength'"]	1	1	FindStat St000540	FindStat's value for [1,2]

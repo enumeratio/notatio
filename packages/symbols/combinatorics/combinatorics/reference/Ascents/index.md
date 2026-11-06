@@ -29,11 +29,16 @@ catalog:
     identity: St000292
     url: https://www.findstat.org/St000292
     on: BinaryWord
+  - system: findstat
+    identity: St001935
+    url: https://www.findstat.org/St001935
+    on: ParkingFunction
 statOn:
   - Arrangement
   - AscentSequence
   - BinaryWord
   - IntegerComposition
+  - ParkingFunction
   - Permutation
   - Word
 ---

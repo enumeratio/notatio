@@ -22,6 +22,7 @@ test("a few objects per new carrier", () => {
   expect(readObject("OrderedTree", "[[],[[]]]")).toEqual(["OrderedTree", L(L(), L(L()))]);
   expect(readObject("StandardTableau", "[[1,3],[2]]")).toEqual(["StandardTableau", L(L(1, 3), L(2))]);
   expect(readObject("ParkingFunction", "[1,1,2]")).toEqual(["ParkingFunction", L(1, 1, 2)]);
+  expect(readObject("PlanePartition", "[[2,1],[1]]")).toEqual(["PlanePartition", L(L(2, 1), L(1))]);
   expect(readObject("SetComposition", "[{2},{1,3}]")).toEqual(["SetComposition", L(L(2), L(1, 3))]);
   expect(readObject("AlternatingSignMatrix", "[[0,1,0],[1,-1,1],[0,1,0]]")).toEqual([
     "AlternatingSignMatrix",
@@ -58,6 +59,8 @@ test("sizes are what the collections grow by", () => {
   expect(objectSize("StandardTableau", "[[1,3],[2]]")).toBe(3);
   expect(objectSize("PerfectMatching", "[(1,4),(2,3)]")).toBe(4);
   expect(objectSize("AlternatingSignMatrix", "[[0,1],[1,0]]")).toBe(2);
+  expect(objectSize("PlanePartition", "[[1],[1]]")).toBe(2);
+  expect(objectSize("PlanePartition", "[[2,1]]")).toBe(3);
 });
 
 interface Snapshot {
@@ -100,6 +103,7 @@ const FAMILY: Readonly<Record<string, [head: string, argument: (size: number) =>
   ParkingFunction: ["ParkingFunctions", (n) => n],
   PerfectMatching: ["PerfectMatchings", (n) => n / 2],
   AlternatingSignMatrix: ["AlternatingSignMatrices", (n) => n],
+  PlanePartition: ["PlanePartitions", (n) => n],
   SetComposition: ["SetCompositions", (n) => n],
 };
 
@@ -124,8 +128,8 @@ test("every snapshot object of the new carriers is an element of our collection 
       const size = objectSize(carrier, text)!;
       if (size > 5) continue;
       let value = readObject(carrier, text) as [string, unknown];
-      // AlternatingSignMatrices yields the bare rows.
-      if (carrier === "AlternatingSignMatrix") value = value[1] as never;
+      // AlternatingSignMatrices and PlanePartitions yield the bare rows.
+      if (carrier === "AlternatingSignMatrix" || carrier === "PlanePartition") value = value[1] as never;
       const member = ce.box(["Element", value, [head, argument(size)]] as never).evaluate().json;
       expect(member, `${carrier} ${text}`).toBe("True");
     }

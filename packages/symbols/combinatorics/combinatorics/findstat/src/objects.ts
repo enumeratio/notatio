@@ -91,6 +91,11 @@ const READERS: Readonly<Record<string, Reader>> = {
     size: (t) => (JSON.parse(t) as number[][]).length,
   },
   SetComposition: { read: (t) => ["SetComposition", blocks(t)], size: (t) => count(t, /\d+/g) },
+  // Rows of weakly decreasing positive entries, as ours; size is the number of boxes, the sum of the entries.
+  PlanePartition: {
+    read: (t) => ["PlanePartition", rows(t)],
+    size: (t) => sum((JSON.parse(t) as number[][]).map((r) => sum(r))),
+  },
 };
 
 /** The carrier value FindStat's `text` names, or `undefined` for a carrier we don't read. A malformed text throws. */

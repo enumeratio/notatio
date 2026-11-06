@@ -199,7 +199,7 @@
     "expr": "BoxedPlanePartitions(2, 2, 2)",
     "columns": ["Trace"],
     "derived": false,
-    "statistics": 2
+    "statistics": 18
   },
   "CalkinWilfPaths": null,
   "CardinalNumbers": null,
@@ -1049,9 +1049,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": [],
+    "columns": ["Ascents", "CriticalLeftToRightMaxima", "Deficiencies", "InitialIncreasingSegmentLength"],
     "derived": true,
-    "statistics": 1
+    "statistics": 13
   },
   "NonNestingMatchings": {
     "expr": "NonNestingMatchings(4)",
@@ -1172,9 +1172,9 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Descents"],
+    "columns": ["Ascents", "CenterSize", "CriticalLeftToRightMaxima", "Deficiencies"],
     "derived": true,
-    "statistics": 1
+    "statistics": 13
   },
   "PartCountBoundedCompositions": {
     "expr": "PartCountBoundedCompositions(4, 2)",
@@ -1376,7 +1376,7 @@
     "expr": "PlanePartitions(6)",
     "columns": ["Length"],
     "derived": false,
-    "statistics": 2
+    "statistics": 18
   },
   "PlaneTrees": null,
   "PolygonalNumbers": {

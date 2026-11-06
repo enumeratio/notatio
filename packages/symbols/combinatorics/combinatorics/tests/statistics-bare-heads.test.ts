@@ -15,8 +15,10 @@ const SAMPLE: Record<string, unknown> = {
   BinaryWord: ["At", ["BinaryWords", 4], 5],
   PerfectMatching: ["At", ["PerfectMatchings", 3], 7],
   SignedPermutation: ["At", ["SignedPermutations", 3], 9],
-  // The family yields bare rows.
+  ParkingFunction: ["At", ["ParkingFunctions", 4], 20],
+  // These families yield bare rows.
   AlternatingSignMatrix: ["AlternatingSignMatrix", ["At", ["AlternatingSignMatrices", 3], 4]],
+  PlanePartition: ["PlanePartition", ["At", ["PlanePartitions", 6], 10]],
 };
 
 test("every statistic is callable by its bare head on each of its carriers", () => {

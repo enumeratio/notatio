@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[CriticalLeftToRightMaxima, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	0			the parking function $[2,1,1,4,2]$
+findstat-st000942-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'CriticalLeftToRightMaxima'"]	1	1	FindStat St000942	FindStat's value for [1]
+findstat-st000942-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'CriticalLeftToRightMaxima'"]	0	0	FindStat St000942	FindStat's value for [1,1]
+findstat-st000942-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'CriticalLeftToRightMaxima'"]	2	2	FindStat St000942	FindStat's value for [1,2]
