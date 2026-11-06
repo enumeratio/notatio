@@ -144,12 +144,19 @@ export class NotatioWorksheet extends LitElement {
   #boxedCache = new Map<string, Expression | null>();
   /** The slider the pointer holds: a re-render leaves its thumb where the reader put it. */
   #held: string | undefined;
+  /**
+   * The value a slider was released on, by `name/part`, until its cell's answer lands. The
+   * controls come from the cells' last answers, so a render between the release and the new
+   * answer would put the thumb back on an earlier one.
+   */
+  #released = new Map<string, number>();
   /** The range a held slider began its drag on, by `name/part`. */
   #frozen = new Map<string, ControlRange>();
   /** Hold a slider until the pointer lets go, wherever it lets go: a press that moves nothing fires no `change`. */
   #hold(c: WorksheetControl): void {
     const key = `${c.name}/${c.part}`;
     this.#held = key;
+    this.#released.delete(key);
     // A default range follows the value, so a drag would rescale its own track (64 in -100..100,
     // then 24 in -50..50); the range the drag began on stays until the pointer lets go.
     this.#frozen.set(key, { min: c.min, max: c.max, step: c.step });
@@ -358,6 +365,7 @@ export class NotatioWorksheet extends LitElement {
     if (targetId === undefined) return;
     const source = bindingEpsil(control, v, this.#integerNames.has(control.name));
     if (commit) {
+      this.#released.set(`${control.name}/${control.part}`, v);
       this.#live.delete(targetId);
       this.#patch(targetId, { value: source });
       this.#notifyReactive(targetId, source);
@@ -365,6 +373,19 @@ export class NotatioWorksheet extends LitElement {
     }
     this.#live.set(targetId, source);
     this.#scheduleRerender();
+  }
+
+  /** A control showing the value its slider was released on, until its cell reports that value. */
+  #asReleased(c: WorksheetControl): WorksheetControl {
+    const key = `${c.name}/${c.part}`;
+    const value = this.#released.get(key);
+    if (value === undefined) return c;
+    // Within half a step: an integer binding answers with the rounded value.
+    if (Math.abs(c.value - value) <= c.step / 2) {
+      this.#released.delete(key);
+      return c;
+    }
+    return { ...c, value };
   }
 
   /** The cell currently bound to `name`, from the last pass's own facts. */
@@ -631,7 +652,7 @@ export class NotatioWorksheet extends LitElement {
    */
   #controlsFor(cell: Cell): unknown {
     const name = this.#cellData.get(cell.id)?.name;
-    const mine = name ? this._controls.filter((x) => x.name === name) : [];
+    const mine = name ? this._controls.filter((x) => x.name === name).map((x) => this.#asReleased(x)) : [];
     if (mine.length === 0) return "";
     const first = mine[0];
     return html`<div class="ws-knob">
