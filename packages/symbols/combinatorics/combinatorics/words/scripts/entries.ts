@@ -12,8 +12,8 @@ import { WORD_STATISTICS } from "../src/statistics.ts";
 const SAMPLES: readonly Sample[] = [{ list: [1, 1, 0, 1, 0, 0, 1, 1, 1], caption: "the word $110100111$" }];
 
 // `SymmetryDegree` is also a Dyck path head, so its record is hand-written and this area only
-// merges in `details` and `examples`. `Ascents`, `Inversions`, `MajorIndex` and `LongestConstantRun`
-// are also defined by other areas, which own their records.
+// merges in `details` and `examples`. `Ascents`, `Inversions`, `InversionSum`, `LongestConstantRun`,
+// `MajorIndex`, `NonInversionSum` and `WeakMajorIndex` are also defined by other areas, which own their records.
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));
 
 export const generated: { standard: GeneratedEntries; curated: GeneratedEntries } = areaStatisticsEntries({
@@ -25,5 +25,13 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   declareArea: declareWords,
   curatedHeads: ["SymmetryDegree"],
   dir: REFERENCE_DIR,
-  omitHeads: ["Ascents", "Inversions", "LongestConstantRun", "MajorIndex"],
+  omitHeads: [
+    "Ascents",
+    "Inversions",
+    "InversionSum",
+    "LongestConstantRun",
+    "MajorIndex",
+    "NonInversionSum",
+    "WeakMajorIndex",
+  ],
 });

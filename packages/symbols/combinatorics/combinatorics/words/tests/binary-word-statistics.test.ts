@@ -16,6 +16,32 @@ const words = (n: number): number[][] =>
   n === 0 ? [[]] : words(n - 1).flatMap((rest) => [0, 1].map((letter) => [...rest, letter]));
 const upTo = (n: number): number[][] => Array.from({ length: n + 1 }, (_, k) => k).flatMap(words);
 
+const DEEP = process.env.DEEP_TESTS === "1";
+/** FindStat heads that cost tens of milliseconds a word: the standard run reads them on words up to length 4, DEEP_TESTS up to 8. */
+const COSTLY = new Set([
+  "DistinctFactorCount",
+  "BorderLength",
+  "DistinctSubsequenceCount",
+  "MinimalPeriod",
+  "RepetitionExponent",
+  "Balance",
+  "ShortestPalindromicDecompositionLength",
+  "PalindromicDecompositionCount",
+  "LongestCatalanFactorSemilength",
+  "CatalanFactorCount",
+  "InternalInversions",
+  "UniqueFactorLength",
+  "LyndonFactorizationLength",
+  "LongestPalindromicPrefix",
+  "LongestPalindromicFactor",
+  "LongestPalindromicSubsequence",
+  "DistinctCubeCount",
+  "DistinctSquareCount",
+  "CyclicShiftIndex",
+  "BorderCount",
+]);
+const sizeFor = (head: string): number => (COSTLY.has(head) && !DEEP ? 4 : 8);
+
 const evaluate = (head: string, word: readonly number[]): number =>
   applyDefinition(ce, index.get(`${head}@BinaryWord`)!, ce.box(["List", ...word] as never)).re;
 
@@ -25,13 +51,13 @@ test("every binary-word definition has an independent reading", () => {
 });
 
 for (const [head, expected] of Object.entries(WORD_READINGS))
-  test(`${head} agrees over every word of length 0..8`, () => {
-    for (const w of upTo(8)) expect(evaluate(head, w), w.join("")).toBe(expected(w));
+  test(`${head} agrees over every word of length 0..${sizeFor(head)}`, () => {
+    for (const w of upTo(sizeFor(head))) expect(evaluate(head, w), w.join("")).toBe(expected(w));
   });
 
 test("each head called on the carrier value gives the reading", () => {
   for (const [head, expected] of Object.entries(WORD_READINGS))
-    for (const w of upTo(4))
+    for (const w of upTo(Math.min(4, sizeFor(head))))
       expect(ce.box([head, ["BinaryWord", ["List", ...w]]] as never).evaluate().re, `${head} ${w.join("")}`).toBe(
         expected(w),
       );
