@@ -12,6 +12,7 @@ import {
   atLeastValue,
   atMostValue,
   bind,
+  bindList,
   count,
   distance,
   equals,
@@ -35,6 +36,7 @@ import {
   slice,
   risesAfter,
   sumOver,
+  upTo,
   upToHere,
   where,
   at,
@@ -81,23 +83,26 @@ const inversions = sumOver(positions, count(["Range", add("i", 1), length()], gr
 // do not count. This was on the frontier as needing "a growing table Fold cannot carry"; it
 // needs no fold at all, just the same filtered double-sum Inversions already uses, restricted
 // to same-block pairs.
-const isExcedanceAt = (i: MathJSON): MathJSON => greater(at(i), i);
-const isNonExcedanceAt = (i: MathJSON): MathJSON => atMostValue(at(i), i);
+const isExcedanceAt = (i: MathJSON, word: MathJSON = x): MathJSON => greater(at(i, word), i);
+const isNonExcedanceAt = (i: MathJSON, word: MathJSON = x): MathJSON => atMostValue(at(i, word), i);
 /** Inversions among positions i < j that both satisfy `inBlock`. */
-const blockInversions = (inBlock: (i: MathJSON) => MathJSON): MathJSON =>
-  sumOver(positions, [
+const blockInversions = (inBlock: (i: MathJSON) => MathJSON, word: MathJSON = x): MathJSON =>
+  sumOver(upTo(length(word)), [
     "If",
     inBlock("i"),
-    count(["Range", add("i", 1), length()], and(inBlock("j"), greater(here, at("j"))), "j"),
+    count(["Range", add("i", 1), length(word)], and(inBlock("j"), greater(at("i", word), at("j", word))), "j"),
     0,
   ]);
-const denert: MathJSON = nonEmpty(
+/** Denert's statistic of the word `word`, a permutation of 1..n. */
+const denertOf = (word: MathJSON = x): MathJSON =>
   add(
-    add(["Sum", where(positions, isExcedanceAt("i"))], blockInversions(isExcedanceAt)),
-    blockInversions(isNonExcedanceAt),
-  ),
-);
-
+    add(
+      ["Sum", where(upTo(length(word)), isExcedanceAt("i", word))],
+      blockInversions((i) => isExcedanceAt(i, word), word),
+    ),
+    blockInversions((i) => isNonExcedanceAt(i, word), word),
+  );
+const denert: MathJSON = nonEmpty(denertOf());
 /** Occurrences of a length-3 pattern, as a triple loop over i < j < k. */
 const occurrencesOfPattern = (relation: (a: string, b: string, c: string) => Definition["expr"]) =>
   sumOver(
@@ -2888,6 +2893,91 @@ const inverseAt = (k: MathJSON): MathJSON => [
   floored(sumOver(positions, ["If", equals(["Abs", here], k), "i", 0])),
 ];
 
+/** The signed entry at the index k of -n..n, where p(-k) = -p(k) and p(0) = 0. */
+const signedEntryAt = (k: MathJSON): MathJSON => [
+  "If",
+  greater(k, 0),
+  at(k),
+  ["If", equals(k, 0), 0, ["Negate", at(["Negate", k])]],
+];
+/** Where the signed point w of -n..n goes under p: p(w) for w > 0 and -p(-w) for w < 0. */
+const signedStep: MathJSON = ["If", less("w", 0), ["Negate", at(["Negate", "w"])], at("w")];
+/** Where the signed point i is after m steps of p. */
+const signedWalk = (i: MathJSON, m: MathJSON): MathJSON => [
+  "Fold",
+  ["Function", signedStep, "w", "j"],
+  i,
+  ["Range", 1, m, 1],
+];
+/** The steps of a signed walk: 2n of them, enough to go round any signed cycle. */
+const signedSteps: MathJSON = ["Range", 1, ["Multiply", 2, length()], 1];
+
+/** The least m >= 1 with p^m(i) = i as a signed point: the cycle of i, counted twice when it is negative. */
+const signedCycleLengthAt = (i: MathJSON): MathJSON => ["Min", where(signedSteps, equals(signedWalk(i, "m"), i), "m")];
+/** Whether i is the smallest point of its cycle, forgetting signs. */
+const leadsSignedCycle = (i: MathJSON): MathJSON =>
+  equals(count(upTo(length()), less(["Abs", signedWalk(i, "m")], i), "m"), 0);
+/** Whether the cycle of i never reaches -i: it is a positive cycle. */
+const staysPositive = (i: MathJSON): MathJSON =>
+  equals(count(upTo(length()), equals(signedWalk(i, "m"), ["Negate", i]), "m"), 0);
+
+/** Selection sort on a signed word: n goes to its place and loses its sign, then n - 1, and so on. A step costs k - t for a positive entry at t and k + t - 1 for a negative one. */
+const signedSortingIndex: MathJSON = [
+  "At",
+  fold(
+    ["Range", length(), 1, -1],
+    ["Tuple", 0, x],
+    [
+      "Apply",
+      [
+        "Function",
+        [
+          "Tuple",
+          add(carried(1), [
+            "If",
+            less(at("t", carried(2)), 0),
+            subtract(add(visiting, "t"), 1),
+            subtract(visiting, "t"),
+          ]),
+          [
+            "ReplaceAt",
+            [
+              "ReplaceAt",
+              carried(2),
+              "t",
+              ["If", less(at("t", carried(2)), 0), ["Negate", at(visiting, carried(2))], at(visiting, carried(2))],
+            ],
+            visiting,
+            visiting,
+          ],
+        ],
+        "t",
+      ],
+      ["Sum", forEach(positions, ["If", equals(["Abs", at("j", carried(2))], visiting), "j", 0], "j")],
+    ],
+  ),
+  1,
+];
+
+/** Pairs (i, j) of 1..n of FindStat's six alignment kinds (St001822), each read with a = p(i) and b = p(j). */
+const signedAlignments: MathJSON = (() => {
+  const b = at("j");
+  const kinds: MathJSON[] = [
+    // Nesting: -i < -j < -b < -a, -i < j <= b < -a, and i < j <= b < a.
+    and(less("j", "i"), and(less(here, b), less(b, "j"))),
+    and(atMostValue("j", b), less(b, ["Negate", here])),
+    and(greater("j", "i"), and(atMostValue("j", b), less(b, here))),
+    // Type EN: -i < 0 < -a < b < j, and i <= a < b < j.
+    and(less(here, 0), and(less(["Negate", here], b), less(b, "j"))),
+    and(atMostValue("i", here), and(less(here, b), less(b, "j"))),
+    // Type NE: a < i < j <= b.
+    and(less(here, "i"), and(less("i", "j"), atMostValue("j", b))),
+  ];
+  return floored(
+    kinds.reduce<MathJSON>((total, kind) => add(total, sumOver(positions, count(positions, kind, "j"))), 0),
+  );
+})();
+
 const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
   signed("NegativeEntryCount", "The number of negative entries.", nonEmpty(negativeEntries)),
   signed("PositiveEntryCount", "The number of positive entries.", nonEmpty(count(positions, greater(here, 0)))),
@@ -2959,6 +3049,54 @@ const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
       ),
     ),
     "FindStat's St001896: the left descents of the inverse. The inverse sends k to the position of k or -k, signed as the entry is.",
+  ),
+  signed(
+    "SignedPermutationOrder",
+    "The least m >= 1 with p^m the identity, p acting on -n..n.",
+    nonEmpty(fold(forEach(positions, signedCycleLengthAt("i")), 1, ["LCM", "a", "b"]), 1),
+    "FindStat's St001555. The lcm of the signed orbit lengths of 1..n: a cycle is counted twice when it is negative. Not PermutationOrder, which reads the word as an unsigned permutation.",
+  ),
+  signed(
+    "SignedReflectionLength",
+    "The least number of reflections of the hyperoctahedral group with product p: n minus the positive cycles.",
+    nonEmpty(subtract(length(), count(positions, and(leadsSignedCycle("i"), staysPositive("i"))))),
+    "FindStat's St001769. The codimension of the fixed space, which is n less the number of positive cycles. Not ReflectionLength, which counts transpositions of an unsigned permutation.",
+  ),
+  signed(
+    "FlagDenertIndex",
+    "The negative entries plus twice the Denert index of the permutation |p(1)| ... |p(n)|.",
+    nonEmpty(add(negativeEntries, ["Multiply", 2, bindList("w", forEach(positions, ["Abs", here]), denertOf("w"))])),
+    "FindStat's St001819.",
+  ),
+  signed(
+    "SignedSortingIndex",
+    "The sum, over the signed transpositions that sort p by moving n, then n - 1, and so on into place, of j - i - 1 when i < 0 and j - i otherwise.",
+    nonEmpty(signedSortingIndex),
+    "FindStat's St001821. The fold carries the total and the word, as SortingIndex does.",
+  ),
+  signed(
+    "SignedAlignmentCount",
+    "The alignments of p: its nesting alignments, those of type EN and those of type NE.",
+    nonEmpty(signedAlignments),
+    "FindStat's St001822 (St001866, St001867, St001868 summed). Not Alignments, which counts the pairs of arcs of an unsigned permutation.",
+  ),
+  signed(
+    "StasinskiVollLength",
+    "Half the pairs -n <= i < j <= n of opposite parity with p(i) > p(j), where p(-k) = -p(k) and p(0) = 0.",
+    nonEmpty(
+      floored(
+        sumOver(
+          positions,
+          count(
+            ["Range", 0, subtract("j", 1)],
+            greater(signedEntryAt(subtract(subtract("j", 1), ["Multiply", 2, "t"])), at("j")),
+            "t",
+          ),
+          "j",
+        ),
+      ),
+    ),
+    "FindStat's St001823. The map (i, j) -> (-j, -i) pairs the counted pairs off, so counting those with i + j > 0, i = j - 1, j - 3, ..., 1 - j, gives the half.",
   ),
 ];
 

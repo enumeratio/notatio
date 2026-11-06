@@ -55,6 +55,34 @@ const overNodes = (contribution: MathJSON, tree: MathJSON = x): MathJSON =>
 const noLeft = isLeaf(left("t"));
 const noRight = isLeaf(right("t"));
 
+/** Whether two binary trees are the same once the children at any nodes are swapped. */
+const sameUpToSwaps = (first: MathJSON, second: MathJSON): MathJSON =>
+  recurse(
+    ifThen(
+      isLeaf("a"),
+      ifThen(isLeaf("b"), "True", "False"),
+      ifThen(
+        isLeaf("b"),
+        "False",
+        ifThen(
+          self(left("a"), left("b")),
+          ifThen(
+            self(right("a"), right("b")),
+            "True",
+            ifThen(self(left("a"), right("b")), self(right("a"), left("b")), "False"),
+          ),
+          ifThen(self(left("a"), right("b")), self(right("a"), left("b")), "False"),
+        ),
+      ),
+    ),
+    ["a", "b"],
+    first,
+    second,
+  );
+
+/** The nodes whose two subtrees differ even when children may be swapped, an only child counting as differing from the empty subtree. */
+const swappableNodes: MathJSON = overNodes(ifThen(sameUpToSwaps(left("t"), right("t")), 0, 1));
+
 /** The product over every node of the number of nodes at or below it. */
 const treeFactorialOf = (tree: MathJSON): MathJSON =>
   recurse(ifThen(isLeaf("f"), 1, ["Multiply", nodesOf("f"), self(left("f")), self(right("f"))]), ["f"], tree);
@@ -443,6 +471,19 @@ const NESTED_STATISTICS: readonly Definition[] = [
     "The number of nodes with two children whose right child's right child has a left child.",
     overNodes(allNonempty([left("t"), rightChild, right(rightChild), left(right(rightChild))])),
     "FindStat's St000132: the contiguous pattern [[.,.],[.,[[.,.],.]]], whose empty slots match any subtree.",
+  ),
+
+  binary(
+    "SwapEquivalentTreeCount",
+    "The number of binary trees that become this one when the children at any nodes are swapped: each node with different subtrees (an only child counts as different from the empty one) doubles the count.",
+    ["Power", 2, swappableNodes],
+    "FindStat's St000412: the binary trees with the same underlying unordered (rooted) tree.",
+  ),
+  binary(
+    "SwapEquivalentTreeCountLog",
+    "The binary logarithm of the number of binary trees with the same underlying rooted tree: the nodes whose two subtrees differ up to swaps.",
+    swappableNodes,
+    "FindStat's St000414.",
   ),
 
   // ── ordered trees ──

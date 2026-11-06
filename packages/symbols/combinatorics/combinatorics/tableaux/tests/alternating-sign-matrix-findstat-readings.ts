@@ -52,6 +52,35 @@ const cornerZeroSquare = (m: Matrix): number => {
   return z - 1;
 };
 
+/** FindStat's St001965: the corner sum matrix is (n + 1) x (n + 1) with c[i][j] the sum of the first i rows and j columns. */
+const decreasableCornerSums = (m: Matrix): number => {
+  const n = m.length;
+  const c = indices(n + 1).map((i) => indices(n + 1).map((j) => sum(m.slice(0, i).map((row) => sum(row.slice(0, j))))));
+  let found = 0;
+  for (let i = 1; i < n; i++)
+    for (let j = 1; j < n; j++)
+      if (
+        c[i]![j] === c[i + 1]![j] &&
+        c[i + 1]![j] === c[i]![j + 1] &&
+        c[i]![j + 1] === c[i - 1]![j]! + 1 &&
+        c[i - 1]![j]! + 1 === c[i]![j - 1]! + 1
+      )
+        found++;
+  return found;
+};
+/** The permanent, summed over every permutation of the columns. */
+const permanent = (m: Matrix): number => {
+  const extend = (row: number, used: readonly number[]): number =>
+    row === m.length
+      ? 1
+      : sum(
+          indices(m.length)
+            .filter((j) => !used.includes(j))
+            .map((j) => m[row]![j]! * extend(row + 1, [...used, j])),
+        );
+  return extend(0, []);
+};
+
 export type Reading = (m: Matrix) => number;
 
 export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
@@ -74,4 +103,6 @@ export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
   AlternatingSignMatrixPosetRank: monotoneTriangleRank,
   MatrixInversionNumber: inversionNumber,
   PositiveMatrixInversionNumber: (m) => inversionNumber(m) - entries(m).filter((a) => a === -1).length,
+  MatrixPermanent: permanent,
+  DecreasableCornerSumPositions: decreasableCornerSums,
 };

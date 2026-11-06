@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[ReverseComplementFactorHalfLength, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	3			the word $110100111$
+findstat-st001420-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'ReverseComplementFactorHalfLength'"]	0	0	FindStat St001420	FindStat's value for 0
+findstat-st001420-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'ReverseComplementFactorHalfLength'"]	0	0	FindStat St001420	FindStat's value for 1
+findstat-st001420-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'ReverseComplementFactorHalfLength'"]	0	0	FindStat St001420	FindStat's value for 00

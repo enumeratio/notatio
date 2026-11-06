@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[Flex, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	6			the word $110100111$
+findstat-st001437-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'Flex'"]	1	1	FindStat St001437	FindStat's value for 0
+findstat-st001437-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'Flex'"]	1	1	FindStat St001437	FindStat's value for 1
+findstat-st001437-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'Flex'"]	2	2	FindStat St001437	FindStat's value for 00

@@ -49,6 +49,7 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
         "LargestOpener",
         "NestingNumber",
         "Nestings",
+        "RotationOrbitSize",
         "Successions",
         "TerminalClosers",
         "TopologicallyConnectedComponents",
@@ -59,6 +60,11 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
     // A weak composition is a composition whose parts may be 0.
     from: "IntegerComposition",
     to: { WeakComposition: ["LargestPart"] },
+  },
+  {
+    // A binary word's rotations are counted as a composition's are (FindStat's St000543, the conjugacy class of a word).
+    from: "IntegerComposition",
+    to: { BinaryWord: ["RotationOrbitSize"] },
   },
 ];
 

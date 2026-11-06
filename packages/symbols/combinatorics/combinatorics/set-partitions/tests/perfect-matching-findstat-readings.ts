@@ -95,6 +95,16 @@ export const PERFECT_MATCHING_READINGS: Record<string, Reading> = {
   CrossingNumber: (m) => largestMutualSet(m, crosses),
   NestingNumber: (m) => largestMutualSet(m, nests),
   Crossings: (m) => sum(m.map((p, i) => m.slice(i + 1).filter((q) => crosses(p, q)).length)),
+  // St000780: the matchings that turning the circle of points by 0, 1, 2, ... places give.
+  RotationOrbitSize: (m) => {
+    const turned = (k: number): string =>
+      JSON.stringify(
+        m
+          .map(([a, b]) => [((a - 1 + k) % points(m)) + 1, ((b - 1 + k) % points(m)) + 1].toSorted((x, y) => x - y))
+          .toSorted((p, q) => p[0]! - q[0]!),
+      );
+    return new Set(Array.from({ length: points(m) }, (_, k) => turned(k))).size;
+  },
   Nestings: (m) => sum(m.map((p, i) => m.slice(i + 1).filter((q) => nests(p, q)).length)),
 };
 

@@ -48,6 +48,8 @@ const INTERPRETED = [
   "RightSubtreeSizeSum",
   "StrahlerNumber",
   "StrahlerNumber",
+  "SwapEquivalentTreeCount",
+  "SwapEquivalentTreeCountLog",
   "TreeFactorial",
   "TreeFactorial",
   "TwoProtectedNodeCount",
