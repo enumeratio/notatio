@@ -347,3 +347,5 @@ fn clogPolar(v: vec2f) -> vec3f {
   return vec3f(u / unit, log(big) + log(unit));
 }
 ${complexWGSL}`;
+
+export { reachableWGSL, withWGSL } from "./shader-prune.ts";

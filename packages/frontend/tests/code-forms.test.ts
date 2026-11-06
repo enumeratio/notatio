@@ -27,3 +27,21 @@ test("an expression with no variable has no shader", () => {
 test("a kernel's display carries the shader beside the other code forms", () => {
   expect(display(ce, ["Add", ["Sin", "x"], ["Power", "y", 2]]).text.gpushader).toContain("fn plotFn(");
 });
+
+const declares = (shader: string | undefined) =>
+  [...(shader ?? "").matchAll(/^(?:fn|const|var<private>|struct)\s+(\w+)/gm)].map((m) => m[1]);
+
+test("a plot that calls no kernel carries no library kernel", () => {
+  const { gpushader } = codeForms(ce, ["Add", ["Power", "x", 2], ["Power", "y", 2]]);
+  expect(declares(gpushader)).not.toContain("hurwitz");
+  expect(declares(gpushader)).not.toContain("cgamma");
+  expect(declares(gpushader)).not.toContain("cmul");
+});
+
+test("a portrait carries the kernels its expression calls and not the others", () => {
+  const names = declares(codeForms(ce, ["Gamma", "z"]).gpushader);
+  expect(names).toContain("cgamma");
+  expect(names).toContain("uncertain"); // the hatching reads it
+  expect(names).not.toContain("cbesselJ");
+  expect(names).not.toContain("hurwitz");
+});

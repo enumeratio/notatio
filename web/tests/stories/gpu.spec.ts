@@ -10,7 +10,7 @@ import {
   emitComplexWGSL,
   type Json,
 } from "../../../packages/ce-patches/src/compute-engine/compilation/wgsl-complex.ts";
-import { zetaWGSL } from "../../../packages/symbols/analysis/analytic/src/shader.ts";
+import { reachableWGSL, zetaWGSL } from "../../../packages/symbols/analysis/analytic/src/shader.ts";
 import {
   colorAt,
   evalComplexOnGpu,
@@ -141,7 +141,9 @@ test.describe("the complex heads agree with mpmath", () => {
       await page.goto("/");
       const emitted = emitComplexWGSL(c.json, "z");
       expect(emitted, `${name} has a complex lowering`).toBeDefined();
-      const got = await evalComplexOnGpu(page, zetaWGSL, emitted!.code, emitted!.literals, golden.points);
+      // Only the kernels the code reaches (the harness reads `uncertain`): a missing one fails the compile.
+      const library = reachableWGSL(`uncertain ${emitted!.code}`);
+      const got = await evalComplexOnGpu(page, library, emitted!.code, emitted!.literals, golden.points);
       let drawn = 0;
       let worst = 0;
       got.forEach(([re, im, declined], i) => {

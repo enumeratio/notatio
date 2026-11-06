@@ -5,7 +5,7 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { JavaScriptTarget, WGSLTarget } from "@cortex-js/compute-engine/compile";
 import { selfContainedCode } from "@enumeratio/engine/compiled";
-import { zetaWGSL } from "@enumeratio/analytic/shader";
+import { withWGSL } from "@enumeratio/analytic/shader";
 
 /** What to compile a plot's expression to. */
 export interface PlotCompileSpec {
@@ -54,7 +54,7 @@ const numeric = (e: Expression): number | undefined => {
 };
 
 /**
- * A bivariate expression as a WGSL `plotFn`; `zetaWGSL` comes first so the zeta heads resolve,
+ * A bivariate expression as a WGSL `plotFn`; the library kernels it reaches come first so its heads resolve,
  * then the target's helper preamble, which defines the `_gpu_*` functions the body calls
  * (`_gpu_sin` for `Sin`).
  */
@@ -62,7 +62,7 @@ export function toWgslFn(expr: Expression, vx: string, vy: string): string | und
   try {
     const r = new WGSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
     if (!r?.success || !r.code) return undefined;
-    return `${zetaWGSL}\n${r.preamble ?? ""}\nfn plotFn(${vx}: f32, ${vy}: f32) -> f32 { return ${r.code}; }`;
+    return withWGSL(`${r.preamble ?? ""}\nfn plotFn(${vx}: f32, ${vy}: f32) -> f32 { return ${r.code}; }`);
   } catch {
     return undefined;
   }

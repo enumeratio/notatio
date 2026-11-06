@@ -1,5 +1,5 @@
 /// <reference types="@webgpu/types" />
-import { zetaWGSL } from "@enumeratio/analytic/shader";
+import { withWGSL } from "@enumeratio/analytic/shader";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 import {
   DEFAULT_PHASE_GRADIENT,
@@ -101,7 +101,7 @@ fn gradient(t0: f32) -> vec3f {
 `;
 
 /** The complete domain-coloring shader for a complex-valued WGSL expression `code`. */
-export const portraitShader = (code: string): string => `${zetaWGSL}\n${HOST.replace("VALUE", `clogPolar(${code})`)}`;
+export const portraitShader = (code: string): string => withWGSL(HOST.replace("VALUE", `clogPolar(${code})`));
 
 /** Bytes before the literal slots: center, res, extent, mask, pad. */
 const SLOTS_OFFSET = 32;
