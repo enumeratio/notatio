@@ -1012,22 +1012,18 @@ export const DYCK_STATISTICS: readonly Definition[] = [
         vertexProfile,
         count(
           upTo(semilength),
-          // GreaterEqual first: CE#510 (0.178) leaves it undecided after an Equal
-          and(
+          and(equals(["At", "v", add(semilength, add("c", 1))], ["At", "v", add(subtract(semilength, "c"), 1)]), [
+            "GreaterEqual",
             [
-              "GreaterEqual",
-              [
-                "Min",
-                forEach(
-                  ["Range", add(subtract(semilength, "c"), 1), add(semilength, add("c", 1))],
-                  ["At", "v", "j"],
-                  "j",
-                ),
-              ],
-              ["At", "v", add(subtract(semilength, "c"), 1)],
+              "Min",
+              forEach(
+                ["Range", add(subtract(semilength, "c"), 1), add(semilength, add("c", 1))],
+                ["At", "v", "j"],
+                "j",
+              ),
             ],
-            equals(["At", "v", add(semilength, add("c", 1))], ["At", "v", add(subtract(semilength, "c"), 1)]),
-          ),
+            ["At", "v", add(subtract(semilength, "c"), 1)],
+          ]),
           "c",
         ),
       ),
