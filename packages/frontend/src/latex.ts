@@ -72,3 +72,10 @@ export function latexOf(ce: ComputeEngine, expr: Expression, options?: Record<st
   if (!hasDictionary(json) || ce.latexSyntax === undefined) return expr.toLatex(written);
   return ce.latexSyntax.serialize(expandDictionaries(json) as MathJsonExpression, written);
 }
+
+/**
+ * The form to parse typed LaTeX with when its InputForm is wanted: invisible operators are
+ * resolved (`\Gamma(2.5)` is a call, `2x` a product) and nothing else is canonicalized, so
+ * `x - 2` stays as written. A raw parse reads `\Gamma(2.5)` as `Gamma * 2.5`.
+ */
+export const AS_TYPED = { form: "InvisibleOperator" } as const;

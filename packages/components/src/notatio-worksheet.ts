@@ -15,6 +15,7 @@ import { LONG_PRESS_MS } from "./choice-menu.ts";
 import { openPlaybackMenu } from "./playback-menu.ts";
 import { ensureStyles } from "./styles.ts";
 import {
+  AS_TYPED,
   bindingEpsil,
   type Cell,
   type ControlRange,
@@ -288,7 +289,7 @@ export class NotatioWorksheet extends LitElement {
       seeded = seeded.map((cell) => {
         if (!cell.value.trim()) return cell;
         try {
-          return { ...cell, value: toInputForm(engine.parse(cell.value, { form: "raw" }).json) };
+          return { ...cell, value: toInputForm(engine.parse(cell.value, AS_TYPED).json) };
         } catch {
           // Left as authored; the cell's own Out reports the parse error, same as any
           // other cell a reader mistypes.

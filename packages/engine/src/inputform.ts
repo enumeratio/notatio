@@ -95,13 +95,18 @@ function unitMantissa(node: unknown): MathJsonExpression | undefined {
   return match ? { num: `${match[1]}10e${Number(match[2]) - 1}` } : undefined;
 }
 
+/** `Delimiter(Sequence(…), ",")`, a comma list the parse kept as written. */
+const isCommaList = (node: unknown): boolean =>
+  headOf(node) === "Delimiter" && headOf(opsOf(node)[0]) === "Sequence" && opsOf(node)[1] === "','";
+
 function rewrite(node: unknown): MathJsonExpression {
   const head = headOf(node);
   if (head === undefined) return unitMantissa(node) ?? (node as MathJsonExpression);
   const ops = opsOf(node).map(rewrite);
 
   switch (head) {
-    // `2x` in a non-canonical parse. Whatever it multiplies, it multiplies.
+    // `2x` in a non-canonical parse. Whatever it multiplies, it multiplies. (A call such as
+    // `Γ(2.5)` is resolved by the parse (`AS_TYPED` in frontend), before it gets here.)
     case "InvisibleOperator":
       return rewrite(["Multiply", ...ops]);
 
@@ -109,8 +114,14 @@ function rewrite(node: unknown): MathJsonExpression {
     // was never a block. A single-operand `Delimiter` is the parse holding on to the
     // parentheses it was written with; the serializer puts back the ones it needs.
     case "Block":
-    case "Delimiter":
+    case "Delimiter": {
+      // `(0, 6)` is a tuple: a comma-separated delimiter holds a `Sequence`.
+      const [inner, fence] = ops;
+      if (head === "Delimiter" && headOf(inner) === "Sequence" && (fence === undefined || fence === "'(,)'")) {
+        return ["Tuple", ...opsOf(inner)] as MathJsonExpression;
+      }
       return ops.length === 1 ? ops[0] : [head, ...ops];
+    }
 
     // Canonicalization wraps an integrand in a lambda and its bounds in `Limits`;
     // `Integrate(x ^ 2, (x, 0, 1))` parses back to exactly the same thing.
@@ -152,8 +163,9 @@ function rewrite(node: unknown): MathJsonExpression {
       return rewrite(one(im) ? ["Add", re, "i"] : ["Add", re, ["Multiply", im, "i"]]);
     }
 
+    // `f^{(0, 1)}`: the parse holds a bare comma list in a delimiter; the call takes its members.
     default:
-      return [head, ...ops];
+      return [head, ...ops.flatMap((op) => (isCommaList(op) ? opsOf(opsOf(op)[0]) : [op]))] as MathJsonExpression;
   }
 }
 

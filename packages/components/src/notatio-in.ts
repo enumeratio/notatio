@@ -6,6 +6,7 @@ import { openPlaybackMenu } from "./playback-menu.ts";
 import { latexForField, pastedFrom } from "./clipboard.ts";
 import { ensureStyles } from "./styles.ts";
 import {
+  AS_TYPED,
   assignLatex,
   inferRange,
   isIntegerKnob,
@@ -468,7 +469,7 @@ export class NotatioIn extends LitElement {
       let next = translated?.written;
       if (next === undefined) {
         const { engine, toInputForm } = (NotatioIn.#local ??= await loadLocal());
-        next = toInputForm(engine.parse(latex, { form: "raw" }).json);
+        next = toInputForm(engine.parse(latex, AS_TYPED).json);
       }
       if (this.value === latex) this.inputForm = next;
     } catch {
@@ -520,7 +521,7 @@ export class NotatioIn extends LitElement {
     if (!NotatioIn.#local) return "";
     const { engine, toInputForm } = NotatioIn.#local;
     try {
-      return toInputForm(engine.parse(latex, { form: "raw" }).json);
+      return toInputForm(engine.parse(latex, AS_TYPED).json);
     } catch {
       return "";
     }
