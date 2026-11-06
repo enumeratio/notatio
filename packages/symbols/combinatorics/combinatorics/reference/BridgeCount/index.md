@@ -3,6 +3,11 @@ name: BridgeCount
 domain: Graph statistics
 signature: BridgeCount(graph)
 summary: The edges whose deletion leaves more components.
+signatures:
+  - call: BridgeCount(graph)
+    description: The edges whose deletion leaves more components.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

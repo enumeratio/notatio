@@ -3,6 +3,11 @@ name: MaximumDegree
 domain: Graph statistics
 signature: MaximumDegree(graph)
 summary: The greatest number of edges at one vertex.
+signatures:
+  - call: MaximumDegree(graph)
+    description: The greatest number of edges at one vertex.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

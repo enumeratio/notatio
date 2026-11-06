@@ -3,6 +3,11 @@ name: InducedPathOnThreeVerticesCount
 domain: Graph statistics
 signature: InducedPathOnThreeVerticesCount(graph)
 summary: "The sets of three vertices that induce a path: exactly two of the three edges."
+signatures:
+  - call: InducedPathOnThreeVerticesCount(graph)
+    description: "The sets of three vertices that induce a path: exactly two of the three edges."
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

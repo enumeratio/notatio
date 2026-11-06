@@ -3,6 +3,11 @@ name: GraphLeafCount
 domain: Graph statistics
 signature: GraphLeafCount(graph)
 summary: The vertices with exactly one edge.
+signatures:
+  - call: GraphLeafCount(graph)
+    description: The vertices with exactly one edge.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -3,6 +3,11 @@ name: IndependenceNumber
 domain: Graph statistics
 signature: IndependenceNumber(graph)
 summary: The most vertices that are pairwise non-adjacent.
+signatures:
+  - call: IndependenceNumber(graph)
+    description: The most vertices that are pairwise non-adjacent.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

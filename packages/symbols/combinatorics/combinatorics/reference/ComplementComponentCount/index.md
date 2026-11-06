@@ -3,6 +3,11 @@ name: ComplementComponentCount
 domain: Graph statistics
 signature: ComplementComponentCount(graph)
 summary: The connected components of the complement graph.
+signatures:
+  - call: ComplementComponentCount(graph)
+    description: The connected components of the complement graph.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

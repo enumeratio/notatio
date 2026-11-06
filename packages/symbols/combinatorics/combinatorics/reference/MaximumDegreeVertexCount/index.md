@@ -3,6 +3,11 @@ name: MaximumDegreeVertexCount
 domain: Graph statistics
 signature: MaximumDegreeVertexCount(graph)
 summary: The vertices whose degree is the greatest.
+signatures:
+  - call: MaximumDegreeVertexCount(graph)
+    description: The vertices whose degree is the greatest.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

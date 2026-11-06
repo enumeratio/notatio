@@ -3,6 +3,11 @@ name: TotalIrregularity
 domain: Graph statistics
 signature: TotalIrregularity(graph)
 summary: The sum over the unordered pairs of vertices of the difference of their degrees.
+signatures:
+  - call: TotalIrregularity(graph)
+    description: The sum over the unordered pairs of vertices of the difference of their degrees.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -3,6 +3,11 @@ name: IndependentSetCount
 domain: Graph statistics
 signature: IndependentSetCount(graph)
 summary: The sets of vertices, the empty set included, with no two adjacent.
+signatures:
+  - call: IndependentSetCount(graph)
+    description: The sets of vertices, the empty set included, with no two adjacent.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -3,6 +3,11 @@ name: MatchingNumber
 domain: Graph statistics
 signature: MatchingNumber(graph)
 summary: The most edges with no two sharing a vertex.
+signatures:
+  - call: MatchingNumber(graph)
+    description: The most edges with no two sharing a vertex.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

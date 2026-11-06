@@ -3,6 +3,11 @@ name: TriangleCount
 domain: Graph statistics
 signature: TriangleCount(graph)
 summary: The triples of vertices that are pairwise adjacent.
+signatures:
+  - call: TriangleCount(graph)
+    description: The triples of vertices that are pairwise adjacent.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

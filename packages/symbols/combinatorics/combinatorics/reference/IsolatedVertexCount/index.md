@@ -3,6 +3,11 @@ name: IsolatedVertexCount
 domain: Graph statistics
 signature: IsolatedVertexCount(graph)
 summary: The vertices with no edge.
+signatures:
+  - call: IsolatedVertexCount(graph)
+    description: The vertices with no edge.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

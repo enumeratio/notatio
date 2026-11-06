@@ -3,6 +3,11 @@ name: DistanceFourPairCount
 domain: Graph statistics
 signature: DistanceFourPairCount(graph)
 summary: The pairs of vertices at distance 4.
+signatures:
+  - call: DistanceFourPairCount(graph)
+    description: The pairs of vertices at distance 4.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

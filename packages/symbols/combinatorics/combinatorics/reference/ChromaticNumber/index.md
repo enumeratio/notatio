@@ -3,6 +3,11 @@ name: ChromaticNumber
 domain: Graph statistics
 signature: ChromaticNumber(graph)
 summary: The fewest colors for the vertices so that adjacent vertices differ.
+signatures:
+  - call: ChromaticNumber(graph)
+    description: The fewest colors for the vertices so that adjacent vertices differ.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

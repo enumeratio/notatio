@@ -3,6 +3,11 @@ name: TriangleVertexCount
 domain: Graph statistics
 signature: TriangleVertexCount(graph)
 summary: The vertices on a triangle.
+signatures:
+  - call: TriangleVertexCount(graph)
+    description: The vertices on a triangle.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

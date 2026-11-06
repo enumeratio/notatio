@@ -3,6 +3,11 @@ name: FirstZagrebIndex
 domain: Graph statistics
 signature: FirstZagrebIndex(graph)
 summary: The sum of the squares of the degrees.
+signatures:
+  - call: FirstZagrebIndex(graph)
+    description: The sum of the squares of the degrees.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

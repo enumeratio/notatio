@@ -3,6 +3,11 @@ name: DistanceTwoPairCount
 domain: Graph statistics
 signature: DistanceTwoPairCount(graph)
 summary: The pairs of vertices at distance 2.
+signatures:
+  - call: DistanceTwoPairCount(graph)
+    description: The pairs of vertices at distance 2.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

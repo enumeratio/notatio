@@ -3,6 +3,11 @@ name: FourCliqueCount
 domain: Graph statistics
 signature: FourCliqueCount(graph)
 summary: The sets of four vertices that are pairwise adjacent.
+signatures:
+  - call: FourCliqueCount(graph)
+    description: The sets of four vertices that are pairwise adjacent.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

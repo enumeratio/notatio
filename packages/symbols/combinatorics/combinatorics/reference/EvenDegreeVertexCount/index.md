@@ -3,6 +3,11 @@ name: EvenDegreeVertexCount
 domain: Graph statistics
 signature: EvenDegreeVertexCount(graph)
 summary: The vertices with an even number of edges.
+signatures:
+  - call: EvenDegreeVertexCount(graph)
+    description: The vertices with an even number of edges.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

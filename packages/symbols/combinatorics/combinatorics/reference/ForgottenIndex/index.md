@@ -3,6 +3,11 @@ name: ForgottenIndex
 domain: Graph statistics
 signature: ForgottenIndex(graph)
 summary: The sum of the cubes of the degrees.
+signatures:
+  - call: ForgottenIndex(graph)
+    description: The sum of the cubes of the degrees.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

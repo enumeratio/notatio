@@ -3,6 +3,11 @@ name: DegreeTwoVertexCount
 domain: Graph statistics
 signature: DegreeTwoVertexCount(graph)
 summary: The vertices with exactly two edges.
+signatures:
+  - call: DegreeTwoVertexCount(graph)
+    description: The vertices with exactly two edges.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

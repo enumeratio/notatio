@@ -3,6 +3,11 @@ name: CutVertexCount
 domain: Graph statistics
 signature: CutVertexCount(graph)
 summary: The vertices whose deletion leaves more components.
+signatures:
+  - call: CutVertexCount(graph)
+    description: The vertices whose deletion leaves more components.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
