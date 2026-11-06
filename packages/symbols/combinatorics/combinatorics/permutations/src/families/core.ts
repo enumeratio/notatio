@@ -97,9 +97,10 @@ export const hasLength = (list: MathJSON, length: MathJSON, then: MathJSON): Mat
 ];
 
 /** The symmetric group: the permutations of n in lex order. Its count passes 2^53 at n = 19,
- *  where compiled code gives way to exact integers. */
+ *  where compiled code gives way to BigInt-compiled code (the interpreter takes ~0.2 s a row). */
 export const symmetricGroup: EpsilFamily = {
   head: "SymmetricGroup",
+  bigSamples: [[19], [25]],
   carrier: "Permutation",
   paramCount: 1,
   kind: "ints",
@@ -115,6 +116,11 @@ export const symmetricGroup: EpsilFamily = {
 /** The k-permutations (arrangements) of n, n!/(n − k)! of them, in lex order. */
 export const kPermutations: EpsilFamily = {
   head: "KPermutations",
+  // n!/(n − k)! passes 2^53 at (25, 13).
+  bigSamples: [
+    [25, 13],
+    [30, 12],
+  ],
   paramCount: 2,
   kind: "ints",
   params: ["_n", "_k"],
@@ -139,6 +145,8 @@ const magnitude = (j: MathJSON): MathJSON => ["Abs", element(j)];
 /** The hyperoctahedral group B_n: permutations with a sign on each entry, 2^n n! of them. */
 const signedPermutations: EpsilFamily = {
   head: "SignedPermutations",
+  // 2^n n! first passes 2^53 at n = 15.
+  bigSamples: [[15], [18]],
   carrier: "SignedPermutation",
   paramCount: 1,
   kind: "ints",

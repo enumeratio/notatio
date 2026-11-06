@@ -55,38 +55,40 @@ const propertyOnly = computed(() => component.value?.attributes.filter((a) => a.
 
     <h2>Props</h2>
     <p v-if="props_.length === 0">This component takes no props.</p>
-    <table v-else>
-      <thead>
-        <tr>
-          <th>Prop</th>
-          <th>Type</th>
-          <th>Default</th>
-          <th>Notes</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="a in props_" :key="a.property">
-          <td>
-            <code>{{ a.property }}</code>
-            <div v-if="a.property !== a.attribute" class="prop">
-              attribute <code>{{ a.attribute }}</code>
-            </div>
-          </td>
-          <td>
-            <code v-if="a.type">{{ a.type }}</code>
-            <span v-else>—</span>
-          </td>
-          <td>
-            <code v-if="a.default">{{ a.default }}</code>
-            <span v-else>—</span>
-          </td>
-          <td>
-            <span v-if="a.description" v-html="inline(a.description)" />
-            <em v-if="a.reflects" class="reflects">reflects</em>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div v-else class="props-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Prop</th>
+            <th>Type</th>
+            <th>Default</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="a in props_" :key="a.property">
+            <td>
+              <code>{{ a.property }}</code>
+              <div v-if="a.property !== a.attribute" class="prop">
+                attribute <code>{{ a.attribute }}</code>
+              </div>
+            </td>
+            <td>
+              <code v-if="a.type">{{ a.type }}</code>
+              <span v-else>—</span>
+            </td>
+            <td>
+              <code v-if="a.default">{{ a.default }}</code>
+              <span v-else>—</span>
+            </td>
+            <td>
+              <span v-if="a.description" v-html="inline(a.description)" />
+              <em v-if="a.reflects" class="reflects">reflects</em>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <h2>As a web component</h2>
     <p>
@@ -109,6 +111,9 @@ const propertyOnly = computed(() => component.value?.attributes.filter((a) => a.
 </template>
 
 <style scoped>
+.props-scroll {
+  overflow-x: auto;
+}
 .component-page table {
   display: table;
   width: 100%;

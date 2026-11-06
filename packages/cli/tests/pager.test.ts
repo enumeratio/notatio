@@ -111,9 +111,9 @@ it("holds a bigint row index, and writes a long one in scientific form when the 
   await narrow.press("G");
   const line = status(narrow.d.text());
   expect(Array.from(line).length).toBeLessThanOrEqual(60);
-  expect(line).toBe("rows 1.55 × 10²⁵–1.55 × 10²⁵ of ≈ 1.55 × 10²⁵");
+  expect(line).toBe("rows near 1.55 × 10²⁵, 4 shown, of ≈ 1.55 × 10²⁵");
   await narrow.press(":", ..."15511210043330985984000000".split(""), "\r");
-  expect(status(narrow.d.text())).toBe("rows 1.55 × 10²⁵–1.55 × 10²⁵ of ≈ 1.55 × 10²⁵");
+  expect(status(narrow.d.text())).toBe("rows near 1.55 × 10²⁵, 4 shown, of ≈ 1.55 × 10²⁵");
 });
 
 it("stays on the page it has when a row past an unmeasured end is asked for", async () => {

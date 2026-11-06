@@ -138,6 +138,11 @@ const optedIn: readonly (readonly [head: string, p: number[], count: (() => bigi
   ["CarlitzCompositions", [68], undefined, true],
   ["ZigzagCompositions", [82], undefined, false],
   ["ParkingFunctions", [15], () => 16n ** 14n, false],
+  // Lex-ranked families, which a table view scrolls row by row: 25! is past 2^53 and the interpreter takes ~0.2 s a row.
+  ["SymmetricGroup", [25], () => factorial(25), true],
+  ["KPermutations", [25, 13], () => factorial(25) / factorial(12), true],
+  ["SignedPermutations", [15], () => 2n ** 15n * factorial(15), true],
+  ["IntegerCompositions", [55], () => 2n ** 54n, true],
 ];
 const byHead = new Map(allFamilies.filter(isEpsilFamily).map((family) => [family.head, family]));
 

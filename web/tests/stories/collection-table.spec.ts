@@ -136,6 +136,27 @@ test.describe("CollectionTable last row", () => {
   });
 });
 
+test.describe("CollectionTable past 2^53", () => {
+  test("SymmetricGroup(25): the index column tells the rows apart, and the footer writes both ends alike", async ({
+    page,
+  }) => {
+    const table = await openStory(page, "symmetric-group-25-last-row");
+    const labels = await table.locator(".tvb-row[data-index] .tvb-idx").allInnerTexts();
+    expect(new Set(labels).size).toBe(labels.length);
+    await expect(table.locator(".tvb-status")).toHaveText(/^rows near 1\.55 × 10²⁵, 12 shown, of/);
+  });
+
+  test("the component page does not scroll sideways at 390 px", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await openStory(page, "symmetric-group-25-last-row");
+    const widths = await page.evaluate(() => [
+      document.documentElement.scrollWidth,
+      document.documentElement.clientWidth,
+    ]);
+    expect(widths[0]).toBe(widths[1]);
+  });
+});
+
 test.describe("CollectionTable after a sort", () => {
   test("row 1 sits directly under the header after a sort from the bottom", async ({ page }) => {
     const table = await openStory(page, "symmetric-group-5-statistics");
