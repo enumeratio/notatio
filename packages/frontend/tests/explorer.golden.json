@@ -1479,7 +1479,12 @@
       "start": 4
     },
     "glyph": "composition",
-    "columns": ["BargraphHalfPerimeter", "BargraphUpStepCount", "CompositionMajorIndex", "CompositionNakayamaGlobalDimension"],
+    "columns": [
+      "BargraphHalfPerimeter",
+      "BargraphUpStepCount",
+      "CompositionMajorIndex",
+      "CompositionNakayamaGlobalDimension"
+    ],
     "derived": true,
     "statistics": 46
   },
@@ -1791,7 +1796,12 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": ["AdjacentSuccessorCount", "AscentCountIncludingLargestEntry", "AttackingInversionCount", "AttackingPairCount"],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "AscentCountIncludingLargestEntry",
+      "AttackingInversionCount",
+      "AttackingPairCount"
+    ],
     "derived": true,
     "statistics": 27
   },
@@ -1875,7 +1885,12 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": ["AdjacentSuccessorCount", "AscentCountIncludingLargestEntry", "AttackingInversionCount", "AttackingPairCount"],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "AscentCountIncludingLargestEntry",
+      "AttackingInversionCount",
+      "AttackingPairCount"
+    ],
     "derived": true,
     "statistics": 27
   },
@@ -1889,7 +1904,12 @@
       "start": 4
     },
     "glyph": "tableau",
-    "columns": ["AdjacentSuccessorCount", "AscentCountIncludingLargestEntry", "AttackingInversionCount", "AttackingPairCount"],
+    "columns": [
+      "AdjacentSuccessorCount",
+      "AscentCountIncludingLargestEntry",
+      "AttackingInversionCount",
+      "AttackingPairCount"
+    ],
     "derived": true,
     "statistics": 27
   },
