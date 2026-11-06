@@ -1,5 +1,5 @@
 /// <reference types="@webgpu/types" />
-import { zetaWGSL } from "@enumeratio/analytic/shader";
+import { withWGSL } from "@enumeratio/analytic/shader";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 
 // Opt-in GPU evaluation of a plot grid: one compute-shader invocation per grid point of a
@@ -141,8 +141,7 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
 `;
 
 /** The complete compute shader for a complex expression over `variable`. */
-export const complexComputeShader = (variable: string, code: string): string =>
-  `${zetaWGSL}\n${COMPLEX_TAIL(variable, code)}`;
+export const complexComputeShader = (variable: string, code: string): string => withWGSL(COMPLEX_TAIL(variable, code));
 
 /** Bytes before the literal slots: the grid parameters. */
 const COMPLEX_PARAMS_OFFSET = 32;

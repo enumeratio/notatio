@@ -6,8 +6,12 @@
 //
 //   xvfb-run -a pnpm exec playwright test -c tests/stories/playwright.config.ts plots
 
+import { fileURLToPath } from "node:url";
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+
+/** This checkout's root, which the dev server serves under `/@fs/`. */
+const REPO = fileURLToPath(new URL("../../../", import.meta.url));
 
 /** A `<graphics-3d-box>` whose expression contains `needle`, scrolled into view so it draws. */
 async function surface(page: Page, needle: string): Promise<Locator> {
@@ -49,7 +53,7 @@ test("a surface with no real value says so instead of drawing only its title (S#
 
 // --- Symbol pages (S#4) ---------------------------------------------------------------------------
 
-for (const head of ["BesselJ", "AiryAi"]) {
+for (const head of ["BesselY", "AiryAi"]) {
   test(`${head}'s page never shows the complex plot's raw status text (S#4)`, async ({ page }) => {
     await page.goto(`/reference/symbol/${head}`);
     // Its real slice draws, and no portrait is offered that the GPU emitter cannot lower.
@@ -271,12 +275,10 @@ test.describe("on the GPU", () => {
   /** `hurwitz(s, a)` on the GPU and the double-precision kernel, over a grid of a: both values, and whether the shader declined. */
   async function hurwitzGrid(page: Page, s: [number, number], step: number, span: number) {
     return page.evaluate(
-      async ([sr, si, step, span]) => {
-        const { zetaWGSL } = await import(
-          "/@fs/home/user/work/fxplot/packages/symbols/analysis/analytic/src/shader.ts" as string
-        );
+      async ([sr, si, step, span, repo]) => {
+        const { zetaWGSL } = await import(`/@fs${repo}packages/symbols/analysis/analytic/src/shader.ts` as string);
         const cpu = await import(
-          "/@fs/home/user/work/fxplot/packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts" as string
+          `/@fs${repo}packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts` as string
         );
         const points: number[][] = [];
         for (let y = -span; y <= span; y += step)
@@ -321,7 +323,7 @@ test.describe("on the GPU", () => {
           return { a: [ar, ai], err, declined: gpu[4 * i + 2]! > 0.5 };
         });
       },
-      [s[0], s[1], step, span] as const,
+      [s[0], s[1], step, span, REPO] as const,
     );
   }
 

@@ -1,4 +1,5 @@
 import { type BoxNode, graphics3dOf, graphicsOf, makeBoxes, optionsOfBox } from "@enumeratio/boxes";
+import { parseExpression } from "@enumeratio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import type { Complex } from "../src/complex-eval.ts";
 import { complexSurfaceBox, sampleComplexSurface } from "../src/complex-plot-3d.ts";
@@ -13,7 +14,7 @@ import {
 import { renderPlot } from "../src/plot-box.ts";
 import { gradientNamed } from "../src/palettes.ts";
 import { PLOT_NOTATION } from "../src/plot-notation.ts";
-import { complexPlotSettingsOf } from "../src/symbols.ts";
+import { complexPlot3dSettingsOf, complexPlotSettingsOf } from "../src/symbols.ts";
 import { imagesIn } from "./png.ts";
 
 const phase = gradientNamed("phase");
@@ -157,4 +158,78 @@ test("a ComplexPlot3D lowers to a surface not yet sampled, holding its expressio
   expect(box[0]).toBe("InterpretationBox");
   expect(optionsOfBox(graphics3dOf(box)!.box).Producer).toBe("ComplexPlot3D");
   expect(JSON.stringify(box)).toContain('"Divide"');
+});
+
+// --- hand-written corners (BL-335) ---------------------------------------------------------------
+
+/** The view a portrait written as Epsil `src` is drawn over: its frame's plot range, as `[re0, re1, im0, im1]`. */
+const viewOfSource = (src: string): number[] => {
+  const { json, errors } = parseExpression(src);
+  expect(errors, src).toEqual([]);
+  const box = makeBoxes(json as never, PLOT_NOTATION) as BoxNode;
+  expect(box[0], src).toBe("InterpretationBox");
+  return (optionsOfBox(graphicsOf(box)!.box).PlotRange as number[][]).flat();
+};
+
+const DEFAULT_RANGE = [-1.2, 1.2, -1.2, 1.2];
+
+test("corners reach the view in every spelling of the range", () => {
+  for (const range of [
+    "{z, -4 - 4*I, 4 + 4*I}",
+    "(z, -4 - 4*I, 4 + 4*I)",
+    "(z, -4-4I, 4+4I)",
+    "{z, -4 - 4*i, 4 + 4*i}",
+    "{z, Complex(-4, -4), Complex(4, 4)}",
+    "{z, -4 + (-4)*I, 4 + 4*I}",
+  ])
+    expect(viewOfSource(`ComplexPlot(Gamma(z), ${range})`), range).toEqual([-4, 4, -4, 4]);
+});
+
+test("the view is centered on the rectangle and as tall as its longer side", () => {
+  // The frame is square, so the longer side sets the extent; a wider screen shows more to the sides.
+  expect(viewOfSource("ComplexPlot(z, {z, 1 + 2*I, 3 + 6*I})")).toEqual([0, 4, 2, 6]);
+  expect(viewOfSource("ComplexPlot(z, {z, -2 - I, 2 + I})")).toEqual([-2, 2, -2, 2]);
+  expect(viewOfSource("ComplexPlot(z, {z, -Pi - Pi*I, Pi + Pi*I})")[1]).toBeCloseTo(Math.PI, 12);
+  expect(complexPlotSettingsOf(parseExpression("ComplexPlot(z, {z, 1 + 2*I, 3 + 6*I})").json as never)).toMatchObject({
+    var: "z",
+    center: "2,4",
+    extent: "4",
+  });
+});
+
+test("corners an engine has folded read the same: Complex(a, b) with number literals", () => {
+  const folded = ["ComplexPlot", "z", ["Tuple", "z", ["Complex", { num: "-4" }, -4], ["Complex", 4, { num: "4.0" }]]];
+  expect(complexPlotSettingsOf(folded as never)).toMatchObject({ center: "0,0", extent: "8" });
+});
+
+test("a bare variable and an explicit Extent keep working beside corners", () => {
+  expect(viewOfSource("ComplexPlot(Gamma(z), z)")).toEqual(DEFAULT_RANGE);
+  expect(viewOfSource("ComplexPlot(Gamma(z), z, Extent -> 6)")).toEqual([-3, 3, -3, 3]);
+  // An option the author wrote wins over what the corners say.
+  expect(viewOfSource("ComplexPlot(Gamma(z), {z, -4 - 4*I, 4 + 4*I}, Extent -> 6)")).toEqual([-3, 3, -3, 3]);
+});
+
+test("corners that are not a real rectangle leave the default view, as ComplexPlot3D's domain does", () => {
+  for (const range of [
+    "{z, 4 + 4*I, -4 - 4*I}", // both parts reversed
+    "{z, 4 - 4*I, -4 + 4*I}", // the real part reversed
+    "{z, -4 + 4*I, 4 - 4*I}", // the imaginary part reversed
+    "{z, -4 - 4*I, 4 - 4*I}", // no height
+    "{z, -4, 4}", // a real interval spans no plane
+    "{z, a, b}", // not numbers
+    "{z, -4 - 4*I, 4 + 4*I*a}",
+    "{z, -4 - 4*I}", // one corner
+  ])
+    expect(viewOfSource(`ComplexPlot(Gamma(z), ${range})`), range).toEqual(DEFAULT_RANGE);
+  expect(complexPlotSettingsOf(parseExpression("ComplexPlot(z, {z, 4 + 4*I, -4 - 4*I})").json as never)).toEqual({
+    value: "z",
+    var: "z",
+  });
+});
+
+test("ComplexPlot3D reads the same spellings", () => {
+  const domain = (src: string) => complexPlot3dSettingsOf(parseExpression(src).json as never)?.domain;
+  expect(domain("ComplexPlot3D(z, {z, -2 - 2*I, 2 + 2*I})")).toBe("-2,2,-2,2");
+  expect(domain("ComplexPlot3D(z, (z, -2 - 2*I, 2 + 2*I))")).toBe("-2,2,-2,2");
+  expect(domain("ComplexPlot3D(z, {z, 2 + 2*I, -2 - 2*I})")).toBeUndefined();
 });
