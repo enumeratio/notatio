@@ -181,6 +181,39 @@ function alternatingSignMatrices(n: number): number[][][] {
   );
 }
 
+/** The parking functions of length n: the lists on 1 .. n whose k-th smallest entry is at most k. */
+function parkingFunctions(n: number): number[][] {
+  const found: number[][] = [];
+  const extend = (entries: number[]): void => {
+    if (entries.length === n) {
+      if (entries.toSorted((a, b) => a - b).every((entry, k) => entry <= k + 1)) found.push(entries);
+      return;
+    }
+    for (let entry = 1; entry <= n; entry++) extend([...entries, entry]);
+  };
+  extend([]);
+  return found;
+}
+
+/** The plane partitions of n boxes: rows that are partitions, each no longer than and entrywise at most the row above. */
+function planePartitions(n: number): number[][][] {
+  const rowsOf = (total: number, most: number): number[][] =>
+    total === 0
+      ? [[]]
+      : Array.from({ length: Math.min(total, most) }, (_, k) => Math.min(total, most) - k).flatMap((first) =>
+          rowsOf(total - first, first).map((rest) => [first, ...rest]),
+        );
+  const extend = (left: number, above: readonly number[] | undefined): number[][][] =>
+    left === 0
+      ? [[]]
+      : Array.from({ length: left }, (_, k) => k + 1).flatMap((total) =>
+          rowsOf(total, left)
+            .filter((row) => above === undefined || (row.length <= above.length && row.every((e, j) => e <= above[j]!)))
+            .flatMap((row) => extend(left - total, row).map((rest) => [row, ...rest])),
+        );
+  return extend(n, undefined);
+}
+
 /** Small subjects of each carrier, as MathJSON contents. */
 const SUBJECTS: Record<string, unknown[]> = {
   // Up to 4: the cubic statistics are slow to interpret, and the exhaustive sweeps elsewhere
@@ -202,6 +235,10 @@ const SUBJECTS: Record<string, unknown[]> = {
     ...[1, 2, 3, 4].flatMap(alternatingSignMatrices),
     ...(DEEP ? [...alternatingSignMatrices(5), ...alternatingSignMatrices(6).filter((_, i) => i % 4 === 0)] : []),
   ].map((rows) => list(rows.map(list))),
+  // Lengths to 3; deep, 4 and 5.
+  ParkingFunction: [1, 2, 3, ...(DEEP ? [4, 5] : [])].flatMap(parkingFunctions).map(list),
+  // Up to 4 boxes; deep, 5 and 6.
+  PlanePartition: [1, 2, 3, 4, ...(DEEP ? [5, 6] : [])].flatMap(planePartitions).map((rows) => list(rows.map(list))),
 };
 
 /** Statistics whose interpretation grows about threefold per size of partition: the largest size

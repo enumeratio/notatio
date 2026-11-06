@@ -408,6 +408,163 @@ const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS: readonly Definition[] = [
   ),
 ];
 
+// ── plane partitions ─────────────────────────────────────────────────────────────────────
+//
+// `_x` is the rows: each a weakly decreasing list of positive entries, no row longer than the one
+// above it. `reading` is the entries row by row; the cell `u` of it is in row `rowIds(u)` and column
+// `columnIds(u)`, its right neighbor is the cell `u + 1` and its neighbor below the cell `u + lengths(row)`.
+
+const planePartition = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
+  head,
+  on: "PlanePartition",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+/** `body` for a plane partition with at least one box, 0 otherwise. */
+const withParts = (body: MathJSON): MathJSON => cellsAtLeast(1, withReading(body));
+const withGrid = (body: MathJSON): MathJSON => cellsAtLeast(1, withColumns(body));
+const entryAt = (u: MathJSON): MathJSON => at(u, "reading");
+/** The cells `u` of the reading, counted where `test` holds. */
+const cellsWhere = (test: MathJSON): MathJSON => floored(sumOver(eachCell, ["If", test, 1, 0], "u"));
+/** How many entries equal `value`. */
+const entryMultiplicity = (value: MathJSON): MathJSON =>
+  floored(sumOver("reading", ["If", equals("e", value), 1, 0], "e"));
+/** The values 1 .. largest entry, so every part size. */
+const partSizes: MathJSON = through(max("reading"));
+const partRow = at("u", "rowIds");
+const partColumn = at("u", "columnIds");
+/** The entry right of cell `u`, 0 past the row's end. */
+const entryRight: MathJSON = ["If", less(partColumn, at(partRow, "lengths")), entryAt(add("u", 1)), 0];
+/** The entry below cell `u`, 0 where the next row is shorter or there is none. */
+const entryBelow: MathJSON = [
+  "If",
+  less(partRow, length()),
+  ["If", atMostValue(partColumn, at(add(partRow, 1), "lengths")), entryAt(add("u", at(partRow, "lengths"))), 0],
+  0,
+];
+const smallestEntry: MathJSON = ["Min", "reading"];
+
+const FINDSTAT_PLANE_PARTITION_STATISTICS: readonly Definition[] = [
+  planePartition(
+    "LargestPart",
+    "The largest entry: the corner of the array.",
+    withParts(max("reading")),
+    "FindStat's St001447, the height of the base box; the same head as on partitions.",
+  ),
+  planePartition(
+    "Trace",
+    "The sum of the diagonal entries.",
+    withGrid(floored(sumOver(eachCell, ["If", equals(partRow, partColumn), entryAt("u"), 0], "u"))),
+    "FindStat's St001919.",
+  ),
+  planePartition(
+    "BoxCount",
+    "The number of boxes: the sum of the entries.",
+    withParts(floored(["Sum", "reading"])),
+    "FindStat's St001422.",
+  ),
+  planePartition(
+    "RemovableBoxCount",
+    "The number of entries larger than both the entry to their right and the entry below.",
+    withGrid(cellsWhere(and(greater(entryAt("u"), entryRight), greater(entryAt("u"), entryBelow)))),
+    "FindStat's St001445. Taking one box off such an entry leaves a plane partition, and off any other does not.",
+  ),
+  planePartition("RowCount", "The number of rows.", withParts(length()), "FindStat's St001446."),
+  planePartition(
+    "ColumnCount",
+    "The number of columns: the length of the first row.",
+    withParts(at(1, "lengths")),
+    "FindStat's St001460.",
+  ),
+  planePartition(
+    "OddParts",
+    "Entries that are odd.",
+    withParts(["Count", ["Filter", "reading", ["Function", equals(["Mod", "e", 2], 1), "e"]]]),
+    "FindStat's St001448; the same head as on partitions.",
+  ),
+  planePartition(
+    "EvenParts",
+    "Entries that are even.",
+    withParts(["Count", ["Filter", "reading", ["Function", equals(["Mod", "e", 2], 0), "e"]]]),
+    "FindStat's St001452; the same head as on partitions.",
+  ),
+  planePartition(
+    "SmallestMissingPart",
+    "The smallest positive integer that is not an entry.",
+    [
+      "If",
+      less(length(reading), 1),
+      1,
+      withReading([
+        "Min",
+        forEach(
+          through(add(length("reading"), 1)),
+          ["If", equals(entryMultiplicity("k"), 0), "k", add(length("reading"), 1)],
+          "k",
+        ),
+      ]),
+    ],
+    "FindStat's St001449; the same head as on partitions. With n entries, one of 1 .. n + 1 is missing.",
+  ),
+  planePartition(
+    "DurfeeCube",
+    "The side of the largest cube in the array: the most diagonal entries d with the d-th at least d.",
+    withGrid(cellsWhere(and(equals(partRow, partColumn), atLeastValue(entryAt("u"), partRow)))),
+    "FindStat's St001451, the plane partition analogue of the Durfee square. Entries down the diagonal never increase, so once one falls short of its place every later one does.",
+  ),
+  planePartition(
+    "DistinctParts",
+    "How many distinct entries occur.",
+    withParts(floored(sumOver(partSizes, ["If", greater(entryMultiplicity("k"), 0), 1, 0], "k"))),
+    "FindStat's St001453, its distinct heights; the same head as on partitions.",
+  ),
+  planePartition(
+    "PartRange",
+    "The largest entry minus the smallest.",
+    withParts(subtract(max("reading"), smallestEntry)),
+    "FindStat's St001454; the same head as on partitions.",
+  ),
+  planePartition(
+    "LargestRepeatedPart",
+    "The largest entry that occurs at least twice; 0 if the entries are distinct.",
+    withParts(max(forEach(partSizes, ["If", atLeastValue(entryMultiplicity("k"), 2), "k", 0], "k"))),
+    "FindStat's St001455; the same head as on partitions.",
+  ),
+  planePartition(
+    "FirstRowSum",
+    "The sum of the first row.",
+    withParts(floored(sumOver(through(at(1, "lengths")), entryAt("j"), "j"))),
+    "FindStat's St001456.",
+  ),
+  planePartition(
+    "MultiplicityOfSmallestPart",
+    "How many entries equal the smallest.",
+    withParts(
+      bindList("least", smallestEntry, floored(sumOver("reading", ["If", equals("e", "least"), 1, 0], "e")), "integer"),
+    ),
+    "FindStat's St001457; the same head as on partitions.",
+  ),
+  planePartition(
+    "AmbientCubeSize",
+    "The side of the smallest cube that holds the array: the most of its rows, its columns and its largest entry.",
+    withParts(["Max", length(), at(1, "lengths"), entryAt(1)]),
+    "FindStat's St001920.",
+  ),
+  planePartition(
+    "PartCount",
+    "The number of parts: the entries.",
+    withParts(length("reading")),
+    "FindStat's St001922; the same head as on partitions.",
+  ),
+  planePartition(
+    "ConjugateTrace",
+    "The entries at least as large as their row number.",
+    withGrid(cellsWhere(atLeastValue(entryAt("u"), partRow))),
+    "FindStat's St001923.",
+  ),
+];
+
 export const TABLEAU_STATISTICS: readonly Definition[] = [
   stat(
     "RowOfLargestEntry",
@@ -498,4 +655,5 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
   ),
   ...FINDSTAT_TABLEAU_STATISTICS_3,
   ...FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS,
+  ...FINDSTAT_PLANE_PARTITION_STATISTICS,
 ];

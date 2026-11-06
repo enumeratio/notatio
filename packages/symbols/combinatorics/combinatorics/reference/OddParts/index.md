@@ -5,16 +5,21 @@ signature: OddParts(partition)
 summary: Parts that are odd.
 statOn:
   - IntegerPartition
+  - PlanePartition
 signatures:
   - call: OddParts(partition)
     description: Parts that are odd.
     library: enumeratio-combinatorics
-    type: (integer_partition) -> number
+    type: (integer_partition | plane_partition) -> number
 catalog:
   - system: findstat
     identity: St000148
     url: https://www.findstat.org/St000148
     on: IntegerPartition
+  - system: findstat
+    identity: St001448
+    url: https://www.findstat.org/St001448
+    on: PlanePartition
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

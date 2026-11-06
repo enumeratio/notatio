@@ -5,16 +5,21 @@ signature: EvenParts(partition)
 summary: Parts that are even.
 statOn:
   - IntegerPartition
+  - PlanePartition
 signatures:
   - call: EvenParts(partition)
     description: Parts that are even.
     library: enumeratio-combinatorics
-    type: (integer_partition) -> number
+    type: (integer_partition | plane_partition) -> number
 catalog:
   - system: findstat
     identity: St000142
     url: https://www.findstat.org/St000142
     on: IntegerPartition
+  - system: findstat
+    identity: St001452
+    url: https://www.findstat.org/St001452
+    on: PlanePartition
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

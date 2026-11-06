@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[Ties, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	1			the parking function $[2,1,1,4,2]$
+findstat-st001947-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'Ties'"]	0	0	FindStat St001947	FindStat's value for [1]
+findstat-st001947-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'Ties'"]	1	1	FindStat St001947	FindStat's value for [1,1]
+findstat-st001947-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'Ties'"]	0	0	FindStat St001947	FindStat's value for [1,2]

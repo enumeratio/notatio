@@ -17,15 +17,20 @@ catalog:
     identity: St000903
     url: https://www.findstat.org/St000903
     on: IntegerComposition
+  - system: findstat
+    identity: St001453
+    url: https://www.findstat.org/St001453
+    on: PlanePartition
 statOn:
   - CorePartition
   - IntegerComposition
   - IntegerPartition
+  - PlanePartition
 signatures:
   - call: DistinctParts(partition)
     description: How many distinct part sizes occur.
     library: enumeratio-combinatorics
-    type: (composition | integer_partition) -> number
+    type: (composition | integer_partition | plane_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

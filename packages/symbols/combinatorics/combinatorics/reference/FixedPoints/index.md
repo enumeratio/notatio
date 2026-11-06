@@ -22,9 +22,14 @@ catalog:
     identity: St000022
     url: https://www.findstat.org/St000022
     on: Permutation
+  - system: findstat
+    identity: St001903
+    url: https://www.findstat.org/St001903
+    on: ParkingFunction
 statOn:
   - DecoratedPermutation
   - Endofunction
+  - ParkingFunction
   - Permutation
   - SignedPermutation
 bindings:

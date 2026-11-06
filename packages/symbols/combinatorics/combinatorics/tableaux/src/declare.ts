@@ -30,8 +30,9 @@ export function declareTableaux(ce: Engine): void {
       ...tableauxPlanePlanePartitionsEntries,
     ].map(liftFamily),
   );
-  // The family yields bare rows, so `CombinatorialStat` is told which carrier they are.
+  // These families yield bare rows, so `CombinatorialStat` is told which carrier they are.
   registerCollectionCarrier(ce, "AlternatingSignMatrices", "AlternatingSignMatrix");
+  registerCollectionCarrier(ce, "PlanePartitions", "PlanePartition");
   // Its statistics, after its own carriers and families.
   declareStatistics(ce, TABLEAU_STATISTICS);
 }

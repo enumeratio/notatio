@@ -8,13 +8,18 @@ catalog:
     identity: St000010
     url: https://www.findstat.org/St000010
     on: IntegerPartition
+  - system: findstat
+    identity: St001922
+    url: https://www.findstat.org/St001922
+    on: PlanePartition
 statOn:
   - IntegerPartition
+  - PlanePartition
 signatures:
   - call: PartCount(partition)
     description: The number of parts.
     library: enumeratio-combinatorics
-    type: (integer_partition) -> number
+    type: (integer_partition | plane_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

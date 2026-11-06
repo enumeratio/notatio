@@ -42,8 +42,14 @@ bindings:
 stub: engine
 statOn:
   - Finset
+  - ParkingFunction
   - PermutationInversion
   - SubexcedantSeq
 attributes:
   - HoldAll
+catalog:
+  - system: findstat
+    identity: St000165
+    url: https://www.findstat.org/St000165
+    on: ParkingFunction
 ---

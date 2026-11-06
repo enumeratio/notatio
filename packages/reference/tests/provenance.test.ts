@@ -1888,6 +1888,23 @@ const NOVEL = [
   "DistinctSquareCount",
   "CyclicShiftIndex",
   "BorderCount",
+  "LuckyCars",
+  "TotalParkingDisplacement",
+  "MaximalParkingDisplacement",
+  "SumLessLength",
+  "CriticalLeftToRightMaxima",
+  "Deficiencies",
+  "InitialIncreasingSegmentLength",
+  "Ties",
+  "CenterSize",
+  "BoxCount",
+  "RemovableBoxCount",
+  "RowCount",
+  "ColumnCount",
+  "DurfeeCube",
+  "FirstRowSum",
+  "AmbientCubeSize",
+  "ConjugateTrace",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

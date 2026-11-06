@@ -46,8 +46,9 @@ const evaluate = (head: string, word: readonly number[]): number =>
   applyDefinition(ce, index.get(`${head}@BinaryWord`)!, ce.box(["List", ...word] as never)).re;
 
 test("every binary-word definition has an independent reading", () => {
-  for (const { head } of WORD_STATISTICS) expect(WORD_READINGS[head], head).toBeDefined();
-  expect(Object.keys(WORD_READINGS).length).toBe(WORD_STATISTICS.length);
+  const heads = WORD_STATISTICS.filter((d) => d.on === "BinaryWord").map((d) => d.head);
+  for (const head of heads) expect(WORD_READINGS[head], head).toBeDefined();
+  expect(Object.keys(WORD_READINGS).length).toBe(heads.length);
 });
 
 for (const [head, expected] of Object.entries(WORD_READINGS))
