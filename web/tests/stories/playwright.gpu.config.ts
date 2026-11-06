@@ -1,6 +1,7 @@
 // Playwright config for the WebGPU specs (gpu.spec.ts), kept apart from the headless one:
 // headless Chromium destroys any device whose canvas is configured, so these run headed.
-// There is no display on a build box; run under a virtual one, with SwiftShader as the adapter:
+// There is no display on a build box; run under a virtual one, with SwiftShader as the adapter. Presenting a
+// canvas also needs Mesa's Vulkan and EGL (mesa-vulkan-drivers, libegl-mesa0, libgles2):
 //
 //   cd web && xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts
 //
