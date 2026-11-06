@@ -30,18 +30,25 @@ export const fragment = ref<Fragment>({ target: "" });
 const TARGET_CLASS = "fragment-target";
 /** How long to wait for a target that renders late (client-only sections, async cards). */
 const WAIT_MS = 30_000;
+/** How long a target is kept in view as the page grows: measured gaps of 5 s between layout steps at 6x CPU throttle. */
+const SETTLE_MS = 60_000;
+/** Input that means the reader is scrolling on their own. */
+const READER_EVENTS = ["wheel", "touchstart", "keydown", "pointerdown"] as const;
 let marked: Element | null = null;
 // Watches the document for a target that is not there yet.
 let waiting: MutationObserver | undefined;
 let giveUp = 0;
 // Vue rewrites `className` when a component's class binding patches, which drops ours.
 let guard: MutationObserver | undefined;
+// Keeps the target in view while content above it loads; stops when the reader takes over.
+let settling: (() => void) | undefined;
 
 function unmark(): void {
   waiting?.disconnect();
   waiting = undefined;
   clearTimeout(giveUp);
   guard?.disconnect();
+  settling?.();
   marked?.classList.remove(TARGET_CLASS);
   marked = null;
 }
@@ -72,11 +79,33 @@ function mark(target: string, scroll: boolean): void {
   guard.observe(el, { attributes: true, attributeFilter: ["class"] });
   // A frame later, so a section the target sits in has opened first.
   if (scroll) {
-    const reveal = (): void => el.scrollIntoView({ block: "center" });
-    requestAnimationFrame(reveal);
-    // Again once the page has settled: cells swapping in for prerendered markup move the card.
-    setTimeout(reveal, 400);
+    requestAnimationFrame(() => keepInView(el));
   }
+}
+
+/**
+ * Scroll `el` to the middle, and again whenever the page resizes (examples hydrating and
+ * plots laying out above it push it down; on a slow machine that is long after the first
+ * scroll) until SETTLE_MS pass, the reader scrolls, or the target changes.
+ */
+function keepInView(el: Element): void {
+  const reveal = (): void => el.scrollIntoView({ block: "center" });
+  reveal();
+  const giveUp = window.setTimeout(stop, SETTLE_MS);
+  const resizes = new ResizeObserver(() => {
+    if (!el.isConnected) return stop();
+    reveal();
+  });
+  resizes.observe(document.documentElement);
+  for (const type of READER_EVENTS) window.addEventListener(type, stop, { passive: true });
+  function stop(): void {
+    clearTimeout(giveUp);
+    resizes.disconnect();
+    for (const type of READER_EVENTS) window.removeEventListener(type, stop);
+    if (settling === stop) settling = undefined;
+  }
+  settling?.();
+  settling = stop;
 }
 
 /** Re-read the URL: after navigation (scroll to the target) or history moves. */
