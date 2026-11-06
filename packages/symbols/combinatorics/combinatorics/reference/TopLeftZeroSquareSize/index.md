@@ -1,7 +1,7 @@
 ---
 name: TopLeftZeroSquareSize
-domain: Tableau statistics
-signature: TopLeftZeroSquareSize(tableau)
+domain: Alternating sign matrix statistics
+signature: TopLeftZeroSquareSize(matrix)
 summary: The side of the largest square of zeros at the top left corner.
 catalog:
   - system: findstat

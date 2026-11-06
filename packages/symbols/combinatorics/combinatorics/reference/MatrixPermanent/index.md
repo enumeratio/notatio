@@ -1,7 +1,7 @@
 ---
 name: MatrixPermanent
-domain: Tableau statistics
-signature: MatrixPermanent(tableau)
+domain: Alternating sign matrix statistics
+signature: MatrixPermanent(matrix)
 summary: "The permanent: the sum over the permutations s of the product of a(i, s(i))."
 signatures:
   - call: MatrixPermanent(tableau)

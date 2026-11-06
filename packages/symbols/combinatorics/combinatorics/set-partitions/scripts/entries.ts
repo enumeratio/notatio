@@ -30,6 +30,7 @@ export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.me
 export const generated: { standard: GeneratedEntries; curated: GeneratedEntries } = areaStatisticsEntries({
   subjectName: "partition",
   domain: "Set partition statistics",
+  carrierNames: { PerfectMatching: { subjectName: "matching", domain: "Perfect matching statistics" } },
   definitions: SET_PARTITION_STATISTICS,
   frontier: SET_PARTITIONS_FRONTIER,
   samples: SAMPLES,

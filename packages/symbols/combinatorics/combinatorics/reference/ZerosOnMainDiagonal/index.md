@@ -1,7 +1,7 @@
 ---
 name: ZerosOnMainDiagonal
-domain: Tableau statistics
-signature: ZerosOnMainDiagonal(tableau)
+domain: Alternating sign matrix statistics
+signature: ZerosOnMainDiagonal(matrix)
 summary: The number of 0s on the main diagonal.
 catalog:
   - system: findstat

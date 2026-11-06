@@ -1289,6 +1289,16 @@ export function renderingOf(expr: Json, inManipulate = false): Rendering | undef
 }
 
 /**
+ * An expression with controls in it as the `DynamicModule` that scopes them: the readouts read the
+ * controls' variables as wildcards, so a structural tree built from it follows its controls as
+ * `renderingOf`'s does. An expression with no controls is returned as it is.
+ */
+export function scopeOf(expr: Json): Json {
+  const names = controlNames(expr);
+  return names.size === 0 ? expr : (["DynamicModule", slottedExceptDeclarations(expr, names)] as unknown as Json);
+}
+
+/**
  * Heads that are boxes end to end -- `makeBoxes` writes them and the box renderer draws them: the
  * controls, `Dynamic` and `StringTemplate`. (`DynamicModule` can hold a transcript of cells, so its element still
  * comes from the symbol map; the box is what other environments read.)

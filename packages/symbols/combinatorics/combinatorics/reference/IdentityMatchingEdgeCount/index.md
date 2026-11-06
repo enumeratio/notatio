@@ -1,7 +1,7 @@
 ---
 name: IdentityMatchingEdgeCount
-domain: Set partition statistics
-signature: IdentityMatchingEdgeCount(partition)
+domain: Perfect matching statistics
+signature: IdentityMatchingEdgeCount(matching)
 summary: "Pairs {2k - 1, 2k}: the edges shared with the matching 12, 34, 56, ...."
 catalog:
   - system: findstat

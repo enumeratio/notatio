@@ -203,6 +203,61 @@ test.describe("AnimationRunning -> False", () => {
   });
 });
 
+test.describe("a previewed Animator", () => {
+  test.use({ viewport: { width: 1280, height: 900 } });
+
+  // Wolfram's Animator repeats (`AnimationRepetitions -> Infinity`), so a sweep that reaches its
+  // maximum comes back round to its minimum instead of stopping there.
+  test("cycles: it passes its maximum and comes back round", async ({ page }) => {
+    await page.goto("/docs/components/environments");
+    // The cards above settle first (the engine arriving reflows them), so the Animator stays on screen.
+    await expect(story(page, "an-animator-becomes-a-filmstrip")).toContainText("t = 0.75", { timeout: 120_000 });
+    const card = story(page, "a-held-animator");
+    const source = card.locator(".env-source");
+    await expect(source).toBeVisible({ timeout: 120_000 });
+    await source.fill("Row([Animator(t, (0, 1, 0.25)), Dynamic(Sin(Pi * t))])");
+    const animator = card.locator("animator-box");
+    const slider = animator.locator("input[type=range]");
+    await expect(animator).not.toHaveAttribute("animation-running", /.*/);
+    await expect(slider).toHaveAttribute("max", "1");
+    await animator.evaluate((n) => n.scrollIntoView({ block: "center" }));
+    await expect(animator.locator("button.control-play")).toHaveAttribute("aria-pressed", "true");
+    const seen: number[] = [];
+    await expect
+      .poll(
+        async () => {
+          seen.push(Number(await slider.inputValue()));
+          const top = seen.indexOf(1);
+          return top >= 0 && seen.slice(top).some((v) => v < 1);
+        },
+        { timeout: 30_000, intervals: [100] },
+      )
+      .toBe(true);
+  });
+});
+
+test.describe("a previewed Dynamic", () => {
+  // The web has an engine and a way in, so the expression is left alone and a readout beside a
+  // control is its value at the control's value, not the formula it was written as.
+  test("reads the value of the control beside it", async ({ page }) => {
+    await page.goto("/docs/components/environments");
+    const card = story(page, "a-held-animator");
+    const slider = card.locator("animator-box input[type=range]");
+    const readout = card.locator("dynamic-box");
+    await expect(slider).toBeVisible({ timeout: 120_000 });
+    await expect(readout).toContainText("0");
+    await expect(readout).not.toContainText("sin");
+    await slider.focus();
+    await page.keyboard.press("ArrowRight");
+    await page.keyboard.press("ArrowRight");
+    await expect(slider).toHaveValue("0.5");
+    // Sin(Pi * 0.5) is 1.
+    await expect(readout.locator("annotation")).toHaveText("1");
+    await card.scrollIntoViewIfNeeded();
+    await card.screenshot({ path: "/tmp/fxan-dynamic.png" });
+  });
+});
+
 test.describe("prefers-reduced-motion: reduce", () => {
   test.use({ reducedMotion: "reduce" });
 

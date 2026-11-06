@@ -1,7 +1,7 @@
 ---
 name: MaximalRightCrossingCount
-domain: Set partition statistics
-signature: MaximalRightCrossingCount(partition)
+domain: Perfect matching statistics
+signature: MaximalRightCrossingCount(matching)
 summary: "The most pairs (c, d) with a < c < b < d, over the pairs (a, b): arcs that cross a given arc at its right end."
 catalog:
   - system: findstat

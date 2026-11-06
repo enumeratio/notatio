@@ -1,7 +1,7 @@
 ---
 name: PositiveOneCount
-domain: Tableau statistics
-signature: PositiveOneCount(tableau)
+domain: Alternating sign matrix statistics
+signature: PositiveOneCount(matrix)
 summary: The number of entries equal to 1.
 catalog:
   - system: findstat

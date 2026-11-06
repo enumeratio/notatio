@@ -1,7 +1,7 @@
 ---
 name: NonzeroEntryCount
-domain: Tableau statistics
-signature: NonzeroEntryCount(tableau)
+domain: Alternating sign matrix statistics
+signature: NonzeroEntryCount(matrix)
 summary: The number of nonzero entries.
 catalog:
   - system: findstat

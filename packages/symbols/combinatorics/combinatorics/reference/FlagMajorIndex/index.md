@@ -1,7 +1,7 @@
 ---
 name: FlagMajorIndex
-domain: Permutation statistics
-signature: FlagMajorIndex(p)
+domain: Signed permutation statistics
+signature: FlagMajorIndex(signedPermutation)
 summary: The number of negative entries plus twice the sum of the descents, a negative first entry counting as a descent at 0.
 catalog:
   - system: findstat

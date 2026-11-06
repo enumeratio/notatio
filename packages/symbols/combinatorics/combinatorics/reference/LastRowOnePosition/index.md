@@ -1,7 +1,7 @@
 ---
 name: LastRowOnePosition
-domain: Tableau statistics
-signature: LastRowOnePosition(tableau)
+domain: Alternating sign matrix statistics
+signature: LastRowOnePosition(matrix)
 summary: The column of the unique 1 in the last row.
 catalog:
   - system: findstat

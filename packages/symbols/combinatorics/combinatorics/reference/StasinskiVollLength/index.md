@@ -1,7 +1,7 @@
 ---
 name: StasinskiVollLength
-domain: Permutation statistics
-signature: StasinskiVollLength(p)
+domain: Signed permutation statistics
+signature: StasinskiVollLength(signedPermutation)
 summary: Half the pairs -n <= i < j <= n of opposite parity with p(i) > p(j), where p(-k) = -p(k) and p(0) = 0.
 signatures:
   - call: StasinskiVollLength(p)

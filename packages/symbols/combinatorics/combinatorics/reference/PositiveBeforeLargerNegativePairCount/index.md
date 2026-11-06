@@ -1,7 +1,7 @@
 ---
 name: PositiveBeforeLargerNegativePairCount
-domain: Permutation statistics
-signature: PositiveBeforeLargerNegativePairCount(p)
+domain: Signed permutation statistics
+signature: PositiveBeforeLargerNegativePairCount(signedPermutation)
 summary: "Pairs i < j with 0 < p(i) < -p(j): the occurrences of the signed pattern 1-2."
 catalog:
   - system: findstat

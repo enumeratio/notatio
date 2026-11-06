@@ -1,7 +1,7 @@
 ---
 name: EarlyCloserPairCount
-domain: Set partition statistics
-signature: EarlyCloserPairCount(partition)
+domain: Perfect matching statistics
+signature: EarlyCloserPairCount(matching)
 summary: Pairs whose larger point is at most n + 1, for a matching of 2n points.
 catalog:
   - system: findstat

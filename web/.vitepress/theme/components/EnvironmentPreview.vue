@@ -16,6 +16,7 @@ import {
   mediaSignals,
   pageEnvironment,
   reduce,
+  scopeOf,
   watchPageEnvironment,
 } from "@enumeratio/frontend";
 import { type StructuralNode, structuralOf, toVNode } from "@enumeratio/frontend/vdom";
@@ -49,11 +50,12 @@ const reduced = computed(() => {
 const epsil = computed(() => (reduced.value === undefined ? "" : serializeExpression(reduced.value)));
 const json = computed(() => (reduced.value === undefined ? "" : JSON.stringify(reduced.value)));
 // The reduction as the vdom it is, reduced again for the page it sits on (a narrow window
-// stacks its rows): every head a tag, the elements lowering their own children.
+// stacks its rows): every head a tag, the elements lowering their own children, and the
+// controls' scope a `DynamicModule`, so a readout follows the control it reads.
 const page = shallowRef<Environment>(pageEnvironment());
 const tree = computed(() => {
   const expr = reduced.value;
-  return expr === undefined ? undefined : structuralOf(reduce(expr, page.value));
+  return expr === undefined ? undefined : structuralOf(scopeOf(reduce(expr, page.value)));
 });
 // One component for every tree, so the engine arriving (a new `reduced`, the same `json`) patches
 // the elements in place instead of mounting new ones.

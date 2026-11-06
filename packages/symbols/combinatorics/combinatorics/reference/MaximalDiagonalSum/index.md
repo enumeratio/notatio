@@ -1,7 +1,7 @@
 ---
 name: MaximalDiagonalSum
-domain: Tableau statistics
-signature: MaximalDiagonalSum(tableau)
+domain: Alternating sign matrix statistics
+signature: MaximalDiagonalSum(matrix)
 summary: The largest sum of the entries along a diagonal.
 catalog:
   - system: findstat

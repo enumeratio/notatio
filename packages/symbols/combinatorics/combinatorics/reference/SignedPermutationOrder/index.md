@@ -1,7 +1,7 @@
 ---
 name: SignedPermutationOrder
-domain: Permutation statistics
-signature: SignedPermutationOrder(p)
+domain: Signed permutation statistics
+signature: SignedPermutationOrder(signedPermutation)
 summary: The least m >= 1 with p^m the identity, p acting on -n..n.
 signatures:
   - call: SignedPermutationOrder(p)

@@ -1,7 +1,7 @@
 ---
 name: NegativeSumPairCount
-domain: Permutation statistics
-signature: NegativeSumPairCount(p)
+domain: Signed permutation statistics
+signature: NegativeSumPairCount(signedPermutation)
 summary: Pairs i < j with p(i) + p(j) < 0.
 catalog:
   - system: findstat

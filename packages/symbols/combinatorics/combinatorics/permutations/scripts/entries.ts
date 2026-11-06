@@ -58,6 +58,7 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: PERMUTATIONS_FRONTIER,
   samples: SAMPLES,
   declareArea: declarePermutations,
+  carrierNames: { SignedPermutation: { subjectName: "signedPermutation", domain: "Signed permutation statistics" } },
   curatedHeads: CURATED_HEADS,
   dir: REFERENCE_DIR,
   shadowedBy: SHADOWED_BY,

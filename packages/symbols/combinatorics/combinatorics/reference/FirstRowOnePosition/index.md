@@ -1,7 +1,7 @@
 ---
 name: FirstRowOnePosition
-domain: Tableau statistics
-signature: FirstRowOnePosition(tableau)
+domain: Alternating sign matrix statistics
+signature: FirstRowOnePosition(matrix)
 summary: The column of the unique 1 in the first row.
 catalog:
   - system: findstat
