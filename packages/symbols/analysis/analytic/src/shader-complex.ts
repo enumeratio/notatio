@@ -433,21 +433,30 @@ fn clambertw(z: vec2f) -> vec2f {
 }
 
 // --- complete and incomplete elliptic integrals (parameter m = k²) -----------------------------
-// AGM(1, b) for Re b > 0, the principal square root keeps every iterate in the right half plane.
-fn cagm1(b0: vec2f) -> vec2f {
-  var a = vec2f(1.0, 0.0);
-  var b = b0;
-  for (var i = 0; i < 16; i = i + 1) {
-    let next = 0.5 * (a + b);
-    b = csqrt(cmul(a, b));
+// AGM(a, b), a₀ = a, g₀ = b, aₙ₊₁ = (aₙ + gₙ)/2, gₙ₊₁ = ±√(aₙgₙ) with the "right choice" of sign (Cox):
+// the root with Re(gₙ₊₁ conj aₙ₊₁) ≥ 0, a tie (a root on the imaginary axis of aₙ₊₁, as at AGM(1, b<0) on
+// the first step) keeping the principal root, the limit from above the negative reals — Wolfram's value.
+// Quadratic convergence: 24 steps; a gap still over 1e-5 of |a| declines.
+fn cagm(a0: vec2f, g0: vec2f) -> vec2f {
+  var a = a0;
+  var g = g0;
+  for (var i = 0; i < 24; i = i + 1) {
+    let next = 0.5 * (a + g);
+    var root = csqrt(cmul(a, g));
+    if (root.x * next.x + root.y * next.y < 0.0) { root = -root; }
     a = next;
+    g = root;
   }
-  return a;
+  if (length(a - g) > 1e-5 * length(a)) { uncertain = 1.0; }
+  return 0.5 * (a + g);
 }
+
+// AGM(1, b), the one-argument AGM.
+fn cagm1(b: vec2f) -> vec2f { return cagm(vec2f(1.0, 0.0), b); }
 
 // K(m) = π / (2 AGM(1, √(1−m))), analytic off [1, ∞).
 fn cellipticK(m: vec2f) -> vec2f {
-  return cdiv(vec2f(1.5707963, 0.0), cagm1(csqrt(vec2f(1.0, 0.0) - m)));
+  return cdiv(vec2f(1.5707963, 0.0), cagm(vec2f(1.0, 0.0), csqrt(vec2f(1.0, 0.0) - m)));
 }
 
 // E(m) = K(m) (1 − Σ 2ⁿ⁻¹ cₙ²), c₀² = m, cₙ₊₁ = (aₙ − bₙ)/2.

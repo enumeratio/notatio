@@ -56,6 +56,8 @@ CASES = {
     "CoshIntegral": (["CoshIntegral", "z"], "mp.chi(z)", 0.0004),
     "ExpIntegralEi": (["ExpIntegralEi", "z"], "mp.ei(z)", 0.0002),
     "LogIntegral": (["LogIntegral", "z"], "mp.li(z)", 0.0002),
+    "AGM": (["AGM", "z"], "agm_right(1, z)", 5e-7),
+    "AGM (a = 2.5)": (["AGM", 2.5, "z"], "agm_right(2.5, z)", 5e-7),
     "LambertW": (["LambertW", "z"], "mp.lambertw(z)", 0.0004),
     "EllipticK": (["EllipticK", "z"], "mp.ellipk(z)", 1e-06),
     "EllipticE": (["EllipticE", "z"], "mp.ellipe(z)", 1e-06),
@@ -70,8 +72,22 @@ CASES = {
 }
 
 
+def agm_right(a, b, steps=80):
+    """AGM(a, b) by the right choice of root (Cox): the root with Re(root * conj(next)) >= 0, a tie keeping the
+    principal root (the limit from above the negative reals), as ce-patches' agm and Wolfram do; mpmath's own takes
+    the principal root throughout and differs across the negative reals."""
+    a, b = mp.mpc(a), mp.mpc(b)
+    for _ in range(steps):
+        nxt = (a + b) / 2
+        root = mp.sqrt(a * b)
+        if mp.re(root * mp.conj(nxt)) < 0:
+            root = -root
+        a, b = nxt, root
+    return (a + b) / 2
+
+
 def value(expr, z):
-    v = mp.mpc(eval(expr, {"mp": mp, "z": z}))
+    v = mp.mpc(eval(expr, {"mp": mp, "z": z, "agm_right": agm_right}))
     return [float(v.real), float(v.imag)]
 
 

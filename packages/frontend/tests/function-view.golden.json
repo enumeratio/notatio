@@ -10,14 +10,19 @@
     "params": "",
     "views": [
       {
+        "head": "ComplexPlot",
+        "variable": "z",
+        "window": "{z, -4 - 4*I, 4 + 4*I}",
+        "body": "AGM(z)"
+      },
+      {
         "head": "Plot",
         "variable": "x",
         "window": "{x, -4, 4}",
         "body": "Re(AGM(x))",
         "note": "real slice"
       }
-    ],
-    "reason": "the complex plot cannot lower AGM"
+    ]
   },
   "Abundance": {
     "axis": {

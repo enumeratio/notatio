@@ -147,6 +147,8 @@ const UNARY: Record<string, string> = {
   EllipticE: "cellipticE",
   BarnesG: "cbarnesG",
   LogBarnesG: "clogBarnesG",
+  // AGM(z) is AGM(1, z), by the right choice of root (Wolfram's values across the negative reals).
+  AGM: "cagm1",
 };
 
 /** Two-argument heads, by the `zetaWGSL` function they call, arguments in the head's order. */
@@ -158,6 +160,7 @@ const BINARY: Record<string, string> = {
   EllipticF: "cellipticF",
   BesselJ: "cbesselJ",
   BesselI: "cbesselI",
+  AGM: "cagm",
 };
 
 /** Three-argument heads, by the `zetaWGSL` function they call. */

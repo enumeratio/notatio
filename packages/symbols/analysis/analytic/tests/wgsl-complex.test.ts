@@ -103,6 +103,8 @@ const WIDENED: [unknown, string][] = [
   [["Hypergeometric1F1", 0.7, 1.9, "z"], "chyp1f1("],
   [["BesselJ", 1, "z"], "cbesselJ("],
   [["BesselI", 1, "z"], "cbesselI("],
+  [["AGM", "z"], "cagm1("],
+  [["AGM", 2, "z"], "cagm("],
   [["BarnesG", "z"], "cbarnesG("],
   [["LogBarnesG", "z"], "clogBarnesG("],
 ];
