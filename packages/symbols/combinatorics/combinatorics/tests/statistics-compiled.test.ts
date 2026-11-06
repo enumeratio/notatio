@@ -21,6 +21,7 @@ import { COMPILED as SET_PARTITIONS_COMPILED } from "../set-partitions/src/stati
 import { COMPILED as TABLEAUX_COMPILED } from "../tableaux/src/statistics.compiled.generated.js";
 import { COMPILED as TREES_COMPILED } from "../trees/src/statistics.compiled.generated.js";
 import { COMPILED as WORDS_COMPILED } from "../words/src/statistics.compiled.generated.js";
+import { COMPILED as GRAPHS_COMPILED } from "../graphs/src/statistics.compiled.generated.js";
 
 const DEEP = process.env.DEEP_TESTS === "1";
 const ce = bareEngine();
@@ -36,6 +37,7 @@ const AREAS = [
   { name: "tableaux", compiled: TABLEAUX_COMPILED },
   { name: "trees", compiled: TREES_COMPILED },
   { name: "words", compiled: WORDS_COMPILED },
+  { name: "graphs", compiled: GRAPHS_COMPILED },
 ] as const;
 
 for (const area of AREAS) {
@@ -55,6 +57,7 @@ const COMPILED_SIGNATURES = new Set(
     TABLEAUX_COMPILED,
     TREES_COMPILED,
     WORDS_COMPILED,
+    GRAPHS_COMPILED,
   ].flatMap((table) => Object.keys(table)),
 );
 
@@ -240,6 +243,17 @@ function skewPartitions(n: number): number[][][] {
   return shapes;
 }
 
+/** The labeled graphs on n vertices, each as the vertex count and its edge list. */
+function labeledGraphs(n: number): unknown[] {
+  const pairs: number[][] = [];
+  for (let u = 1; u <= n; u++) for (let v = u + 1; v <= n; v++) pairs.push([u, v]);
+  return Array.from({ length: 2 ** pairs.length }, (_, mask) => [
+    "Tuple",
+    n,
+    list(pairs.filter((_, k) => (mask >> k) & 1).map(list)),
+  ]);
+}
+
 /** Small subjects of each carrier, as MathJSON contents. */
 const SUBJECTS: Record<string, unknown[]> = {
   // Up to 4: the cubic statistics are slow to interpret, and the exhaustive sweeps elsewhere
@@ -266,6 +280,13 @@ const SUBJECTS: Record<string, unknown[]> = {
   // Up to 4 boxes; deep, 5 and 6.
   PlanePartition: [1, 2, 3, 4, ...(DEEP ? [5, 6] : [])].flatMap(planePartitions).map((rows) => list(rows.map(list))),
   // Up to 2; deep, up to 5 (the dynamic programs take about a tenth of a second a shape to interpret at 3 cells, and growing).
+  // Up to 3 vertices, every fourth graph on 4; deep, all of 4 and every 64th of 5 (the distance and component statistics
+  // take a second or more a graph to interpret).
+  LabeledGraph: [
+    ...[0, 1, 2, 3].flatMap(labeledGraphs),
+    ...labeledGraphs(4).filter((_, i) => DEEP || i % 4 === 0),
+    ...(DEEP ? labeledGraphs(5).filter((_, i) => i % 64 === 0) : []),
+  ],
   SkewPartition: (DEEP ? [1, 2, 3, 4, 5] : [1, 2]).flatMap(skewPartitions).map((shape) => list(shape.map(list))),
 };
 

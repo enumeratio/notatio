@@ -49,6 +49,19 @@ const orderedTree = (text: string): MathJSON => {
   return node(JSON.parse(text));
 };
 
+/**
+ * `([(0,1),(0,2),(1,2)],3)`: the edges on the vertices 0 .. n - 1, and n. Ours is `Tuple(n, edges)`, the vertices from 1
+ * and each edge as [u, v] with u < v, in lexicographic order.
+ */
+function graph(text: string): MathJSON {
+  const match = /^\(\[(.*)\],(\d+)\)$/.exec(text);
+  if (match === null) throw new SyntaxError(`graph: expected ([(a,b),...],n), got ${text}`);
+  const edges = [...match[1]!.matchAll(/\((\d+),(\d+)\)/g)]
+    .map((end) => [Number(end[1]) + 1, Number(end[2]) + 1].toSorted((a, b) => a - b))
+    .toSorted((a, b) => a[0]! - b[0]! || a[1]! - b[1]!);
+  return ["Tuple", Number(match[2]), list(edges.map((edge) => list(edge)))];
+}
+
 interface Reader {
   readonly read: (text: string) => MathJSON;
   /** The size FindStat's tables are cut at: the length, sum or node count the collection grows by. */
@@ -104,6 +117,12 @@ const READERS: Readonly<Record<string, Reader>> = {
       return sum(outer) - sum(inner);
     },
   },
+  // A graph up to isomorphism, as the labeled graph FindStat lists it by; the vertex count is the size. We have no collection of
+  // graphs up to isomorphism, so the crosscheck compares object by object.
+  LabeledGraph: {
+    read: (t) => ["LabeledGraph", graph(t)],
+    size: (t) => Number(/,(\d+)\)$/.exec(t)?.[1]),
+  },
 };
 
 /** The carrier value FindStat's `text` names, or `undefined` for a carrier we don't read. A malformed text throws. */
@@ -134,6 +153,7 @@ export const COLLECTION_CARRIER: Readonly<Record<string, string>> = {
   "Semistandard tableaux": "SemistandardTableau",
   "Plane partitions": "PlanePartition",
   "Gelfand-Tsetlin patterns": "GelfandTsetlinPattern",
+  Graphs: "LabeledGraph",
 };
 
 /** The carriers whose text we read. */

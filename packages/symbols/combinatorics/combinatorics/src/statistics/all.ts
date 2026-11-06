@@ -17,6 +17,8 @@ import { TABLEAUX_FRONTIER } from "../../tableaux/src/statistics.frontier.ts";
 import { PERMUTATION_STATISTICS } from "../../permutations/src/statistics.ts";
 import { PERMUTATIONS_FRONTIER } from "../../permutations/src/statistics.frontier.ts";
 import { WORD_STATISTICS } from "../../words/src/statistics.ts";
+import { GRAPH_STATISTICS } from "../../graphs/src/statistics.ts";
+import { GRAPHS_FRONTIER } from "../../graphs/src/statistics.frontier.ts";
 import { WORDS_FRONTIER } from "../../words/src/statistics.frontier.ts";
 import type { Definition, FrontierEntry } from "./types.ts";
 
@@ -29,6 +31,7 @@ export const ALL_STATISTICS: readonly Definition[] = [
   ...COMPOSITION_STATISTICS,
   ...WORD_STATISTICS,
   ...TABLEAU_STATISTICS,
+  ...GRAPH_STATISTICS,
 ];
 
 /** Every area's frontier, concatenated — the union `statistics-coverage.test.ts` (catalog)
@@ -42,4 +45,5 @@ export const ALL_FRONTIER: readonly FrontierEntry[] = [
   ...COMPOSITIONS_FRONTIER,
   ...WORDS_FRONTIER,
   ...TABLEAUX_FRONTIER,
+  ...GRAPHS_FRONTIER,
 ];

@@ -21,6 +21,7 @@ const SAMPLE: Record<string, unknown> = {
   PlanePartition: ["PlanePartition", ["At", ["PlanePartitions", 6], 10]],
   // The family yields bare [outer, inner].
   SkewPartition: ["SkewPartition", ["At", ["SkewPartitions", 4], 7]],
+  LabeledGraph: ["At", ["LabeledGraphs", 4], 37],
 };
 
 test("every statistic is callable by its bare head on each of its carriers", () => {
