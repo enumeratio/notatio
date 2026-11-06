@@ -50,6 +50,8 @@ const prefixSum = (i: MathJSON): MathJSON => fold(add("acc2", element("t")), "ac
 
 const integerCompositions: EpsilFamily = {
   head: "IntegerCompositions",
+  // 2^(n − 1) first passes 2^53 at n = 55.
+  bigSamples: [[55], [70]],
   carrier: "IntegerComposition",
   paramCount: 1,
   kind: "ints",
