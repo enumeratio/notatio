@@ -178,6 +178,10 @@ const criticalStep = (j: MathJSON): MathJSON => [
   ifThen(less(tableAt("h", subtract(j, 1)), min(forEach(span(j, k), tableAt("h", "m"), "m")))),
 ];
 
+/** All of `conditions`; a lone one stands alone, as a one-operand `And` doesn't read back. */
+const allOf = (conditions: readonly MathJSON[]): MathJSON =>
+  conditions.length === 1 ? conditions[0]! : ["And", ...conditions];
+
 /** The distinct words `u` with `copies` copies of `u` side by side in the word, counted length by length. */
 const repeatedFactors = (copies: number): MathJSON =>
   atLeast(
@@ -191,12 +195,11 @@ const repeatedFactors = (copies: number): MathJSON =>
               "Unique",
               forEach(span(1, add(subtract(k, times(copies, "l")), 1)), [
                 "If",
-                [
-                  "And",
-                  ...Array.from({ length: copies - 1 }, (_, c) =>
+                allOf(
+                  Array.from({ length: copies - 1 }, (_, c) =>
                     equals(factorNumeral("i", "l"), factorNumeral(add("i", times(c + 1, "l")), "l")),
                   ),
-                ],
+                ),
                 factorNumeral("i", "l"),
                 0,
               ]),
