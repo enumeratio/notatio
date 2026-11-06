@@ -1,7 +1,7 @@
 ---
 name: FlagDenertIndex
-domain: Permutation statistics
-signature: FlagDenertIndex(p)
+domain: Signed permutation statistics
+signature: FlagDenertIndex(signedPermutation)
 summary: The negative entries plus twice the Denert index of the permutation |p(1)| ... |p(n)|.
 signatures:
   - call: FlagDenertIndex(p)

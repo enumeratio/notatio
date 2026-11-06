@@ -1,7 +1,7 @@
 ---
 name: SignedReflectionLength
-domain: Permutation statistics
-signature: SignedReflectionLength(p)
+domain: Signed permutation statistics
+signature: SignedReflectionLength(signedPermutation)
 summary: "The least number of reflections of the hyperoctahedral group with product p: n minus the positive cycles."
 signatures:
   - call: SignedReflectionLength(p)

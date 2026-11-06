@@ -1,7 +1,7 @@
 ---
 name: TypeBInversionCount
-domain: Permutation statistics
-signature: TypeBInversionCount(p)
+domain: Signed permutation statistics
+signature: TypeBInversionCount(signedPermutation)
 summary: Pairs i < j with p(i) > p(j), plus pairs i <= j with -p(i) > p(j).
 catalog:
   - system: findstat

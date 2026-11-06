@@ -1,7 +1,7 @@
 ---
 name: OnesOnMainDiagonal
-domain: Tableau statistics
-signature: OnesOnMainDiagonal(tableau)
+domain: Alternating sign matrix statistics
+signature: OnesOnMainDiagonal(matrix)
 summary: The number of 1s on the main diagonal.
 catalog:
   - system: findstat

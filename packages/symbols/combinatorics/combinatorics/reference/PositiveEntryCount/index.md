@@ -1,7 +1,7 @@
 ---
 name: PositiveEntryCount
-domain: Permutation statistics
-signature: PositiveEntryCount(p)
+domain: Signed permutation statistics
+signature: PositiveEntryCount(signedPermutation)
 summary: The number of positive entries.
 catalog:
   - system: findstat

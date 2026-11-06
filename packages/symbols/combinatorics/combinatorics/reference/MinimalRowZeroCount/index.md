@@ -1,7 +1,7 @@
 ---
 name: MinimalRowZeroCount
-domain: Tableau statistics
-signature: MinimalRowZeroCount(tableau)
+domain: Alternating sign matrix statistics
+signature: MinimalRowZeroCount(matrix)
 summary: The fewest zeros in a row.
 catalog:
   - system: findstat

@@ -1,7 +1,7 @@
 ---
 name: DistinctDiagonalSumCount
-domain: Tableau statistics
-signature: DistinctDiagonalSumCount(tableau)
+domain: Alternating sign matrix statistics
+signature: DistinctDiagonalSumCount(matrix)
 summary: The number of distinct sums of the entries along a diagonal.
 catalog:
   - system: findstat

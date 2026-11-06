@@ -1,7 +1,7 @@
 ---
 name: NegativeOneCount
-domain: Tableau statistics
-signature: NegativeOneCount(tableau)
+domain: Alternating sign matrix statistics
+signature: NegativeOneCount(matrix)
 summary: The number of entries equal to -1.
 catalog:
   - system: findstat

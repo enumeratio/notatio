@@ -1,7 +1,7 @@
 ---
 name: SignedAlignmentCount
-domain: Permutation statistics
-signature: SignedAlignmentCount(p)
+domain: Signed permutation statistics
+signature: SignedAlignmentCount(signedPermutation)
 summary: "The alignments of p: its nesting alignments, those of type EN and those of type NE."
 signatures:
   - call: SignedAlignmentCount(p)

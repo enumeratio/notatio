@@ -1,7 +1,7 @@
 ---
 name: RightDescents
-domain: Permutation statistics
-signature: RightDescents(p)
+domain: Signed permutation statistics
+signature: RightDescents(signedPermutation)
 summary: Indices 0 <= k < n with s(k) > s(k+1), where s is the inverse of p and s(0) = 0.
 catalog:
   - system: findstat

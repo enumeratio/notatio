@@ -1,7 +1,7 @@
 ---
 name: DecreasableCornerSumPositions
-domain: Tableau statistics
-signature: DecreasableCornerSumPositions(tableau)
+domain: Alternating sign matrix statistics
+signature: DecreasableCornerSumPositions(matrix)
 summary: The interior positions of the corner sum matrix whose entry can be lowered by one to give another alternating sign matrix's corner sum matrix.
 signatures:
   - call: DecreasableCornerSumPositions(tableau)

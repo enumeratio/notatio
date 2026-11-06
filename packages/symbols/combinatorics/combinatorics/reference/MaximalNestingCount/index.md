@@ -1,7 +1,7 @@
 ---
 name: MaximalNestingCount
-domain: Set partition statistics
-signature: MaximalNestingCount(partition)
+domain: Perfect matching statistics
+signature: MaximalNestingCount(matching)
 summary: "The most pairs that nest one pair: the largest number of pairs (a, b) with a < c and d < b, over the pairs (c, d)."
 catalog:
   - system: findstat

@@ -1,7 +1,7 @@
 ---
 name: FlagDescent
-domain: Permutation statistics
-signature: FlagDescent(p)
+domain: Signed permutation statistics
+signature: FlagDescent(signedPermutation)
 summary: Twice the descents between entries, plus 1 when the first entry is negative.
 catalog:
   - system: findstat

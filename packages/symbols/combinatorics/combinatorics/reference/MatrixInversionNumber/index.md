@@ -1,7 +1,7 @@
 ---
 name: MatrixInversionNumber
-domain: Tableau statistics
-signature: MatrixInversionNumber(tableau)
+domain: Alternating sign matrix statistics
+signature: MatrixInversionNumber(matrix)
 summary: The sum of a(i, j) a(k, l) over the pairs of entries with i > k and j < l.
 catalog:
   - system: findstat

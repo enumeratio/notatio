@@ -1,7 +1,7 @@
 ---
 name: PositiveBeforeNegativeCount
-domain: Permutation statistics
-signature: PositiveBeforeNegativeCount(p)
+domain: Signed permutation statistics
+signature: PositiveBeforeNegativeCount(signedPermutation)
 summary: Twice the adjacent pairs of a positive entry followed by a negative one, plus 1 when the first entry is negative.
 catalog:
   - system: findstat

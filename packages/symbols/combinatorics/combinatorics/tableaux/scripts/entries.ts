@@ -64,6 +64,7 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   samples: SAMPLES,
   declareArea: declareTableaux,
   carrierNames: {
+    AlternatingSignMatrix: { subjectName: "matrix", domain: "Alternating sign matrix statistics" },
     PlanePartition: { subjectName: "planePartition", domain: "Plane partition statistics" },
     SkewPartition: { subjectName: "shape", domain: "Skew partition statistics" },
   },

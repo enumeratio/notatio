@@ -1,7 +1,7 @@
 ---
 name: FlagExcedance
-domain: Permutation statistics
-signature: FlagExcedance(p)
+domain: Signed permutation statistics
+signature: FlagExcedance(signedPermutation)
 summary: Twice the excedances plus the negative entries.
 catalog:
   - system: findstat

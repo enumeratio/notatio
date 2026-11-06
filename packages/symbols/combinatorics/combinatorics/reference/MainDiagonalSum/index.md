@@ -1,7 +1,7 @@
 ---
 name: MainDiagonalSum
-domain: Tableau statistics
-signature: MainDiagonalSum(tableau)
+domain: Alternating sign matrix statistics
+signature: MainDiagonalSum(matrix)
 summary: The sum of the entries on the main diagonal, its trace.
 catalog:
   - system: findstat

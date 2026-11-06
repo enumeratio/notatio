@@ -1,7 +1,7 @@
 ---
 name: AlternatingSignMatrixPosetRank
-domain: Tableau statistics
-signature: AlternatingSignMatrixPosetRank(tableau)
+domain: Alternating sign matrix statistics
+signature: AlternatingSignMatrixPosetRank(matrix)
 summary: "Half the sum of (i - j)^2 a(i, j): the rank in the alternating sign matrix poset."
 catalog:
   - system: findstat

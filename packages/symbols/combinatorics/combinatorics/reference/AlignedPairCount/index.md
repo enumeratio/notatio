@@ -1,7 +1,7 @@
 ---
 name: AlignedPairCount
-domain: Set partition statistics
-signature: AlignedPairCount(partition)
+domain: Perfect matching statistics
+signature: AlignedPairCount(matching)
 summary: Pairs of pairs (a, b), (c, d) with a < b < c < d.
 catalog:
   - system: findstat

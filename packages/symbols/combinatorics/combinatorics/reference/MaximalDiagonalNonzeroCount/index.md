@@ -1,7 +1,7 @@
 ---
 name: MaximalDiagonalNonzeroCount
-domain: Tableau statistics
-signature: MaximalDiagonalNonzeroCount(tableau)
+domain: Alternating sign matrix statistics
+signature: MaximalDiagonalNonzeroCount(matrix)
 summary: The largest number of nonzero entries along a diagonal.
 catalog:
   - system: findstat

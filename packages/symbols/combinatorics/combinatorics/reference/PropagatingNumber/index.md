@@ -1,7 +1,7 @@
 ---
 name: PropagatingNumber
-domain: Set partition statistics
-signature: PropagatingNumber(partition)
+domain: Perfect matching statistics
+signature: PropagatingNumber(matching)
 summary: Pairs with one point among the first n and the other among the last n, for a matching of 2n points.
 catalog:
   - system: findstat

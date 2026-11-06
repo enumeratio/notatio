@@ -1,7 +1,7 @@
 ---
 name: ClosersBelowLargestOpener
-domain: Set partition statistics
-signature: ClosersBelowLargestOpener(partition)
+domain: Perfect matching statistics
+signature: ClosersBelowLargestOpener(matching)
 summary: The pairs whose larger point is below the largest opener, the larger point of the pair opening last.
 catalog:
   - system: findstat

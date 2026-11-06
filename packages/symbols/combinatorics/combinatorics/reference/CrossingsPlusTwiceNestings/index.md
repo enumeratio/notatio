@@ -1,7 +1,7 @@
 ---
 name: CrossingsPlusTwiceNestings
-domain: Set partition statistics
-signature: CrossingsPlusTwiceNestings(partition)
+domain: Perfect matching statistics
+signature: CrossingsPlusTwiceNestings(matching)
 summary: The crossings plus twice the nestings.
 catalog:
   - system: findstat

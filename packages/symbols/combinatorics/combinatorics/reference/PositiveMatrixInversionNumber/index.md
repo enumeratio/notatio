@@ -1,7 +1,7 @@
 ---
 name: PositiveMatrixInversionNumber
-domain: Tableau statistics
-signature: PositiveMatrixInversionNumber(tableau)
+domain: Alternating sign matrix statistics
+signature: PositiveMatrixInversionNumber(matrix)
 summary: The inversion number less the number of entries equal to -1.
 catalog:
   - system: findstat

@@ -1,7 +1,7 @@
 ---
 name: NegativeEntryCount
-domain: Permutation statistics
-signature: NegativeEntryCount(p)
+domain: Signed permutation statistics
+signature: NegativeEntryCount(signedPermutation)
 summary: The number of negative entries.
 catalog:
   - system: findstat

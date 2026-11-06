@@ -1,7 +1,7 @@
 ---
 name: IncreasingPositivePairCount
-domain: Permutation statistics
-signature: IncreasingPositivePairCount(p)
+domain: Signed permutation statistics
+signature: IncreasingPositivePairCount(signedPermutation)
 summary: "Pairs i < j with 0 < p(i) < p(j): the occurrences of the signed pattern 12."
 catalog:
   - system: findstat

@@ -1,7 +1,7 @@
 ---
 name: SignedSortingIndex
-domain: Permutation statistics
-signature: SignedSortingIndex(p)
+domain: Signed permutation statistics
+signature: SignedSortingIndex(signedPermutation)
 summary: The sum, over the signed transpositions that sort p by moving n, then n - 1, and so on into place, of j - i - 1 when i < 0 and j - i otherwise.
 signatures:
   - call: SignedSortingIndex(p)
