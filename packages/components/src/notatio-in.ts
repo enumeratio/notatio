@@ -407,15 +407,28 @@ export class NotatioIn extends LitElement {
     return this.readonly || !this._editing;
   }
 
+  // The editor shows once MathLive is loaded: before that a `<math-field>` is a visible element
+  // that takes no focus, and the keys typed at it land on the page. Until then the typeset
+  // form stays, so nothing flashes.
+  #opening = false;
+
   #edit = (): void => {
-    this._editing = true;
+    if (this._editing || this.#opening) return;
+    this.#opening = true;
+    const done = (): void => {
+      this.#opening = false;
+    };
+    loadEditor().then(() => {
+      done();
+      this._editing = true;
+    }, done);
   };
 
   /** Focusing an input opens its editor: the typeset form has no caret to place. */
   override focus(options?: FocusOptions): void {
     if (this.readonly) return super.focus(options);
-    if (this._editing) this.#field?.focus(options);
-    else this.#edit();
+    if (this._editing) return this.#field?.focus(options);
+    this.#edit();
   }
 
   // A click edits; a drag that selected some of the formula is a selection, left alone.
