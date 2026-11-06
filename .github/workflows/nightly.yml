@@ -211,6 +211,10 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
         continue-on-error: true
+      # Without Mesa's Vulkan and EGL, Chromium has no shared image to present a WebGPU canvas with, and drops
+      # the WebGPU instance at the first frame. Compute-only tests pass regardless.
+      - run: sudo apt-get install -y --no-install-recommends libegl-mesa0 libgles2 mesa-vulkan-drivers
+        continue-on-error: true
       - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts --shard=${{ matrix.shard }}/3
         working-directory: web
         continue-on-error: true
