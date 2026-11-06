@@ -40,6 +40,7 @@ const compiles: ReadonlyArray<readonly [script: string, output: string]> = [
   ["set-partitions/scripts/compile-definitions.ts", "set-partitions/src/statistics.compiled.generated.js"],
   ["words/scripts/compile-definitions.ts", "words/src/statistics.compiled.generated.js"],
   ["graphs/scripts/compile-definitions.ts", "graphs/src/statistics.compiled.generated.js"],
+  ["cartan/scripts/compile-definitions.ts", "cartan/src/statistics.compiled.generated.js"],
 ];
 
 const jobs = Number(process.env.BUILD_JOBS) || Math.max(1, Math.min(3, Math.floor(availableParallelism() / 3)));

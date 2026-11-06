@@ -8,7 +8,7 @@
 // agrees (its entry carries the flat hash), and its subject is encoded to the carrier's flat reading first.
 
 import type { Engine } from "@enumeratio/engine";
-import { definitionHash, fromJs, type MathJSON, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
+import { definitionHash, fromJs, type MathJSON, runtimeHelpers } from "@enumeratio/engine/compiled";
 import { COMPILED as PERMUTATIONS_COMPILED } from "../../permutations/src/statistics.compiled.generated.js";
 import { COMPILED as PARTITIONS_COMPILED } from "../../partitions/src/statistics.compiled.generated.js";
 import { COMPILED as COMPOSITIONS_COMPILED } from "../../compositions/src/statistics.compiled.generated.js";
@@ -17,8 +17,9 @@ import { COMPILED as SET_PARTITIONS_COMPILED } from "../../set-partitions/src/st
 import { COMPILED as TABLEAUX_COMPILED } from "../../tableaux/src/statistics.compiled.generated.js";
 import { COMPILED as TREES_COMPILED } from "../../trees/src/statistics.compiled.generated.js";
 import { COMPILED as GRAPHS_COMPILED } from "../../graphs/src/statistics.compiled.generated.js";
+import { COMPILED as CARTAN_COMPILED } from "../../cartan/src/statistics.compiled.generated.js";
 import { COMPILED as WORDS_COMPILED } from "../../words/src/statistics.compiled.generated.js";
-import { FLAT_BY_NAME as FLAT } from "../flat.ts";
+import { FLAT_BY_NAME as FLAT, subjectToJs } from "../flat.ts";
 import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 
 /** Every area's compiled table, merged. Add a spread here when an area's kernel moves in;
@@ -33,6 +34,7 @@ const COMPILED = {
   ...TREES_COMPILED,
   ...WORDS_COMPILED,
   ...GRAPHS_COMPILED,
+  ...CARTAN_COMPILED,
 };
 
 /** The compiled form of `definition`, as a function of its subject's MathJSON, or undefined
@@ -50,7 +52,7 @@ export function compiledStatistic(
   if (flat && codec === undefined) return undefined;
   const sys = runtimeHelpers(ce);
   return (subject) => {
-    const nested = toJs(subject);
+    const nested = subjectToJs(subject);
     const value = codec === undefined || nested === undefined ? nested : codec.encode(nested);
     if (value === undefined) return undefined;
     try {

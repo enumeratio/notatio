@@ -24,9 +24,10 @@ export async function compileArea(
   definitions: readonly Definition[],
   shape: string,
   output: string,
+  subjects = smallElements,
 ): Promise<void> {
   const run = await sharded(script, step, checkers.statistics, definitions.map(signatureOf), (verdicts, mine) =>
-    compiledDefinitionsFor(definitions, shape, smallElements, verdicts, mine),
+    compiledDefinitionsFor(definitions, shape, subjects, verdicts, mine),
   );
   if (run === undefined) return;
   const entries: CompiledDefinition[] = run.results.flatMap((r) => r.compiled).toSorted(bySignature);

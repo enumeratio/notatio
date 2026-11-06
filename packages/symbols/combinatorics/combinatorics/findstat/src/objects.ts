@@ -65,7 +65,14 @@ function graph(text: string): MathJSON {
 interface Reader {
   readonly read: (text: string) => MathJSON;
   /** The size FindStat's tables are cut at: the length, sum or node count the collection grows by. */
-  readonly size: (text: string) => number;
+  readonly size: (text: string) => number | undefined;
+}
+
+/** `['A', 3]` as its letter and rank. */
+function cartanText(text: string): [letter: string, rank: number] {
+  const match = /^\['([A-G])',\s*(\d+)\]$/.exec(text);
+  if (match === null) throw new SyntaxError(`Cartan type: cannot read ${text}`);
+  return [match[1]!, Number(match[2])];
 }
 
 const READERS: Readonly<Record<string, Reader>> = {
@@ -123,6 +130,18 @@ const READERS: Readonly<Record<string, Reader>> = {
     read: (t) => ["LabeledGraph", graph(t)],
     size: (t) => Number(/,(\d+)\)$/.exec(t)?.[1]),
   },
+  // `['A', 3]`: the letter and the rank, the size. FindStat also writes C_2 (and B_1, C_1), the same types as B_2 and A_1:
+  // the size of those is undefined, so they are left out of the sizes.
+  CartanType: {
+    read: (t) => {
+      const [letter, rank] = cartanText(t);
+      return ["CartanType", ["Tuple", `'${letter}'`, rank]];
+    },
+    size: (t) => {
+      const [letter, rank] = cartanText(t);
+      return (letter === "C" && rank < 3) || (letter === "B" && rank < 2) ? undefined : rank;
+    },
+  },
 };
 
 /** The carrier value FindStat's `text` names, or `undefined` for a carrier we don't read. A malformed text throws. */
@@ -154,6 +173,7 @@ export const COLLECTION_CARRIER: Readonly<Record<string, string>> = {
   "Plane partitions": "PlanePartition",
   "Gelfand-Tsetlin patterns": "GelfandTsetlinPattern",
   Graphs: "LabeledGraph",
+  "Finite Cartan types": "CartanType",
 };
 
 /** The carriers whose text we read. */

@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[CartanParkingFunctionCount, [CartanType, [Tuple, "'D'", 5]]]	59049			the type $D_5$
+the-type-e-6			[CartanParkingFunctionCount, [CartanType, [Tuple, "'E'", 6]]]	4826809			the type $E_6$
+findstat-st000859-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'CartanParkingFunctionCount'"]	3	3	FindStat St000859	FindStat's value for ['A',1]
+findstat-st000859-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'CartanParkingFunctionCount'"]	16	16	FindStat St000859	FindStat's value for ['A',2]
+findstat-st000859-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'CartanParkingFunctionCount'"]	125	125	FindStat St000859	FindStat's value for ['A',3]

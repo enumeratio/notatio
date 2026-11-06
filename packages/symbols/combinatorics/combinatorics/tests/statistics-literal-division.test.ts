@@ -44,6 +44,16 @@ const SUBJECTS: Record<string, unknown[]> = {
   SetPartition: [[block(1, 16)], [block(1, 19)], [block(1, 300)], [block(1, 120), block(121, 5)], [block(1, 700)]].map(
     (blocks) => list(blocks.map(list)),
   ),
+  // Ranks whose products of degrees pass 2^53.
+  CartanType: [
+    ["A", 12],
+    ["A", 20],
+    ["A", 30],
+    ["B", 14],
+    ["D", 16],
+    ["E", 8],
+    ["E", 6],
+  ].map(([letter, rank]) => ["Tuple", `'${letter}'`, rank]),
   BinaryWord: [ones(12), [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]].map(list),
 };
 

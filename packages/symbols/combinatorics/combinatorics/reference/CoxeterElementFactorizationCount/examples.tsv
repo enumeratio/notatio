@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[CoxeterElementFactorizationCount, [CartanType, [Tuple, "'D'", 5]]]	2048			the type $D_5$
+the-type-e-6			[CoxeterElementFactorizationCount, [CartanType, [Tuple, "'E'", 6]]]	41472			the type $E_6$
+findstat-st000858-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'CoxeterElementFactorizationCount'"]	1	1	FindStat St000858	FindStat's value for ['A',1]
+findstat-st000858-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'CoxeterElementFactorizationCount'"]	3	3	FindStat St000858	FindStat's value for ['A',2]
+findstat-st000858-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'CoxeterElementFactorizationCount'"]	16	16	FindStat St000858	FindStat's value for ['A',3]

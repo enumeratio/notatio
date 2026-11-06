@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[GammaNumber, [CartanType, [Tuple, "'D'", 5]]]	64			the type $D_5$
+the-type-e-6			[GammaNumber, [CartanType, [Tuple, "'E'", 6]]]	144			the type $E_6$
+findstat-st001676-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'GammaNumber'"]	4	4	FindStat St001676	FindStat's value for ['A',1]
+findstat-st001676-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'GammaNumber'"]	9	9	FindStat St001676	FindStat's value for ['A',2]
+findstat-st001676-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'GammaNumber'"]	16	16	FindStat St001676	FindStat's value for ['A',3]

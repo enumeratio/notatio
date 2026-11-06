@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[MinimalFaithfulRepresentationDimension, [CartanType, [Tuple, "'D'", 5]]]	10			the type $D_5$
+the-type-e-6			[MinimalFaithfulRepresentationDimension, [CartanType, [Tuple, "'E'", 6]]]	27			the type $E_6$
+findstat-st001150-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'MinimalFaithfulRepresentationDimension'"]	2	2	FindStat St001150	FindStat's value for ['A',1]
+findstat-st001150-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'MinimalFaithfulRepresentationDimension'"]	3	3	FindStat St001150	FindStat's value for ['A',2]
+findstat-st001150-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'MinimalFaithfulRepresentationDimension'"]	4	4	FindStat St001150	FindStat's value for ['A',3]

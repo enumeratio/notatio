@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[CartanMatrix, [CartanType, [Tuple, "'D'", 5]]]	[List, [List, 2, -1, 0, 0, 0], [List, -1, 2, -1, 0, 0], [List, 0, -1, 2, -1, -1], [List, 0, 0, -1, 2, 0], [List, 0, 0, -1, 0, 2]]			the type $D_5$
+the-type-e-6			[CartanMatrix, [CartanType, [Tuple, "'E'", 6]]]	[List, [List, 2, 0, -1, 0, 0, 0], [List, 0, 2, 0, -1, 0, 0], [List, -1, 0, 2, -1, 0, 0], [List, 0, -1, -1, 2, -1, 0], [List, 0, 0, 0, -1, 2, -1], [List, 0, 0, 0, 0, -1, 2]]			the type $E_6$
+bourbaki-a-2	Properties		[CartanMatrix, [CartanType, [Tuple, "'A'", 2]]]	[List, [List, 2, -1], [List, -1, 2]]	[List, [List, 2, -1], [List, -1, 2]]	Humphreys, Introduction to Lie Algebras and Representation Theory, section 11.4	the Cartan matrix of $A_2$
+bourbaki-b-2	Properties		[CartanMatrix, [CartanType, [Tuple, "'B'", 2]]]	[List, [List, 2, -2], [List, -1, 2]]	[List, [List, 2, -2], [List, -1, 2]]	Humphreys, Introduction to Lie Algebras and Representation Theory, section 11.4	the Cartan matrix of $B_2$
+bourbaki-g-2	Properties		[CartanMatrix, [CartanType, [Tuple, "'G'", 2]]]	[List, [List, 2, -1], [List, -3, 2]]	[List, [List, 2, -1], [List, -3, 2]]	Humphreys, Introduction to Lie Algebras and Representation Theory, section 11.4	the Cartan matrix of $G_2$

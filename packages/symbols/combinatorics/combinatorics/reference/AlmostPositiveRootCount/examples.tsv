@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[AlmostPositiveRootCount, [CartanType, [Tuple, "'D'", 5]]]	25			the type $D_5$
+the-type-e-6			[AlmostPositiveRootCount, [CartanType, [Tuple, "'E'", 6]]]	42			the type $E_6$
+findstat-st000853-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'AlmostPositiveRootCount'"]	2	2	FindStat St000853	FindStat's value for ['A',1]
+findstat-st000853-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'AlmostPositiveRootCount'"]	5	5	FindStat St000853	FindStat's value for ['A',2]
+findstat-st000853-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'AlmostPositiveRootCount'"]	9	9	FindStat St000853	FindStat's value for ['A',3]

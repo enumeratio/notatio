@@ -20,6 +20,8 @@ import { WORD_STATISTICS } from "../../words/src/statistics.ts";
 import { GRAPH_STATISTICS } from "../../graphs/src/statistics.ts";
 import { GRAPHS_FRONTIER } from "../../graphs/src/statistics.frontier.ts";
 import { WORDS_FRONTIER } from "../../words/src/statistics.frontier.ts";
+import { CARTAN_STATISTICS } from "../../cartan/src/statistics.ts";
+import { CARTAN_FRONTIER } from "../../cartan/src/statistics.frontier.ts";
 import type { Definition, FrontierEntry } from "./types.ts";
 
 export const ALL_STATISTICS: readonly Definition[] = [
@@ -32,6 +34,7 @@ export const ALL_STATISTICS: readonly Definition[] = [
   ...WORD_STATISTICS,
   ...TABLEAU_STATISTICS,
   ...GRAPH_STATISTICS,
+  ...CARTAN_STATISTICS,
 ];
 
 /** Every area's frontier, concatenated — the union `statistics-coverage.test.ts` (catalog)
@@ -46,4 +49,5 @@ export const ALL_FRONTIER: readonly FrontierEntry[] = [
   ...WORDS_FRONTIER,
   ...TABLEAUX_FRONTIER,
   ...GRAPHS_FRONTIER,
+  ...CARTAN_FRONTIER,
 ];

@@ -87,6 +87,13 @@ export interface FamilyShape {
    *  alone doesn't always determine a shape). Mutually exclusive with `carrierParams` (which
    *  packs raw params instead of sub-elements). */
   readonly carrierElements?: readonly string[];
+  /** For a carrier whose value is not the element's own shape: how the element becomes the constructor's contents and
+   *  back (`CartanType(Tuple("A", 3))` for the element `[1, 3]`, which keeps the kernels in integers). Mutually
+   *  exclusive with `carrierParams` and `carrierElements`. */
+  readonly carrierCodec?: {
+    readonly encode: (element: unknown, p: number[]) => unknown;
+    readonly decode: (contents: Boxed, p: number[]) => unknown;
+  };
   readonly paramCount: 0 | 1 | 2 | 3;
   readonly kind: "ints" | "blocks" | "nested" | "scalar";
   readonly declared?: Declared;
@@ -164,6 +171,7 @@ export function numberKernel(k: NumberKernel): FamilyKernel {
     ...(k.carrier === undefined ? {} : { carrier: k.carrier }),
     ...(k.carrierParams === undefined ? {} : { carrierParams: k.carrierParams }),
     ...(k.carrierElements === undefined ? {} : { carrierElements: k.carrierElements }),
+    ...(k.carrierCodec === undefined ? {} : { carrierCodec: k.carrierCodec }),
     ...(k.declared === undefined ? {} : { declared: k.declared }),
     count: (p) => {
       const exactly = k.exactCount?.(p);
