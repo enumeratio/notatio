@@ -19,6 +19,10 @@ on:
         description: Also run every weekly job
         type: boolean
         default: false
+      only:
+        description: Run only this daily job (its id); empty runs them all
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -35,7 +39,7 @@ jobs:
   # 90-minute cap): rebalance by moving a step between them when one drifts.
   deep-tests-kernels:
     name: deep test sweeps (kernels)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-tests-kernels')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
@@ -53,7 +57,7 @@ jobs:
 
   deep-tests-statistics:
     name: deep test sweeps (statistics)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-tests-statistics')
     runs-on: ubuntu-latest
     # A cold dist build takes about an hour on a 2-vCPU runner; the tests had 60 minutes before.
     timeout-minutes: 120
@@ -92,7 +96,7 @@ jobs:
 
   deep-tests-reference:
     name: deep test sweeps (compiled, reference and number theory)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-tests-reference')
     runs-on: ubuntu-latest
     # A cold dist build takes about an hour on a 2-vCPU runner; the tests had 60 minutes before.
     timeout-minutes: 120
@@ -125,7 +129,7 @@ jobs:
   # one that differs means a carried verdict was stale.
   deep-crosschecks:
     name: deep compile cross-checks
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-crosschecks')
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
@@ -143,7 +147,7 @@ jobs:
   # holding fails the job and the nightly-fixup routine files it. Visual review items are not here.
   review-claims:
     name: review claims
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'review-claims')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -157,7 +161,7 @@ jobs:
   # required, and a failure doesn't block anything.
   component-stories:
     name: component stories (Playwright) ${{ matrix.shard }}/3
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'component-stories')
     runs-on: ubuntu-latest
     # A cold dist build (up to 16 minutes), the stories (16), and on shard 1 the site build for the hydration check.
     timeout-minutes: 75
@@ -180,12 +184,20 @@ jobs:
         continue-on-error: true
       - if: matrix.shard == 1
         run: pnpm --filter @enumeratio/web run test:hydration
+      # A failed test's trace and page snapshot: the log says what timed out, not what the page was doing.
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: stories-results-${{ matrix.shard }}
+          path: web/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
   # The WebGPU stories: headless Chromium destroys a device whose canvas is configured, so these run
   # headed, on a virtual display and a software adapter. Advisory, like the stories above.
   component-stories-gpu:
     name: component stories (WebGPU) ${{ matrix.shard }}/3
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'component-stories-gpu')
     runs-on: ubuntu-latest
     # A cold dist build (up to 11 minutes) and a cold dev server, then a third of the tests: all 68 take
     # about 8 minutes on two CPUs, and SwiftShader's frames are the slow part on a runner.
@@ -203,18 +215,26 @@ jobs:
         working-directory: web
         continue-on-error: true
       - if: matrix.shard == 1
-        run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU"
+        run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU" --output=test-results/plots
         working-directory: web
         env:
           WEBGPU: "1"
         continue-on-error: true
+      # A failed test's trace and page snapshot: the log says what timed out, not what the page was doing.
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gpu-stories-results-${{ matrix.shard }}
+          path: web/test-results
+          if-no-files-found: ignore
+          retention-days: 7
 
   # The Python ecosystem: every example with an mpmath or SymPy mapping, rescanned against the committed
   # records, including the special-function grid kept as hidden examples in its heads' YAML. Each
   # ecosystem is its own nightly job: they share nothing to install. The heavier lanes run weekly below.
   python-oracle:
     name: reference ⟷ Python (mpmath, SymPy)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'python-oracle')
     runs-on: ubuntu-latest
     # The two rescans take about 24 minutes on a runner, after a cold dist build.
     timeout-minutes: 60
@@ -239,7 +259,7 @@ jobs:
   # The Python sampling is its own job so the rescans and the sampling each fit the cap.
   python-oracle-plausible:
     name: reference ⟷ Python Plausible (mpmath, SymPy)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'python-oracle-plausible')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -262,7 +282,7 @@ jobs:
   # install, so they run weekly below.
   julia-oracle:
     name: reference ⟷ Julia (Nemo, Combinatorics.jl)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'julia-oracle')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -281,7 +301,7 @@ jobs:
   # (plausible-lanes.ts) beside an install and the sampler's own start-up, without the rescan's time.
   julia-oracle-plausible:
     name: reference ⟷ Julia Plausible (Nemo, Combinatorics.jl)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'julia-oracle-plausible')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -301,7 +321,7 @@ jobs:
   # nightly: rustup takes the pinned toolchain from packages/oracle/rust/rust-toolchain.toml.
   rust-oracle:
     name: reference ⟷ Rust (num, primal, statrs, adic)
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'rust-oracle')
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -481,7 +501,7 @@ jobs:
   # or by hand.)
   split-check-list:
     name: split check list
-    if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'split-check-list')
     runs-on: ubuntu-latest
     outputs:
       packages: ${{ steps.list.outputs.packages }}
