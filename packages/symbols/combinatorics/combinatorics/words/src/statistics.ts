@@ -387,7 +387,7 @@ export const WORD_STATISTICS: readonly Definition[] = [
                 "If",
                 equals(["Mod", k, "q"], 0),
                 equals(factorNumeral(1, subtract(k, "q")), suffixNumeral(subtract(k, "q"))),
-                false,
+                "False",
               ],
               "q",
             ),
