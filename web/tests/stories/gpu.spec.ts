@@ -132,7 +132,8 @@ test.describe("the fractals", () => {
 // points of complex-heads.golden.json and held to mpmath's values (collect-complex-heads.py). A point the kernel declines (its `uncertain` flag, drawn as hatching) is
 // not compared; the rest are, where the value is at least 0.1, to the case's measured tolerance.
 test.describe("the complex heads agree with mpmath", () => {
-  const golden = JSON.parse(readFileSync(new URL("complex-heads.golden.json", import.meta.url), "utf8")) as {
+  const file = new URL("../../../packages/symbols/analysis/analytic/tests/complex-heads.golden.json", import.meta.url);
+  const golden = JSON.parse(readFileSync(file, "utf8")) as {
     points: [number, number][];
     cases: Record<string, { json: Json; tolerance: number; values: [number, number][] }>;
   };

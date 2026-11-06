@@ -12,9 +12,9 @@ const declared = (s: string) =>
 const libraryNames = declared(zetaWGSL);
 
 // The heads the GPU spec holds to mpmath: the emitter's lowered set.
-const golden = JSON.parse(
-  readFileSync(new URL("../../../../../web/tests/stories/complex-heads.golden.json", import.meta.url), "utf8"),
-) as { cases: Record<string, { json: Json }> };
+const golden = JSON.parse(readFileSync(new URL("complex-heads.golden.json", import.meta.url), "utf8")) as {
+  cases: Record<string, { json: Json }>;
+};
 
 test("code that calls no kernel gets no library", () => {
   expect(reachableWGSL("fn plotFn(x: f32, y: f32) -> f32 { return x * x + y * y; }")).toBe("");
