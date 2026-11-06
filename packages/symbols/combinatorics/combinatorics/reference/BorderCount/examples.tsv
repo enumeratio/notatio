@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[BorderCount, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	3			the word $110100111$
+findstat-st001884-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'BorderCount'"]	1	1	FindStat St001884	FindStat's value for 0
+findstat-st001884-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'BorderCount'"]	1	1	FindStat St001884	FindStat's value for 1
+findstat-st001884-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'BorderCount'"]	2	2	FindStat St001884	FindStat's value for 00

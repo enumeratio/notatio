@@ -7,13 +7,18 @@ signatures:
   - call: NonInversionSum(p)
     description: The sum of j - i over the non-inversions i < j.
     library: enumeratio-combinatorics
-    type: (list<integer> | permutation) -> number
+    type: (binary_word | list<integer> | permutation) -> number
 catalog:
   - system: findstat
     identity: St000341
     url: https://www.findstat.org/St000341
     on: Permutation
+  - system: findstat
+    identity: St000348
+    url: https://www.findstat.org/St000348
+    on: BinaryWord
 statOn:
+  - BinaryWord
   - Permutation
 ---
 

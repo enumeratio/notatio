@@ -2,25 +2,35 @@
 //
 // Most are a fold with a small state: the run of ones in progress, a running height.
 
+import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
 import {
   add,
   adjacent,
   and,
   at,
+  atLeast,
+  atLeastValue,
   atMostValue,
+  bind,
+  bindList,
   carried,
   count,
   equals,
   fallsAfter,
   floored,
   fold,
+  forEach,
   greater,
   hasPair,
   here,
   length,
+  less,
+  max,
+  min,
   next,
   nonEmpty,
+  or,
   positions,
   risesAfter,
   subtract,
@@ -40,6 +50,8 @@ const stat = (head: string, summary: string, expr: MathJSON, note?: string): Def
 });
 
 const k = length();
+/** A fold whose accumulator is a typed list of integers. */
+const listFold = (...args: Parameters<typeof typedFold>): MathJSON => typedFold(...args) as MathJSON;
 const list = (...items: MathJSON[]): MathJSON => ["List", ...items];
 const times = (a: MathJSON, b: MathJSON): MathJSON => ["Multiply", a, b];
 /** The last field of a fold's state, which holds the answer. */
@@ -104,6 +116,103 @@ const balancedPrefixes: MathJSON = result(
 /** The letter opposite position `i`. */
 const mirrored: MathJSON = at(subtract(add(k, 1), "i"));
 
+/** `from .. to` in steps of 1. */
+const span = (from: MathJSON, to: MathJSON): MathJSON => ["Range", from, to, 1];
+const power = (base: number, exponent: MathJSON): MathJSON => ["Power", base, exponent];
+
+/** The `size` letters from position `from`, read as a base-3 numeral with the letters 0 and 1 as the digits 1 and 2: it names the factor, and no two factors share one, whatever their lengths. */
+const factorNumeral = (from: MathJSON, size: MathJSON): MathJSON =>
+  floored(sumOver(span(1, size), times(add(at(add(from, subtract("m", 1))), 1), power(3, subtract(size, "m"))), "m"));
+/** The numeral of the same letters read from the last to the first. */
+const reversedNumeral = (from: MathJSON, size: MathJSON): MathJSON =>
+  floored(sumOver(span(1, size), times(add(at(add(from, subtract("m", 1))), 1), power(3, subtract("m", 1))), "m"));
+/** The last `size` letters. */
+const suffixNumeral = (size: MathJSON): MathJSON => factorNumeral(add(subtract(k, size), 1), size);
+
+/** The lengths 1 .. n - 1 of the proper prefixes that are also suffixes. */
+const borderLengths: MathJSON = where(span(1, subtract(k, 1)), equals(factorNumeral(1, "l"), suffixNumeral("l")), "l");
+
+/** The value of the word read as a binary numeral. */
+const binaryValue: MathJSON = floored(sumOver(positions, times(here, power(2, subtract(k, "i")))));
+
+/** Pairs `i < j` weighted by `j - i` where the letters satisfy `relation`. */
+const weightedPairs = (relation: MathJSON): MathJSON =>
+  hasPair(
+    floored(
+      sumOver(adjacent, floored(sumOver(span(add("i", 1), k), times(subtract("j", "i"), ["If", relation, 1, 0]), "j"))),
+    ),
+  );
+
+/** The ones among the `size` letters from position `from`. */
+const onesFrom = (from: MathJSON, size: MathJSON): MathJSON =>
+  floored(sumOver(span(from, subtract(add(from, size), 1)), at("j"), "j"));
+
+/** The `size` letters from position `from` read the same backwards. */
+const isPalindrome = (from: MathJSON, size: MathJSON): MathJSON =>
+  equals(factorNumeral(from, size), reversedNumeral(from, size));
+
+/** A list over the prefixes of the word, built by `typedFold` from `initial`: entry j + 1 holds the value for the first j letters; `entry` reads the list so far as `a` and the last letter's position as `b`. */
+const prefixTable = (initial: readonly MathJSON[], entry: MathJSON): MathJSON =>
+  listFold(["Join", "a", list(entry)], "a", "b", list(...initial), positions, "list<integer>");
+/** Entry `j` of a prefix table, `j` letters in. */
+const tableAt = (table: MathJSON, letters: MathJSON): MathJSON => at(add(letters, 1), table);
+
+/** The latest position before `j` holding the letter at `j`, or 0. */
+const lastSame = (j: MathJSON): MathJSON =>
+  max(["Join", list(0), forEach(span(1, subtract(j, 1)), ["If", equals(at("p"), at(j)), "p", 0], "p")]);
+
+const max2 = (a: MathJSON, b: MathJSON): MathJSON => ["Max", a, b];
+const ifThen = (condition: MathJSON): MathJSON => ["If", condition, 1, 0];
+
+/** The ones less the zeros among the first `letters` letters. */
+const heightAfterLetters = (letters: MathJSON): MathJSON => subtract(times(2, onesFrom(1, letters)), letters);
+
+/** The heights after 0, 1, ... n letters, with the 1 as a step up. */
+const heights: MathJSON = prefixTable([0], add(at(["Length", "a"], "a"), subtract(times(2, at(visiting)), 1)));
+
+/** 1 when position `j` is a critical step of the Catalan factorization: a 0 that reaches a new low, or a 1 after which the height stays above where it was. The other letters make up the Dyck words. */
+const criticalStep = (j: MathJSON): MathJSON => [
+  "If",
+  equals(at(j), 0),
+  ifThen(less(tableAt("h", j), min(forEach(span(0, subtract(j, 1)), tableAt("h", "m"), "m")))),
+  ifThen(less(tableAt("h", subtract(j, 1)), min(forEach(span(j, k), tableAt("h", "m"), "m")))),
+];
+
+/** All of `conditions`; a lone one stands alone, as a one-operand `And` doesn't read back. */
+const allOf = (conditions: readonly MathJSON[]): MathJSON =>
+  conditions.length === 1 ? conditions[0]! : ["And", ...conditions];
+
+/** The distinct words `u` with `copies` copies of `u` side by side in the word, counted length by length. */
+const repeatedFactors = (copies: number): MathJSON =>
+  atLeast(
+    copies,
+    floored(
+      sumOver(
+        span(1, ["Divide", subtract(k, ["Mod", k, copies]), copies]),
+        floored(
+          sumOver(
+            [
+              "Unique",
+              forEach(span(1, add(subtract(k, times(copies, "l")), 1)), [
+                "If",
+                allOf(
+                  Array.from({ length: copies - 1 }, (_, c) =>
+                    equals(factorNumeral("i", "l"), factorNumeral(add("i", times(c + 1, "l")), "l")),
+                  ),
+                ),
+                factorNumeral("i", "l"),
+                0,
+              ]),
+            ],
+            ifThen(greater("n", 0)),
+            "n",
+          ),
+        ),
+        "l",
+      ),
+    ),
+  );
+
 export const WORD_STATISTICS: readonly Definition[] = [
   stat("HammingWeight", "The number of ones.", ones),
   stat("LeadingOnesCount", "The number of ones before the first 0.", leadingOnes),
@@ -160,5 +269,415 @@ export const WORD_STATISTICS: readonly Definition[] = [
     "FirstOnePositionAfterAppendedOne",
     "The position of the first 1 once a 1 is appended to the word: one more than the leading zeros.",
     add(leadingZeros, 1),
+  ),
+  stat(
+    "DecimalRepresentation",
+    "The word read as a binary numeral.",
+    nonEmpty(binaryValue),
+    "FindStat's St000289. The first letter is the most significant digit.",
+  ),
+  stat(
+    "DecimalRepresentationWithLeadingOne",
+    "The word with a 1 put in front, read as a binary numeral.",
+    nonEmpty(add(power(2, k), binaryValue), 1),
+    "FindStat's St000827.",
+  ),
+  stat(
+    "DistinctFactorCount",
+    "The distinct factors, the empty one included: the subword complexity.",
+    nonEmpty(
+      add(
+        1,
+        floored(
+          sumOver(
+            span(1, k),
+            ["Length", ["Unique", forEach(span(1, add(subtract(k, "l"), 1)), factorNumeral("i", "l"))]],
+            "l",
+          ),
+        ),
+      ),
+      1,
+    ),
+    "FindStat's St000294.",
+  ),
+  stat(
+    "BorderLength",
+    "The length of the longest proper prefix that is also a suffix; 0 for none.",
+    nonEmpty(hasPair(max(["Join", list(0), borderLengths]))),
+    "FindStat's St000295.",
+  ),
+  stat(
+    "SymmetricBorderLength",
+    "The length of the longest prefix whose reverse is a suffix.",
+    nonEmpty(
+      result(
+        fold(
+          positions,
+          list(1, 0),
+          list(
+            times(carried(1), ["If", equals(at(visiting), at(subtract(add(k, 1), visiting))), 1, 0]),
+            add(carried(2), times(carried(1), ["If", equals(at(visiting), at(subtract(add(k, 1), visiting))), 1, 0])),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St000296. The longest prefix that is a suffix read backwards is the run of leading positions i with w(i) = w(n + 1 - i).",
+  ),
+  stat(
+    "InversionSum",
+    "The sum of j - i over the pairs i < j with w(i) > w(j).",
+    weightedPairs(greater(at("i"), at("j"))),
+    "FindStat's St000347.",
+  ),
+  stat(
+    "NonInversionSum",
+    "The sum of j - i over the pairs i < j with w(i) < w(j).",
+    weightedPairs(less(at("i"), at("j"))),
+    "FindStat's St000348.",
+  ),
+  stat(
+    "StrictlyIncreasingRuns",
+    "The maximal runs of strictly increasing letters.",
+    nonEmpty(add(1, hasPair(count(adjacent, atLeastValue(here, next))))),
+    "FindStat's St000393: one more than the weak descents.",
+  ),
+  stat(
+    "MinimalPeriod",
+    "The least p with w(i) = w(i + p) wherever both are letters.",
+    nonEmpty(subtract(k, hasPair(max(["Join", list(0), borderLengths])))),
+    "FindStat's St000626: the length less the longest border.",
+  ),
+  stat(
+    "BorderCount",
+    "The prefixes shorter than the word that are also suffixes, the empty one included.",
+    nonEmpty(hasPair(add(1, ["Count", borderLengths]), 1)),
+    "FindStat's St001884.",
+  ),
+  {
+    ...stat(
+      "WeakMajorIndex",
+      "The sum of the positions i with w(i) >= w(i+1).",
+      hasPair(["Sum", where(adjacent, atLeastValue(here, next))]),
+      "FindStat's St001930.",
+    ),
+  },
+  stat(
+    "DistinctSubsequenceCount",
+    "The distinct subsequences, the empty one included.",
+    nonEmpty(
+      at(
+        add(k, 2),
+        prefixTable([0, 1], subtract(times(2, at(["Length", "a"], "a")), tableAt("a", lastSame(visiting)))),
+      ),
+      1,
+    ),
+    "FindStat's St000518. With d(j) the count for the first j letters, d(j) = 2 d(j - 1) less d(p - 1), where p is the latest earlier position holding the same letter, if any.",
+  ),
+  stat(
+    "RepetitionExponent",
+    "The largest e such that the word is e copies of one word.",
+    nonEmpty(
+      hasPair(
+        [
+          "Divide",
+          k,
+          min([
+            "Join",
+            list(k),
+            where(
+              span(1, subtract(k, 1)),
+              [
+                "If",
+                equals(["Mod", k, "q"], 0),
+                equals(factorNumeral(1, subtract(k, "q")), suffixNumeral(subtract(k, "q"))),
+                "False",
+              ],
+              "q",
+            ),
+          ]),
+        ],
+        1,
+      ),
+    ),
+    "FindStat's St000627, also called the frequency. The word is copies of a word of length q when q divides n and the first n - q letters are the last n - q.",
+  ),
+  stat(
+    "Balance",
+    "The least q such that any two factors of one length differ by at most q ones.",
+    nonEmpty(
+      max(
+        forEach(
+          span(1, k),
+          bindList("c", forEach(span(1, add(subtract(k, "l"), 1)), onesFrom("i", "l")), subtract(max("c"), min("c"))),
+          "l",
+        ),
+      ),
+    ),
+    "FindStat's St000628.",
+  ),
+  stat(
+    "ShortestPalindromicDecompositionLength",
+    "The fewest palindromic factors the word is a concatenation of.",
+    nonEmpty(
+      at(
+        add(k, 1),
+        prefixTable(
+          [0],
+          min(
+            forEach(span(0, subtract(visiting, 1)), [
+              "If",
+              isPalindrome(add("i", 1), subtract(visiting, "i")),
+              add(tableAt("a", "i"), 1),
+              add(k, 1),
+            ]),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St000630. The table holds the fewest pieces for each prefix.",
+  ),
+  stat(
+    "PalindromicDecompositionCount",
+    "The ways to write the word as a concatenation of palindromic factors.",
+    nonEmpty(
+      at(
+        add(k, 1),
+        prefixTable(
+          [1],
+          floored(
+            sumOver(span(0, subtract(visiting, 1)), [
+              "If",
+              isPalindrome(add("i", 1), subtract(visiting, "i")),
+              tableAt("a", "i"),
+              0,
+            ]),
+          ),
+        ),
+      ),
+      1,
+    ),
+    "FindStat's St000631. The table holds the ways for each prefix.",
+  ),
+  stat(
+    "LongestCatalanFactorSemilength",
+    "The semilength of the longest Dyck word in the Catalan factorization.",
+    nonEmpty(
+      bindList(
+        "h",
+        heights,
+        bindList(
+          "g",
+          listFold(
+            bind(
+              "c",
+              criticalStep(visiting),
+              list(times(subtract(1, "c"), add(carried(1), 1)), max2(carried(2), times("c", carried(1)))),
+              "integer",
+            ),
+            "a",
+            "b",
+            list(0, 0),
+            positions,
+            "list<integer>",
+          ),
+          ["Divide", max2(at(1, "g"), at(2, "g")), 2],
+        ),
+      ),
+    ),
+    "FindStat's St000875. Every word is (D 0)^l D (1 D)^m with the D Dyck words; the longest D lies between two critical steps, or an end of the word and one.",
+  ),
+  stat(
+    "CatalanFactorCount",
+    "The factors in the Catalan factorization: the critical steps, and the middle Dyck word if it is not empty.",
+    nonEmpty(
+      bindList(
+        "h",
+        heights,
+        bind(
+          "low",
+          min("h"),
+          add(subtract(tableAt("h", k), times(2, "low")), [
+            "If",
+            greater(floored(sumOver(span(0, k), ifThen(equals(tableAt("h", "j"), "low")), "j")), 1),
+            1,
+            0,
+          ]),
+          "integer",
+        ),
+      ),
+    ),
+    "FindStat's St000876. The middle word is not empty when the height reaches its lowest value more than once.",
+  ),
+  stat(
+    "CriticalStepCount",
+    "The critical steps l + m in the Catalan factorization (D 0)^l D (1 D)^m.",
+    nonEmpty(bindList("h", heights, subtract(tableAt("h", k), times(2, min("h"))))),
+    "FindStat's St000885. The word ends at height m - l, and l is the least height reached below 0.",
+  ),
+  stat(
+    "InternalInversions",
+    "The pairs i < j with w(i) > w(j) that lie in the same block of the sorted word.",
+    hasPair(
+      bind(
+        "z",
+        subtract(k, ones),
+        floored(
+          sumOver(
+            adjacent,
+            floored(
+              sumOver(
+                span(add("i", 1), k),
+                ifThen(and(greater(at("i"), at("j")), or(atMostValue("j", "z"), greater("i", "z")))),
+                "j",
+              ),
+            ),
+          ),
+        ),
+        "integer",
+      ),
+    ),
+    "FindStat's St000921. The sorted word is the zeros then the ones, so a pair is internal when both positions are among the first z or both after.",
+  ),
+  stat(
+    "UniqueFactorLength",
+    "The least length for which all factors of that length are different.",
+    nonEmpty(
+      min(
+        where(
+          positions,
+          equals(
+            ["Length", ["Unique", forEach(span(1, add(subtract(k, "l"), 1)), factorNumeral("i", "l"))]],
+            add(subtract(k, "l"), 1),
+          ),
+          "l",
+        ),
+      ),
+    ),
+    "FindStat's St000922.",
+  ),
+  stat(
+    "LyndonFactorizationLength",
+    "The factors in the Lyndon factorization.",
+    nonEmpty(
+      hasPair(
+        bindList(
+          "v",
+          prefixTable(
+            [power(3, k)],
+            floored(
+              sumOver(
+                span(1, add(subtract(k, visiting), 1)),
+                times(add(at(add(visiting, subtract("m", 1))), 1), power(3, subtract(k, "m"))),
+                "m",
+              ),
+            ),
+          ),
+          add(
+            1,
+            floored(
+              sumOver(span(2, k), ifThen(less(tableAt("v", "i"), min(forEach(span(1, "i"), at("m", "v"), "m")))), "i"),
+            ),
+          ),
+        ),
+        1,
+      ),
+    ),
+    "FindStat's St001267. A factor starts at each position whose suffix is smaller than every earlier suffix; the table starts with a numeral above any suffix's, and pads a suffix with the digit 0, which is smaller than a letter, so the numerals order the suffixes.",
+  ),
+  stat(
+    "LongestYamanouchiPrefix",
+    "The length of the longest prefix in which no prefix has more ones than zeros.",
+    nonEmpty(subtract(min(["Join", list(add(k, 1)), where(positions, greater(heightAfterLetters("j"), 0), "j")]), 1)),
+    "FindStat's St001371.",
+  ),
+  stat(
+    "LongestPalindromicPrefix",
+    "The length of the longest prefix that reads the same backwards.",
+    nonEmpty(max(where(positions, isPalindrome(1, "l"), "l"))),
+    "FindStat's St001415.",
+  ),
+  stat(
+    "LongestPalindromicFactor",
+    "The length of the longest factor that reads the same backwards.",
+    nonEmpty(
+      max(
+        forEach(
+          positions,
+          times("l", max(forEach(span(1, add(subtract(k, "l"), 1)), ifThen(isPalindrome("i", "l")), "i"))),
+          "l",
+        ),
+      ),
+    ),
+    "FindStat's St001416.",
+  ),
+  stat(
+    "LongestPalindromicSubsequence",
+    "The length of the longest subsequence that reads the same backwards.",
+    nonEmpty(
+      at(
+        add(k, 1),
+        listFold(
+          [
+            "Join",
+            list(0),
+            forEach(
+              positions,
+              max2(
+                tableAt("a", "j"),
+                max([
+                  "Join",
+                  list(0),
+                  forEach(
+                    span(1, "j"),
+                    ["If", equals(at(visiting), at(subtract(add(k, 1), "jp"))), add(at("jp", "a"), 1), 0],
+                    "jp",
+                  ),
+                ]),
+              ),
+              "j",
+            ),
+          ],
+          "a",
+          "b",
+          ["Map", ["Function", 0, "z"], span(0, k)],
+          positions,
+          "list<integer>",
+        ),
+      ),
+    ),
+    "FindStat's St001417: the longest common subsequence of the word and its reverse. After the first i letters, entry j + 1 holds that for the first j letters of the reverse.",
+  ),
+  stat(
+    "DistinctCubeCount",
+    "The distinct nonempty words u with uuu a factor.",
+    repeatedFactors(3),
+    "FindStat's St001423.",
+  ),
+  stat(
+    "DistinctSquareCount",
+    "The distinct nonempty words u with uu a factor.",
+    repeatedFactors(2),
+    "FindStat's St001424.",
+  ),
+  stat(
+    "CyclicShiftIndex",
+    "The position of the word among its distinct cyclic shifts in lexicographic order, from 0.",
+    nonEmpty(
+      bindList(
+        "v",
+        prefixTable(
+          [power(2, k)],
+          floored(
+            sumOver(
+              positions,
+              times(at(add(["Mod", add(visiting, subtract("m", 2)), k], 1)), power(2, subtract(k, "m"))),
+              "m",
+            ),
+          ),
+        ),
+        floored(sumOver(["Unique", "v"], ifThen(less("n", tableAt("v", 1))), "n")),
+      ),
+    ),
+    "FindStat's St001436. The shifts are compared as binary numerals, which orders words of one length lexicographically; the table starts with a numeral above every shift's.",
   ),
 ];
