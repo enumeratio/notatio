@@ -164,6 +164,31 @@ test.describe("the complex heads agree with mpmath", () => {
   }
 });
 
+// The corners of a hand-written range are the portrait's view (BL-335): the Gamma page draws
+// ComplexPlot(Gamma(z), {z, -5 - 3*I, 5 + 3*I}), so its view is centered on 0 and 10 tall.
+test("a portrait is drawn over the corners it was written with", async ({ page }) => {
+  await page.goto("/reference/symbol/Gamma");
+  const plot = page.locator("notatio-complex-plot").first();
+  await expect(plot).toHaveAttribute("center", "0,0");
+  await expect(plot).toHaveAttribute("extent", "10");
+  const canvas = plot.locator("canvas");
+  await paintedStats(canvas);
+  const box = (await canvas.boundingBox())!;
+  const aspect = box.width / box.height;
+  const at = (re: number, im = 0.005) => colorAt(canvas, 0.5 + re / (10 * aspect), 0.5 - im / 10);
+  // Gamma is real on the real axis: positive (red) at 2.5 and between -2 and -1, negative (cyan) between -1 and 0 and
+  // between -3 and -2, and so on, each pole a hue flip. Only the right view puts these signs at these places.
+  const redness = ([r, g, b]: number[]) => r - (g + b) / 2;
+  for (const [re, sign] of [
+    [2.5, 1],
+    [-0.5, -1],
+    [-1.5, 1],
+    [-2.5, -1],
+    [-3.5, 1],
+  ] as const)
+    expect(Math.sign(redness(await at(re))), `Gamma(${re}) hue`).toBe(sign);
+});
+
 // Symbol pages whose portrait the emitter was widened to draw (BL-335): each is the function's own
 // picture, in color and in several hues, not blank, hatched or one color. (A purely real function such
 // as Re draws two hues, and is left out.)

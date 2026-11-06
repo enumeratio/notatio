@@ -38,7 +38,10 @@ import {
  * is part of the story (the polylog's |z| < 1). Drag to pan; ⌘/Ctrl + scroll to zoom.
  *
  * Framing is manipulable too: `extent="_e"` takes a wildcard directly, and `center`
- * accepts the Epsil list form `[_c, 0]` as well as a bare `re,im`.
+ * accepts the Epsil list form `[_c, 0]` as well as a bare `re,im`. Written as
+ * `ComplexPlot(f, {z, a + b I, c + d I})`, the corners set both: the view is centered on the
+ * rectangle and as tall as its longer side, so it shows all of it (more, on a wide canvas).
+ * Corners that are not a real rectangle (`a >= c` or `b >= d`, or not numbers) leave the default view.
  */
 export class NotatioComplexPlot extends LitElement {
   static properties = {
