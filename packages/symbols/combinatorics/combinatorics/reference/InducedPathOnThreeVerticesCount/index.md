@@ -8,6 +8,13 @@ signatures:
     description: "The sets of three vertices that induce a path: exactly two of the three edges."
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001308
+    url: https://www.findstat.org/St001308
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

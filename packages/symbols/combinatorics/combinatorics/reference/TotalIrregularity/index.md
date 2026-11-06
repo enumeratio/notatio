@@ -8,6 +8,13 @@ signatures:
     description: The sum over the unordered pairs of vertices of the difference of their degrees.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001522
+    url: https://www.findstat.org/St001522
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

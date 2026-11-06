@@ -8,6 +8,13 @@ signatures:
     description: "The least eccentricity of a vertex, the greatest distance from it to another vertex: the radius."
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000260
+    url: https://www.findstat.org/St000260
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

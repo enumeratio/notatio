@@ -8,6 +8,13 @@ signatures:
     description: "The edges less the vertices plus the components: the independent cycles."
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001311
+    url: https://www.findstat.org/St001311
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

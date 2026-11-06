@@ -8,6 +8,13 @@ signatures:
     description: The pairs of vertices at distance 2.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000448
+    url: https://www.findstat.org/St000448
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

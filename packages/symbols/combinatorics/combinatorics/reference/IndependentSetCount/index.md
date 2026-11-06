@@ -8,6 +8,13 @@ signatures:
     description: The sets of vertices, the empty set included, with no two adjacent.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000300
+    url: https://www.findstat.org/St000300
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

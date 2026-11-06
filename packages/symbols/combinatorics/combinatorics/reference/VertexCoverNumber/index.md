@@ -8,6 +8,13 @@ signatures:
     description: "The fewest vertices that meet every edge: the vertices less the independence number."
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000362
+    url: https://www.findstat.org/St000362
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

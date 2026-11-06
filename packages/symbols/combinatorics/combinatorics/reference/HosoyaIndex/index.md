@@ -8,6 +8,13 @@ signatures:
     description: The sets of edges with no two sharing a vertex, the empty set included.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000468
+    url: https://www.findstat.org/St000468
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

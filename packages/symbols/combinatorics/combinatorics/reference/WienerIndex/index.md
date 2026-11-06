@@ -8,6 +8,13 @@ signatures:
     description: The sum of the distances over the pairs of vertices that are joined by a path.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000265
+    url: https://www.findstat.org/St000265
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
