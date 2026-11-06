@@ -31,6 +31,11 @@ const SAMPLES: readonly Sample[] = [
     list: [[4, 3, 1], [3, 1], [1]],
     caption: "the plane partition $[[4,3,1],[3,1],[1]]$",
   },
+  {
+    on: "SkewPartition",
+    list: [[3, 1], [1]],
+    caption: "the skew partition $[[3,1],[1]]$",
+  },
 ];
 
 // These heads are also partition heads, which own their records.
@@ -39,11 +44,14 @@ const SHARED_WITH_PARTITIONS = [
   "EvenParts",
   "LargestPart",
   "LargestRepeatedPart",
+  "MaximalRookPlacementCount",
   "MultiplicityOfSmallestPart",
   "OddParts",
   "PartCount",
   "PartRange",
+  "RookPlacementCount",
   "SmallestMissingPart",
+  "StandardTableauCount",
 ];
 
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));
@@ -55,7 +63,10 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: TABLEAUX_FRONTIER,
   samples: SAMPLES,
   declareArea: declareTableaux,
-  carrierNames: { PlanePartition: { subjectName: "planePartition", domain: "Plane partition statistics" } },
+  carrierNames: {
+    PlanePartition: { subjectName: "planePartition", domain: "Plane partition statistics" },
+    SkewPartition: { subjectName: "shape", domain: "Skew partition statistics" },
+  },
   curatedHeads: ["WeightedSize"],
   dir: REFERENCE_DIR,
   omitHeads: SHARED_WITH_PARTITIONS,

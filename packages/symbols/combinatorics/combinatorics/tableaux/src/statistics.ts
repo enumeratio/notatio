@@ -6,6 +6,7 @@
 // each reading position, and `IndexOf` finds the position of an entry.
 
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
+import { FINDSTAT_SKEW_PARTITION_STATISTICS } from "./skew-statistics.ts";
 import {
   add,
   and,
@@ -656,4 +657,5 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_TABLEAU_STATISTICS_3,
   ...FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS,
   ...FINDSTAT_PLANE_PARTITION_STATISTICS,
+  ...FINDSTAT_SKEW_PARTITION_STATISTICS,
 ];

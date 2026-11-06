@@ -29,7 +29,7 @@ export const PARTITIONS_CARRIERS: readonly Carrier[] = [
   {
     name: "SkewPartition",
     type: "skew_partition",
-    shape: "tuple<list<integer>, list<integer>>",
+    shape: "list<list<integer>>",
     id: "skew_partition",
     plural: "SkewPartitions",
   },

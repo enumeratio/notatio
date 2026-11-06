@@ -1905,6 +1905,13 @@ const NOVEL = [
   "FirstRowSum",
   "AmbientCubeSize",
   "ConjugateTrace",
+  "FirstRowMissingBoxCount",
+  "MissingBoxCount",
+  "InnerCornerCount",
+  "SkewCornerCount",
+  "SkewConnectedComponentCount",
+  "TwoByTwoSquareCount",
+  "FrobeniusRank",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

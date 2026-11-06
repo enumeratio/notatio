@@ -33,6 +33,8 @@ export function declareTableaux(ce: Engine): void {
   // These families yield bare rows, so `CombinatorialStat` is told which carrier they are.
   registerCollectionCarrier(ce, "AlternatingSignMatrices", "AlternatingSignMatrix");
   registerCollectionCarrier(ce, "PlanePartitions", "PlanePartition");
+  // Likewise SkewPartitions yields bare [outer, inner] lists.
+  registerCollectionCarrier(ce, "SkewPartitions", "SkewPartition");
   // Its statistics, after its own carriers and families.
   declareStatistics(ce, TABLEAU_STATISTICS);
 }

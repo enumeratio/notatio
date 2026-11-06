@@ -9,5 +9,5 @@ signatures:
   - call: SkewPartition(...)
     description: Catalogued in the enumeratio database; not yet written up here.
     library: enumeratio-combinatorics
-    type: (tuple<list<integer>, list<integer>>) -> skew_partition
+    type: (list<list<integer>>) -> skew_partition
 ---

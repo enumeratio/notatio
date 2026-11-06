@@ -19,6 +19,8 @@ const SAMPLE: Record<string, unknown> = {
   // These families yield bare rows.
   AlternatingSignMatrix: ["AlternatingSignMatrix", ["At", ["AlternatingSignMatrices", 3], 4]],
   PlanePartition: ["PlanePartition", ["At", ["PlanePartitions", 6], 10]],
+  // The family yields bare [outer, inner].
+  SkewPartition: ["SkewPartition", ["At", ["SkewPartitions", 4], 7]],
 };
 
 test("every statistic is callable by its bare head on each of its carriers", () => {

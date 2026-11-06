@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-skew-partition-3-1-1			[TwoByTwoSquareCount, [SkewPartition, [List, [List, 3, 1], [List, 1]]]]	0			the skew partition $[[3,1],[1]]$
+findstat-st001596-1	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 1], [List]]], "'TwoByTwoSquareCount'"]	0	0	FindStat St001596	FindStat's value for [[1],[]]
+findstat-st001596-2	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 2], [List]]], "'TwoByTwoSquareCount'"]	0	0	FindStat St001596	FindStat's value for [[2],[]]
+findstat-st001596-3	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 3], [List]]], "'TwoByTwoSquareCount'"]	0	0	FindStat St001596	FindStat's value for [[3],[]]

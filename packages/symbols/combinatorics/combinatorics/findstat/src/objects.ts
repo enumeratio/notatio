@@ -96,6 +96,14 @@ const READERS: Readonly<Record<string, Reader>> = {
     read: (t) => ["PlanePartition", rows(t)],
     size: (t) => sum((JSON.parse(t) as number[][]).map((r) => sum(r))),
   },
+  // `[[outer],[inner]]`, the part lists of λ and μ; size the cells of λ/μ, as ours.
+  SkewPartition: {
+    read: (t) => ["SkewPartition", rows(t)],
+    size: (t) => {
+      const [outer, inner] = JSON.parse(t) as [number[], number[]];
+      return sum(outer) - sum(inner);
+    },
+  },
 };
 
 /** The carrier value FindStat's `text` names, or `undefined` for a carrier we don't read. A malformed text throws. */

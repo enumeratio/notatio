@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-skew-partition-3-1-1			[FirstRowMissingBoxCount, [SkewPartition, [List, [List, 3, 1], [List, 1]]]]	1			the skew partition $[[3,1],[1]]$
+findstat-st001435-1	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 1], [List]]], "'FirstRowMissingBoxCount'"]	0	0	FindStat St001435	FindStat's value for [[1],[]]
+findstat-st001435-2	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 2], [List]]], "'FirstRowMissingBoxCount'"]	0	0	FindStat St001435	FindStat's value for [[2],[]]
+findstat-st001435-3	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 3], [List]]], "'FirstRowMissingBoxCount'"]	0	0	FindStat St001435	FindStat's value for [[3],[]]

@@ -8,13 +8,18 @@ catalog:
     identity: St001659
     url: https://www.findstat.org/St001659
     on: IntegerPartition
+  - system: findstat
+    identity: St001660
+    url: https://www.findstat.org/St001660
+    on: SkewPartition
 statOn:
   - IntegerPartition
+  - SkewPartition
 signatures:
   - call: MaximalRookPlacementCount(partition)
     description: The ways to place as many non-attacking rooks as possible on the Ferrers board of the diagram.
     library: enumeratio-combinatorics
-    type: (integer_partition) -> number
+    type: (integer_partition | skew_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
