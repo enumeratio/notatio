@@ -17,7 +17,7 @@ import { bareEngine } from "@enumeratio/engine/testing";
 import { declareStructures } from "@enumeratio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
-import { COLLECTION_CARRIER, objectSize } from "../src/objects.ts";
+import { COLLECTION_CARRIER, objectSize, readObject } from "../src/objects.ts";
 import { findstat } from "../src/findstat-data.ts";
 
 const DEEP = process.env.DEEP_TESTS === "1";
@@ -49,6 +49,17 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   PlanePartition: ["PlanePartitions", (n) => n],
   SkewPartition: ["SkewPartitions", (n) => n],
 };
+
+/**
+ * Carriers whose FindStat collection is not one of ours by size: graphs are listed up to isomorphism, ours by labeling, so a
+ * per-size distribution would not match. Each object of the crawl is read, the statistic evaluated on it, and the value held
+ * to the object's row, which says more than a distribution. The largest size read, in the standard run and in a deep one;
+ * a size the crawl covers only in part is compared as far as it goes.
+ */
+const OBJECT_WISE: Readonly<Record<string, { standard: number; deep: number }>> = {
+  LabeledGraph: { standard: 5, deep: Number(process.env.DEEP_OBJECT_SIZE ?? 7) },
+};
+const objectCap = (carrier: string): number => OBJECT_WISE[carrier]![DEEP ? "deep" : "standard"];
 
 type Kind = "unclassified" | "emit" | "convention" | "ours";
 interface Disagreement {
@@ -101,8 +112,17 @@ function ourTally(carrier: string, size: number, head: string): Record<string, n
   return Object.fromEntries(values.map((v, i) => [v, counts[i]!]));
 }
 
+/** Ours on one object of a carrier compared object by object: the statistic's call on the carrier value, as FindStat's `text` reads. */
+function ourValue(carrier: string, object: string, head: string): number | string {
+  const answer = value(["CombinatorialStat", readObject(carrier, object)!, `'${head}'`]) as unknown;
+  return typeof answer === "number" ? answer : String(answer);
+}
+
 interface Report {
+  /** One label per statistic and size compared in full: a distribution, or every object of the crawl at that size. */
   readonly compared: string[];
+  /** The objects read one by one behind the labels `ending in "objects"`. */
+  objects: number;
   readonly skipped: string[];
   readonly disagreements: Golden;
 }
@@ -112,8 +132,9 @@ function sweep(only?: readonly string[]): Report {
   const skipped: string[] = [];
   const disagreements: Golden = {};
   const counts = new Map<string, number>();
+  let objectsRead = 0;
   for (const match of findstat) {
-    if (!COLLECTIONS[match.on]) continue;
+    if (!COLLECTIONS[match.on] && !OBJECT_WISE[match.on]) continue;
     if (only && !only.includes(`${match.head}@${match.on}`)) continue;
     for (const id of match.findstat) {
       const bySize = new Map<number, Map<string, number>>();
@@ -121,11 +142,39 @@ function sweep(only?: readonly string[]): Report {
       if (!entry || COLLECTION_CARRIER[entry.collection] !== match.on) continue;
       for (const [object, v] of pairsOf(id)) {
         const size = objectSize(match.on, object);
-        if (size === undefined || size > MAX_SIZE || typeof v !== "number") continue;
+        const cap = OBJECT_WISE[match.on] ? objectCap(match.on) : MAX_SIZE;
+        if (size === undefined || size > cap || typeof v !== "number") continue;
         (bySize.get(size) ?? bySize.set(size, new Map()).get(size)!).set(object, v);
       }
       for (const [size, objects] of [...bySize].toSorted((a, b) => a[0] - b[0])) {
         const label = `${match.head}@${match.on} ${id} n=${size}`;
+        if (OBJECT_WISE[match.on]) {
+          const ours: Record<string, number> = {};
+          const theirs: Record<string, number> = {};
+          const wrong: string[] = [];
+          try {
+            for (const [object, expected] of objects) {
+              const got = ourValue(match.on, object, match.head);
+              if (got === expected) continue;
+              wrong.push(`${object}: ours ${got}, FindStat ${expected}`);
+              ours[String(got)] = (ours[String(got)] ?? 0) + 1;
+              theirs[expected] = (theirs[expected] ?? 0) + 1;
+            }
+          } catch (error) {
+            skipped.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
+            continue;
+          }
+          objectsRead += objects.size;
+          compared.push(`${label} objects`);
+          if (wrong.length > 0)
+            disagreements[`${label} objects`] = {
+              kind: "unclassified",
+              note: wrong.slice(0, 3).join("; "),
+              ours,
+              theirs,
+            };
+          continue;
+        }
         const key = `${match.on}:${size}`;
         let ours: Record<string, number> | undefined;
         try {
@@ -152,7 +201,7 @@ function sweep(only?: readonly string[]): Report {
       }
     }
   }
-  return { compared, skipped, disagreements };
+  return { compared, objects: objectsRead, skipped, disagreements };
 }
 
 const readGolden = (): Golden => (existsSync(GOLDEN) ? (JSON.parse(readFileSync(GOLDEN, "utf8")) as Golden) : {});
@@ -205,6 +254,10 @@ test.skipIf(!DEEP)("every adopted statistic against FindStat's distributions, as
   console.info(
     `findstat distributions: ${report.compared.length} compared, ${Object.keys(report.disagreements).length} disagree, ${report.skipped.length} skipped`,
   );
+  // Of the compared labels, those ending in "objects" held every crawl object of that size to its own row.
+  console.info(
+    `findstat objects: ${report.compared.filter((label) => label.endsWith(" objects")).length} of them object by object, ${report.objects} objects read`,
+  );
   if (process.env.UPDATE_FINDSTAT_DISTRIBUTIONS === "1") {
     // Without the crawl only the snapshot's sizes are seen, so pins for the others stay.
     const golden = readGolden();
@@ -214,4 +267,15 @@ test.skipIf(!DEEP)("every adopted statistic against FindStat's distributions, as
     return;
   }
   expectPinned(report);
+});
+
+test("graph statistics agree with FindStat's rows object by object, as far as the snapshot reaches", () => {
+  const heads = findstat.filter((m) => OBJECT_WISE[m.on]).map((m) => `${m.head}@${m.on}`);
+  const report = sweep(heads);
+  expect(report.compared.length).toBeGreaterThan(0);
+  expect(report.skipped).toEqual([]);
+  expectPinned(
+    report,
+    heads.map((h) => h.split("@")[0]!),
+  );
 });

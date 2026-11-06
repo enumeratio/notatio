@@ -18,6 +18,7 @@ const STUBS: Record<string, string> = {
   "../trees/src/statistics.compiled.generated.js": "COMPILED",
   "../set-partitions/src/statistics.compiled.generated.js": "COMPILED",
   "../words/src/statistics.compiled.generated.js": "COMPILED",
+  "../graphs/src/statistics.compiled.generated.js": "COMPILED",
 };
 
 for (const [path, name] of Object.entries(STUBS)) {

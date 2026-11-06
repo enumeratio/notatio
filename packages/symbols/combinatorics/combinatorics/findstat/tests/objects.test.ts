@@ -30,6 +30,13 @@ test("a few objects per new carrier", () => {
   ]);
   expect(readObject("SkewPartition", "[[3,1],[1]]")).toEqual(["SkewPartition", L(L(3, 1), L(1))]);
   expect(readObject("SkewPartition", "[[2],[]]")).toEqual(["SkewPartition", L(L(2), L())]);
+  // Vertices count from 1 here and from 0 in the crawl; each edge is [lower, higher], the edges in order.
+  expect(readObject("LabeledGraph", "([(0,1),(0,2),(1,2)],3)")).toEqual([
+    "LabeledGraph",
+    ["Tuple", 3, L(L(1, 2), L(1, 3), L(2, 3))],
+  ]);
+  expect(readObject("LabeledGraph", "([(2,0),(1,2)],4)")).toEqual(["LabeledGraph", ["Tuple", 4, L(L(1, 3), L(2, 3))]]);
+  expect(readObject("LabeledGraph", "([],0)")).toEqual(["LabeledGraph", ["Tuple", 0, L()]]);
 });
 
 test("the empty objects", () => {
@@ -64,6 +71,8 @@ test("sizes are what the collections grow by", () => {
   expect(objectSize("PlanePartition", "[[1],[1]]")).toBe(2);
   expect(objectSize("PlanePartition", "[[2,1]]")).toBe(3);
   expect(objectSize("SkewPartition", "[[3,1],[1]]")).toBe(3);
+  expect(objectSize("LabeledGraph", "([(0,1),(0,2),(1,2)],3)")).toBe(3);
+  expect(objectSize("LabeledGraph", "([],0)")).toBe(0);
 });
 
 interface Snapshot {
@@ -109,6 +118,7 @@ const FAMILY: Readonly<Record<string, [head: string, argument: (size: number) =>
   PlanePartition: ["PlanePartitions", (n) => n],
   SetComposition: ["SetCompositions", (n) => n],
   SkewPartition: ["SkewPartitions", (n) => n],
+  LabeledGraph: ["LabeledGraphs", (n) => n],
 };
 
 test("every snapshot object of the new carriers is an element of our collection of its size", () => {
