@@ -214,7 +214,6 @@ const repeatedFactors = (copies: number): MathJSON =>
     ),
   );
 
-export const WORD_STATISTICS: readonly Definition[] = [
 const BINARY_WORD_STATISTICS: readonly Definition[] = [
   stat("HammingWeight", "The number of ones.", ones),
   stat("LeadingOnesCount", "The number of ones before the first 0.", leadingOnes),
