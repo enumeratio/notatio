@@ -25,7 +25,7 @@ import { setEngineDefaults } from "@enumeratio/engine";
 import { toFullForm } from "@enumeratio/formats/fullform";
 import { toInputForm } from "@enumeratio/formats/inputform";
 import { markupOf, readMarkupText, stripMetadata } from "@enumeratio/formats/markup";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression, withoutProgramBlock } from "@enumeratio/formats/expression";
 import { portableTeX, registerTeXMacros } from "@enumeratio/formats/tex";
 import { emit, SYSTEMS, type System } from "@enumeratio/oracle";
 import { conventionalLatexDictionary, DisplayLatexSyntax, withStringsWrapped } from "../src/conventional-latex.ts";
@@ -106,7 +106,7 @@ function inputFormBack(expr: MathJSON, printed: string): MathJSON | undefined {
 function fullFormBack(expr: MathJSON, printed: string): MathJSON | undefined {
   const [json, errors] = parseEpsil(printed);
   if (errors.length > 0) return "Unreadable";
-  const read = attempt(() => JSON.stringify(numbersAsValues(box(stripOffsets(json)).json)));
+  const read = attempt(() => JSON.stringify(numbersAsValues(box(stripOffsets(withoutProgramBlock(json))).json)));
   if (read === attempt(() => JSON.stringify(numbersAsValues(box(expr).json)))) return undefined;
   return read === undefined ? "Unreadable" : (JSON.parse(read) as MathJSON);
 }

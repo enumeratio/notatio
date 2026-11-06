@@ -1,3 +1,3 @@
-id	section	role	expr	expected	caption	wolfram.note
-append-to-a-bound-list			[Block, [Declare, appendToDemoList, list<integer>, [List, 1, 2, 3]], [List, appendToDemoList, [AppendTo, appendToDemoList, 4]]]	[List, [List, 1, 2, 3], [List, 1, 2, 3, 4]]	bind a list, then append to it	
-appendto-m-list-e-f	Applications		[AppendTo, m, [List, a, b]]	[AppendTo, m, [List, a, b]]		Spelled with a and b: compute-engine defines the bare symbol e as ExponentialE (Wolfram's e is a free symbol), which the oracle refuses. AppendTo on a symbol with no value stays unevaluated in both (AppendTo::rvalue).
+id	section	role	expr	expected	caption	epsil.back	wolfram.note
+append-to-a-bound-list			[Block, [Declare, appendToDemoList, list<integer>, [List, 1, 2, 3]], [List, appendToDemoList, [AppendTo, appendToDemoList, 4]]]	[List, [List, 1, 2, 3], [List, 1, 2, 3, 4]]	bind a list, then append to it	Unreadable	
+appendto-m-list-e-f	Applications		[AppendTo, m, [List, a, b]]	[AppendTo, m, [List, a, b]]			Spelled with a and b: compute-engine defines the bare symbol e as ExponentialE (Wolfram's e is a free symbol), which the oracle refuses. AppendTo on a symbol with no value stays unevaluated in both (AppendTo::rvalue).
