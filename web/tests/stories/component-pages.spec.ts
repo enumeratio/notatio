@@ -37,11 +37,18 @@ const tagByName = new Map([
 // reason) rather than failed. A tag with no entry here falls back to "at least one <svg>".
 const RENDER_CHECKS: Readonly<Record<string, (el: Locator) => Promise<void>>> = {
   "notatio-collection-table": async (el) => {
-    await expect(el.locator("table-view-box .tvb-row[role=row]:not([aria-busy]):not(.tvb-header)").first()).toBeVisible(
-      {
-        timeout: 30_000,
-      },
-    );
+    // A table asks the kernel for rows once it is near the viewport, and a story's hash link can
+    // land short of it, so each try scrolls to it first. Measured on dell-arcade at load 6: rows
+    // 12-30 s after the card is visible (the kernel declares its libraries first), and 31-50 s for
+    // SymmetricGroup(20), SymmetricGroup(25) and Permutations(25), whose rows past 2^53 are
+    // interpreted at about 0.12 s each. This is the most the test's own 180 s leaves after the
+    // page load; a runner four times slower may still miss it on those three (BL-330).
+    await expect(async () => {
+      await el.scrollIntoViewIfNeeded();
+      await expect(
+        el.locator("table-view-box .tvb-row[role=row]:not([aria-busy]):not(.tvb-header)").first(),
+      ).toBeVisible({ timeout: 5_000 });
+    }).toPass({ timeout: 150_000 });
     await expect(el.locator(".nct-error, .tvb-error")).toHaveCount(0);
   },
   "notatio-complex-plot": async (el) => {

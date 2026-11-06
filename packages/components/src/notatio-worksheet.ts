@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { html, LitElement, type PropertyValues } from "lit";
+import { html, LitElement, noChange, type PropertyValues } from "lit";
 import { repeat } from "lit/directives/repeat.js";
 import "./notatio-cell.ts";
 import "./dynamic-module-box.ts";
@@ -15,6 +15,7 @@ import { LONG_PRESS_MS } from "./choice-menu.ts";
 import { openPlaybackMenu } from "./playback-menu.ts";
 import { ensureStyles } from "./styles.ts";
 import {
+  AS_TYPED,
   bindingEpsil,
   type Cell,
   type ControlRange,
@@ -141,6 +142,33 @@ export class NotatioWorksheet extends LitElement {
   /** `#cellData`'s evaluated JSON, boxed -- cached by JSON text, since a slider redraws
    * only the cell it drives; every OTHER cell's box is unchanged from the last pass. */
   #boxedCache = new Map<string, Expression | null>();
+  /** The slider the pointer holds: a re-render leaves its thumb where the reader put it. */
+  #held: string | undefined;
+  /**
+   * The value a slider was released on, by `name/part`, until its cell's answer lands. The
+   * controls come from the cells' last answers, so a render between the release and the new
+   * answer would put the thumb back on an earlier one.
+   */
+  #released = new Map<string, number>();
+  /** The range a held slider began its drag on, by `name/part`. */
+  #frozen = new Map<string, ControlRange>();
+  /** Hold a slider until the pointer lets go, wherever it lets go: a press that moves nothing fires no `change`. */
+  #hold(c: WorksheetControl): void {
+    const key = `${c.name}/${c.part}`;
+    this.#held = key;
+    this.#released.delete(key);
+    // A default range follows the value, so a drag would rescale its own track (64 in -100..100,
+    // then 24 in -50..50); the range the drag began on stays until the pointer lets go.
+    this.#frozen.set(key, { min: c.min, max: c.max, step: c.step });
+    const release = (): void => {
+      this.#held = undefined;
+      this.#frozen.clear();
+      window.removeEventListener("pointerup", release, true);
+      window.removeEventListener("pointercancel", release, true);
+    };
+    window.addEventListener("pointerup", release, true);
+    window.addEventListener("pointercancel", release, true);
+  }
   #deriveTimer: ReturnType<typeof setTimeout> | undefined;
   #lastDeriveAt = 0;
   /** How many points a curve cell evaluated to, for the elided readout. */
@@ -268,7 +296,7 @@ export class NotatioWorksheet extends LitElement {
       seeded = seeded.map((cell) => {
         if (!cell.value.trim()) return cell;
         try {
-          return { ...cell, value: toInputForm(engine.parse(cell.value, { form: "raw" }).json) };
+          return { ...cell, value: toInputForm(engine.parse(cell.value, AS_TYPED).json) };
         } catch {
           // Left as authored; the cell's own Out reports the parse error, same as any
           // other cell a reader mistypes.
@@ -337,6 +365,7 @@ export class NotatioWorksheet extends LitElement {
     if (targetId === undefined) return;
     const source = bindingEpsil(control, v, this.#integerNames.has(control.name));
     if (commit) {
+      this.#released.set(`${control.name}/${control.part}`, v);
       this.#live.delete(targetId);
       this.#patch(targetId, { value: source });
       this.#notifyReactive(targetId, source);
@@ -344,6 +373,19 @@ export class NotatioWorksheet extends LitElement {
     }
     this.#live.set(targetId, source);
     this.#scheduleRerender();
+  }
+
+  /** A control showing the value its slider was released on, until its cell reports that value. */
+  #asReleased(c: WorksheetControl): WorksheetControl {
+    const key = `${c.name}/${c.part}`;
+    const value = this.#released.get(key);
+    if (value === undefined) return c;
+    // Within half a step: an integer binding answers with the rounded value.
+    if (Math.abs(c.value - value) <= c.step / 2) {
+      this.#released.delete(key);
+      return c;
+    }
+    return { ...c, value };
   }
 
   /** The cell currently bound to `name`, from the last pass's own facts. */
@@ -473,6 +515,9 @@ export class NotatioWorksheet extends LitElement {
     const cellEl = (event.target as Element | null)?.closest<HTMLElement>("[data-cell]");
     const id = cellEl ? Number(cellEl.dataset.cell) : Number.NaN;
     if (!Number.isFinite(id)) return;
+    // A cell re-evaluating under a dragged slider reports nothing until its answer lands; keep
+    // what it last said, or its binding's slider is torn out from under the pointer.
+    if (this.#live.has(id) && !detail.json && this.#cellData.has(id)) return;
     this.#cellData.set(id, {
       name: detail.name,
       jsonStr: detail.json ?? "",
@@ -538,7 +583,8 @@ export class NotatioWorksheet extends LitElement {
           type: cell.domain,
           letterConventions: true,
         });
-        controls.push(...made);
+        // An author's range is already fixed; a default one is held while its slider is.
+        controls.push(...made.map((c) => (cell.range ? c : { ...c, ...this.#frozen.get(`${c.name}/${c.part}`) })));
         if (made.some((c) => c.integer)) this.#integerNames.add(data.name);
         continue;
       }
@@ -606,7 +652,7 @@ export class NotatioWorksheet extends LitElement {
    */
   #controlsFor(cell: Cell): unknown {
     const name = this.#cellData.get(cell.id)?.name;
-    const mine = name ? this._controls.filter((x) => x.name === name) : [];
+    const mine = name ? this._controls.filter((x) => x.name === name).map((x) => this.#asReleased(x)) : [];
     if (mine.length === 0) return "";
     const first = mine[0];
     return html`<div class="ws-knob">
@@ -617,9 +663,13 @@ export class NotatioWorksheet extends LitElement {
             min=${c.min}
             max=${c.max}
             step=${c.step}
-            .value=${String(c.value)}
+            .value=${this.#held === `${c.name}/${c.part}` ? noChange : String(c.value)}
+            @pointerdown=${() => this.#hold(c)}
             @input=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value)}
-            @change=${(e: Event) => this.#setControl(c, (e.target as HTMLInputElement).value, true)}
+            @change=${(e: Event) => {
+              this.#held = undefined;
+              this.#setControl(c, (e.target as HTMLInputElement).value, true);
+            }}
           /><span class="ws-slider-val">${formatValue(c.value, c.step)}</span></label
         >`,
       )}

@@ -20,16 +20,21 @@ catalog:
     identity: Mp00292
     url: https://www.findstat.org/Mp00292
     on: SetComposition
+  - system: findstat
+    identity: Mp00293
+    url: https://www.findstat.org/Mp00293
+    on: ParkingFunction
 mapOn:
   - BinaryWord
   - IntegerComposition
+  - ParkingFunction
   - Permutation
   - SetComposition
 signatures:
   - call: CyclicShift(Permutation)
     description: Rotate the word one place to the left.
     library: enumeratio-combinatorics
-    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((permutation) -> permutation) & ((set_composition) -> set_composition)
+    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((parking_function) -> parking_function) & ((permutation) -> permutation) & ((set_composition) -> set_composition)
 laws:
   - inverse: InverseCyclicShift
   - graded:
@@ -55,3 +60,4 @@ laws:
 - FindStat's Mp00292.
 - Also takes a `IntegerComposition`, returning a `IntegerComposition`: Rotate the parts one place to the left: the first part moves to the end.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: Rotate the word one place to the left: the first letter moves to the end.
+- Also takes a `ParkingFunction`, returning a `ParkingFunction`: Rotate the word one place to the left: the first entry moves to the end.

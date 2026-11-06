@@ -21,10 +21,10 @@ function onCopy(event: ClipboardEvent): void {
   if (!selection || selection.isCollapsed || selection.rangeCount === 0) return;
   const range = selection.getRangeAt(0);
   const out = typesetOutAround(range.commonAncestorContainer);
-  if (out && event.clipboardData && (out.expression.inputForm || out.expression.latex)) {
+  if (out && event.clipboardData && (out.copyForms.inputForm || out.copyForms.latex)) {
     // Typeset glyphs copy as nonsense, and a part of them has no expression of its own:
     // the copy is the Out's whole expression.
-    writeExpression(event.clipboardData, out.expression);
+    writeExpression(event.clipboardData, out.copyForms);
     event.preventDefault();
     return;
   }
@@ -43,7 +43,7 @@ function onCopy(event: ClipboardEvent): void {
 const WITH_INPUT_FORM = "notatio-out[input-form], notatio-in[input-form]";
 
 interface TypesetOut extends Element {
-  readonly expression: { inputForm: string; latex: string };
+  readonly copyForms: { inputForm: string; latex: string };
 }
 
 /** The Out whose typeset math `node` sits in -- not prose math, not a plain-text form. */
@@ -52,7 +52,7 @@ function typesetOutAround(node: Node): TypesetOut | undefined {
   const out = el?.closest(".notatio-render")?.closest("notatio-out");
   if (!out || out.hasAttribute("inline") || out.hasAttribute("display") || el?.closest("notatio-code"))
     return undefined;
-  return "expression" in out ? (out as TypesetOut) : undefined;
+  return "copyForms" in out ? (out as TypesetOut) : undefined;
 }
 
 // Chrome (menus, In/Out labels, diagnostics) that shouldn't end up in the copy.

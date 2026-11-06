@@ -49,6 +49,19 @@ const orderedTree = (text: string): MathJSON => {
   return node(JSON.parse(text));
 };
 
+/**
+ * `([(0,1),(0,2),(1,2)],3)`: the edges on the vertices 0 .. n - 1, and n. Ours is `Tuple(n, edges)`, the vertices from 1
+ * and each edge as [u, v] with u < v, in lexicographic order.
+ */
+function graph(text: string): MathJSON {
+  const match = /^\(\[(.*)\],(\d+)\)$/.exec(text);
+  if (match === null) throw new SyntaxError(`graph: expected ([(a,b),...],n), got ${text}`);
+  const edges = [...match[1]!.matchAll(/\((\d+),(\d+)\)/g)]
+    .map((end) => [Number(end[1]) + 1, Number(end[2]) + 1].toSorted((a, b) => a - b))
+    .toSorted((a, b) => a[0]! - b[0]! || a[1]! - b[1]!);
+  return ["Tuple", Number(match[2]), list(edges.map((edge) => list(edge)))];
+}
+
 interface Reader {
   readonly read: (text: string) => MathJSON;
   /** The size FindStat's tables are cut at: the length, sum or node count the collection grows by. */
@@ -83,15 +96,33 @@ const READERS: Readonly<Record<string, Reader>> = {
   },
   // 1-based: entry i is the spot car i prefers, as ours.
   ParkingFunction: { read: (t) => ["ParkingFunction", intList(t)], size: (t) => ints(t).length },
-  // Ours reads a matching as the set partition of its 2-element blocks (PerfectMatchings yields
-  // SetPartitions, not the PerfectMatching carrier); size the number of points.
-  PerfectMatching: { read: (t) => ["SetPartition", pairs(t)], size: (t) => count(t, /\d+/g) },
-  // Rows of -1, 0, 1. Our AlternatingSignMatrices family yields the bare rows; this is the carrier's constructor on them.
+  // A matching is its 2-element blocks; size the number of points.
+  PerfectMatching: { read: (t) => ["PerfectMatching", pairs(t)], size: (t) => count(t, /\d+/g) },
+  // Rows of -1, 0, 1; size the number of rows. Our AlternatingSignMatrices family yields the bare rows; this is the carrier's constructor on them.
   AlternatingSignMatrix: {
     read: (t) => ["AlternatingSignMatrix", rows(t)],
     size: (t) => (JSON.parse(t) as number[][]).length,
   },
   SetComposition: { read: (t) => ["SetComposition", blocks(t)], size: (t) => count(t, /\d+/g) },
+  // Rows of weakly decreasing positive entries, as ours; size is the number of boxes, the sum of the entries.
+  PlanePartition: {
+    read: (t) => ["PlanePartition", rows(t)],
+    size: (t) => sum((JSON.parse(t) as number[][]).map((r) => sum(r))),
+  },
+  // `[[outer],[inner]]`, the part lists of λ and μ; size the cells of λ/μ, as ours.
+  SkewPartition: {
+    read: (t) => ["SkewPartition", rows(t)],
+    size: (t) => {
+      const [outer, inner] = JSON.parse(t) as [number[], number[]];
+      return sum(outer) - sum(inner);
+    },
+  },
+  // A graph up to isomorphism, as the labeled graph FindStat lists it by; the vertex count is the size. We have no collection of
+  // graphs up to isomorphism, so the crosscheck compares object by object.
+  LabeledGraph: {
+    read: (t) => ["LabeledGraph", graph(t)],
+    size: (t) => Number(/,(\d+)\)$/.exec(t)?.[1]),
+  },
 };
 
 /** The carrier value FindStat's `text` names, or `undefined` for a carrier we don't read. A malformed text throws. */
@@ -122,6 +153,7 @@ export const COLLECTION_CARRIER: Readonly<Record<string, string>> = {
   "Semistandard tableaux": "SemistandardTableau",
   "Plane partitions": "PlanePartition",
   "Gelfand-Tsetlin patterns": "GelfandTsetlinPattern",
+  Graphs: "LabeledGraph",
 };
 
 /** The carriers whose text we read. */

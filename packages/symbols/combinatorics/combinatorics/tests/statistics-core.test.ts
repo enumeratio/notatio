@@ -58,6 +58,8 @@ const CORE = [
   "Mod",
   "Most",
   "Multiply",
+  // TypeBInversionCount (St001428) compares -p(i) with p(j).
+  "Negate",
   "NotEqual",
   "Or",
   "Power",

@@ -6,6 +6,13 @@
 //   (when recording) the recording tableau's.
 // - Compact: a tableau's entries row by row, with its row lengths and each row's offset beside them. The shape
 //   never changes, so promotion walks a hole through it.
+//
+// Two rules for Epsil that runs interpreted:
+//
+// - Iterate over a RANGE and index; never fold or filter over a list taken out of the accumulator.
+//   `Filter(At(state, 1), …)` inside a fold step stays lazy and nothing downstream forces it, not even `Count`;
+//   the same selection as a `Fold` over `Range(1, Count(row))`, indexing with `At`, evaluates eagerly.
+// - When a list has to BE a value rather than a promise, build it with a fold: `Map` over a range stays lazy.
 
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import { at, lets, type MathJSON } from "../../src/map-helpers.ts";
@@ -168,28 +175,48 @@ export const insertionShape = (tag: string, word: MathJSON): MathJSON =>
   withInsertion(tag, word, false, (n, s) => forEach(upTo(rowCount(s, n, "fl_q")), at("fl_r", s), "fl_r"));
 
 /** Both the tableaux of `word`'s RSK pair, as the list of their rows. */
-export const rskPairRows = (tag: string, word: MathJSON): MathJSON =>
-  withInsertion(tag, word, true, (n, s) => ["List", rowsOfState(s, n, n), rowsOfState(s, n, add(n, times(n, n)))]);
+export const rskPairRows = (tag: string, word: MathJSON, head = "List"): MathJSON =>
+  withInsertion(tag, word, true, (n, s) => [head, rowsOfState(s, n, n), rowsOfState(s, n, add(n, times(n, n)))]);
+
+/** The capacity-layout state of the tableau whose rows are the bound name `rows` (a `list<list<integer>>`) with `n` a
+ *  bound name for its number of cells: the n row lengths, then n * n cells, zero past a row's end. A row beyond the
+ *  last has length 0. */
+export const capacityState = (tag: string, rows: string, n: string): MathJSON => {
+  const { j, r, c } = named(tag, ["j", "r", "c"] as const);
+  const present = (row: MathJSON): MathJSON => ["LessEqual", row, ["Length", rows]];
+  return [
+    "Join",
+    forEach(upTo(n), when(present(j), ["Length", at(j, rows)], 0), j),
+    forEach(
+      upTo(times(n, n)),
+      lets(
+        [
+          [r, add(["Floor", ["Divide", sub(j, 1), n]], 1), "integer"],
+          [c, add(["Mod", sub(j, 1), n], 1), "integer"],
+        ],
+        when(present(r), when(["LessEqual", c, ["Length", at(r, rows)]], at(c, at(r, rows)), 0), 0),
+      ),
+      j,
+    ),
+  ];
+};
 
 /** The row reading word of the insertion tableau of `word`: its rows from the bottom up, each left to right. */
 export const readingWord = (tag: string, word: MathJSON): MathJSON =>
   withInsertion(tag, word, false, (n, s) =>
     lets(
       [[`${tag}_rows`, rowCount(s, n, "fl_q"), "integer"]],
-      [
-        "Fold",
-        [
-          "Function",
-          lets(
-            [["fl_bottom", sub(add(`${tag}_rows`, 1), "fl_r"), "integer"]],
-            ["Join", "fl_acc", forEach(upTo(at("fl_bottom", s)), cell(s, n, n, "fl_bottom", "fl_c"), "fl_c")],
-          ),
-          "fl_acc",
-          "fl_r",
-        ],
+      fold(
+        lets(
+          [["fl_bottom", sub(add(`${tag}_rows`, 1), "fl_r"), "integer"]],
+          ["Join", "fl_acc", forEach(upTo(at("fl_bottom", s)), cell(s, n, n, "fl_bottom", "fl_c"), "fl_c")],
+        ),
+        "fl_acc",
+        "fl_r",
         ["List"],
         upTo(`${tag}_rows`),
-      ],
+        LIST,
+      ),
     ),
   );
 
@@ -222,24 +249,21 @@ export const inverseRsk = (tag: string, p: string, q: string, n: MathJSON): Math
   const letter = (index: MathJSON): MathJSON => at(add(n, nn, index), s);
 
   // What leaves each row on the way up: u[1] the cell that left, u[t + 1] what row (row - t) gives up.
-  const climb: MathJSON = [
-    "Fold",
-    [
-      "Function",
-      lets(
-        [[m, sub(row, j), "integer"]],
-        [
-          "Join",
-          acc,
-          ["List", when(less(0, m), held(m, ["Count", keep(upTo(length(m)), less(held(m, i), at(j, acc)), i)]), 0)],
-        ],
-      ),
-      acc,
-      j,
-    ],
+  const climb: MathJSON = fold(
+    lets(
+      [[m, sub(row, j), "integer"]],
+      [
+        "Join",
+        acc,
+        ["List", when(less(0, m), held(m, ["Count", keep(upTo(length(m)), less(held(m, i), at(j, acc)), i)]), 0)],
+      ],
+    ),
+    acc,
+    j,
     ["List", held(row, length(row))],
     upTo(n),
-  ];
+    LIST,
+  );
 
   const step: MathJSON = lets(
     [
@@ -287,12 +311,14 @@ export const inverseRsk = (tag: string, p: string, q: string, n: MathJSON): Math
       [colOf, forEach(upTo(nn), add(["Mod", sub(j, 1), n], 1), j), "list<integer>"],
       [
         done,
-        [
-          "Fold",
-          ["Function", step, s, c],
+        fold(
+          step,
+          s,
+          c,
           forEach(upTo(add(n, nn, n)), when(["LessEqual", j, add(n, nn)], at(j, p), 0), j),
           upTo(n),
-        ],
+          LIST,
+        ),
         "list<integer>",
       ],
     ],
@@ -354,17 +380,14 @@ const compact = (table: string, body: MathJSON): MathJSON =>
       ["fl_lens", forEach(upTo("fl_rows"), ["Length", at("fl_r", table)], "fl_r"), "list<integer>"],
       [
         "fl_offs",
-        [
-          "Fold",
-          [
-            "Function",
-            ["Join", "fl_acc", ["List", add(at("fl_r", "fl_acc"), at("fl_r", "fl_lens"))]],
-            "fl_acc",
-            "fl_r",
-          ],
+        fold(
+          ["Join", "fl_acc", ["List", add(at("fl_r", "fl_acc"), at("fl_r", "fl_lens"))]],
+          "fl_acc",
+          "fl_r",
           ["List", 0],
           upTo("fl_rows"),
-        ],
+          LIST,
+        ),
         "list<integer>",
       ],
       ["fl_ent", ["Flatten", table], "list<integer>"],
@@ -397,10 +420,8 @@ const holeMoved = (value: MathJSON, row: MathJSON, column: MathJSON): MathJSON =
   );
 
 /** One step of a walk: `choose` gets the hole's row and column and says the next state. */
-const walk = (start: MathJSON, choose: MathJSON): MathJSON => [
-  "Fold",
-  [
-    "Function",
+const walk = (start: MathJSON, choose: MathJSON): MathJSON =>
+  fold(
     lets(
       [
         ["fl_row", at(add("fl_n", 1), "fl_s"), "integer"],
@@ -410,10 +431,10 @@ const walk = (start: MathJSON, choose: MathJSON): MathJSON => [
     ),
     "fl_s",
     "fl_step",
-  ],
-  start,
-  upTo("fl_n"),
-];
+    start,
+    upTo("fl_n"),
+    LIST,
+  );
 
 /** Promotion of the standard tableau `table` (a bound name): the hole starts at the largest entry and slides to the
  *  origin, pulling in the larger of the entry to its left and the one above it; the entries then all go up by one

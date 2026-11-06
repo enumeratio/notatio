@@ -8,13 +8,18 @@ catalog:
     identity: St000143
     url: https://www.findstat.org/St000143
     on: IntegerPartition
+  - system: findstat
+    identity: St001455
+    url: https://www.findstat.org/St001455
+    on: PlanePartition
 statOn:
   - IntegerPartition
+  - PlanePartition
 signatures:
   - call: LargestRepeatedPart(partition)
     description: The largest part that occurs at least twice; 0 if the parts are distinct.
     library: enumeratio-combinatorics
-    type: (integer_partition) -> number
+    type: (integer_partition | plane_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

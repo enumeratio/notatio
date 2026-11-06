@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-skew-partition-3-1-1			[SkewCornerCount, [SkewPartition, [List, [List, 3, 1], [List, 1]]]]	3			the skew partition $[[3,1],[1]]$
+findstat-st001488-1	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 1], [List]]], "'SkewCornerCount'"]	1	1	FindStat St001488	FindStat's value for [[1],[]]
+findstat-st001488-2	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 2], [List]]], "'SkewCornerCount'"]	2	2	FindStat St001488	FindStat's value for [[2],[]]
+findstat-st001488-3	Properties		[CombinatorialStat, [SkewPartition, [List, [List, 3], [List]]], "'SkewCornerCount'"]	2	2	FindStat St001488	FindStat's value for [[3],[]]

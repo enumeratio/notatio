@@ -1,5 +1,5 @@
 /// <reference types="@webgpu/types" />
-import { zetaWGSL } from "@enumeratio/analytic/shader";
+import { withWGSL } from "@enumeratio/analytic/shader";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 import {
   DEFAULT_PHASE_GRADIENT,
@@ -83,12 +83,15 @@ fn gradient(t0: f32) -> vec3f {
     let g = 0.05 + 0.03 * step(0.5, fract(z.x * 4.0)) * step(0.5, fract(z.y * 4.0));
     return vec4f(vec3f(g), 1.0);
   }
+  uncertain = 0.0;
   let polar = VALUE;
+  // A value whose digits the f32 kernel cannot vouch for is hatched, not colored: noise there reads as structure.
+  if (uncertain > 0.5) { return vec4f(vec3f(0.2 + 0.12 * step(0.5, fract((frag.x + frag.y) / 8.0))), 1.0); }
   let logMag = polar.z;
   if (!(logMag < 1e30)) { return vec4f(1.0, 1.0, 1.0, 1.0); } // a pole
   if (!(logMag > -1e30)) { return vec4f(0.0, 0.0, 0.0, 1.0); } // a zero
   // arg/2π along the gradient: on the phase wheel, red on the positive reals, as ComplexPlot3D.
-  let hue = fract(atan2(polar.y, polar.x) * 0.15915494);
+  let hue = fract(argOf(polar.xy) * 0.15915494);
   let bands = fract(logMag * 1.442695); // log2|v|
   let base = 1.0 / (1.0 + exp(-logMag)); // = |v| / (1 + |v|)
   let val = clamp(mix(base * 0.9, 1.0, 0.22 * bands), 0.0, 1.0);
@@ -98,7 +101,7 @@ fn gradient(t0: f32) -> vec3f {
 `;
 
 /** The complete domain-coloring shader for a complex-valued WGSL expression `code`. */
-export const portraitShader = (code: string): string => `${zetaWGSL}\n${HOST.replace("VALUE", `clogPolar(${code})`)}`;
+export const portraitShader = (code: string): string => withWGSL(HOST.replace("VALUE", `clogPolar(${code})`));
 
 /** Bytes before the literal slots: center, res, extent, mask, pad. */
 const SLOTS_OFFSET = 32;

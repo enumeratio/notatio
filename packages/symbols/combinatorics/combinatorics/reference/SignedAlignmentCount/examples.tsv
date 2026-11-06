@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-signed-word-2-bar-1-bar-3			[SignedAlignmentCount, [SignedPermutation, [List, 2, -1, -3]]]	2			the signed word $2\,\bar{1}\,\bar{3}$
+findstat-st001822-1	Properties		[CombinatorialStat, [SignedPermutation, [List, 1]], "'SignedAlignmentCount'"]	0	0	FindStat St001822	FindStat's value for [1]
+findstat-st001822-2	Properties		[CombinatorialStat, [SignedPermutation, [List, -1]], "'SignedAlignmentCount'"]	0	0	FindStat St001822	FindStat's value for [-1]
+findstat-st001822-3	Properties		[CombinatorialStat, [SignedPermutation, [List, 1, 2]], "'SignedAlignmentCount'"]	0	0	FindStat St001822	FindStat's value for [1,2]

@@ -1,13 +1,4 @@
-import {
-  applyFunction,
-  capturesArguments,
-  type Engine,
-  type Expr,
-  operandsOf,
-  symbolNameOf,
-  widenSignature,
-  wrapOperator,
-} from "@enumeratio/engine";
+import { type Engine, type Expr, operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@enumeratio/engine";
 
 // Wolfram's operator forms: `Map[f][xs]` is `Map[f, xs]`. compute-engine boxes `Map(f)` with its
 // collection `missing`, so `Map(f)(xs)` evaluates to that error unless `Map(f)` is a valid call.
@@ -46,17 +37,6 @@ export function declareOperatorForms(ce: Engine): void {
     ["Apply"],
     ([callee, ...args]) => args.length > 0 && ARITHMETIC.has(callee!.operator) && !hasSlot(callee!),
     () => () => undefined,
-  );
-  // A `Function` literal that would capture an argument (`Function(y, Function(x, y^x))` called on
-  // `x`, which compute-engine reads as `x^x`) binds by renaming instead. Any other call stays
-  // compute-engine's: it binds a value once, which `bind` relies on to share a sub-term.
-  wrapOperator(
-    ce,
-    ["Apply"],
-    ([f, ...args]) => f!.operator === "Function" && capturesArguments(f!, args),
-    () =>
-      ([f, ...args]) =>
-        applyFunction(ce, f as Expr, args as Expr[]),
   );
   wrapOperator(
     ce,

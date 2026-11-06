@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[InitialIncreasingSegmentLength, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	1			the parking function $[2,1,1,4,2]$
+findstat-st001904-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'InitialIncreasingSegmentLength'"]	1	1	FindStat St001904	FindStat's value for [1]
+findstat-st001904-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'InitialIncreasingSegmentLength'"]	1	1	FindStat St001904	FindStat's value for [1,1]
+findstat-st001904-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'InitialIncreasingSegmentLength'"]	2	2	FindStat St001904	FindStat's value for [1,2]

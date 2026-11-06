@@ -22,6 +22,13 @@ test("Binomial and a fold over a range are exact", () => {
   expect(run(factorial, { _n: "integer" }, { _n: 25 })).toBe(15511210043330985984000000n);
 });
 
+test("Factorial is exact past 2^53, and declines (RangeError) outside its range", () => {
+  expect(run(["Factorial", "_n"], { _n: "integer" }, { _n: 25 })).toBe(15511210043330985984000000n);
+  expect(run(["Factorial", "_n"], { _n: "integer" }, { _n: 0 })).toBe(1n);
+  expect(() => run(["Factorial", "_n"], { _n: "integer" }, { _n: -1 })).toThrow(RangeError);
+  expect(() => run(["Factorial", "_n"], { _n: "integer" }, { _n: 10 ** 6 })).toThrow(RangeError);
+});
+
 test("a list of integers in, a list out", () => {
   const sum = ["Fold", ["Function", ["Add", "a", ["At", "_x", "i"]], "a", "i"], 0, ["Range", 1, 2, 1]];
   expect(run(sum, { _x: "list<integer>" }, { _x: [2 ** 52, 2 ** 52, 5] })).toBe(2n ** 53n);

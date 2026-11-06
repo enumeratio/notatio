@@ -260,6 +260,10 @@ export class Graphics3DBoxElement extends LitElement {
       scope[vy] = y;
       return samplers[k]!(scope);
     });
+    // A surface with no real value anywhere says so, rather than drawing only its title.
+    if (!grids.some((g) => g.some((row) => row.some(Number.isFinite)))) {
+      throw new Error(`no real value of ${raw} on the plotted domain`);
+    }
     return surfaceBox(grids, xs, ys, graphics3dOptionsOf(settings));
   }
 

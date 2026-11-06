@@ -149,6 +149,137 @@ const differenceRows = (p: number[]): number[][] => {
   return rows;
 };
 
+/** The leaf labels of the binary search tree, by inserting the entries one at a time. */
+const searchTreeLeaves = (p: number[]): number[] => {
+  type Node = { key: number; left?: Node; right?: Node };
+  let root: Node | undefined;
+  for (const key of p) {
+    if (!root) root = { key };
+    else {
+      let node = root;
+      for (;;) {
+        const side = key < node.key ? "left" : "right";
+        if (!node[side]) {
+          node[side] = { key };
+          break;
+        }
+        node = node[side]!;
+      }
+    }
+  }
+  const leaves = (node?: Node): number[] =>
+    !node ? [] : !node.left && !node.right ? [node.key] : [...leaves(node.left), ...leaves(node.right)];
+  return leaves(root);
+};
+/** Occurrences of a length-3 pattern with no other entry inside the rectangle of its first and last positions and least and greatest values. */
+const boxedOccurrences = (p: number[], pattern: number[]): number =>
+  pairs(p)
+    .flatMap(([i, j]) => range(j + 1, p.length - 1).map((k): [number, number, number] => [i, j, k]))
+    .filter(
+      (at) =>
+        matchesAt(p, at, pattern) &&
+        range(at[0] + 1, at[2] - 1).every(
+          (m) =>
+            at.includes(m) || p[m]! < Math.min(...at.map((a) => p[a]!)) || p[m]! > Math.max(...at.map((a) => p[a]!)),
+        ),
+    ).length;
+
+/** The permutation of the entries' ranks: the standardization of a word. */
+const standardize = (w: number[]): number[] => w.map((v) => w.filter((u) => u < v).length + 1);
+const sameShape = (a: number[], b: number[]): boolean => standardize(a).join() === standardize(b).join();
+/** The suffix shifts i (1 <= i < n) at which the first n - i entries match the last n - i in relative order. */
+const overlapShifts = (p: number[]): number[] =>
+  range(1, p.length - 1).filter((i) => sameShape(p.slice(0, p.length - i), p.slice(i)));
+/** The values that stand between neighbors one apart, read from the second to the second-to-last position. */
+const verticalSeparators = (p: number[]): number[] =>
+  range(1, p.length - 2)
+    .filter((i) => Math.abs(p[i - 1]! - p[i + 1]!) === 1)
+    .map((i) => p[i]!);
+/** The restriction of p to the values at most k, in order. */
+const restrictedTo = (p: number[], k: number): number[] => p.filter((v) => v <= k);
+/** Every permutation reachable by reversing, complementing and inverting. */
+const symmetryClass = (p: number[]): number[][] => {
+  const seen = new Map<string, number[]>([[p.join(), p]]);
+  for (const todo = [p]; todo.length > 0;) {
+    const q = todo.pop()!;
+    for (const image of [q.toReversed(), q.map((v) => q.length + 1 - v), inverse(q)])
+      if (!seen.has(image.join())) {
+        seen.set(image.join(), image);
+        todo.push(image);
+      }
+  }
+  return [...seen.values()];
+};
+
+/** The 0-based rank of p among the permutations of its size in lexicographic order: the first entry picks a block of (n - 1)! words. */
+const lexicographicRankFrom0 = (p: number[]): number =>
+  p.length === 0
+    ? 0
+    : (p[0]! - 1) * factorial(p.length - 1) + lexicographicRankFrom0(p.slice(1).map((v) => (v > p[0]! ? v - 1 : v)));
+/** The hook factorization p t1 ... tk, cut from the right: each factor runs from the nearest descent top, scanning left over ascents, to the end of what remains. */
+const hookFactorization = (w: number[]): { prefix: number[]; hooks: number[][] } => {
+  const hooks: number[][] = [];
+  let end = w.length;
+  for (;;) {
+    let i = end - 1;
+    while (i > 0 && w[i - 1]! < w[i]!) i--;
+    if (i <= 0) break;
+    hooks.unshift(w.slice(i - 1, end));
+    end = i - 1;
+  }
+  return { prefix: w.slice(0, end), hooks };
+};
+/** The height of the tree built by inserting the entries in turn: each pops the larger ones off the branch from the root 0, then joins it. */
+const insertionTreeHeight = (p: number[]): number => {
+  const branch = [0];
+  let height = 0;
+  for (const v of p) {
+    while (branch.at(-1)! > v) branch.pop();
+    branch.push(v);
+    height = Math.max(height, branch.length);
+  }
+  return p.length === 0 ? 0 : height - 1;
+};
+/** The permanent of the identity matrix plus the permutation matrix of p, expanded along the rows. */
+const permanentOfIdentityPlusPermutation = (p: number[]): number => {
+  const entry = (r: number, c: number) => (r === c ? 1 : 0) + (p[r] === c + 1 ? 1 : 0);
+  const expand = (row: number, used: number[]): number =>
+    row === p.length
+      ? 1
+      : sum(
+          indices(p)
+            .filter((c) => !used.includes(c))
+            .map((c) => entry(row, c) * expand(row + 1, [...used, c])),
+        );
+  return expand(0, []);
+};
+/** FindStat's rix (St000461), by its recursion on the word. */
+const rix = (w: number[]): number => {
+  if (w.length === 0) return 0;
+  const k = w.length;
+  const i = w.indexOf(Math.max(...w)) + 1;
+  if (i === 1 && k > 1) return 0;
+  return i === k ? 1 + rix(w.slice(0, -1)) : rix(w.slice(i));
+};
+/** FindStat's aix (St000873): split at the leftmost minimum into alpha and beta. */
+const aix = (w: number[]): number => {
+  if (w.length === 0) return 0;
+  const j = w.indexOf(Math.min(...w));
+  const alpha = w.slice(0, j);
+  const beta = w.slice(j + 1);
+  if (alpha.length > 0 && beta.length > 0) return aix(alpha);
+  return alpha.length === 0 ? 1 + aix(beta) : 0;
+};
+/** FindStat's St000724: follow the smaller label from the root of the increasing tree down to a leaf. */
+const smallerChildLeaf = (w: number[]): number => {
+  if (w.length === 1) return w[0]!;
+  const a = Math.min(...w);
+  const j = w.indexOf(a);
+  const b = Math.min(...w.filter((v) => v !== a));
+  return w.indexOf(b) < j ? smallerChildLeaf(w.slice(0, j)) : smallerChildLeaf(w.slice(j + 1));
+};
+const leastCommonMultiple = (n: number): number => range(1, n).reduce((m, k) => (m * k) / gcd(m, k), 1);
+
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -827,4 +958,122 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
           .every((v) => v === 0)
           ? 2
           : 1),
+  MinimalCycleDifference: (p) =>
+    p.length === 0 ? 0 : Math.min(...cycles(p).map((c) => Math.max(...c) - Math.min(...c))),
+  NonFixedPoints: (p) => p.filter((v, i) => v !== i + 1).length,
+  LargestSearchTreeLeafLabel: (p) => Math.max(0, ...searchTreeLeaves(p)),
+  NormalizedLeafLabelSum: (p) => sum(leafLabels(p)) - p.length,
+  DescentsMinusOneUnlessFirstEntryOne: (p) => descents(p).length - (p.length > 0 && p[0] !== 1 ? 1 : 0),
+  PermutationBreadth: (p) =>
+    p.length < 2 ? 0 : Math.min(...pairs(p).map(([i, j]) => Math.abs(i - j) + Math.abs(p[i]! - p[j]!))),
+  BoxedOccurrencesOf123: (p) => boxedOccurrences(p, [1, 2, 3]),
+  BoxedOccurrencesOf132: (p) => boxedOccurrences(p, [1, 3, 2]),
+  BinStatistic: (p) => sum(descents(p).map((i) => (i * (i + 1)) / 2)),
+  NonNegativeWalkSteps: (p) => {
+    const heights = range(0, p.length - 1).map((k) => sum(range(1, k).map((i) => (p[i - 1]! < p[i]! ? 1 : -1))));
+    return range(0, p.length - 2).filter((i) => heights[i]! >= 0 && heights[i + 1]! >= 0).length;
+  },
+  CycleMinimumExceedancesDeficiencies: (p) =>
+    sum(
+      cycles(p).map((c) => {
+        const rises = c.filter((v, k) => v < c[(k + 1) % c.length]!).length;
+        return Math.min(rises, c.length - rises);
+      }),
+    ),
+  Separators: (p) => {
+    const q = inverse(p);
+    return new Set([...verticalSeparators(p), ...verticalSeparators(q).map((v) => q[v - 1]!)]).size;
+  },
+  OverlapSetSize: (p) => overlapShifts(p).length,
+  ExteriorLength: (p) => (p.length < 2 ? 0 : p.length - Math.min(...overlapShifts(p))),
+  SimsunDoubleDescents: (p) =>
+    sum(
+      range(3, p.length).map(
+        (k) =>
+          range(0, k - 3).filter((i) => {
+            const r = restrictedTo(p, k);
+            return r[i]! > r[i + 1]! && r[i + 1]! > r[i + 2]!;
+          }).length,
+      ),
+    ),
+  SymmetryClassSize: (p) => symmetryClass(p).length,
+  PermutationGenus: (p) => {
+    const q = inverse(p);
+    const product = q.map((v) => (v % p.length) + 1);
+    return p.length === 0 ? 0 : (p.length + 1 - cycles(p).length - cycles(product).length) / 2;
+  },
+  PermutationBounce: (p) => {
+    const n = p.length;
+    if (n === 0) return 0;
+    const v = inverse(p);
+    const bounces = [v[0]!];
+    while (bounces[bounces.length - 1]! < n) bounces.push(Math.max(...v.slice(0, bounces[bounces.length - 1]! + 1)));
+    return sum(bounces.map((b) => n - b));
+  },
+  LexicographicRank: (p) => 1 + lexicographicRankFrom0(p),
+  NonAttackingNeighbors: (p) => consecutiveGaps(p).filter((gap) => gap > 1).length,
+  StaircaseSizeOfCode: (p) => {
+    const code = p.map((v, i) => after(p, i).filter((w) => w < v).length);
+    return Math.max(
+      ...subsequences(code)
+        .filter((s) => s.every((c, k) => c >= s.length - k))
+        .map((s) => s.length),
+    );
+  },
+  BruhatLowerCovers: (p) =>
+    pairs(p).filter(([i, j]) => p[i]! > p[j]! && range(i + 1, j - 1).every((m) => p[m]! > p[i]! || p[m]! < p[j]!))
+      .length,
+  TailPairsOfOccurrencesOf321: (p) =>
+    pairs(p).filter(([j, k]) => p[j]! > p[k]! && range(0, j - 1).some((i) => p[i]! > p[j]!)).length,
+  StandardizedBiAlternatingInversionNumber: (p) =>
+    (Math.floor(p.length / 2) ** 2 + sum(pairs(p).map(([y, x]) => (-1) ** (x + y) * Math.sign(p[x]! - p[y]!)))) / 2,
+  MinimalInversionsEitherDirection: (p) => Math.min(inversionPairs(p).length, inversionPairs(p.toReversed()).length),
+  BabsonSteingrimssonStatisticPrime: (p) =>
+    descents(p).length +
+    sum(
+      [
+        [1, 3, 2],
+        [3, 1, 2],
+        [3, 2, 1],
+      ].map((q) => vincular(p, q, adjacentStart)),
+    ),
+  BabsonSteingrimssonStatisticDoublePrime: (p) =>
+    descents(p).length +
+    sum(
+      [
+        [1, 3, 2],
+        [3, 1, 2],
+        [3, 2, 1],
+      ].map((q) => vincular(p, q, adjacentEnd)),
+    ),
+  Hag: (p) => {
+    const tops = indices(p).filter((i) => i + 1 < p[i]!);
+    const rest = indices(p).filter((i) => i + 1 >= p[i]!);
+    const subword = (at: number[]) => at.map((i) => p[i]!);
+    const blockers = sum(tops.map((i) => range(0, i - 1).filter((k) => p[k]! <= i + 1).length));
+    return (
+      sum(tops.map((i) => p[i]! - (i + 1))) +
+      inversionPairs(subword(tops)).length -
+      inversionPairs(subword(rest)).length +
+      blockers
+    );
+  },
+  HalfPermanentOfIdentityPlusPermutation: (p) => (p.length === 0 ? 0 : permanentOfIdentityPlusPermutation(p) / 2),
+  HookFactorizationPrefixLength: (p) => hookFactorization(p).prefix.length,
+  HookFactorInversions: (p) => sum(hookFactorization(p).hooks.map((hook) => inversionPairs(hook).length)),
+  PermutationTreeHeight: insertionTreeHeight,
+  FixedPointMajorIndex: (p) => {
+    const fixed = indices(p)
+      .filter((i) => p[i] === i + 1)
+      .map((i) => i + 1);
+    const rest = p.filter((v, i) => v !== i + 1);
+    const standard = rest.map((v) => rest.filter((w) => w <= v).length);
+    return sum(fixed) - (fixed.length * (fixed.length + 1)) / 2 + sum(descents(standard));
+  },
+  RecursiveEndMaximumCount: rix,
+  RecursiveStartMinimumCount: aix,
+  SmallerChildPathLeafLabel: (p) => (p.length === 0 ? 0 : smallerChildLeaf(p)),
+  // The sum of the fractions, times the least common multiple of 1 .. 2n.
+  ScaledReciprocalPositionValueSum: (p) =>
+    p.length === 0 ? 0 : Math.round(sum(p.map((v, i) => 1 / (i + 1 + v))) * leastCommonMultiple(2 * p.length)),
 };

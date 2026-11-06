@@ -7,7 +7,7 @@ signatures:
   - call: Ascents(p)
     description: the ascent count of a one-line permutation $p$
     library: enumeratio-combinatorics
-    type: (composition | list | permutation) -> integer | number
+    type: (binary_word | composition | list | permutation) -> integer | number
 seeAlso:
   - Descents
   - SymmetricGroup
@@ -25,10 +25,20 @@ catalog:
     identity: St000245
     url: https://www.findstat.org/St000245
     on: Permutation
+  - system: findstat
+    identity: St000292
+    url: https://www.findstat.org/St000292
+    on: BinaryWord
+  - system: findstat
+    identity: St001935
+    url: https://www.findstat.org/St001935
+    on: ParkingFunction
 statOn:
   - Arrangement
   - AscentSequence
+  - BinaryWord
   - IntegerComposition
+  - ParkingFunction
   - Permutation
   - Word
 ---

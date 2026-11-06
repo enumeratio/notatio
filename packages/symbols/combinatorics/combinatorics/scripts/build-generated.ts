@@ -35,8 +35,11 @@ const compiles: ReadonlyArray<readonly [script: string, output: string]> = [
   ["lattice-paths/scripts/compile-definitions.ts", "lattice-paths/src/statistics.compiled.generated.js"],
   ["partitions/scripts/compile-definitions.ts", "partitions/src/statistics.compiled.generated.js"],
   ["permutations/scripts/compile-definitions.ts", "permutations/src/statistics.compiled.generated.js"],
+  ["tableaux/scripts/compile-definitions.ts", "tableaux/src/statistics.compiled.generated.js"],
   ["trees/scripts/compile-definitions.ts", "trees/src/statistics.compiled.generated.js"],
   ["set-partitions/scripts/compile-definitions.ts", "set-partitions/src/statistics.compiled.generated.js"],
+  ["words/scripts/compile-definitions.ts", "words/src/statistics.compiled.generated.js"],
+  ["graphs/scripts/compile-definitions.ts", "graphs/src/statistics.compiled.generated.js"],
 ];
 
 const jobs = Number(process.env.BUILD_JOBS) || Math.max(1, Math.min(3, Math.floor(availableParallelism() / 3)));
@@ -65,7 +68,10 @@ const compileInputs = {
   skip: (path: string) => generated.test(path) || path === at("reference"),
 };
 
+const seconds = (since: number): string => `${((Date.now() - since) / 1000).toFixed(1)}s`;
+
 // The compile steps import the stubs, so they count as outputs here.
+const quickStarted = Date.now();
 await cached(
   "quick",
   inputs,
@@ -74,6 +80,7 @@ await cached(
     for (const script of quick) execFileSync("node", [script], { cwd: dir, stdio: "inherit" });
   },
 );
+console.log(`quick: ${seconds(quickStarted)}`);
 
 const queue = [...compiles];
 const failures: unknown[] = [];
@@ -81,11 +88,13 @@ await Promise.all(
   Array.from({ length: jobs }, async () => {
     for (let step = queue.shift(); step !== undefined; step = queue.shift()) {
       const [script, output] = step;
+      const started = Date.now();
       try {
         // RECHECK_ALL runs every step whatever its stamp says (the nightly cross-check).
         if (process.env.RECHECK_ALL === "1") await run(script);
         else if (!(await cached(script, compileInputs, [at(output)], () => run(script))))
           console.log(`${script}: up to date`);
+        console.log(`${script}: ${seconds(started)}`);
       } catch (error) {
         failures.push(error);
       }

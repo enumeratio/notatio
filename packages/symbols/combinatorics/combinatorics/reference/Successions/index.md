@@ -12,7 +12,12 @@ catalog:
     identity: St000502
     url: https://www.findstat.org/St000502
     on: SetPartition
+  - system: findstat
+    identity: St000164
+    url: https://www.findstat.org/St000164
+    on: PerfectMatching
 statOn:
+  - PerfectMatching
   - Permutation
   - SetPartition
 signatures:

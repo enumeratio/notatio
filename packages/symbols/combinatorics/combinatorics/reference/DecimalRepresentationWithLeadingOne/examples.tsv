@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[DecimalRepresentationWithLeadingOne, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	935			the word $110100111$
+findstat-st000827-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'DecimalRepresentationWithLeadingOne'"]	2	2	FindStat St000827	FindStat's value for 0
+findstat-st000827-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'DecimalRepresentationWithLeadingOne'"]	3	3	FindStat St000827	FindStat's value for 1
+findstat-st000827-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'DecimalRepresentationWithLeadingOne'"]	4	4	FindStat St000827	FindStat's value for 00

@@ -32,11 +32,15 @@ catalog:
     identity: St000157
     url: https://www.findstat.org/St000157
     on: StandardTableau
+  - system: findstat
+    identity: St000291
+    url: https://www.findstat.org/St000291
+    on: BinaryWord
 statOn:
   - Arrangement
   - BinaryWord
-  - IntegerComposition
   - DecoratedPermutation
+  - IntegerComposition
   - ParkingFunction
   - Permutation
   - SignedPermutation

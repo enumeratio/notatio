@@ -12,10 +12,13 @@ import { toInputForm } from "@enumeratio/formats/inputform";
 import { type CodeForm, codeForms } from "./code-forms.ts";
 import { type DisplayBoxes, displayBoxes } from "./display.ts";
 import { compilePlot, type PlotCompileSpec } from "./plot-compile.ts";
+import { AS_TYPED } from "./latex.ts";
 import { boundName } from "./reactive.ts";
 import { createRowsHost, type RowsRequest } from "./row-source.ts";
 import { renderingOf } from "./symbols.ts";
 import { Transcript } from "./transcript.ts";
+
+export { gpuShader } from "./code-forms.ts";
 
 /** The session a page's cells outside any notebook share: one scope, no `Out[n]` history. */
 export const PAGE_SESSION = "page";
@@ -31,7 +34,7 @@ export interface Display {
 /** A cell's text as MathJSON: Epsil (`$…$` islands in LaTeX), LaTeX, or MathJSON itself. */
 export function readSource(ce: ComputeEngine, { text, format }: KernelSource, raw = false): unknown {
   if (format === "mathjson") return JSON.parse(text);
-  if (format === "latex") return ce.parse(text, raw ? { form: "raw" } : undefined).json;
+  if (format === "latex") return ce.parse(text, raw ? AS_TYPED : undefined).json;
   // A cell is a notebook line, so it may bind (`a := 5`) as well as compute.
   const { json, diagnostics } = parseExpression(text, {
     allow: ["Assign"],

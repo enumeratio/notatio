@@ -50,6 +50,16 @@ function binomial(n: bigint, k: bigint): bigint {
   return result;
 }
 
+/** Largest n whose exact n! the compiled code computes; past it, or below 0, it declines to the interpreter. */
+const FACTORIAL_LIMIT = 20_000n;
+
+function factorial(n: bigint): bigint {
+  if (n < 0n || n > FACTORIAL_LIMIT) throw new RangeError("Factorial: the argument is out of range for exact code");
+  let result = 1n;
+  for (let i = 2n; i <= n; i++) result *= i;
+  return result;
+}
+
 function at(list: unknown, index: bigint): unknown {
   return Array.isArray(list) && typeof index === "bigint" && index >= 1n && index <= BigInt(list.length)
     ? list[Number(index) - 1]
@@ -129,6 +139,7 @@ export function bigintRuntime(ce: ComputeEngine): unknown {
         return out;
       },
       binomial,
+      factorial,
       gcd: (a: bigint, b: bigint) => {
         [a, b] = [a < 0n ? -a : a, b < 0n ? -b : b];
         while (b !== 0n) [a, b] = [b, a % b];

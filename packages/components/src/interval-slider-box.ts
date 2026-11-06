@@ -127,9 +127,12 @@ export class NotatioIntervalSlider extends LitElement {
         aria-label=${`${this.name || "interval"} ${which === "lo" ? "from" : "to"}`}
         aria-valuetext=${numberLatex(v, step)}
         @input=${(e: Event) => {
-          const n = Number((e.target as HTMLInputElement).value);
+          const input = e.target as HTMLInputElement;
+          const n = Number(input.value);
           if (which === "lo") this.#commit(n, this._hi);
           else this.#commit(this._lo, n);
+          // A thumb pushed past the other stops there: the input shows the clamped value too.
+          input.value = String(which === "lo" ? this._lo : this._hi);
         }}
         @keydown=${(e: KeyboardEvent) => this.#onKey(which, e)}
         @keyup=${() => (this.#repeats = 0)}

@@ -30,10 +30,10 @@ import {
   insertionShape,
   readingWord,
   recordingRows,
+  rskPairRows,
 } from "../../tableaux/src/flat.ts";
 import { cactusEvacuationKernel } from "../../tableaux/src/promotion.ts";
-import { rskRows } from "../../tableaux/src/tableau.ts";
-import { rskInsertionKernel, rskRecordingKernel, rskShapeKernel } from "../../tableaux/src/rsk-kernels.ts";
+import { rskInsertionKernel, rskKernel, rskRecordingKernel, rskShapeKernel } from "../../tableaux/src/rsk-kernels.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "./foata-bijection.ts";
 import { lehmerCode, majorCode, permutationOfLehmerCode, permutationOfMajorCode } from "./codes.ts";
 import {
@@ -47,7 +47,7 @@ import {
 import { permutationOfCycleDecompositionBody, permutationOfCycleDecompositionGuard } from "./cycle-decomposition.ts";
 
 /** A fold over `1 .. n`, indexing rather than iterating a structure — the rule from
- *  tableau.ts, which is what makes these evaluate at all. */
+ *  flat.ts, which is what makes these evaluate at all. */
 const byIndex = (n: MathJSON, initial: MathJSON, step: MathJSON, accumulator: string, variable: string): MathJSON => [
   "Fold",
   ["Function", step, accumulator, variable],
@@ -104,6 +104,85 @@ const krewerasBody: MathJSON = forEach(positions, longCycleAt(["IndexOf", "_raw"
 
 /** The position of value v in the word: where v sits. */
 const where = (v: MathJSON): MathJSON => ["IndexOf", "_raw", v];
+
+/** The least of the first p entries. */
+const prefixMinimum = (p: MathJSON): MathJSON => ["Min", forEach(["Range", 1, p, 1], at("k"), "k")];
+
+/** Mp00068: entries that are left-to-right minima stay; the other positions take the other values, largest first. */
+const simionSchmidtBody: MathJSON = [
+  "If",
+  ["Equal", size, 0],
+  ["List"],
+  bind(
+    "ss_rest",
+    // The values that are not left-to-right minima, ascending: some entry up to and including v is below v.
+    ["Filter", ["Range", 1, size, 1], ["Function", ["Less", prefixMinimum(where("v")), "v"], "v"]],
+    forEach(positions, [
+      "If",
+      ["Equal", at("i"), prefixMinimum("i")],
+      at("i"),
+      // The c-th non-minimum position takes the c-th largest of ss_rest.
+      at(
+        [
+          "Subtract",
+          ["Add", ["Count", "ss_rest"], 1],
+          ["Count", ["Filter", ["Range", 1, "i", 1], ["Function", ["Greater", at("j"), prefixMinimum("j")], "j"]]],
+        ],
+        "ss_rest",
+      ),
+    ]),
+    "list<integer>",
+  ),
+];
+
+/** `word` with the values a and b swapped, unless they sit next to each other. */
+const toggled = (word: MathJSON, a: MathJSON, b: MathJSON): MathJSON => [
+  "If",
+  ["Equal", ["Abs", ["Subtract", ["IndexOf", word, a], ["IndexOf", word, b]]], 1],
+  word,
+  ["Map", ["Function", ["If", ["Equal", "x", a], b, ["If", ["Equal", "x", b], a, "x"]], "x"], word],
+];
+
+/** Mp00310: toggle (1 2), (2 3), ..., (n-1 n), then (n 1). */
+const toricPromotionBody: MathJSON = [
+  "If",
+  ["Less", size, 2],
+  "_raw",
+  bind(
+    "tp_swept",
+    [
+      "Fold",
+      ["Function", toggled("tp_acc", "tp_i", ["Add", "tp_i", 1]), "tp_acc", "tp_i"],
+      "_raw",
+      ["Range", 1, ["Subtract", size, 1], 1],
+    ],
+    toggled("tp_swept", size, 1),
+    "list<integer>",
+  ),
+];
+
+/** Mp00309: toggle (n 1), then (n-1 n), ..., (1 2). */
+const inverseToricPromotionBody: MathJSON = [
+  "If",
+  ["Less", size, 2],
+  "_raw",
+  bind(
+    "tp_first",
+    toggled("_raw", size, 1),
+    [
+      "Fold",
+      [
+        "Function",
+        toggled("tp_acc", ["Subtract", size, "tp_k"], ["Add", ["Subtract", size, "tp_k"], 1]),
+        "tp_acc",
+        "tp_k",
+      ],
+      "tp_first",
+      ["Range", 1, ["Subtract", size, 1], 1],
+    ],
+    "list<integer>",
+  ),
+];
 
 export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
   {
@@ -296,7 +375,7 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     body: insertionRows("rs", "_raw"),
     kernel: rskInsertionKernel,
     summary: "The insertion tableau of the RSK correspondence.",
-    note: "Row insertion with bumping, as a fold over the word whose accumulator is the growing tableau, emitted as its rows. See tableau.ts for the indexing rule that makes it evaluate at all.",
+    note: "Row insertion with bumping, as a fold over the word whose accumulator is the growing tableau, emitted as its rows. See flat.ts for the indexing rule that makes it evaluate at all.",
   },
   {
     name: "RskShape",
@@ -320,7 +399,9 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     name: "Rsk",
     from: "permutation",
     to: "standard_tableau_pair",
-    body: rskRows,
+    body: rskPairRows("rs", "_raw", "Tuple"),
+    kernel: rskKernel,
+    imageParts: ["StandardTableau", "StandardTableau"],
     summary: "The RSK correspondence: the insertion and recording tableaux, as a pair.",
     note: "Both tableaux share a shape (RskShape reads it off either), and each carries its own rows, so the pair alone determines them. A standard_tableau_pair is a tuple of two carriers — the first composite carrier anything here constructs.",
   },
@@ -337,7 +418,7 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
       "list<integer>",
     ),
     summary: "The orbits, as a set partition of the positions.",
-    note: "Removed once for giving every position the same label. The cause was the laziness rule in tableau.ts — folding over a list taken out of the accumulator instead of indexing a range. Written by index it is right first time.",
+    note: "Removed once for giving every position the same label. The cause was the laziness rule in flat.ts — folding over a list taken out of the accumulator instead of indexing a range. Written by index it is right first time.",
   },
   {
     name: "DescentComposition",
@@ -727,6 +808,46 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     ],
     summary: "The coarsest set partition containing every arc from i to π(i) with i ≤ π(i).",
     note: "FindStat's Mp00240, the weak exceedance partition. Not injective.",
+  },
+  {
+    name: "CycleAsOneLineNotation",
+    from: "permutation",
+    to: "permutation",
+    // Foata's construction with the least point of each cycle in front instead of the greatest.
+    body: withLengths(
+      plain(),
+      "Min",
+      () => true,
+      cycleWord(plain(), (word) => word),
+    ),
+    summary: "The cycles, each written from its least point and in order of those points, read as one word.",
+    note: "FindStat's Mp00090, Sage's cycle_tuples concatenated. Foata's fundamental transformation is the same with the greatest point in front.",
+  },
+  {
+    name: "SimionSchmidt",
+    from: "permutation",
+    to: "permutation",
+    body: simionSchmidtBody,
+    summary:
+      "The left-to-right minima stay in place and the other positions take the remaining values, largest first: a 123-avoiding permutation.",
+    note: "FindStat's Mp00068, Sage's simion_schmidt(avoid=[1,2,3]). Idempotent; a bijection from the 132-avoiding permutations to the 123-avoiding ones.",
+  },
+  {
+    name: "ToricPromotion",
+    from: "permutation",
+    to: "permutation",
+    body: toricPromotionBody,
+    summary:
+      "Toric promotion of the path graph: swap the values 1 and 2, then 2 and 3, and so on up to n and 1, each swap skipped when the two values sit next to each other.",
+    note: "FindStat's Mp00310. Its order is n - 1; the inverse is InverseToricPromotion.",
+  },
+  {
+    name: "InverseToricPromotion",
+    from: "permutation",
+    to: "permutation",
+    body: inverseToricPromotionBody,
+    summary: "The same swaps as ToricPromotion in the opposite order: n and 1, then n - 1 and n, down to 1 and 2.",
+    note: "FindStat's Mp00309, titled the inverse of toric promotion.",
   },
 ];
 

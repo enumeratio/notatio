@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[ValleyFillingDegree, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	8			the word $110100111$
+findstat-st001721-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'ValleyFillingDegree'"]	1	1	FindStat St001721	FindStat's value for 0
+findstat-st001721-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'ValleyFillingDegree'"]	0	0	FindStat St001721	FindStat's value for 1
+findstat-st001721-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'ValleyFillingDegree'"]	3	3	FindStat St001721	FindStat's value for 00

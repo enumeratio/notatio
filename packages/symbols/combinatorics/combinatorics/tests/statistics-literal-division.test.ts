@@ -44,6 +44,7 @@ const SUBJECTS: Record<string, unknown[]> = {
   SetPartition: [[block(1, 16)], [block(1, 19)], [block(1, 300)], [block(1, 120), block(121, 5)], [block(1, 700)]].map(
     (blocks) => list(blocks.map(list)),
   ),
+  BinaryWord: [ones(12), [0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1], [0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1]].map(list),
 };
 
 for (const definition of AFFECTED) {

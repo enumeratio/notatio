@@ -12,6 +12,7 @@ import {
   atLeastValue,
   atMostValue,
   bind,
+  bindList,
   count,
   distance,
   equals,
@@ -35,12 +36,14 @@ import {
   slice,
   risesAfter,
   sumOver,
+  upTo,
   upToHere,
   where,
   at,
   add,
   carried,
   fold,
+  floored,
   forEach,
   subtract,
   visiting,
@@ -80,23 +83,26 @@ const inversions = sumOver(positions, count(["Range", add("i", 1), length()], gr
 // do not count. This was on the frontier as needing "a growing table Fold cannot carry"; it
 // needs no fold at all, just the same filtered double-sum Inversions already uses, restricted
 // to same-block pairs.
-const isExcedanceAt = (i: MathJSON): MathJSON => greater(at(i), i);
-const isNonExcedanceAt = (i: MathJSON): MathJSON => atMostValue(at(i), i);
+const isExcedanceAt = (i: MathJSON, word: MathJSON = x): MathJSON => greater(at(i, word), i);
+const isNonExcedanceAt = (i: MathJSON, word: MathJSON = x): MathJSON => atMostValue(at(i, word), i);
 /** Inversions among positions i < j that both satisfy `inBlock`. */
-const blockInversions = (inBlock: (i: MathJSON) => MathJSON): MathJSON =>
-  sumOver(positions, [
+const blockInversions = (inBlock: (i: MathJSON) => MathJSON, word: MathJSON = x): MathJSON =>
+  sumOver(upTo(length(word)), [
     "If",
     inBlock("i"),
-    count(["Range", add("i", 1), length()], and(inBlock("j"), greater(here, at("j"))), "j"),
+    count(["Range", add("i", 1), length(word)], and(inBlock("j"), greater(at("i", word), at("j", word))), "j"),
     0,
   ]);
-const denert: MathJSON = nonEmpty(
+/** Denert's statistic of the word `word`, a permutation of 1..n. */
+const denertOf = (word: MathJSON = x): MathJSON =>
   add(
-    add(["Sum", where(positions, isExcedanceAt("i"))], blockInversions(isExcedanceAt)),
-    blockInversions(isNonExcedanceAt),
-  ),
-);
-
+    add(
+      ["Sum", where(upTo(length(word)), isExcedanceAt("i", word))],
+      blockInversions((i) => isExcedanceAt(i, word), word),
+    ),
+    blockInversions((i) => isNonExcedanceAt(i, word), word),
+  );
+const denert: MathJSON = nonEmpty(denertOf());
 /** Occurrences of a length-3 pattern, as a triple loop over i < j < k. */
 const occurrencesOfPattern = (relation: (a: string, b: string, c: string) => Definition["expr"]) =>
   sumOver(
@@ -432,17 +438,27 @@ const occurrencesOfPatterns = (...patterns: (readonly number[])[]): MathJSON => 
   return atLeast(size, loop(0));
 };
 
-/** Occurrences of a vincular pattern whose first two entries are adjacent: i, i + 1, then any k > i + 1. */
-const occurrencesWithAdjacentStart = (pattern: readonly number[]): MathJSON => {
+/** Occurrences of a vincular pattern (any of `patterns`) whose first two entries are adjacent: i, i + 1, then any k > i + 1. */
+const occurrencesWithAdjacentStart = (...patterns: (readonly number[])[]): MathJSON => {
   const n = length();
   return atLeast(
     3,
     sumOver(
       ["Range", 1, subtract(n, 2)],
-      count(["Range", add("i", 2), n], orderedAs(pattern, [at("i"), at(add("i", 1)), at("k")]), "k"),
+      count(["Range", add("i", 2), n], orderedAsAny(patterns, [at("i"), at(add("i", 1)), at("k")]), "k"),
     ),
   );
 };
+/** Occurrences of a vincular pattern (any of `patterns`) whose last two entries are adjacent: any i < j, then j, j + 1. */
+const occurrencesWithAdjacentEnd = (...patterns: (readonly number[])[]): MathJSON =>
+  atLeast(
+    3,
+    sumOver(
+      ["Range", 2, subtract(length(), 1)],
+      count(["Range", 1, subtract("j", 1)], orderedAsAny(patterns, [at("i"), at("j"), at(add("j", 1))]), "i"),
+      "j",
+    ),
+  );
 
 /** Occurrences whose first entry is p(1), the other two anywhere after it: j < k. */
 const occurrencesFromFirstEntry = (pattern: readonly number[]): MathJSON => {
@@ -1410,11 +1426,9 @@ const FINDSTAT_PERMUTATION_STATISTICS_6: readonly Definition[] = [
     "FixedPointsBeforeLargestMovedPoint",
     "Fixed points smaller than the largest i with p(i) != i.",
     nonEmpty(
-      bind(
-        "m",
-        max(["Join", ["List", 0], where(positions, or(less(here, "i"), greater(here, "i")))]),
-        count(span(1, "m"), equals(here, "i")),
-        "number",
+      count(
+        span(1, max(["Join", ["List", 0], where(positions, or(less(here, "i"), greater(here, "i")))])),
+        equals(here, "i"),
       ),
     ),
   ),
@@ -1567,16 +1581,6 @@ const FINDSTAT_PERMUTATION_STATISTICS_6: readonly Definition[] = [
   ),
 ];
 
-/** Occurrences of a vincular pattern whose last two entries are adjacent: any i, then j, j + 1. */
-const occurrencesWithAdjacentEnd = (pattern: readonly number[]): MathJSON =>
-  atLeast(
-    3,
-    sumOver(
-      ["Range", 2, subtract(length(), 1)],
-      count(["Range", 1, subtract("j", 1)], orderedAs(pattern, [at("i"), at("j"), at(add("j", 1))]), "i"),
-      "j",
-    ),
-  );
 /** The descents: the vincular pattern (21). */
 const adjacentDescents: MathJSON = hasPair(count(adjacent, fallsAfter));
 
@@ -2076,6 +2080,12 @@ const finiteDifference = (k: MathJSON): MathJSON =>
     "j",
   );
 
+/** The positions of the leaves of the increasing binary tree: the peaks, an end counting as a peak. */
+const peakPositions: MathJSON = where(
+  positions,
+  and(["If", greater("i", 1), less(previous, here), "True"], ["If", less("i", length()), greater(here, next), "True"]),
+);
+
 // The eighth batch: cycle spread, a leaf label of the increasing tree, longest-subsequence counts and
 // progressions, primes among position-value sums and products, and the Diaconis–Graham defect.
 const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
@@ -2094,20 +2104,7 @@ const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
   stat(
     "SmallestLeafLabel",
     "The smallest label of a leaf of the increasing binary tree of p: the least peak, an end counting as a peak.",
-    nonEmpty(
-      min(
-        forEach(
-          where(
-            positions,
-            and(
-              ["If", greater("i", 1), less(previous, here), "True"],
-              ["If", less("i", length()), greater(here, next), "True"],
-            ),
-          ),
-          here,
-        ),
-      ),
-    ),
+    nonEmpty(min(forEach(peakPositions, here))),
   ),
   word(
     "LongestIncreasingSubsequenceCount",
@@ -2164,6 +2161,942 @@ const FINDSTAT_PERMUTATION_STATISTICS_8: readonly Definition[] = [
     "InterpolatingPolynomialDegree",
     "The degree of the polynomial through the points (i, p(i)): the largest k with a nonzero k-th finite difference.",
     nonEmpty(max(where(["Range", 0, subtract(length(), 1)], ["NotEqual", finiteDifference("k"), 0], "k"))),
+  ),
+];
+
+/** The largest earlier entry below p(i), else 0: the lower end of the interval p(i) splits in the search tree. */
+const searchTreeLower: MathJSON = max([
+  "Join",
+  ["List", 0],
+  forEach(where(["Range", 1, "i"], less(at("j"), here), "j"), at("j"), "j"),
+]);
+/** The smallest earlier entry above p(i), else n + 1. */
+const searchTreeUpper: MathJSON = min([
+  "Join",
+  ["List", add(length(), 1)],
+  forEach(where(["Range", 1, "i"], greater(at("j"), here), "j"), at("j"), "j"),
+]);
+/** Whether p(i) is a leaf of the binary search tree: no later entry falls between its neighbors among the earlier ones. */
+const isSearchTreeLeaf: MathJSON = bind(
+  "lo",
+  searchTreeLower,
+  bind(
+    "hi",
+    searchTreeUpper,
+    equals(count(positions, and(greater("k", "i"), and(greater(at("k"), "lo"), less(at("k"), "hi"))), "k"), 0),
+    "integer",
+  ),
+  "integer",
+);
+
+/** Occurrences of a pattern on i < j < k with no other entry in the rectangle of positions i..k and values lo..hi. */
+const boxedOccurrences = (
+  relation: (a: string, b: string, c: string) => MathJSON,
+  lowest: (a: string, b: string, c: string) => MathJSON,
+  highest: (a: string, b: string, c: string) => MathJSON,
+): MathJSON =>
+  sumOver(
+    positions,
+    sumOver(
+      ["Range", add("i", 1), length()],
+      count(
+        ["Range", add("j", 1), length()],
+        and(
+          relation("i", "j", "k"),
+          equals(
+            count(
+              positions,
+              and(
+                and(greater("m", "i"), less("m", "k")),
+                and(
+                  ["NotEqual", "m", "j"],
+                  and(greater(at("m"), lowest("i", "j", "k")), less(at("m"), highest("i", "j", "k"))),
+                ),
+              ),
+              "m",
+            ),
+            0,
+          ),
+        ),
+        "k",
+      ),
+      "j",
+    ),
+  );
+
+// The ninth batch: cycle spread, leaf labels of the search and increasing trees, breadth and boxed patterns.
+const FINDSTAT_PERMUTATION_STATISTICS_9: readonly Definition[] = [
+  stat(
+    "MinimalCycleDifference",
+    "The smallest, over the cycles, of the largest difference between two elements of a cycle.",
+    nonEmpty(
+      min(forEach(cycleLeaders, max(forEach(where(positions, sameCycle("i", "m"), "m"), distance("m", "i"), "m")))),
+    ),
+  ),
+  stat("NonFixedPoints", "Positions i with p(i) != i.", nonEmpty(count(positions, ["NotEqual", here, "i"]))),
+  word(
+    "LargestSearchTreeLeafLabel",
+    "The largest label of a leaf of the binary search tree of p, inserting p(1), ..., p(n) in order.",
+    nonEmpty(max(forEach(where(positions, isSearchTreeLeaf), here))),
+  ),
+  word(
+    "NormalizedLeafLabelSum",
+    "The sum of the leaf labels of the increasing binary tree of p, less n.",
+    nonEmpty(subtract(floored(sumOver(peakPositions, here)), length())),
+  ),
+  word(
+    "DescentsMinusOneUnlessFirstEntryOne",
+    "The number of descents of p, less one when p(1) is not 1.",
+    hasPair(subtract(count(adjacent, fallsAfter), ["If", equals(at(1), 1), 0, 1])),
+  ),
+  stat(
+    "PermutationBreadth",
+    "The least Manhattan distance |i - j| + |p(i) - p(j)| between two points of the permutation matrix.",
+    hasPair(
+      min(
+        forEach(
+          adjacent,
+          min(forEach(["Range", add("i", 1), length()], add(distance("i", "j"), distance(here, at("j"))), "j")),
+        ),
+      ),
+    ),
+  ),
+  word(
+    "BoxedOccurrencesOf123",
+    "Occurrences of 123 with no other entry positioned between the first and last and valued between them.",
+    hasTriple(
+      boxedOccurrences(
+        (i, j, k) => and(less(at(i), at(j)), less(at(j), at(k))),
+        (i) => at(i),
+        (_i, _j, k) => at(k),
+      ),
+    ),
+  ),
+  word(
+    "BoxedOccurrencesOf132",
+    "Occurrences of 132 with no other entry positioned between the first and last and valued between the least and greatest.",
+    hasTriple(
+      boxedOccurrences(
+        (i, j, k) => and(less(at(i), at(k)), less(at(k), at(j))),
+        (i) => at(i),
+        (_i, j) => at(j),
+      ),
+    ),
+  ),
+];
+
+/** The number of ascents among steps 1..i of the walk, an ascent being an up step. */
+const ascentsThrough = count(["Range", 1, "i", 1], less(at("j"), at(add("j", 1))), "j");
+
+/** The vertical-separator test at position s: interior, with the neighbors' values one apart. */
+const separatesAt = (s: MathJSON): MathJSON => [
+  "If",
+  and(atLeastValue(s, 2), atMostValue(s, subtract(length(), 1))),
+  equals(distance(at(subtract(s, 1)), at(add(s, 1))), 1),
+  "False",
+];
+/** The same test on the inverse at value t: the values just around t sit at positions one apart. */
+const separatesInverseAt = (t: MathJSON): MathJSON => [
+  "If",
+  and(atLeastValue(t, 2), atMostValue(t, subtract(length(), 1))),
+  equals(distance(positionOf(subtract(t, 1)), positionOf(add(t, 1))), 1),
+  "False",
+];
+
+/** -1, 0 or 1 as a is below, equal to or above b. */
+const comparison = (a: MathJSON, b: MathJSON): MathJSON => ["If", less(a, b), -1, ["If", greater(a, b), 1, 0]];
+/** Whether the first n - i entries and the last n - i entries are in the same relative order. */
+const sameOrderAfterShift: MathJSON = equals(
+  floored(
+    sumOver(
+      ["Range", 1, subtract(length(), "i"), 1],
+      count(
+        ["Range", 1, subtract(length(), "i"), 1],
+        and(greater("b", "a"), [
+          "NotEqual",
+          comparison(at("a"), at("b")),
+          comparison(at(add("a", "i")), at(add("b", "i"))),
+        ]),
+        "b",
+      ),
+      "a",
+    ),
+  ),
+  0,
+);
+
+/** n + 1 - v: the reflection of a position or value. */
+const reflected = (v: MathJSON): MathJSON => subtract(add(length(), 1), v);
+/** 1 when no position violates `differs`, i.e. a symmetry of the square fixes p; else 0. */
+const fixedBy = (differs: MathJSON): MathJSON => ["If", equals(count(positions, differs), 0), 1, 0];
+
+/** The cycles of the permutation list `q`: positions whose walk returns before meeting anything smaller. */
+const cyclesOf = (q: MathJSON): MathJSON =>
+  count(
+    positions,
+    equals(
+      [
+        "Fold",
+        [
+          "Function",
+          ["If", ["LessEqual", "w", 0], "w", ["If", equals("w", "i"), 0, ["If", less("w", "i"), -1, at("w", q)]]],
+          "w",
+          "k",
+        ],
+        at("i", q),
+        steps,
+      ],
+      0,
+    ),
+  );
+
+/** The bounce point after t bounces: from the first entry of the inverse, the greatest of the inverse's entries up to one past the last. */
+const bounceAfter = (inverseList: MathJSON): MathJSON => [
+  "Fold",
+  [
+    "Function",
+    ["If", less("w", length()), max(forEach(["Range", 1, add("w", 1), 1], at("j", inverseList), "j")), length()],
+    "w",
+    "s",
+  ],
+  at(1, inverseList),
+  ["Range", 1, "t", 1],
+];
+
+// The tenth batch: the walk of ascents and descents, separators and overlaps, symmetry classes, genus and bounce.
+const FINDSTAT_PERMUTATION_STATISTICS_10: readonly Definition[] = [
+  word(
+    "BinStatistic",
+    "The sum of the binomial coefficients (i + 1 choose 2) over the descents i.",
+    hasPair(sumOver(where(adjacent, fallsAfter), ["Divide", ["Multiply", "i", add("i", 1)], 2])),
+  ),
+  word(
+    "NonNegativeWalkSteps",
+    "Steps of the walk (up at an ascent, down at a descent) that begin and end at height at least 0.",
+    hasPair(count(adjacent, atLeastValue(subtract(["Multiply", 2, ascentsThrough], "i"), ["If", risesAfter, 1, 0]))),
+  ),
+  stat(
+    "CycleMinimumExceedancesDeficiencies",
+    "The sum over the cycles of the lesser of the number of exceedances and the number of the other points.",
+    nonEmpty(
+      floored(
+        sumOver(
+          cycleLeaders,
+          min([
+            "List",
+            count(positions, and(sameCycle("i", "m"), greater(at("m"), "m")), "m"),
+            count(positions, and(sameCycle("i", "m"), atMostValue(at("m"), "m")), "m"),
+          ]),
+        ),
+      ),
+    ),
+  ),
+  stat(
+    "Separators",
+    "The values v that are a vertical separator of p, or whose image under p^-1 is a vertical separator of p^-1.",
+    hasTriple(
+      count(
+        positions,
+        bind(
+          "s",
+          positionOf("v"),
+          bind("t", at(at("v")), or(separatesAt("s"), separatesInverseAt("t")), "integer"),
+          "integer",
+        ),
+        "v",
+      ),
+    ),
+  ),
+  word(
+    "OverlapSetSize",
+    "Shifts i < n for which the first n - i entries and the last n - i entries are in the same relative order.",
+    hasPair(count(adjacent, sameOrderAfterShift)),
+  ),
+  word(
+    "ExteriorLength",
+    "The longest proper prefix whose relative order is that of the suffix of the same length.",
+    hasPair(max(forEach(where(adjacent, sameOrderAfterShift), subtract(length(), "i")))),
+  ),
+  stat(
+    "SimsunDoubleDescents",
+    "Double descents in the restrictions of p to the values 1..k, over all k, counted with multiplicity.",
+    hasTriple(
+      sumOver(
+        positions,
+        sumOver(
+          where(positions, greater("j", "i"), "j"),
+          sumOver(
+            where(positions, greater("k", "j"), "k"),
+            [
+              "If",
+              and(greater(at("i"), at("j")), greater(at("j"), at("k"))),
+              [
+                "Max",
+                0,
+                subtract(
+                  min([
+                    "Join",
+                    ["List", add(length(), 1)],
+                    forEach(
+                      where(positions, and(and(greater("m", "i"), less("m", "k")), ["NotEqual", "m", "j"]), "m"),
+                      at("m"),
+                      "m",
+                    ),
+                  ]),
+                  at("i"),
+                ),
+              ],
+              0,
+            ],
+            "k",
+          ),
+          "j",
+        ),
+      ),
+    ),
+  ),
+  stat(
+    "SymmetryClassSize",
+    "The permutations reachable from p by inverse, reverse and complement: 8 over the symmetries that fix p.",
+    nonEmpty(
+      [
+        "Divide",
+        8,
+        [
+          "Add",
+          1,
+          fixedBy(["NotEqual", here, at(reflected("i"))]),
+          fixedBy(["NotEqual", here, reflected(here)]),
+          fixedBy(["NotEqual", at(reflected("i")), reflected(here)]),
+          fixedBy(["NotEqual", at(here), "i"]),
+          fixedBy(["NotEqual", at(here), reflected("i")]),
+          fixedBy(["NotEqual", at(reflected(here)), "i"]),
+          fixedBy(["NotEqual", at(reflected(here)), reflected("i")]),
+        ],
+      ],
+      1,
+    ),
+  ),
+  stat(
+    "PermutationGenus",
+    "The genus g with n + 1 - 2g the cycles of p plus the cycles of p^-1 composed with the long cycle.",
+    nonEmpty(
+      bind(
+        "q",
+        forEach(positions, positionOf(add(["Mod", "i", length()], 1))),
+        ["Divide", subtract(subtract(add(length(), 1), ["Count", cycleLeaders]), cyclesOf("q")), 2],
+        "list<integer>",
+      ),
+    ),
+  ),
+  stat(
+    "PermutationBounce",
+    "The sum of n - b over the bounce points b: the position of 1 in p, then the greatest position among the entries up to one past the last.",
+    nonEmpty(
+      bind(
+        "v",
+        forEach(positions, positionOf("m"), "m"),
+        floored(sumOver(["Range", 0, subtract(length(), 1), 1], subtract(length(), bounceAfter("v")), "t")),
+        "list<integer>",
+      ),
+    ),
+  ),
+];
+
+/** Pairs i < j with p(i) < p(j), the later entry above the earlier one. */
+const nonInversionPairs: MathJSON = sumOver(positions, count(span(add("i", 1), length()), less(here, at("j")), "j"));
+/** Pairs i < j with p(i) < p(j) whose distance j - i has the given parity. */
+const nonInversionsAtParity = (parity: number): MathJSON =>
+  sumOverPairs(and(less(here, at("j")), equals(["Mod", subtract("j", "i"), 2], parity)), 1);
+
+/** The excedance tops less their positions, summed. */
+const excedanceDifferences: MathJSON = floored([
+  "Sum",
+  forEach(where(positions, isExcedanceAt("i")), subtract(here, "i")),
+]);
+/** Pairs k < i, over the excedances i, with p(k) <= i. */
+const excedanceBlockers: MathJSON = sumOver(
+  where(positions, isExcedanceAt("i")),
+  count(span(1, subtract("i", 1)), atMostValue(at("k"), "i"), "k"),
+);
+
+/**
+ * The length of the leading increasing factor of the hook factorization. Factors are cut from the right,
+ * each starting at the last descent top at least two before the previous cut; the fold's state is the
+ * latest cut, starting past the end.
+ */
+const hookPrefixLength: MathJSON = subtract(
+  fold(["Range", subtract(length(), 1), 1, -1], add(length(), 1), [
+    "If",
+    and(atMostValue(visiting, subtract("a", 2)), greater(at(visiting), at(add(visiting, 1)))),
+    visiting,
+    "a",
+  ]),
+  1,
+);
+/** The inversions inside the hook factors, carrying (cut, total) and adding the new factor's inversions at each cut. */
+const hookInversionSum: MathJSON = [
+  "At",
+  fold(
+    ["Range", subtract(length(), 1), 1, -1],
+    ["List", add(length(), 1), 0],
+    bind(
+      "e",
+      subtract(carried(1), 1),
+      [
+        "If",
+        and(atMostValue(visiting, subtract("e", 1)), greater(at(visiting), at(add(visiting, 1)))),
+        [
+          "List",
+          visiting,
+          add(carried(2), sumOver(span(visiting, "e"), count(span(add("i", 1), "e"), greater(here, at("j")), "j"))),
+        ],
+        "a",
+      ],
+      "integer",
+    ),
+  ),
+  2,
+];
+
+/** The most entries on the stack while the word is read, each entry first popping the larger ones: the most right-to-left minima of a prefix. */
+const stackHeight: MathJSON = max(forEach(positions, count(span(1, "i"), equals(at("k"), min(slice("k", "i"))), "k")));
+
+/** The word without its fixed points: the zeroed word with the zeros dropped. */
+const derangementWord: MathJSON = where(fixedPointsZeroed, ["NotEqual", "v", 0], "v");
+const fixedPointCount: MathJSON = count(positions, equals(here, "i"));
+
+// The eleventh batch: Lehmer-code and Bruhat counts, vincular sums, the hook factorization, the fixed-point
+// major index and a few small counts.
+const FINDSTAT_PERMUTATION_STATISTICS_11: readonly Definition[] = [
+  word(
+    "LexicographicRank",
+    "The position of p among the permutations of its size in lexicographic order, counting from 1.",
+    nonEmpty(
+      add(
+        1,
+        floored(
+          sumOver(positions, [
+            "Multiply",
+            count(span(add("i", 1), length()), less(at("j"), here), "j"),
+            factorial(subtract(length(), "i")),
+          ]),
+        ),
+      ),
+      1,
+    ),
+    "One more than the Lehmer code read as a number in the factorial base.",
+  ),
+  word(
+    "NonAttackingNeighbors",
+    "Positions i with |p(i) - p(i+1)| > 1.",
+    hasPair(count(adjacent, greater(distance(here, next), 1))),
+    "Kings on adjacent columns that do not attack each other.",
+  ),
+  word(
+    "StaircaseSizeOfCode",
+    "The largest k with a subsequence of the Lehmer code whose j-th entry from the right is at least j.",
+    nonEmpty(
+      bind(
+        "c",
+        forEach(positions, count(span(add("i", 1), length()), less(at("j"), here), "j")),
+        fold(["Range", length(), 1, -1], 0, ["If", greater(at(visiting, "c"), "a"), add("a", 1), "a"]),
+        "list<integer>",
+      ),
+    ),
+    "Scanning the code from the right and taking each entry that exceeds the count so far is optimal.",
+  ),
+  word(
+    "BruhatLowerCovers",
+    "Pairs i < j with p(i) > p(j) and no entry between them valued between p(j) and p(i).",
+    hasPair(
+      sumOver(
+        adjacent,
+        count(
+          span(add("i", 1), length()),
+          and(
+            greater(here, at("j")),
+            equals(
+              count(span(add("i", 1), subtract("j", 1)), and(greater(at("k"), at("j")), less(at("k"), here)), "k"),
+              0,
+            ),
+          ),
+          "j",
+        ),
+      ),
+    ),
+    "The boxed occurrences of 21.",
+  ),
+  word(
+    "TailPairsOfOccurrencesOf321",
+    "Pairs j < k with p(j) > p(k) and some entry before j above p(j), the positions of the 2 and the 1 of the occurrences of 321.",
+    nonEmpty(
+      sumOver(
+        where(positions, less(here, max(upToHere))),
+        count(span(add("i", 1), length()), less(at("j"), here), "j"),
+      ),
+    ),
+  ),
+  word(
+    "StandardizedBiAlternatingInversionNumber",
+    "Half of floor(n/2)^2 plus the signed inversions, each pair i < j weighted by (-1)^(i+j).",
+    hasPair(
+      add(
+        ["Divide", ["Multiply", halfFloor(length()), add(halfFloor(length()), 1)], 2],
+        subtract(nonInversionsAtParity(0), nonInversionsAtParity(1)),
+      ),
+    ),
+    "Half of the sum of (-1)^(i+j) sgn(p(j) - p(i)) over i < j, shifted by floor(n/2)^2.",
+  ),
+  word(
+    "MinimalInversionsEitherDirection",
+    "The smaller of the number of inversions and the number of non-inversions.",
+    hasPair(min(["List", inversions, nonInversionPairs])),
+    "Inversions of p against those of its reverse.",
+  ),
+  word(
+    "BabsonSteingrimssonStatisticPrime",
+    "Descents plus the occurrences of the vincular patterns 13-2, 31-2 and 32-1.",
+    hasPair(add(count(adjacent, fallsAfter), occurrencesWithAdjacentStart([1, 3, 2], [3, 1, 2], [3, 2, 1]))),
+    "FindStat's stat', after Babson and Steingrimsson.",
+  ),
+  word(
+    "BabsonSteingrimssonStatisticDoublePrime",
+    "Descents plus the occurrences of the vincular patterns 1-32, 3-12 and 3-21.",
+    hasPair(add(count(adjacent, fallsAfter), occurrencesWithAdjacentEnd([1, 3, 2], [3, 1, 2], [3, 2, 1]))),
+    "FindStat's stat'', after Babson and Steingrimsson.",
+  ),
+  stat(
+    "Hag",
+    "The excedance tops less their positions, plus the inversions among the excedance tops less those among the rest, plus the pairs k < i, over excedances i, with p(k) <= i.",
+    nonEmpty(
+      subtract(
+        add(add(excedanceDifferences, blockInversions(isExcedanceAt)), excedanceBlockers),
+        blockInversions(isNonExcedanceAt),
+      ),
+    ),
+    "FindStat's Haglund hag. The inversions are within the subwords, as in Denert.",
+  ),
+  stat(
+    "HalfPermanentOfIdentityPlusPermutation",
+    "Half the permanent of the identity matrix plus the permutation matrix, which is 2 to the power of the cycles less one.",
+    nonEmpty(["Power", 2, subtract(["Count", cycleLeaders], 1)]),
+  ),
+  word(
+    "HookFactorizationPrefixLength",
+    "The length of the leading increasing factor p of the hook factorization p t1 ... tk.",
+    atLeast(2, hookPrefixLength, length()),
+    "Hook factors are cut from the right, each from a descent top.",
+  ),
+  word(
+    "HookFactorInversions",
+    "The inversions summed over the hook factors t1, ..., tk of p.",
+    atLeast(2, hookInversionSum),
+    "Called lec.",
+  ),
+  word(
+    "PermutationTreeHeight",
+    "The height of the rooted tree from inserting the entries one by one, the most entries on the stack of ancestors.",
+    nonEmpty(stackHeight),
+  ),
+  stat(
+    "FixedPointMajorIndex",
+    "The sum of the fixed points less the triangular number of their count, plus the major index of the word without its fixed points.",
+    nonEmpty(
+      add(
+        subtract(
+          ["Sum", where(positions, equals(here, "i"))],
+          ["Divide", ["Multiply", fixedPointCount, add(fixedPointCount, 1)], 2],
+        ),
+        bind(
+          "d",
+          derangementWord,
+          ["Sum", forEach(where(span(1, subtract(length("d"), 1)), greater(at("i", "d"), at(add("i", 1), "d"))), "i")],
+          "list<integer>",
+        ),
+      ),
+    ),
+    "Called maf.",
+  ),
+];
+
+// The tenth batch: statistics defined by recursion on a window of the word. Each fold carries the
+// window `lo .. hi`, and where there is one a running total, as a list of integers. Every step
+// shrinks a non-empty window, so n steps settle any word; an empty window (lo > hi) stays as it is.
+const windowLow = carried(1);
+const windowHigh = carried(2);
+const windowEntries: MathJSON = forEach(["Range", windowLow, windowHigh, 1], at("j"), "j");
+/** The position in the window of the entry with value `value`; entries are distinct. */
+const windowPositionOf = (value: MathJSON): MathJSON =>
+  floored(sumOver(["Range", windowLow, windowHigh, 1], ["If", equals(at("j"), value), "j", 0], "j"));
+/** `step` while the window is non-empty, the accumulator unchanged once it is empty. */
+const whileWindow = (step: MathJSON): MathJSON => ["If", greater(windowLow, windowHigh), "a", step];
+const emptyWindow = (total: MathJSON): MathJSON => ["List", 1, 0, total];
+
+/** rix: the window's maximum at its end counts one and drops it; at its start ends the walk; else the walk goes on right of it. */
+const recursiveEndMaximumCount: MathJSON = [
+  "At",
+  fold(
+    positions,
+    ["List", 1, length(), 0],
+    whileWindow(
+      bind(
+        "top",
+        max(windowEntries),
+        bind(
+          "peak",
+          windowPositionOf("top"),
+          [
+            "If",
+            equals("peak", windowHigh),
+            ["List", windowLow, subtract(windowHigh, 1), add(carried(3), 1)],
+            [
+              "If",
+              equals("peak", windowLow),
+              emptyWindow(carried(3)),
+              ["List", add("peak", 1), windowHigh, carried(3)],
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+    ),
+  ),
+  3,
+];
+
+/** aix: the window's minimum at its start counts one and drops it; at its end ends the walk; else the walk goes on left of it. */
+const recursiveStartMinimumCount: MathJSON = [
+  "At",
+  fold(
+    positions,
+    ["List", 1, length(), 0],
+    whileWindow(
+      bind(
+        "bottom",
+        min(windowEntries),
+        bind(
+          "low",
+          windowPositionOf("bottom"),
+          [
+            "If",
+            equals("low", windowLow),
+            ["List", add(windowLow, 1), windowHigh, add(carried(3), 1)],
+            [
+              "If",
+              equals("low", windowHigh),
+              emptyWindow(carried(3)),
+              ["List", windowLow, subtract("low", 1), carried(3)],
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+    ),
+  ),
+  3,
+];
+
+/** The window `lo .. hi` of the path in the increasing tree that follows the smaller child, down to one entry. */
+const smallerChildPathWindow: MathJSON = fold(
+  positions,
+  ["List", 1, length()],
+  [
+    "If",
+    atLeastValue(windowLow, windowHigh),
+    "a",
+    bind(
+      "smallest",
+      min(windowEntries),
+      bind(
+        "low",
+        windowPositionOf("smallest"),
+        bind(
+          "runnerUp",
+          min(
+            forEach(
+              ["Range", windowLow, windowHigh, 1],
+              ["If", equals(at("j"), "smallest"), add(length(), 1), at("j")],
+              "j",
+            ),
+          ),
+          [
+            "If",
+            less(windowPositionOf("runnerUp"), "low"),
+            ["List", windowLow, subtract("low", 1)],
+            ["List", add("low", 1), windowHigh],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+  ],
+);
+
+const FINDSTAT_PERMUTATION_WINDOW_STATISTICS: readonly Definition[] = [
+  stat(
+    "RecursiveEndMaximumCount",
+    "FindStat's rix: the number of times, peeling the word, the maximum of what is left is its last entry.",
+    nonEmpty(recursiveEndMaximumCount),
+    "Recursively: the maximum last counts one and the rest is the word without it; the maximum first ends the walk; otherwise the walk goes on with the entries after the maximum (St000461).",
+  ),
+  stat(
+    "RecursiveStartMinimumCount",
+    "FindStat's aix: the number of times, peeling the word, the minimum of what is left is its first entry.",
+    nonEmpty(recursiveStartMinimumCount),
+    "Recursively: the minimum first counts one and the rest is the word without it; the minimum last ends the walk; otherwise the walk goes on with the entries before the minimum (St000873).",
+  ),
+  stat(
+    "SmallerChildPathLeafLabel",
+    "The label of the leaf reached from the root of the increasing binary tree of p by always following the child with the smaller label.",
+    nonEmpty(at(["At", smallerChildPathWindow, 1])),
+    "The root of a window is its minimum, and the smaller child is the root of the side holding the second smallest entry (St000724).",
+  ),
+  stat(
+    "ScaledReciprocalPositionValueSum",
+    "The sum of 1/(i + p(i)) times the least common multiple of 1 .. 2n, an integer.",
+    nonEmpty(
+      bind(
+        "scale",
+        fold(["Range", 1, ["Multiply", 2, length()], 1], 1, ["LCM", "a", "b"]),
+        floored(sumOver(positions, ["Divide", "scale", add("i", here)])),
+        "integer",
+      ),
+    ),
+    "Each term is an integer, since i + p(i) is at most 2n and divides the scale (St001293).",
+  ),
+];
+
+// Signed permutations: `_x` is the one-line word of signed entries, a permutation of 1..n with a sign on each.
+const signed = (head: string, summary: string, expr: Definition["expr"], note?: string): Definition => ({
+  head,
+  on: "SignedPermutation",
+  summary,
+  expr,
+  ...(note ? { note } : {}),
+});
+const negativeEntries = count(positions, less(here, 0));
+/** Pairs i < j (or i <= j when `inclusive`) whose entries satisfy `relation`, which reads p(i) and p(j) as `here` and `At(_x, j)`. */
+const entryPairs = (inclusive: boolean, relation: MathJSON): MathJSON =>
+  floored(
+    sumOver(positions, count(positions, and(inclusive ? atLeastValue("j", "i") : greater("j", "i"), relation), "j")),
+  );
+
+/** The inverse of the word at `k`: the position of the entry k or -k, negative when the entry is -k. The position is a floored sum over the entries equal to k in absolute value. */
+const inverseAt = (k: MathJSON): MathJSON => [
+  "Multiply",
+  subtract(1, ["Multiply", 2, count(positions, equals(here, ["Negate", k]), "i")]),
+  floored(sumOver(positions, ["If", equals(["Abs", here], k), "i", 0])),
+];
+
+/** The signed entry at the index k of -n..n, where p(-k) = -p(k) and p(0) = 0. */
+const signedEntryAt = (k: MathJSON): MathJSON => [
+  "If",
+  greater(k, 0),
+  at(k),
+  ["If", equals(k, 0), 0, ["Negate", at(["Negate", k])]],
+];
+/** Where the signed point w of -n..n goes under p: p(w) for w > 0 and -p(-w) for w < 0. */
+const signedStep: MathJSON = ["If", less("w", 0), ["Negate", at(["Negate", "w"])], at("w")];
+/** Where the signed point i is after m steps of p. */
+const signedWalk = (i: MathJSON, m: MathJSON): MathJSON => [
+  "Fold",
+  ["Function", signedStep, "w", "j"],
+  i,
+  ["Range", 1, m, 1],
+];
+/** The steps of a signed walk: 2n of them, enough to go round any signed cycle. */
+const signedSteps: MathJSON = ["Range", 1, ["Multiply", 2, length()], 1];
+
+/** The least m >= 1 with p^m(i) = i as a signed point: the cycle of i, counted twice when it is negative. */
+const signedCycleLengthAt = (i: MathJSON): MathJSON => ["Min", where(signedSteps, equals(signedWalk(i, "m"), i), "m")];
+/** Whether i is the smallest point of its cycle, forgetting signs. */
+const leadsSignedCycle = (i: MathJSON): MathJSON =>
+  equals(count(upTo(length()), less(["Abs", signedWalk(i, "m")], i), "m"), 0);
+/** Whether the cycle of i never reaches -i: it is a positive cycle. */
+const staysPositive = (i: MathJSON): MathJSON =>
+  equals(count(upTo(length()), equals(signedWalk(i, "m"), ["Negate", i]), "m"), 0);
+
+/** Selection sort on a signed word: n goes to its place and loses its sign, then n - 1, and so on. A step costs k - t for a positive entry at t and k + t - 1 for a negative one. */
+const signedSortingIndex: MathJSON = [
+  "At",
+  fold(
+    ["Range", length(), 1, -1],
+    ["Tuple", 0, x],
+    [
+      "Apply",
+      [
+        "Function",
+        [
+          "Tuple",
+          add(carried(1), [
+            "If",
+            less(at("t", carried(2)), 0),
+            subtract(add(visiting, "t"), 1),
+            subtract(visiting, "t"),
+          ]),
+          [
+            "ReplaceAt",
+            [
+              "ReplaceAt",
+              carried(2),
+              "t",
+              ["If", less(at("t", carried(2)), 0), ["Negate", at(visiting, carried(2))], at(visiting, carried(2))],
+            ],
+            visiting,
+            visiting,
+          ],
+        ],
+        "t",
+      ],
+      ["Sum", forEach(positions, ["If", equals(["Abs", at("j", carried(2))], visiting), "j", 0], "j")],
+    ],
+  ),
+  1,
+];
+
+/** Pairs (i, j) of 1..n of FindStat's six alignment kinds (St001822), each read with a = p(i) and b = p(j). */
+const signedAlignments: MathJSON = (() => {
+  const b = at("j");
+  const kinds: MathJSON[] = [
+    // Nesting: -i < -j < -b < -a, -i < j <= b < -a, and i < j <= b < a.
+    and(less("j", "i"), and(less(here, b), less(b, "j"))),
+    and(atMostValue("j", b), less(b, ["Negate", here])),
+    and(greater("j", "i"), and(atMostValue("j", b), less(b, here))),
+    // Type EN: -i < 0 < -a < b < j, and i <= a < b < j.
+    and(less(here, 0), and(less(["Negate", here], b), less(b, "j"))),
+    and(atMostValue("i", here), and(less(here, b), less(b, "j"))),
+    // Type NE: a < i < j <= b.
+    and(less(here, "i"), and(less("i", "j"), atMostValue("j", b))),
+  ];
+  return floored(
+    kinds.reduce<MathJSON>((total, kind) => add(total, sumOver(positions, count(positions, kind, "j"))), 0),
+  );
+})();
+
+const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
+  signed("NegativeEntryCount", "The number of negative entries.", nonEmpty(negativeEntries)),
+  signed("PositiveEntryCount", "The number of positive entries.", nonEmpty(count(positions, greater(here, 0)))),
+  signed(
+    "TypeBInversionCount",
+    "Pairs i < j with p(i) > p(j), plus pairs i <= j with -p(i) > p(j).",
+    nonEmpty(add(entryPairs(false, greater(here, at("j"))), entryPairs(true, greater(["Negate", here], at("j"))))),
+    "The Coxeter length in type B (FindStat St001428).",
+  ),
+  signed(
+    "NegativeSumPairCount",
+    "Pairs i < j with p(i) + p(j) < 0.",
+    nonEmpty(entryPairs(false, less(add(here, at("j")), 0))),
+  ),
+  signed(
+    "FlagMajorIndex",
+    "The number of negative entries plus twice the sum of the descents, a negative first entry counting as a descent at 0.",
+    nonEmpty(add(negativeEntries, hasPair(floored(["Multiply", 2, sumOver(adjacent, ["If", fallsAfter, "i", 0])])))),
+    "The descent at 0 adds 0 to the sum, so only the descents between entries weigh.",
+  ),
+  signed(
+    "FlagDescent",
+    "Twice the descents between entries, plus 1 when the first entry is negative.",
+    nonEmpty(add(["Multiply", 2, hasPair(count(adjacent, fallsAfter))], ["If", less(at(1), 0), 1, 0])),
+    "FindStat's St001893. The descent at 0 counts once, the others twice.",
+  ),
+  signed(
+    "FlagExcedance",
+    "Twice the excedances plus the negative entries.",
+    nonEmpty(add(["Multiply", 2, count(positions, greater(here, "i"))], negativeEntries)),
+    "FindStat's St001892. An excedance is an entry p(i) > i.",
+  ),
+  signed(
+    "FlagWeakExcedance",
+    "Twice the weak excedances plus the negative entries.",
+    nonEmpty(add(["Multiply", 2, count(positions, atLeastValue(here, "i"))], negativeEntries)),
+    "FindStat's St001817. A weak excedance is an entry p(i) >= i.",
+  ),
+  signed(
+    "PositiveBeforeLargerNegativePairCount",
+    "Pairs i < j with 0 < p(i) < -p(j): the occurrences of the signed pattern 1-2.",
+    nonEmpty(entryPairs(false, and(greater(here, 0), less(here, ["Negate", at("j")])))),
+    "FindStat's St001771. A positive entry followed, later, by a negative entry of larger absolute value.",
+  ),
+  signed(
+    "IncreasingPositivePairCount",
+    "Pairs i < j with 0 < p(i) < p(j): the occurrences of the signed pattern 12.",
+    nonEmpty(entryPairs(false, and(greater(here, 0), less(here, at("j"))))),
+    "FindStat's St001772. Both entries positive and increasing.",
+  ),
+  signed(
+    "PositiveBeforeNegativeCount",
+    "Twice the adjacent pairs of a positive entry followed by a negative one, plus 1 when the first entry is negative.",
+    nonEmpty(
+      add(
+        ["Multiply", 2, hasPair(count(adjacent, and(greater(here, 0), less(next, 0))))],
+        ["If", less(at(1), 0), 1, 0],
+      ),
+    ),
+    "FindStat's St001870 counts them in the word p(-n), ..., p(-1), p(1), ..., p(n) with p(-i) = -p(i): each adjacent pair twice, once reflected, and the pair across the middle when p(1) is negative.",
+  ),
+  signed(
+    "RightDescents",
+    "Indices 0 <= k < n with s(k) > s(k+1), where s is the inverse of p and s(0) = 0.",
+    nonEmpty(
+      add(
+        count(positions, equals(here, -1)),
+        hasPair(count(adjacent, greater(inverseAt("d"), inverseAt(add("d", 1))), "d")),
+      ),
+    ),
+    "FindStat's St001896: the left descents of the inverse. The inverse sends k to the position of k or -k, signed as the entry is.",
+  ),
+  signed(
+    "SignedPermutationOrder",
+    "The least m >= 1 with p^m the identity, p acting on -n..n.",
+    nonEmpty(fold(forEach(positions, signedCycleLengthAt("i")), 1, ["LCM", "a", "b"]), 1),
+    "FindStat's St001555. The lcm of the signed orbit lengths of 1..n: a cycle is counted twice when it is negative. Not PermutationOrder, which reads the word as an unsigned permutation.",
+  ),
+  signed(
+    "SignedReflectionLength",
+    "The least number of reflections of the hyperoctahedral group with product p: n minus the positive cycles.",
+    nonEmpty(subtract(length(), count(positions, and(leadsSignedCycle("i"), staysPositive("i"))))),
+    "FindStat's St001769. The codimension of the fixed space, which is n less the number of positive cycles. Not ReflectionLength, which counts transpositions of an unsigned permutation.",
+  ),
+  signed(
+    "FlagDenertIndex",
+    "The negative entries plus twice the Denert index of the permutation |p(1)| ... |p(n)|.",
+    nonEmpty(add(negativeEntries, ["Multiply", 2, bindList("w", forEach(positions, ["Abs", here]), denertOf("w"))])),
+    "FindStat's St001819.",
+  ),
+  signed(
+    "SignedSortingIndex",
+    "The sum, over the signed transpositions that sort p by moving n, then n - 1, and so on into place, of j - i - 1 when i < 0 and j - i otherwise.",
+    nonEmpty(signedSortingIndex),
+    "FindStat's St001821. The fold carries the total and the word, as SortingIndex does.",
+  ),
+  signed(
+    "SignedAlignmentCount",
+    "The alignments of p: its nesting alignments, those of type EN and those of type NE.",
+    nonEmpty(signedAlignments),
+    "FindStat's St001822 (St001866, St001867, St001868 summed). Not Alignments, which counts the pairs of arcs of an unsigned permutation.",
+  ),
+  signed(
+    "StasinskiVollLength",
+    "Half the pairs -n <= i < j <= n of opposite parity with p(i) > p(j), where p(-k) = -p(k) and p(0) = 0.",
+    nonEmpty(
+      floored(
+        sumOver(
+          positions,
+          count(
+            ["Range", 0, subtract("j", 1)],
+            greater(signedEntryAt(subtract(subtract("j", 1), ["Multiply", 2, "t"])), at("j")),
+            "t",
+          ),
+          "j",
+        ),
+      ),
+    ),
+    "FindStat's St001823. The map (i, j) -> (-j, -i) pairs the counted pairs off, so counting those with i + j > 0, i = j - 1, j - 3, ..., 1 - j, gives the half.",
   ),
 ];
 
@@ -2374,4 +3307,9 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_6,
   ...FINDSTAT_PERMUTATION_STATISTICS_7,
   ...FINDSTAT_PERMUTATION_STATISTICS_8,
+  ...FINDSTAT_PERMUTATION_STATISTICS_9,
+  ...FINDSTAT_PERMUTATION_STATISTICS_10,
+  ...FINDSTAT_PERMUTATION_STATISTICS_11,
+  ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
+  ...FINDSTAT_PERMUTATION_WINDOW_STATISTICS,
 ];

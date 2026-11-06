@@ -1,11 +1,11 @@
 // The verdict memo (scripts/stamp.ts `verdictCache`): reused while nothing moved, sampled and
 // carried when only the engine's dists moved, and fully re-checked on any other change.
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { afterAll, afterEach, beforeAll, beforeEach, expect, test } from "vite-plus/test";
-import { SAMPLE_MIN, verdictCache, type Verdicts } from "../scripts/stamp.ts";
+import { MEMO_GENERATIONS, SAMPLE_MIN, verdictCache, type Verdicts } from "../scripts/stamp.ts";
 
 let dir: string;
 const put = (file: string, text: string): void => {
@@ -132,4 +132,43 @@ test("RECHECK_ALL checks everything", () => {
   first.save();
   process.env.RECHECK_ALL = "1";
   expect(runOver(open())).toHaveLength(labels.length);
+});
+
+/** Builds under checker `text`, saving. Returns how many labels it checked. */
+function buildWith(text: string): number {
+  put("src/a.ts", text);
+  const verdicts = open();
+  const checked = runOver(verdicts).length;
+  verdicts.save();
+  return checked;
+}
+
+test("builds of different checker code keep each other's answers", () => {
+  expect(buildWith("base")).toBe(labels.length);
+  expect(buildWith("lane")).toBe(labels.length);
+  // The other lane's build did not wipe this one's.
+  expect(buildWith("base")).toBe(0);
+  expect(buildWith("lane")).toBe(0);
+});
+
+test("a memo keeps only the newest generations", () => {
+  const codes = Array.from({ length: MEMO_GENERATIONS + 1 }, (_, i) => `code${i}`);
+  for (const code of codes) buildWith(code);
+  expect(buildWith(codes.at(-1)!)).toBe(0);
+  expect(buildWith(codes[1]!)).toBe(0);
+  expect(buildWith(codes[0]!)).toBe(labels.length);
+});
+
+test("a memo from before generations is still read, costs and all", () => {
+  const first = open();
+  runOver(first);
+  first.save();
+  const cache = join(dir, "node_modules/.cache/enumeratio");
+  const file = join(
+    cache,
+    readdirSync(cache).find((f) => f.endsWith(".verdicts.json"))!,
+  );
+  const saved = JSON.parse(readFileSync(file, "utf8")) as { costs: object; memos: Array<object> };
+  writeFileSync(file, JSON.stringify({ ...saved.memos[0], costs: saved.costs }));
+  expect(runOver(open())).toEqual([]);
 });

@@ -16,12 +16,14 @@ import {
   mediaSignals,
   pageEnvironment,
   reduce,
+  scopeOf,
   watchPageEnvironment,
 } from "@enumeratio/frontend";
-import { structuralOf, toVNode } from "@enumeratio/frontend/vdom";
+import { type StructuralNode, structuralOf, toVNode } from "@enumeratio/frontend/vdom";
 import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
-import { computed, h, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
+import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { fragment, setFragment } from "../fragment.ts";
+import { vueFactory } from "../vdom-props.ts";
 
 const props = defineProps<{ expr: string; env?: string }>();
 
@@ -48,14 +50,16 @@ const reduced = computed(() => {
 const epsil = computed(() => (reduced.value === undefined ? "" : serializeExpression(reduced.value)));
 const json = computed(() => (reduced.value === undefined ? "" : JSON.stringify(reduced.value)));
 // The reduction as the vdom it is, reduced again for the page it sits on (a narrow window
-// stacks its rows): every head a tag, the elements lowering their own children.
+// stacks its rows): every head a tag, the elements lowering their own children, and the
+// controls' scope a `DynamicModule`, so a readout follows the control it reads.
 const page = shallowRef<Environment>(pageEnvironment());
 const tree = computed(() => {
   const expr = reduced.value;
-  if (expr === undefined) return undefined;
-  const node = structuralOf(reduce(expr, page.value));
-  return () => toVNode(node, (tag, attrs, children) => h(tag, { ...attrs }, [...children]));
+  return expr === undefined ? undefined : structuralOf(scopeOf(reduce(expr, page.value)));
 });
+// One component for every tree, so the engine arriving (a new `reduced`, the same `json`) patches
+// the elements in place instead of mounting new ones.
+const Tree = Object.assign((p: { node: StructuralNode }) => toVNode(p.node, vueFactory), { props: ["node"] });
 const textOnly = computed(() => environment.value.surface.every((s) => s === "text"));
 
 const card = ref<HTMLElement>();
@@ -110,7 +114,7 @@ onUnmounted(() => {
       <notatio-code language="epsil" :value="epsil" hide-lang />
       <div class="env-out" :env="environment.name">
         <notatio-terminal v-if="textOnly" mode="show" :env="environment.name" :value="source" />
-        <component :is="tree" v-else-if="tree" :key="json" />
+        <Tree v-else-if="tree" :key="json" :node="tree" />
       </div>
     </div>
   </ClientOnly>

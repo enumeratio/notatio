@@ -14,8 +14,11 @@ const STUBS: Record<string, string> = {
   "../lattice-paths/src/statistics.compiled.generated.js": "COMPILED",
   "../partitions/src/statistics.compiled.generated.js": "COMPILED",
   "../permutations/src/statistics.compiled.generated.js": "COMPILED",
+  "../tableaux/src/statistics.compiled.generated.js": "COMPILED",
   "../trees/src/statistics.compiled.generated.js": "COMPILED",
   "../set-partitions/src/statistics.compiled.generated.js": "COMPILED",
+  "../words/src/statistics.compiled.generated.js": "COMPILED",
+  "../graphs/src/statistics.compiled.generated.js": "COMPILED",
 };
 
 for (const [path, name] of Object.entries(STUBS)) {

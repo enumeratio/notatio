@@ -462,7 +462,7 @@ export const pairing: MathJSON = and(
 
 const perfectMatchings: EpsilFamily = {
   head: "PerfectMatchings",
-  carrier: "SetPartition",
+  carrier: "PerfectMatching",
   paramCount: 1,
   kind: "blocks",
   params: ["_n"],

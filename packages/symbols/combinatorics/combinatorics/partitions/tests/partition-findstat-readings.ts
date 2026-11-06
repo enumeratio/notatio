@@ -601,6 +601,118 @@ const solitaireOrbit = (l: Partition): { preperiod: number; period: number } => 
   }
 };
 
+/** The least nonnegative integer not in the set. */
+const leastMissing = (values: ReadonlySet<number>): number => {
+  let k = 0;
+  while (values.has(k)) k++;
+  return k;
+};
+const couplesValues: number[] = [0, 0, 0];
+/** Grundy value of one part in "Couples are forever": a part above 2 splits into two parts, a position is the nim-sum of its parts. */
+const couplesValue = (m: number): number => {
+  for (let k = couplesValues.length; k <= m; k++)
+    couplesValues[k] = leastMissing(
+      new Set(Array.from({ length: k - 1 }, (_, a) => couplesValues[a + 1]! ^ couplesValues[k - a - 1]!)),
+    );
+  return couplesValues[m]!;
+};
+const rowRemovalValues = new Map<string, number>();
+/** Grundy value of the game that cuts a row down to any length from the next row's up, searched move by move. */
+const rowRemovalValue = (l: Partition): number => {
+  const known = rowRemovalValues.get(l.join());
+  if (known !== undefined) return known;
+  const options = new Set<number>();
+  l.forEach((part, i) => {
+    for (let kept = l[i + 1] ?? 0; kept < part; kept++)
+      options.add(rowRemovalValue(l.map((p, k) => (k === i ? kept : p)).filter((p) => p > 0)));
+  });
+  const value = leastMissing(options);
+  rowRemovalValues.set(l.join(), value);
+  return value;
+};
+/** The partitions one split away (a part into two) or one merge away (two parts into one), as sorted distinct lists. */
+const distinctPartitions = (lists: number[][]): number[][] => [
+  ...new Map(lists.map((m) => [m.toSorted((a, b) => b - a).join(), m.toSorted((a, b) => b - a)])).values(),
+];
+const splitsOf = (l: Partition): number[][] =>
+  distinctPartitions(
+    l.flatMap((part, i) =>
+      Array.from({ length: Math.floor(part / 2) }, (_, a) => [...l.filter((_, k) => k !== i), a + 1, part - a - 1]),
+    ),
+  );
+const mergesOf = (l: Partition): number[][] =>
+  distinctPartitions(
+    l.flatMap((p, i) => l.slice(i + 1).map((q, k) => [...l.filter((_, m) => m !== i && m !== i + 1 + k), p + q])),
+  );
+/** Every partition reached from this one by the moves. */
+const reachedBy = (l: Partition, moves: (l: Partition) => number[][]): number => {
+  const seen = new Set([l.join()]);
+  for (let frontier: Partition[] = [l]; frontier.length > 0;) {
+    const next = frontier.flatMap(moves).filter((m) => !seen.has(m.join()));
+    frontier = distinctPartitions(next);
+    for (const m of frontier) seen.add(m.join());
+  }
+  return seen.size;
+};
+const chainCounts = new Map<string, number>();
+const splitChains = (l: Partition): number => {
+  const known = chainCounts.get(l.join());
+  if (known !== undefined) return known;
+  const next = splitsOf(l);
+  const chains = next.length === 0 ? 1 : sum(next.map(splitChains));
+  chainCounts.set(l.join(), chains);
+  return chains;
+};
+
+/** Hurwitz's formula (n + c - 2)! n^(c-3) prod p^p / (p-1)!, exactly: the power of n on the side it belongs. */
+const hurwitzNumber = (l: Partition): number => {
+  let [numerator, denominator] = [bigFactorial(sum(l) + l.length - 2), 1n];
+  for (const p of l) [numerator, denominator] = [numerator * BigInt(p) ** BigInt(p), denominator * bigFactorial(p - 1)];
+  if (l.length >= 3) numerator *= BigInt(sum(l)) ** BigInt(l.length - 3);
+  else denominator *= BigInt(sum(l)) ** BigInt(3 - l.length);
+  return Number(numerator / denominator);
+};
+/** The cycles of a permutation of 0..n-1 given as an image list. */
+const cycleCount = (p: readonly number[]): number => {
+  const seen = new Set<number>();
+  let cycles = 0;
+  for (let start = 0; start < p.length; start++) {
+    if (seen.has(start)) continue;
+    cycles++;
+    for (let at = start; !seen.has(at); at = p[at]!) seen.add(at);
+  }
+  return cycles;
+};
+/**
+ * Factorizations of a permutation into transpositions (a b), a < b, with b weakly decreasing as they are peeled off: each one
+ * must split a cycle, since the number of transpositions is the size less the number of cycles.
+ */
+const monotoneFactorizations = (p: readonly number[], steps: number, bound: number): number => {
+  if (steps === 0) return p.every((image, i) => image === i) ? 1 : 0;
+  let total = 0;
+  for (let b = 1; b < bound; b++)
+    for (let a = 0; a < b; a++) {
+      const swapped = p.map((image) => (image === a ? b : image === b ? a : image));
+      if (cycleCount(swapped) === cycleCount(p) + 1) total += monotoneFactorizations(swapped, steps - 1, b + 1);
+    }
+  return total;
+};
+/** C(n) by C(n+1) = sum of C(i) C(n-i). */
+const catalanByRecurrence = (n: number): number => {
+  const c = [1];
+  for (let m = 1; m <= n; m++) c[m] = sum(Array.from({ length: m }, (_, i) => c[i]! * c[m - 1 - i]!));
+  return c[n]!;
+};
+/** The distinct sub-multisets of the parts that do not dominate their own conjugate, by choosing parts and discarding repeats. */
+const nonDominatingSubmultisets = (l: Partition): number => {
+  const distinct = new Set<string>();
+  for (let mask = 0; mask < 1 << l.length; mask++) distinct.add(l.filter((_, i) => (mask >> i) & 1).join());
+  return [...distinct].filter((key) => {
+    const mu = key === "" ? [] : key.split(",").map(Number);
+    return !dominates(mu, conjugate(mu));
+  }).length;
+};
+
 export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   PartRange: (l) => (l.length === 0 ? 0 : l[0]! - l.at(-1)!),
   ContainingRectangleShortSide: (l) => (l.length === 0 ? 0 : Math.min(l[0]!, l.length)),
@@ -834,4 +946,35 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
     return preperiod + period;
   },
   BulgarianSolitairePreperiod: (l) => solitaireOrbit(l).preperiod,
+
+  // The eighth batch.
+  PartitionSize: (l) => sum(l),
+  CouplesAreForeverGrundyValue: (l) => l.reduce((nim, p) => nim ^ couplesValue(p), 0),
+  RowRemovalGrundyValue: rowRemovalValue,
+  OrderedRefinementCount: (l) =>
+    partitionsOf(sum(l)).filter((mu) => {
+      let at = 0;
+      return (
+        l.every((part) => {
+          let block = 0;
+          while (block < part && at < mu.length) block += mu[at++]!;
+          return block === part;
+        }) && at === mu.length
+      );
+    }).length,
+  RefinementCount: (l) => reachedBy(l, splitsOf),
+  CoarseningCount: (l) => reachedBy(l, mergesOf),
+  SingletonRefinementCount: splitChains,
+
+  // The ninth batch.
+  HurwitzNumber: (l) => (l.length === 0 ? 0 : hurwitzNumber(l)),
+  MonotoneHurwitzNumber: (l) => {
+    // By counting every factorization for small sizes; beyond, the cycles factor alone, a p-cycle in C(p-1) ways.
+    if (sum(l) <= 8) {
+      const p = permutationOfCycleType(l);
+      return monotoneFactorizations(p, p.length - l.length, p.length);
+    }
+    return product(l.map((p) => catalanByRecurrence(p - 1)));
+  },
+  NonDominatingSubmultisetCount: nonDominatingSubmultisets,
 };

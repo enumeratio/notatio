@@ -2,12 +2,7 @@
 // `permutations/src/maps.ts`).
 
 import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
-import { inverseRsk } from "./families/rsk-pairs.ts";
-import { evacuation, insertionRows, inversePromotion, promotion } from "./flat.ts";
-
-/** The rows of one tableau of the pair: a pair's contents are two `StandardTableau(rows)`, and
- *  `At` doesn't see through the constructor, but a lambda argument does. */
-const rowsOf = (side: number): MathJSON => ["Apply", ["Function", ["At", "tb", 1], "tb"], ["At", "_raw", side]];
+import { capacityState, evacuation, insertionRows, inversePromotion, inverseRsk, promotion } from "./flat.ts";
 
 /** Rows must be nonempty and weakly shrinking: the carrier also holds the odd tableaux other families draw. */
 const tableauGuard: MathJSON = [
@@ -25,6 +20,98 @@ const tableauGuard: MathJSON = [
     ],
     0,
   ],
+];
+
+/** Whether part `side` of the pair `_raw` is a standard tableau: entries 1..n each once, rows and columns increasing,
+ *  no empty row, and rows weakly shrinking (checked first in each column test, so the column read stays in range).
+ *  Each part is bound inside its own check: the interpreter leaves a predicate undecided when it reads a name bound
+ *  by an enclosing `bind` of another part. */
+const standardRows = (side: number): MathJSON => bind("sr_t", at(side), standardBody("sr_t"), "list<list<integer>>");
+
+const standardBody = (t: string): MathJSON => {
+  const row = (i: MathJSON): MathJSON => at(i, t);
+  const cell = (i: MathJSON, j: MathJSON): MathJSON => at(j, row(i));
+  const count = (over: MathJSON, test: MathJSON, variable: string): MathJSON => [
+    "Count",
+    ["Filter", over, ["Function", test, variable]],
+  ];
+  // The entries are 1..n each once when each of 1..n occurs exactly once among the n entries (`Sort` doesn't compile).
+  const onceEach: MathJSON = bind(
+    "sr_f",
+    ["Flatten", t],
+    [
+      "Equal",
+      count(
+        ["Range", 1, ["Length", "sr_f"], 1],
+        ["Equal", count("sr_f", ["Equal", "sr_x", "sr_v"], "sr_x"), 1],
+        "sr_v",
+      ),
+      ["Length", "sr_f"],
+    ],
+    "list<integer>",
+  );
+  return [
+    "And",
+    onceEach,
+    ["Equal", count(["Range", 1, ["Length", t], 1], ["LessEqual", ["Length", row("sr_i")], 0], "sr_i"), 0],
+    [
+      "Equal",
+      count(
+        ["Range", 1, ["Length", t], 1],
+        [
+          "Greater",
+          count(
+            ["Range", 1, ["Subtract", ["Length", row("sr_i")], 1], 1],
+            ["GreaterEqual", cell("sr_i", "sr_j"), cell("sr_i", ["Add", "sr_j", 1])],
+            "sr_j",
+          ),
+          0,
+        ],
+        "sr_i",
+      ),
+      0,
+    ],
+    [
+      "Equal",
+      count(
+        ["Range", 1, ["Subtract", ["Length", t], 1], 1],
+        [
+          "If",
+          ["Greater", ["Length", row(["Add", "sr_i", 1])], ["Length", row("sr_i")]],
+          "True",
+          [
+            "Greater",
+            count(
+              ["Range", 1, ["Length", row(["Add", "sr_i", 1])], 1],
+              ["GreaterEqual", cell("sr_i", "sr_k"), cell(["Add", "sr_i", 1], "sr_k")],
+              "sr_k",
+            ),
+            0,
+          ],
+        ],
+        "sr_i",
+      ),
+      0,
+    ],
+  ];
+};
+
+/** The row lengths of part `side` of the pair `_raw`. */
+const rowLengths = (side: number): MathJSON =>
+  bind(
+    "rl_t",
+    at(side),
+    forEach(["Range", 1, ["Length", "rl_t"], 1], ["Length", at("rl_i", "rl_t")], "rl_i"),
+    "list<list<integer>>",
+  );
+
+/** `_raw` is a valid RSK image: two standard tableaux of one shape. Outside it inverse RSK has no permutation. */
+// Staged with `If`, which is lazy: `And` evaluates every operand, and a read past the rows of a mismatched tableau is an error.
+const rskImageGuard: MathJSON = [
+  "If",
+  ["Equal", rowLengths(1), rowLengths(2)],
+  ["And", standardRows(1), standardRows(2)],
+  "False",
 ];
 
 /** The number of entries. */
@@ -278,12 +365,20 @@ export const TABLEAUX_MAPS: readonly CombinatorialMap[] = [
     name: "ToPermutation",
     from: "standard_tableau_pair",
     to: "permutation",
-    body: bind(
-      "pp",
-      rowsOf(1),
-      bind("qq", rowsOf(2), inverseRsk("pp", "qq", ["Count", ["Flatten", "pp"]]) as MathJSON, "list<list<integer>>"),
-      "list<list<integer>>",
+    // The pair is read bare (`argumentParts`) and typed as its rows (`compiledFrom`): the carrier alias has no compiled type.
+    body: lets(
+      [
+        ["tp_pp", at(1), "list<list<integer>>"],
+        ["tp_qq", at(2), "list<list<integer>>"],
+        ["tp_n", ["Length", ["Flatten", "tp_pp"]], "integer"],
+        ["tp_p", capacityState("tp_a", "tp_pp", "tp_n"), "list<integer>"],
+        ["tp_q", capacityState("tp_b", "tp_qq", "tp_n"), "list<integer>"],
+      ],
+      inverseRsk("tp_r", "tp_p", "tp_q", "tp_n"),
     ),
+    guard: rskImageGuard,
+    argumentParts: ["StandardTableau", "StandardTableau"],
+    compiledFrom: "tuple<list<list<integer>>, list<list<integer>>>",
     summary: "The permutation an RSK pair comes from: inverse RSK.",
     note: "Unbumps the cell holding n in Q, then n − 1, and so on, each time reading a letter off the first row of P.",
   },

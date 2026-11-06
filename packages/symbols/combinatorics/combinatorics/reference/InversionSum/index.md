@@ -8,13 +8,18 @@ catalog:
     identity: St000055
     url: https://www.findstat.org/St000055
     on: Permutation
+  - system: findstat
+    identity: St000347
+    url: https://www.findstat.org/St000347
+    on: BinaryWord
 statOn:
+  - BinaryWord
   - Permutation
 signatures:
   - call: InversionSum(p)
     description: The sum of j - i over the inversions i < j.
     library: enumeratio-combinatorics
-    type: (list<integer> | permutation) -> number
+    type: (binary_word | list<integer> | permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

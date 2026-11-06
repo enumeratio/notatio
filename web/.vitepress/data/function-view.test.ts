@@ -28,3 +28,12 @@ test("a head with no numeric result has no Plot section", () => {
   expect(plotSectionOf(functionViewFor("PrimeQ"))).toBeUndefined();
   expect(plotSectionOf(undefined)).toBeUndefined();
 });
+
+test("a head the complex emitter cannot lower is plotted over its real slice only (S#4)", () => {
+  const heads = (h: string) => plotSectionOf(functionViewFor(h))?.panels.map((p) => p.value.split("(")[0]);
+  for (const head of ["BesselY", "AiryAi"]) expect(heads(head)).toEqual(["Plot"]);
+  // The ones it lowers keep the portrait, among them the heads the emitter was widened to (BL-335).
+  expect(heads("Gamma")).toEqual(["ComplexPlot", "Plot"]);
+  for (const head of ["BesselJ", "Erfc", "LambertW", "Log", "Sinc", "Pochhammer"])
+    expect(heads(head), head).toEqual(["ComplexPlot", "Plot"]);
+});

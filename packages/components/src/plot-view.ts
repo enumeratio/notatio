@@ -265,6 +265,15 @@ export class PlotView {
       const scope = loaded.scope();
       Object.assign(scope, this.host.bindings);
       const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
+      // A symbol that is neither the plot variable nor bound would sample to nothing: say so.
+      const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
+      if (unbound.length > 0) {
+        this.#clear();
+        const names = unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
+        this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${unbound.length > 1 ? "have" : "has"} no value.</span>`;
+        this.host.requestUpdate();
+        return;
+      }
       // Each curve is code the kernel compiled, sampled per t: vastly faster than a subs()+N()
       // per sample, so a 1000-point sweep or an animated slider stays smooth.
       const at =
@@ -633,6 +642,13 @@ export class PlotView {
     if (this.#window !== undefined) this.#show(undefined);
   };
 
+  /** `0` returns a zoomed plot to its whole range, as a double-click does. */
+  #onKeyDown = (e: KeyboardEvent): void => {
+    if (e.key !== "0" || this.#window === undefined) return;
+    e.preventDefault();
+    this.#show(undefined);
+  };
+
   #onPointerMove = (e: PointerEvent): void => {
     if (this.#dragTo(e)) return;
     if (this.#polar || this.#field || this.#diagram || this.#charted) return;
@@ -654,7 +670,9 @@ export class PlotView {
   render(): unknown {
     return html`<span
       class="graphics-box-plot"
+      tabindex=${this.#zoomable ? "0" : nothing}
       style=${this.#window === undefined ? nothing : "cursor:grab"}
+      @keydown=${this.#onKeyDown}
       @pointermove=${this.#onPointerMove}
       @pointerleave=${this.#onPointerLeave}
       @pointerdown=${this.#onPointerDown}

@@ -4,7 +4,7 @@
 // current. `ConjugacyClassSize` is also defined on `Permutation`, where its record is curated, so
 // `omitHeads` keeps this generator out of that folder. `LargestPart` and `PartsEqualOne` are also
 // defined on other carriers (plane partitions, compositions), whose examples are written by hand
-// into the record, so they are `curatedHeads`.
+// into the record, so they are `curatedHeads`; so is `WeightedSize`, also defined on standard tableaux.
 
 import { fileURLToPath } from "node:url";
 import type { GeneratedEntries } from "@enumeratio/entry/node";
@@ -27,7 +27,7 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: PARTITIONS_FRONTIER,
   samples: SAMPLES,
   declareArea: declarePartitions,
-  curatedHeads: ["LargestPart", "PartsEqualOne"],
+  curatedHeads: ["LargestPart", "PartsEqualOne", "WeightedSize"],
   dir: REFERENCE_DIR,
   omitHeads: ["ConjugacyClassSize"],
 });

@@ -22,11 +22,21 @@ test("a few objects per new carrier", () => {
   expect(readObject("OrderedTree", "[[],[[]]]")).toEqual(["OrderedTree", L(L(), L(L()))]);
   expect(readObject("StandardTableau", "[[1,3],[2]]")).toEqual(["StandardTableau", L(L(1, 3), L(2))]);
   expect(readObject("ParkingFunction", "[1,1,2]")).toEqual(["ParkingFunction", L(1, 1, 2)]);
+  expect(readObject("PlanePartition", "[[2,1],[1]]")).toEqual(["PlanePartition", L(L(2, 1), L(1))]);
   expect(readObject("SetComposition", "[{2},{1,3}]")).toEqual(["SetComposition", L(L(2), L(1, 3))]);
   expect(readObject("AlternatingSignMatrix", "[[0,1,0],[1,-1,1],[0,1,0]]")).toEqual([
     "AlternatingSignMatrix",
     L(L(0, 1, 0), L(1, -1, 1), L(0, 1, 0)),
   ]);
+  expect(readObject("SkewPartition", "[[3,1],[1]]")).toEqual(["SkewPartition", L(L(3, 1), L(1))]);
+  expect(readObject("SkewPartition", "[[2],[]]")).toEqual(["SkewPartition", L(L(2), L())]);
+  // Vertices count from 1 here and from 0 in the crawl; each edge is [lower, higher], the edges in order.
+  expect(readObject("LabeledGraph", "([(0,1),(0,2),(1,2)],3)")).toEqual([
+    "LabeledGraph",
+    ["Tuple", 3, L(L(1, 2), L(1, 3), L(2, 3))],
+  ]);
+  expect(readObject("LabeledGraph", "([(2,0),(1,2)],4)")).toEqual(["LabeledGraph", ["Tuple", 4, L(L(1, 3), L(2, 3))]]);
+  expect(readObject("LabeledGraph", "([],0)")).toEqual(["LabeledGraph", ["Tuple", 0, L()]]);
 });
 
 test("the empty objects", () => {
@@ -37,8 +47,8 @@ test("the empty objects", () => {
   expect(readObject("StandardTableau", "[]")).toEqual(["StandardTableau", L()]);
 });
 
-test("a perfect matching is read as the set partition of its pairs", () => {
-  expect(readObject("PerfectMatching", "[(1,4),(2,3)]")).toEqual(["SetPartition", L(L(1, 4), L(2, 3))]);
+test("a perfect matching is read as its pairs", () => {
+  expect(readObject("PerfectMatching", "[(1,4),(2,3)]")).toEqual(["PerfectMatching", L(L(1, 4), L(2, 3))]);
 });
 
 test("a text that isn't the carrier's throws, and an unread carrier is undefined", () => {
@@ -58,6 +68,11 @@ test("sizes are what the collections grow by", () => {
   expect(objectSize("StandardTableau", "[[1,3],[2]]")).toBe(3);
   expect(objectSize("PerfectMatching", "[(1,4),(2,3)]")).toBe(4);
   expect(objectSize("AlternatingSignMatrix", "[[0,1],[1,0]]")).toBe(2);
+  expect(objectSize("PlanePartition", "[[1],[1]]")).toBe(2);
+  expect(objectSize("PlanePartition", "[[2,1]]")).toBe(3);
+  expect(objectSize("SkewPartition", "[[3,1],[1]]")).toBe(3);
+  expect(objectSize("LabeledGraph", "([(0,1),(0,2),(1,2)],3)")).toBe(3);
+  expect(objectSize("LabeledGraph", "([],0)")).toBe(0);
 });
 
 interface Snapshot {
@@ -100,7 +115,10 @@ const FAMILY: Readonly<Record<string, [head: string, argument: (size: number) =>
   ParkingFunction: ["ParkingFunctions", (n) => n],
   PerfectMatching: ["PerfectMatchings", (n) => n / 2],
   AlternatingSignMatrix: ["AlternatingSignMatrices", (n) => n],
+  PlanePartition: ["PlanePartitions", (n) => n],
   SetComposition: ["SetCompositions", (n) => n],
+  SkewPartition: ["SkewPartitions", (n) => n],
+  LabeledGraph: ["LabeledGraphs", (n) => n],
 };
 
 test("every snapshot object of the new carriers is an element of our collection of its size", () => {
@@ -124,8 +142,9 @@ test("every snapshot object of the new carriers is an element of our collection 
       const size = objectSize(carrier, text)!;
       if (size > 5) continue;
       let value = readObject(carrier, text) as [string, unknown];
-      // AlternatingSignMatrices yields the bare rows.
-      if (carrier === "AlternatingSignMatrix") value = value[1] as never;
+      // AlternatingSignMatrices, PlanePartitions and SkewPartitions yield the bare contents.
+      if (carrier === "AlternatingSignMatrix" || carrier === "PlanePartition" || carrier === "SkewPartition")
+        value = value[1] as never;
       const member = ce.box(["Element", value, [head, argument(size)]] as never).evaluate().json;
       expect(member, `${carrier} ${text}`).toBe("True");
     }

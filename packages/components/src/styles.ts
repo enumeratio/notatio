@@ -23,6 +23,9 @@ graphics-box.inline-figure { display: inline-flex; flex: none; width: auto; vert
 graphics-box.inline-figure .graphics-box-figure { margin: 0; border: 0; background: none; }
 graphics-box.inline-figure .graphics-box-layers { background: none !important; }
 
+/* A plot whose expression names a symbol with no value says so, in place of a blank frame. */
+.graphics-box-unbound { display: block; padding: 0.6rem 0.8rem; font-size: 0.85rem; line-height: 1.4; color: var(--vp-c-text-2, #666); }
+
 /* Plots are block figures sized to a max width; the viewBox drives the ratio. */
 graphics-box[data-plot] { display: block; flex: 0 1 auto; width: auto; line-height: 0; position: relative; }
 graphics-box[data-plot] .graphics-box-plot { display: inline-block; max-width: 100%; }
@@ -76,6 +79,8 @@ notatio-in math-field {
 /* The field and its play button (when shown) form one input group: no gap, one
    shared seam -- the field's right corner only flattens when something sits there. */
 .notatio-in-row { display: flex; align-items: stretch; position: relative; }
+/* An empty typeset input is still a target to click: it keeps a line's height and a little width. */
+.notatio-in-row .notatio-static.is-editable { flex: 1; min-width: 4rem; min-height: 1.6em; cursor: text; }
 .notatio-in-row math-field {
   flex: 1;
   min-width: 0;

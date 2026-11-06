@@ -56,5 +56,11 @@ export const rskRecordingKernel = (word: readonly number[]): number[][] | undefi
   return pair && copy(pair.recording);
 };
 
+/** Both tableaux, as the pair of their rows. */
+export const rskKernel = (word: readonly number[]): [number[][], number[][]] | undefined => {
+  const pair = rskOf(word);
+  return pair && [copy(pair.insertion), copy(pair.recording)];
+};
+
 export const rskShapeKernel = (word: readonly number[]): number[] | undefined =>
   rskOf(word)?.insertion.map((row) => row.length);

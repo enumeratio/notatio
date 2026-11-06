@@ -285,6 +285,12 @@ export class Sweep {
     this.host.onState();
   }
 
+  /** Start because the control scrolled into view: not for a reader who asked for reduced motion. */
+  autoStart(): void {
+    if (typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    this.start();
+  }
+
   stop(): void {
     if (!this.#playing) return;
     this.#playback.stop();

@@ -21,6 +21,7 @@ import { loadEngine, loadMarkup } from "./mathlive.ts";
 import type { PlotInfo } from "./out-engine.ts";
 import { ensureStyles } from "./styles.ts";
 import {
+  AS_TYPED,
   boundName,
   collectErrors,
   debug,
@@ -1029,8 +1030,12 @@ export class NotatioOut extends LitElement {
     super.disconnectedCallback();
   }
 
-  /** What copying this Out puts on the clipboard: its InputForm, and its LaTeX. */
-  get expression(): { inputForm: string; latex: string } {
+  /**
+   * What copying this Out puts on the clipboard: its InputForm, and its LaTeX. Not `expression`:
+   * that names an element that stands for MathJSON (`isExpressive`), which a scope would adopt
+   * as an argument and move out of the page.
+   */
+  get copyForms(): { inputForm: string; latex: string } {
     return { inputForm: this._input, latex: this._latex };
   }
 
@@ -1058,9 +1063,7 @@ export class NotatioOut extends LitElement {
       const [engine, here] = await Promise.all([loadEngine(), import("./out-engine.ts")]);
       const source = this.value ?? "";
       const json =
-        this.format === "latex"
-          ? engine.parse(source, { form: "raw" }).json
-          : here.cellJson(engine, this.format, source);
+        this.format === "latex" ? engine.parse(source, AS_TYPED).json : here.cellJson(engine, this.format, source);
       this._input = here.inputFormOf(json);
     } catch {
       this._input = "";

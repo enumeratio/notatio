@@ -113,16 +113,16 @@ type Json = MathJsonExpression;
  */
 function complexOf(node: Json | undefined): [number, number] | undefined {
   if (node === undefined) return undefined;
-  const n = numOf(node);
+  const n = realOf(node);
   if (n !== undefined) return [n, 0];
-  // `i` is the symbol before the engine canonicalises it, `ImaginaryUnit` after.
+  // `i` (or Wolfram's `I`) is the symbol before the engine canonicalises it, `ImaginaryUnit` after.
   const sym = symOf(node);
-  if (sym === "ImaginaryUnit" || sym === "i") return [0, 1];
+  if (sym === "ImaginaryUnit" || sym === "i" || sym === "I") return [0, 1];
   const head = headOf(node);
   const ops = opsOf(node);
   if (head === "Complex" && ops.length === 2) {
-    const re = numOf(ops[0]);
-    const im = numOf(ops[1]);
+    const re = realOf(ops[0]);
+    const im = realOf(ops[1]);
     return re !== undefined && im !== undefined ? [re, im] : undefined;
   }
   if (head === "Negate" && ops.length === 1) {
@@ -195,14 +195,61 @@ export function toJsonData(node: Json): unknown {
 
 const json = (node: Json): string => JSON.stringify(toJsonData(node));
 
-/** A Wolfram iterator `(x, a, b)`: the variable and its range, or undefined. */
+/** A real constant as a number: a literal, or arithmetic over `Pi` and `ExponentialE` (`2*Pi`); else undefined. */
+function realOf(node: Json | undefined): number | undefined {
+  if (node === undefined) return undefined;
+  const n = numOf(node);
+  if (n !== undefined) return Number.isFinite(n) ? n : undefined;
+  const sym = symOf(node);
+  if (sym === "Pi") return Math.PI;
+  if (sym === "ExponentialE") return Math.E;
+  const ops = opsOf(node).map(realOf);
+  if (ops.length === 0 || ops.some((v) => v === undefined)) return undefined;
+  const [a, b] = ops as number[];
+  switch (headOf(node)) {
+    case "Negate":
+      return ops.length === 1 ? -a! : undefined;
+    case "Add":
+      return (ops as number[]).reduce((sum, v) => sum + v, 0);
+    case "Multiply":
+      return (ops as number[]).reduce((product, v) => product * v, 1);
+    case "Subtract":
+      return ops.length === 2 ? a! - b! : undefined;
+    case "Divide":
+      return ops.length === 2 && b !== 0 ? a! / b! : undefined;
+    default:
+      return undefined;
+  }
+}
+
+/** A range's end as the attribute text: a constant as its plain decimal (a reader of `domain` takes `Number`), else Epsil. */
+const endOf = (node: Json): string => {
+  const value = realOf(node);
+  return value === undefined ? epsil(node) : String(value);
+};
+
+/** A Wolfram iterator `(x, a, b)`, or `{x, a, b}` as Wolfram writes it: the variable and its range, or undefined. */
 function iterator(node: Json | undefined): { variable?: string; range?: string } {
-  const parts = tupleOf(node);
+  const parts = tupleOf(node) ?? (headOf(node) === "Set" ? opsOf(node) : undefined);
   if (parts === undefined) return {};
   const [first, lo, hi] = parts;
   const variable = symOf(first);
-  const range = lo !== undefined && hi !== undefined ? `${epsil(lo)},${epsil(hi)}` : undefined;
+  const range = lo !== undefined && hi !== undefined ? `${endOf(lo)},${endOf(hi)}` : undefined;
   return { variable, range };
+}
+
+/**
+ * A complex iterator `(z, c0, c1)` or `{z, c0, c1}`: its variable and, when the corners are numbers
+ * that span a real rectangle (`re0 < re1` and `im0 < im1`), that rectangle as `[re0, re1, im0, im1]`.
+ * Corners that are not (reversed, equal, symbolic) give no rectangle, and the view keeps its default.
+ */
+function complexIterator(node: Json | undefined): { variable?: string; rect?: [number, number, number, number] } {
+  const parts = tupleOf(node) ?? (headOf(node) === "Set" ? opsOf(node) : undefined);
+  const variable = parts === undefined ? symOf(node) : symOf(parts[0]);
+  const lo = complexOf(parts?.[1]);
+  const hi = complexOf(parts?.[2]);
+  const spans = lo !== undefined && hi !== undefined && lo[0] < hi[0] && lo[1] < hi[1];
+  return { variable, ...(spans && { rect: [lo[0], hi[0], lo[1], hi[1]] as [number, number, number, number] }) };
 }
 
 /** Attributes for a function of one variable over an iterator. */
@@ -754,8 +801,13 @@ const COMPLEX_PLOT_SYMBOL: VisualSymbol = {
   attributes: (ops) => {
     const out: Record<string, string> = {};
     if (ops[0] !== undefined) out.value = epsil(ops[0]);
-    const variable = symOf(ops[1]) ?? iterator(ops[1]).variable;
+    const { variable, rect } = complexIterator(ops[1]);
     if (variable) out.var = variable;
+    // The view is centered on the rectangle and as tall as its longer side, so a square frame shows all of it.
+    if (rect) {
+      out.center = `${(rect[0] + rect[1]) / 2},${(rect[2] + rect[3]) / 2}`;
+      out.extent = String(Math.max(rect[1] - rect[0], rect[3] - rect[2]));
+    }
     return out;
   },
   options: { ColorFunction: colorFunction },
@@ -771,12 +823,9 @@ const COMPLEX_PLOT_3D_SYMBOL: VisualSymbol = {
   attributes: (ops) => {
     const out: Record<string, string> = {};
     if (ops[0] !== undefined) out.value = epsil(ops[0]);
-    const parts = tupleOf(ops[1]);
-    const variable = symOf(ops[1]) ?? symOf(parts?.[0]);
+    const { variable, rect } = complexIterator(ops[1]);
     if (variable) out.var = variable;
-    const lo = complexOf(parts?.[1]);
-    const hi = complexOf(parts?.[2]);
-    if (lo && hi) out.domain = `${lo[0]},${hi[0]},${lo[1]},${hi[1]}`;
+    if (rect) out.domain = rect.join(",");
     return out;
   },
   options: { ColorFunction: colorFunction },
@@ -1237,6 +1286,16 @@ export function renderingOf(expr: Json, inManipulate = false): Rendering | undef
     }
   }
   return render(expr, inManipulate);
+}
+
+/**
+ * An expression with controls in it as the `DynamicModule` that scopes them: the readouts read the
+ * controls' variables as wildcards, so a structural tree built from it follows its controls as
+ * `renderingOf`'s does. An expression with no controls is returned as it is.
+ */
+export function scopeOf(expr: Json): Json {
+  const names = controlNames(expr);
+  return names.size === 0 ? expr : (["DynamicModule", slottedExceptDeclarations(expr, names)] as unknown as Json);
 }
 
 /**

@@ -120,11 +120,24 @@ test("the axis is the last required numeric argument unless the record names one
 });
 
 test("a head the complex emitter cannot lower is the real slice, with the reason", () => {
-  const sig: FunctionSignature = { head: "F", parameters: [{ name: "z", type: "complex" }], returns: "number" };
-  expect(functionViewOf(sig)?.views.map((v) => v.head)).toEqual(["ComplexPlot", "Plot"]);
-  const reduced = functionViewOf(sig, undefined, { lowers: () => false });
+  const z: FunctionSignature["parameters"] = [{ name: "z", type: "complex" }];
+  // Gamma has a complex lowering; BesselY (integer orders are limits) has none.
+  expect(functionViewOf({ head: "Gamma", parameters: z, returns: "number" })?.views.map((v) => v.head)).toEqual([
+    "ComplexPlot",
+    "Plot",
+  ]);
+  const unlowered = functionViewOf({
+    head: "BesselY",
+    parameters: [{ name: "n", type: "real" }, ...z],
+    returns: "number",
+  });
+  expect(unlowered?.views.map((v) => v.head)).toEqual(["Plot"]);
+  expect(unlowered?.reason).toMatch(/cannot lower/);
+  // The context overrides the emitter.
+  const reduced = functionViewOf({ head: "Gamma", parameters: z, returns: "number" }, undefined, {
+    lowers: () => false,
+  });
   expect(reduced?.views.map((v) => v.head)).toEqual(["Plot"]);
-  expect(reduced?.reason).toMatch(/cannot lower/);
 });
 
 test("a result that is not a number has no view", () => {

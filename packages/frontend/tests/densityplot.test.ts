@@ -52,7 +52,7 @@ function rasterOf(box: BoxNode): { colors: string[][]; range: unknown } {
 test("one cell per sample, in one raster on the default viewBox", () => {
   const { grid, xs, ys } = rampGrid(5);
   const s = densitySvg(grid, xs, ys, { axes: false });
-  expect(s).toContain('viewBox="0 0 340 200"');
+  expect(s).toContain('viewBox="0 0 340 326"'); // a 292 px square plot area: 12 + 292 + 22 tall
   expect(count(s, "image")).toBe(1);
   const [image] = imagesIn(s);
   expect([image!.width, image!.height]).toEqual([5, 5]);
@@ -61,8 +61,8 @@ test("one cell per sample, in one raster on the default viewBox", () => {
 test("the raster is the plot area, and its rows run bottom to top", () => {
   const { grid, xs, ys } = rampGrid(2);
   const s = densitySvg(grid, xs, ys, { axes: false });
-  // 340 - 38 - 10 = 292 wide, 200 - 12 - 22 = 166 tall.
-  expect(s).toContain('x="38" y="12" width="292" height="166"');
+  // 340 - 38 - 10 = 292 wide, and as tall: the default aspect ratio is 1.
+  expect(s).toContain('x="38" y="12" width="292" height="292"');
   // z = x + y: the least value is at the bottom left, the greatest at the top right.
   const [image] = imagesIn(s);
   expect(image!.pixels[1]![0]).toEqual([0x44, 0x01, 0x54, 255]);

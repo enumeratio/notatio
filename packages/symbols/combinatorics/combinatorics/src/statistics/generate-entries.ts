@@ -72,6 +72,8 @@ export interface Sample {
   /** Only for the definitions on this carrier, when the area has several. */
   readonly on?: string;
   readonly list: Nested;
+  /** The carrier's contents when they are not `list` read as nested lists: a tuple, say. */
+  readonly contents?: MathJSONIn;
   readonly caption: string;
 }
 
@@ -80,6 +82,8 @@ export interface AreaEntriesOptions {
   readonly subjectName: string;
   /** The human name of the carrier, as a reference `domain` reads. */
   readonly domain: string;
+  /** What to call a carrier's subject and statistics where it differs from the area's (`subjectName`, `domain`). */
+  readonly carrierNames?: Readonly<Record<string, { readonly subjectName: string; readonly domain: string }>>;
   /** This area's definitions (one `on: carrier` kernel's worth). */
   readonly definitions: readonly Definition[];
   /** This area's frontier signatures, if any. */
@@ -219,7 +223,7 @@ export function areaStatisticsEntries(options: AreaEntriesOptions): {
   /** Every subject a head accepts for one sample: the carrier, and — for a definition also
    *  meaningful on a bare list (`alsoOnList`) — the bare list too. */
   function subjectsFor(definition: Definition, sample: Sample): unknown[] {
-    const value = listOf(sample.list);
+    const value = sample.contents ?? listOf(sample.list);
     const carrierValue = [definition.on, value];
     return definition.alsoOnList === true ? [carrierValue, value] : [carrierValue];
   }
@@ -261,10 +265,11 @@ export function areaStatisticsEntries(options: AreaEntriesOptions): {
           `A separate definition exists for \`${d.on}\` (${d.summary}) but is not the one declared: one head, one owner.`,
       ),
     ];
+    const names = options.carrierNames?.[definition.on] ?? { subjectName, domain };
     return {
       name: definition.head,
-      domain,
-      signature: `${definition.head}(${subjectName})`,
+      domain: names.domain,
+      signature: `${definition.head}(${names.subjectName})`,
       summary: definition.summary,
       details,
       examples: [...withIds(examplesFor(definition)), ...findstatExamples(definition)],

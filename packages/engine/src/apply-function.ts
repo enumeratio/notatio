@@ -89,24 +89,6 @@ function bindings(body: Expr, params: readonly Expr[], args: readonly Expr[]): R
   return names.length === args.length ? Object.fromEntries(names.map((name, i) => [name!, args[i]!])) : undefined;
 }
 
-/** Whether calling the `Function` literal `f` on `args` would let a `Function` inside it capture a
- *  symbol `args` leave free (`Function(y, Function(x, y^x))` called on `x`), which `applyFunction`
- *  renames around. */
-export function capturesArguments(f: Expr, args: readonly Expr[]): boolean {
-  const [body, ...params] = f.operator === "Function" ? operandsOf(f) : [];
-  if (body === undefined || bindings(body, params, args) === undefined) return false;
-  const free = new Set(args.flatMap((arg) => [...freeSymbols(arg)]));
-  const captures = (expr: Expr): boolean => {
-    if (expr.operator === "Function") {
-      const [inner, ...own] = operandsOf(expr) as [Expr, ...Expr[]];
-      if (own.some((param) => free.has(paramName(param) ?? ""))) return true;
-      return captures(inner);
-    }
-    return operandsOf(expr).some(captures);
-  };
-  return captures(body);
-}
-
 /**
  * Call `f` (a `Function` literal, a head, or any callable expression) on `args`.
  *

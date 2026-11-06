@@ -1,5 +1,6 @@
 import { parseExpression } from "@enumeratio/formats/expression";
 import { expect, test } from "vite-plus/test";
+import { scopeOf } from "../src/symbols.ts";
 import { type StructuralNode, structuralOf, tagOf, toVNode, vdomOf } from "../src/vdom.ts";
 
 /** A vnode factory that keeps everything, for looking at. */
@@ -93,4 +94,20 @@ test("options ride as props in the structural tree, a node-valued one as a slott
   });
   const inset = tree.children?.find((c): c is StructuralNode => typeof c !== "string" && c.attributes.slot === "inset");
   expect(inset?.tag).toBe("notatio-plot");
+});
+
+test("controls in an expression scope it: the structural tree is a module whose readouts read the wildcard", () => {
+  const { json } = parseExpression("Row([Animator(t, (0, 1, 0.25)), Dynamic(Sin(Pi * t))])");
+  const tree = structuralOf(scopeOf(json));
+  expect(tree.tag).toBe("dynamic-module-box");
+  const find = (node: StructuralNode | string, tag: string): StructuralNode | undefined =>
+    typeof node === "string"
+      ? undefined
+      : node.tag === tag
+        ? node
+        : node.children?.map((c) => find(c, tag)).find((n) => n !== undefined);
+  expect(find(tree, "dynamic-box")?.attributes.value).toBe("sin(pi * _t)");
+  expect(find(tree, "animator-box")).toBeDefined();
+  const plain = parseExpression("Sin(Pi * t)").json;
+  expect(scopeOf(plain)).toBe(plain);
 });

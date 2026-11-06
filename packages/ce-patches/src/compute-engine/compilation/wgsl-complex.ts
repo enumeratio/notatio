@@ -111,6 +111,61 @@ const UNARY: Record<string, string> = {
   Gamma: "cgamma",
   Negate: "cneg",
   Conjugate: "cconj",
+  Tan: "ctan",
+  Tanh: "ctanh",
+  Sinc: "csinc",
+  // Log is base 10 (compute-engine's default); Ln is the natural one.
+  Log: "clog10",
+  Abs: "cabs",
+  Re: "cre",
+  Real: "cre",
+  Im: "cim",
+  Imaginary: "cim",
+  Arg: "carg",
+  Argument: "carg",
+  // ln Γ on the branch analytic off the negative real axis, and the principal log of Γ itself.
+  LogGamma: "cloggamma",
+  GammaLn: "cgammaln",
+  Digamma: "cdigamma",
+  Trigamma: "ctrigamma",
+  DirichletEta: "cdirichletEta",
+  DirichletBeta: "cdirichletBeta",
+  Erf: "cerf",
+  Erfc: "cerfc",
+  Erfi: "cerfi",
+  FresnelS: "cfresnelS",
+  FresnelC: "cfresnelC",
+  SinIntegral: "csi",
+  CosIntegral: "cci",
+  SinhIntegral: "cshi",
+  CoshIntegral: "cchi",
+  ExpIntegralEi: "cei",
+  LogIntegral: "cli",
+  // The principal branch only: a second argument (the branch) is not lowered.
+  LambertW: "clambertw",
+  EllipticK: "cellipticK",
+  EllipticE: "cellipticE",
+  BarnesG: "cbarnesG",
+  LogBarnesG: "clogBarnesG",
+  // AGM(z) is AGM(1, z), by the right choice of root (Wolfram's values across the negative reals).
+  AGM: "cagm1",
+};
+
+/** Two-argument heads, by the `zetaWGSL` function they call, arguments in the head's order. */
+const BINARY: Record<string, string> = {
+  Log: "clogBase",
+  Pochhammer: "cpochhammer",
+  Binomial: "cbinomial",
+  Choose: "cbinomial",
+  EllipticF: "cellipticF",
+  BesselJ: "cbesselJ",
+  BesselI: "cbesselI",
+  AGM: "cagm",
+};
+
+/** Three-argument heads, by the `zetaWGSL` function they call. */
+const TERNARY: Record<string, string> = {
+  Hypergeometric1F1: "chyp1f1",
 };
 
 class Emitter {
@@ -233,8 +288,13 @@ class Emitter {
         if (kernel && args.length === kernel.arity) {
           return `${kernel.fn}(${args.map((_, i) => sub(i)).join(", ")})`;
         }
-        const unary = UNARY[head] ?? UNARY[capitalize(head)];
+        const name = UNARY[head] || BINARY[head] || TERNARY[head] ? head : capitalize(head);
+        const unary = UNARY[name];
         if (unary && args.length === 1) return `${unary}(${sub(0)})`;
+        const binary = BINARY[name];
+        if (binary && args.length === 2) return `${binary}(${sub(0)}, ${sub(1)})`;
+        const ternary = TERNARY[name];
+        if (ternary && args.length === 3) return `${ternary}(${sub(0)}, ${sub(1)}, ${sub(2)})`;
       }
     }
     throw new Error(`unsupported ${head}/${args.length}`);

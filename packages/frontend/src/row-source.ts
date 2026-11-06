@@ -99,6 +99,9 @@ function checkAborted(signal: AbortSignal | undefined): void {
   if (signal?.aborted) throw signal.reason ?? new DOMException("The rows call was aborted.", "AbortError");
 }
 
+/** The glyph column's width in em: room for a shape to read, and it scales down to whatever it gets. */
+const GLYPH_EM = 8;
+
 /** A row on one line: a long permutation must not wrap into a bracket layout. */
 const oneLine = (json: Json): string =>
   serializeEpsil(normalizeInputForm(json), { margin: Number.POSITIVE_INFINITY, softMargin: Number.POSITIVE_INFINITY });
@@ -197,7 +200,7 @@ export class CollectionRows implements RowSource {
     }
     const glyph = spec.glyph as GlyphKind | undefined;
     this.columns = [
-      ...(glyph !== undefined && GLYPH_KINDS.has(glyph) ? [{ label: "", width: 3 }] : []),
+      ...(glyph !== undefined && GLYPH_KINDS.has(glyph) ? [{ label: "", width: GLYPH_EM }] : []),
       { label: "element", width: 14 },
       ...this.#cols.map((c) => ({ label: c.label, width: 6, numeric: true })),
     ];
@@ -497,7 +500,8 @@ export class CollectionRows implements RowSource {
         const svg = this.#glyph(this.#representations(elt).bare);
         out.push(svg === "" ? "" : tag(svg, "Glyph"));
       } else if (c === (hasGlyph ? 1 : 0)) {
-        out.push(text(oneLine(elt.json)));
+        // The row as the carrier holds it (`[5,2,1]`), not under its constructor, which every row repeats.
+        out.push(text(oneLine(this.#representations(elt).bare)));
       } else {
         const col = this.#cols[c - (hasGlyph ? 2 : 1)]!;
         out.push(text(this.#cell(col, index, elt).text));

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-alternating-sign-matrix-0-1-0-1-1-1-0-1-0			[MinimalRowZeroCount, [AlternatingSignMatrix, [List, [List, 0, 1, 0], [List, 1, -1, 1], [List, 0, 1, 0]]]]	0			the alternating sign matrix $[[0,1,0],[1,-1,1],[0,1,0]]$
+findstat-st001925-1	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 1]]], "'MinimalRowZeroCount'"]	0	0	FindStat St001925	FindStat's value for [[1]]
+findstat-st001925-2	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 0, 1], [List, 1, 0]]], "'MinimalRowZeroCount'"]	1	1	FindStat St001925	FindStat's value for [[0,1],[1,0]]
+findstat-st001925-3	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 1, 0], [List, 0, 1]]], "'MinimalRowZeroCount'"]	1	1	FindStat St001925	FindStat's value for [[1,0],[0,1]]

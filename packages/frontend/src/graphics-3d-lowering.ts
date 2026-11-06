@@ -169,6 +169,9 @@ export function graphics3dOptionsOf(settings: Graphics3dSettings): Graphics3dOpt
   };
 }
 
+/** The length of a point's row: `[x, y, z]`. */
+const TRIPLE = 3;
+
 /** `ListPlot3D`: a height grid (or scattered triples, binned onto one) as a mesh, or `Type -> "points"` as a scatter. */
 export function listBoxOfSettings(settings: Graphics3dSettings): Box | undefined {
   const parsed = jsonOf(settings["data"]);
@@ -188,7 +191,12 @@ export function listBoxOfSettings(settings: Graphics3dSettings): Box | undefined
         })
       : undefined;
   const size = Math.max(2, Math.min(120, number(settings["n"]) ?? 12));
-  const grid = matrixOf(parsed) ?? (points ? gridFromPoints(points, size, size).grid : undefined);
+  // Rows of three numbers are triples, except a 3 x 3 array, which is a small grid of heights: any
+  // other count of triples would otherwise read as a tall grid with three columns.
+  const triples =
+    points !== undefined && points.length !== TRIPLE && (parsed as unknown[][]).every((r) => r.length === TRIPLE);
+  const heights = triples ? undefined : matrixOf(parsed);
+  const grid = heights ?? (points ? gridFromPoints(points, size, size).grid : undefined);
   return grid && meshBox(grid, { ...view, zRange, wireframe: on(settings["wireframe"]) });
 }
 

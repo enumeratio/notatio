@@ -15,6 +15,7 @@ import {
   runLengths,
   sortedRuns,
 } from "../../src/map-helpers.ts";
+import { fold } from "../../collections/src/families/tables.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "../../permutations/src/foata-bijection.ts";
 
 /** The composition of m + 1 a cut word of length m describes: the parts between the cuts. */
@@ -280,6 +281,59 @@ const supportDyckPathBody: MathJSON = [
   ),
 ];
 
+/** Mp00336, and the rank of every entry of a parking function: the entries below entry i, plus those equal to it up to
+ *  and including i, so equal entries rank left to right. */
+const standardRanks: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  forEach(positions, [
+    "Add",
+    ["Fold", ["Function", ["If", ["Less", at("j"), at("i")], ["Add", "sr_c", 1], "sr_c"], "sr_c", "j"], 0, positions],
+    ["Fold", ["Function", ["If", ["Equal", at("j"), at("i")], ["Add", "sr_d", 1], "sr_d"], "sr_d", "j"], 0, upTo("i")],
+  ]),
+];
+
+/** Mp00055: the labeling of the support Dyck path, the inverse of the standard permutation: entry k is the position
+ *  of the k-th smallest entry, equal entries from left to right. */
+const labelingPermutationBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  bind("lp_rank", standardRanks, forEach(positions, ["IndexOf", "lp_rank", "k"], "k"), "list<integer>"),
+];
+
+/** One car's turn: it takes the first free spot at or after its preference. */
+const carParks: MathJSON = bind(
+  "cp_spot",
+  [
+    "Fold",
+    [
+      "Function",
+      [
+        "If",
+        ["And", ["Equal", "cp_best", 0], ["GreaterEqual", "cp_s", at("cp_car")], ["Equal", at("cp_s", "cp_spots"), 0]],
+        "cp_s",
+        "cp_best",
+      ],
+      "cp_best",
+      "cp_s",
+    ],
+    0,
+    positions,
+  ],
+  forEach(positions, ["If", ["Equal", "cp_s", "cp_spot"], "cp_car", at("cp_s", "cp_spots")], "cp_s"),
+  "integer",
+);
+
+/** Mp00053: spot j holds the car that parks there, cars taking their turns in order. */
+const carPermutationBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  fold(carParks, "cp_spots", "cp_car", fill(0, n), positions, "list<integer>") as MathJSON,
+];
+
 export const WORDS_MAPS: readonly CombinatorialMap[] = [
   {
     name: "Reverse",
@@ -475,5 +529,51 @@ export const WORDS_MAPS: readonly CombinatorialMap[] = [
     body: supportDyckPathBody,
     summary: "The Dyck path whose area sequence is j minus the j-th smallest entry: the parking function's support.",
     note: "FindStat's Mp00056, Sage's to_area_sequence. A surjection: the preimage of a path is its parking functions, the labelings of its up steps.",
+  },
+  {
+    name: "StandardPermutation",
+    from: "binary_word",
+    to: "permutation",
+    body: standardRanks,
+    summary: "The permutation ranking the letters of the word, equal letters from left to right.",
+    note: "FindStat's Mp00336, Sage's standard_permutation. The image is the Grassmannian permutations, those with at most one descent.",
+  },
+  {
+    name: "LabelingPermutation",
+    from: "parking_function",
+    to: "permutation",
+    body: labelingPermutationBody,
+    summary:
+      "The labeling of the parking function's support Dyck path: the positions of the entries, smallest entry first and equal entries left to right.",
+    note: "FindStat's Mp00055, which it titles labelling permutation; Sage's standard_permutation().inverse(). A surjection.",
+  },
+  {
+    name: "CarPermutation",
+    from: "parking_function",
+    to: "permutation",
+    body: carPermutationBody,
+    summary: "Spot j holds the car that parks there, each car taking the first free spot at or after its preference.",
+    note: "FindStat's Mp00053, Sage's cars_permutation. A surjection.",
+  },
+  {
+    name: "CyclicShift",
+    from: "parking_function",
+    to: "parking_function",
+    body: rotatedLeft,
+    summary: "Rotate the word one place to the left: the first entry moves to the end.",
+  },
+  {
+    name: "InverseCyclicShift",
+    from: "parking_function",
+    to: "parking_function",
+    body: rotatedRight,
+    summary: "Rotate the word one place to the right: the last entry moves to the front.",
+  },
+  {
+    name: "Reverse",
+    from: "parking_function",
+    to: "parking_function",
+    body: reversedWord,
+    summary: "The word read backwards.",
   },
 ];

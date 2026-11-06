@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-binary-tree			[SwapEquivalentTreeCount, [BinaryTree, [List, [List, 0, 0], [List, [List, 0, 0], 0]]]]	4			the binary tree $[[.,.],[[.,.],.]]$
+findstat-st000412-1	Properties		[CombinatorialStat, [BinaryTree, [List, 0, [List, 0, 0]]], "'SwapEquivalentTreeCount'"]	2	2	FindStat St000412	FindStat's value for [.,[.,.]]
+findstat-st000412-2	Properties		[CombinatorialStat, [BinaryTree, [List, [List, 0, 0], 0]], "'SwapEquivalentTreeCount'"]	2	2	FindStat St000412	FindStat's value for [[.,.],.]
+findstat-st000412-3	Properties		[CombinatorialStat, [BinaryTree, [List, 0, [List, 0, [List, 0, 0]]]], "'SwapEquivalentTreeCount'"]	4	4	FindStat St000412	FindStat's value for [.,[.,[.,.]]]

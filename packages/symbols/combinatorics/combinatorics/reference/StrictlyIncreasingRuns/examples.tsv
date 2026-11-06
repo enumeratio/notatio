@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[StrictlyIncreasingRuns, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	7			the word $110100111$
+findstat-st000393-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'StrictlyIncreasingRuns'"]	1	1	FindStat St000393	FindStat's value for 0
+findstat-st000393-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'StrictlyIncreasingRuns'"]	1	1	FindStat St000393	FindStat's value for 1
+findstat-st000393-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'StrictlyIncreasingRuns'"]	2	2	FindStat St000393	FindStat's value for 00

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-signed-word-2-bar-1-bar-3			[FlagDescent, [SignedPermutation, [List, 2, -1, -3]]]	4			the signed word $2\,\bar{1}\,\bar{3}$
+findstat-st001893-1	Properties		[CombinatorialStat, [SignedPermutation, [List, 1]], "'FlagDescent'"]	0	0	FindStat St001893	FindStat's value for [1]
+findstat-st001893-2	Properties		[CombinatorialStat, [SignedPermutation, [List, -1]], "'FlagDescent'"]	1	1	FindStat St001893	FindStat's value for [-1]
+findstat-st001893-3	Properties		[CombinatorialStat, [SignedPermutation, [List, 1, 2]], "'FlagDescent'"]	0	0	FindStat St001893	FindStat's value for [1,2]

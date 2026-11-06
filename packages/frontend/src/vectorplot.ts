@@ -6,7 +6,7 @@
 // same picture. `renderPlot` draws the box.
 
 import { arrow, type Box, graphics, line, type OptionValue, style, tag } from "@enumeratio/boxes";
-import { plotArea } from "./plot-box.ts";
+import { fieldImageSize, plotArea } from "./plot-box.ts";
 import { type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 
 /** A planar vector field, in data coordinates. Returning a non-finite
@@ -156,8 +156,6 @@ export interface VectorPlotOptions extends ColorOptions {
   title?: string;
 }
 
-const WIDTH = 340;
-const HEIGHT = 200;
 const ARROW_WIDTH = 1.2;
 const STREAM_WIDTH = 1.1;
 const STREAM_OPACITY = 0.8;
@@ -183,7 +181,7 @@ export function vectorPlotBox(
   y1: number,
   opts: VectorPlotOptions = {},
 ): Box {
-  const [W, H] = [opts.width ?? WIDTH, opts.height ?? HEIGHT];
+  const [W, H] = fieldImageSize({ ...opts, titled: Boolean(opts.title) });
   const kind = opts.type === "stream" ? "stream" : "vector";
   const { plotW, plotH } = plotArea(W, H, Boolean(opts.title));
   const options: Record<string, OptionValue> = {

@@ -74,6 +74,24 @@ const boundaryPaths = (t: Binary): Set<string> => {
   return paths;
 };
 
+/** A contiguous pattern in FindStat's notation: "." matches any subtree, [l, r] a node whose subtrees match l and r. */
+type Pattern = "." | readonly [Pattern, Pattern];
+const matches = (s: Binary, pattern: Pattern): boolean =>
+  pattern === "." || (s !== 0 && matches(s[0], pattern[0]) && matches(s[1], pattern[1]));
+const PATTERNS: Record<string, Pattern> = {
+  RightForkRightLeftPatternCount: [
+    ".",
+    [
+      [".", "."],
+      [[".", "."], "."],
+    ],
+  ],
+  ForkRightRightLeftPatternCount: [
+    [".", "."],
+    [".", [[".", "."], "."]],
+  ],
+};
+
 const PATHS: Record<string, readonly (1 | 2)[]> = {
   RightRightPathCount: [2, 2],
   RightRightRightPathCount: [2, 2, 2],
@@ -93,9 +111,31 @@ const nearestLeaf = (t: Ordered): number => (t.length === 0 ? 0 : 1 + Math.min(.
 const isHangingBranch = (b: Ordered): boolean => b.length === 0 || (b.length === 1 && isHangingBranch(b[0]!));
 const prune = (t: Ordered): Ordered => (t.length === 0 ? [] : t.filter((b) => !isHangingBranch(b)).map(prune));
 
+/** Every binary tree with n nodes. */
+const binaryTreesOfSize = (n: number): Binary[] =>
+  n === 0
+    ? [0]
+    : Array.from({ length: n }, (_, k) => k).flatMap((k) =>
+        binaryTreesOfSize(k).flatMap((l) => binaryTreesOfSize(n - 1 - k).map((r): Binary => [l, r])),
+      );
+/** The rooted tree under a binary tree: each node's nonempty children, as an unordered collection (sorted words). */
+const rootedWord = (t: Binary): string =>
+  t === 0
+    ? ""
+    : `(${[t[0], t[1]]
+        .filter((c) => c !== 0)
+        .map(rootedWord)
+        .toSorted()
+        .join("")})`;
+/** How many binary trees have the same underlying rooted tree as t, counted among all binary trees of its size. */
+const sameRootedTreeCount = (t: Binary): number =>
+  binaryTreesOfSize(binarySize(t)).filter((u) => rootedWord(u) === rootedWord(t)).length;
+
 const key = (t: unknown): string => JSON.stringify(t);
 
 export const BINARY_READINGS: Record<string, (t: Binary) => number> = {
+  SwapEquivalentTreeCount: sameRootedTreeCount,
+  SwapEquivalentTreeCountLog: (t) => Math.log2(sameRootedTreeCount(t)),
   LinearExtensionCount: (t) => factorial(binarySize(t)) / product(binarySubtrees(t).map(binarySize)),
   Height: binaryHeight,
   LeftSubtreeSize: (t) => (t === 0 ? 0 : binarySize(t[0])),
@@ -130,6 +170,12 @@ export const BINARY_READINGS: Record<string, (t: Binary) => number> = {
   NonRootBinaryNodes: (t) => binarySubtrees(t).filter((s) => s !== t && s[0] !== 0 && s[1] !== 0).length,
   HookNumber: hooks,
   VertexHeightSum: (t) => sum(binarySubtrees(t).map(binaryHeight)),
+  ...Object.fromEntries(
+    Object.entries(PATTERNS).map(([head, pattern]) => [
+      head,
+      (t: Binary) => binarySubtrees(t).filter((s) => matches(s, pattern)).length,
+    ]),
+  ),
   ...Object.fromEntries(
     Object.entries(PATHS).map(([head, steps]) => [
       head,

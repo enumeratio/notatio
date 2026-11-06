@@ -18,15 +18,19 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
     to: {
       Arrangement: ["Ascents", "Descents", "Inversions", "LeftToRightMaxima"],
       BinaryWord: ["Descents", "Runs"],
-      ParkingFunction: ["Descents"],
+      ParkingFunction: ["Ascents", "Descents"],
       Surjection: ["Descents"],
       Word: ["Ascents", "Descents", "LongestRun"],
     },
   },
   {
-    // These read a value against its position, which an endofunction's or signed permutation's list has too.
+    // These read a value against its position, which an endofunction's, parking function's or signed permutation's list has too.
     from: "Permutation",
-    to: { Endofunction: ["FixedPoints"], SignedPermutation: ["FixedPoints"] },
+    to: {
+      Endofunction: ["FixedPoints"],
+      ParkingFunction: ["FixedPoints"],
+      SignedPermutation: ["Excedances", "FixedPoints", "WeakExcedances"],
+    },
   },
   {
     // A set composition is a list of blocks, as a set partition is; the blocks' sizes read alike.
@@ -36,18 +40,37 @@ const SHARED: readonly { from: string; to: Readonly<Record<string, readonly stri
   {
     // A perfect matching is a set partition into pairs.
     from: "SetPartition",
-    to: { PerfectMatching: ["Crossings", "Nestings"] },
+    to: {
+      PerfectMatching: [
+        "BlocksWithEvenMinimum",
+        "BlocksWithOddMinimum",
+        "CrossingNumber",
+        "Crossings",
+        "LargestOpener",
+        "NestingNumber",
+        "Nestings",
+        "RotationOrbitSize",
+        "Successions",
+        "TerminalClosers",
+        "TopologicallyConnectedComponents",
+      ],
+    },
   },
   {
     // A weak composition is a composition whose parts may be 0.
     from: "IntegerComposition",
     to: { WeakComposition: ["LargestPart"] },
   },
+  {
+    // A binary word's rotations are counted as a composition's are (FindStat's St000543, the conjugacy class of a word).
+    from: "IntegerComposition",
+    to: { BinaryWord: ["RotationOrbitSize"] },
+  },
 ];
 
 /** Statistics stated as one expression over a carrier's contents (`_x`): the sum of a Lehmer-style table or of a subset's members. */
 const EXPRESSIONS: readonly { name: string; expression: MathJSON; carriers: readonly string[] }[] = [
-  { name: "Sum", expression: ["Sum", "_x"], carriers: ["PermutationInversion", "SubexcedantSeq"] },
+  { name: "Sum", expression: ["Sum", "_x"], carriers: ["ParkingFunction", "PermutationInversion", "SubexcedantSeq"] },
 ];
 
 /** File the shared statistics in their carriers' `CombinatorialStat` tables, once every area has declared. */

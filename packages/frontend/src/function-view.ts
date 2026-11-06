@@ -4,6 +4,7 @@
 // The plot's choice is `inferPlotOver`'s (real -> Plot, complex -> ComplexPlot, integer ->
 // DiscretePlot), in Wolfram's names; the other arguments are `inferControl`s.
 
+import { emitComplexWGSL } from "@enumeratio/ce-patches/wgsl-complex";
 import {
   controllableType,
   inferControl,
@@ -25,9 +26,16 @@ export interface PlotHints {
 }
 
 export interface FunctionViewContext {
-  /** Whether the complex emitter can lower a call of this head; default every head does. */
-  readonly lowers?: (head: string) => boolean;
+  /**
+   * Whether the complex emitter can lower a call of this head with `arity` arguments, the axis at
+   * `position`; by default whatever `emitComplexWGSL` lowers.
+   */
+  readonly lowers?: (head: string, arity: number, position: number) => boolean;
 }
+
+/** Whether `emitComplexWGSL` lowers `head(…)` over the complex axis `z`: a portrait of it needs that. */
+export const complexLowers = (head: string, arity: number, position: number): boolean =>
+  emitComplexWGSL([head, ...Array.from({ length: arity }, (_, k) => (k === position ? "z" : 1))]) !== undefined;
 
 /** A head's signature with its result type, the part `HeadSignature` leaves out. */
 export interface FunctionSignature extends HeadSignature {
@@ -219,7 +227,8 @@ export function functionViewOf(
     body: `Re(${bodyOver("x")})`,
     note: "real slice",
   };
-  return ctx.lowers?.(signature.head) === false
+  const lowers = ctx.lowers ?? complexLowers;
+  return !lowers(signature.head, callArgs.length, callArgs.indexOf("\0"))
     ? { ...base, views: [slice], reason: `the complex plot cannot lower ${signature.head}` }
     : { ...base, views: [main, slice] };
 }
