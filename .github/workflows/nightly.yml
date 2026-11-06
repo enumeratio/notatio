@@ -184,19 +184,26 @@ jobs:
   # The WebGPU stories: headless Chromium destroys a device whose canvas is configured, so these run
   # headed, on a virtual display and a software adapter. Advisory, like the stories above.
   component-stories-gpu:
-    name: component stories (WebGPU)
+    name: component stories (WebGPU) ${{ matrix.shard }}/3
     if: github.event_name != 'schedule' || github.event.schedule == '5 4 * * *'
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    # A cold dist build (up to 11 minutes) and a cold dev server, then a third of the tests: all 68 take
+    # about 8 minutes on two CPUs, and SwiftShader's frames are the slow part on a runner.
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
         continue-on-error: true
-      - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts
+      - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts --shard=${{ matrix.shard }}/3
         working-directory: web
         continue-on-error: true
-      - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU"
+      - if: matrix.shard == 1
+        run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU"
         working-directory: web
         env:
           WEBGPU: "1"
