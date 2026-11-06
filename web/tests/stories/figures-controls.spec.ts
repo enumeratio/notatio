@@ -376,8 +376,11 @@ test.describe("the worksheet", () => {
       await page.waitForTimeout(300);
       expect([await slider.getAttribute("min"), await slider.getAttribute("max")]).toEqual(["-100", "100"]);
     }
+    const dragged = await slider.inputValue();
     await page.mouse.up();
-    expect(Number(await slider.inputValue())).toBeLessThan(40);
+    // The thumb stays where the reader let go, not on an earlier answer that lands late.
+    expect(await slider.inputValue()).toBe(dragged);
+    expect(Number(dragged)).toBeLessThan(40);
   });
 
   test("+ cell adds a cell the reader can see and type in", async ({ page }) => {
@@ -390,9 +393,12 @@ test.describe("the worksheet", () => {
     const fresh = cells.last();
     const target = fresh.locator("notatio-in math-field, notatio-in .notatio-static");
     // The typeset form gives way to the editor once MathLive loads; either is a box to type in.
-    const widthNow = async (): Promise<number> => (await target.first().boundingBox())?.width ?? 0;
-    await expect.poll(widthNow).toBeGreaterThan(8);
-    expect(((await target.first().boundingBox()) ?? { height: 0 }).height).toBeGreaterThan(8);
+    // Width and height come from one read, since the element can be swapped between two.
+    const sizeNow = async (): Promise<number> => {
+      const box = await target.first().boundingBox();
+      return box ? Math.min(box.width, box.height) : 0;
+    };
+    await expect.poll(sizeNow).toBeGreaterThan(8);
     // Focus is in the new cell, so typing goes there.
     const id = await fresh.getAttribute("data-cell");
     await expect

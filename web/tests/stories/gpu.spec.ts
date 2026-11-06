@@ -4,7 +4,7 @@
 // The zeta surface and the Im a < 0 half of the zeta portrait belong to the plots spec.
 
 import { readFileSync } from "node:fs";
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
   emitComplexWGSL,
@@ -25,6 +25,21 @@ test.beforeEach(async ({ page }) => {
   await page.addInitScript(installCapture);
 });
 
+/**
+ * A small stage for the portraits whose checks are shares and fractions of the canvas, not pixels
+ * of it: SwiftShader shades every pixel of every frame, so a frame costs by the canvas's area.
+ */
+async function smallPortraits(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    document.addEventListener("DOMContentLoaded", () => {
+      const style = document.createElement("style");
+      style.textContent =
+        ".notatio-complex-plot { max-width: 420px } .notatio-complex-plot-stage { height: 260px !important }";
+      document.head.append(style);
+    });
+  });
+}
+
 /** Share of the saturated pixels in the red sectors (hue within 30 degrees of 0, either side). */
 const red = (sectors: number[]) => sectors[0] + sectors[11];
 
@@ -32,6 +47,7 @@ for (const path of ["/explore/lerchphi/", "/explore/polylog/", "/explore/zeta/ph
   test(`every portrait on ${path} is drawn in color and in many hues`, async ({ page }) => {
     const errors: string[] = [];
     page.on("pageerror", (e) => errors.push(String(e)));
+    await smallPortraits(page);
     await page.goto(path);
     const canvases = page.locator("notatio-complex-plot canvas");
     await expect(canvases.first()).toBeVisible();
@@ -45,15 +61,16 @@ for (const path of ["/explore/lerchphi/", "/explore/polylog/", "/explore/zeta/ph
 }
 
 test.describe("the Lerch portrait", () => {
-  const dial = (page: import("@playwright/test").Page, name: string) => page.locator(`slider-box[name=${name}] input`);
+  const dial = (page: Page, name: string) => page.locator(`slider-box[name=${name}] input`);
 
-  async function setDial(page: import("@playwright/test").Page, canvas: Locator, name: string, value: string) {
+  async function setDial(page: Page, canvas: Locator, name: string, value: string) {
     const before = (await readCanvas(canvas))!.frame;
     await dial(page, name).fill(value);
     return repaintedStats(canvas, before);
   }
 
   test("is the unit disk, goes one hue at large Re s, shifts with a, and comes back", async ({ page }) => {
+    await smallPortraits(page);
     await page.goto("/explore/lerchphi/");
     const canvas = page.locator("notatio-complex-plot canvas").first();
     const opening = await paintedStats(canvas);
@@ -96,6 +113,7 @@ test.describe("the Lerch portrait", () => {
   });
 
   test("is mirror-symmetric for real s and not for complex s", async ({ page }) => {
+    await smallPortraits(page);
     await page.goto("/explore/lerchphi/");
     const canvas = page.locator("notatio-complex-plot canvas").first();
     await paintedStats(canvas);

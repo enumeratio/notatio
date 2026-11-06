@@ -4,6 +4,8 @@
 //
 //   cd web && xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts
 //
+// On two CPUs the 68 tests take about 8 minutes; the nightly job shards them (`--shard=n/3`).
+//
 // `xvfb-run -a` picks its own free display; never point this at a real one.
 
 import { defineConfig, devices } from "@playwright/test";
@@ -15,6 +17,8 @@ export default defineConfig({
   testMatch: "gpu.spec.ts",
   timeout: 180_000,
   expect: { timeout: 120_000 },
+  // Test-level, so the nightly job can `--shard` the one spec file across runners.
+  fullyParallel: true,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
   reporter: "list",
@@ -39,6 +43,7 @@ export default defineConfig({
     cwd: "../..",
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // A cold dev server took about 170 s to answer on two CPUs.
+    timeout: 300_000,
   },
 });
