@@ -13,6 +13,7 @@ import {
   compactIndex,
   extentRows,
   farOff,
+  indexLabel,
   MAX_SCROLL_PX,
   parseIndex,
   rangesOf,
@@ -127,7 +128,26 @@ test("the status line reads the window and how sure the count is", () => {
 
 test("a compact status line writes a long index in scientific form and leaves a short one alone", () => {
   const n = 15511210043330985984000000n;
-  expect(statusText(n - 19n, n, "≈ 1.55 × 10²⁵", true)).toBe("rows 1.55 × 10²⁵–1.55 × 10²⁵ of ≈ 1.55 × 10²⁵");
+  expect(statusText(n - 19n, n, "≈ 1.55 × 10²⁵", true)).toBe("rows near 1.55 × 10²⁵, 20 shown, of ≈ 1.55 × 10²⁵");
+  expect(statusText(n - 19n, n, "≈ 1.55 × 10²⁵")).toBe(
+    "rows 15,511,210,043,330,985,983,999,981–15,511,210,043,330,985,984,000,000 of ≈ 1.55 × 10²⁵",
+  );
   expect(statusText(1201n, 1220n, "∞", true)).toBe("rows 1,201–1,220 of ∞");
   expect(compactIndex(999_999_999_999n)).toBe("999,999,999,999");
+});
+
+test("a compact status line never mixes an exact end with a scientific one", () => {
+  // 2^53 − 3 is exact to `describeBig`, yet a long index: both ends go scientific.
+  expect(statusText(9_007_199_254_740_989n, 10_000_000_000_000_000n, "≈ 1.55 × 10²⁵", true)).toBe(
+    "rows 9.00 × 10¹⁵–1.00 × 10¹⁶ of ≈ 1.55 × 10²⁵",
+  );
+  expect(compactIndex(1_000_000_000_000_000_000_000n)).toBe("1.00 × 10²¹");
+});
+
+test("the index column keeps the tail of a long index, which is what tells rows apart", () => {
+  expect(indexLabel(1_201n)).toBe("1,201");
+  expect(indexLabel(999_999_999_999n)).toBe("999,999,999,999");
+  expect(indexLabel(15511210043330985984000000n)).toBe("…985,984,000,000");
+  expect(indexLabel(15511210043330985983999999n)).toBe("…985,983,999,999");
+  expect(indexLabel(1_000_000_000_000_000_007n)).toBe("…000,000,000,007");
 });

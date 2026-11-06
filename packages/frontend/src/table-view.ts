@@ -3,7 +3,7 @@
 // scroll position maps to a row when the content is taller than a browser will scroll. Pure, so
 // the web element and the terminal pager share it and a test needs no document.
 
-import { describeBig, type IndexRange, type RowCount } from "@enumeratio/boxes";
+import type { IndexRange, RowCount } from "@enumeratio/boxes";
 
 /** Rows per cache block: aligned, so overlapping requests share. */
 export const BLOCK_ROWS = 64n;
@@ -126,21 +126,49 @@ export function scrollTopFor(
   return (Number(top - 1n) / Math.max(1, rows - visible)) * travel;
 }
 
-/** A row index for a line with little room: separators while it is short, else `1.55 × 10²⁵`. */
-export function compactIndex(x: bigint): string {
-  return x.toString().length <= COMPACT_DIGITS ? x.toLocaleString("en-US") : describeBig(x).replace(/^≈ /, "");
-}
+const SUPERSCRIPT = "⁰¹²³⁴⁵⁶⁷⁸⁹";
 
 /** Digits a row index may have before the status line writes it in scientific form. */
 const COMPACT_DIGITS = 12;
 
+/** `1.55 × 10²⁵`: a long index to three digits, whatever its size (`describeBig` is exact up to 2^53). */
+function scientific(x: bigint): string {
+  const digits = x.toString();
+  const exponent = String(digits.length - 1)
+    .split("")
+    .map((d) => SUPERSCRIPT[Number(d)])
+    .join("");
+  return `${digits[0]}.${digits.slice(1, 3)} × 10${exponent}`;
+}
+
+const isLong = (x: bigint): boolean => x.toString().length > COMPACT_DIGITS;
+
+/** A row index for a line with little room: separators while it is short, else `1.55 × 10²⁵`. */
+export function compactIndex(x: bigint): string {
+  return isLong(x) ? scientific(x) : x.toLocaleString("en-US");
+}
+
 /**
- * `rows 1,201–1,220 of ≥ 4,096` for the status line and the live region; `compact` writes a
- * long index in scientific form so the line fits (the full text belongs in a `title`).
+ * A row index for the index column: whole while it fits, else its last `COMPACT_DIGITS` digits after
+ * an ellipsis, since the tail is what tells one row from the next (the full text belongs in a `title`).
+ */
+export function indexLabel(x: bigint): string {
+  if (!isLong(x)) return x.toLocaleString("en-US");
+  const tail = (x % 10n ** BigInt(COMPACT_DIGITS)).toString().padStart(COMPACT_DIGITS, "0");
+  return `…${tail.replace(/\B(?=(\d{3})+$)/g, ",")}`;
+}
+
+/**
+ * `rows 1,201–1,220 of ≥ 4,096` for the status line and the live region; `compact` writes the line
+ * in scientific form when either end is long, so it never mixes an exact end with an approximate one
+ * (the full text belongs in a `title`). Rows too close to tell apart that way read `rows near 1.55 × 10²⁵, 20 shown, of …`.
  */
 export function statusText(first: bigint, last: bigint, total: string, compact = false): string {
-  const n = compact ? compactIndex : (x: bigint): string => x.toLocaleString("en-US");
-  return `rows ${n(first)}–${n(last)} of ${total}`;
+  if (!compact) return `rows ${first.toLocaleString("en-US")}–${last.toLocaleString("en-US")} of ${total}`;
+  if (!isLong(first) && !isLong(last)) return `rows ${compactIndex(first)}–${compactIndex(last)} of ${total}`;
+  const [from, to] = [scientific(first), scientific(last)];
+  if (from === to) return `rows near ${from}, ${(last - first + 1n).toLocaleString("en-US")} shown, of ${total}`;
+  return `rows ${from}–${to} of ${total}`;
 }
 
 /** An index typed into a jump field: digits, with separators allowed; `undefined` for anything else. */

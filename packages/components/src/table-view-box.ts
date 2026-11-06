@@ -29,6 +29,7 @@ import {
   endOf,
   extentRows,
   farOff,
+  indexLabel,
   parseIndex,
   rangesOf,
   scrollAreaPx,
@@ -634,7 +635,7 @@ export class TableViewBox extends HTMLElement {
     fresh.dataset.index = String(index);
     fresh.dataset.stamp = stamp;
     if (state === "loading") fresh.setAttribute("aria-busy", "true");
-    const idx = text("div", "tvb-cell tvb-idx", index.toLocaleString("en-US"));
+    const idx = text("div", "tvb-cell tvb-idx", indexLabel(index));
     idx.title = index.toLocaleString("en-US");
     idx.setAttribute("role", "rowheader");
     idx.setAttribute("aria-colindex", "1");
@@ -683,9 +684,9 @@ export class TableViewBox extends HTMLElement {
     const loading = !this.#registered && this.#error === "";
     this.#status.textContent = loading ? "loading…" : statusText(this.#top, to, total, true);
     this.#status.title = loading ? "" : statusText(this.#top, to, total);
-    // The index column fits the rows shown, not the count: a long index is cut short, never the other columns.
-    const digits = (last > this.#top ? last : this.#top).toString().length;
-    const idx = Math.min(INDEX_MAX_EM, Math.max(INDEX_MIN_EM, digits * 0.6 + 1.4));
+    // The index column fits the labels of the rows shown, not the count: a long index keeps its tail, never the other columns.
+    const chars = indexLabel(last > this.#top ? last : this.#top).length;
+    const idx = Math.min(INDEX_MAX_EM, Math.max(INDEX_MIN_EM, chars * 0.45 + 1.2));
     this.style.setProperty("--tvb-idx", `${idx}em`);
     this.setAttribute("aria-rowcount", settled ? String(count.n + 1n) : "-1");
     this.dataset.count = count.kind;
