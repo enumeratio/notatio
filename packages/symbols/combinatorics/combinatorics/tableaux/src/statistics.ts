@@ -146,6 +146,52 @@ const blockedAtShift: MathJSON = floored(
   ),
 );
 
+/** The weighted size of the shape: the sum over the rows of the row's number counted from 0 times its length. */
+const weightedSize: MathJSON = floored(sumOver(positions, ["Multiply", subtract("i", 1), at("i", "lengths")]));
+
+const entryOf = (position: MathJSON): MathJSON => at(position, "reading");
+const smallerThanCell = (position: MathJSON): MathJSON => less(entryOf(position), entryOf("u"));
+/** One step of the inversion path of the cell at position `u`, carrying [position, pairs counted]. A cell in the first
+ *  column runs straight up, each row above counting its entries below `u`'s entry; in the first row the path has ended;
+ *  otherwise it goes up when the entry above is larger than the entry to the left (counting the entries of the row above
+ *  from this column on that are below `u`'s entry), else left. */
+const pathPosition: MathJSON = at(1, "a");
+const pathRow: MathJSON = at(pathPosition, "rowIds");
+const pathColumn: MathJSON = at(pathPosition, "columnIds");
+const countCells = (test: MathJSON): MathJSON => floored(sumOver(eachCell, ["If", test, 1, 0], "v"));
+const pathStep: MathJSON = [
+  "If",
+  equals(pathColumn, 1),
+  ["List", 1, add(at(2, "a"), countCells(and(less(at("v", "rowIds"), pathRow), smallerThanCell("v"))))],
+  [
+    "If",
+    equals(pathRow, 1),
+    "a",
+    [
+      "If",
+      greater(entryOf(subtract(pathPosition, at(subtract(pathRow, 1), "lengths"))), entryOf(subtract(pathPosition, 1))),
+      [
+        "List",
+        subtract(pathPosition, at(subtract(pathRow, 1), "lengths")),
+        add(
+          at(2, "a"),
+          countCells(
+            and(
+              equals(at("v", "rowIds"), subtract(pathRow, 1)),
+              and(atLeastValue(at("v", "columnIds"), pathColumn), smallerThanCell("v")),
+            ),
+          ),
+        ),
+      ],
+      ["List", subtract(pathPosition, 1), at(2, "a")],
+    ],
+  ],
+];
+/** A path takes at most n steps: it ends in the first row or column, and a cell has at most n - 1 cells before it there. */
+const haglundStevensInversions: MathJSON = floored(
+  sumOver(eachCell, at(2, ["Fold", ["Function", pathStep, "a", "b"], ["List", "u", 0], eachCell]), "u"),
+);
+
 const EMPTY = "The empty tableau, which has no such entry, gives 0.";
 
 // The second batch: pair counts of the shape and the entries, ascents, a shifted comajor index and the cylindric statistics.
@@ -228,6 +274,28 @@ const FINDSTAT_TABLEAU_STATISTICS_3: readonly Definition[] = [
   ),
 ];
 
+// The fourth batch: the major and comajor index less the weighted size, and Haglund and Stevens's inversion number.
+const FINDSTAT_TABLEAU_STATISTICS_4: readonly Definition[] = [
+  stat(
+    "MajorIndexMinusWeightedSize",
+    "The major index of the tableau less the weighted size of its shape.",
+    cellsAtLeast(2, withRows(subtract(overSuccessors(successorBelow, "e"), weightedSize))),
+    "FindStat's St001699. The major index is the sum of the descents, the entries whose successor is in a strictly lower row; the weighted size is the sum over the rows of the row's number counted from 0 times its length. A tableau of fewer than two entries has neither.",
+  ),
+  stat(
+    "ComajorIndexMinusWeightedSize",
+    "The sum of n - e over the descents e of the tableau, less the weighted size of its shape.",
+    cellsAtLeast(2, withRows(subtract(overSuccessors(successorBelow, entriesAfter), weightedSize))),
+    "FindStat's St001698. A descent is an entry whose successor is in a strictly lower row. A tableau of fewer than two entries has neither.",
+  ),
+  stat(
+    "HaglundStevensInversionCount",
+    "The pairs of a cell's entry and a smaller entry lying below the cell's inversion path, over all cells.",
+    nonEmpty(withColumns(haglundStevensInversions)),
+    "FindStat's St000059, Haglund and Stevens's inversion number. The inversion path of a cell leaves it up when the entry above is larger than the entry to the left, else left, until it reaches the first column (and then runs straight up) or the first row; the cells below the path in a row are those from the path's column on. A path has fewer than n steps and stays put once it ends.",
+  ),
+];
+
 // ── alternating sign matrices ───────────────────────────────────────────────────────────
 //
 // `_x` is the rows of the matrix, entries -1, 0, 1. The entries are read as one list, row by row,
@@ -300,6 +368,65 @@ const entriesAboveRight = (u: MathJSON): MathJSON =>
 const inversionTotal: MathJSON = floored(
   sumOver(cellNumbers, ["Multiply", at("u", "cells"), entriesAboveRight("u")], "u"),
 );
+
+/** The corner sum c(i, j): the entries of the first i rows and j columns, never negative. */
+const cornerSum = (i: MathJSON, j: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      cellNumbers,
+      ["If", and(atMostValue(rowOfCell("v"), i), atMostValue(columnOfCell("v"), j)), at("v", "cells"), 0],
+      "v",
+    ),
+  );
+const decreasablePositions: MathJSON = floored(
+  sumOver(
+    ["Range", 1, subtract("side", 1)],
+    floored(
+      sumOver(
+        ["Range", 1, subtract("side", 1)],
+        [
+          "If",
+          and(
+            and(
+              equals(cornerSum("i", "j"), cornerSum(add("i", 1), "j")),
+              equals(cornerSum("i", "j"), cornerSum("i", add("j", 1))),
+            ),
+            and(
+              equals(cornerSum("i", "j"), add(cornerSum(subtract("i", 1), "j"), 1)),
+              equals(cornerSum("i", "j"), add(cornerSum("i", subtract("j", 1)), 1)),
+            ),
+          ),
+          1,
+          0,
+        ],
+        "j",
+      ),
+    ),
+    "i",
+  ),
+);
+/** Ryser's formula for the permanent, the column sets S as the numbers m = 0 .. 2^n - 1 with column j in S when bit j - 1 is set. */
+const inColumnSet = (m: MathJSON, j: MathJSON): MathJSON => {
+  const place: MathJSON = ["Power", 2, subtract(j, 1)];
+  // The bit is the quotient of m less its remainder by the place, mod 2: exact without a floor.
+  return ["Mod", ["Divide", subtract(m, ["Mod", m, place]), place], 2];
+};
+/** The sign goes inside each term, so a permanent of zero is a sum of zeros and not negative zero (an odd order times zero), which the interpreter does not give. */
+const ryserPermanent: MathJSON = [
+  "Sum",
+  forEach(
+    ["Range", 0, subtract(["Power", 2, "side"], 1)],
+    [
+      "Multiply",
+      ["Power", -1, add("side", ["Sum", forEach(positions, inColumnSet("m", "j"), "j")])],
+      [
+        "Product",
+        forEach(positions, ["Sum", forEach(positions, ["Multiply", inColumnSet("m", "j"), cell("i", "j")], "j")], "i"),
+      ],
+    ],
+    "m",
+  ),
+];
 
 const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS: readonly Definition[] = [
   matrix("NegativeOneCount", "The number of entries equal to -1.", entriesEqual(-1)),
@@ -406,6 +533,18 @@ const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS: readonly Definition[] = [
     "The inversion number less the number of entries equal to -1.",
     withCells(subtract(inversionTotal, ["Count", ["Filter", "cells", ["Function", equals("e", -1), "e"]]])),
     "FindStat's St000332.",
+  ),
+  matrix(
+    "MatrixPermanent",
+    "The permanent: the sum over the permutations s of the product of a(i, s(i)).",
+    withCells(ryserPermanent),
+    "FindStat's St001260. Ryser's formula: (-1)^n times the sum over the sets S of columns of (-1)^|S| times the product over the rows of the row's sum over S. The sets are the numbers 0 .. 2^n - 1 read in binary.",
+  ),
+  matrix(
+    "DecreasableCornerSumPositions",
+    "The interior positions of the corner sum matrix whose entry can be lowered by one to give another alternating sign matrix's corner sum matrix.",
+    withCells(["If", less("side", 2), 0, decreasablePositions]),
+    "FindStat's St001965. The corner sum c(i, j) is the sum of the entries in the first i rows and j columns; a position 0 < i, j < n qualifies when c(i, j) = c(i + 1, j) = c(i, j + 1) = c(i - 1, j) + 1 = c(i, j - 1) + 1.",
   ),
 ];
 
@@ -655,6 +794,7 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
     `FindStat's leg major index (St000336), a statistic of the shape; on a partition it is the same head. The empty tableau gives 0.`,
   ),
   ...FINDSTAT_TABLEAU_STATISTICS_3,
+  ...FINDSTAT_TABLEAU_STATISTICS_4,
   ...FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS,
   ...FINDSTAT_PLANE_PARTITION_STATISTICS,
   ...FINDSTAT_SKEW_PARTITION_STATISTICS,

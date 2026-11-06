@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[LatticePathsAboveWordCount, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	58			the word $110100111$
+findstat-st001365-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'LatticePathsAboveWordCount'"]	2	2	FindStat St001365	FindStat's value for 0
+findstat-st001365-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'LatticePathsAboveWordCount'"]	1	1	FindStat St001365	FindStat's value for 1
+findstat-st001365-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'LatticePathsAboveWordCount'"]	4	4	FindStat St001365	FindStat's value for 00

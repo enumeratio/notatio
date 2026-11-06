@@ -214,6 +214,173 @@ const repeatedFactors = (copies: number): MathJSON =>
     ),
   );
 
+/** The largest e such that the word is e copies of one word; 0 for the empty word. */
+const repetitionExponent: MathJSON = nonEmpty(
+  hasPair(
+    [
+      "Divide",
+      k,
+      min([
+        "Join",
+        list(k),
+        where(
+          span(1, subtract(k, 1)),
+          [
+            "If",
+            equals(["Mod", k, "q"], 0),
+            equals(factorNumeral(1, subtract(k, "q")), suffixNumeral(subtract(k, "q"))),
+            "False",
+          ],
+          "q",
+        ),
+      ]),
+    ],
+    1,
+  ),
+);
+
+/** The position of the word among its distinct cyclic shifts in lexicographic order, from 0; 0 for the empty word. */
+const cyclicShiftIndex: MathJSON = nonEmpty(
+  bindList(
+    "v",
+    prefixTable(
+      [power(2, k)],
+      floored(
+        sumOver(
+          positions,
+          times(at(add(["Mod", add(visiting, subtract("m", 2)), k], 1)), power(2, subtract(k, "m"))),
+          "m",
+        ),
+      ),
+    ),
+    floored(sumOver(["Unique", "v"], ifThen(less("n", tableAt("v", 1))), "n")),
+  ),
+);
+
+/** Lattice paths of the word's length weakly above the word, read with a 1 as a step up and a 0 as a step across: counted by the height `d` of the path over the word (never below 0). The list holds the counts for d = -1 .. n + 1, the two ends always 0. */
+const pathsAboveByHeight: MathJSON = listFold(
+  [
+    "Join",
+    list(0),
+    forEach(
+      span(2, add(k, 2)),
+      [
+        "If",
+        equals(visiting, 1),
+        add(at("j", "a"), at(add("j", 1), "a")),
+        add(at(subtract("j", 1), "a"), at("j", "a")),
+      ],
+      "j",
+    ),
+    list(0),
+  ],
+  "a",
+  "b",
+  ["Join", list(0, 1), forEach(span(1, add(k, 1)), 0, "z")],
+  x,
+  "list<integer>",
+);
+
+/** The half lengths 1 .. n/2 of the even factors. */
+const halfLengths: MathJSON = span(1, ["Divide", subtract(k, ["Mod", k, 2]), 2]);
+/** 1 when the `2h` letters from `i` are their own reverse complement: letter m and letter 2h + 1 - m are different for every m. */
+const isReverseComplement = (i: MathJSON, h: MathJSON): MathJSON =>
+  equals(
+    floored(
+      sumOver(
+        span(1, h),
+        ifThen(equals(add(at(add(i, subtract("m", 1))), at(add(i, subtract(times(2, h), "m")))), 1)),
+        "m",
+      ),
+    ),
+    h,
+  );
+/** The largest half length of an even factor that is its own reverse complement, over the starts `i` that satisfy `starts`. */
+const reverseComplementHalfLength = (starts: (i: MathJSON) => MathJSON): MathJSON =>
+  hasPair(
+    max([
+      "Join",
+      list(0),
+      forEach(
+        halfLengths,
+        times(
+          "h",
+          max(
+            forEach(
+              span(1, add(subtract(k, times(2, "h")), 1)),
+              ifThen(and(starts("i"), isReverseComplement("i", "h"))),
+              "i",
+            ),
+          ),
+        ),
+        "h",
+      ),
+    ]),
+  );
+
+/** The permutations of 1 .. N whose descent word is the word: by inclusion-exclusion over the descents kept, N! times the sum, over the coarsenings, of (-1)^(descents merged away) over the product of the blocks' factorials. A 1 is appended so that N is a cut. Entry j of the list is N! times that sum for the cut j (0 where j is not a cut), each entry an integer. */
+const descentWordPreimages: MathJSON = bindList(
+  "y",
+  ["Join", x, list(1)],
+  bindList(
+    "c",
+    listFold(
+      ["Join", "a", list(add(at(["Length", "a"], "a"), at(visiting, "y")))],
+      "a",
+      "b",
+      list(0),
+      upTo(add(k, 1)),
+      "list<integer>",
+    ),
+    at(
+      add(k, 2),
+      listFold(
+        [
+          "Join",
+          "a",
+          list([
+            "If",
+            equals(at(visiting, "y"), 1),
+            floored(
+              sumOver(
+                span(0, subtract(visiting, 1)),
+                [
+                  "Divide",
+                  times(["Power", -1, subtract(at(visiting, "c"), at(add("i", 1), "c"))], at(add("i", 1), "a")),
+                  ["Product", span(1, subtract(visiting, "i"))],
+                ],
+                "i",
+              ),
+            ),
+            0,
+          ]),
+        ],
+        "a",
+        "b",
+        list(["Product", span(1, add(k, 1))]),
+        upTo(add(k, 1)),
+        "list<integer>",
+      ),
+    ),
+  ),
+);
+
+/** Whether the first n - d letters of the factor of length `l` from `i` equal its last: it has period d. */
+const hasPeriod = (i: MathJSON, l: MathJSON, d: MathJSON): MathJSON =>
+  equals(factorNumeral(i, subtract(l, d)), factorNumeral(add(i, d), subtract(l, d)));
+/** 1 when the factor of length `l` from `i` is primitive: no proper divisor d of l is a period. */
+const isPrimitive = (i: MathJSON, l: MathJSON): MathJSON =>
+  equals(
+    floored(
+      sumOver(
+        span(1, l),
+        ["If", less("d", l), ["If", equals(["Mod", l, "d"], 0), ifThen(hasPeriod(i, l, "d")), 0], 0],
+        "d",
+      ),
+    ),
+    0,
+  );
+
 const BINARY_WORD_STATISTICS: readonly Definition[] = [
   stat("HammingWeight", "The number of ones.", ones),
   stat("LeadingOnesCount", "The number of ones before the first 0.", leadingOnes),
@@ -377,29 +544,7 @@ const BINARY_WORD_STATISTICS: readonly Definition[] = [
   stat(
     "RepetitionExponent",
     "The largest e such that the word is e copies of one word.",
-    nonEmpty(
-      hasPair(
-        [
-          "Divide",
-          k,
-          min([
-            "Join",
-            list(k),
-            where(
-              span(1, subtract(k, 1)),
-              [
-                "If",
-                equals(["Mod", k, "q"], 0),
-                equals(factorNumeral(1, subtract(k, "q")), suffixNumeral(subtract(k, "q"))),
-                "False",
-              ],
-              "q",
-            ),
-          ]),
-        ],
-        1,
-      ),
-    ),
+    repetitionExponent,
     "FindStat's St000627, also called the frequency. The word is copies of a word of length q when q divides n and the first n - q letters are the last n - q.",
   ),
   stat(
@@ -663,23 +808,144 @@ const BINARY_WORD_STATISTICS: readonly Definition[] = [
   stat(
     "CyclicShiftIndex",
     "The position of the word among its distinct cyclic shifts in lexicographic order, from 0.",
+    cyclicShiftIndex,
+    "FindStat's St001436. The shifts are compared as binary numerals, which orders words of one length lexicographically; the table starts with a numeral above every shift's.",
+  ),
+  stat(
+    "DescentWordPreimageCount",
+    "The permutations whose descent word is this word.",
+    nonEmpty(descentWordPreimages),
+    "FindStat's St000529, the size of the preimage of the descent word map. The word has length N - 1; the count is by inclusion-exclusion over the descents.",
+  ),
+  stat(
+    "LatticePathsAboveWordCount",
+    "The paths of the word's length, ending anywhere, that stay weakly above the path the word gives.",
+    nonEmpty(floored(["Sum", pathsAboveByHeight])),
+    "FindStat's St001365. A 1 is a step up and a 0 a step across; a path is above when it has made at least as many steps up after every step. The fold counts the paths by how many steps up they are ahead.",
+  ),
+  stat(
+    "SameEndpointPathsAboveWordCount",
+    "The paths with the word's number of ones and zeros that stay weakly above the path the word gives.",
+    nonEmpty(at(2, pathsAboveByHeight)),
+    "FindStat's St001313, the count of St001365 that end where the word does: ahead by 0 steps up.",
+  ),
+  stat(
+    "EvenPalindromicPrefixHalfLength",
+    "Half the length of the longest palindromic prefix of even length.",
+    hasPair(max(["Join", list(0), forEach(halfLengths, times("h", ifThen(isPalindrome(1, times(2, "h")))), "h")])),
+    "FindStat's St001413.",
+  ),
+  stat(
+    "OddPalindromicPrefixHalfLength",
+    "The largest j such that the prefix of length 2 j + 1 is a palindrome.",
     nonEmpty(
-      bindList(
-        "v",
-        prefixTable(
-          [power(2, k)],
-          floored(
-            sumOver(
-              positions,
-              times(at(add(["Mod", add(visiting, subtract("m", 2)), k], 1)), power(2, subtract(k, "m"))),
-              "m",
-            ),
-          ),
+      max(
+        forEach(
+          span(0, ["Divide", subtract(subtract(k, 1), ["Mod", subtract(k, 1), 2]), 2]),
+          times("h", ifThen(isPalindrome(1, add(times(2, "h"), 1)))),
+          "h",
         ),
-        floored(sumOver(["Unique", "v"], ifThen(less("n", tableAt("v", 1))), "n")),
       ),
     ),
-    "FindStat's St001436. The shifts are compared as binary numerals, which orders words of one length lexicographically; the table starts with a numeral above every shift's.",
+    "FindStat's St001414.",
+  ),
+  stat(
+    "LongestPalindromicFactorStartingWithOne",
+    "The length of the longest palindromic factor that begins with a 1.",
+    nonEmpty(
+      max(
+        forEach(
+          positions,
+          times(
+            "l",
+            max(
+              forEach(span(1, add(subtract(k, "l"), 1)), ifThen(and(equals(at("i"), 1), isPalindrome("i", "l"))), "i"),
+            ),
+          ),
+          "l",
+        ),
+      ),
+    ),
+    "FindStat's St001419.",
+  ),
+  stat(
+    "ReverseComplementFactorHalfLength",
+    "Half the length of the longest factor that is its own reverse complement.",
+    reverseComplementHalfLength(() => "True"),
+    "FindStat's St001420. Such a factor has even length: its middle letter would be its own complement.",
+  ),
+  stat(
+    "ReverseComplementFactorHalfLengthStartingWithOne",
+    "Half the length of the longest factor that is its own reverse complement and begins with a 1.",
+    reverseComplementHalfLength((i) => equals(at(i), 1)),
+    "FindStat's St001421.",
+  ),
+  stat(
+    "Flex",
+    "The product of the word's lex (its position among its distinct cyclic shifts, from 1) and its frequency.",
+    nonEmpty(times(add(cyclicShiftIndex, 1), repetitionExponent)),
+    "FindStat's St001437: St001436 plus 1, times St000627.",
+  ),
+  stat(
+    "ModularMajorIndex",
+    "The major index modulo the length of the word.",
+    nonEmpty(["Mod", hasPair(["Sum", where(adjacent, fallsAfter)]), k]),
+    "FindStat's St001485.",
+  ),
+  stat(
+    "ValleyFillingDegree",
+    "The number of times every valley 01 must be swapped for a peak 10, and a trailing 0 made a 1, to leave no zeros.",
+    nonEmpty(
+      max2(
+        0,
+        fold(positions, -1, ["If", equals(at(subtract(add(k, 1), visiting)), 0), max2(add("a", 2), visiting), "a"]),
+      ),
+    ),
+    "FindStat's St001721.",
+  ),
+  stat(
+    "BaselineCrossings",
+    "The times the path, a 1 a step up and a 0 a step down, crosses the baseline.",
+    hasPair(
+      bindList(
+        "h",
+        heights,
+        floored(
+          sumOver(
+            adjacent,
+            ifThen(and(equals(here, next), equals(tableAt("h", subtract("i", 1)), subtract(1, times(2, here))))),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001730.",
+  ),
+  stat(
+    "PrimitiveFactorCount",
+    "The distinct nonempty factors that are not a power of a shorter word.",
+    nonEmpty(
+      floored(
+        sumOver(
+          positions,
+          floored(
+            sumOver(
+              [
+                "Unique",
+                forEach(
+                  span(1, add(subtract(k, "l"), 1)),
+                  ["If", isPrimitive("i", "l"), factorNumeral("i", "l"), 0],
+                  "i",
+                ),
+              ],
+              ifThen(greater("n", 0)),
+              "n",
+            ),
+          ),
+          "l",
+        ),
+      ),
+    ),
+    "FindStat's St001838.",
   ),
 ];
 

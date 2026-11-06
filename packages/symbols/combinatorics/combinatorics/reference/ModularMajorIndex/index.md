@@ -8,13 +8,18 @@ catalog:
     identity: St000693
     url: https://www.findstat.org/St000693
     on: StandardTableau
+  - system: findstat
+    identity: St001485
+    url: https://www.findstat.org/St001485
+    on: BinaryWord
 statOn:
+  - BinaryWord
   - StandardTableau
 signatures:
   - call: ModularMajorIndex(tableau)
     description: The major index modulo the number of entries.
     library: enumeratio-combinatorics
-    type: (standard_tableau) -> number
+    type: (binary_word | standard_tableau) -> number
 ---
 
 - Defined over `StandardTableau` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

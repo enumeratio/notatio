@@ -72,6 +72,33 @@ const cylindricalOverlap = (t: Tableau): number => {
   return d;
 };
 
+/** FindStat's St000059: for each cell, the columns of its inversion path, one per row above it; the entries below the path in those rows and smaller than the cell's are the inversion pairs. */
+function haglundStevensInversions(t: Tableau): number {
+  let found = 0;
+  for (const [i0, row] of t.entries())
+    for (const [j0, c] of row.entries()) {
+      let i = i0;
+      let j = j0;
+      const columnsUp: number[] = [];
+      for (;;) {
+        if (j === 0) {
+          for (let k = 0; k < i; k++) columnsUp.push(0);
+          break;
+        }
+        if (i === 0) break;
+        if (t[i - 1]![j]! > t[i]![j - 1]!) {
+          columnsUp.push(j);
+          i--;
+        } else j--;
+      }
+      for (const [r, column] of columnsUp.toReversed().entries())
+        found += t[r]!.slice(column).filter((d) => d < c).length;
+    }
+  return found;
+}
+/** The sum of the rows' numbers (from 0) times their lengths: FindStat's weighted size of the shape. */
+const weightedSize = (t: Tableau): number => sum(t.map((row, r) => r * row.length));
+
 export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   // The first row whose largest entry beats those above it is the one holding n.
   RowOfLargestEntry: (t) => {
@@ -148,4 +175,8 @@ export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
     }
     throw new Error("no shift");
   },
+  // FindStat: St001699 is the major index less the weighted size, St001698 the comajor index less it.
+  MajorIndexMinusWeightedSize: (t) => sum(descents(t)) - weightedSize(t),
+  ComajorIndexMinusWeightedSize: (t) => sum(descents(t).map((d) => size(t) - d)) - weightedSize(t),
+  HaglundStevensInversionCount: haglundStevensInversions,
 };

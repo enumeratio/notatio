@@ -12,8 +12,18 @@ catalog:
     identity: St000820
     url: https://www.findstat.org/St000820
     on: IntegerComposition
+  - system: findstat
+    identity: St000543
+    url: https://www.findstat.org/St000543
+    on: BinaryWord
+  - system: findstat
+    identity: St000780
+    url: https://www.findstat.org/St000780
+    on: PerfectMatching
 statOn:
+  - BinaryWord
   - IntegerComposition
+  - PerfectMatching
   - SetPartition
 signatures:
   - call: RotationOrbitSize(partition)

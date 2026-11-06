@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[DescentWordPreimageCount, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	5201			the word $110100111$
+findstat-st000529-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'DescentWordPreimageCount'"]	1	1	FindStat St000529	FindStat's value for 0
+findstat-st000529-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'DescentWordPreimageCount'"]	1	1	FindStat St000529	FindStat's value for 1
+findstat-st000529-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'DescentWordPreimageCount'"]	1	1	FindStat St000529	FindStat's value for 00

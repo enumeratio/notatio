@@ -35,6 +35,7 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
     "InversionSum",
     "LongestConstantRun",
     "MajorIndex",
+    "ModularMajorIndex",
     "NonInversionSum",
     "WeakMajorIndex",
   ],

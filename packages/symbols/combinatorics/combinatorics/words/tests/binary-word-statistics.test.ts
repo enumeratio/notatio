@@ -4,7 +4,7 @@ import { declareCombinatorics } from "../../src/index.ts";
 import { applyDefinition } from "../../src/statistics/declare.ts";
 import { bySignature } from "../../src/statistics/types.ts";
 import { WORD_STATISTICS } from "../src/statistics.ts";
-import { descentsOfWord, WORD_READINGS } from "./binary-word-findstat-readings.ts";
+import { descentsOfWord, SHARED_WORD_READINGS, WORD_READINGS } from "./binary-word-findstat-readings.ts";
 
 // The whole library, as a page evaluates it.
 const ce = bareEngine();
@@ -39,6 +39,17 @@ const COSTLY = new Set([
   "DistinctSquareCount",
   "CyclicShiftIndex",
   "BorderCount",
+  "DescentWordPreimageCount",
+  "LatticePathsAboveWordCount",
+  "SameEndpointPathsAboveWordCount",
+  "Flex",
+  "EvenPalindromicPrefixHalfLength",
+  "OddPalindromicPrefixHalfLength",
+  "LongestPalindromicFactorStartingWithOne",
+  "BaselineCrossings",
+  "PrimitiveFactorCount",
+  "ReverseComplementFactorHalfLength",
+  "ReverseComplementFactorHalfLengthStartingWithOne",
 ]);
 const sizeFor = (head: string): number => (COSTLY.has(head) && !DEEP ? 4 : 8);
 
@@ -62,6 +73,16 @@ test("each head called on the carrier value gives the reading", () => {
       expect(ce.box([head, ["BinaryWord", ["List", ...w]]] as never).evaluate().re, `${head} ${w.join("")}`).toBe(
         expected(w),
       );
+});
+
+// A shared head is FindStat's on nonempty words only; it reads a binary word through `CombinatorialStat`.
+test("each shared head gives the reading on a binary word, over every nonempty word of length 1..5 (1..8 under DEEP_TESTS)", () => {
+  for (const [head, expected] of Object.entries(SHARED_WORD_READINGS))
+    for (const w of upTo(DEEP ? 8 : 5).filter((word) => word.length > 0))
+      expect(
+        ce.box(["CombinatorialStat", ["BinaryWord", ["List", ...w]], `'${head}'`] as never).evaluate().re,
+        `${head} ${w.join("")}`,
+      ).toBe(expected(w));
 });
 
 // `Descents` is a permutation head that also reads a binary word through `CombinatorialStat` (FindStat's St000291).
