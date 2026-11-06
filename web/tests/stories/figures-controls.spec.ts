@@ -184,15 +184,22 @@ test.describe("AnimationRunning -> False", () => {
     await holdsUntilPlayed(story(page, "a-held-animator-element").locator("animator-box"));
   });
 
-  // The preview remounts its tree when the engine arrives, so the card is held to what the
-  // element is told; the element's own behavior is the first test.
-  test("an Animator's option reaches its element, held or not", async ({ page }) => {
+  // The preview's Animator is the expression's: its range (0..1, from 0), held still until
+  // played, and let go once the option is gone from the source.
+  test("a previewed Animator keeps its range and holds still until played", async ({ page }) => {
     await page.goto("/docs/components/environments");
     const card = story(page, "a-held-animator");
     const animator = card.locator("animator-box");
+    const slider = animator.locator("input[type=range]");
     await expect(animator).toHaveAttribute("animation-running", "false", { timeout: 120_000 });
+    await expect(slider).toHaveAttribute("min", "0");
+    await expect(slider).toHaveAttribute("max", "1");
+    expect(await slider.inputValue()).toBe("0");
+    await holdsUntilPlayed(animator);
+    await expect(slider).toHaveAttribute("max", "1");
     await card.locator(".env-source").fill("Row([Animator(t, (0, 1, 0.25)), Dynamic(Sin(Pi * t))])");
     await expect(animator).not.toHaveAttribute("animation-running", /.*/);
+    await expect(slider).toHaveAttribute("max", "1");
   });
 });
 
