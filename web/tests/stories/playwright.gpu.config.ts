@@ -43,6 +43,7 @@ export default defineConfig({
     cwd: "../..",
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
-    timeout: 120_000,
+    // A cold dev server took about 170 s to answer on two CPUs.
+    timeout: 300_000,
   },
 });
