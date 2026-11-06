@@ -5,7 +5,7 @@ import "./notatio-out.ts";
 import { latexForText, pastedFrom } from "./clipboard.ts";
 import { translate } from "./kernel-client.ts";
 import { loadEngine } from "./mathlive.ts";
-import { assignLatex } from "@enumeratio/frontend/core";
+import { AS_TYPED, assignLatex } from "@enumeratio/frontend/core";
 import type { Prerendered } from "@enumeratio/frontend/prerender";
 import { ensureStyles } from "./styles.ts";
 
@@ -59,7 +59,7 @@ async function parseSyntax(syntax: Syntax, text: string): Promise<unknown> {
       const read = await translate({ source: { text, format: "latex" }, raw: true, write: "mathjson" });
       if (read !== undefined) return read.json;
       const engine = await loadEngine();
-      return engine.parse(text, { form: "raw" }).json;
+      return engine.parse(text, AS_TYPED).json;
     }
     case "epsil":
     default: {

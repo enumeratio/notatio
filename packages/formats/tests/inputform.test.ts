@@ -83,3 +83,13 @@ test("InputForm never emits a LaTeX island", () => {
 afterAll(() => {
   if (updating) writeFileSync(GOLDEN, `${JSON.stringify(fresh, null, 2)}\n`);
 });
+
+// A parse that keeps the parentheses it was written with: a pair is a tuple, and a bare comma list
+// in a call is its members.
+test("InputForm: a comma-separated delimiter is a tuple", () => {
+  expect(toInputForm(["Plot", "f", ["Delimiter", ["Sequence", "x", 0, 1], "'(,)'"]])).toBe("Plot(f, (x, 0, 1))");
+});
+
+test("InputForm: a bare comma list in a call is spread", () => {
+  expect(toInputForm(["Derivative", "f", ["Delimiter", ["Sequence", 0, 1], "','"]])).toBe("Derivative(f, 0, 1)");
+});

@@ -184,15 +184,22 @@ test.describe("AnimationRunning -> False", () => {
     await holdsUntilPlayed(story(page, "a-held-animator-element").locator("animator-box"));
   });
 
-  // The preview remounts its tree when the engine arrives, so the card is held to what the
-  // element is told; the element's own behavior is the first test.
-  test("an Animator's option reaches its element, held or not", async ({ page }) => {
+  // The preview's Animator is the expression's: its range (0..1, from 0), held still until
+  // played, and let go once the option is gone from the source.
+  test("a previewed Animator keeps its range and holds still until played", async ({ page }) => {
     await page.goto("/docs/components/environments");
     const card = story(page, "a-held-animator");
     const animator = card.locator("animator-box");
+    const slider = animator.locator("input[type=range]");
     await expect(animator).toHaveAttribute("animation-running", "false", { timeout: 120_000 });
+    await expect(slider).toHaveAttribute("min", "0");
+    await expect(slider).toHaveAttribute("max", "1");
+    expect(await slider.inputValue()).toBe("0");
+    await holdsUntilPlayed(animator);
+    await expect(slider).toHaveAttribute("max", "1");
     await card.locator(".env-source").fill("Row([Animator(t, (0, 1, 0.25)), Dynamic(Sin(Pi * t))])");
     await expect(animator).not.toHaveAttribute("animation-running", /.*/);
+    await expect(slider).toHaveAttribute("max", "1");
   });
 });
 
@@ -269,6 +276,37 @@ test.describe("the worksheet", () => {
     await expect.poll(() => slider.inputValue(), { timeout: 30_000 }).toBe("3");
   });
 
+  // MathLive loads when a cell first opens its editor, and the typeset form stays until the
+  // editor is usable. The keys go out the moment the math field shows, with no wait for focus.
+  test("keys typed as the math field appears reach it", async ({ page }) => {
+    await page.goto("/worksheet/");
+    const slider = page.locator(".ws-slider input[type=range]").first();
+    await expect(slider).toBeVisible({ timeout: 120_000 });
+    const cell = page.locator("[data-cell]").first();
+    await cell.locator("notatio-in .notatio-static").first().click();
+    const field = cell.locator("notatio-in math-field").first();
+    await expect(field).toBeVisible({ timeout: 60_000 });
+    await page.keyboard.press("ControlOrMeta+A");
+    await page.keyboard.type("a:=3", { delay: 80 });
+    await expect.poll(() => field.evaluate((f) => (f as HTMLInputElement).value)).toMatch(/^a\\coloneq\s*3$/);
+    expect(await page.evaluate(() => window.getSelection()?.toString().length ?? 0)).toBe(0);
+    await page.keyboard.press("Enter");
+    await expect.poll(() => slider.inputValue(), { timeout: 30_000 }).toBe("3");
+  });
+
+  test("a new cell's math field takes the keys typed as it appears", async ({ page }) => {
+    await page.goto("/worksheet/");
+    const cells = page.locator("[data-cell]");
+    await expect(cells.first()).toBeVisible({ timeout: 120_000 });
+    const count = await cells.count();
+    await page.getByRole("button", { name: "+ cell" }).click();
+    await expect(cells).toHaveCount(count + 1);
+    const field = cells.last().locator("notatio-in math-field");
+    await expect(field).toBeVisible({ timeout: 60_000 });
+    await page.keyboard.type("x+1");
+    await expect.poll(() => field.evaluate((f) => (f as HTMLInputElement).value)).toBe("x+1");
+  });
+
   test("a default range holds still while its slider is dragged", async ({ page }) => {
     await page.goto("/explore/fractals/");
     const slider = page.locator(".ws-slider input[type=range]").nth(1); // n := 64, in -100..100
@@ -296,8 +334,10 @@ test.describe("the worksheet", () => {
     await expect(cells).toHaveCount(count + 1);
     const fresh = cells.last();
     const target = fresh.locator("notatio-in math-field, notatio-in .notatio-static");
-    await expect.poll(async () => (await boxOf(target.first())).width).toBeGreaterThan(8);
-    expect((await boxOf(target.first())).height).toBeGreaterThan(8);
+    // The typeset form gives way to the editor once MathLive loads; either is a box to type in.
+    const widthNow = async (): Promise<number> => (await target.first().boundingBox())?.width ?? 0;
+    await expect.poll(widthNow).toBeGreaterThan(8);
+    expect(((await target.first().boundingBox()) ?? { height: 0 }).height).toBeGreaterThan(8);
     // Focus is in the new cell, so typing goes there.
     const id = await fresh.getAttribute("data-cell");
     await expect
