@@ -214,6 +214,32 @@ function planePartitions(n: number): number[][][] {
   return extend(n, undefined);
 }
 
+/** The reduced skew shapes of n cells, as [outer, inner] part lists: no empty row and no empty column. */
+function skewPartitions(n: number): number[][][] {
+  // A reduced shape has at most n rows and n columns, so its outer partition fits in the n x n box.
+  const inBox = (rows: number, width: number): number[][] =>
+    rows === 0
+      ? [[]]
+      : Array.from({ length: width + 1 }, (_, part) => part).flatMap((part) =>
+          inBox(rows - 1, part).map((rest) => [part, ...rest]),
+        );
+  const trim = (p: number[]): number[] => p.filter((part) => part > 0);
+  const columns = (p: number[]): number[] => Array.from({ length: p[0] ?? 0 }, (_, j) => p.filter((q) => q > j).length);
+  const shapes: number[][][] = [];
+  for (const outer of inBox(n, n).map(trim))
+    for (const inner of inBox(outer.length, outer[0] ?? 0).map(trim)) {
+      const cells = outer.reduce((a, b) => a + b, 0) - inner.reduce((a, b) => a + b, 0);
+      const innerColumns = columns(inner);
+      const reduced =
+        cells === n &&
+        inner.length <= outer.length &&
+        outer.every((part, i) => part > (inner[i] ?? 0)) &&
+        columns(outer).every((height, j) => height > (innerColumns[j] ?? 0));
+      if (reduced && inner.every((part, i) => part <= outer[i]!)) shapes.push([outer, inner]);
+    }
+  return shapes;
+}
+
 /** Small subjects of each carrier, as MathJSON contents. */
 const SUBJECTS: Record<string, unknown[]> = {
   // Up to 4: the cubic statistics are slow to interpret, and the exhaustive sweeps elsewhere
@@ -239,6 +265,8 @@ const SUBJECTS: Record<string, unknown[]> = {
   ParkingFunction: [1, 2, 3, ...(DEEP ? [4, 5] : [])].flatMap(parkingFunctions).map(list),
   // Up to 4 boxes; deep, 5 and 6.
   PlanePartition: [1, 2, 3, 4, ...(DEEP ? [5, 6] : [])].flatMap(planePartitions).map((rows) => list(rows.map(list))),
+  // Up to 2; deep, up to 5 (the dynamic programs take about a tenth of a second a shape to interpret at 3 cells, and growing).
+  SkewPartition: (DEEP ? [1, 2, 3, 4, 5] : [1, 2]).flatMap(skewPartitions).map((shape) => list(shape.map(list))),
 };
 
 /** Statistics whose interpretation grows about threefold per size of partition: the largest size

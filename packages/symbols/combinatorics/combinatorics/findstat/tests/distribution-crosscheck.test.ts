@@ -47,6 +47,7 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   ParkingFunction: ["ParkingFunctions", (n) => n],
   // FindStat's plane partition size is its boxes, the sum of the entries, as ours.
   PlanePartition: ["PlanePartitions", (n) => n],
+  SkewPartition: ["SkewPartitions", (n) => n],
 };
 
 type Kind = "unclassified" | "emit" | "convention" | "ours";
