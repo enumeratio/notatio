@@ -2,6 +2,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 import { emitComplexWGSL, type Json, MAX_SLOTS } from "@enumeratio/ce-patches";
+import { complexWGSL } from "../src/shader-complex.ts";
 import { zetaWGSL } from "../src/shader.ts";
 
 test("the real Lerch wrapper in the shader returns NaN where Φ is complex", () => {
@@ -59,6 +60,85 @@ test("every special-function head reaches its kernel", () => {
   expect(emit(["PolyGamma", 1, "z"])?.code).toContain("polygamma(");
 });
 
+// --- the widened heads (BL-335) -----------------------------------------------------
+
+/** Every head the emitter lowers beyond the first set, as the page writes it, with the kernel it should reach. */
+const WIDENED: [unknown, string][] = [
+  [["Log", "z"], "clog10("],
+  [["Log", "z", 2], "clogBase("],
+  [["Tan", "z"], "ctan("],
+  [["Tanh", "z"], "ctanh("],
+  [["Sinc", "z"], "csinc("],
+  [["Re", "z"], "cre("],
+  [["Im", "z"], "cim("],
+  [["Real", "z"], "cre("],
+  [["Imaginary", "z"], "cim("],
+  [["Arg", "z"], "carg("],
+  [["Argument", "z"], "carg("],
+  [["Abs", "z"], "cabs("],
+  [["LogGamma", "z"], "cloggamma("],
+  [["GammaLn", "z"], "cgammaln("],
+  [["Digamma", "z"], "cdigamma("],
+  [["Trigamma", "z"], "ctrigamma("],
+  [["Pochhammer", 2.5, "z"], "cpochhammer("],
+  [["Binomial", 5, "z"], "cbinomial("],
+  [["Choose", 5, "z"], "cbinomial("],
+  [["DirichletEta", "z"], "cdirichletEta("],
+  [["DirichletBeta", "z"], "cdirichletBeta("],
+  [["Erf", "z"], "cerf("],
+  [["Erfc", "z"], "cerfc("],
+  [["Erfi", "z"], "cerfi("],
+  [["FresnelS", "z"], "cfresnelS("],
+  [["FresnelC", "z"], "cfresnelC("],
+  [["SinIntegral", "z"], "csi("],
+  [["CosIntegral", "z"], "cci("],
+  [["SinhIntegral", "z"], "cshi("],
+  [["CoshIntegral", "z"], "cchi("],
+  [["ExpIntegralEi", "z"], "cei("],
+  [["LogIntegral", "z"], "cli("],
+  [["LambertW", "z"], "clambertw("],
+  [["EllipticK", "z"], "cellipticK("],
+  [["EllipticE", "z"], "cellipticE("],
+  [["EllipticF", 0.9, "z"], "cellipticF("],
+  [["Hypergeometric1F1", 0.7, 1.9, "z"], "chyp1f1("],
+  [["BesselJ", 1, "z"], "cbesselJ("],
+  [["BesselI", 1, "z"], "cbesselI("],
+  [["BarnesG", "z"], "cbarnesG("],
+  [["LogBarnesG", "z"], "clogBarnesG("],
+];
+
+test("each widened head reaches a kernel the shader defines", () => {
+  for (const [expr, call] of WIDENED) {
+    const code = emit(expr)?.code;
+    expect(code, JSON.stringify(expr)).toBeDefined();
+    expect(code, JSON.stringify(expr)).toContain(call);
+    const fn = call.slice(0, -1);
+    expect(zetaWGSL, `${fn} is defined`).toMatch(new RegExp(`fn ${fn}\\(`));
+  }
+});
+
+test("Log is base 10, Ln natural, as compute-engine has them; Log2 and Log10 are its two-argument form", () => {
+  expect(emit(["Log", "z"])?.code).toBe("clog10(z)");
+  expect(emit(["Log2", "z"])?.code).toBe("clogBase(z, prm.p[0].xy)");
+  expect(emit(["Log2", "z"])?.literals).toEqual([[2, 0]]);
+  expect(emit(["Ln", "z"])?.code).toBe("clog(z)");
+});
+
+test("a head whose kernel cannot vouch for its digits stays declined", () => {
+  // Airy: its Maclaurin series cancels as e^(2/3 z^3/2) against a result that decays by the same factor, and the
+  // asymptotic series needs Stokes sectors. Bessel Y and K: integer orders are limits, the sliders' own default.
+  // 2F1 is a disk and its continuation. LambertW with a branch, and the rest, have no kernel.
+  for (const head of ["AiryAi", "AiryBi", "AiryAiPrime", "BesselY", "BesselK", "Hypergeometric2F1", "EllipticPi"])
+    expect(emit([head, 1, "z"]), head).toBeUndefined();
+  expect(emit(["LambertW", "z", 1])).toBeUndefined();
+});
+
+test("PolyGamma of order 0 and 1 takes the digamma and trigamma kernels, not the pole of ζ(1, z)", () => {
+  const polygamma = /fn polygamma\([\s\S]*?\n}\n/.exec(zetaWGSL)![0];
+  expect(polygamma).toContain("cdigamma(z)");
+  expect(polygamma).toContain("ctrigamma(z)");
+});
+
 // --- the property the pipeline cache rests on -------------------------------------
 
 test("changing only a literal keeps the shape and the code, moving just the slots", () => {
@@ -86,7 +166,7 @@ test("the baked-in integer exponent is part of the shape", () => {
 
 test("an unbound symbol or unsupported head is rejected, not mis-emitted", () => {
   expect(emit(["PolyLog", 2, "w"])).toBeUndefined(); // w is not the variable
-  expect(emit(["Erf", "z"])).toBeUndefined();
+  expect(emit(["AiryAi", "z"])).toBeUndefined();
   expect(emitComplexWGSL(["Hypot", "z"] as Json)).toBeUndefined();
 });
 
@@ -235,5 +315,5 @@ test("poles come out huge and finite, never NaN", () => {
 test("the Hurwitz kernels flag a sum whose terms dwarf it, for a host to hatch (S#5)", () => {
   expect(zetaWGSL).toContain("var<private> uncertain: f32");
   // Both sums that lose digits to cancellation vouch for their result before returning it.
-  expect(zetaWGSL.match(/vouch\(largest, /g)?.length).toBe(3);
+  expect(zetaWGSL.replace(complexWGSL, "").match(/vouch\(largest, /g)?.length).toBe(3);
 });

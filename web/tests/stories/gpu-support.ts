@@ -2,7 +2,7 @@
 // script copies each presented texture into a buffer and keeps the pixels per canvas; the helpers
 // below read them. Used by gpu.spec.ts, run under playwright.gpu.config.ts.
 
-import type { Locator } from "@playwright/test";
+import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
 /** Makes every configured WebGPU canvas readable: COPY_SRC on its usage and a copy of each frame. */
@@ -169,4 +169,67 @@ export function mirrorMatch(canvas: Locator, tolerance = 12): Promise<number> {
       }
     return same / total;
   }, tolerance);
+}
+
+/**
+ * A complex WGSL expression in `z` evaluated at each of `points` on the GPU, with `literals` in the
+ * uniform slots `prm.p` the emitter reads. One `[re, im, declined]` per point: `declined` is the
+ * kernel's `uncertain` flag, the hatching a portrait draws instead of a color.
+ */
+export function evalComplexOnGpu(
+  page: Page,
+  preamble: string,
+  code: string,
+  literals: readonly (readonly [number, number])[],
+  points: readonly (readonly [number, number])[],
+): Promise<[number, number, boolean][]> {
+  return page.evaluate(
+    async ({ preamble, code, literals, points }) => {
+      const n = points.length;
+      const shader = `${preamble}
+struct Prm { p : array<vec4f, 16> };
+@group(0) @binding(2) var<uniform> prm : Prm;
+@group(0) @binding(0) var<storage, read> inp : array<vec2f>;
+@group(0) @binding(1) var<storage, read_write> outp : array<vec4f>;
+@compute @workgroup_size(1) fn main(@builtin(global_invocation_id) g : vec3u) {
+  let z = inp[g.x]; uncertain = 0.0; let v = ${code}; outp[g.x] = vec4f(v, uncertain, prm.p[15].x);
+}`;
+      const device = await (await navigator.gpu.requestAdapter())!.requestDevice();
+      const module = device.createShaderModule({ code: shader });
+      const errors = (await module.getCompilationInfo()).messages.filter((m) => m.type === "error");
+      if (errors.length) throw new Error(errors.map((m) => `${m.lineNum}: ${m.message}`).join("\n"));
+      const pipeline = device.createComputePipeline({ layout: "auto", compute: { module, entryPoint: "main" } });
+      const buffer = (size: number, usage: number) => device.createBuffer({ size, usage });
+      const input = buffer(n * 8, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
+      device.queue.writeBuffer(input, 0, new Float32Array(points.flat()));
+      const slots = new Float32Array(64);
+      literals.forEach(([re, im], i) => slots.set([re, im], 4 * i));
+      const uniform = buffer(256, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
+      device.queue.writeBuffer(uniform, 0, slots);
+      const output = buffer(n * 16, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
+      const read = buffer(n * 16, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
+      const bind = device.createBindGroup({
+        layout: pipeline.getBindGroupLayout(0),
+        entries: [
+          { binding: 0, resource: { buffer: input } },
+          { binding: 1, resource: { buffer: output } },
+          { binding: 2, resource: { buffer: uniform } },
+        ],
+      });
+      const encoder = device.createCommandEncoder();
+      const pass = encoder.beginComputePass();
+      pass.setPipeline(pipeline);
+      pass.setBindGroup(0, bind);
+      pass.dispatchWorkgroups(n);
+      pass.end();
+      encoder.copyBufferToBuffer(output, 0, read, 0, n * 16);
+      device.queue.submit([encoder.finish()]);
+      await read.mapAsync(GPUMapMode.READ);
+      const values = new Float32Array(read.getMappedRange().slice(0));
+      return points.map(
+        (_, i) => [values[4 * i]!, values[4 * i + 1]!, values[4 * i + 2]! > 0.5] as [number, number, boolean],
+      );
+    },
+    { preamble, code, literals: literals.map((l) => [...l]), points: points.map((p) => [...p]) },
+  );
 }

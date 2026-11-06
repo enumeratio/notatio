@@ -39,6 +39,7 @@ const cos = (z: Complex): Complex => [Math.cos(z[0]) * Math.cosh(z[1]), -Math.si
 const sinh = (z: Complex): Complex => [Math.sinh(z[0]) * Math.cos(z[1]), Math.cosh(z[0]) * Math.sin(z[1])];
 const cosh = (z: Complex): Complex => [Math.cosh(z[0]) * Math.cos(z[1]), Math.sinh(z[0]) * Math.sin(z[1])];
 const sqrt = (z: Complex): Complex => pow(z, [0.5, 0]);
+const scale = (z: Complex, k: number): Complex => [z[0] * k, z[1] * k];
 
 type Cx = { re: number; im: number };
 const toCx = (z: Complex): Cx => ({ re: z[0], im: z[1] });
@@ -47,7 +48,8 @@ const ofCx = (c: Cx): Complex => [c.re, c.im];
 const UNARY: Record<string, (z: Complex) => Complex> = {
   Exp: exp,
   Ln: log,
-  Log: log,
+  // Log is base 10 (compute-engine's default); Ln is the natural logarithm.
+  Log: (z) => scale(log(z), Math.LOG10E),
   Sqrt: sqrt,
   Sin: sin,
   Cos: cos,
@@ -59,12 +61,43 @@ const UNARY: Record<string, (z: Complex) => Complex> = {
   Conjugate: (z) => [z[0], -z[1]],
   Abs: (z) => [Math.hypot(z[0], z[1]), 0],
   Re: (z) => [z[0], 0],
+  Real: (z) => [z[0], 0],
   Im: (z) => [z[1], 0],
+  Imaginary: (z) => [z[1], 0],
+  Arg: (z) => [Math.atan2(z[1], z[0]), 0],
+  Argument: (z) => [Math.atan2(z[1], z[0]), 0],
+  Sinc: (z) => (z[0] === 0 && z[1] === 0 ? [1, 0] : div(sin(z), z)),
   Square: (z) => mul(z, z),
   Gamma: (z) => exp(ofCx(logGamma(toCx(z)))),
   LogGamma: (z) => ofCx(logGamma(toCx(z))),
+  // The principal logarithm of Γ(z) itself: LogGamma's imaginary part wrapped into (-π, π].
+  GammaLn: (z) => {
+    const l = logGamma(toCx(z));
+    return [l.re, l.im - 2 * Math.PI * Math.round(l.im / (2 * Math.PI))];
+  },
   Digamma: (z) => ofCx(digamma(toCx(z))),
+  Trigamma: (z) => ofCx(polygamma(1, toCx(z))),
+  // (1 - 2^(1-s)) ζ(s), with its limit ln 2 at the pole of ζ.
+  DirichletEta: (s) =>
+    s[0] === 1 && s[1] === 0
+      ? [Math.LN2, 0]
+      : mul(sub([1, 0], pow([2, 0], sub([1, 0], s))), ofCx(hurwitzZeta(toCx(s), { re: 1, im: 0 }))),
+  // 4^(-s) (ζ(s, 1/4) - ζ(s, 3/4))
+  DirichletBeta: (s) =>
+    mul(
+      pow([4, 0], [-s[0], -s[1]]),
+      sub(ofCx(hurwitzZeta(toCx(s), { re: 0.25, im: 0 })), ofCx(hurwitzZeta(toCx(s), { re: 0.75, im: 0 }))),
+    ),
 };
+
+/** Two-argument heads: Log in a base, (a)_z = Γ(a + z) / Γ(a) and the binomial coefficient, as exponentials of log-gamma differences. */
+const lg = (z: Complex): Complex => ofCx(logGamma(toCx(z)));
+const BINARY: Record<string, (a: Complex, b: Complex) => Complex> = {
+  Log: (z, b) => div(log(z), log(b)),
+  Pochhammer: (a, z) => exp(sub(lg(add(a, z)), lg(a))),
+  Binomial: (n, k) => exp(sub(sub(lg(add(n, [1, 0])), lg(add(k, [1, 0]))), lg(add(sub(n, k), [1, 0])))),
+};
+BINARY["Choose"] = BINARY["Binomial"]!;
 
 const CONSTANTS: Record<string, Complex> = {
   Pi: [Math.PI, 0],
@@ -182,8 +215,11 @@ function compile(j: Json, variable: string): ComplexFunction {
       break;
     }
     default: {
-      const unary = UNARY[head] ?? UNARY[capitalize(head)];
+      const name = UNARY[head] || BINARY[head] ? head : capitalize(head);
+      const unary = UNARY[name];
       if (unary && fs.length === 1) return (z) => unary(f(0)(z));
+      const binary = BINARY[name];
+      if (binary && fs.length === 2) return (z) => binary(f(0)(z), f(1)(z));
     }
   }
   throw new Unsupported(`unsupported ${head}/${args.length}`);

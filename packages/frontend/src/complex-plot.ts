@@ -91,7 +91,7 @@ fn gradient(t0: f32) -> vec3f {
   if (!(logMag < 1e30)) { return vec4f(1.0, 1.0, 1.0, 1.0); } // a pole
   if (!(logMag > -1e30)) { return vec4f(0.0, 0.0, 0.0, 1.0); } // a zero
   // arg/2π along the gradient: on the phase wheel, red on the positive reals, as ComplexPlot3D.
-  let hue = fract(atan2(polar.y, polar.x) * 0.15915494);
+  let hue = fract(argOf(polar.xy) * 0.15915494);
   let bands = fract(logMag * 1.442695); // log2|v|
   let base = 1.0 / (1.0 + exp(-logMag)); // = |v| / (1 + |v|)
   let val = clamp(mix(base * 0.9, 1.0, 0.22 * bands), 0.0, 1.0);

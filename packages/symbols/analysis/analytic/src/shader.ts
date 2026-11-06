@@ -1,3 +1,5 @@
+import { complexWGSL } from "./shader-complex.ts";
+
 // A WGSL port of the Hurwitz / generalized-zeta kernel, for GPU evaluation of a
 // whole a-grid in parallel (domain coloring, surface plots, an interactive
 // Manipulate). Import `zetaWGSL`, prepend it to a shader that supplies a uniform s
@@ -29,7 +31,11 @@ const EM_PAIRS : i32 = 8;
 fn cmul(a: vec2f, b: vec2f) -> vec2f { return vec2f(a.x*b.x - a.y*b.y, a.x*b.y + a.y*b.x); }
 fn cdiv(a: vec2f, b: vec2f) -> vec2f { let d = dot(b, b); return vec2f(a.x*b.x + a.y*b.y, a.y*b.x - a.x*b.y) / d; }
 fn cexp(z: vec2f) -> vec2f { let e = exp(z.x); return vec2f(e*cos(z.y), e*sin(z.y)); }
-fn clog(z: vec2f) -> vec2f { return vec2f(0.5*log(dot(z, z)), atan2(z.y, z.x)); }
+// arg z in (−π, π], the cut's upper side on the negative real axis. A −0 imaginary part (a conjugate or a
+// product with 0, or sin of a multiple of π) reads as +0: SwiftShader's atan2(−0, x > 0) is π, a whole
+// half turn off on the positive reals.
+fn argOf(z: vec2f) -> f32 { return atan2(select(z.y, 0.0, z.y == 0.0), z.x); }
+fn clog(z: vec2f) -> vec2f { return vec2f(0.5*log(dot(z, z)), argOf(z)); }
 fn cpow(z: vec2f, w: vec2f) -> vec2f { return cexp(cmul(w, clog(z))); }
 
 // The rest of the elementary complex functions, for the expression emitter (see
@@ -37,7 +43,19 @@ fn cpow(z: vec2f, w: vec2f) -> vec2f { return cexp(cmul(w, clog(z))); }
 // function. Principal branches throughout, matching clog's cut on (-∞, 0].
 fn cneg(z: vec2f) -> vec2f { return -z; }
 fn cconj(z: vec2f) -> vec2f { return vec2f(z.x, -z.y); }
-fn csqrt(z: vec2f) -> vec2f { return cexp(0.5 * clog(z)); }
+fn csqrt(z: vec2f) -> vec2f {
+  let r = length(z);
+  if (r == 0.0) { return vec2f(0.0, 0.0); }
+  // The half-angle formulas, with no sin or cos in them: the root of the larger part first, the
+  // other from y / 2·root, so neither subtracts nearly equal numbers. The cut's upper side at y = 0.
+  if (z.x >= 0.0) {
+    let a = sqrt(0.5 * (r + z.x));
+    return vec2f(a, z.y / (2.0 * a));
+  }
+  let b = sqrt(0.5 * (r - z.x));
+  let s = select(-1.0, 1.0, z.y >= 0.0);
+  return vec2f(abs(z.y) / (2.0 * b), s * b);
+}
 fn csin(z: vec2f) -> vec2f { return vec2f(sin(z.x) * cosh(z.y), cos(z.x) * sinh(z.y)); }
 fn ccos(z: vec2f) -> vec2f { return vec2f(cos(z.x) * cosh(z.y), -sin(z.x) * sinh(z.y)); }
 fn csinh(z: vec2f) -> vec2f { return vec2f(sinh(z.x) * cos(z.y), cosh(z.x) * sin(z.y)); }
@@ -259,11 +277,15 @@ fn lerchPhiReal(z: vec2f, s: vec2f, a: vec2f) -> f32 {
 // Polylogarithm Liₛ(z) = z·Φ(z, s, 1). Same |z| < 1 limit as lerchPhi.
 fn polyLog(s: vec2f, z: vec2f) -> vec2f { return cmul(z, lerchPhi(z, s, vec2f(1.0, 0.0))); }
 
-// Polygamma ψ⁽ᵐ⁾(z) = (−1)^(m+1) m! ζ(m+1, z), integer m ≥ 1. ψ⁽ᵐ⁾(1) ≈ m!, which
+// Polygamma ψ⁽ᵐ⁾(z) = (−1)^(m+1) m! ζ(m+1, z), integer m ≥ 2; orders 0 and 1 are the digamma and
+// trigamma kernels (ζ(1, z) is a pole), a negative order declines. ψ⁽ᵐ⁾(1) ≈ m!, which
 // leaves f32 range past m = 34, so high orders saturate to inf here — that is the
 // value itself overflowing, not a loss of precision. Use polygammaLog to plot them.
 fn polygamma(m: vec2f, z: vec2f) -> vec2f {
   let n = i32(round(m.x));
+  if (n < 0 || m.y != 0.0 || m.x != round(m.x)) { uncertain = 1.0; }
+  if (n <= 0) { return cdigamma(z); }
+  if (n == 1) { return ctrigamma(z); }
   var fact = 1.0;
   for (var k = 2; k <= n; k = k + 1) { fact = fact * f32(k); }
   let sgn = select(-1.0, 1.0, (n % 2) == 1);
@@ -315,8 +337,13 @@ fn julia(z: vec2f, c: vec2f, n: vec2f) -> vec2f { return iterateQuadratic(z, c, 
 
 // The same (direction, log-magnitude) pair for a value that is already in range —
 // so a portrait can colour every function through one path.
+// The magnitude is taken off the larger part first: length(v) squares, so it overflows at 1e19 and
+// would read a value like G(−5.3 + 4i) = 1e28 as a pole (white).
 fn clogPolar(v: vec2f) -> vec3f {
-  let mag = max(length(v), 1e-30);
-  return vec3f(v / mag, log(mag));
+  let big = max(abs(v.x), abs(v.y));
+  if (!(big > 1e-30)) { return vec3f(0.0, 0.0, log(1e-30)); }
+  let u = v / big;
+  let unit = length(u);
+  return vec3f(u / unit, log(big) + log(unit));
 }
-`;
+${complexWGSL}`;

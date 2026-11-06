@@ -133,7 +133,7 @@ test("the argument of a complex surface is colored on the phase wheel by default
 // ── The WGSL domain coloring ──────────────────────────────────────────────────────────────
 
 test("the portrait and the complex surface agree: arg/2π along the gradient, red at arg 0", () => {
-  expect(portraitShader("z")).toContain("fract(atan2(polar.y, polar.x) * 0.15915494);");
+  expect(portraitShader("z")).toContain("fract(argOf(polar.xy) * 0.15915494);");
   expect(hueOf([1, 0])).toBe(0);
   expect(sampleGradient(gradientNamed("phase"), hueOf([1, 0]))).toBe("#ff0000");
 });

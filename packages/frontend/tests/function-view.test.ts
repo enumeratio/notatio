@@ -121,13 +121,13 @@ test("the axis is the last required numeric argument unless the record names one
 
 test("a head the complex emitter cannot lower is the real slice, with the reason", () => {
   const z: FunctionSignature["parameters"] = [{ name: "z", type: "complex" }];
-  // Gamma has a complex lowering; BesselJ and F have none.
+  // Gamma has a complex lowering; BesselY (integer orders are limits) has none.
   expect(functionViewOf({ head: "Gamma", parameters: z, returns: "number" })?.views.map((v) => v.head)).toEqual([
     "ComplexPlot",
     "Plot",
   ]);
   const unlowered = functionViewOf({
-    head: "BesselJ",
+    head: "BesselY",
     parameters: [{ name: "n", type: "real" }, ...z],
     returns: "number",
   });
