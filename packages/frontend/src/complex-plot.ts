@@ -85,7 +85,7 @@ fn gradient(t0: f32) -> vec3f {
   }
   uncertain = 0.0;
   let polar = VALUE;
-  // A value whose digits the f32 kernel cannot vouch for is hatched, not colored: noise there reads as structure.
+  // A value whose digits the kernel cannot vouch for is hatched, not colored: noise there reads as structure.
   if (uncertain > 0.5) { return vec4f(vec3f(0.2 + 0.12 * step(0.5, fract((frag.x + frag.y) / 8.0))), 1.0); }
   let logMag = polar.z;
   if (!(logMag < 1e30)) { return vec4f(1.0, 1.0, 1.0, 1.0); } // a pole

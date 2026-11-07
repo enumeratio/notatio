@@ -272,17 +272,25 @@ test.describe("on the GPU", () => {
     await expect.poll(() => box.locator("svg text").allTextContents()).toContain("5.7e-3");
   });
 
-  /** `hurwitz(s, a)` on the GPU and the double-precision kernel, over a grid of a: both values, and whether the shader declined. */
-  async function hurwitzGrid(page: Page, s: [number, number], step: number, span: number) {
+  /**
+   * `hurwitz(s, a)` on the GPU and the double-precision kernel, over a grid of a (x over ±xSpan, y over
+   * [-ySpan, ySpan]): the error of one against the other, whether the shader declined, and how many times
+   * the sum the double kernel's largest term is (its own cancellation, which its digits go with).
+   */
+  async function hurwitzGrid(page: Page, s: [number, number], step: number, xSpan: number, ySpan = xSpan) {
+    const points: [number, number][] = [];
+    for (let y = -ySpan; y <= ySpan; y += step)
+      for (let x = -xSpan; x <= xSpan; x += step) points.push([Math.fround(x + 0.013), Math.fround(y - 0.0071)]);
+    return hurwitzAt(page, s, points);
+  }
+
+  async function hurwitzAt(page: Page, s: [number, number], a: [number, number][]) {
     return page.evaluate(
-      async ([sr, si, step, span, repo]) => {
+      async ([sr, si, points, repo]) => {
         const { zetaWGSL } = await import(`/@fs${repo}packages/symbols/analysis/analytic/src/shader.ts` as string);
         const cpu = await import(
           `/@fs${repo}packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts` as string
         );
-        const points: number[][] = [];
-        for (let y = -span; y <= span; y += step)
-          for (let x = -span; x <= span; x += step) points.push([sr!, si!, x + 0.013, y - 0.0071]);
         const n = points.length;
         const code = `${zetaWGSL}
 @group(0) @binding(0) var<storage, read> inp : array<vec4f>;
@@ -297,7 +305,7 @@ test.describe("on the GPU", () => {
           compute: { module: device.createShaderModule({ code }), entryPoint: "main" },
         });
         const input = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-        device.queue.writeBuffer(input, 0, new Float32Array(points.flat()));
+        device.queue.writeBuffer(input, 0, new Float32Array(points.flatMap(([ar, ai]) => [sr!, si!, ar!, ai!])));
         const output = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
         const read = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
         const bind = device.createBindGroup({
@@ -317,66 +325,165 @@ test.describe("on the GPU", () => {
         device.queue.submit([encoder.finish()]);
         await read.mapAsync(GPUMapMode.READ);
         const gpu = new Float32Array(read.getMappedRange().slice(0));
-        return points.map(([sr, si, ar, ai], i) => {
-          const exact = cpu.hurwitzZeta({ re: sr, im: si }, { re: ar, im: ai }) as { re: number; im: number };
+        return points.map(([ar, ai], i) => {
+          const exact = cpu.hurwitzZeta({ re: sr, im: si }, { re: ar!, im: ai! }) as { re: number; im: number };
+          const { value, largest } = cpu.hurwitzEMWithLargest({ re: sr, im: si }, { re: ar!, im: ai! }) as {
+            value: { re: number; im: number };
+            largest: number;
+          };
           const err = Math.hypot(gpu[4 * i]! - exact.re, gpu[4 * i + 1]! - exact.im) / Math.hypot(exact.re, exact.im);
-          return { a: [ar, ai], err, declined: gpu[4 * i + 2]! > 0.5 };
+          return { a: [ar, ai], err, declined: gpu[4 * i + 2]! > 0.5, cond: largest / Math.hypot(value.re, value.im) };
         });
       },
-      [s[0], s[1], step, span, REPO] as const,
+      [s[0], s[1], a, REPO] as const,
     );
   }
 
-  for (const si of [4, 12]) {
-    test(`the GPU HurwitzZeta kernel at s = 1.5 + ${si}i agrees with the CPU kernel wherever it draws (S#5)`, async ({
+  // Measured on the GPU (swiftshader) over a in [-6, 6]^2 and [-58, 58] x [-32, 32], the portrait's zoom range: f32 hatched
+  // 40% of the lower half at s = 1.5 + 4i and 70% at 12i, 0 above. The df64 sum hatches none at 4i and 10% (the
+  // small window) and 21% (the whole range) at 12i, where e^(-12 |arg a|) is below 1e-9 of the terms.
+  for (const [si, hatchedSmall, hatchedWide] of [
+    [4, 0, 0],
+    [12, 0.15, 0.25],
+  ] as const) {
+    test(`the GPU HurwitzZeta kernel at s = 1.5 + ${si}i agrees with the CPU kernel wherever it draws and declines only where its df64 sum cannot vouch (S#5, BL-336)`, async ({
       page,
     }) => {
       await page.goto("/explore/zeta/phase-portrait");
-      const grid = await hurwitzGrid(page, [1.5, si], 0.5, 6);
-      const drawn = grid.filter((p) => !p.declined && Number.isFinite(p.err));
-      // Above the real axis every point is drawn, below it the kernel declines where its sum has lost the digits.
-      expect(grid.filter((p) => p.a[1]! > 0 && p.declined)).toEqual([]);
-      expect(grid.filter((p) => p.a[1]! < 0 && p.declined).length).toBeGreaterThan(0);
-      expect(drawn.length).toBeGreaterThan(grid.length / 3);
-      // A drawn value is within 0.05 of the exact one: no terraces of noise below the axis.
-      for (const p of drawn) expect(p.err).toBeLessThan(0.05);
+      const small = await hurwitzGrid(page, [1.5, si], 0.5, 6);
+      const wide = await hurwitzGrid(page, [1.5, si], 2, 58, 32);
+      for (const [grid, hatched] of [
+        [small, hatchedSmall],
+        [wide, hatchedWide],
+      ] as const) {
+        const below = grid.filter((p) => p.a[1]! < 0);
+        // Above the real axis every point is drawn; below it only a share is hatched, and nothing is drawn where
+        // the sum has lost more than the 1e9 the kernel vouches to: its terms are cond times the sum.
+        expect(grid.filter((p) => p.a[1]! > 0 && p.declined)).toEqual([]);
+        expect(below.filter((p) => p.declined).length / below.length).toBeLessThanOrEqual(hatched);
+        for (const p of grid) {
+          if (p.declined) expect(p.cond).toBeGreaterThan(1e8);
+          else if (Number.isFinite(p.err)) {
+            expect(p.cond).toBeLessThan(1e10);
+            // A drawn value is within 0.05 of the exact one (measured 0.023 at most, at a sum f32 still draws), no
+            // terraces of noise below the axis; one that needed df64 to be drawn is good to 1e-3 (measured 3e-4).
+            expect(p.err).toBeLessThan(0.05);
+            if (p.cond > 1e3) expect(p.err).toBeLessThan(1e-3);
+          }
+        }
+        // The df64 sum draws most of what f32 declined: past the real axis hatching is the exception.
+        expect(below.filter((p) => !p.declined).length).toBeGreaterThan(below.length * 0.7);
+      }
+      if (si === 12) expect(wide.some((p) => p.declined)).toBe(true);
     });
   }
 
-  test("the HurwitzZeta portrait hatches what the kernel declines below the real axis, and nothing above it (S#5)", async ({
+  test("the GPU HurwitzZeta kernel declines past its 96 direct terms, where the Euler–Maclaurin tail would start under 0.75 of emEdge (S#5, BL-336)", async ({
     page,
   }) => {
+    await page.goto("/explore/zeta/phase-portrait");
+    // s = 1.5 + 12i: emEdge is 19, so the direct sum from a reaches 19 only for Re a above 19 - 96 = -77, and the
+    // tail may start at 0.75 * 19 = 14, Re a above -82. Above the real axis nothing cancels, so any hatch there is the cap.
+    const at = await hurwitzAt(
+      page,
+      [1.5, 12],
+      [
+        [-60.3, 2.5],
+        [-80.3, 2.5],
+        [-90.3, 2.5],
+        [-100.3, 2.5],
+        [-90.3, 30.5],
+      ],
+    );
+    expect(at.map((p) => p.declined)).toEqual([false, false, true, true, true]);
+    for (const p of at.filter((p) => !p.declined)) expect(p.err).toBeLessThan(0.05);
+  });
+
+  // A portrait of HurwitzZeta(1.5 + si i, a) over a window of height `extent`, read back as pixels: for a lattice of
+  // pixels below the real axis, whether it is the grey hatch and how many times its sum the double kernel's largest term is.
+  async function hatchedPixels(page: Page, si: number, extent: number) {
     await page.addInitScript(CAPTURE_CANVAS);
     await page.goto("/explore/zeta/phase-portrait");
-    const canvas = page.locator('notatio-complex-plot[value^="HurwitzZeta"] canvas').first();
+    await page.evaluate(
+      ([si, extent]) => {
+        const el = document.createElement("notatio-complex-plot");
+        el.setAttribute("value", `HurwitzZeta(1.5 + ${si} * i, z)`);
+        el.setAttribute("extent", String(extent));
+        el.setAttribute("height", "380");
+        el.id = "hurwitz-portrait";
+        document.querySelector("main, .vp-doc, body")!.prepend(el);
+      },
+      [si, extent] as const,
+    );
+    const canvas = page.locator("#hurwitz-portrait canvas").first();
     await canvas.scrollIntoViewIfNeeded();
-    const share = async () =>
-      canvas.evaluate(async (c: HTMLCanvasElement) => {
-        const url = (window as unknown as { __grab(c: HTMLCanvasElement): string | null }).__grab(c);
-        if (!url) return undefined;
-        const img = new Image();
-        img.src = url;
-        await img.decode();
-        const flat = document.createElement("canvas");
-        flat.width = img.width;
-        flat.height = img.height;
-        const ctx = flat.getContext("2d")!;
-        ctx.drawImage(img, 0, 0);
-        const data = ctx.getImageData(0, 0, img.width, img.height).data;
-        // The view is centered on the real axis: the top half of the canvas is Im a > 0.
-        const half = Math.floor(img.height / 2);
-        const grey = [0, 0];
-        for (let y = 0; y < img.height; y++)
-          for (let x = 0; x < img.width; x++) {
-            const k = 4 * (y * img.width + x);
-            const [r, g, b] = [data[k]!, data[k + 1]!, data[k + 2]!];
-            if (Math.max(r, g, b) - Math.min(r, g, b) <= 2 && r >= 40 && r <= 95) grey[y < half ? 0 : 1]!++;
-          }
-        return { above: grey[0]! / (half * img.width), below: grey[1]! / ((img.height - half) * img.width) };
-      });
-    await expect.poll(share, { timeout: 90_000 }).toBeDefined();
-    const { above, below } = (await share())!;
-    expect(above).toBeLessThan(0.01);
-    expect(below).toBeGreaterThan(0.1);
-  });
+    const read = () =>
+      canvas.evaluate(
+        async (c: HTMLCanvasElement, [si, extent, repo]) => {
+          const url = (window as unknown as { __grab(c: HTMLCanvasElement): string | null }).__grab(c);
+          if (!url) return undefined;
+          const cpu = await import(
+            `/@fs${repo}packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts` as string
+          );
+          const img = new Image();
+          img.src = url;
+          await img.decode();
+          const flat = document.createElement("canvas");
+          flat.width = img.width;
+          flat.height = img.height;
+          const ctx = flat.getContext("2d")!;
+          ctx.drawImage(img, 0, 0);
+          const data = ctx.getImageData(0, 0, img.width, img.height).data;
+          const out: { grey: boolean; cond: number; above: boolean; re: number }[] = [];
+          // The window is centered on the origin, y up, and as wide as its aspect says.
+          for (let py = 3; py < img.height; py += 7)
+            for (let px = 3; px < img.width; px += 7) {
+              const k = 4 * (py * img.width + px);
+              const [r, g, b] = [data[k]!, data[k + 1]!, data[k + 2]!];
+              const re = ((px + 0.5) / img.width - 0.5) * extent! * (img.width / img.height);
+              const im = (0.5 - (py + 0.5) / img.height) * extent!;
+              const { value, largest } = cpu.hurwitzEMWithLargest({ re: 1.5, im: si! }, { re, im }) as {
+                value: { re: number; im: number };
+                largest: number;
+              };
+              out.push({
+                grey: Math.max(r, g, b) - Math.min(r, g, b) <= 2 && r >= 40 && r <= 95,
+                cond: largest / Math.hypot(value.re, value.im),
+                above: im > 0,
+                re,
+              });
+            }
+          return out;
+        },
+        [si, extent, REPO] as const,
+      );
+    await expect.poll(read, { timeout: 120_000 }).toBeDefined();
+    return (await read())!;
+  }
+
+  // Hatched where the df64 sum cannot vouch (the double kernel's terms 1e9 times its sum), drawn elsewhere: the lattice
+  // is read off the pixels, the cancellation off the double kernel at the pixel's a. Measured on the GPU, the lower
+  // half of a 1263 x 380 portrait: f32 hatched 35% (4i) and 42% (12i) of a window 8 high, 52% of one 64 high (the
+  // whole zoom range); df64 hatches none of the first two and 34% of the third, 12% of the width of it being the
+  // term cap, left of Re a = -82.
+  for (const [si, extent, hatched] of [
+    [4, 8, 0],
+    [12, 8, 0],
+    [12, 64, 0.4],
+  ] as const) {
+    test(`the HurwitzZeta portrait at s = 1.5 + ${si}i over a window ${extent} high hatches what the df64 kernel cannot vouch for, and nothing above the real axis (S#5, BL-336)`, async ({
+      page,
+    }) => {
+      const pixels = await hatchedPixels(page, si, extent);
+      const below = pixels.filter((p) => !p.above);
+      // (Left of Re a = -82 the kernel declines for want of direct terms, above the axis as well.)
+      const near = pixels.filter((p) => p.above && p.re > -80);
+      expect(near.filter((p) => p.grey).length / near.length).toBeLessThan(0.01);
+      expect(below.filter((p) => p.grey).length / below.length).toBeLessThanOrEqual(hatched);
+      // A hatched pixel is one the kernel's terms dwarf; a drawn one is not past the kernel's limit.
+      expect(below.filter((p) => p.grey && p.cond < 1e8 && p.re > -80)).toEqual([]);
+      expect(below.filter((p) => !p.grey && p.cond > 1e10)).toEqual([]);
+      if (hatched > 0) expect(below.filter((p) => p.grey).length / below.length).toBeGreaterThan(hatched / 3);
+    });
+  }
 });
