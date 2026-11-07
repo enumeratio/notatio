@@ -52,11 +52,33 @@ function openSymbolsOf(ce: Engine): readonly string[] {
  */
 export function isolateFreeSymbols<T>(ce: Engine, body: () => T): T {
   const open = openSymbolsOf(ce);
+  const before = chainOf(ce).map((scope) => new Set(scope.bindings.keys()));
   ce.pushScope();
   try {
     for (const name of open) ce.declare(name, { type: "unknown", inferred: true });
     return body();
   } finally {
     ce.popScope();
+    forgetNewBindings(ce, before);
   }
+}
+
+const chainOf = (ce: Engine): Scope[] => {
+  const scopes: Scope[] = [];
+  for (let scope: Scope | null = ce.context.lexicalScope; scope; scope = scope.parent) scopes.push(scope);
+  return scopes;
+};
+
+/**
+ * Drop what the call declared in a scope that outlives it. `Solve` declares its free
+ * parameter (`t`, or `t_1` after an integer one) in the scope below the current one, so the
+ * name would stay taken and the next call on the engine would answer `t_1` for what a fresh
+ * engine answers `t`.
+ */
+function forgetNewBindings(ce: Engine, before: readonly ReadonlySet<string>[]): void {
+  chainOf(ce).forEach((scope, i) => {
+    const known = before[i];
+    if (known === undefined) return;
+    for (const name of scope.bindings.keys()) if (!known.has(name)) scope.bindings.delete(name);
+  });
 }

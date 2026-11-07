@@ -170,6 +170,21 @@ test("a case's inferred free-symbol types don't reach the next case on the same 
   expect(results[1]).toMatchObject({ id: "fresh-m", outcome: "Evaluated", value: ["Transpose", "m"] });
 });
 
+test("a case's fresh Solve parameter doesn't stay taken for the next case on the same worker", async () => {
+  const solve = ["Solve", ["Equal", "x", "x"], "x"];
+  const results = await runCases(
+    [
+      { id: "first", input: solve },
+      { id: "second", input: solve },
+    ],
+    { concurrency: 1 },
+  );
+  expect(results.map((r) => r.value)).toEqual([
+    ["List", "t"],
+    ["List", "t"],
+  ]);
+});
+
 test("a hard-killed case (no cooperative answer) reports outcome Aborted, not a value of Aborted", async () => {
   // Every worker this pool creates hangs (including the replacement after the kill), so
   // only the one case is run here -- ./pool.test.ts already covers a killed worker being
