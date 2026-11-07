@@ -7,7 +7,8 @@
 // The walk's table is n² cells of n terms each: fine while a count is a double, but partition
 // counts reach 2^53 only around n = 300, where the interpreter's exact integers would take
 // minutes. So past 2^53 unrank, rank and the interpreter decline (unknown); the count stays exact
-// through the `fast` count (exact-classes.ts).
+// through the `fast` count (exact-classes.ts). IntegerPartitions alone answers there, from a
+// BigInt table built with a recurrence (a cell is one addition), up to a table size.
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
 import { partSets, partWalk, type PartWalk } from "../../../collections/src/families/part-walk.ts";
 import { add, equal, iff, mul, quotient, sub } from "../../../collections/src/families/tables.ts";
@@ -18,6 +19,9 @@ const n = "_n";
 const m = "_m";
 const k = "_k";
 const cap = add(n, 1);
+
+/** Largest n whose partition table (n² cells) the BigInt path builds; the table of 1,000 is a million cells. */
+const INTEGER_PARTITIONS_TABLE_LIMIT = 1000;
 
 /** The walk's family, declining past 2^53. */
 const walk = (spec: Omit<PartWalk, "carrier" | "order" | "total">): EpsilFamily => ({
@@ -38,7 +42,25 @@ const capped = (head: string, allows?: (p: MathJSON) => MathJSON): EpsilFamily =
     ...(allows === undefined ? {} : { allows: (_c, p) => allows(p) }),
   });
 
-export const integerPartitions = capped("IntegerPartitions");
+/** Partitions of n into parts at most c: T(m, c) = T(m, c − 1) + T(m − c, c), the count with a part c or without. The
+ *  walk's table is built over BigInts, n² cells, so a table past `INTEGER_PARTITIONS_TABLE_LIMIT` declines as before. */
+export const integerPartitions: EpsilFamily = {
+  ...walk({
+    head: "IntegerPartitions",
+    paramCount: 1,
+    params: [n],
+    width: cap,
+    start: n,
+    limit: (c) => c,
+    next: (_c, p) => p,
+    recurrence: (read, here, m, c) =>
+      iff(equal(c, 0), 0, add(here(sub(c, 1)), iff(["LessEqual", c, m], read(sub(m, c), c), 0))),
+  }),
+  // p(n) first passes 2^53 at n = 300.
+  bigSamples: [[300], [400]],
+  declinePastDoubles: true,
+  bigLimit: ([size]) => size > INTEGER_PARTITIONS_TABLE_LIMIT,
+};
 
 /** Parts all different: after part p the next is at most p − 1. */
 export const distinctPartitions = walk({

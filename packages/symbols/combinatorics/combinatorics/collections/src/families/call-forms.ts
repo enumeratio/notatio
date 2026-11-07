@@ -87,6 +87,7 @@ function polyCollection<E>(
   encode: (e: E) => unknown,
   decode: (b: Boxed) => unknown,
   resolve: (ops: readonly Expr[]) => Resolved<E> | undefined,
+  own?: CollectionHandlers,
 ): CollectionHandlers {
   const opsOf = (c: Expr) => operandsOf(c);
   const element = (res: Resolved<E>, i: number): Expr => ce.box((res.encode ?? encode)(res.unrank(i)) as BoxInput);
@@ -110,7 +111,11 @@ function polyCollection<E>(
       };
     },
     at: (c, index) => {
-      if (typeof index !== "number") return undefined;
+      // A row past 2^53 arrives as digits: the family's own `at` takes them for its plain call, `Head(n)`.
+      if (typeof index !== "number") {
+        const ops = opsOf(c);
+        return ops.length === 1 && integerAt(ops[0]) !== undefined ? own?.at?.(c, index) : undefined;
+      }
       const res = resolve(opsOf(c));
       if (res === undefined) return undefined;
       const total = res.count;
@@ -479,8 +484,9 @@ function resolveSubsets(
 /** Replace `head`'s `collection` handlers -- a no-op if `head` isn't declared on `ce`
  *  (e.g. a test engine that only runs declareFamilies, or GroupOrder's owning package
  *  not being loaded), matching widenSignature's own quiet no-op in that case. */
-function setCollection(ce: Engine, head: string, handlers: CollectionHandlers): void {
-  extendHead(ce, head, { collection: handlers });
+function setCollection(ce: Engine, head: string, handlers: (own?: CollectionHandlers) => CollectionHandlers): void {
+  const definition = ce.lookupDefinition(head) as { operator?: { collection?: CollectionHandlers } } | undefined;
+  extendHead(ce, head, { collection: handlers(definition?.operator?.collection) });
 }
 
 /** Declare the widened call forms. Call AFTER declareFamilies (IntegerPartitions,
@@ -492,16 +498,15 @@ export function declareCallForms(ce: Engine): void {
   // Typed by its carrier when it has one: `IntegerPartition([3, 1])`, as the plain family is.
   const partition = carrierTypeForName(ce, "IntegerPartition");
   widenSignature(ce, "IntegerPartitions", `(integer, any?, any?) -> list<${partition ?? "list<integer>"}>`);
-  setCollection(
-    ce,
-    "IntegerPartitions",
+  setCollection(ce, "IntegerPartitions", (own) =>
     partition === undefined
-      ? polyCollection(ce, listMJ, asIntList, resolveIntegerPartitions)
+      ? polyCollection(ce, listMJ, asIntList, resolveIntegerPartitions, own)
       : polyCollection(
           ce,
           (e: number[]) => ["IntegerPartition", listMJ(e)],
           (b) => asIntList((b as unknown as Expr).operator === "IntegerPartition" ? b.ops![0]! : b),
           resolveIntegerPartitions,
+          own,
         ),
   );
 
@@ -526,16 +531,15 @@ export function declareCallForms(ce: Engine): void {
       ? "(integer | collection<any>, integer?) -> list<list<list<any>>>"
       : `(integer | collection<any>, integer?) -> list<${setPartition} | list<list<any>>>`,
   );
-  setCollection(
-    ce,
-    "SetPartitions",
+  setCollection(ce, "SetPartitions", (own) =>
     setPartition === undefined
-      ? polyCollection(ce, blocksMJ, asBlockList, resolveSetPartitions)
+      ? polyCollection(ce, blocksMJ, asBlockList, resolveSetPartitions, own)
       : polyCollection(
           ce,
           (blocks: number[][]) => ["SetPartition", blocksMJ(blocks)],
           (b) => asBlockList((b as unknown as Expr).operator === "SetPartition" ? b.ops![0]! : b),
           resolveSetPartitions,
+          own,
         ),
   );
 
@@ -552,9 +556,7 @@ export function declareCallForms(ce: Engine): void {
   const kernels = subsetKernels(ce);
   const wrapSubset = (n: number, idxs: number[]): unknown =>
     finset === undefined ? listMJ(idxs) : ["Finset", ["Tuple", n, listMJ(idxs)]];
-  setCollection(
-    ce,
-    "Subsets",
+  setCollection(ce, "Subsets", (own) =>
     polyCollection(
       ce,
       listMJ,
@@ -565,6 +567,7 @@ export function declareCallForms(ce: Engine): void {
             : b) as never,
         ),
       (ops) => resolveSubsets(kernels, ops, wrapSubset),
+      own,
     ),
   );
 

@@ -7,7 +7,7 @@
 import { bareEngine } from "@enumeratio/engine/testing";
 import { evaluateEpsil } from "@enumeratio/structures";
 import { expect, test } from "vite-plus/test";
-import { type EpsilFamily, epsilKernelOn } from "../../collections/src/families/epsil.ts";
+import { type EpsilFamily, epsilKernelOn, kernelOn } from "../../collections/src/families/epsil.ts";
 import { entries as listed, epsilEntries } from "../src/families/core.ts";
 import { entries as restricted } from "../src/families/partitions.ts";
 import {
@@ -217,10 +217,12 @@ for (const [head, reading] of Object.entries(RESTRICTIONS)) {
   });
 }
 
-// Past 2^53 the table is out of the interpreter's reach (minutes of exact integers by n = 300),
-// so every operation declines, unknown, as the TS kernels did.
-test("past 2^53 IntegerPartitions declines", () => {
-  const kernel = epsilKernelOn(ce, byHead.get("IntegerPartitions")!);
-  expect(() => kernel.count([400])).toThrow(/past 2\^53/);
-  expect(() => kernel.unrank([400], 0n)).toThrow(/past 2\^53/);
+// Past 2^53 the interpreter's table takes minutes (exact integers by n = 300); the BigInt table answers instead,
+// up to INTEGER_PARTITIONS_TABLE_LIMIT, and past it the family declines. The rows are in tests/bigint-families.test.ts.
+test("past 2^53 IntegerPartitions answers from BigInt code, and declines past its table limit", () => {
+  const family = byHead.get("IntegerPartitions")!;
+  expect(epsilKernelOn(ce, family).count([400])).toBe(6727090051741041926n);
+  const kernel = kernelOn(ce, family);
+  expect(() => kernel.unrank([1001], 5n ** 40n)).toThrow(/past 2\^53/);
+  expect(() => kernel.rank([1001], [1001])).toThrow(/past 2\^53/);
 });

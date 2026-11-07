@@ -53,6 +53,8 @@ interface Shape {
   readonly carrierParams?: number;
   readonly params: readonly string[];
   readonly fastCount?: FastKernel["count"];
+  /** Fibers past 2^53 to check BigInt-compiled code on; opts the family in (`EpsilFamily.bigSamples`). */
+  readonly bigSamples?: EpsilFamily["bigSamples"];
 }
 const shapeOf = (s: Shape) => ({
   head: s.head,
@@ -62,6 +64,7 @@ const shapeOf = (s: Shape) => ({
   kind: "ints" as const,
   params: s.params,
   ...(s.fastCount === undefined ? {} : { fastCount: s.fastCount }),
+  ...(s.bigSamples === undefined ? {} : { bigSamples: s.bigSamples }),
 });
 
 /**

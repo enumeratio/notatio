@@ -1,6 +1,8 @@
 import { bareEngine } from "@enumeratio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
+import { allFamilies } from "../src/families/index.ts";
+import { kernelOn } from "../src/families/epsil.ts";
 
 // Brute-force cross-checks for the call forms in ./families/call-forms.ts, against
 // independent generators (no shared code with the kernels those call forms route to) --
@@ -345,4 +347,24 @@ test("a family whose interpreter declines past 2^53 still answers membership and
   expect(countOf(["DistinctPartitions", 400])).toBe(11962163400706);
   expect(stripLists(run(["At", ["DistinctPartitions", 400], 1]).json)).toEqual([400]);
   expect(run(["Element", list(400), ["DistinctPartitions", 400]]).json).toBe("True");
+});
+
+// A table asks a head's `collection.at` for a row past 2^53 as digits; the widened call forms hand the plain
+// `Head(n)` to the family, which unranks it, in the order the family lists.
+test.each([
+  ["Subsets", 60],
+  ["SetPartitions", 30],
+  ["IntegerPartitions", 400],
+])("%s(%i): a row past 2^53, asked as digits, is the family's row", (head, n) => {
+  const call = ce.box([head, n] as never);
+  const definition = ce.lookupDefinition(head) as {
+    operator?: { collection?: { at?: (c: unknown, i: string) => any } };
+  };
+  const at = definition.operator!.collection!.at!;
+  const kernel = kernelOn(ce, allFamilies.find((f) => f.head === head)! as never);
+  for (const rank of [2n ** 53n, 2n ** 53n + 5n]) {
+    const row = at(call, String(rank + 1n));
+    expect(row, `rank ${rank}`).toBeDefined();
+    expect(stripLists(row.json)).toEqual(kernel.unrank([n], rank));
+  }
 });
