@@ -8,6 +8,13 @@ signatures:
     description: The most edges whose ends induce a subgraph that is just those edges.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001393
+    url: https://www.findstat.org/St001393
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

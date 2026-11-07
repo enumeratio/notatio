@@ -8,6 +8,13 @@ signatures:
     description: The fewest vertices such that every vertex is one of them or adjacent to one.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000273
+    url: https://www.findstat.org/St000273
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

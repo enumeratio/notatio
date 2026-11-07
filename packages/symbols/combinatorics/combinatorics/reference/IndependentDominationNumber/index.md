@@ -8,6 +8,13 @@ signatures:
     description: "The fewest vertices in a set that is independent and dominating: a maximal independent set."
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001322
+    url: https://www.findstat.org/St001322
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

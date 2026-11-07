@@ -1196,7 +1196,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     `FindStat's St001315. ${NO_VERTICES}`,
   ),
   stat(
-    "VertexConnectivity",
+    "GraphVertexConnectivity",
     "The fewest vertices whose deletion leaves a disconnected graph; the complete graph on n vertices gives n - 1.",
     withMasks(
       bindList("connected", connectedMasks, [

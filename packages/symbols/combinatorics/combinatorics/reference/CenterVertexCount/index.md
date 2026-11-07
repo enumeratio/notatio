@@ -8,6 +8,13 @@ signatures:
     description: The vertices whose greatest distance to another vertex is the least.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001342
+    url: https://www.findstat.org/St001342
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -43,7 +43,7 @@ const BATCH_TWO = new Set([
   "GraphDifferential",
   "Degeneracy",
   "DissociationNumber",
-  "VertexConnectivity",
+  "GraphVertexConnectivity",
   "InducedFourCycleCount",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;

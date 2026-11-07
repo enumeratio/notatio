@@ -8,6 +8,13 @@ signatures:
     description: The greatest, over the sets of vertices, of the least number of neighbors a vertex has inside the set.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001277
+    url: https://www.findstat.org/St001277
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -8,6 +8,13 @@ signatures:
     description: The sets of edges that meet every vertex exactly once.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000274
+    url: https://www.findstat.org/St000274
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

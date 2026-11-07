@@ -8,6 +8,13 @@ signatures:
     description: The sets of vertices such that every vertex is in the set or adjacent to one of it.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001303
+    url: https://www.findstat.org/St001303
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

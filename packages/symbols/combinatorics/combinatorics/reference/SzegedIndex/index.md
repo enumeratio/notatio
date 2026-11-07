@@ -8,6 +8,13 @@ signatures:
     description: The sum over the edges of the vertices nearer one end times those nearer the other.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000263
+    url: https://www.findstat.org/St000263
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

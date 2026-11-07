@@ -1,10 +1,17 @@
 ---
-name: VertexConnectivity
+name: GraphVertexConnectivity
 domain: Graph statistics
-signature: VertexConnectivity(graph)
+signature: GraphVertexConnectivity(graph)
 summary: The fewest vertices whose deletion leaves a disconnected graph; the complete graph on n vertices gives n - 1.
+catalog:
+  - system: findstat
+    identity: St000262
+    url: https://www.findstat.org/St000262
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 signatures:
-  - call: VertexConnectivity(graph)
+  - call: GraphVertexConnectivity(graph)
     description: The fewest vertices whose deletion leaves a disconnected graph; the complete graph on n vertices gives n - 1.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number

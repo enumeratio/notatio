@@ -8,6 +8,13 @@ signatures:
     description: The sum over the pairs of vertices of their distance plus its square.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000467
+    url: https://www.findstat.org/St000467
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

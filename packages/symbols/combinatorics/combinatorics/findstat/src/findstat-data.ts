@@ -6668,7 +6668,7 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
-    head: "VertexConnectivity",
+    head: "GraphVertexConnectivity",
     on: "LabeledGraph",
     findstat: ["St000262"],
     values: 208,

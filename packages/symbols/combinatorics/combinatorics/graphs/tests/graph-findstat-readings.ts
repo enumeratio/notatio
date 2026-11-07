@@ -354,7 +354,7 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
         .filter((s) => s.every((v) => neighborsIn(matrix(g), v, s).length <= 1))
         .map((s) => s.length),
     ),
-  VertexConnectivity: (g) => {
+  GraphVertexConnectivity: (g) => {
     if (g.n === 0) return 0;
     for (let k = 0; k <= g.n - 2; k++)
       if (

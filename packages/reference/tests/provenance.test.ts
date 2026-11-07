@@ -2004,7 +2004,7 @@ const NOVEL = [
   "GraphDifferential",
   "Degeneracy",
   "DissociationNumber",
-  "VertexConnectivity",
+  "GraphVertexConnectivity",
   "InducedFourCycleCount",
   "AdjointRepresentationDimension",
   "AlmostPositiveRootCount",

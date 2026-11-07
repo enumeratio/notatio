@@ -8,6 +8,13 @@ signatures:
     description: The most that the vertices next to a set, outside it, exceed the set in number.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001723
+    url: https://www.findstat.org/St001723
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

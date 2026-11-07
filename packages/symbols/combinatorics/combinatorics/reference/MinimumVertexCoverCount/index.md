@@ -8,6 +8,13 @@ signatures:
     description: "The vertex covers with the fewest vertices: the independent sets with the most."
     library: enumeratio-combinatorics
     type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000363
+    url: https://www.findstat.org/St000363
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
