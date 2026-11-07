@@ -64,7 +64,7 @@ it.runIf(process.env.DEEP_TESTS === "1")(
   "reaches the last row of SymmetricGroup(25) with G",
   async () => {
     const { text } = await lastPage("CollectionTable(SymmetricGroup(25))");
-    expect(text).toContain("15511210043330985984000000 │ Permutation([25, 24, 23");
+    expect(text).toContain("15511210043330985984000000 │ [25, 24, 23");
     expect(text).toContain("of ≈ 1.55 × 10²⁵");
   },
   60_000,

@@ -74,17 +74,30 @@ test("each head called on the carrier value gives the reading", () => {
       ).toBe(expected(t));
 });
 
-// Larger trees run nightly (DEEP_TESTS=1).
+/** The trees the deep sweep interprets across all heads, about 40 ms each here (the swap and automorphism
+ *  heads 100 to 150): a head takes its share, so the sweep's time stays put as heads are added. */
+const DEEP_EVALUATIONS = 30_000;
+const PER_HEAD = Math.floor(DEEP_EVALUATIONS / TREE_STATISTICS.length);
+
+/** At most `k` of the trees, spread evenly through them with the last taken. */
+const spread = <T>(trees: T[], k: number): T[] =>
+  k >= trees.length ? trees : Array.from({ length: k }, (_, i) => trees[Math.ceil(((i + 1) * trees.length) / k) - 1]!);
+
+/** A head's trees of each size, the smaller sizes whole when the budget allows: every size is represented. */
+const sweep = <T>(sizes: number[], trees: (n: number) => T[]): T[] =>
+  sizes.flatMap((n) => spread(trees(n), Math.floor(PER_HEAD / sizes.length)));
+
+// Larger trees run nightly (DEEP_TESTS=1), each head over its share of them (evenly through each size).
 test.skipIf(!process.env.DEEP_TESTS)(
   "every tree definition agrees over the binary trees of 6..8 nodes and the ordered trees of 6..7 edges",
   () => {
-    for (const t of [6, 7, 8].flatMap(binaryTrees))
+    for (const t of sweep([6, 7, 8], binaryTrees))
       for (const [head, expected] of Object.entries(BINARY_READINGS))
         if (!(SWAP_HEADS.has(head) && JSON.stringify(t).split("[").length > 8))
           expect(evaluate(head, "BinaryTree", binaryJson(t)), `${head} ${JSON.stringify(t)}`).toBe(expected(t));
     // The automorphism heads compare every pair of children and cost the most; seven edges is theirs to skip.
     const slow = new Set(["AutomorphismGroupSize", "InequivalentIncreasingTreeCount"]);
-    for (const t of [6, 7].flatMap(orderedTrees))
+    for (const t of sweep([6, 7], orderedTrees))
       for (const [head, expected] of Object.entries(ORDERED_READINGS))
         if (!(slow.has(head) && JSON.stringify(t).split("[").length > 8))
           expect(evaluate(head, "OrderedTree", orderedJson(t)), `${head} ${JSON.stringify(t)}`).toBe(expected(t));

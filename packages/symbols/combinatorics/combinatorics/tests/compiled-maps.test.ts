@@ -29,6 +29,7 @@ const MAX_SIZE = DEEP ? 6 : 4;
 const PER_FAMILY = DEEP ? 60 : 6;
 
 const carrierByType = new Map(CARRIERS.map((carrier) => [carrier.type, carrier]));
+const carrierByName = new Map(CARRIERS.map((carrier) => [carrier.name, carrier]));
 
 /** Small elements of every family whose elements are values of `carrier`, as its contents. */
 const subjectsOf = (carrier: string): unknown[] => smallElements(ce, carrier, MAX_SIZE, PER_FAMILY);
@@ -135,6 +136,67 @@ test("each small element is sampled once", () => {
   expect(subjects).toEqual([...new Set(all)]);
 });
 
+/** How many subjects of a carrier its maps interpret together, deep or not. The interpreter is the slow
+ *  side of the comparison, so a map's share is this over the carrier's maps: the file's time stays put as
+ *  maps are added, and each map sees fewer subjects. Sized from the seconds one interpretation took on a
+ *  2-thread box, the mean over a carrier's maps at the standard sizes (BinaryWord .03, Permutation .14,
+ *  SignedPermutation .2, DyckPath .3, SetPartition .3, StandardTableau .3, IntegerPartition .7, whose
+ *  composition ReadingTableau takes seconds); deep sizes cost several times that. */
+const CARRIER_ALLOWANCE: Readonly<Record<string, number>> = {
+  Permutation: 800,
+  SignedPermutation: 400,
+  DyckPath: 450,
+  SetPartition: 400,
+  StandardTableau: 300,
+  IntegerPartition: 200,
+  BinaryWord: 2000,
+};
+/** The allowance of a carrier not listed: the others' maps are cheap at every size the sample reaches. */
+const DEFAULT_ALLOWANCE = 1500;
+
+/** The fewest subjects a map interprets however many maps share the carrier: enough to take every
+ *  size up to 3 whole in a one-parameter family. */
+const MIN_PER_MAP = 12;
+
+/** Maps whose interpretation grows steeply with the element: the most cells (the sum of its numbers) a
+ *  subject may have. A family's sample reaches shapes of 36 cells at its largest sizes; RskRecording, which
+ *  ReadingTableau applies to the reading word, takes about a second at 3 cells, 3 at 6 and 9 at 10, so past
+ *  8 the composition outlasts `testTimeout`. */
+const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([["ReadingTableau@integer_partition", 8]]);
+
+const cellsOf = (contents: unknown): number =>
+  typeof contents === "number"
+    ? contents
+    : Array.isArray(contents)
+      ? contents.reduce((n: number, c) => n + cellsOf(c), 0)
+      : 0;
+
+/** The subjects a map of `carrier` interprets, at most its share of the carrier's allowance. The
+ *  smallest (by length of their MathJSON) half stay whole and the rest are spread evenly through the
+ *  larger ones, the largest taken last, so every size is represented. The same subjects every run. */
+function budgeted(carrier: string, subjects: unknown[]): unknown[] {
+  const type = carrierByName.get(carrier)?.type;
+  const maps = MAPS.filter(
+    (m) => m.from === type && (m.composedOf !== undefined || COMPILED_MAPS[mapKey(m)]?.run !== undefined),
+  );
+  const cap = Math.max(
+    MIN_PER_MAP,
+    Math.floor((CARRIER_ALLOWANCE[carrier] ?? DEFAULT_ALLOWANCE) / Math.max(1, maps.length)),
+  );
+  if (subjects.length <= cap) return subjects;
+  const bySize = subjects
+    .map((s) => [JSON.stringify(s).length, s] as const)
+    .toSorted((a, b) => a[0] - b[0])
+    .map(([, s]) => s);
+  const whole = Math.ceil(cap / 2);
+  const rest = bySize.slice(whole);
+  const spread = cap - whole;
+  return [
+    ...bySize.slice(0, whole),
+    ...Array.from({ length: spread }, (_, k) => rest[Math.ceil(((k + 1) * rest.length) / spread) - 1]),
+  ];
+}
+
 // A map's subjects run in chunks of one test each, so the file's total grows with the sample
 // but no test comes near `testTimeout`.
 const CHUNK = 40;
@@ -170,10 +232,10 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
   const small = (words: unknown[]): unknown[] => words.filter((word) => DEEP || (word as unknown[]).length <= 4);
   const subjects =
     map.argumentParts !== undefined
-      ? partSubjects(ce, map, small(subjectsOf("Permutation")))
+      ? partSubjects(ce, map, budgeted("Permutation", small(subjectsOf("Permutation"))))
       : map.imageParts !== undefined
-        ? small(subjectsOf(from.name))
-        : subjectsOf(from.name);
+        ? budgeted(from.name, small(subjectsOf(from.name)))
+        : budgeted(from.name, subjectsOf(from.name));
   const title = `${map.name} from ${map.from}: compiled agrees with interpreted`;
   for (let start = 0; start < subjects.length; start += CHUNK) {
     test(subjects.length > CHUNK ? `${title} (${start / CHUNK + 1})` : title, () => {
@@ -248,7 +310,11 @@ for (const map of compositions.filter((m) => COMPILED_MAPS[mapKey(m)]?.run !== u
   const steps = compositionSteps(MAPS, map)!;
   const from = carrierByType.get(map.from)!;
   const chain = composedDefinition({ ce, steps, generated: COMPILED_MAPS[mapKey(map)] })!;
-  const subjects = subjectsOf(from.name);
+  const largest = SLOW_TO_INTERPRET.get(mapKey(map)) ?? Infinity;
+  const subjects = budgeted(
+    from.name,
+    subjectsOf(from.name).filter((contents) => cellsOf(contents) <= largest),
+  );
   let declined = 0;
   const interpret = (contents: unknown): unknown => {
     let value = contents;

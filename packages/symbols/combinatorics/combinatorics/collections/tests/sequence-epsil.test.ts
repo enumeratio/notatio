@@ -226,7 +226,12 @@ for (const head of definitions.keys()) {
       for (const d of [-1n, 0n, 1n]) if (x + d <= horizon) probes.add(x + d);
     for (const [name, kernel] of kernels(head)) {
       expect([name, kernel.count([])]).toEqual([name, Infinity]);
-      sequence.forEach((term, r) => expect([name, r, kernel.unrank([], BigInt(r))]).toEqual([name, r, asTerm(term)]));
+      sequence.forEach((term, r) => {
+        // A rank past the definition's reach is declined (the deep run goes past it for the partition numbers).
+        if (name === "Epsil" && definitions.get(head)!.early?.unrank?.(BigInt(r) as never, []) === "decline")
+          return expect([name, r, answer(() => kernel.unrank([], BigInt(r)))]).toEqual([name, r, "declined"]);
+        expect([name, r, kernel.unrank([], BigInt(r))]).toEqual([name, r, asTerm(term)]);
+      });
       for (const x of probes) {
         const member = head === "SternDiatomicSequence" ? x >= 0n : places.has(x);
         const place = places.get(x);
@@ -325,6 +330,11 @@ for (const head of definitions.keys()) {
         expect([r, kernel.rank(asTerm(x) as never, [])]).toEqual([r, BigInt(places.get(x)!)]);
         for (const y of DEEP ? [x - 1n, x + 1n, 2n * x, x / 2n] : [x + 1n])
           if (!places.has(y)) {
+            // A number past the scan's reach is declined, as a member of that size is.
+            if (definitions.get(head)!.early?.member?.(y as never, []) === "decline") {
+              expect([r, y, answer(() => kernel.valid(y as never, []))]).toEqual([r, y, "declined"]);
+              continue;
+            }
             expect([r, y, kernel.valid(y as never, [])]).toEqual([r, y, false]);
             expect([r, y, kernel.rank(y as never, [])]).toEqual([r, y, -1n]);
           }

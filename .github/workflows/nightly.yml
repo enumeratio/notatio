@@ -35,8 +35,11 @@ concurrency:
 
 jobs:
   # Test suites' long sweeps, gated on DEEP_TESTS so the PR gate stays fast. A package whose tests read
-  # DEEP_TESTS gets a filter here. Three jobs, about half an hour each (one job ran 89 minutes against a
-  # 90-minute cap): rebalance by moving a step between them when one drifts.
+  # DEEP_TESTS gets a filter here. Four jobs, none past about 85 minutes on a runner's speed (statistics and
+  # compiled the longest; the 120-minute cap includes a cold dist build): rebalance by moving a step between
+  # them when one drifts. A step runs after a failed one (`!cancelled()`) once setup has passed, so a job
+  # reports every failure and still ends red; a sweep that outgrows its time takes a share of its subjects per
+  # head (see the files' own comments) rather than a longer timeout.
   deep-tests-kernels:
     name: deep test sweeps (kernels)
     if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-tests-kernels')
@@ -46,14 +49,19 @@ jobs:
       DEEP_TESTS: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
+      - id: setup
+        uses: ./.github/actions/setup
       - run: pnpm -r --filter @enumeratio/analytic run test
       # Hand-written kernels against the interpreter, and each family's Epsil counts past 2^53.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/fast-kernels.test.ts tests/map-kernels.test.ts
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/lattice-orders.test.ts
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run words/tests/epsil-families trees/tests/epsil-families graphs/tests/epsil-families collections/tests/epsil-families permutations/tests/epsil-families permutations/tests/permutation-classes
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/fast-kernels.test.ts tests/map-kernels.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/lattice-orders.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run words/tests/epsil-families trees/tests/epsil-families graphs/tests/epsil-families collections/tests/epsil-families permutations/tests/epsil-families permutations/tests/permutation-classes
       # Every member of the larger families, and the sizes the standard run skips (about six minutes together).
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/unlabeled-tree-classes trees/tests/nested-families collections/tests/increasing-binary-trees compositions/tests/epsil-families partitions/tests/epsil-families tableaux/tests/boxed-plane-partitions tableaux/tests/rsk-pairs tableaux/tests/skew-standard-tableaux words/tests/parking-functions
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/unlabeled-tree-classes trees/tests/nested-families collections/tests/increasing-binary-trees compositions/tests/epsil-families partitions/tests/epsil-families tableaux/tests/boxed-plane-partitions tableaux/tests/rsk-pairs tableaux/tests/skew-standard-tableaux words/tests/parking-functions
 
   deep-tests-statistics:
     name: deep test sweeps (statistics)
@@ -65,39 +73,73 @@ jobs:
       DEEP_TESTS: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
+      - id: setup
+        uses: ./.github/actions/setup
       # Statistics compiled from their Epsil against the hand-written kernels; the timing table
       # goes to the job summary.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/statistics-compiled.test.ts
       # Dyck-path statistics over the longer paths.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run lattice-paths/tests/dyck-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run lattice-paths/tests/dyck-statistics
       # Integer-partition statistics over the larger partitions.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run partitions/tests/partition-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run partitions/tests/partition-statistics
       # FindStat integer-partition statistics over the larger partitions.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run partitions/tests/partition-findstat
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run partitions/tests/partition-findstat
       # FindStat Dyck-path statistics over the larger paths.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run lattice-paths/tests/dyck-findstat
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run lattice-paths/tests/dyck-findstat
       # FindStat maps against their independent readings, over the larger objects (Demazure product, tableau actions).
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/map-findstat.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/map-findstat.test.ts
       # Our statistic distributions against FindStat's, per size, for every adopted statistic the pairs cover.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/distribution-crosscheck.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/distribution-crosscheck.test.ts
       # Cartan type statistics over the larger types and the group-generating readings.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run cartan/tests/cartan-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run cartan/tests/cartan-statistics
       # Tree statistics over the larger trees.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/tree-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/tree-statistics
       # Composition statistics over the larger compositions.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run compositions/tests/composition-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run compositions/tests/composition-statistics
       # Tableau statistics over the larger tableaux.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tableaux/tests/tableau-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run tableaux/tests/tableau-statistics
       # Permutation statistics over the larger permutations.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/permutation-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/permutation-statistics
       # Signed-permutation, alternating-sign-matrix and perfect-matching statistics over the next size up.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/signed-permutation-statistics tableaux/tests/alternating-sign-matrix-statistics set-partitions/tests/perfect-matching-statistics
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/signed-permutation-statistics tableaux/tests/alternating-sign-matrix-statistics set-partitions/tests/perfect-matching-statistics
       # The numeric sequences and predicate scans defined in Epsil, against references in bigints and sieves, farther out.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run collections/tests/numeric-epsil.test.ts collections/tests/sequence-epsil.test.ts collections/tests/scan-epsil.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run collections/tests/numeric-epsil.test.ts collections/tests/sequence-epsil.test.ts collections/tests/scan-epsil.test.ts
+
+  # The compiled code against the interpreter, the slow side of both: each file takes a deterministic share of
+  # the subjects per head, so its time holds as heads are added.
+  deep-tests-compiled:
+    name: deep test sweeps (compiled families and maps)
+    if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-tests-compiled')
+    runs-on: ubuntu-latest
+    # A cold dist build takes about an hour on a 2-vCPU runner.
+    timeout-minutes: 120
+    env:
+      DEEP_TESTS: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - id: setup
+        uses: ./.github/actions/setup
+      # Compiled families against the interpreter on the fibers the build skips.
+      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-families.test.ts
+      # Compiled maps against the interpreter, over the larger sample.
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-maps.test.ts
 
   deep-tests-reference:
-    name: deep test sweeps (compiled, reference and number theory)
+    name: deep test sweeps (reference and number theory)
     if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-tests-reference')
     runs-on: ubuntu-latest
     # A cold dist build takes about an hour on a 2-vCPU runner; the tests had 60 minutes before.
@@ -106,25 +148,29 @@ jobs:
       DEEP_TESTS: "1"
     steps:
       - uses: actions/checkout@v4
-      - uses: ./.github/actions/setup
-      # Compiled families against the interpreter on the fibers the build skips.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-families.test.ts
-      # Compiled maps against the interpreter, over the larger sample.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-maps.test.ts
+      - id: setup
+        uses: ./.github/actions/setup
       # Each map's graded, surjection and bijection laws, a size at a time, one size deeper.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/map-laws-per-size.test.ts
       # Every head in an engine holding only what the resolver picks, against the full one.
-      - run: pnpm --filter @enumeratio/reference exec vp test run tests/resolver.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/reference exec vp test run tests/resolver.test.ts
       # Every sampled head's examples, read back from markup and evaluated through the registry.
-      - run: pnpm --filter @enumeratio/reference exec vp test run tests/markup-registry.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/reference exec vp test run tests/markup-registry.test.ts
       # Every example through a bare and a declared engine: the exact list of heads we override.
-      - run: pnpm --filter @enumeratio/reference exec vp test run tests/provenance.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/reference exec vp test run tests/provenance.test.ts
       # Every declaration order of the packages that extend one head (BL-13).
-      - run: pnpm --filter @enumeratio/census exec vp test run tests/declaration-order.test.ts
-      - run: pnpm --filter @enumeratio/ce-patches exec vp test run tests/algebraic-numbers.test.ts
-      - run: pnpm --filter @enumeratio/cli exec vp test run tests/table.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/census exec vp test run tests/declaration-order.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/ce-patches exec vp test run tests/algebraic-numbers.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/cli exec vp test run tests/table.test.ts
       # π(x) by the combinatorial count against Lucy_Hedgehog, then 10^14 … 10^17 (minutes at the top).
-      - run: pnpm --filter @enumeratio/residues exec vp test run tests/prime-count.test.ts
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/residues exec vp test run tests/prime-count.test.ts
 
   # The compile steps' interpreter cross-checks, every definition (a PR run re-checks only a sample
   # when just the engine's dists moved). The generated files must come out as the build made them:
@@ -590,3 +636,65 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
       - run: node packages/reference/scripts/check-crosswalk.ts 2>&1 | tee -a "$GITHUB_STEP_SUMMARY"
+
+  # A job cancelled at its timeout fails no step, so the routine reading failed runs misses it. One rolling issue for
+  # the jobs a scheduled run lost, closed by the next daily run that loses none. A push never cancels this workflow.
+  cancelled-jobs-issue:
+    name: cancelled jobs issue
+    needs:
+      - deep-tests-kernels
+      - deep-tests-statistics
+      - deep-tests-compiled
+      - deep-tests-reference
+      - deep-crosschecks
+      - review-claims
+      - component-stories
+      - component-stories-gpu
+      - python-oracle
+      - python-oracle-plausible
+      - julia-oracle
+      - julia-oracle-plausible
+      - rust-oracle
+      - oscar-oracle
+      - mathlib-oracle
+      - sage-oracle
+      - wolfram-oracle
+      - split-check-list
+      - split-check
+      - crosswalk-links
+    if: ${{ always() && github.event_name == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@v7
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          SCHEDULE: ${{ github.event.schedule }}
+        with:
+          script: |
+            const TITLE = 'nightly job cancelled'
+            const LABELS = ['nightly-fixup']
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            const results = Object.entries(JSON.parse(process.env.NEEDS))
+            const cancelled = results.filter(([, job]) => job.result === 'cancelled').map(([id]) => id)
+            const listed = await github.rest.issues.listForRepo({ ...context.repo, labels: LABELS.join(','), state: 'all', per_page: 100 })
+            const matches = listed.data.filter(i => !i.pull_request && i.title === TITLE)
+            const existing = matches.find(i => i.state === 'open') ?? matches[0]
+            if (cancelled.length === 0) {
+              if (process.env.SCHEDULE === '5 4 * * *' && existing?.state === 'open') {
+                await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body: `Every job ran to the end. ${runUrl}` })
+                await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'closed' })
+              }
+              return
+            }
+            const body = [
+              `Cancelled before finishing, most likely at the job's timeout: ${cancelled.map(id => `\`${id}\``).join(', ')}.`,
+              ``,
+              `Run: ${runUrl}`,
+            ].join('\n')
+            if (existing) {
+              if (existing.state === 'closed') await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'open' })
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body })
+            } else {
+              await github.rest.issues.create({ ...context.repo, title: TITLE, body, labels: LABELS })
+            }
