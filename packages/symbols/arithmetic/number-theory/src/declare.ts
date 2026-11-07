@@ -372,7 +372,9 @@ function declareCombinatoricsGamma113(ce: Engine): void {
   wrapOperator(
     ce,
     ["Pochhammer", ["Complex", 2, 5], ["Complex", 0, 8]],
-    (ops) => isNonReal(ops[0]) || isNonReal(ops[1]),
+    // An integer order stays native's: its exact product, where the Gamma ratio in doubles
+    // would turn (2+5i)_3 = -201+5i into -201.00000000000003+5i.
+    (ops) => (isNonReal(ops[0]) || isNonReal(ops[1])) && integerAt(ops[1]) === undefined,
     () => (ops, options) => {
       const [a, n] = ops;
       return doublesIfComplex(ops, options, () => div(gamma(add(a, n)), gamma(a)).N());
