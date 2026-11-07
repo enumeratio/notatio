@@ -3,6 +3,11 @@ name: SmallestMissingDegree
 domain: Graph statistics
 signature: SmallestMissingDegree(graph)
 summary: The least number, 0 or more, that is not the degree of any vertex.
+signatures:
+  - call: SmallestMissingDegree(graph)
+    description: The least number, 0 or more, that is not the degree of any vertex.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

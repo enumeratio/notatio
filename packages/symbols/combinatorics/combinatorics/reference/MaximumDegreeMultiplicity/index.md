@@ -3,6 +3,11 @@ name: MaximumDegreeMultiplicity
 domain: Graph statistics
 signature: MaximumDegreeMultiplicity(graph)
 summary: The most vertices that share one degree.
+signatures:
+  - call: MaximumDegreeMultiplicity(graph)
+    description: The most vertices that share one degree.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

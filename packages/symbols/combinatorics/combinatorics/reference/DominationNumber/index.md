@@ -3,6 +3,11 @@ name: DominationNumber
 domain: Graph statistics
 signature: DominationNumber(graph)
 summary: The fewest vertices such that every vertex is one of them or adjacent to one.
+signatures:
+  - call: DominationNumber(graph)
+    description: The fewest vertices such that every vertex is one of them or adjacent to one.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -3,6 +3,11 @@ name: DistinctNeighborhoodCount
 domain: Graph statistics
 signature: DistinctNeighborhoodCount(graph)
 summary: The different sets of neighbors the vertices have.
+signatures:
+  - call: DistinctNeighborhoodCount(graph)
+    description: The different sets of neighbors the vertices have.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

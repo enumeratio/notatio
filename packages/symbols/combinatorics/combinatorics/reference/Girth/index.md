@@ -3,6 +3,11 @@ name: Girth
 domain: Graph statistics
 signature: Girth(graph)
 summary: The length of the shortest cycle.
+signatures:
+  - call: Girth(graph)
+    description: The length of the shortest cycle.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

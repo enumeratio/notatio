@@ -3,6 +3,11 @@ name: SchultzIndex
 domain: Graph statistics
 signature: SchultzIndex(graph)
 summary: The sum over the pairs of vertices of the sum of their degrees times their distance.
+signatures:
+  - call: SchultzIndex(graph)
+    description: The sum over the pairs of vertices of the sum of their degrees times their distance.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

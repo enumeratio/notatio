@@ -3,6 +3,11 @@ name: InducedMatchingNumber
 domain: Graph statistics
 signature: InducedMatchingNumber(graph)
 summary: The most edges whose ends induce a subgraph that is just those edges.
+signatures:
+  - call: InducedMatchingNumber(graph)
+    description: The most edges whose ends induce a subgraph that is just those edges.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

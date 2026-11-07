@@ -3,6 +3,11 @@ name: DissociationNumber
 domain: Graph statistics
 signature: DissociationNumber(graph)
 summary: The most vertices in a set in which every vertex has at most one neighbor.
+signatures:
+  - call: DissociationNumber(graph)
+    description: The most vertices in a set in which every vertex has at most one neighbor.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

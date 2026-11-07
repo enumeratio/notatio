@@ -3,6 +3,11 @@ name: MaximumCutSize
 domain: Graph statistics
 signature: MaximumCutSize(graph)
 summary: The most edges between the two sides of a division of the vertices.
+signatures:
+  - call: MaximumCutSize(graph)
+    description: The most edges between the two sides of a division of the vertices.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

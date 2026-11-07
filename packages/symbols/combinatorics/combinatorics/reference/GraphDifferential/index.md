@@ -3,6 +3,11 @@ name: GraphDifferential
 domain: Graph statistics
 signature: GraphDifferential(graph)
 summary: The most that the vertices next to a set, outside it, exceed the set in number.
+signatures:
+  - call: GraphDifferential(graph)
+    description: The most that the vertices next to a set, outside it, exceed the set in number.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

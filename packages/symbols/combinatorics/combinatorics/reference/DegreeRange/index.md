@@ -3,6 +3,11 @@ name: DegreeRange
 domain: Graph statistics
 signature: DegreeRange(graph)
 summary: The greatest degree less the least.
+signatures:
+  - call: DegreeRange(graph)
+    description: The greatest degree less the least.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

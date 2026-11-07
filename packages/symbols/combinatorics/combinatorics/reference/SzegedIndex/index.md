@@ -3,6 +3,11 @@ name: SzegedIndex
 domain: Graph statistics
 signature: SzegedIndex(graph)
 summary: The sum over the edges of the vertices nearer one end times those nearer the other.
+signatures:
+  - call: SzegedIndex(graph)
+    description: The sum over the edges of the vertices nearer one end times those nearer the other.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

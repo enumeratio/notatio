@@ -3,6 +3,11 @@ name: GutmanIndex
 domain: Graph statistics
 signature: GutmanIndex(graph)
 summary: The sum over the pairs of vertices of the product of their degrees times their distance.
+signatures:
+  - call: GutmanIndex(graph)
+    description: The sum over the pairs of vertices of the product of their degrees times their distance.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

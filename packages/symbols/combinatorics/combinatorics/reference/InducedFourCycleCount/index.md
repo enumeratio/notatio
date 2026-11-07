@@ -3,6 +3,11 @@ name: InducedFourCycleCount
 domain: Graph statistics
 signature: InducedFourCycleCount(graph)
 summary: "The sets of four vertices that induce a cycle: every one has exactly two neighbors among the four."
+signatures:
+  - call: InducedFourCycleCount(graph)
+    description: "The sets of four vertices that induce a cycle: every one has exactly two neighbors among the four."
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

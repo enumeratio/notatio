@@ -3,6 +3,11 @@ name: LongestPathLength
 domain: Graph statistics
 signature: LongestPathLength(graph)
 summary: The edges of the longest path.
+signatures:
+  - call: LongestPathLength(graph)
+    description: The edges of the longest path.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

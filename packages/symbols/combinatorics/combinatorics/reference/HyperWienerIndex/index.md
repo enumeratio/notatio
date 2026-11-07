@@ -3,6 +3,11 @@ name: HyperWienerIndex
 domain: Graph statistics
 signature: HyperWienerIndex(graph)
 summary: The sum over the pairs of vertices of their distance plus its square.
+signatures:
+  - call: HyperWienerIndex(graph)
+    description: The sum over the pairs of vertices of their distance plus its square.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

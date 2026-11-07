@@ -3,6 +3,11 @@ name: CenterVertexCount
 domain: Graph statistics
 signature: CenterVertexCount(graph)
 summary: The vertices whose greatest distance to another vertex is the least.
+signatures:
+  - call: CenterVertexCount(graph)
+    description: The vertices whose greatest distance to another vertex is the least.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

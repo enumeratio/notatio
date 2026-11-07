@@ -3,6 +3,11 @@ name: SpanningTreeCount
 domain: Graph statistics
 signature: SpanningTreeCount(graph)
 summary: "The spanning trees: by the matrix-tree theorem, the determinant of the Laplacian with its last row and column deleted."
+signatures:
+  - call: SpanningTreeCount(graph)
+    description: "The spanning trees: by the matrix-tree theorem, the determinant of the Laplacian with its last row and column deleted."
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

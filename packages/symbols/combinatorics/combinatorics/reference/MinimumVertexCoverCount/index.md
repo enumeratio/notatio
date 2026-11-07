@@ -3,6 +3,11 @@ name: MinimumVertexCoverCount
 domain: Graph statistics
 signature: MinimumVertexCoverCount(graph)
 summary: "The vertex covers with the fewest vertices: the independent sets with the most."
+signatures:
+  - call: MinimumVertexCoverCount(graph)
+    description: "The vertex covers with the fewest vertices: the independent sets with the most."
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

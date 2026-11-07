@@ -3,6 +3,11 @@ name: GraphCycleCount
 domain: Graph statistics
 signature: GraphCycleCount(graph)
 summary: The cycles, each counted once however it is started or turned.
+signatures:
+  - call: GraphCycleCount(graph)
+    description: The cycles, each counted once however it is started or turned.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

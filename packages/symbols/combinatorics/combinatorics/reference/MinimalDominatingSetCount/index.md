@@ -3,6 +3,11 @@ name: MinimalDominatingSetCount
 domain: Graph statistics
 signature: MinimalDominatingSetCount(graph)
 summary: The dominating sets that stop dominating when any vertex is dropped.
+signatures:
+  - call: MinimalDominatingSetCount(graph)
+    description: The dominating sets that stop dominating when any vertex is dropped.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
