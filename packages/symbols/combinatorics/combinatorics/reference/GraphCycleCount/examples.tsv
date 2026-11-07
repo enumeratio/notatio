@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-graph-on-4-vertices-with-the-edges-12-23-24			[GraphCycleCount, [LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 2, 3], [List, 2, 4], [List, 3, 4]]]]]	1			the graph on 4 vertices with the edges 12, 23, 24 and 34
+findstat-st001736-1	Properties		[CombinatorialStat, [LabeledGraph, [Tuple, 1, [List]]], "'GraphCycleCount'"]	0	0	FindStat St001736	FindStat's value for ([],1)
+findstat-st001736-2	Properties		[CombinatorialStat, [LabeledGraph, [Tuple, 2, [List]]], "'GraphCycleCount'"]	0	0	FindStat St001736	FindStat's value for ([],2)
+findstat-st001736-3	Properties		[CombinatorialStat, [LabeledGraph, [Tuple, 3, [List]]], "'GraphCycleCount'"]	0	0	FindStat St001736	FindStat's value for ([],3)

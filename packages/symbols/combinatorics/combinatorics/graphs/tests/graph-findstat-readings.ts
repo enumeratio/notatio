@@ -100,6 +100,98 @@ function matchings(g: Graph): (readonly [number, number][])[] {
   return found;
 }
 
+/** The vertices of `set` adjacent to `v`. */
+const neighborsIn = (m: boolean[][], v: number, set: readonly number[]): number[] => set.filter((w) => m[v]![w]);
+const isDominating = (m: boolean[][], n: number, set: readonly number[]): boolean =>
+  range(0, n - 1).every((v) => set.includes(v) || neighborsIn(m, v, set).length > 0);
+const dominatingSets = (g: Graph): number[][] => subsets(g.n).filter((s) => isDominating(matrix(g), g.n, s));
+const isSubset = (small: readonly number[], big: readonly number[]): boolean => small.every((v) => big.includes(v));
+const minimalDominatingSets = (g: Graph): number[][] => {
+  const all = dominatingSets(g);
+  return all.filter((s) => !all.some((t) => t.length < s.length && isSubset(t, s)));
+};
+
+/** The length of each cycle of the graph, once: found by depth-first search from its lowest vertex, in one direction. */
+function cycleLengths(g: Graph): number[] {
+  const m = matrix(g);
+  const found: number[] = [];
+  const extend = (start: number, path: number[]): void => {
+    const last = path[path.length - 1]!;
+    for (let w = start; w < g.n; w++) {
+      if (!m[last]![w]) continue;
+      if (w === start && path.length >= 3 && path[1]! < last) found.push(path.length);
+      else if (w > start && !path.includes(w)) extend(start, [...path, w]);
+    }
+  };
+  for (let s = 0; s < g.n; s++) extend(s, [s]);
+  return found;
+}
+/** The edges of the longest path, by depth-first search from every vertex. */
+function longestPath(g: Graph): number {
+  const m = matrix(g);
+  let best = 0;
+  const extend = (path: number[]): void => {
+    best = Math.max(best, path.length - 1);
+    for (let w = 0; w < g.n; w++) if (m[path[path.length - 1]!]![w] && !path.includes(w)) extend([...path, w]);
+  };
+  for (let s = 0; s < g.n; s++) extend([s]);
+  return best;
+}
+/** The determinant by the Leibniz sum over permutations. */
+function determinant(rows: readonly (readonly number[])[]): number {
+  const n = rows.length;
+  const permute = (left: number[], chosen: number[]): number => {
+    if (left.length === 0) {
+      let inversions = 0;
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) if (chosen[i]! > chosen[j]!) inversions++;
+      return (
+        (inversions % 2 === 0 ? 1 : -1) * chosen.reduce((product, column, row) => product * rows[row]![column]!, 1)
+      );
+    }
+    return sum(
+      left.map((c) =>
+        permute(
+          left.filter((d) => d !== c),
+          [...chosen, c],
+        ),
+      ),
+    );
+  };
+  return permute(range(0, n - 1), []);
+}
+/** The edge subsets of size `k`. */
+function edgeSubsets(g: Graph, k: number): (readonly (readonly [number, number])[])[] {
+  const found: (readonly [number, number])[][] = [];
+  const extend = (from: number, chosen: (readonly [number, number])[]): void => {
+    if (chosen.length === k) found.push(chosen);
+    else for (let i = from; i < g.edges.length; i++) extend(i + 1, [...chosen, g.edges[i]!]);
+  };
+  extend(0, []);
+  return found;
+}
+/** The peeling order's smallest degrees: remove a vertex of least degree until none is left. */
+function degeneracy(g: Graph): number {
+  const m = matrix(g);
+  let left = allVertices(g);
+  let worst = 0;
+  while (left.length > 0) {
+    const [v] = left.toSorted((a, b) => neighborsIn(m, a, left).length - neighborsIn(m, b, left).length);
+    worst = Math.max(worst, neighborsIn(m, v!, left).length);
+    left = left.filter((w) => w !== v);
+  }
+  return worst;
+}
+/** Over the pairs of vertices joined by a path, the sum of `term(degree u, degree w, distance)`. */
+const overJoinedPairs = (g: Graph, term: (a: number, b: number, d: number) => number): number =>
+  sum(
+    pairsOf(allVertices(g)).map(([u, w]) => {
+      const d = distancesFrom(matrix(g), u, allVertices(g)).get(w);
+      return d === undefined ? 0 : term(degrees(g)[u]!, degrees(g)[w]!, d);
+    }),
+  );
+const cutSizes = (g: Graph): number[] =>
+  subsets(g.n).map((s) => g.edges.filter(([u, v]) => s.includes(u - 1) !== s.includes(v - 1)).length);
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -185,4 +277,104 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
     subsets(g.n).filter((s) => s.length > 0 && componentsOn(matrix(g), s) === 1).length,
   MatchingNumber: (g) => Math.max(...matchings(g).map((chosen) => chosen.length)),
   HosoyaIndex: (g) => matchings(g).length,
+  MinimumVertexCoverCount: (g) => {
+    const covers = subsets(g.n).filter((s) => g.edges.every(([u, v]) => s.includes(u - 1) || s.includes(v - 1)));
+    const fewest = Math.min(...covers.map((s) => s.length));
+    return covers.filter((s) => s.length === fewest).length;
+  },
+  SpanningTreeCount: (g) =>
+    g.n === 0
+      ? 0
+      : edgeSubsets(g, g.n - 1).filter(
+          (chosen) => componentsOn(matrix({ n: g.n, edges: chosen }), allVertices(g)) === 1,
+        ).length,
+  AdjacencyDeterminant: (g) => determinant(matrix(g).map((row) => row.map(Number))),
+  DegreeRange: (g) => (g.n === 0 ? 0 : Math.max(...degrees(g)) - Math.min(...degrees(g))),
+  MaximumDegreeMultiplicity: (g) => Math.max(0, ...degrees(g).map((d) => degrees(g).filter((e) => e === d).length)),
+  SmallestMissingDegree: (g) => range(0, g.n).find((k) => !degrees(g).includes(k))!,
+  DistinctNeighborhoodCount: (g) => new Set(matrix(g).map((row) => row.map((edge, v) => (edge ? v : -1)).join())).size,
+  SzegedIndex: (g) => {
+    const m = matrix(g);
+    const all = allVertices(g);
+    return sum(
+      g.edges.map(([a, b]) => {
+        const fromA = distancesFrom(m, a - 1, all);
+        const fromB = distancesFrom(m, b - 1, all);
+        const nearer = (x: Map<number, number>, y: Map<number, number>): number =>
+          all.filter((w) => (x.get(w) ?? Infinity) < (y.get(w) ?? Infinity)).length;
+        return nearer(fromA, fromB) * nearer(fromB, fromA);
+      }),
+    );
+  },
+  SchultzIndex: (g) => overJoinedPairs(g, (a, b, d) => (a + b) * d),
+  GutmanIndex: (g) => overJoinedPairs(g, (a, b, d) => a * b * d),
+  HyperWienerIndex: (g) => overJoinedPairs(g, (_a, _b, d) => d + d * d),
+  CenterVertexCount: (g) => eccentricities(g).filter((e) => e === Math.min(...eccentricities(g))).length,
+  Girth: (g) => (g.n === 0 ? 0 : Math.min(Infinity, ...cycleLengths(g))),
+  GraphLongestCycleLength: (g) => Math.max(0, ...cycleLengths(g)),
+  GraphCycleCount: (g) => cycleLengths(g).length,
+  LongestPathLength: longestPath,
+  MaximumCutSize: (g) => Math.max(0, ...cutSizes(g)),
+  BipartiteEdgeDeletionNumber: (g) => g.edges.length - Math.max(0, ...cutSizes(g)),
+  PerfectMatchingCount: (g) => matchings(g).filter((chosen) => 2 * chosen.length === g.n).length,
+  InducedMatchingNumber: (g) =>
+    Math.max(
+      0,
+      ...matchings(g)
+        .filter((chosen) => {
+          const ends = new Set(chosen.flat());
+          return g.edges.filter(([u, v]) => ends.has(u) && ends.has(v)).length === chosen.length;
+        })
+        .map((chosen) => chosen.length),
+    ),
+  DominationNumber: (g) => Math.min(...dominatingSets(g).map((s) => s.length)),
+  DominatingSetCount: (g) => dominatingSets(g).length,
+  MinimalDominatingSetCount: (g) => minimalDominatingSets(g).length,
+  UpperDominationNumber: (g) => Math.max(0, ...minimalDominatingSets(g).map((s) => s.length)),
+  IndependentDominationNumber: (g) =>
+    Math.min(
+      ...dominatingSets(g)
+        .filter((s) => isIndependent(matrix(g), s))
+        .map((s) => s.length),
+    ),
+  GraphDifferential: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      0,
+      ...subsets(g.n).map(
+        (s) => allVertices(g).filter((v) => !s.includes(v) && neighborsIn(m, v, s).length > 0).length - s.length,
+      ),
+    );
+  },
+  Degeneracy: degeneracy,
+  DissociationNumber: (g) =>
+    Math.max(
+      0,
+      ...subsets(g.n)
+        .filter((s) => s.every((v) => neighborsIn(matrix(g), v, s).length <= 1))
+        .map((s) => s.length),
+    ),
+  GraphVertexConnectivity: (g) => {
+    if (g.n === 0) return 0;
+    for (let k = 0; k <= g.n - 2; k++)
+      if (
+        subsets(g.n).some(
+          (s) =>
+            s.length === k &&
+            componentsOn(
+              matrix(g),
+              allVertices(g).filter((v) => !s.includes(v)),
+            ) > 1,
+        )
+      )
+        return k;
+    return g.n - 1;
+  },
+  InducedFourCycleCount: (g) =>
+    subsets(g.n).filter(
+      (s) =>
+        s.length === 4 &&
+        pairsOf(s).filter(([u, v]) => matrix(g)[u]![v]).length === 4 &&
+        s.every((v) => neighborsIn(matrix(g), v, s).length <= 2),
+    ).length,
 };

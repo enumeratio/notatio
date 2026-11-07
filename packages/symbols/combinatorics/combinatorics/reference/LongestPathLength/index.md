@@ -1,0 +1,22 @@
+---
+name: LongestPathLength
+domain: Graph statistics
+signature: LongestPathLength(graph)
+summary: The edges of the longest path.
+signatures:
+  - call: LongestPathLength(graph)
+    description: The edges of the longest path.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001120
+    url: https://www.findstat.org/St001120
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
+---
+
+- Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
+- Takes a `LabeledGraph` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
+- FindStat's St001120. The graph with no vertices gives 0.

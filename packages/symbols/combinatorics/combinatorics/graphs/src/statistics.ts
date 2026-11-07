@@ -117,6 +117,16 @@ const distancesOf = (matrix: MathJSON): MathJSON =>
   );
 const withDistances = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
   withAdjacency(bindList("distances", distancesOf("adjacency"), body, "list<list<integer>>"), otherwise);
+const withDegreesAndDistances = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withDegrees(
+    bindList(
+      "adjacency",
+      adjacencyMatrix,
+      bindList("distances", distancesOf("adjacency"), body, "list<list<integer>>"),
+      "list<list<integer>>",
+    ),
+    otherwise,
+  );
 const distance = (u: MathJSON, w: MathJSON): MathJSON => entry("distances", u, w);
 /** Over the ordered pairs of vertices (u, w), `body` summed. */
 const overPairs = (body: MathJSON): MathJSON => floored(sumOver(vertices, floored(sumOver(vertices, body, "w")), "u"));
@@ -301,6 +311,180 @@ const matchingTable = (
     "list<list<integer>>",
   );
 const lastEntry = (table: MathJSON): MathJSON => at(length(table), table);
+
+/** For each subset (by mask + 1), each vertex's neighbors inside it, around `body`. */
+const withNeighborsIn = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withMasks(
+    bindList(
+      "toSet",
+      forEach(
+        masks,
+        forEach(
+          vertices,
+          floored(
+            sumOver(
+              "edges",
+              add(
+                times(one(equals(lower("e"), "v")), one(hasBit("m", upper("e")))),
+                times(one(equals(upper("e"), "v")), one(hasBit("m", lower("e")))),
+              ),
+              "e",
+            ),
+          ),
+          "v",
+        ),
+        "m",
+      ),
+      body,
+      "list<list<integer>>",
+    ),
+    otherwise,
+  );
+/** The neighbors of `vertex` among the vertices of the subset `mask`. */
+const neighborsIn = (mask: MathJSON, vertex: MathJSON): MathJSON => at(vertex, at(add(mask, 1), "toSet"));
+/** The vertices of the subset `mask` whose number of neighbors inside it is `bad`. */
+const misfits = (mask: MathJSON, bad: (inside: MathJSON) => MathJSON): MathJSON =>
+  floored(sumOver(vertices, times(one(hasBit(mask, "v")), one(bad(neighborsIn(mask, "v")))), "v"));
+/** Each subset's size when no vertex of it has `bad` neighbors inside, else 0, by mask + 1. */
+const sizeUnlessAny = (bad: (inside: MathJSON) => MathJSON): MathJSON =>
+  forEach(masks, times(one(equals(misfits("m", bad), 0)), total("m")), "m");
+
+/** Whether the subset `mask` is dominating, by mask + 1: every vertex is in it or has a neighbor in it. */
+const dominatingTable: MathJSON = forEach(
+  masks,
+  one(
+    equals(
+      floored(sumOver(vertices, times(subtract(1, one(hasBit("m", "v"))), one(equals(neighborsIn("m", "v"), 0))), "v")),
+      0,
+    ),
+  ),
+  "m",
+);
+const isDominating = (mask: MathJSON): MathJSON => at(add(mask, 1), "dominating");
+const withDominating = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withNeighborsIn(bindList("dominating", dominatingTable, body), otherwise);
+/** A dominating subset no vertex of which can be dropped. */
+const isMinimalDominating = (mask: MathJSON): MathJSON =>
+  times(
+    isDominating(mask),
+    one(
+      equals(
+        floored(sumOver(vertices, ["If", hasBit(mask, "v"), isDominating(subtract(mask, bitValue("v"))), 0], "v")),
+        0,
+      ),
+    ),
+  );
+
+/** The subsets 1 .. 2^n - 1, the nonempty ones. */
+const masksFromOne: MathJSON = ["Range", 1, subtract(["Power", 2, "n"], 1)];
+/** Edges with both ends on one side of the cut (`mask`, its complement). */
+const uncut = (mask: MathJSON): MathJSON => add(inside(mask), inside(subtract(subtract(["Power", 2, "n"], 1), mask)));
+
+/** The index of the entry for `end` of the subset `mask` in a path table: a leading placeholder, then n entries per subset. */
+const pathAt = (mask: MathJSON, end: MathJSON): MathJSON => add(add(times(subtract(mask, 1), "n"), end), 1);
+/**
+ * The paths of the graph that visit exactly the vertices of a subset and end at a vertex, by subset and end: the entry
+ * for subset b and end e counts them. With `fromLowest` a path starts at the lowest vertex of its subset, so a cycle on
+ * the subset is counted once for each direction; else it starts anywhere.
+ */
+const pathTable = (fromLowest: boolean): MathJSON => {
+  const extend = floored(
+    sumOver(
+      vertices,
+      times(
+        one(hasBit(subtract("b", bitValue("e")), "w")),
+        times(adjacent("w", "e"), at(pathAt(subtract("b", bitValue("e")), "w"), "a")),
+      ),
+      "w",
+    ),
+  );
+  return typedFolding(
+    [
+      "Join",
+      "a",
+      forEach(
+        vertices,
+        [
+          "If",
+          hasBit("b", "e"),
+          ["If", equals("b", bitValue("e")), 1, fromLowest ? ["If", equals("e", lowest("b")), 0, extend] : extend],
+          0,
+        ],
+        "e",
+      ),
+    ],
+    "a",
+    "b",
+    ["List", 0],
+    masksFromOne,
+    "list<integer>",
+  );
+};
+const withPaths = (fromLowest: boolean, body: MathJSON): MathJSON =>
+  withGraph(
+    bindList(
+      "totals",
+      vertexTotals,
+      bindList("adjacency", adjacencyMatrix, bindList("paths", pathTable(fromLowest), body), "list<list<integer>>"),
+    ),
+  );
+/** Twice the cycles through exactly the vertices of the subset `mask`, which holds at least 3: each is closed from the lowest vertex by an edge, in either direction. */
+const cyclesTwice = (mask: MathJSON): MathJSON =>
+  times(
+    one(atLeastValue(total(mask), 3)),
+    bind(
+      "low",
+      lowest(mask),
+      floored(sumOver(vertices, times(adjacent("low", "e"), at(pathAt(mask, "e"), "paths")), "e")),
+      "integer",
+    ),
+  );
+
+/** A sum that may be negative, bounded below by the least integer a double holds so the compiler types it real. */
+const signedSum = (sum: MathJSON): MathJSON => ["Max", sum, -(2 ** 53)];
+/** The determinant of the `size` x `size` leading block of the matrix called `name`, by expansion along rows over the subsets of columns. */
+const determinantOf = (name: string, size: MathJSON): MathJSON =>
+  lastEntry(
+    typedFolding(
+      [
+        "Join",
+        "a",
+        [
+          "List",
+          signedSum(
+            sumOver(
+              ["Range", 1, size],
+              [
+                "If",
+                hasBit("b", "c"),
+                times(
+                  [
+                    "If",
+                    equals(
+                      ["Mod", floored(sumOver(vertices, times(one(greater("w", "c")), one(hasBit("b", "w"))), "w")), 2],
+                      0,
+                    ),
+                    1,
+                    -1,
+                  ],
+                  times(entry(name, total("b"), "c"), at(add(subtract("b", bitValue("c")), 1), "a")),
+                ),
+                0,
+              ],
+              "c",
+            ),
+          ),
+        ],
+      ],
+      "a",
+      "b",
+      ["List", 1],
+      ["Range", 1, subtract(["Power", 2, size], 1)],
+      "list<integer>",
+    ),
+  );
+const withTotals = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withGraph(bindList("totals", vertexTotals, body), otherwise);
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -699,5 +883,360 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
       1,
     ),
     `FindStat's St000468. The graph with no vertices has the empty set, so 1.`,
+  ),
+  stat(
+    "MinimumVertexCoverCount",
+    "The vertex covers with the fewest vertices: the independent sets with the most.",
+    withMasks(
+      bind(
+        "top",
+        largestMask(isIndependent("m")),
+        overMasks(times(one(isIndependent("m")), one(equals(total("m"), "top")))),
+        "integer",
+      ),
+      1,
+    ),
+    `FindStat's St000363: the covers of the least possible size, which are the complements of the largest independent sets. The graph with no vertices has the empty cover, so 1.`,
+  ),
+  stat(
+    "SpanningTreeCount",
+    "The spanning trees: by the matrix-tree theorem, the determinant of the Laplacian with its last row and column deleted.",
+    withDegrees(
+      bindList(
+        "totals",
+        vertexTotals,
+        bindList(
+          "adjacency",
+          adjacencyMatrix,
+          bindList(
+            "laplacian",
+            forEach(
+              vertices,
+              forEach(vertices, ["If", equals("i", "j"), degree("i"), subtract(0, adjacent("i", "j"))], "j"),
+              "i",
+            ),
+            ["If", equals("n", 1), 1, determinantOf("laplacian", subtract("n", 1))],
+            "list<list<integer>>",
+          ),
+          "list<list<integer>>",
+        ),
+      ),
+    ),
+    `FindStat's St000096. A graph with two components has none. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AdjacencyDeterminant",
+    "The determinant of the adjacency matrix.",
+    withTotals(bindList("adjacency", adjacencyMatrix, determinantOf("adjacency", "n"), "list<list<integer>>"), 1),
+    `FindStat's St000351. The graph with no vertices has the empty determinant, 1.`,
+  ),
+  stat(
+    "DegreeRange",
+    "The greatest degree less the least.",
+    withDegrees(subtract(["Max", "degrees"], ["Min", "degrees"])),
+    `FindStat's St001742. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumDegreeMultiplicity",
+    "The most vertices that share one degree.",
+    withDegrees(["Max", forEach("degrees", overDegrees(one(equals("d", "q"))), "q")]),
+    `FindStat's St001366. ${NO_VERTICES}`,
+  ),
+  stat(
+    "SmallestMissingDegree",
+    "The least number, 0 or more, that is not the degree of any vertex.",
+    withDegrees([
+      "Min",
+      forEach(["Range", 0, "n"], ["If", equals(overDegrees(one(equals("d", "k"))), 0), "k", add("n", 1)], "k"),
+    ]),
+    `FindStat's St001367. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DistinctNeighborhoodCount",
+    "The different sets of neighbors the vertices have.",
+    withAdjacency(
+      floored(
+        sumOver(
+          vertices,
+          one(
+            equals(
+              floored(
+                sumOver(
+                  vertices,
+                  times(
+                    one(less("u", "v")),
+                    one(
+                      equals(
+                        floored(sumOver(vertices, ["Abs", subtract(adjacent("u", "w"), adjacent("v", "w"))], "w")),
+                        0,
+                      ),
+                    ),
+                  ),
+                  "u",
+                ),
+              ),
+              0,
+            ),
+          ),
+          "v",
+        ),
+      ),
+    ),
+    `FindStat's St000722: the vertices whose row of the adjacency matrix has no equal row above it. Two adjacent vertices never share a neighborhood. ${NO_VERTICES}`,
+  ),
+  stat(
+    "SzegedIndex",
+    "The sum over the edges of the vertices nearer one end times those nearer the other.",
+    withDistances(
+      floored(
+        sumOver(
+          "edges",
+          times(
+            floored(sumOver(vertices, one(less(distance(lower("e"), "w"), distance(upper("e"), "w"))), "w")),
+            floored(sumOver(vertices, one(less(distance(upper("e"), "w"), distance(lower("e"), "w"))), "w")),
+          ),
+          "e",
+        ),
+      ),
+    ),
+    `FindStat's St000263. A vertex in another component is as far from both ends, so is in neither count. ${NO_VERTICES}`,
+  ),
+  stat(
+    "SchultzIndex",
+    "The sum over the pairs of vertices of the sum of their degrees times their distance.",
+    withDegreesAndDistances(
+      spread(
+        overPairs(["If", less(distance("u", "w"), "n"), times(add(degree("u"), degree("w")), distance("u", "w")), 0]),
+      ),
+    ),
+    `FindStat's St000464, of a connected graph; a pair with no path adds nothing. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GutmanIndex",
+    "The sum over the pairs of vertices of the product of their degrees times their distance.",
+    withDegreesAndDistances(
+      spread(
+        overPairs(["If", less(distance("u", "w"), "n"), times(times(degree("u"), degree("w")), distance("u", "w")), 0]),
+      ),
+    ),
+    `FindStat's St000466, the modified Schultz index, of a connected graph; a pair with no path adds nothing. ${NO_VERTICES}`,
+  ),
+  stat(
+    "HyperWienerIndex",
+    "The sum over the pairs of vertices of their distance plus its square.",
+    withDistances(
+      spread(
+        overPairs([
+          "If",
+          less(distance("u", "w"), "n"),
+          add(distance("u", "w"), times(distance("u", "w"), distance("u", "w"))),
+          0,
+        ]),
+      ),
+    ),
+    `FindStat's St000467, of a connected graph; a pair with no path adds nothing. ${NO_VERTICES}`,
+  ),
+  stat(
+    "CenterVertexCount",
+    "The vertices whose greatest distance to another vertex is the least.",
+    withDistances(
+      bindList(
+        "eccentricity",
+        forEach(vertices, ["Max", at("u", "distances")], "u"),
+        floored(sumOver("eccentricity", one(equals("c", ["Min", "eccentricity"])), "c")),
+      ),
+    ),
+    `FindStat's St001342. In a disconnected graph every vertex is as far as 2n from another, so all are central. ${NO_VERTICES}`,
+  ),
+  stat(
+    "Girth",
+    "The length of the shortest cycle.",
+    withPaths(
+      true,
+      bindList(
+        "shortest",
+        ["Min", forEach(masksFromOne, ["If", greater(cyclesTwice("s"), 0), total("s"), add("n", 1)], "s")],
+        ["If", greater("shortest", "n"), "PositiveInfinity", "shortest"],
+        "integer",
+      ),
+    ),
+    `FindStat's St000264, of a graph that is not a tree; a graph without a cycle has an infinite girth. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphLongestCycleLength",
+    "The length of the longest cycle.",
+    withPaths(true, ["Max", forEach(masksFromOne, ["If", greater(cyclesTwice("s"), 0), total("s"), 0], "s")]),
+    `FindStat's St000637; a graph without a cycle gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphCycleCount",
+    "The cycles, each counted once however it is started or turned.",
+    withPaths(true, spread(floored(["Sum", forEach(masksFromOne, cyclesTwice("s"), "s")]))),
+    `FindStat's St001736. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LongestPathLength",
+    "The edges of the longest path.",
+    withPaths(false, [
+      "Max",
+      forEach(
+        masksFromOne,
+        ["If", greater(floored(sumOver(vertices, at(pathAt("s", "e"), "paths"), "e")), 0), subtract(total("s"), 1), 0],
+        "s",
+      ),
+    ]),
+    `FindStat's St001120. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumCutSize",
+    "The most edges between the two sides of a division of the vertices.",
+    withMasks(["Max", forEach(masks, subtract(length("edges"), uncut("m")), "m")]),
+    `FindStat's St001869. ${NO_VERTICES}`,
+  ),
+  stat(
+    "BipartiteEdgeDeletionNumber",
+    "The fewest edges whose deletion leaves a bipartite graph.",
+    withMasks(["Min", forEach(masks, uncut("m"), "m")]),
+    `FindStat's St001572: the edges that fall inside the sides of the best division. ${NO_VERTICES}`,
+  ),
+  stat(
+    "PerfectMatchingCount",
+    "The sets of edges that meet every vertex exactly once.",
+    withMasks(
+      lastEntry(
+        matchingTable(
+          1,
+          (f) => f,
+          (_without, matched) => floored(["Sum", matched]),
+        ),
+      ),
+      1,
+    ),
+    `FindStat's St000274. The graph with no vertices has the empty set, so 1.`,
+  ),
+  stat(
+    "InducedMatchingNumber",
+    "The most edges whose ends induce a subgraph that is just those edges.",
+    withNeighborsIn(spread(["Max", sizeUnlessAny((d) => ["NotEqual", d, 1])])),
+    `FindStat's St001393: half the vertices of the largest set in which every vertex has exactly one neighbor. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DominationNumber",
+    "The fewest vertices such that every vertex is one of them or adjacent to one.",
+    withDominating(["Min", forEach(masks, ["If", equals(isDominating("m"), 1), total("m"), "n"], "m")]),
+    `FindStat's St000273. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DominatingSetCount",
+    "The sets of vertices such that every vertex is in the set or adjacent to one of it.",
+    withDominating(overMasks(isDominating("m")), 1),
+    `FindStat's St001303. The graph with no vertices has the empty set, so 1.`,
+  ),
+  stat(
+    "MinimalDominatingSetCount",
+    "The dominating sets that stop dominating when any vertex is dropped.",
+    withDominating(overMasks(isMinimalDominating("m")), 1),
+    `FindStat's St001302. The graph with no vertices has the empty set, so 1.`,
+  ),
+  stat(
+    "UpperDominationNumber",
+    "The most vertices in a minimal dominating set.",
+    withDominating(["Max", forEach(masks, times(isMinimalDominating("m"), total("m")), "m")]),
+    `FindStat's St001337. ${NO_VERTICES}`,
+  ),
+  stat(
+    "IndependentDominationNumber",
+    "The fewest vertices in a set that is independent and dominating: a maximal independent set.",
+    withDominating([
+      "Min",
+      forEach(masks, ["If", equals(times(isDominating("m"), one(isIndependent("m"))), 1), total("m"), "n"], "m"),
+    ]),
+    `FindStat's St001322. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphDifferential",
+    "The most that the vertices next to a set, outside it, exceed the set in number.",
+    withNeighborsIn([
+      "Max",
+      forEach(
+        masks,
+        subtract(
+          floored(
+            sumOver(vertices, times(subtract(1, one(hasBit("m", "v"))), one(greater(neighborsIn("m", "v"), 0))), "v"),
+          ),
+          total("m"),
+        ),
+        "m",
+      ),
+    ]),
+    `FindStat's St001723; the empty set gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "Degeneracy",
+    "The greatest, over the sets of vertices, of the least number of neighbors a vertex has inside the set.",
+    withNeighborsIn([
+      "Max",
+      forEach(
+        masks,
+        [
+          "If",
+          equals(total("m"), 0),
+          0,
+          ["Min", forEach(vertices, ["If", hasBit("m", "v"), neighborsIn("m", "v"), add("n", 1)], "v")],
+        ],
+        "m",
+      ),
+    ]),
+    `FindStat's St001277. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DissociationNumber",
+    "The most vertices in a set in which every vertex has at most one neighbor.",
+    withNeighborsIn(["Max", sizeUnlessAny((d) => greater(d, 1))]),
+    `FindStat's St001315. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphVertexConnectivity",
+    "The fewest vertices whose deletion leaves a disconnected graph; the complete graph on n vertices gives n - 1.",
+    withMasks(
+      bindList("connected", connectedMasks, [
+        "Min",
+        forEach(
+          masks,
+          [
+            "If",
+            equals(
+              times(
+                one(less("m", subtract(["Power", 2, "n"], 1))),
+                subtract(1, at(add(subtract(subtract(["Power", 2, "n"], 1), "m"), 1), "connected")),
+              ),
+              1,
+            ),
+            total("m"),
+            subtract("n", 1),
+          ],
+          "m",
+        ),
+      ]),
+    ),
+    `FindStat's St000262. A disconnected graph gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "InducedFourCycleCount",
+    "The sets of four vertices that induce a cycle: every one has exactly two neighbors among the four.",
+    withNeighborsIn(
+      overMasks(
+        times(
+          one(equals(total("m"), 4)),
+          one(
+            equals(
+              misfits("m", (d) => ["NotEqual", d, 2]),
+              0,
+            ),
+          ),
+        ),
+      ),
+    ),
+    `FindStat's St001305. ${NO_VERTICES}`,
   ),
 ];
