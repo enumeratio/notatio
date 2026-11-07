@@ -75,9 +75,8 @@ test.describe("index pages", () => {
 
   for (const path of ["/reference/statistics/", "/reference/maps/"]) {
     test(`${path} shows its summary column at 1280 px`, async ({ page }) => {
-      // BL-319 S#15: the table is wider than the 624 px column and scrolls sideways, so the summary
-      // (its third column) starts at the column's right edge and a reader sees only name and carrier.
-      test.fail();
+      // A 70-letter name once widened the table past the column, so the summary (its third column)
+      // started at the column's right edge and a reader saw only name and carrier.
       await page.setViewportSize({ width: 1280, height: 900 });
       await page.goto(path);
       await expect(page.locator(".ref-cat-table tbody tr").first()).toBeVisible();
