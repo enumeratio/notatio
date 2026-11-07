@@ -514,6 +514,8 @@ export function kernelOn(
     }
   };
 
+  const compiledCount = (): boolean => compiled("count") !== null && (!reads("count") || compiled("tables") !== null);
+
   const counts = new Map<string, Count>();
   // Calls come in runs at the same params, so the last fiber is found without building a key.
   let lastParams: readonly number[] = [];
@@ -542,7 +544,8 @@ export function kernelOn(
       else if (isInteger(fast)) total = BigInt(fast);
       else if (typeof (big = attemptBig("count", p, {})) === "bigint") total = big as bigint;
       else if (typeof big === "number" && Number.isSafeInteger(big)) total = BigInt(big);
-      else if (declinePastDoubles === "count" && wellParamed(p)) return decline(p);
+      // Declines only where compiled code ran and gave out (past doubles); with none to run, the interpreter answers.
+      else if (declinePastDoubles === "count" && wellParamed(p) && compiledCount()) return decline(p);
       else {
         const json = interpret("count", p, {});
         total = json === "PositiveInfinity" ? Number.POSITIVE_INFINITY : (integerOf(json) ?? Number.NaN);

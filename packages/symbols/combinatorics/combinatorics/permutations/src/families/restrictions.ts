@@ -1034,6 +1034,8 @@ const ncCycleBlock = (i: MathJSON, j: MathJSON): MathJSON =>
           "ncx",
           ["List", 1, i],
           upTo(add(i, 1), ncHigh(i)),
+          // Untyped, the pair accumulator leaves the If's shape unknown, and nothing compiles.
+          "list<integer>",
         ),
         "list<integer>",
       ],

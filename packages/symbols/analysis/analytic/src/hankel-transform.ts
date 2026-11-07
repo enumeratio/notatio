@@ -39,7 +39,7 @@ import { dividedByT, fractionFactors } from "./transforms.ts";
 // s because the integral is conditionally convergent and jumps where s crosses a (k = |a|):
 //   sin(a*r)/r             -> sgn(a)/sqrt(a^2-s^2) for s < |a|,  0 for s > |a|
 //   cos(a*r)/r             -> 0 for s < |a|,  1/sqrt(s^2-a^2) for s > |a|
-// A symbolic s leaves a Piecewise that settles once s is known; s = |a| diverges (Indeterminate).
+// A symbolic s leaves a Piecewise that settles once s is known; s = |a| diverges (NaN).
 // Wolfram answers a MeijerG in s^-2 that equals these on each side, and holds the call at s = |a|.
 //
 // Declined: any other function, any other stated order (Wolfram's own closed forms for
@@ -270,11 +270,11 @@ function trigOverR(ce: ComputeEngine, expr: Expression, r: string, s: Expression
         "List",
         clauses.map(([value, condition]) => ce.function("List", [value!, condition!])),
       ),
-      ce.symbol("Indeterminate"),
+      ce.NaN,
     ])
     .evaluate();
-  // s = |a| diverges; hold the call there, as Wolfram does, rather than answer Indeterminate.
-  return value.operator === "Indeterminate" ? undefined : value;
+  // s = |a| diverges; hold the call there, as Wolfram does, rather than answer NaN.
+  return value.isNaN === true ? undefined : value;
 }
 
 function hankelPairs(ce: ComputeEngine, expr: Expression, r: string, s: Expression): Expression | undefined {

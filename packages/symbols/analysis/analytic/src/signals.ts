@@ -592,7 +592,7 @@ const SIGNAL_DERIVATIVES: Readonly<Record<string, Readonly<Record<string, Signal
   Ramp: {
     "1": {
       params: ["u"],
-      body: ["Piecewise", ["List", ["List", 0, ["Less", "u", 0]], ["List", 1, ["Greater", "u", 0]]], "Indeterminate"],
+      body: ["Piecewise", ["List", ["List", 0, ["Less", "u", 0]], ["List", 1, ["Greater", "u", 0]]], "NaN"],
     },
   },
   // D(UnitBox(x)) = Piecewise({{Indeterminate, x == 1/2 || x == -1/2}}, 0) -- 0 on the open
@@ -604,7 +604,7 @@ const SIGNAL_DERIVATIVES: Readonly<Record<string, Readonly<Record<string, Signal
       params: ["u"],
       body: [
         "Piecewise",
-        ["List", ["List", "Indeterminate", ["Or", ["Equal", "u", HALF_JSON], ["Equal", "u", ["Negate", HALF_JSON]]]]],
+        ["List", ["List", "NaN", ["Or", ["Equal", "u", HALF_JSON], ["Equal", "u", ["Negate", HALF_JSON]]]]],
         0,
       ],
     },

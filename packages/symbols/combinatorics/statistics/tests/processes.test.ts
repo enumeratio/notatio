@@ -34,7 +34,13 @@ const evalOf = (expr: unknown) => box(ce, expr as Json).evaluate();
 // same "reseed, extract, reseed back to default" idiom `reference/RandomFunction/examples.tsv`
 // uses, so a test run doesn't leak RNG state into whatever test runs after it.
 const seededPath = (seed: number, proc: unknown, spec: unknown): number[][] => {
-  const out = evalOf(["Last", ["List", ["SeedRandom", seed], ["RandomFunction", proc, spec], ["SeedRandom", 42]]]);
+  const out = evalOf([
+    "Block",
+    ["SeedRandom", seed],
+    ["Assign", "path", ["RandomFunction", proc, spec]],
+    ["SeedRandom", 42],
+    "path",
+  ]);
   return operandsOf(out).map((pair) => {
     const ops = operandsOf(pair);
     return [ops[0].re, ops[1].re];

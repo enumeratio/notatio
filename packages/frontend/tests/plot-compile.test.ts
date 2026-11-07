@@ -77,6 +77,5 @@ test("a plot's code reads its variables as reals, whatever type the engine infer
   engine.declare("y", "complex");
   const [item] = compilePlot(engine, ["HurwitzZeta", "x", "y"], { target: "javascript", each: true }).items;
   // ζ(2, 3) = π²/6 − 1 − 1/4, from numbers in the scope.
-  const value = run(item!.code, { x: 2, y: 3 }) as { re: number };
-  expect(value.re).toBeCloseTo(Math.PI ** 2 / 6 - 1.25, 12);
+  expect(run(item!.code, { x: 2, y: 3 })).toBeCloseTo(Math.PI ** 2 / 6 - 1.25, 12);
 });
