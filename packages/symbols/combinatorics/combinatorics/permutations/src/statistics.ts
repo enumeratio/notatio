@@ -190,7 +190,7 @@ const cyclesOfLength = (size: number): MathJSON => count(cycleLengths, equals("c
 //   - the pile to replace is found once per entry, then replaced with `ReplaceAt`. Finding it
 //     reads the piles inside a lambda, which keeps the compiled fold copying them (one native
 //     copy per entry) rather than updating in place.
-const piles = (ahead: MathJSON): MathJSON => {
+const piles = (ahead: MathJSON, over: MathJSON = x): MathJSON => {
   const target: MathJSON = ["Add", ["Count", ["Filter", "a", ["Function", ahead, "t"]]], 1];
   const step: MathJSON = [
     "If",
@@ -198,7 +198,7 @@ const piles = (ahead: MathJSON): MathJSON => {
     ["Join", "a", ["List", visiting]],
     ["ReplaceAt", "a", "k", visiting],
   ];
-  return fold(x, ["List"], ["Apply", ["Function", step, "k"], target]);
+  return fold(over, ["List"], ["Apply", ["Function", step, "k"], target]);
 };
 
 /** Peaks of the word `w` (interior positions only); needs at least three letters. */
@@ -2330,10 +2330,10 @@ const reflected = (v: MathJSON): MathJSON => subtract(add(length(), 1), v);
 /** 1 when no position violates `differs`, i.e. a symmetry of the square fixes p; else 0. */
 const fixedBy = (differs: MathJSON): MathJSON => ["If", equals(count(positions, differs), 0), 1, 0];
 
-/** The cycles of the permutation list `q`: positions whose walk returns before meeting anything smaller. */
-const cyclesOf = (q: MathJSON): MathJSON =>
+/** The cycles of the permutation list `q` of `size` points: points whose walk returns before meeting anything smaller. */
+const cyclesOf = (q: MathJSON, size?: MathJSON): MathJSON =>
   count(
-    positions,
+    size === undefined ? positions : upTo(size),
     equals(
       [
         "Fold",
@@ -2344,7 +2344,7 @@ const cyclesOf = (q: MathJSON): MathJSON =>
           "k",
         ],
         at("i", q),
-        steps,
+        size === undefined ? steps : ["Range", 1, size, 1],
       ],
       0,
     ),
@@ -2362,6 +2362,21 @@ const bounceAfter = (inverseList: MathJSON): MathJSON => [
   at(1, inverseList),
   ["Range", 1, "t", 1],
 ];
+
+/** One more than the number of symmetries of the square (inverse, reverse, complement and their products) that fix p. */
+const symmetryClassSymmetries: MathJSON = [
+  "Add",
+  1,
+  fixedBy(["NotEqual", here, at(reflected("i"))]),
+  fixedBy(["NotEqual", here, reflected(here)]),
+  fixedBy(["NotEqual", at(reflected("i")), reflected(here)]),
+  fixedBy(["NotEqual", at(here), "i"]),
+  fixedBy(["NotEqual", at(here), reflected("i")]),
+  fixedBy(["NotEqual", at(reflected(here)), "i"]),
+  fixedBy(["NotEqual", at(reflected(here)), reflected("i")]),
+];
+/** 8 over those symmetries: the size of its symmetry class. */
+const symmetryClassSize: MathJSON = ["Divide", 8, symmetryClassSymmetries];
 
 // The tenth batch: the walk of ascents and descents, separators and overlaps, symmetry classes, genus and bounce.
 const FINDSTAT_PERMUTATION_STATISTICS_10: readonly Definition[] = [
@@ -2458,24 +2473,7 @@ const FINDSTAT_PERMUTATION_STATISTICS_10: readonly Definition[] = [
   stat(
     "SymmetryClassSize",
     "The permutations reachable from p by inverse, reverse and complement: 8 over the symmetries that fix p.",
-    nonEmpty(
-      [
-        "Divide",
-        8,
-        [
-          "Add",
-          1,
-          fixedBy(["NotEqual", here, at(reflected("i"))]),
-          fixedBy(["NotEqual", here, reflected(here)]),
-          fixedBy(["NotEqual", at(reflected("i")), reflected(here)]),
-          fixedBy(["NotEqual", at(here), "i"]),
-          fixedBy(["NotEqual", at(here), reflected("i")]),
-          fixedBy(["NotEqual", at(reflected(here)), "i"]),
-          fixedBy(["NotEqual", at(reflected(here)), reflected("i")]),
-        ],
-      ],
-      1,
-    ),
+    nonEmpty(symmetryClassSize, 1),
   ),
   stat(
     "PermutationGenus",
@@ -3100,6 +3098,227 @@ const FINDSTAT_SIGNED_PERMUTATION_STATISTICS: readonly Definition[] = [
   ),
 ];
 
+/** The largest of the first v entries. */
+const maximumUpTo = (v: MathJSON): MathJSON => max(forEach(["Range", 1, v], at("m"), "m"));
+/** Whether position v holds something smaller than an entry before it. */
+const notRecordAt = (v: MathJSON): MathJSON => less(at(v), maximumUpTo(v));
+
+/**
+ * Pairs a < b whose transposition lies below p in Bruhat order. By the rank criterion only the box
+ * a <= k < b, a < m <= b matters: there the transposition has max(k - m + 1, 0) + 1 entries of its
+ * first k at least m, and p needs at least as many.
+ */
+const bruhatTranspositions: MathJSON = sumOver(
+  positions,
+  count(
+    span(add("i", 1), length()),
+    equals(
+      sumOver(
+        span("i", subtract("j", 1)),
+        count(
+          span(add("i", 1), "j"),
+          less(count(span(1, "k"), atLeastValue(at("u"), "m"), "u"), add(["Max", add(subtract("k", "m"), 1), 0], 1)),
+          "m",
+        ),
+        "k",
+      ),
+      0,
+    ),
+    "j",
+  ),
+);
+
+/** Whether the windows of length k starting at s and t are order isomorphic: no pair a < b they compare differently. */
+const windowsAgree = (k: MathJSON, s: MathJSON, t: MathJSON): MathJSON => {
+  const rises = (start: MathJSON): MathJSON => [
+    "If",
+    less(at(add(start, subtract("a", 1))), at(add(start, subtract("b", 1)))),
+    1,
+    0,
+  ];
+  return equals(
+    sumOver(
+      where(positions, less("a", k), "a"),
+      count(where(positions, and(greater("b", "a"), atMostValue("b", k)), "b"), ["NotEqual", rises(s), rises(t)], "b"),
+      "a",
+    ),
+    0,
+  );
+};
+/** Whether two windows of length k are order isomorphic. */
+const repeatedWindow = (k: MathJSON): MathJSON =>
+  sumOver(
+    where(positions, atMostValue(add("s", subtract(k, 1)), length()), "s"),
+    count(
+      where(positions, and(greater("t", "s"), atMostValue(add("t", subtract(k, 1)), length())), "t"),
+      windowsAgree(k, "s", "t"),
+      "t",
+    ),
+    "s",
+  );
+
+/** The permutations of one more point than p has whose last entry has each rank, after the descent or ascent at `b`: partial sums of the counts so far. */
+const descentWordStep: MathJSON = forEach(
+  upTo(add(["Count", "a"], 1)),
+  [
+    "If",
+    greater(at("b"), at(add("b", 1))),
+    ["Sum", forEach(where(upTo(["Count", "a"]), atLeastValue("m", "j"), "m"), ["At", "a", "m"], "m")],
+    ["Sum", forEach(where(upTo(["Count", "a"]), less("m", "j"), "m"), ["At", "a", "m"], "m")],
+  ],
+  "j",
+);
+
+/** The breakpoint graph's vertices 0 .. n as 1 .. n + 1: the word 0 p(1) ... p(n), shifted up one. */
+const breakpointWord: MathJSON = ["Join", ["List", 1], forEach(positions, add(at("i"), 1))];
+/** The vertex a black edge leads to from u: the entry before u in the word, cyclically. */
+const blackNeighbor = (u: MathJSON): MathJSON =>
+  at(
+    add(
+      [
+        "Mod",
+        add(sumOver(upTo(add(length(), 1)), ["If", equals(at("m", "w"), u), "m", 0], "m"), subtract(length(), 1)),
+        add(length(), 1),
+      ],
+      1,
+    ),
+    "w",
+  );
+/** Black edge, then grey edge u -> u + 1 (cyclically): the permutation whose cycles are the alternating cycles. */
+const breakpointSuccessor: MathJSON = forEach(
+  upTo(add(length(), 1)),
+  add(["Mod", blackNeighbor("i"), add(length(), 1)], 1),
+);
+
+// The twelfth batch: Bruhat transpositions, fibers of maps, a-function and Rajchgot index, and a few cycle formulas.
+const FINDSTAT_PERMUTATION_STATISTICS_12: readonly Definition[] = [
+  stat(
+    "HalfSymmetryClassSize",
+    "Half the size of the symmetry class of p, rounded down.",
+    nonEmpty(halfFloor(symmetryClassSize)),
+    "The symmetry class is generated by inverse, reverse and complement.",
+  ),
+  stat(
+    "CycleInverseClassSize",
+    "2 to the power of the cycles of length at least three: the permutations got by inverting any of p's cycles.",
+    nonEmpty(["Power", 2, count(cycleLengths, atLeastValue("c", 3), "c")], 1),
+  ),
+  stat(
+    "BruhatTranspositionCount",
+    "Transpositions that are at most p in Bruhat order.",
+    nonEmpty(floored(bruhatTranspositions)),
+    "Equal to the inversions exactly when p avoids 4231 and 3412.",
+  ),
+  stat(
+    "BruhatNonInversionTranspositionCount",
+    "Transpositions at most p in Bruhat order that are not inversions of p.",
+    nonEmpty(floored(subtract(bruhatTranspositions, inversions))),
+    "Zero exactly when p is smooth, avoiding 4231 and 3412.",
+  ),
+  stat(
+    "InsertionBumpsOfOne",
+    "One more than the longest decreasing subsequence of the entries before 1.",
+    nonEmpty(
+      bind(
+        "v",
+        forEach(where(positions, less("i", positionOf(1))), at("i")),
+        add(1, ["Count", piles(["Greater", "t", visiting], "v")]),
+        "list<integer>",
+      ),
+    ),
+    "Inserting 1 bumps along the first column of the tableau built from the entries before it.",
+  ),
+  word(
+    "ShortestDistinctWindowLength",
+    "The least k such that no two windows of k consecutive entries are order isomorphic.",
+    nonEmpty(["Min", where(positions, equals(repeatedWindow("k"), 0), "k")]),
+    "The whole word is one window, so the least exists.",
+  ),
+  stat(
+    "BreakpointGraphCycles",
+    "The alternating cycles of the breakpoint graph on 0, ..., n: a black edge from p(i) to p(i-1) and a grey edge from i to i+1, indices cyclic.",
+    nonEmpty(
+      bind(
+        "w",
+        breakpointWord,
+        bind("q", breakpointSuccessor, cyclesOf("q", add(length(), 1)), "list<integer>"),
+        "list<integer>",
+      ),
+      1,
+    ),
+    "Each cycle of the black-then-grey successor is one alternating cycle.",
+  ),
+  word(
+    "RajchgotIndex",
+    "The sum over positions i of n - i less the longest increasing subsequence of the larger entries after p(i).",
+    nonEmpty(
+      floored(
+        sumOver(
+          positions,
+          subtract(
+            subtract(length(), "i"),
+            bind(
+              "v",
+              forEach(where(positions, and(greater("j", "i"), greater(at("j"), at("i"))), "j"), at("j"), "j"),
+              ["Count", piles(["Less", "t", visiting], "v")],
+              "list<integer>",
+            ),
+          ),
+        ),
+      ),
+    ),
+    "The degree of the Grothendieck polynomial, after Pechenik, Speyer and Weigandt.",
+  ),
+  word(
+    "DescentWordFiberSize",
+    "The permutations of the same size with the same descents as p.",
+    atLeast(2, ["Sum", fold(adjacent, ["List", 1], descentWordStep)], 1),
+    "Counted by the rank of the last entry: a descent keeps the partial sums from the right, an ascent from the left.",
+  ),
+  stat(
+    "CycleAsOneLinePreimageSize",
+    "The permutations whose cycles, each from its least point and in order of those, read p as one word.",
+    nonEmpty(["If", equals(at(1), 1), ["Power", 2, subtract(count(positions, equals(here, min(fromHere))), 1)], 0], 1),
+    "A cycle may start at each right-to-left minimum after the first entry, which must be 1.",
+  ),
+  stat(
+    "SimionSchmidtPreimageSize",
+    "The permutations sent to p by the Simion-Schmidt map onto the 321-avoiding permutations.",
+    nonEmpty(
+      [
+        "If",
+        equals(
+          sumOver(
+            where(positions, notRecordAt("i")),
+            count(positions, and(greater("j", "i"), less(at("j"), here)), "j"),
+          ),
+          0,
+        ),
+        ["Product", forEach(where(positions, notRecordAt("i")), add(subtract(maximumUpTo("i"), "i"), 1))],
+        0,
+      ],
+      1,
+    ),
+    "That map keeps the left-to-right maxima and puts the other entries in increasing order, so p needs those increasing; each other position then chooses among the smaller values left.",
+  ),
+  stat(
+    "PrefixExchangeDistance",
+    "The star transpositions (1 i) needed to sort p: the moved points, plus the nontrivial cycles, less two when 1 is moved.",
+    nonEmpty(
+      subtract(
+        add(subtract(length(), count(positions, equals(here, "i"))), count(cycleLengths, atLeastValue("c", 2), "c")),
+        ["If", equals(at(1), 1), 0, 2],
+      ),
+    ),
+  ),
+  stat(
+    "ReducedReflectionLength",
+    "The total displacement less the inversions.",
+    nonEmpty(subtract(sumOver(positions, distance(here, "i")), inversions)),
+    "Twice the depth less the length.",
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -3310,6 +3529,7 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_9,
   ...FINDSTAT_PERMUTATION_STATISTICS_10,
   ...FINDSTAT_PERMUTATION_STATISTICS_11,
+  ...FINDSTAT_PERMUTATION_STATISTICS_12,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
   ...FINDSTAT_PERMUTATION_WINDOW_STATISTICS,
 ];

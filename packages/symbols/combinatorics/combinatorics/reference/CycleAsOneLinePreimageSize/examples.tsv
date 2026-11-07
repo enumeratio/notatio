@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-one-line-word-312			[CycleAsOneLinePreimageSize, [Permutation, [List, 3, 1, 2]]]	0			the one-line word $312$
+the-one-line-word-2413			[CycleAsOneLinePreimageSize, [Permutation, [List, 2, 4, 1, 3]]]	0			the one-line word $2413$
+findstat-st000279-1	Properties		[CombinatorialStat, [Permutation, [List, 1, 2]], "'CycleAsOneLinePreimageSize'"]	2	2	FindStat St000279	FindStat's value for [1,2]
+findstat-st000279-2	Properties		[CombinatorialStat, [Permutation, [List, 2, 1]], "'CycleAsOneLinePreimageSize'"]	0	0	FindStat St000279	FindStat's value for [2,1]
+findstat-st000279-3	Properties		[CombinatorialStat, [Permutation, [List, 1, 2, 3]], "'CycleAsOneLinePreimageSize'"]	4	4	FindStat St000279	FindStat's value for [1,2,3]

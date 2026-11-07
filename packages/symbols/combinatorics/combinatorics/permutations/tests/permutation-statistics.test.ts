@@ -24,10 +24,26 @@ test("every new permutation definition has an independent reading", () => {
   for (const head of Object.keys(EXPECTED)) expect(index.has(`${head}@Permutation`), head).toBe(true);
 });
 
+// Definitions that cost seconds in the interpreter over 1..5 are checked over 1..4; the nightly takes them to 1..6.
+const HEAVY = new Set([
+  "BreakpointGraphCycles",
+  "ShortestDistinctWindowLength",
+  "BruhatTranspositionCount",
+  "BruhatNonInversionTranspositionCount",
+  "DescentWordFiberSize",
+  "RajchgotIndex",
+  "HalfSymmetryClassSize",
+  "CycleInverseClassSize",
+  "InsertionBumpsOfOne",
+  "SimionSchmidtPreimageSize",
+  "PrefixExchangeDistance",
+]);
 const ALL = upTo(5);
+const SMALL = upTo(4);
 for (const [head, expected] of Object.entries(EXPECTED)) {
-  test(`${head} agrees over every permutation of 1..5`, () => {
-    for (const p of ALL) expect(evaluate(head, p), `[${p.join(", ")}]`).toBe(expected(p));
+  const heavy = HEAVY.has(head);
+  test(`${head} agrees over every permutation of 1..${heavy ? 4 : 5}`, () => {
+    for (const p of heavy ? SMALL : ALL) expect(evaluate(head, p), `[${p.join(", ")}]`).toBe(expected(p));
   });
 }
 
@@ -55,8 +71,8 @@ test("ScaledReciprocalPositionValueSum is exact past the doubles", () => {
 test.skipIf(!process.env.DEEP_TESTS)(
   "every new permutation definition agrees over every permutation of 6 and 7",
   () => {
-    for (const p of [6, 7].flatMap((n) => permutations(n)))
-      for (const [head, expected] of Object.entries(EXPECTED))
+    for (const [head, expected] of Object.entries(EXPECTED))
+      for (const p of (HEAVY.has(head) ? [5, 6] : [6, 7]).flatMap((n) => permutations(n)))
         expect(evaluate(head, p), `${head} [${p.join(", ")}]`).toBe(expected(p));
   },
   3_600_000,
