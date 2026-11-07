@@ -558,6 +558,14 @@ from sympy.combinatorics import Permutation
 from sympy.ntheory.modular import crt
 
 ${HELD_ALIKE}
+# A sum or product over integer bounds formed term by term, for a summand SymPy checks as it builds it
+# (stirling(4, k)): the index is an Integer in each term. An empty range is the identity, as ours.
+def enumeratio_summation(f, a, b):
+    return Add(*[f(Integer(k)) for k in range(a, b + 1)])
+
+def enumeratio_product(f, a, b):
+    return Mul(*[f(Integer(k)) for k in range(a, b + 1)])
+
 # How close a numeric identity must hold: 1e-20, loosened to the digits of the least precise float in it,
 # since two 15-digit literals (0.3 + 0.7) can't be told apart from 1 any closer than that.
 def _enumeratio_tolerance(*xs):

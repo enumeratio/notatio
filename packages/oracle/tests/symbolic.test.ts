@@ -913,3 +913,25 @@ test.skipIf(!hasWolfram)(
   },
   120_000,
 );
+
+test("sympy: a transform is taken with its parameters symbolic and its answer sampled", () => {
+  // SymPy's inverse Laplace transform of a rational parameter can be a different function, and a
+  // number in the variable slot raises (`inverse_laplace_transform(F, s, 13/4)`).
+  const call = [
+    "InverseLaplaceTransform",
+    ["Divide", "s", ["Power", ["Add", ["Power", "a", 2], ["Power", "s", 2]], 2]],
+    "s",
+    "t",
+  ];
+  const source = symbolicAgreementSource(
+    "sympy",
+    call as never,
+    ["Divide", ["Multiply", "t", ["Sin", ["Multiply", "a", "t"]]], ["Multiply", 2, "a"]] as never,
+    ["a", "s", "t"],
+  ) as string;
+  // The call itself keeps `a` and `t` symbols in every trial; the sample values go to what it answers.
+  expect(source).not.toContain("Rational(7, 3))**2");
+  expect(source).not.toMatch(/Symbol\("s"\), Rational\(/);
+  expect(source).toContain('.subs({Symbol("a"): Rational(7, 3), Symbol("t"): Rational(13, 4)})');
+  expect(source).not.toContain('Symbol("s"): Rational');
+});

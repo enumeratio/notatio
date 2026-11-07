@@ -1030,3 +1030,42 @@ test("mathlib4 tests a Finset as a Finset, not as the list it unwraps to", () =>
     source: "(([1, 3, 4] : List ℚ).max?.get (by decide +kernel))",
   });
 });
+
+test("a SymPy sum or product of a call that checks its integer index is formed term by term", () => {
+  const sum = emit(
+    ["Sum", ["Multiply", ["StirlingS1", 4, "k"], ["Power", "x", "k"]], ["Limits", "k", 0, 4]] as MathJSON,
+    "sympy",
+  );
+  expect(sum).toEqual({
+    ok: true,
+    source: 'enumeratio_summation(lambda _k: (stirling(4, _k, kind=1, signed=True) * (S(Symbol("x"))**_k)), 0, 4)',
+    freeSymbols: ["x"],
+  });
+  const product = emit(["Product", ["NthPrime", "n"], ["Limits", "n", 1, 6]] as MathJSON, "sympy");
+  expect(product.ok && product.source).toBe("enumeratio_product(lambda _n: prime(_n), 1, 6)");
+  // Without such a call, or over a symbolic bound, SymPy's own summation stands.
+  const plain = emit(["Sum", ["Power", "k", 2], ["Limits", "k", 0, 4]] as MathJSON, "sympy");
+  expect(plain.ok && plain.source).toContain("summation(");
+  const open = emit(["Sum", ["NthPrime", "k"], ["Limits", "k", 1, "n"]] as MathJSON, "sympy");
+  expect(open.ok && open.source).toContain("summation(");
+});
+
+test("SymPy's simplifiers and expand_func map over a list, and over another of them that yields one", () => {
+  const list = ["List", ["ExpIntegralE", 4, "z"], ["ExpIntegralE", -4, "z"]] as MathJSON;
+  const expanded = emit(["FunctionExpand", list] as MathJSON, "sympy");
+  expect(expanded.ok && expanded.source).toMatch(/^enumeratio_broadcast\(lambda _a0: expand_func\(_a0\), \[/);
+  const simplified = emit(["Simplify", ["FunctionExpand", list]] as MathJSON, "sympy");
+  expect(simplified.ok && simplified.source).toMatch(
+    /^enumeratio_broadcast\(lambda _a0: simplify\(_a0\), enumeratio_broadcast\(lambda _a0: expand_func\(_a0\)/,
+  );
+  // A scalar is the plain call; a literal list under a head that threads keeps its own threading.
+  const scalar = emit(["FunctionExpand", ["ExpIntegralE", 4, "z"]] as MathJSON, "sympy");
+  expect(scalar.ok && scalar.source).toMatch(/^expand_func\(/);
+  const threaded = emit(["Simplify", ["List", "x", "y"]] as MathJSON, "sympy");
+  expect(threaded.ok && threaded.source).toBe('[simplify(Symbol("x")), simplify(Symbol("y"))]');
+});
+
+test("SymPy's crt takes the moduli and residues as lists, and a call over residue classes answers a class", () => {
+  const out = emit(["ChineseRemainder", ["IntegerMod", 2, 3], ["IntegerMod", 3, 5]] as MathJSON, "sympy");
+  expect(out.ok && out.source).toBe("(lambda _c: GF(_c[1], symmetric=False)(_c[0]))(crt([3, 5], [2, 3]))");
+});
