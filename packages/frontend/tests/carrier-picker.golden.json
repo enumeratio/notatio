@@ -56,6 +56,16 @@
     "carrier": "Cardinal",
     "reason": "no collection of sized elements on this carrier"
   },
+  "CartanType": {
+    "carrier": "CartanType",
+    "collection": "FiniteCartanTypes",
+    "template": "FiniteCartanTypes({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
+  },
   "CollatzTrajectory": {
     "carrier": "CollatzTrajectory",
     "reason": "no collection of sized elements on this carrier"
