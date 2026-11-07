@@ -351,9 +351,12 @@ export {
   hurwitzZeta,
   hurwitzZetaChecked,
   hurwitzZetaReal,
+  hurwitzZetaWithError,
+  MAX_RELATIVE_ERROR,
   zetaGeneralized,
   zetaGeneralizedChecked,
   zetaGeneralizedReal,
+  zetaGeneralizedWithError,
 } from "../numerics/hurwitz-zeta.ts";
 export { digamma, polygamma, polygammaReal } from "../numerics/polygamma.ts";
 export { polyLog, polyLogReal } from "../numerics/polylog.ts";

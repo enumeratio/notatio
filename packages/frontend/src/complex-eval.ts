@@ -1,4 +1,17 @@
-import { digamma, hurwitzZeta, lerchPhi, logGamma, polygamma, polyLog, zetaGeneralized } from "@enumeratio/analytic";
+import {
+  digamma,
+  hurwitzZetaChecked,
+  hurwitzZetaWithError,
+  lerchPhi,
+  logGamma,
+  MAX_RELATIVE_ERROR,
+  polygamma,
+  polyLog,
+  zetaGeneralizedChecked,
+} from "@enumeratio/analytic";
+import { Uncertain } from "./uncertain.ts";
+
+export { Uncertain };
 
 // A small complex evaluator over canonical MathJSON: the head set `emitComplexWGSL`
 // lowers, plus Gamma, on `[re, im]` tuples. `notatio-complex-plot-3d`'s CPU sampler,
@@ -8,6 +21,19 @@ import { digamma, hurwitzZeta, lerchPhi, logGamma, polygamma, polyLog, zetaGener
 export type Complex = readonly [number, number];
 
 export type ComplexFunction = (z: Complex) => Complex;
+
+const vouched = (c: Cx | undefined): Cx => {
+  if (c === undefined) throw new Uncertain();
+  return c;
+};
+
+/** ζ(s, 1/4) − ζ(s, 3/4): the two errors add against the difference, which can be far smaller than either. */
+function hurwitzQuarterDifference(s: Cx): Cx {
+  const [lo, hi] = [hurwitzZetaWithError(s, { re: 0.25, im: 0 }), hurwitzZetaWithError(s, { re: 0.75, im: 0 })];
+  const diff = { re: lo.value.re - hi.value.re, im: lo.value.im - hi.value.im };
+  if (lo.error + hi.error > MAX_RELATIVE_ERROR * Math.hypot(diff.re, diff.im)) throw new Uncertain();
+  return diff;
+}
 
 /** MathJSON, in the canonical plain-array form `ce.box(expr).json` returns. */
 type Json = number | string | boolean | { [k: string]: unknown } | Json[];
@@ -81,13 +107,9 @@ const UNARY: Record<string, (z: Complex) => Complex> = {
   DirichletEta: (s) =>
     s[0] === 1 && s[1] === 0
       ? [Math.LN2, 0]
-      : mul(sub([1, 0], pow([2, 0], sub([1, 0], s))), ofCx(hurwitzZeta(toCx(s), { re: 1, im: 0 }))),
+      : mul(sub([1, 0], pow([2, 0], sub([1, 0], s))), ofCx(vouched(hurwitzZetaChecked(toCx(s), { re: 1, im: 0 })))),
   // 4^(-s) (ζ(s, 1/4) - ζ(s, 3/4))
-  DirichletBeta: (s) =>
-    mul(
-      pow([4, 0], [-s[0], -s[1]]),
-      sub(ofCx(hurwitzZeta(toCx(s), { re: 0.25, im: 0 })), ofCx(hurwitzZeta(toCx(s), { re: 0.75, im: 0 }))),
-    ),
+  DirichletBeta: (s) => mul(pow([4, 0], [-s[0], -s[1]]), ofCx(hurwitzQuarterDifference(toCx(s)))),
 };
 
 /** Two-argument heads: Log in a base, (a)_z = Γ(a + z) / Γ(a) and the binomial coefficient, as exponentials of log-gamma differences. */
@@ -194,11 +216,11 @@ function compile(j: Json, variable: string): ComplexFunction {
       if (fs.length === 2) return (z) => pow(f(0)(z), div([1, 0], f(1)(z)));
       break;
     case "Zeta":
-      if (fs.length === 1) return (z) => ofCx(hurwitzZeta(toCx(f(0)(z)), { re: 1, im: 0 }));
-      if (fs.length === 2) return (z) => ofCx(zetaGeneralized(toCx(f(0)(z)), toCx(f(1)(z))));
+      if (fs.length === 1) return (z) => ofCx(vouched(hurwitzZetaChecked(toCx(f(0)(z)), { re: 1, im: 0 })));
+      if (fs.length === 2) return (z) => ofCx(vouched(zetaGeneralizedChecked(toCx(f(0)(z)), toCx(f(1)(z)))));
       break;
     case "HurwitzZeta":
-      if (fs.length === 2) return (z) => ofCx(hurwitzZeta(toCx(f(0)(z)), toCx(f(1)(z))));
+      if (fs.length === 2) return (z) => ofCx(vouched(hurwitzZetaChecked(toCx(f(0)(z)), toCx(f(1)(z)))));
       break;
     case "PolyLog":
       if (fs.length === 2) return (z) => ofCx(polyLog(toCx(f(0)(z)), toCx(f(1)(z))));

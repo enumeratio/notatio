@@ -13,6 +13,7 @@ import type { ComplexPlotView } from "./complex-plot.ts";
 import { parseNumeric } from "./manipulate.ts";
 import { DEFAULT_PHASE_GRADIENT, type Gradient, hexToRgb, rgbToHex, sampleGradient } from "./palettes.ts";
 import { type ColorOptions, gradientOf } from "./plot-color.ts";
+import { Uncertain } from "./uncertain.ts";
 
 /** A portrait's view (`extent` is the plane's height, its width the same for a square frame) and how it is drawn. */
 export interface ComplexPlotBoxOptions extends ColorOptions, Partial<ComplexPlotView> {
@@ -87,6 +88,12 @@ const maskColor = (x: number, y: number): string => {
   return rgbToHex([g, g, g]);
 };
 
+/** The shader's hatch for a value it cannot vouch for: two grays in diagonal bands, eight cells to the period. */
+const hatchColor = (i: number, j: number): string => {
+  const g = 0.2 + 0.12 * (fract((i + j) / 8) >= 0.5 ? 1 : 0);
+  return rgbToHex([g, g, g]);
+};
+
 /** The frame a portrait is drawn in: a square plot area over the plane `view` shows. */
 function chrome(view: ComplexPlotView, title: string | undefined): Record<string, OptionValue> {
   const half = view.extent / 2;
@@ -122,7 +129,8 @@ const definedOnly = <T extends object>(o: T): Partial<T> =>
 
 /**
  * `f` evaluated over the plane as a `GraphicsBox`: one raster cell per sample, at the cell's center,
- * rows from the least imaginary part up. A sample that throws is clear. A pure function of its inputs.
+ * rows from the least imaginary part up. A sample that throws is clear, except one the kernel declines
+ * for lost digits (`Uncertain`), which is hatched as the shader hatches it. A pure function of its inputs.
  */
 export function complexPlotBox(f: ComplexFunction, options: ComplexPlotBoxOptions = {}): Box {
   const view = { ...DEFAULT_VIEW, ...definedOnly(options) };
@@ -137,8 +145,8 @@ export function complexPlotBox(f: ComplexFunction, options: ComplexPlotBoxOption
       if (view.mask > 0 && x * x + y * y >= view.mask * view.mask) return maskColor(x, y);
       try {
         return portraitColor(f([x, y]), gradient);
-      } catch {
-        return "";
+      } catch (error) {
+        return error instanceof Uncertain ? hatchColor(i, j) : "";
       }
     }),
   );
