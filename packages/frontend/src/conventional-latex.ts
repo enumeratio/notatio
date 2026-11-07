@@ -225,6 +225,37 @@ const bracketed = (name: "Floor" | "Ceil", open: string, close: string): Entry =
   },
 });
 
+/** Precedence of `=` in compute-engine's dictionary. */
+const EQUAL_PRECEDENCE = 245;
+
+/** `5! = 5`: native `Equal` writes `5!=5`, which reads back as `5 != 5`, a different relation. */
+const equal: Entry = {
+  ...native("Equal"),
+  name: "Equal",
+  serialize: (serializer, expr) =>
+    operands(expr)
+      .map((x) => serializer.wrap(x, EQUAL_PRECEDENCE))
+      .reduce((written, next) => (written.endsWith("!") ? `${written} = ${next}` : `${written}=${next}`)),
+};
+
+/** `(a \setminus b) \setminus c` for three or more sets: the sign reads `a \setminus b \setminus c` as
+ *  `a \setminus (b \setminus c)`, but `SetMinus(a, b, c)` removes `b` and then `c` from `a`. */
+const setMinus: Entry = {
+  ...native("SetMinus"),
+  name: "SetMinus",
+  serialize: (serializer, expr) => {
+    const [first, second, ...rest] = operands(expr);
+    if (first === undefined || second === undefined || rest.length === 0) {
+      return native("SetMinus").serialize(serializer, expr);
+    }
+    const left = rest.reduce<MathJsonExpression>(
+      (acc, next) => ["SetMinus", ["Delimiter", acc], next],
+      ["SetMinus", first, second],
+    );
+    return native("SetMinus").serialize(serializer, left);
+  },
+};
+
 /** A truth value written as the word, as InputForm spells it; ⊤ and ⊥ are TraditionalForm's
  *  and still read. */
 const truth = (name: "True" | "False", trigger: string): Entry => ({
@@ -275,6 +306,11 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   operatorname("Erfc", "erfc"),
   // compute-engine writes the Russian `arcctg`.
   operatorname("Arccot", "arccot"),
+  // `\mathrm{arcsec}` is the arcsecond to `Quantity`'s reader.
+  operatorname("Arcsec", "arcsec"),
+  operatorname("Arccsc", "arccsc"),
+  equal,
+  setMinus,
   bracketed("Floor", "\\lfloor", "\\rfloor"),
   bracketed("Ceil", "\\lceil", "\\rceil"),
   zeta,

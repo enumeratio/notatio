@@ -16,6 +16,7 @@ import {
   splitHead,
   sweepInterval,
   symbolLatex,
+  typedLatex,
   wrapHead,
 } from "@enumeratio/frontend/core";
 import { Sweep } from "./sweep.ts";
@@ -522,7 +523,7 @@ export class NotatioIn extends LitElement {
     });
     if (errors.length > 0) return undefined;
     try {
-      return assignLatex(engine.box(json, { form: "raw" }).latex);
+      return assignLatex(typedLatex(engine, json));
     } catch {
       return undefined;
     }

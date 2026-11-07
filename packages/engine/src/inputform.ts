@@ -143,6 +143,10 @@ function rewrite(node: unknown): MathJsonExpression {
     case "Rule":
       return ops.some((op) => headOf(op) === "KeyValuePair") ? [head, ...ops] : ["KeyValuePair", ...ops];
 
+    // `-\infty` reads as a negation of `PositiveInfinity`; the constant has a name of its own.
+    case "Negate":
+      return ops[0] === "PositiveInfinity" ? ("NegativeInfinity" as MathJsonExpression) : ["Negate", ...ops];
+
     // `-1 * x` is how a canonical tree spells a negation.
     case "Multiply": {
       const [first, ...rest] = ops;

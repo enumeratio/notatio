@@ -5,7 +5,7 @@ import "./notatio-out.ts";
 import { latexForText, pastedFrom } from "./clipboard.ts";
 import { translate } from "./kernel-client.ts";
 import { loadEngine } from "./mathlive.ts";
-import { AS_TYPED, assignLatex } from "@enumeratio/frontend/core";
+import { AS_TYPED, assignLatex, typedLatex } from "@enumeratio/frontend/core";
 import type { Prerendered } from "@enumeratio/frontend/prerender";
 import { ensureStyles } from "./styles.ts";
 
@@ -101,7 +101,7 @@ async function textInSyntax(syntax: Syntax, json: unknown, engine?: Engine): Pro
         if (written !== undefined) return assignLatex(written);
       }
       const e = engine ?? (await loadEngine());
-      return assignLatex(e.box(json as Parameters<Engine["box"]>[0], { form: "raw" }).latex);
+      return assignLatex(typedLatex(e, json));
     }
     case "epsil":
     default: {

@@ -93,3 +93,12 @@ test("InputForm: a comma-separated delimiter is a tuple", () => {
 test("InputForm: a bare comma list in a call is spread", () => {
   expect(toInputForm(["Derivative", "f", ["Delimiter", ["Sequence", 0, 1], "','"]])).toBe("Derivative(f, 0, 1)");
 });
+
+// `-\infty` parses as a negation of `PositiveInfinity`; the constant has a name of its own, and it
+// reads back as the same expression.
+test("InputForm: a negated PositiveInfinity is NegativeInfinity", () => {
+  expect(toInputForm(["Negate", "PositiveInfinity"])).toBe("NegativeInfinity");
+  expect(toInputForm(ce.parse("-\\infty", { form: "raw" }).json)).toBe("NegativeInfinity");
+  expect(toInputForm(["Add", "x", ["Negate", "PositiveInfinity"]])).toBe("x + NegativeInfinity");
+  expect(reparse("NegativeInfinity")).toEqual(ce.box(["Negate", "PositiveInfinity"]).json);
+});

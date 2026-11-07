@@ -110,6 +110,13 @@ const WRITTEN: unknown[][] = [
   ["Exp", "x"],
   ["Exp", ["Multiply", 2, "x"]],
   ["Exp", ["Add", "x", 1]],
+  ["Arcsec", "x"],
+  ["Arccsc", "x"],
+  ["Equal", ["Factorial", 5], 5],
+  ["Equal", ["Factorial2", 5], ["Factorial", 3]],
+  ["Equal", "x", ["Factorial", 5]],
+  ["SetMinus", "a", "b"],
+  ["SetMinus", "a", "b", "c"],
 ];
 
 for (const json of WRITTEN) {
@@ -180,4 +187,24 @@ test("a derivative brackets an operand that binds looser than the prime", () => 
   expect(latex(["Derivative", ["Function", ["Block", ["Power", "x", 2]], "x"]])).toBe("(x\\mapsto x^2)^{\\prime}");
   expect(latex(["Derivative", ["Power", "x", 2]])).toBe("(x^2)^{\\prime}");
   expect(latex(["Derivative", "f", 2])).toBe("f^{\\doubleprime}");
+});
+
+test("an equation after a factorial reads back as an equation, not as `!=`", () => {
+  const written = ce.box(["Equal", ["Factorial", 5], 5] as never, { form: "raw" }).latex;
+  expect(ce.parse(written, { form: "raw" }).json).toEqual(["Equal", ["Factorial", 5], 5]);
+});
+
+test("arcsec and arccsc read back as the functions", () => {
+  for (const head of ["Arcsec", "Arccsc"]) {
+    const written = ce.box([head, "x"] as never, { form: "raw" }).latex;
+    expect(ce.parse(written, { form: "raw" }).json, written).toEqual([head, "x"]);
+  }
+});
+
+test("three sets minus one another read back as removing the second, then the third", () => {
+  const written = ce.box(["SetMinus", "a", "b", "c"] as never, { form: "raw" }).latex;
+  const [head, left, right] = ce.parse(written, { form: "raw" }).json as unknown as unknown[];
+  expect(head).toBe("SetMinus");
+  expect(right).toBe("c");
+  expect(JSON.stringify(left)).toContain('"SetMinus","a","b"');
 });
