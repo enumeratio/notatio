@@ -1,6 +1,6 @@
 /// <reference types="@webgpu/types" />
 import { withWGSL } from "@enumeratio/analytic/shader";
-import { testDf64 } from "./df64-selftest.ts";
+import { type Df64Mode, testDf64, withDf64 } from "./df64-selftest.ts";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 
 // Opt-in GPU evaluation of a plot grid: one compute-shader invocation per grid point of a
@@ -21,8 +21,8 @@ function getDevice(): Promise<GPUDevice | null> {
 }
 
 // The df64 self-test runs once per device; the compute path takes its verdict (a failed device sums in f32).
-const df64Verdicts = new WeakMap<GPUDevice, Promise<boolean>>();
-const df64Verdict = (device: GPUDevice): Promise<boolean> => {
+const df64Verdicts = new WeakMap<GPUDevice, Promise<Df64Mode>>();
+const df64Verdict = (device: GPUDevice): Promise<Df64Mode> => {
   let v = df64Verdicts.get(device);
   if (!v) df64Verdicts.set(device, (v = testDf64(device)));
   return v;
@@ -151,10 +151,8 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
 `;
 
 /** The complete compute shader for a complex expression over `variable`. */
-export const complexComputeShader = (variable: string, code: string, df64 = true): string => {
-  const shader = withWGSL(COMPLEX_TAIL(variable, code));
-  return df64 ? shader : shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
-};
+export const complexComputeShader = (variable: string, code: string, df64: Df64Mode = "fma"): string =>
+  withDf64(withWGSL(COMPLEX_TAIL(variable, code)), df64);
 
 /** Bytes before the literal slots: the grid parameters. */
 const COMPLEX_PARAMS_OFFSET = 32;

@@ -2,9 +2,10 @@
 import { withWGSL } from "@enumeratio/analytic/shader";
 
 // df64 (the Hurwitz kernel's double-float sums) rests on error-free transforms a GPU compiler may
-// simplify away (Metal's fast-math folds (a + b) - a to b). A device that does so sums in f32 and
-// still passes the kernel's own cancellation check, so each device is tested once, on inputs it cannot
-// fold because they arrive through a buffer; a device that fails draws the f32 kernel, which hatches.
+// simplify away (Metal's fast-math folds (a + b) - a to b) or a device may leave inexact (an unfused
+// fma). A device that does so sums in f32 and still passes the kernel's own cancellation check, so each
+// device is tested once, on inputs it cannot fold because they arrive through a buffer: first with fma
+// two-products, then with Dekker's split; a device that fails both draws the f32 kernel, which hatches.
 
 const HOST = /* wgsl */ `
 @group(0) @binding(0) var<storage, read> inp : array<f32, 8>;
@@ -41,51 +42,72 @@ const EXPECTED = [
 /** Whether `out` (the shader's eight floats) is what exact error-free transforms give. */
 export const df64Exact = (out: ArrayLike<number>): boolean => EXPECTED.every((x, i) => out[i] === x);
 
-const verdicts = new WeakMap<GPUDevice, boolean>();
+/** How a device draws df64: two-products by fma or by Dekker's split, or not at all (f32, hatched). */
+export type Df64Mode = "fma" | "split" | "off";
 
-/** The self-test's verdict for `device` (false before it ran): true when df64 may be drawn. */
-export const df64Works = (device: GPUDevice): boolean => verdicts.get(device) ?? false;
+/** `shader` (written for "fma") set up for `mode`. */
+export const withDf64 = (shader: string, mode: Df64Mode): string =>
+  mode === "fma"
+    ? shader
+    : mode === "split"
+      ? shader.replace("const DF_FMA: bool = true;", "const DF_FMA: bool = false;")
+      : shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
+
+const verdicts = new WeakMap<GPUDevice, Df64Mode>();
+
+/** The self-test's verdict for `device` ("off" before it ran). */
+export const df64Mode = (device: GPUDevice): Df64Mode => verdicts.get(device) ?? "off";
 
 /**
  * Run the self-test once on `device`. A test sets `globalThis.__notatioDf64SelfTest = "fail"` to force the
  * failed path. Logs the verdict (debug).
  */
-export async function testDf64(device: GPUDevice): Promise<boolean> {
-  let ok = false;
+export async function testDf64(device: GPUDevice): Promise<Df64Mode> {
+  let mode: Df64Mode = "off";
   try {
     if ((globalThis as { __notatioDf64SelfTest?: string }).__notatioDf64SelfTest === "fail") throw new Error("forced");
-    const module = device.createShaderModule({ code: withWGSL(HOST) });
-    const pipeline = device.createComputePipeline({ layout: "auto", compute: { module, entryPoint: "main" } });
-    const input = device.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-    device.queue.writeBuffer(input, 0, new Float32Array(INPUT));
-    const output = device.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
-    const read = device.createBuffer({ size: 32, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-    const bind = device.createBindGroup({
-      layout: pipeline.getBindGroupLayout(0),
-      entries: [
-        { binding: 0, resource: { buffer: input } },
-        { binding: 1, resource: { buffer: output } },
-      ],
-    });
-    const encoder = device.createCommandEncoder();
-    const pass = encoder.beginComputePass();
-    pass.setPipeline(pipeline);
-    pass.setBindGroup(0, bind);
-    pass.dispatchWorkgroups(1);
-    pass.end();
-    encoder.copyBufferToBuffer(output, 0, read, 0, 32);
-    device.queue.submit([encoder.finish()]);
-    await read.mapAsync(GPUMapMode.READ);
-    ok = df64Exact(new Float32Array(read.getMappedRange().slice(0)));
-    for (const b of [input, output, read]) b.destroy();
+    for (const m of ["fma", "split"] as const) {
+      if (await exactOn(device, m)) {
+        mode = m;
+        break;
+      }
+    }
   } catch {
-    ok = false;
+    mode = "off";
   }
-  verdicts.set(device, ok);
+  verdicts.set(device, mode);
   console.debug(
-    ok
-      ? "df64 self-test passed: the Hurwitz portrait draws double-float sums"
+    mode !== "off"
+      ? `df64 self-test passed (${mode}): the Hurwitz portrait draws double-float sums`
       : "df64 self-test failed: the Hurwitz portrait draws f32 sums and hatches what f32 cannot vouch for",
   );
+  return mode;
+}
+
+async function exactOn(device: GPUDevice, mode: Df64Mode): Promise<boolean> {
+  const module = device.createShaderModule({ code: withDf64(withWGSL(HOST), mode) });
+  const pipeline = device.createComputePipeline({ layout: "auto", compute: { module, entryPoint: "main" } });
+  const input = device.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
+  device.queue.writeBuffer(input, 0, new Float32Array(INPUT));
+  const output = device.createBuffer({ size: 32, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
+  const read = device.createBuffer({ size: 32, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
+  const bind = device.createBindGroup({
+    layout: pipeline.getBindGroupLayout(0),
+    entries: [
+      { binding: 0, resource: { buffer: input } },
+      { binding: 1, resource: { buffer: output } },
+    ],
+  });
+  const encoder = device.createCommandEncoder();
+  const pass = encoder.beginComputePass();
+  pass.setPipeline(pipeline);
+  pass.setBindGroup(0, bind);
+  pass.dispatchWorkgroups(1);
+  pass.end();
+  encoder.copyBufferToBuffer(output, 0, read, 0, 32);
+  device.queue.submit([encoder.finish()]);
+  await read.mapAsync(GPUMapMode.READ);
+  const ok = df64Exact(new Float32Array(read.getMappedRange().slice(0)));
+  for (const b of [input, output, read]) b.destroy();
   return ok;
 }

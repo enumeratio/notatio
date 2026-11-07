@@ -1,6 +1,6 @@
 /// <reference types="@webgpu/types" />
 import { withWGSL } from "@enumeratio/analytic/shader";
-import { df64Works, testDf64 } from "./df64-selftest.ts";
+import { type Df64Mode, df64Mode, testDf64, withDf64 } from "./df64-selftest.ts";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 import {
   DEFAULT_PHASE_GRADIENT,
@@ -104,10 +104,8 @@ fn gradient(t0: f32) -> vec3f {
 `;
 
 /** The complete domain-coloring shader for a complex-valued WGSL expression `code`. */
-export const portraitShader = (code: string, df64 = true): string => {
-  const shader = withWGSL(HOST.replace("VALUE", `clogPolar(${code})`));
-  return df64 ? shader : shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
-};
+export const portraitShader = (code: string, df64: Df64Mode = "fma"): string =>
+  withDf64(withWGSL(HOST.replace("VALUE", `clogPolar(${code})`)), df64);
 
 /** Bytes before the literal slots: center, res, extent, mask, pad. */
 const SLOTS_OFFSET = 32;
@@ -224,7 +222,7 @@ export class ComplexPlotRenderer {
       this.#use(cached);
       return rebuilt ? "rebuilt" : "slots";
     }
-    const code = portraitShader(e.code, df64Works(this.#device));
+    const code = portraitShader(e.code, df64Mode(this.#device));
     this.#device.pushErrorScope("validation");
     const module = this.#device.createShaderModule({ code });
     const pipeline = this.#device.createRenderPipeline({

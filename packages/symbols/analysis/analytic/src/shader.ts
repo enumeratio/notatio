@@ -273,27 +273,33 @@ fn hurwitzEM(s: vec2f, a: vec2f) -> vec2f {
 
 // A host whose device failed the df64 self-test (df64-selftest.ts) sets this false, and no df64 value is drawn.
 const DF64: bool = true;
-// 1.0 that a compiler cannot see. A host sets it from a runtime value (the portrait's uniform); the
-// two-sums below multiply their intermediate by it, so fast-math cannot fold (a + b) - a to b. Not the
-// Dekker split: a multiply there fuses with 4097·a and loses 1e-9 of the sum (measured, swiftshader);
-// the host's self-test covers it.
+// A host whose device leaves fma unfused (fma(a, b, -a·b) is then 0) sets this false, and two-products
+// take Dekker's split.
+const DF_FMA: bool = true;
+// 1.0 that a compiler cannot see. A host sets it from a runtime value (the portrait's uniform).
 var<private> dfOne: f32 = 1.0;
+// x, passed through an integer xor with a 0 the compiler cannot see. Fast-math reassociates float
+// arithmetic, so a two-sum's (a + b) - a folds to b, even through a multiply by dfOne (Metal, measured);
+// it does not look through integer bits.
+fn dfOpq(x: f32) -> f32 { return bitcast<f32>(bitcast<u32>(x) ^ (bitcast<u32>(dfOne) ^ 0x3f800000u)); }
 
 // ---- df64: a double-float is an f32 pair (hi, lo), hi + lo to 48 bits. A complex df is a vec4f of
-// (re.hi, re.lo, im.hi, im.lo). The errors of a sum or product are taken with Knuth's two-sum and
-// Dekker's split, not fma, which WGSL lets an implementation leave unfused.
+// (re.hi, re.lo, im.hi, im.lo). The error of a sum is Knuth's two-sum; of a product, fma where the
+// device fuses it (WGSL lets an implementation leave it unfused), else Dekker's split.
 fn dfTwoSum(a: f32, b: f32) -> vec2f {
-  let s = a + b;
-  let v = (s - a) * dfOne;
-  return vec2f(s, (a - (s - v)) + (b - v));
+  let s = dfOpq(a + b);
+  let v = dfOpq(s - a);
+  // Both halves opaque: Metal otherwise regroups their sum to (a + b) - s, which is 0.
+  return vec2f(s, dfOpq(a - dfOpq(s - v)) + dfOpq(b - v));
 }
 // |a| >= |b|, or a == 0.
 fn dfFast(a: f32, b: f32) -> vec2f {
-  let s = a + b;
-  return vec2f(s, b - (s - a) * dfOne);
+  let s = dfOpq(a + b);
+  return vec2f(s, b - dfOpq(s - a));
 }
 fn dfTwoProd(a: f32, b: f32) -> vec2f {
   let p = a * b;
+  if (DF_FMA) { return vec2f(p, fma(a, b, -p)); }
   let ta = 4097.0 * a;
   let ah = ta - (ta - a);
   let al = a - ah;
