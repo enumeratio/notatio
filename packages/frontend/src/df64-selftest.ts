@@ -1,5 +1,5 @@
 /// <reference types="@webgpu/types" />
-import { withWGSL } from "@enumeratio/analytic/shader";
+import { DF_OPAQUE_WGSL, DF_PLAIN_WGSL, withWGSL } from "@enumeratio/analytic/shader";
 
 // df64 (the Hurwitz kernel's double-float sums) rests on error-free transforms a GPU compiler may
 // simplify away (Metal's fast-math folds (a + b) - a to b) or a device may leave inexact (an unfused
@@ -53,8 +53,7 @@ export type Df64Mode = "plain" | "opaque" | "fma" | "off";
 /** `shader` (written for "plain") set up for `mode`. */
 export const withDf64 = (shader: string, mode: Df64Mode): string => {
   if (mode === "off") return shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
-  const opaque =
-    mode === "plain" ? shader : shader.replace("const DF_OPAQUE: bool = false;", "const DF_OPAQUE: bool = true;");
+  const opaque = mode === "plain" ? shader : shader.replace(DF_PLAIN_WGSL, DF_OPAQUE_WGSL);
   return mode === "fma" ? opaque.replace("const DF_FMA: bool = false;", "const DF_FMA: bool = true;") : opaque;
 };
 

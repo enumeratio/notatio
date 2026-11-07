@@ -53,6 +53,16 @@ const EM_COEFFICIENTS = [
   -3617 / 10670622842880000,
 ];
 
+export const DF_PLAIN_WGSL = "fn dfOpq(x: f32) -> f32 { return x; }";
+/**
+ * dfOpq for a device that folds the two-sums. Fast-math reassociates float arithmetic, so (a + b) - a folds
+ * to b, even through a multiply by a runtime 1.0 (Metal, measured); it does not look through integer bits, so
+ * x goes through an xor with a 0 the compiler cannot see. Swapped in as text, not branched on a const: a dead
+ * branch holding the bitcasts loses SwiftShader's device (measured), and the xor slows its portrait by half.
+ */
+export const DF_OPAQUE_WGSL =
+  "fn dfOpq(x: f32) -> f32 { return bitcast<f32>(bitcast<u32>(x) ^ (bitcast<u32>(dfOne) ^ 0x3f800000u)); }";
+
 export const zetaWGSL = /* wgsl */ `
 const EM_PAIRS : i32 = 8;
 
@@ -278,15 +288,8 @@ const DF64: bool = true;
 const DF_FMA: bool = false;
 // 1.0 that a compiler cannot see. A host sets it from a runtime value (the portrait's uniform).
 var<private> dfOne: f32 = 1.0;
-// A host whose device folds the two-sums sets this true. Fast-math reassociates float arithmetic, so
-// (a + b) - a folds to b, even through a multiply by dfOne (Metal, measured); dfOpq then passes x through
-// an integer xor with a 0 the compiler cannot see, which it does not look through. Off where the device
-// keeps the sums exact without it: the xor slows SwiftShader's portrait by half (measured).
-const DF_OPAQUE: bool = false;
-fn dfOpq(x: f32) -> f32 {
-  if (DF_OPAQUE) { return bitcast<f32>(bitcast<u32>(x) ^ (bitcast<u32>(dfOne) ^ 0x3f800000u)); }
-  return x;
-}
+// x. A host whose device folds the two-sums replaces it with DF_OPAQUE_WGSL.
+${DF_PLAIN_WGSL}
 
 // ---- df64: a double-float is an f32 pair (hi, lo), hi + lo to 48 bits. A complex df is a vec4f of
 // (re.hi, re.lo, im.hi, im.lo). The error of a sum is Knuth's two-sum; of a product, Dekker's split,
