@@ -7,6 +7,8 @@ signatures:
   - call: NonCommutativeMultiply(a, b, …)
     description: the product of the operands, in the order written
     library: enumeratio-hypercomplex
+    type: (number*) -> number
+    overrides: enumeratio-structures
   - call: GeometricProduct(a, b, …)
     description: alias, for the geometric-algebra reading
     library: enumeratio-hypercomplex
