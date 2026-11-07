@@ -7,6 +7,7 @@
 
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+import { curveOf, peaks, sineMaxima } from "./support.ts";
 
 /** A docs story's card, by its anchor. */
 const story = (page: Page, id: string): Locator => page.locator(`[id="${id}"]`);
@@ -455,13 +456,25 @@ test.describe("environments", () => {
     await expect(cell.locator("notatio-in")).not.toHaveText("", { timeout: 20_000 });
   });
 
-  // The vdom puts the Plot and the Slider in a Column outside any dynamic module, so the
-  // slider's `k` never reaches the plot.
-  test.fail("a narrow column's plot follows its slider", async ({ page }) => {
+  test("a narrow column's plot follows its slider", async ({ page }) => {
     await page.goto("/docs/components/environments");
     const out = story(page, "a-narrow-column").locator(".env-out");
-    const curve = out.locator("graphics-box svg path");
-    await expect(curve.first()).toBeVisible({ timeout: 20_000 });
+    const plot = out.locator("graphics-box svg[aria-label=plot]");
+    // sin(k x) over (0, 10): k = 1 has two maxima, k = 4 has seven.
+    const maxima = async (k: number) => {
+      const c = await curveOf(plot);
+      return { drawn: peaks(c.ys), expected: sineMaxima(k, c.xRange[0], c.xRange[1]) };
+    };
+    await expect(async () => {
+      const { drawn, expected } = await maxima(1);
+      expect(expected).toBeGreaterThan(0);
+      expect(drawn).toBe(expected);
+    }).toPass();
+    await out.locator("input[type=range]").fill("4");
+    await expect(async () => {
+      const { drawn, expected } = await maxima(4);
+      expect(drawn).toBe(expected);
+    }).toPass();
   });
 });
 
