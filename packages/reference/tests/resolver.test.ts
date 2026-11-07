@@ -1,7 +1,9 @@
 // The resolver (`@enumeratio/manifest`'s `createResolver`) declares only what an expression
 // names. It means what the full engine means when every example evaluates the same in an
 // engine holding just the packages its head's examples name, and their requirements. The
-// standard run checks a few heads across the packages; `DEEP_TESTS=1` checks every one. Triage
+// standard run checks a few heads across the packages; `DEEP_TESTS=1` checks every head, each
+// for its first `DEEP_ALLOWANCE` examples in page order (the cost is the cases, about 30 ms
+// each, plus an engine per package set, not a slow resolver path). Triage
 // rows are left out: one that reads state an earlier case left on the pooled engine (Transpose's
 // `m`) differs with which cases share an engine.
 
@@ -67,6 +69,10 @@ const agree = (a: unknown, b: unknown): boolean => {
   return keys.length === Object.keys(y).length && keys.every((key) => key in y && agree(x[key], y[key]));
 };
 
+// Examples a head contributes in the deep run: all of them are ~17k cases and outrun the test's
+// 600 s. Every head keeps its first few, in page order, with no sampling and no clock; the
+// SAMPLE heads keep all of theirs.
+const DEEP_ALLOWANCE = 3;
 const OWN_ENGINE = new Set(["statistics", "domains"]);
 const deep = process.env.DEEP_TESTS === "1";
 const heads = referenceData().heads.filter(
@@ -80,15 +86,13 @@ test(
     const setup = (query = ""): string =>
       new URL(`../scripts/${query ? "lazy-engines.ts" : "engines.ts"}${query}`, import.meta.url).href;
     const options = { timeMs: 10_000, memoryBytes: 512 * 1024 * 1024, materialize: true, concurrency: 3 };
-    const cases = heads.flatMap((h) =>
-      h.entry.examples.filter(isSettled).map((e) => ({ id: `${h.package}/${h.head}/${e.id}`, input: e.expr })),
-    );
+    const share = (h: (typeof heads)[number]) =>
+      h.entry.examples.filter(isSettled).slice(0, SAMPLE.has(h.head) ? undefined : DEEP_ALLOWANCE);
+    const cases = heads.flatMap((h) => share(h).map((e) => ({ id: `${h.package}/${h.head}/${e.id}`, input: e.expr })));
     const full = new Map((await runCases(cases, { ...options, setup: setup() })).map((r) => [r.id, r]));
     const groups = new Map<string, typeof cases>();
     for (const h of heads) {
-      const packages = new Set(
-        h.entry.examples.filter(isSettled).flatMap((e) => [...packagesNeeded(e.expr, LIBRARIES, undefined, TABLES)]),
-      );
+      const packages = new Set(share(h).flatMap((e) => [...packagesNeeded(e.expr, LIBRARIES, undefined, TABLES)]));
       const key = [...packages].toSorted().join(",");
       groups.set(key, [...(groups.get(key) ?? []), ...cases.filter((c) => c.id.startsWith(`${h.package}/${h.head}/`))]);
     }
