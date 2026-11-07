@@ -1039,6 +1039,203 @@ const modulesGreatestDimensionSum: MathJSON = [
 ];
 const simplesCountWhere = (test: MathJSON): MathJSON => count(upTo(vertexCount), test, "v");
 
+// ── grades and extensions of simple, injective and dual modules with the regular module ────
+/** dim Hom((x, y), A) for the regular module A. */
+const homWithRegular = (x: MathJSON, y: MathJSON): MathJSON =>
+  floored(sumOver(upTo(vertexCount), homDimension(x, y, subtract("w", 1), at("w", "series")), "w"));
+/** The syzygy of the module (x0, y0) taken `steps` times (or until it is projective), as (top, length, steps taken). */
+const syzygyAfter = (x0: MathJSON, y0: MathJSON, steps: MathJSON): MathJSON =>
+  bindList(
+    "target",
+    steps,
+    fold(
+      upTo(vertexCount),
+      ["List", x0, y0, 0],
+      bindList(
+        "entry",
+        at(add(carried(1), 1), "series"),
+        [
+          "If",
+          or(equals(carried(2), "entry"), equals(carried(3), "target")),
+          ["List", carried(1), carried(2), carried(3)],
+          ["List", add(carried(1), carried(2)), subtract("entry", carried(2)), add(carried(3), 1)],
+        ],
+        "integer",
+      ),
+    ),
+    "integer",
+  );
+/** dim Ext^i((x0, y0), A) for i >= 1, which is Ext^1 of the (i - 1)-th syzygy. */
+const extensionWithRegularAt = (x0: MathJSON, y0: MathJSON, degree: MathJSON): MathJSON =>
+  bindList(
+    "syzygy",
+    syzygyAfter(x0, y0, subtract(degree, 1)),
+    firstExtensionWithRegular(at(1, "syzygy"), at(2, "syzygy")),
+  );
+/**
+ * The grade of the module (x0, y0): the least i with Ext^i(M, A) nonzero. Accumulator (top, length, grade, found, ticks):
+ * tick k reads Ext^(k+1) as Ext^1 of the k-th syzygy, and the grade is 0 when Hom(M, A) is nonzero.
+ */
+const gradeOf = (x0: MathJSON, y0: MathJSON): MathJSON => [
+  "At",
+  fold(
+    upTo(vertexCount),
+    ["List", x0, y0, 0, ["If", greater(homWithRegular(x0, y0), 0), 1, 0], 0],
+    bindList(
+      "cursor",
+      carried(1),
+      bindList(
+        "extent",
+        carried(2),
+        bindList(
+          "extension",
+          firstExtensionWithRegular("cursor", "extent"),
+          bindList(
+            "entry",
+            at(add("cursor", 1), "series"),
+            bindList(
+              "found",
+              ["If", or(equals(carried(4), 1), greater("extension", 0)), 1, 0],
+              [
+                "List",
+                ["If", equals("extent", "entry"), "cursor", add("cursor", "extent")],
+                ["If", equals("extent", "entry"), "extent", subtract("entry", "extent")],
+                [
+                  "If",
+                  equals(carried(4), 1),
+                  carried(3),
+                  ["If", greater("extension", 0), add(carried(5), 1), carried(3)],
+                ],
+                "found",
+                add(carried(5), 1),
+              ],
+              "integer",
+            ),
+            "integer",
+          ),
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+  ),
+  3,
+];
+const injectiveGrades: MathJSON = forInjectives(gradeOf);
+const simpleGrades: MathJSON = forEach(vertexIndices, gradeOf(subtract("v", 1), 1), "v");
+/** The total dimension of Ext^i(D(A), A), D(A) the direct sum of the indecomposable injectives. */
+const dualRegularExtensionTotal = (degree: MathJSON): MathJSON =>
+  floored(["Sum", forInjectives((top, moduleLength) => extensionWithRegularAt(top, moduleLength, degree))]);
+/** Simple modules S that are k-regular: projective dimension k, grade k, and Ext^k(S, A) one-dimensional. */
+const regularSimples = (k: number): MathJSON =>
+  overSimples(
+    floored(
+      sumOver(
+        vertexIndices,
+        [
+          "If",
+          equals(at("v", "dims"), k),
+          [
+            "If",
+            equals(gradeOf(subtract("v", 1), 1), k),
+            ["If", equals(extensionWithRegularAt(subtract("v", 1), 1, k), 1), 1, 0],
+            0,
+          ],
+          0,
+        ],
+        "v",
+      ),
+    ),
+  );
+/** The `steps`-th cosyzygy of (x0, y0) as (top, length, steps taken); the zero module has length 0 and stays. */
+const cosyzygyAfter = (x0: MathJSON, y0: MathJSON, steps: number): MathJSON =>
+  fold(
+    upTo(vertexCount),
+    ["List", x0, y0, 0],
+    bindList(
+      "cursor",
+      carried(1),
+      bindList(
+        "extent",
+        carried(2),
+        bindList(
+          "socle",
+          ["Max", subtract(add("cursor", "extent"), 1), 0],
+          bindList(
+            "hull",
+            hullTop("socle"),
+            [
+              "If",
+              or(equals("extent", 0), equals(carried(3), steps)),
+              ["List", "cursor", "extent", carried(3)],
+              ["List", "hull", subtract("cursor", "hull"), add(carried(3), 1)],
+            ],
+            "integer",
+          ),
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+  );
+/** The greatest projective dimension of the `steps`-th term of the minimal injective coresolution of the indecomposable projectives (term 0 is the injective hull). */
+const coresolutionTermProjectiveDimension = (steps: number): MathJSON =>
+  overSeries([
+    "Max",
+    forEach(
+      vertexIndices,
+      bindList("cosyzygy", cosyzygyAfter(subtract("v", 1), at("v", "series"), steps), [
+        "If",
+        equals(at(2, "cosyzygy"), 0),
+        0,
+        bindList(
+          "socle",
+          subtract(add(at(1, "cosyzygy"), at(2, "cosyzygy")), 1),
+          bindList("hull", hullTop("socle"), projectiveDimension("hull", subtract(add("socle", 1), "hull")), "integer"),
+          "integer",
+        ),
+      ]),
+      "v",
+    ),
+  ]);
+/** The dominant dimension of each indecomposable projective module, vertex by vertex. */
+const projectiveDominantDimensions = [
+  "projectiveDominantDims",
+  forEach(vertexIndices, dominantDimensionOfModule(subtract("v", 1), at("v", "series")), "v"),
+] as const;
+/** The codominant dimension of each simple module, vertex by vertex. */
+const simpleCodominantDimensions = [
+  "simpleCodominantDims",
+  forEach(vertexIndices, codominantDimension(subtract("v", 1), 1), "v"),
+] as const;
+/** The projective and injective dimensions of each projective's radical, vertex by vertex; the zero radical of a simple projective reads a clamped module and is never used. */
+const radicalProjectiveDimensions = [
+  "radicalProjectiveDims",
+  forEach(
+    vertexIndices,
+    projectiveDimension(["Min", "v", semilength], ["Max", subtract(at("v", "series"), 1), 1]),
+    "v",
+  ),
+] as const;
+const radicalInjectiveDimensions = [
+  "radicalInjectiveDims",
+  forEach(vertexIndices, injectiveDimension(["Min", "v", semilength], ["Max", subtract(at("v", "series"), 1), 1]), "v"),
+] as const;
+/** The injective dimension of each projective's square radical, which starts two vertices on; read only where it is nonzero. */
+const squaredRadicalInjectiveDimensions = [
+  "squaredRadicalInjectiveDims",
+  forEach(
+    vertexIndices,
+    injectiveDimension(["Min", add("v", 1), semilength], ["Max", subtract(at("v", "series"), 2), 1]),
+    "v",
+  ),
+] as const;
+const leftShiftedSeries = ["leftSeries", leftSeries] as const;
+/** The indecomposable projectives that are not injective: the one before is longer, so a longer module ends at their socle. */
+const projectiveNotInjective: MathJSON = greater(at("v", "leftSeries"), at("v", "series"));
+
 export const DYCK_STATISTICS: readonly Definition[] = [
   stat("Height", "The greatest height the path reaches.", nonEmpty(["Max", profile])),
 
@@ -2272,5 +2469,327 @@ export const DYCK_STATISTICS: readonly Definition[] = [
       ),
     ),
     "FindStat's St001483. A simple module is in the socle when some indecomposable projective ends at it.",
+  ),
+
+  // Grades, extensions with the regular module and dominant dimensions of projectives (batch 9).
+  stat(
+    "ProjectivesOfInjectiveDimensionAtMostDominantDimension",
+    "The indecomposable projective modules whose injective dimension is at most their dominant dimension.",
+    overNakayama(
+      [projectiveInjectiveDimensions, projectiveDominantDimensions],
+      simplesCountWhere(atMostValue(at("v", "projectiveInjectiveDims"), at("v", "projectiveDominantDims"))),
+    ),
+    "FindStat's St000998, read with the dominant dimension of the module itself: that is the reading its rows follow.",
+  ),
+  stat(
+    "SimplesOfInjectiveDimensionEqualToDominantDimension",
+    "The simple modules whose injective dimension equals their dominant dimension.",
+    overNakayama(
+      [simpleInjectiveDimensions, simpleDominantDimensions],
+      simplesCountWhere(equals(at("v", "simpleInjectiveDims"), at("v", "simpleDominantDims"))),
+    ),
+    "FindStat's St001028, read with the dominant dimension of the module itself: that is the reading its rows follow.",
+  ),
+  stat(
+    "NonInjectiveProjectivesOfDominantDimensionEqualToInjectiveDimension",
+    "The indecomposable projective modules that are not injective and whose dominant dimension equals their injective dimension.",
+    overNakayama(
+      [leftShiftedSeries, projectiveInjectiveDimensions, projectiveDominantDimensions],
+      simplesCountWhere(
+        and(projectiveNotInjective, equals(at("v", "projectiveInjectiveDims"), at("v", "projectiveDominantDims"))),
+      ),
+    ),
+    "FindStat's St001088.",
+  ),
+  stat(
+    "NonInjectiveProjectivesOfDominantDimensionDifferentFromInjectiveDimension",
+    "The indecomposable projective modules that are not injective and whose dominant dimension differs from their injective dimension.",
+    overNakayama(
+      [leftShiftedSeries, projectiveInjectiveDimensions, projectiveDominantDimensions],
+      simplesCountWhere(
+        and(projectiveNotInjective, [
+          "NotEqual",
+          at("v", "projectiveInjectiveDims"),
+          at("v", "projectiveDominantDims"),
+        ]),
+      ),
+    ),
+    "FindStat's St001089: the non-injective projectives less those counted by NonInjectiveProjectivesOfDominantDimensionEqualToInjectiveDimension.",
+  ),
+  stat(
+    "ProjectivesOfDominantDimensionEqualToGlobalDimensionOrInjective",
+    "The indecomposable projective modules that are injective or whose dominant dimension is the global dimension.",
+    overNakayama(
+      [simpleProjectiveDimensions, leftShiftedSeries, projectiveDominantDimensions],
+      simplesCountWhere(
+        or(
+          atMostValue(at("v", "leftSeries"), at("v", "series")),
+          equals(at("v", "projectiveDominantDims"), globalDimension),
+        ),
+      ),
+    ),
+    "FindStat's St001166. A projective-injective module has dominant dimension past the global dimension, so the two cases do not overlap.",
+  ),
+  stat(
+    "InjectivesOfGradeAtLeastOne",
+    "The indecomposable injective modules of grade at least one: Hom into the regular module vanishes.",
+    overSeries(count(injectiveGrades, atLeastValue("d", 1), "d")),
+    "FindStat's St001184. The grade of a module M is the least i with Ext^i(M, A) nonzero.",
+  ),
+  stat(
+    "InjectivesOfGradeAtLeastTwo",
+    "The indecomposable injective modules of grade at least two.",
+    overSeries(count(injectiveGrades, atLeastValue("d", 2), "d")),
+    "FindStat's St001185.",
+  ),
+  stat(
+    "InjectivesOfGradeAtLeastThree",
+    "The indecomposable injective modules of grade at least three.",
+    overSeries(count(injectiveGrades, atLeastValue("d", 3), "d")),
+    "FindStat's St001181.",
+  ),
+  stat(
+    "SimplesOfGradeAtLeastTwo",
+    "The simple modules of grade at least two.",
+    overSeries(count(simpleGrades, atLeastValue("d", 2), "d")),
+    "FindStat's St001188, and St001244 (the simples of projective dimension one that are not 1-regular), which has the same values on every path of semilength 8 or less.",
+  ),
+  stat(
+    "SimplesOfGradeAtLeastThree",
+    "The simple modules of grade at least three.",
+    overSeries(count(simpleGrades, atLeastValue("d", 3), "d")),
+    "FindStat's St001186.",
+  ),
+  stat(
+    "SimplesOfGradeAtLeastGlobalDimension",
+    "The simple modules of grade at least the global dimension: their extensions with the regular module vanish below it.",
+    overSimples(count(simpleGrades, atLeastValue("d", globalDimension), "d")),
+    "FindStat's St001191.",
+  ),
+  stat(
+    "DualRegularModuleVanishingExtensionDegrees",
+    "The degrees i from 1 to the global dimension at which the extensions of the direct sum of the indecomposable injective modules by the regular module vanish.",
+    overSimples(floored(sumOver(upTo(globalDimension), ["If", equals(dualRegularExtensionTotal("i"), 0), 1, 0], "i"))),
+    "FindStat's St000954. Ext^i(D(A), A) is Ext^1 of the (i - 1)-th syzygy.",
+  ),
+  stat(
+    "DualRegularModuleNonVanishingExtensionDegrees",
+    "The degrees i from 1 to the global dimension at which the extensions of the direct sum of the indecomposable injective modules by the regular module do not vanish.",
+    overSimples(floored(sumOver(upTo(globalDimension), ["If", greater(dualRegularExtensionTotal("i"), 0), 1, 0], "i"))),
+    "FindStat's St000955.",
+  ),
+  stat(
+    "DualRegularModuleTopExtensionDimension",
+    "The dimension of the extensions in the global dimension of the direct sum of the indecomposable injective modules by the regular module.",
+    overSimples(dualRegularExtensionTotal(globalDimension)),
+    "FindStat's St000964.",
+  ),
+  stat(
+    "NonZeroRadicalsOfProjectivesOfProjectiveAndInjectiveDimensionAtMostOne",
+    "The nonzero radicals of the indecomposable projective modules whose projective and injective dimensions are both at most one.",
+    overNakayama(
+      [radicalProjectiveDimensions, radicalInjectiveDimensions],
+      simplesCountWhere(
+        and(
+          greater(at("v", "series"), 1),
+          and(atMostValue(at("v", "radicalProjectiveDims"), 1), atMostValue(at("v", "radicalInjectiveDims"), 1)),
+        ),
+      ),
+    ),
+    "FindStat's St001241. The radical of the projective at vertex v starts at v + 1.",
+  ),
+  stat(
+    "ProjectiveSquaredRadicalsOfInjectiveDimensionAtMostOne",
+    "The indecomposable projective modules whose square radical, zero included, has injective dimension at most one.",
+    overNakayama(
+      [squaredRadicalInjectiveDimensions],
+      simplesCountWhere(or(atMostValue(at("v", "series"), 2), atMostValue(at("v", "squaredRadicalInjectiveDims"), 1))),
+    ),
+    "FindStat's St001240: the modules e_i J^2, the zero ones included.",
+  ),
+  stat(
+    "SimplesOfInjectiveAndDominantDimensionOneWithDualProperty",
+    "The simple modules whose injective and dominant dimensions are both one and whose projective and codominant dimensions are both one.",
+    overNakayama(
+      [
+        leftShiftedSeries,
+        simpleProjectiveDimensions,
+        simpleInjectiveDimensions,
+        simpleDominantDimensions,
+        simpleCodominantDimensions,
+      ],
+      simplesCountWhere(
+        and(
+          and(equals(at("v", "simpleInjectiveDims"), 1), equals(at("v", "simpleDominantDims"), 1)),
+          and(equals(at("v", "dims"), 1), equals(at("v", "simpleCodominantDims"), 1)),
+        ),
+      ),
+    ),
+    "FindStat's St001230.",
+  ),
+  stat(
+    "SimplesOfNonVanishingSecondExtensionWithRegularModule",
+    "The simple modules with a nonzero second extension by the regular module.",
+    overSeries(count(simpleSecondExtensions, greater("d", 0), "d")),
+    "FindStat's St001212.",
+  ),
+  stat(
+    "SimplesOfOneDimensionalSecondExtensionWithRegularModule",
+    "The simple modules whose second extensions by the regular module have dimension one.",
+    overSeries(count(simpleSecondExtensions, equals("d", 1), "d")),
+    "FindStat's St001222.",
+  ),
+  stat(
+    "SimpleModulesSecondExtensionWithRegularModuleDimension",
+    "The dimension of the second extensions of the direct sum of the simple modules by the regular module.",
+    overSeries(floored(["Sum", simpleSecondExtensions])),
+    "FindStat's St001215.",
+  ),
+  stat(
+    "NakayamaFinitisticDominantDimension",
+    "The greatest finite dominant dimension of an indecomposable module.",
+    overSeries([
+      "Max",
+      forEach(
+        vertexIndices,
+        [
+          "Max",
+          forEach(
+            moduleLengths,
+            bindList(
+              "size",
+              "y",
+              bindList(
+                "dominant",
+                dominantDimensionOfModule(subtract("v", 1), "size"),
+                ["If", less("dominant", vertexCount), "dominant", 0],
+                "integer",
+              ),
+              "integer",
+            ),
+            "y",
+          ),
+        ],
+        "v",
+      ),
+    ]),
+    "FindStat's St000686. A dominant dimension reaching the vertex count is the infinite one the fold caps at.",
+  ),
+  stat(
+    "OneRegularSimpleModules",
+    "The simple modules of projective dimension one, grade one and one-dimensional first extension by the regular module.",
+    regularSimples(1),
+    "FindStat's St001126. A simple module is k-regular when its projective dimension is k, Ext^k(S, A) is one-dimensional and Ext^i(S, A) vanishes below k.",
+  ),
+  stat("TwoRegularSimpleModules", "The simple modules that are 2-regular.", regularSimples(2), "FindStat's St001125."),
+  stat(
+    "ThreeRegularSimpleModules",
+    "The simple modules that are 3-regular.",
+    regularSimples(3),
+    "FindStat's St001137.",
+  ),
+  stat(
+    "SphericalSimpleModules",
+    "The simple modules with Ext^i(S, A) zero for 0 < i < the projective dimension of S; those of projective dimension at most one count.",
+    overSimples(
+      floored(
+        sumOver(
+          vertexIndices,
+          [
+            "If",
+            atMostValue(at("v", "dims"), 1),
+            1,
+            [
+              "If",
+              equals(
+                floored(
+                  sumOver(
+                    upTo(semilength),
+                    ["If", less("i", at("v", "dims")), extensionWithRegularAt(subtract("v", 1), 1, "i"), 0],
+                    "i",
+                  ),
+                ),
+                0,
+              ),
+              1,
+              0,
+            ],
+          ],
+          "v",
+        ),
+      ),
+    ),
+    "FindStat's St001994.",
+  ),
+  stat(
+    "ProjectiveRadicalsOfVanishingFirstExtensionFromJacobsonRadical",
+    "The indecomposable projective modules whose radical, zero included, has no first extension by the Jacobson radical.",
+    overModuleSets(
+      [radicals],
+      add(
+        1,
+        floored(
+          sumOver(
+            upTo(semilength),
+            [
+              "If",
+              equals(
+                floored(
+                  sumOver(
+                    upTo(semilength),
+                    firstExtensionDimension(
+                      at("j", "radicalTops"),
+                      at("j", "radicalLengths"),
+                      at("i", "radicalTops"),
+                      at("i", "radicalLengths"),
+                    ),
+                    "j",
+                  ),
+                ),
+                0,
+              ),
+              1,
+              0,
+            ],
+            "i",
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001226: the number of i with Ext^1(J, e_i J) zero. The last projective is simple, so its radical is zero and counts.",
+  ),
+  stat(
+    "RegularModuleSecondInjectiveTermProjectiveDimension",
+    "The greatest projective dimension of the second term of the minimal injective coresolution of an indecomposable projective module.",
+    coresolutionTermProjectiveDimension(1),
+    "FindStat's St001273, which calls this the first term: its rows count the injective hull as the zeroth term, the injective hull of the first cosyzygy as the first.",
+  ),
+  stat(
+    "RegularModuleThirdInjectiveTermProjectiveDimension",
+    "The greatest projective dimension of the third term of the minimal injective coresolution of an indecomposable projective module.",
+    coresolutionTermProjectiveDimension(2),
+    "FindStat's St001275, which calls this the second term; see RegularModuleSecondInjectiveTermProjectiveDimension.",
+  ),
+  stat(
+    "SimplesNotInSocleOrOfVanishingFirstExtensionWithRegularModule",
+    "The simple modules that are not in the socle of the regular module or have no first extension by the regular module.",
+    overSeries(
+      floored(
+        sumOver(
+          vertexIndices,
+          [
+            "If",
+            equals(
+              floored(sumOver(vertexIndices, ["If", equals(add("w", at("w", "series")), add("v", 1)), 1, 0], "w")),
+              0,
+            ),
+            1,
+            ["If", equals(firstExtensionWithRegular(subtract("v", 1), 1), 0), 1, 0],
+          ],
+          "v",
+        ),
+      ),
+    ),
+    "FindStat's St001492. A simple module is in the socle when some indecomposable projective ends at it.",
   ),
 ];
