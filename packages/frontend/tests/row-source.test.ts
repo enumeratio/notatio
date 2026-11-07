@@ -209,8 +209,16 @@ test("rows on both sides of 2^53 match direct At on Permutations(25)", async () 
   for (let i = 1; i < rows.length; i++) expect(lexLess(rows[i - 1]!, rows[i]!)).toBe(true);
 });
 
-test("a family with no bigint unrank says where paging stops", async () => {
+test("an Epsil family with a bigint unrank pages past 2^53", async () => {
   const source = open(["Subsets", 60]);
+  const edge = BigInt(Number.MAX_SAFE_INTEGER);
+  const batch = await source.rows([edge, edge + 3n], [0, 1]);
+  expect(batch.rows).toHaveLength(3);
+  expect(batch.declined).toBeUndefined();
+});
+
+test("a family with no bigint unrank says where paging stops", async () => {
+  const source = open(["Subsets", 60, 30]);
   const edge = BigInt(Number.MAX_SAFE_INTEGER);
   const batch = await source.rows([edge, edge + 3n], [0, 1]);
   expect(batch.rows).toHaveLength(1);
