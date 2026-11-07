@@ -32,7 +32,7 @@ import { logGamma } from "../numerics/log-gamma.ts";
 import { lerchPhi } from "../numerics/lerch-phi.ts";
 import { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 import { lerchPhiBig } from "../numerics/lerch-phi-big.ts";
-import { hurwitzZeta, zetaGeneralized } from "../numerics/hurwitz-zeta.ts";
+import { hurwitzZetaChecked, zetaGeneralizedChecked } from "../numerics/hurwitz-zeta.ts";
 import { hurwitzZetaBig, zetaGeneralizedBig, type BigCx, bigCx } from "../numerics/hurwitz-zeta-big.ts";
 import { digamma, polygamma, polygammaCoefficient } from "../numerics/polygamma.ts";
 import { bernoulliPolyExpr } from "../numerics/bernoulli-rational.ts";
@@ -188,10 +188,7 @@ export function evaluateHurwitz(
 
   // Numeric Euler–Maclaurin for everything else — only when a number is asked for.
   if (numeric && isFiniteNum(s) && isFiniteNum(a)) {
-    return (
-      bigZetaResult(ce, hurwitzZetaBig, s, a) ??
-      numberResult(ce, hurwitzZeta({ re: s.re, im: s.im }, { re: a.re, im: a.im }))
-    );
+    return bigZetaResult(ce, hurwitzZetaBig, s, a) ?? checkedResult(ce, hurwitzZetaChecked, s, a);
   }
 
   return undefined; // stay symbolic
@@ -248,13 +245,21 @@ export function evaluateZeta(ce: ComputeEngine, ops: readonly Expression[], nume
 
   // a concrete with Re(a) ≤ 0: generalized-zeta convention, numeric only.
   if (numeric && isFiniteNum(s)) {
-    return (
-      bigZetaResult(ce, zetaGeneralizedBig, s, a) ??
-      numberResult(ce, zetaGeneralized({ re: s.re, im: s.im }, { re: a.re, im: a.im }))
-    );
+    return bigZetaResult(ce, zetaGeneralizedBig, s, a) ?? checkedResult(ce, zetaGeneralizedChecked, s, a);
   }
 
   return undefined; // stay symbolic
+}
+
+/** The double kernel's value boxed, or undefined (unevaluated) where it declines for lost digits. */
+function checkedResult(
+  ce: ComputeEngine,
+  kernel: (s: Cx, a: Cx) => Cx | undefined,
+  s: Expression,
+  a: Expression,
+): Expression | undefined {
+  const r = kernel({ re: s.re, im: s.im }, { re: a.re, im: a.im });
+  return r === undefined ? undefined : numberResult(ce, r);
 }
 
 /**
@@ -342,7 +347,14 @@ export { stieltjesGammaBall, stieltjesGammaBig } from "../numerics/stieltjes-big
 export { lerchPhi, lerchPhiReal } from "../numerics/lerch-phi.ts";
 export { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 export { lerchPhiBig, lerchPhiBall } from "../numerics/lerch-phi-big.ts";
-export { hurwitzZeta, hurwitzZetaReal, zetaGeneralized, zetaGeneralizedReal } from "../numerics/hurwitz-zeta.ts";
+export {
+  hurwitzZeta,
+  hurwitzZetaChecked,
+  hurwitzZetaReal,
+  zetaGeneralized,
+  zetaGeneralizedChecked,
+  zetaGeneralizedReal,
+} from "../numerics/hurwitz-zeta.ts";
 export { digamma, polygamma, polygammaReal } from "../numerics/polygamma.ts";
 export { polyLog, polyLogReal } from "../numerics/polylog.ts";
 
