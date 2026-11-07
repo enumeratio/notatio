@@ -6,7 +6,7 @@
 // is meant to have them; shared setup belongs here.
 
 import { readFileSync } from "node:fs";
-import { ComputeEngine } from "@cortex-js/compute-engine";
+import { ComputeEngine, type LatexSyntax } from "@cortex-js/compute-engine";
 import type { PackageNotation } from "@enumeratio/boxes";
 import {
   buildEngine,
@@ -101,15 +101,19 @@ export const packageNotations = (): Promise<PackageNotation[]> =>
  * decide what the oracle takes for a free symbol (`collect-defined-names.ts`): the oracle sends
  * the heads formats holds inert as written, Wolfram's own (`Plot`) by name and the rest
  * (`Chart`, `Knob`, `CollectionTable`) as free functions. Counting them defined would leave the
- * latter unmapped, and a scan would drop the answers recorded for them.
+ * latter unmapped, and a scan would drop the answers recorded for them. With `latexSyntax`, it
+ * reads and writes LaTeX with that syntax (the page engine's), not compute-engine's own.
  */
-export const declaredEngine = ({ graphics = true }: { readonly graphics?: boolean } = {}): ComputeEngine =>
+export const declaredEngine = ({
+  graphics = true,
+  latexSyntax,
+}: { readonly graphics?: boolean; readonly latexSyntax?: LatexSyntax } = {}): ComputeEngine =>
   buildEngine({
     libraries: NAMES,
     available: AVAILABLE,
     include: graphics ? EXTRAS : EXTRAS.filter((extra) => extra.name !== "graphics"),
     engine: () => {
-      const ce = new ComputeEngine();
+      const ce = new ComputeEngine(latexSyntax === undefined ? {} : { latexSyntax });
       installPurityDefault(ce);
       return ce;
     },

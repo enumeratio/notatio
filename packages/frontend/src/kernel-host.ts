@@ -12,7 +12,7 @@ import { toInputForm } from "@enumeratio/formats/inputform";
 import { type CodeForm, codeForms } from "./code-forms.ts";
 import { type DisplayBoxes, displayBoxes } from "./display.ts";
 import { compilePlot, type PlotCompileSpec } from "./plot-compile.ts";
-import { AS_TYPED } from "./latex.ts";
+import { AS_TYPED, typedLatex } from "./latex.ts";
 import { boundName } from "./reactive.ts";
 import { createRowsHost, type RowsRequest } from "./row-source.ts";
 import { renderingOf } from "./symbols.ts";
@@ -49,7 +49,7 @@ export function readSource(ce: ComputeEngine, { text, format }: KernelSource, ra
 
 /** `json` in an editor's syntax: LaTeX as written (not canonical), Epsil, or MathJSON. */
 export function writeSource(ce: ComputeEngine, json: unknown, syntax: string): string {
-  if (syntax === "latex") return ce.box(json as never, { form: "raw" }).latex;
+  if (syntax === "latex") return typedLatex(ce, json);
   if (syntax === "epsil") return toInputForm(json as MathJsonExpression);
   if (syntax === "mathjson") return JSON.stringify(json);
   throw new Error(`no ${syntax} spelling`);

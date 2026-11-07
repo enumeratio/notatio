@@ -35,5 +35,12 @@
   "written [\"Lb\",\"x\"]": "\\log_{2}(x)",
   "written [\"Exp\",\"x\"]": "\\exponentialE^{x}",
   "written [\"Exp\",[\"Multiply\",2,\"x\"]]": "\\exponentialE^{2x}",
-  "written [\"Exp\",[\"Add\",\"x\",1]]": "\\exponentialE^{x+1}"
+  "written [\"Exp\",[\"Add\",\"x\",1]]": "\\exponentialE^{x+1}",
+  "written [\"Arcsec\",\"x\"]": "\\operatorname{arcsec}(x)",
+  "written [\"Arccsc\",\"x\"]": "\\operatorname{arccsc}(x)",
+  "written [\"Equal\",[\"Factorial\",5],5]": "5! = 5",
+  "written [\"Equal\",[\"Factorial2\",5],[\"Factorial\",3]]": "5!! = 3!",
+  "written [\"Equal\",\"x\",[\"Factorial\",5]]": "x=5!",
+  "written [\"SetMinus\",\"a\",\"b\"]": "a\\setminus b",
+  "written [\"SetMinus\",\"a\",\"b\",\"c\"]": "(a\\setminus b)\\setminus c"
 }

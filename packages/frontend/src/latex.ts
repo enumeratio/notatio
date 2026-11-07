@@ -79,3 +79,11 @@ export function latexOf(ce: ComputeEngine, expr: Expression, options?: Record<st
  * `x - 2` stays as written. A raw parse reads `\Gamma(2.5)` as `Gamma * 2.5`.
  */
 export const AS_TYPED = { form: "InvisibleOperator" } as const;
+
+/**
+ * `json` as the LaTeX an editor shows: boxed as written, with roots kept as radicals. The
+ * default style turns `\sqrt{2}` into `2^{1/2}` below the second nesting level, which reads
+ * back as a power, not a `Sqrt`.
+ */
+export const typedLatex = (ce: ComputeEngine, json: unknown): string =>
+  ce.box(json as MathJsonExpression, { form: "raw" }).toLatex({ rootStyle: "radical" });
