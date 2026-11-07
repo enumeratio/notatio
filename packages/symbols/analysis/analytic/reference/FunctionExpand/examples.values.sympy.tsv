@@ -8,7 +8,7 @@ a-rising-factorial-with-an-integer-length	expand_func(rf(Symbol("x"), 3))	x*(x +
 binom-n2-frac-n-n-1-2	expand_func(binomial(Symbol("n"), 2))	n*(n - 1)/2	
 functionexpand-1-over-sqrt-x-pow-2-times-sin	expand_func(((S(1) / sqrt((S(Symbol("x"))**2))) * sin(sqrt((S(Symbol("x"))**2)))))	sin(sqrt(x**2))/sqrt(x**2)	
 functionexpand-1-over-zeta-z-times-zeta-neg-z	expand_func(((S(1) / zeta(Symbol("z"))) * zeta(((-Symbol("z")) + 1))))	zeta(1 - z)/zeta(z)	
-functionexpand-list-sqrt-neg-x-pow-2-ln-sqrt-neg	expand_func([sqrt((-(S(Symbol("x"))**2))), log(sqrt(((-(S(Symbol("x"))**2)) + 1)))])	AttributeError: 'list' object has no attribute 'expand'	error
+functionexpand-list-sqrt-neg-x-pow-2-ln-sqrt-neg	enumeratio_broadcast(lambda _a0: expand_func(_a0), [sqrt((-(S(Symbol("x"))**2))), log(sqrt(((-(S(Symbol("x"))**2)) + 1)))])	[sqrt(-x**2), log(sqrt(1 - x**2))]	disagree
 functionexpand-airyai-x-times-neg-1-pow-4-over-3			
 functionexpand-polylog-2-z-plus-polylog-2-neg-z	expand_func((polylog(2, Symbol("z")) + polylog(2, ((-Symbol("z")) + 1)) + (-zeta(2))))	polylog(2, z) + polylog(2, 1 - z) - pi**2/6	
 a-generic-cos-argument-passes-through-unchanged	expand_func(cos(Symbol("theta")))	cos(theta)	

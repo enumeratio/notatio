@@ -18,7 +18,7 @@ expintegrale-0-z	expint(0, Symbol("z"))	exp(-z)/z
 seriescoefficient-expintegrale-0-x-list-x-0-n			
 expintegrale-0-positiveinfinity	expint(0, oo)	0	
 n-expintegrale-3-11-over-5-50	N(expint(3, Rational(11, 5)), 30)	0.0235206566482765000078317199118	
-simplify-functionexpand-list-expintegrale-5	simplify(expand_func([expint((5 * (S(2)**-1)), Symbol("z")), expint(4, Symbol("z")), expint(-4, Symbol("z"))]))		
+simplify-functionexpand-list-expintegrale-5	enumeratio_broadcast(lambda _a0: simplify(_a0), enumeratio_broadcast(lambda _a0: expand_func(_a0), [expint((5 * (S(2)**-1)), Symbol("z")), expint(4, Symbol("z")), expint(-4, Symbol("z"))]))	[2*(2*sqrt(pi)*z**(3/2)*(1 - erf(sqrt(z)))*exp(z) - 2*z + 1)*exp(-z)/3, (-z**3*exp(z)*expint(1, z) + z**2 - z + 2)*exp(-z)/6, (z**4 + 4*z**3 + 12*z**2 + 24*z + 24)*exp(-z)/z**5]	
 functionexpand-expintegrale-3-over-2-z	expand_func(expint(Rational(3, 2), Symbol("z")))		
 functionexpand-expintegrale-3-z	expand_func(expint(3, Symbol("z")))		
 functionexpand-expintegrale-minus-2-z	expand_func(expint(-2, Symbol("z")))		
