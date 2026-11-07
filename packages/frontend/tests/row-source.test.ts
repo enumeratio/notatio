@@ -209,6 +209,22 @@ test("rows on both sides of 2^53 match direct At on Permutations(25)", async () 
   for (let i = 1; i < rows.length; i++) expect(lexLess(rows[i - 1]!, rows[i]!)).toBe(true);
 });
 
+test("a row past 2^53 is shown and measured as a row before it is, under its carrier", async () => {
+  const source = open(["SymmetricGroup", 25], { columns: ["Descents"] });
+  const edge = BigInt(Number.MAX_SAFE_INTEGER);
+  const batch = await source.rows([edge - 1n, edge + 4n], [0, source.columns.length]);
+  expect(batch.rows).toHaveLength(5);
+  for (const [i, row] of batch.rows.entries()) {
+    const element = textOf(row[0]);
+    // The carrier's body, as on the rows before 2^53; the head would repeat on every row.
+    expect(element, `row ${edge - 1n + BigInt(i)}`).toMatch(/^\[\d+(, \d+){24}\]$/);
+    // The statistic is declared on Permutation, so it answers only if the row arrived as one.
+    const values = element.slice(1, -1).split(", ").map(Number);
+    const descents = values.filter((v, k) => k > 0 && values[k - 1]! > v).length;
+    expect(textOf(row[1]), element).toBe(String(descents));
+  }
+});
+
 test("an Epsil family with a bigint unrank pages past 2^53", async () => {
   const source = open(["Subsets", 60]);
   const edge = BigInt(Number.MAX_SAFE_INTEGER);
