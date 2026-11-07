@@ -257,6 +257,17 @@ const hasSymbol = (node: MathJSON): boolean =>
 /** SymPy's `PowerMod(a, s/r, m)`: the least root `x` of `x^r = a^s` (mod m), or `None` where there is none. */
 const POWER_MOD_ROOT = "min(nthroot_mod(pow(ZZ.convert($1), S($2).p, ZZ.convert($3)), S($2).q, $3, True) or [None])";
 
+/** Heads whose SymPy call checks its argument as it is built (`stirling(4, k)` raises for a symbol `k`, an
+ * integer one included), so a sum or product over them is formed term by term. */
+const SYMPY_INTEGER_ARGUMENT_HEADS: ReadonlySet<string> = new Set(["Stirling", "StirlingS1", "NthPrime"]);
+/** Heads that take one expression in SymPy, so a list is mapped entry by entry. */
+const SYMPY_ENTRYWISE_HEADS: ReadonlySet<string> = new Set(["Simplify", "FullSimplify", "FunctionExpand"]);
+/** Whether `node` is a list, or one of those heads over one. */
+const yieldsList = (node: MathJSON): boolean =>
+  isCall(node) &&
+  (node[0] === "List" ||
+    (SYMPY_ENTRYWISE_HEADS.has(node[0] as string) && node.length === 2 && yieldsList(node[1] as MathJSON)));
+
 /** A symbol that can be a series variable: not one of the named constants. */
 const isVariable = (node: MathJSON): node is string => typeof node === "string" && !(node in CONSTANTS);
 
@@ -342,8 +353,11 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
   // The variables of a held derivative (below), named apart for each one, and those taken at real points.
   let derivatives = 0;
   const realDummies = new Set<string>();
+  // The indices of a SymPy sum or product written as a Python lambda (below): plain Python names.
+  const lambdaIndices = new Set<string>();
   const boundName = (name: string): string => {
     if (wl) return isSystemName(name) ? `${CONTEXT}${name}` : name;
+    if (system === "sympy" && lambdaIndices.has(name)) return `_${name}`;
     // The symbols a held derivative differentiates are Sage variables, not Python names.
     if (system === "sage" && /^_d\d+$/.test(name))
       return `SR.var(${JSON.stringify(name)}${realDummies.has(name) ? ', domain="real"' : ""})`;
@@ -795,6 +809,24 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
       ) {
         const [from, to] = bounds.length === 1 ? [1, bounds[0]] : bounds;
         const range = [iterator[1], from === "Nothing" ? 1 : from, to].map((part) => walk(part as MathJSON));
+        const index = iterator[1] as string;
+        const first = from === "Nothing" ? 1 : from;
+        if (
+          system === "sympy" &&
+          /^[A-Za-z]\w*$/.test(index) &&
+          typeof first === "number" &&
+          Number.isInteger(first) &&
+          typeof to === "number" &&
+          Number.isInteger(to) &&
+          mentions(operands[0] as MathJSON, SYMPY_INTEGER_ARGUMENT_HEADS)
+        ) {
+          lambdaIndices.add(index);
+          try {
+            return `enumeratio_${head === "Sum" ? "summation" : "product"}(lambda _${index}: ${walk(operands[0] as MathJSON)}, ${first}, ${to})`;
+          } finally {
+            lambdaIndices.delete(index);
+          }
+        }
         const summation = mappingFor(head, 2, extra, system)?.emit[system];
         if (summation !== undefined)
           return fill(summation, [
@@ -860,6 +892,19 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
       (operands[0] as readonly MathJSON[])[0] === "MatrixFunction"
     )
       return walk(operands[0] as MathJSON);
+    // `simplify` and `expand_func` take one expression: over a list, or over another of them that yields one, each
+    // entry is mapped at run time. A literal list threads by the mapping's `threadArg` where it has one.
+    if (system === "sympy" && SYMPY_ENTRYWISE_HEADS.has(head) && operands.length === 1) {
+      const operand = operands[0] as MathJSON;
+      const mapping = mappingFor(head, 1, extra, system);
+      const template = mapping?.emit[system];
+      if (
+        template !== undefined &&
+        yieldsList(operand) &&
+        !(isCall(operand) && operand[0] === "List" && mapping?.threadArg !== undefined)
+      )
+        return `enumeratio_broadcast(lambda _a0: ${fill(template, ["_a0"])}, ${walk(operand)})`;
+    }
     // SymPy's `Matrix.analytic_func(f(x), x)` takes f as an expression of one variable: a head's name, a
     // Function's body, or an undefined name as an unknown function of it.
     if (system === "sympy" && head === "MatrixFunction" && operands.length === 2) {
@@ -1020,6 +1065,18 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
       if ((head === "Power" || head === "Divide") && isResidue(first)) template = template.replace("S($1)", "$1");
       // SymPy's `Abs` leaves an AccumBounds held; Python's `abs()` takes its absolute value.
       if (head === "Abs" && isCall(first) && first[0] === "Interval") template = "abs($1)";
+      // SymPy's `crt(moduli, residues)` takes two lists and answers the pair (x, modulus); a call over residue
+      // classes (`ChineseRemainder(2 mod 3, 3 mod 5)`) is the class of x modulo the product, as ours.
+      if (
+        head === "ChineseRemainder" &&
+        operands.length === 2 &&
+        operands.every((operand) => isCall(operand) && operand[0] === "IntegerMod" && operand.length === 3)
+      ) {
+        const classes = operands as readonly (readonly MathJSON[])[];
+        const residues = classes.map((operand) => walk(operand[1] as MathJSON)).join(", ");
+        const moduli = classes.map((operand) => walk(operand[2] as MathJSON)).join(", ");
+        return `(lambda _c: GF(_c[1], symmetric=False)(_c[0]))(crt([${moduli}], [${residues}]))`;
+      }
       // PowerMod runs over SymPy's ZZ, which takes integers only (a rational or Gaussian operand is a coercion
       // error there; `pow` on SymPy numbers would only hold `Mod(...)` unreduced, or expand a huge power). A
       // rational exponent is a modular root, as PowerModList; a symbol (a summand's variable) goes to `pow` itself.

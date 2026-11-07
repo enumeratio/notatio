@@ -403,8 +403,16 @@ function trialSources(
     ...(system === "wolfram" ? [] : derivativeVariables(expr)),
     ...(system === "sympy" || system === "sage" ? integrationVariables(expr).definite : []),
   ]);
-  // Sage's transforms take a variable, not a number, for the answer's variable: it is sampled after the call.
-  const deferred = system === "sage" ? positiveVariables(expr) : new Set<string>();
+  // Sage's and SymPy's transforms take a variable, not a number, for the answer's variable
+  // (`inverse_laplace_transform(F, s, 13/4)` raises): it is sampled after the call. SymPy's transform of
+  // a rational parameter can be a different function (`s/(7/3^2 + s^2)^2` comes back with branch cuts that
+  // are not the sine), so it takes every parameter symbolic and the answer is sampled.
+  const deferred =
+    system === "sage"
+      ? positiveVariables(expr)
+      : system === "sympy" && boundVariables(expr).size > 0
+        ? new Set([...all.keys()].filter((name) => !bound.has(name)))
+        : new Set<string>();
   const subs = new Map([...all].filter(([name]) => !held.has(name) && !bound.has(name) && !deferred.has(name)));
   // A series is sampled as a polynomial, so the simplifier around it has nothing to do: on a
   // symbolic-coefficient series it only runs out the clock (`FullSimplify[Normal[Series[…]]]`).
@@ -427,7 +435,7 @@ function trialSources(
   const afterwards = (source: string): string =>
     later.length === 0
       ? source
-      : `SR(${source}).subs({${later.map(([name, value]) => `${(name as { source: string }).source}: ${(value as { source: string }).source}`).join(", ")}})`;
+      : `${system === "sage" ? "SR" : "sympify"}(${source}).subs({${later.map(([name, value]) => `${(name as { source: string }).source}: ${(value as { source: string }).source}`).join(", ")}})`;
   return {
     theirs: system === "wolfram" ? withoutConditions(theirs.source) : afterwards(theirs.source),
     ours: afterwards(ours.source),

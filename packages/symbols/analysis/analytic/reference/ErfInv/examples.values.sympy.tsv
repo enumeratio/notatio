@@ -13,7 +13,7 @@ interval-arithmetic-the-inverse-is-increasing-so	erfinv(AccumBounds(0.5, 0.6))	e
 uncertainty-propagation			
 to-30-significant-digits-every-one-correctly	N(erfinv(Rational(1, 2)), 30)	0.476936276204469873381418353643	
 n-erfinv-33-over-100-50	N(erfinv(Rational(33, 100)), 30)	0.301332146133705826128502718158	
-functionexpand-matrixfunction-erfinv-list-list-0	expand_func(Matrix([[0, Rational(1, 2)], [1, 0]]).analytic_func(erfinv(Symbol("_mf")), Symbol("_mf")).applyfunc(simplify).tolist())		
+functionexpand-matrixfunction-erfinv-list-list-0	expand_func(Matrix([[0, Rational(1, 2)], [1, 0]]).analytic_func(erfinv(Symbol("_mf")), Symbol("_mf")).applyfunc(simplify).tolist())	ValueError: Cannot evaluate the function because the function erfinv(_mf) is not analytic at the given eigenvalu	error
 erfinv-a-erf-a-z			
 functionexpand-erf-erfinv-s	expand_func(erf(erfinv(Symbol("s"))))		
 erfinv-s-eq-erfinv-0-s			
