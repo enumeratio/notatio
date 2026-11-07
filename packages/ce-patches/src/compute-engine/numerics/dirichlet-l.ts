@@ -1,6 +1,6 @@
 import { bernoulliPolyAt } from "./bernoulli-rational.ts";
 import { add, cexp, cpow, cx, type Cx, mul, scale } from "./complex-arithmetic.ts";
-import { hurwitzZeta } from "./hurwitz-zeta.ts";
+import { hurwitzZetaWithError, MAX_RELATIVE_ERROR } from "./hurwitz-zeta.ts";
 import { stieltjesGamma } from "./stieltjes.ts";
 
 // Dirichlet characters mod k and their L-functions, in Wolfram's indexing:
@@ -194,6 +194,22 @@ const LAURENT_TERMS = 24;
 
 /** L(s, χ_j mod k). Non-finite at s = 1 for the principal character. */
 export function dirichletL(k: number, j: number, s: Cx): Cx {
+  return dirichletLWithError(k, j, s).value;
+}
+
+/**
+ * `dirichletL`, or undefined where the Hurwitz sums behind it cancel past `MAX_RELATIVE_ERROR`.
+ * L is Σ χ(r) ζ(s, r/k) k^(−s): each ζ is good to its own error, the character sum can cancel
+ * them down (q = 97, s = −2.5+100i: a relative error of 4e35), so the errors are added and held
+ * to the result's size, not to each ζ's.
+ */
+export function dirichletLChecked(k: number, j: number, s: Cx): Cx | undefined {
+  const { value, error } = dirichletLWithError(k, j, s);
+  return error > MAX_RELATIVE_ERROR * Math.hypot(value.re, value.im) ? undefined : value;
+}
+
+function dirichletLWithError(k: number, j: number, s: Cx): { value: Cx; error: number } {
+  let error = 0;
   const values: Cx[] = [];
   for (let r = 1; r <= k; r++) values.push(character(k, j, r));
   const nearPole = Math.hypot(s.re - 1, s.im) < NEAR_POLE;
@@ -222,12 +238,16 @@ export function dirichletL(k: number, j: number, s: Cx): Cx {
     for (let r = 1; r <= k; r++) {
       const chi = values[r - 1];
       if (chi.re === 0 && chi.im === 0) continue;
-      const z =
-        negInt === undefined ? hurwitzZeta(s, cx(r / k)) : cx(-bernoulliPolyAt(negInt + 1, r / k) / (negInt + 1));
-      sum = add(sum, mul(chi, z));
+      if (negInt !== undefined) {
+        sum = add(sum, mul(chi, cx(-bernoulliPolyAt(negInt + 1, r / k) / (negInt + 1))));
+        continue;
+      }
+      const z = hurwitzZetaWithError(s, cx(r / k));
+      error += Math.hypot(chi.re, chi.im) * z.error;
+      sum = add(sum, mul(chi, z.value));
     }
   }
-  return mul(kPow, sum);
+  return { value: mul(kPow, sum), error: Math.hypot(kPow.re, kPow.im) * error };
 }
 
 export const dirichletLReal = (k: number, j: number, s: number): number => dirichletL(k, j, cx(s)).re;

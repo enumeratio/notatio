@@ -224,7 +224,7 @@ export function hurwitzZeta(s: Cx, a: Cx): Cx {
  * undeclined (e.g. s = 1.5+12i, a = −47.85−7i, whose sum is −2.6e-18−1.2e-18i where the kernel gave
  * −3.2e-18−4.8e-18i), and every point this bound lets through is within it.
  */
-const MAX_RELATIVE_ERROR = 1e-8;
+export const MAX_RELATIVE_ERROR = 1e-8;
 
 /** Measured worst relative error per unit of (1 + reach) · ratio is 7.7e-16; this is that with a margin. */
 const ERROR_PER_LOSS = 2.5e-15;
@@ -240,6 +240,22 @@ const errorBound = (reach: number, lost: number): number => ERROR_PER_LOSS * (1 
 export function hurwitzZetaChecked(s: Cx, a: Cx): Cx | undefined {
   const r = hurwitzZetaWithLoss(s, a);
   return errorBound(r.reach, r.lost) > MAX_RELATIVE_ERROR ? undefined : r.value;
+}
+
+/**
+ * `hurwitzZeta` with the absolute error its sum may carry, `ERROR_PER_LOSS`·(1 + reach)·(largest
+ * term). Callers that need an absolute accuracy (a root-finder, where a relative bound trips at
+ * every zero) or sum several zetas (so their errors add) read this instead of declining on
+ * `MAX_RELATIVE_ERROR`. NaN for a non-finite value; Infinity when the terms cancel to exactly 0.
+ */
+export function hurwitzZetaWithError(s: Cx, a: Cx): { value: Cx; error: number } {
+  return withError(hurwitzZetaWithLoss(s, a));
+}
+
+function withError(r: { value: Cx; lost: number; reach: number }): { value: Cx; error: number } {
+  const size = Math.hypot(r.value.re, r.value.im);
+  if (!Number.isFinite(size)) return { value: r.value, error: Number.NaN };
+  return { value: r.value, error: size === 0 ? (r.lost === 1 ? 0 : Infinity) : errorBound(r.reach, r.lost) * size };
 }
 
 /** ζ(s, a), its cancellation ratio (the largest term summed over the result) and the `reach` of its powers. */
@@ -465,6 +481,11 @@ export function zetaGeneralized(s: Cx, a: Cx): Cx {
 export function zetaGeneralizedChecked(s: Cx, a: Cx): Cx | undefined {
   const r = zetaGeneralizedWithLoss(s, a);
   return errorBound(r.reach, r.lost) > MAX_RELATIVE_ERROR ? undefined : r.value;
+}
+
+/** `zetaGeneralized` with its absolute error, as `hurwitzZetaWithError`. */
+export function zetaGeneralizedWithError(s: Cx, a: Cx): { value: Cx; error: number } {
+  return withError(zetaGeneralizedWithLoss(s, a));
 }
 
 function zetaGeneralizedWithLoss(s: Cx, a: Cx): { value: Cx; lost: number; reach: number } {

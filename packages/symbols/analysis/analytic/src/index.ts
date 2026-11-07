@@ -1,10 +1,15 @@
 export { declareAnalytic } from "./declare.ts";
 export {
   hurwitzZeta,
+  hurwitzZetaChecked,
   hurwitzZetaReal,
+  hurwitzZetaWithError,
+  MAX_RELATIVE_ERROR,
   setZetaKernel,
   zetaGeneralized,
+  zetaGeneralizedChecked,
   zetaGeneralizedReal,
+  zetaGeneralizedWithError,
   type ZetaKernel,
   type BigCx,
   bigCx,
@@ -26,6 +31,7 @@ export {
   character,
   characterExponent,
   dirichletL,
+  dirichletLChecked,
   dirichletLReal,
   eulerPhi,
   lerchPhi,
