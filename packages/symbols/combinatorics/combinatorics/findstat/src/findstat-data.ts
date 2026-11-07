@@ -2954,6 +2954,30 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "CharacterPolynomialConstantTerm",
+    on: "IntegerPartition",
+    findstat: ["St000929"],
+    values: 270,
+  },
+  {
+    head: "InverseByConjugationCount",
+    on: "IntegerPartition",
+    findstat: ["St001710"],
+    values: 67,
+  },
+  {
+    head: "StandardTableauCountWithMajorIndexDivisibleBySize",
+    on: "IntegerPartition",
+    findstat: ["St001442"],
+    values: 100,
+  },
+  {
+    head: "SelfEvacuatingTableauCount",
+    on: "IntegerPartition",
+    findstat: ["St000618"],
+    values: 271,
+  },
+  {
     head: "Height",
     on: "DyckPath",
     findstat: ["St000013"],

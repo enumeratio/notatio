@@ -337,6 +337,8 @@ const CUBIC = new Set([
   "HurwitzNumber",
   "MonotoneHurwitzNumber",
   "NonDominatingSubmultisetCount",
+  "InverseByConjugationCount",
+  "StandardTableauCountWithMajorIndexDivisibleBySize",
 ]);
 
 // ── the query ─────────────────────────────────────────────────────────────────────────────

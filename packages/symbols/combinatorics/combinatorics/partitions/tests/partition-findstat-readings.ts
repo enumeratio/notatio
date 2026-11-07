@@ -490,6 +490,100 @@ const majorIndexHistogram = (l: Partition): Map<number, number> => {
 const tableauxWithMajorIndexRemainder = (l: Partition, remainder: number): number =>
   sum([...majorIndexHistogram(l)].filter(([m]) => m % sum(l) === remainder).map(([, c]) => c));
 
+/** The permutations pi of the points with alpha pi alpha^-1 = pi^-1 for alpha of this cycle type, which is pi alpha pi = alpha, tried one by one. */
+const permutationsInvertedByConjugation = (l: Partition): number => {
+  const n = sum(l);
+  const alpha = permutationOfCycleType(l);
+  let found = 0;
+  const walk = (pi: number[]): void => {
+    if (pi.length === n) {
+      if (pi.every((_, v) => pi[alpha[pi[v]!]!] === alpha[v])) found++;
+      return;
+    }
+    for (let image = 0; image < n; image++) if (!pi.includes(image)) walk([...pi, image]);
+  };
+  walk([]);
+  return found;
+};
+/** The cycle type of the square of a permutation of this cycle type: an odd cycle stays, an even one splits in two halves. */
+const squareCycleType = (l: Partition): number[] =>
+  l.flatMap((p) => (p % 2 === 1 ? [p] : [p / 2, p / 2])).toSorted((a, b) => b - a);
+/**
+ * The permutations whose square is a fixed permutation of the square's cycle type, by counting the pairs (root, square): the classes of
+ * every cycle type that squares to that type, over the size of its class.
+ */
+const rootsOfSquare = (l: Partition): number => {
+  const n = sum(l);
+  const target = squareCycleType(l).join();
+  const classSize = (m: Partition): bigint => bigFactorial(n) / BigInt(PARTITION_READINGS.CentralizerSize!(m));
+  const roots = partitionsOf(n).filter((m) => squareCycleType(m).join() === target);
+  return Number(roots.reduce((total, m) => total + classSize(m), 0n) / classSize(squareCycleType(l)));
+};
+/** The standard tableaux of the shape, as rows of entries: 1 .. n placed one at a time at the end of a row that may grow. */
+const standardTableauxOf = (l: Partition): number[][][] => {
+  const grow = (rows: number[][], entry: number): number[][][] =>
+    entry > sum(l)
+      ? [rows]
+      : l.flatMap((limit, r) =>
+          rows[r]!.length < limit && (r === 0 || rows[r - 1]!.length > rows[r]!.length)
+            ? grow(
+                rows.map((row, k) => (k === r ? [...row, entry] : row)),
+                entry + 1,
+              )
+            : [],
+        );
+  return grow(
+    l.map(() => []),
+    1,
+  );
+};
+/** Schützenberger's evacuation: remove the corner entry, slide the hole out along the smaller neighbors, and label the cell it leaves n, then n - 1, ... */
+const evacuation = (tableau: number[][]): number[][] => {
+  const rows = tableau.map((row) => [...row]);
+  const out = tableau.map((row) => row.map(() => 0));
+  for (let label = rows.flat().length; label >= 1; label--) {
+    let [r, c] = [0, 0];
+    for (;;) {
+      const right = rows[r]![c + 1];
+      const below = rows[r + 1]?.[c];
+      if (right === undefined && below === undefined) break;
+      if (below === undefined || (right !== undefined && right < below)) {
+        rows[r]![c] = right!;
+        c++;
+      } else {
+        rows[r]![c] = below;
+        r++;
+      }
+    }
+    out[r]![c] = label;
+    rows[r]!.pop();
+  }
+  return out.filter((row) => row.length > 0);
+};
+/** The standard domino tableaux, chains of rim dominoes from the shape down to the empty shape (or one cell, when the size is odd). */
+const dominoTableaux = (l: Partition, memo = new Map<string, number>()): number => {
+  if (sum(l) <= 1) return 1;
+  const key = l.join();
+  const known = memo.get(key);
+  if (known !== undefined) return known;
+  let total = 0;
+  for (let r = 0; r < l.length; r++) {
+    const below = l[r + 1] ?? 0;
+    if (l[r]! - 2 >= below)
+      total += dominoTableaux(
+        l.map((p, k) => (k === r ? p - 2 : p)).filter((p) => p > 0),
+        memo,
+      );
+    if (r + 1 < l.length && l[r] === l[r + 1] && l[r + 1]! - 1 >= (l[r + 2] ?? 0))
+      total += dominoTableaux(
+        l.map((p, k) => (k === r || k === r + 1 ? p - 1 : p)).filter((p) => p > 0),
+        memo,
+      );
+  }
+  memo.set(key, total);
+  return total;
+};
+
 /** The cyclic permutations of 0..n-1 that commute with a permutation of the given cycle type, by trying every n-cycle. */
 const commutingCycles = (l: Partition): number => {
   const n = sum(l);
@@ -977,4 +1071,18 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
     return product(l.map((p) => catalanByRecurrence(p - 1)));
   },
   NonDominatingSubmultisetCount: nonDominatingSubmultisets,
+
+  // The tenth batch.
+  CharacterPolynomialConstantTerm: (l) => (l.every((p) => p === 1) ? 1 : 0),
+  // Tried against every permutation for small sizes.
+  InverseByConjugationCount: (l) => (sum(l) <= 7 ? permutationsInvertedByConjugation(l) : rootsOfSquare(l)),
+  StandardTableauCountWithMajorIndexDivisibleBySize: (l) =>
+    l.length === 0 ? 0 : tableauxWithMajorIndexRemainder(l, 0),
+  // Evacuation applied to every tableau for small sizes.
+  SelfEvacuatingTableauCount: (l) =>
+    l.length === 0
+      ? 0
+      : sum(l) <= 8
+        ? standardTableauxOf(l).filter((t) => JSON.stringify(evacuation(t)) === JSON.stringify(t)).length
+        : dominoTableaux(l),
 };
