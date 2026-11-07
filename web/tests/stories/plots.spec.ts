@@ -401,8 +401,9 @@ test.describe("on the GPU", () => {
 
   // A portrait of HurwitzZeta(1.5 + si i, a) over a window of height `extent`, read back as pixels: for a lattice of
   // pixels below the real axis, whether it is the grey hatch and how many times its sum the double kernel's largest term is.
-  async function hatchedPixels(page: Page, si: number, extent: number) {
+  async function hatchedPixels(page: Page, si: number, extent: number, selfTest?: "fail") {
     await page.addInitScript(CAPTURE_CANVAS);
+    if (selfTest) await page.addInitScript((v) => ((globalThis as any).__notatioDf64SelfTest = v), selfTest);
     await page.goto("/explore/zeta/phase-portrait");
     await page.evaluate(
       ([si, extent]) => {
@@ -486,4 +487,35 @@ test.describe("on the GPU", () => {
       if (hatched > 0) expect(below.filter((p) => p.grey).length / below.length).toBeGreaterThan(hatched / 3);
     });
   }
+
+  // A device that fails the df64 self-test draws the f32 kernel: it hatches what f32 hatched (35% of the lower half
+  // at 4i and 42% at 12i, window 8 high, measured), every pixel whose terms dwarf the sum 100-fold, and draws no df64.
+  for (const [si, least] of [
+    [4, 0.25],
+    [12, 0.3],
+  ] as const) {
+    test(`the HurwitzZeta portrait at s = 1.5 + ${si}i on a device that fails the df64 self-test hatches what f32 cannot vouch for (S#5, BL-336)`, async ({
+      page,
+    }) => {
+      const logs: string[] = [];
+      page.on("console", (m) => logs.push(m.text()));
+      const pixels = await hatchedPixels(page, si, 8, "fail");
+      const below = pixels.filter((p) => !p.above);
+      expect(logs.some((l) => l.includes("df64 self-test failed"))).toBe(true);
+      expect(below.filter((p) => p.grey).length / below.length).toBeGreaterThan(least);
+      // f32's bar is a ratio of 100 (the measured f32 sum is good to 2.6e-2 there): nothing past 1e4 is drawn, nothing under 10 hatched.
+      expect(below.filter((p) => !p.grey && p.cond > 1e4)).toEqual([]);
+      expect(below.filter((p) => p.grey && p.cond < 10)).toEqual([]);
+      expect(pixels.filter((p) => p.above && p.grey).length / pixels.filter((p) => p.above).length).toBeLessThan(0.01);
+    });
+  }
+
+  test("the df64 self-test passes on this device and the portrait draws df64 (S#5, BL-336)", async ({ page }) => {
+    const logs: string[] = [];
+    page.on("console", (m) => logs.push(m.text()));
+    const pixels = await hatchedPixels(page, 12, 8);
+    expect(logs.some((l) => l.includes("df64 self-test passed"))).toBe(true);
+    const below = pixels.filter((p) => !p.above);
+    expect(below.filter((p) => p.grey).length).toBe(0);
+  });
 });

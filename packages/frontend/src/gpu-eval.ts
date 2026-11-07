@@ -1,5 +1,6 @@
 /// <reference types="@webgpu/types" />
 import { withWGSL } from "@enumeratio/analytic/shader";
+import { testDf64 } from "./df64-selftest.ts";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 
 // Opt-in GPU evaluation of a plot grid: one compute-shader invocation per grid point of a
@@ -18,6 +19,14 @@ function getDevice(): Promise<GPUDevice | null> {
   })().catch(() => null);
   return devicePromise;
 }
+
+// The df64 self-test runs once per device; the compute path takes its verdict (a failed device sums in f32).
+const df64Verdicts = new WeakMap<GPUDevice, Promise<boolean>>();
+const df64Verdict = (device: GPUDevice): Promise<boolean> => {
+  let v = df64Verdicts.get(device);
+  if (!v) df64Verdicts.set(device, (v = testDf64(device)));
+  return v;
+};
 
 const TAIL = `
 @group(0) @binding(0) var<storage, read_write> outp : array<f32>;
@@ -127,7 +136,7 @@ export async function evalGridGPU(
 
 const COMPLEX_TAIL = (variable: string, code: string): string => `
 struct Params {
-  nx: u32, ny: u32, x0: f32, y0: f32, dx: f32, dy: f32, pad0: u32, pad1: u32,
+  nx: u32, ny: u32, x0: f32, y0: f32, dx: f32, dy: f32, one: f32, pad1: u32,
   p: array<vec4f, ${MAX_SLOTS}>,
 };
 @group(0) @binding(0) var<storage, read_write> outp : array<vec2f>;
@@ -135,13 +144,17 @@ struct Params {
 @compute @workgroup_size(8, 8)
 fn main(@builtin(global_invocation_id) gid : vec3u) {
   if (gid.x >= prm.nx || gid.y >= prm.ny) { return; }
+  dfOne = prm.one;
   let ${variable} = vec2f(prm.x0 + f32(gid.x) * prm.dx, prm.y0 + f32(gid.y) * prm.dy);
   outp[gid.y * prm.nx + gid.x] = ${code};
 }
 `;
 
 /** The complete compute shader for a complex expression over `variable`. */
-export const complexComputeShader = (variable: string, code: string): string => withWGSL(COMPLEX_TAIL(variable, code));
+export const complexComputeShader = (variable: string, code: string, df64 = true): string => {
+  const shader = withWGSL(COMPLEX_TAIL(variable, code));
+  return df64 ? shader : shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
+};
 
 /** Bytes before the literal slots: the grid parameters. */
 const COMPLEX_PARAMS_OFFSET = 32;
@@ -164,7 +177,7 @@ export async function evalComplexGridGPU(
   const ny = ys.length;
   if (nx < 1 || ny < 1) return undefined;
 
-  const code = complexComputeShader(variable, emitted.code);
+  const code = complexComputeShader(variable, emitted.code, await df64Verdict(device));
   let pipeline = pipelineCache.get(code);
   if (!pipeline) {
     device.pushErrorScope("validation");
@@ -201,6 +214,7 @@ export async function evalComplexGridGPU(
     nx > 1 ? (xs[nx - 1] - xs[0]) / (nx - 1) : 0,
     ny > 1 ? (ys[ny - 1] - ys[0]) / (ny - 1) : 0,
   ]);
+  new Float32Array(ab, 24, 1).set([1]); // `one`, opaque to the compiler
   const slots = new Float32Array(ab, COMPLEX_PARAMS_OFFSET);
   for (const [i, [re, im]] of emitted.literals.entries()) {
     slots[i * 4] = re;

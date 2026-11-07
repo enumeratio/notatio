@@ -1,5 +1,6 @@
 /// <reference types="@webgpu/types" />
 import { withWGSL } from "@enumeratio/analytic/shader";
+import { df64Works, testDf64 } from "./df64-selftest.ts";
 import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
 import {
   DEFAULT_PHASE_GRADIENT,
@@ -33,7 +34,8 @@ struct Prm {
   res    : vec2f,
   extent : f32,
   mask   : f32,
-  _pad   : vec2f,
+  one    : f32,  // 1.0, that the compiler cannot see: dfOne in the library
+  _pad   : f32,
   p      : array<vec4f, ${MAX_SLOTS}>,
   // The gradient: each stop is its color (sRGB, or OKLab) and its position; ramp is
   // (stop count, 1 when the stops blend in OKLab, 1 when the gradient wraps, unused).
@@ -84,6 +86,7 @@ fn gradient(t0: f32) -> vec3f {
     return vec4f(vec3f(g), 1.0);
   }
   uncertain = 0.0;
+  dfOne = prm.one;
   let polar = VALUE;
   // A value whose digits the kernel cannot vouch for is hatched, not colored: noise there reads as structure.
   if (uncertain > 0.5) { return vec4f(vec3f(0.2 + 0.12 * step(0.5, fract((frag.x + frag.y) / 8.0))), 1.0); }
@@ -101,7 +104,10 @@ fn gradient(t0: f32) -> vec3f {
 `;
 
 /** The complete domain-coloring shader for a complex-valued WGSL expression `code`. */
-export const portraitShader = (code: string): string => withWGSL(HOST.replace("VALUE", `clogPolar(${code})`));
+export const portraitShader = (code: string, df64 = true): string => {
+  const shader = withWGSL(HOST.replace("VALUE", `clogPolar(${code})`));
+  return df64 ? shader : shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
+};
 
 /** Bytes before the literal slots: center, res, extent, mask, pad. */
 const SLOTS_OFFSET = 32;
@@ -173,7 +179,10 @@ export function getComplexPlotDevice(): Promise<GPUDevice | null> {
     const gpu = (navigator as unknown as { gpu?: GPU }).gpu;
     if (!gpu) return null;
     const adapter = await gpu.requestAdapter();
-    return adapter ? await adapter.requestDevice() : null;
+    if (!adapter) return null;
+    const device = await adapter.requestDevice();
+    await testDf64(device);
+    return device;
   })().catch(() => null);
   return devicePromise;
 }
@@ -215,7 +224,7 @@ export class ComplexPlotRenderer {
       this.#use(cached);
       return rebuilt ? "rebuilt" : "slots";
     }
-    const code = portraitShader(e.code);
+    const code = portraitShader(e.code, df64Works(this.#device));
     this.#device.pushErrorScope("validation");
     const module = this.#device.createShaderModule({ code });
     const pipeline = this.#device.createRenderPipeline({
@@ -260,6 +269,7 @@ export class ComplexPlotRenderer {
     f[3] = height;
     f[4] = view.extent;
     f[5] = view.mask;
+    f[6] = 1;
     for (const [i, [re, im]] of this.#literals.entries()) {
       f[SLOTS_OFFSET / 4 + i * 4] = re;
       f[SLOTS_OFFSET / 4 + i * 4 + 1] = im;

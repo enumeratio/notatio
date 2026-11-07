@@ -319,8 +319,8 @@ test("the Hurwitz kernels flag a sum whose terms dwarf it, for a host to hatch (
   // The Taylor sum vouches for itself in f32; the Euler–Maclaurin sum, where f32 cancels it, is redone
   // in df64 and that vouches.
   const hurwitz = zetaWGSL.replace(complexWGSL, "");
-  expect(hurwitz.match(/vouch\(largest, /g)?.length).toBe(2);
-  expect(hurwitz).toContain("return hurwitzEMDf(s, a, largest);");
+  expect(hurwitz.match(/vouch\(largest, /g)?.length).toBe(3);
+  expect(hurwitz).toContain("if (DF64 && largest > SUM_COND_LIMIT * length(sum)) { return hurwitzEMDf(s, a, largest);");
   expect(hurwitz.match(/vouchDf\(largest, /g)?.length).toBe(1);
 });
 

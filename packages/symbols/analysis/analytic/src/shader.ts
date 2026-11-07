@@ -264,23 +264,33 @@ fn hurwitzEM(s: vec2f, a: vec2f) -> vec2f {
     poch = cmul(poch, cmul(f1, f2));
     zpow = cmul(zpow, zinv2);
   }
-  // The terms dwarf the sum: f32 has cancelled its digits, so sum again in df64.
-  if (largest > SUM_COND_LIMIT * length(sum)) { return hurwitzEMDf(s, a, largest); }
+  // The terms dwarf the sum: f32 has cancelled its digits, so sum again in df64, unless the host found
+  // this device's arithmetic does not keep an error-free transform exact (DF64 false): f32 hatches it.
+  if (DF64 && largest > SUM_COND_LIMIT * length(sum)) { return hurwitzEMDf(s, a, largest); }
+  vouch(largest, sum);
   return sum;
 }
+
+// A host whose device failed the df64 self-test (df64-selftest.ts) sets this false, and no df64 value is drawn.
+const DF64: bool = true;
+// 1.0 that a compiler cannot see. A host sets it from a runtime value (the portrait's uniform); the
+// two-sums below multiply their intermediate by it, so fast-math cannot fold (a + b) - a to b. Not the
+// Dekker split: a multiply there fuses with 4097·a and loses 1e-9 of the sum (measured, swiftshader);
+// the host's self-test covers it.
+var<private> dfOne: f32 = 1.0;
 
 // ---- df64: a double-float is an f32 pair (hi, lo), hi + lo to 48 bits. A complex df is a vec4f of
 // (re.hi, re.lo, im.hi, im.lo). The errors of a sum or product are taken with Knuth's two-sum and
 // Dekker's split, not fma, which WGSL lets an implementation leave unfused.
 fn dfTwoSum(a: f32, b: f32) -> vec2f {
   let s = a + b;
-  let v = s - a;
+  let v = (s - a) * dfOne;
   return vec2f(s, (a - (s - v)) + (b - v));
 }
 // |a| >= |b|, or a == 0.
 fn dfFast(a: f32, b: f32) -> vec2f {
   let s = a + b;
-  return vec2f(s, b - (s - a));
+  return vec2f(s, b - (s - a) * dfOne);
 }
 fn dfTwoProd(a: f32, b: f32) -> vec2f {
   let p = a * b;
