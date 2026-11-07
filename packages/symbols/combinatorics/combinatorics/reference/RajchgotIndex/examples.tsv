@@ -1,0 +1,7 @@
+id	section	role	expr	expected	known	source	caption
+the-one-line-word-312			[RajchgotIndex, [Permutation, [List, 3, 1, 2]]]	2			the one-line word $312$
+the-one-line-word-312-as-a-plain-list			[RajchgotIndex, [List, 3, 1, 2]]	2			the one-line word $312$, as a plain list
+the-one-line-word-2413			[RajchgotIndex, [Permutation, [List, 2, 4, 1, 3]]]	4			the one-line word $2413$
+findstat-st001759-1	Properties		[CombinatorialStat, [Permutation, [List, 1]], "'RajchgotIndex'"]	0	0	FindStat St001759	FindStat's value for [1]
+findstat-st001759-2	Properties		[CombinatorialStat, [Permutation, [List, 1, 2]], "'RajchgotIndex'"]	0	0	FindStat St001759	FindStat's value for [1,2]
+findstat-st001759-3	Properties		[CombinatorialStat, [Permutation, [List, 2, 1]], "'RajchgotIndex'"]	1	1	FindStat St001759	FindStat's value for [2,1]

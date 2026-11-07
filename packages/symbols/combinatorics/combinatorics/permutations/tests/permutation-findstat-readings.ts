@@ -280,6 +280,107 @@ const smallerChildLeaf = (w: number[]): number => {
 };
 const leastCommonMultiple = (n: number): number => range(1, n).reduce((m, k) => (m * k) / gcd(m, k), 1);
 
+/** Every permutation of 1..n, one-line. */
+const allPermutations = (n: number): number[][] =>
+  n === 0
+    ? [[]]
+    : allPermutations(n - 1).flatMap((rest) =>
+        range(0, rest.length).map((i) => [...rest.slice(0, i), n, ...rest.slice(i)]),
+      );
+const sameWord = (a: number[], b: number[]): boolean => a.length === b.length && a.every((v, i) => v === b[i]);
+/** The permutations of p's size that `related` ties to p, counted one by one. */
+const countAmongAll = (p: number[], related: (q: number[]) => boolean): number =>
+  allPermutations(p.length).filter(related).length;
+/** u is at most v in Bruhat order when, for each k, the sorted first k entries of u are below those of v entry by entry. */
+const bruhatAtMost = (u: number[], v: number[]): boolean =>
+  range(1, u.length).every((k) => {
+    const a = u.slice(0, k).toSorted((x, y) => x - y);
+    const b = v.slice(0, k).toSorted((x, y) => x - y);
+    return a.every((value, i) => value <= b[i]!);
+  });
+const transpositionsBelow = (p: number[]): number =>
+  pairs(p).filter(([i, j]) => {
+    const t = p.map((_, k) => k + 1);
+    [t[i], t[j]] = [t[j]!, t[i]!];
+    return bruhatAtMost(t, p);
+  }).length;
+/** Row insertion of the entries up to the 1, returning the row (from 1) of the cell that 1 creates. */
+const rowOfInsertingOne = (p: number[]): number => {
+  const rows: number[][] = [];
+  let created = 0;
+  for (const value of p.slice(0, p.indexOf(1) + 1)) {
+    let bumped = value;
+    let r = 0;
+    for (; ; r++) {
+      if (r === rows.length) rows.push([]);
+      const row = rows[r]!;
+      const at = row.findIndex((v) => v > bumped);
+      if (at < 0) {
+        row.push(bumped);
+        break;
+      }
+      [row[at], bumped] = [bumped, row[at]!];
+    }
+    created = r + 1;
+  }
+  return created;
+};
+/** The order pattern of a window: each entry's rank within it. */
+const windowShape = (w: number[]): string => w.map((v) => w.filter((u) => u < v).length).join(",");
+/** The alternating cycles of the breakpoint graph: leave a vertex by its black edge, return along the grey one. */
+const breakpointCycles = (p: number[]): number => {
+  const word = [0, ...p];
+  const n = p.length;
+  const black = new Map(word.map((v, i) => [v, word[(i + n) % (n + 1)]!] as const));
+  const seen = new Set<number>();
+  let found = 0;
+  for (let start = 0; start <= n; start++) {
+    if (seen.has(start)) continue;
+    found++;
+    for (let v = start; !seen.has(v); v = (black.get(v)! + 1) % (n + 1)) seen.add(v);
+  }
+  return found;
+};
+const majorIndexOf = (w: number[]): number => sum(descents(w));
+/** The inversion set by values: pairs a < b with b before a. */
+const valueInversions = (w: number[]): Set<string> =>
+  new Set(
+    pairs(w)
+      .filter(([i, j]) => w[i]! > w[j]!)
+      .map(([i, j]) => `${w[j]},${w[i]}`),
+  );
+/** Distance from the identity by star transpositions (1 i), found breadth first. */
+const starDistances = new Map<number, Map<string, number>>();
+const starDistance = (p: number[]): number => {
+  const n = p.length;
+  if (!starDistances.has(n)) {
+    const distance = new Map<string, number>([[range(1, n).join(), 0]]);
+    let frontier = [range(1, n)];
+    while (frontier.length > 0) {
+      const next: number[][] = [];
+      for (const w of frontier)
+        for (const i of range(1, n - 1)) {
+          const v = [...w];
+          [v[0], v[i]] = [v[i]!, v[0]!];
+          if (!distance.has(v.join())) {
+            distance.set(v.join(), distance.get(w.join())! + 1);
+            next.push(v);
+          }
+        }
+      frontier = next;
+    }
+    starDistances.set(n, distance);
+  }
+  return starDistances.get(n)!.get(p.join())!;
+};
+/** The cycles written from their least points in order of those points, as one word. */
+const cyclesAsWord = (q: number[]): number[] => cycles(q).flat();
+/** The image of q under the Simion-Schmidt map onto 321-avoiders: records stay, the rest are the leftover values in increasing order. */
+const simionSchmidtOntoAvoiders = (q: number[]): number[] => {
+  const records = q.filter((v, i) => q.slice(0, i).every((u) => u < v));
+  const rest = range(1, q.length).filter((v) => !records.includes(v));
+  return q.map((v) => (records.includes(v) ? v : rest.shift()!));
+};
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -1076,4 +1177,32 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   // The sum of the fractions, times the least common multiple of 1 .. 2n.
   ScaledReciprocalPositionValueSum: (p) =>
     p.length === 0 ? 0 : Math.round(sum(p.map((v, i) => 1 / (i + 1 + v))) * leastCommonMultiple(2 * p.length)),
+  HalfSymmetryClassSize: (p) => Math.floor(symmetryClass(p).length / 2),
+  CycleInverseClassSize: (p) => 2 ** cycles(p).filter((c) => c.length >= 3).length,
+  BruhatTranspositionCount: transpositionsBelow,
+  BruhatNonInversionTranspositionCount: (p) => transpositionsBelow(p) - inversionPairs(p).length,
+  InsertionBumpsOfOne: (p) => (p.length === 0 ? 0 : rowOfInsertingOne(p)),
+  ShortestDistinctWindowLength: (p) =>
+    p.length === 0
+      ? 0
+      : range(1, p.length).find((k) => {
+          const shapes = range(0, p.length - k).map((i) => windowShape(p.slice(i, i + k)));
+          return new Set(shapes).size === shapes.length;
+        })!,
+  BreakpointGraphCycles: (p) => (p.length === 0 ? 1 : breakpointCycles(p)),
+  RajchgotIndex: (p) => {
+    const above = valueInversions(p);
+    return p.length === 0
+      ? 0
+      : Math.max(
+          ...allPermutations(p.length)
+            .filter((v) => [...valueInversions(v)].every((e) => above.has(e)))
+            .map(majorIndexOf),
+        );
+  },
+  DescentWordFiberSize: (p) => countAmongAll(p, (q) => sameWord(descents(q), descents(p))),
+  CycleAsOneLinePreimageSize: (p) => countAmongAll(p, (q) => sameWord(cyclesAsWord(q), p)),
+  SimionSchmidtPreimageSize: (p) => countAmongAll(p, (q) => sameWord(simionSchmidtOntoAvoiders(q), p)),
+  PrefixExchangeDistance: (p) => (p.length === 0 ? 0 : starDistance(p)),
+  ReducedReflectionLength: (p) => 2 * sum(p.map((v, i) => Math.max(0, v - i - 1))) - inversionPairs(p).length,
 };
