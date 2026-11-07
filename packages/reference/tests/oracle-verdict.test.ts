@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { asksForDigits, sameDigits, verdictOf } from "../scripts/oracle-verdict.ts";
+import { asksForDigits, holdsUnevaluated, leaf, sameDigits, verdictOf } from "../scripts/oracle-verdict.ts";
 
 // An N(x, d) example is judged by Wolfram's displayed digits as well as its value: the value
 // agrees within a tolerance that can't see the last digit, and Wolfram holds more digits than
@@ -291,4 +291,19 @@ test("nested lists of symbols compare structurally, not by a simplified differen
   expect(verdictOf("wolfram", ours as never, theirs)).toBe("agree");
   const swapped = ["List", "x", ["List", "x", "a"], ["List", "b", ["List", "a", "x"]]];
   expect(verdictOf("wolfram", swapped as never, theirs)).toBe("disagree");
+});
+
+test("a held integral or limit is compared as its unevaluated form, never sampled with N()", () => {
+  const held = [
+    "Integrate",
+    ["Function", ["Block", ["Boole", ["Less", ["Power", "x", 2], 1]]], "x"],
+    ["Limits", "x", 0, 1],
+  ];
+  expect(holdsUnevaluated(held)).toBe(true);
+  expect(holdsUnevaluated(["List", 1, ["Limit", ["Function", "x", "x"], 0]])).toBe(true);
+  expect(holdsUnevaluated(["Sin", 1])).toBe(false);
+  const start = performance.now();
+  expect(typeof leaf(held as never)).toBe("string");
+  expect(performance.now() - start).toBeLessThan(300);
+  expect(leaf(["Add", 1, 2])).toBe(3);
 });

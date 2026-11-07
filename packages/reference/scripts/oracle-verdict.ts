@@ -46,6 +46,7 @@ const ce = new ComputeEngine();
  * with pure notation and buried the real divergences.
  */
 export const leaf = (expr: MathJSON): Leaf => {
+  if (holdsUnevaluated(expr)) return symbolic(expr);
   try {
     const boxed = ce.box(expr as Parameters<ComputeEngine["box"]>[0]).N();
     // `.symbol` lives on the narrowed SymbolInterface, with no typed route from the union.
@@ -64,6 +65,17 @@ export const leaf = (expr: MathJSON): Leaf => {
   }
   return symbolic(expr);
 };
+
+/** Heads whose unevaluated form is not a number to sample: `N()` of one integrates or takes a limit numerically (10-17 s for a held 2-D Boole integral). */
+const UNEVALUATED_HEADS = new Set(["Integrate", "Limit", "DirectedLimit"]);
+
+/** Whether `expr` still holds an integral or a limit, at any depth. */
+export function holdsUnevaluated(expr: MathJSON): boolean {
+  if (!Array.isArray(expr)) return false;
+  return (
+    (typeof expr[0] === "string" && UNEVALUATED_HEADS.has(expr[0])) || expr.some((e) => holdsUnevaluated(e as MathJSON))
+  );
+}
 
 /** A real written as `{ num }` that no double holds, as its mantissa and exponent. */
 function bignum(expr: MathJSON): Approximate | undefined {
