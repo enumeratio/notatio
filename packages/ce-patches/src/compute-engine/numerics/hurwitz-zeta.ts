@@ -2,7 +2,7 @@
 // declaration (HurwitzZeta, and Zeta widened to a complex s / two-argument form) lives in
 // library/special-functions.ts, which calls hurwitzZeta/zetaGeneralized below.
 import { bernoulliNumber } from "./bernoulli-rational.ts";
-import { add, cexp, clog, cosPi, cpow, cx, type Cx, mul, scale, sinPi } from "./complex-arithmetic.ts";
+import { add, cexp, clog, cosPi, cx, type Cx, mul, scale, sinPi } from "./complex-arithmetic.ts";
 import { GAUSS_LEGENDRE_20 } from "./gauss-legendre.ts";
 import { logGamma } from "./log-gamma.ts";
 
@@ -35,6 +35,13 @@ const EM_COEFF: number[] = (() => {
 let _pr = 0;
 let _pi = 0;
 
+/**
+ * Largest |ln m| or |arg| (the exponent's real and imaginary parts) of any power taken since
+ * `hurwitzZetaWithLoss` reset it. exp and cos/sin of an argument that large carry an error of
+ * that many ulps, so a term of size m is only good to eps·m·(1 + this).
+ */
+let _reach = 0;
+
 /** z^w for z = zr+zi·i, w = wr+wi·i, principal branch; result in _pr/_pi. */
 function cpowInto(zr: number, zi: number, wr: number, wi: number): void {
   if (zi === 0 && zr > 0 && wi === 0) {
@@ -55,6 +62,8 @@ function cpowInto(zr: number, zi: number, wr: number, wi: number): void {
   const th = Math.atan2(zi, zr);
   const er = wr * logr - wi * th;
   const ei = wr * th + wi * logr;
+  const reach = Math.max(Math.abs(er), Math.abs(ei));
+  if (reach > _reach) _reach = reach;
   const m = Math.exp(er);
   _pr = m * Math.cos(ei);
   _pi = m * Math.sin(ei);
@@ -199,17 +208,58 @@ export function hurwitzAtZero(s: Cx, a: Cx): Cx | undefined {
  * end: there those terms grow like N^(−Re s) and cancel down to an O(1) result. Instead, near
  * the real axis, the Taylor series in a about 1 (`hurwitzTaylor`); off it, or wherever that
  * series cancels, Hermite's integral (`hurwitzHermite`), whichever measures the smaller loss.
+ *
+ * Best effort: where terms cancel it carries an absolute error of eps·(largest term), which
+ * root-finders near a zero of ζ rely on. `hurwitzZetaChecked` is the value-or-decline form.
  */
 export function hurwitzZeta(s: Cx, a: Cx): Cx {
+  return hurwitzZetaWithLoss(s, a).value;
+}
+
+/**
+ * Relative error a double result may carry before `hurwitzZetaChecked` declines it. A term of
+ * size m is good to eps·m·(1 + reach), so the sum is good to `ERROR_PER_LOSS`·(1 + reach)·(largest
+ * term / |sum|). Measured against mpmath (120 digits) on a ∈ [−58, 58] × [−32, 0] for s = 1.5+12i,
+ * 4i, 24i, 0.5+40i, 3+24i, 1.5+4i, −2.5+12i and −0.5+3i: ~3% of that grid is off by more than 1e-2
+ * undeclined (e.g. s = 1.5+12i, a = −47.85−7i, whose sum is −2.6e-18−1.2e-18i where the kernel gave
+ * −3.2e-18−4.8e-18i), and every point this bound lets through is within it.
+ */
+const MAX_RELATIVE_ERROR = 1e-8;
+
+/** Measured worst relative error per unit of (1 + reach) · ratio is 7.7e-16; this is that with a margin. */
+const ERROR_PER_LOSS = 2.5e-15;
+
+/** The relative error to expect of a sum whose largest term is `lost` times its value, its powers reaching `reach`. */
+const errorBound = (reach: number, lost: number): number => ERROR_PER_LOSS * (1 + reach) * lost;
+
+/**
+ * `hurwitzZeta`, or undefined where the digits it could return are below `MAX_RELATIVE_ERROR`
+ * (a sum that cancels its own terms away, far down-left at large |Im s|). A non-finite result,
+ * the s = 1 pole included, is returned as it is.
+ */
+export function hurwitzZetaChecked(s: Cx, a: Cx): Cx | undefined {
+  const r = hurwitzZetaWithLoss(s, a);
+  return errorBound(r.reach, r.lost) > MAX_RELATIVE_ERROR ? undefined : r.value;
+}
+
+/** ζ(s, a), its cancellation ratio (the largest term summed over the result) and the `reach` of its powers. */
+export function hurwitzZetaWithLoss(s: Cx, a: Cx): { value: Cx; lost: number; reach: number } {
   const atZero = hurwitzAtZero(s, a);
-  if (atZero) return atZero;
+  if (atZero) return { value: atZero, lost: 1, reach: 0 };
+  _reach = 0;
+  const r = hurwitzZetaRoute(s, a);
+  return { ...r, reach: _reach };
+}
+
+function hurwitzZetaRoute(s: Cx, a: Cx): { value: Cx; lost: number } {
   if (s.re >= 0 || a.re >= EM_BEYOND * emEdge(s) || !Number.isFinite(a.re) || !Number.isFinite(a.im)) {
-    return hurwitzEM(s, a);
+    const { value, largest } = hurwitzEMWithLargest(s, a);
+    return { value, lost: largest / Math.hypot(value.re, value.im) };
   }
   const taylor = hurwitzTaylor(s, a);
-  if (taylor && taylor.lost <= TAYLOR_TRUSTED) return taylor.value;
+  if (taylor && taylor.lost <= TAYLOR_TRUSTED) return taylor;
   const hermite = hurwitzHermite(s, a);
-  return taylor && !(hermite.lost < taylor.lost) ? taylor.value : hermite.value;
+  return taylor && !(hermite.lost < taylor.lost) ? taylor : hermite;
 }
 
 /**
@@ -408,21 +458,42 @@ function logSin(w: Cx): Cx {
  * unlike HurwitzZeta, Zeta(s, a) is finite at a = 0, −1, −2, … (Zeta(s, 0) = ζ(s)).
  */
 export function zetaGeneralized(s: Cx, a: Cx): Cx {
+  return zetaGeneralizedWithLoss(s, a).value;
+}
+
+/** `zetaGeneralized`, or undefined where `hurwitzZetaChecked` would decline, the front terms counted in the cancellation. */
+export function zetaGeneralizedChecked(s: Cx, a: Cx): Cx | undefined {
+  const r = zetaGeneralizedWithLoss(s, a);
+  return errorBound(r.reach, r.lost) > MAX_RELATIVE_ERROR ? undefined : r.value;
+}
+
+function zetaGeneralizedWithLoss(s: Cx, a: Cx): { value: Cx; lost: number; reach: number } {
   const atZero = hurwitzAtZero(s, a);
-  if (atZero) return atZero;
+  if (atZero) return { value: atZero, lost: 1, reach: 0 };
   const negHalfS = scale(s, -0.5);
   let acc = cx(0, 0);
+  let largest = 0;
   let cur = cx(a.re, a.im);
+  _reach = 0;
   while (cur.re < 0) {
-    acc = add(acc, cpow(mul(cur, cur), negHalfS)); // ((k+a)²)^(−s/2)
+    const sq = mul(cur, cur);
+    cpowInto(sq.re, sq.im, negHalfS.re, negHalfS.im); // ((k+a)²)^(−s/2)
+    const t = cx(_pr, _pi);
+    largest = Math.max(largest, Math.hypot(t.re, t.im));
+    acc = add(acc, t);
     cur = cx(cur.re + 1, cur.im);
   }
   if (cur.re === 0 && cur.im === 0) cur = cx(1, 0); // drop the (k+a)=0 term — no pole
-  return add(acc, hurwitzZeta(s, cur));
+  const frontReach = _reach;
+  const tail = hurwitzZetaWithLoss(s, cur);
+  const value = add(acc, tail.value);
+  largest = Math.max(largest, tail.lost * Math.hypot(tail.value.re, tail.value.im));
+  return { value, lost: largest / Math.hypot(value.re, value.im), reach: Math.max(tail.reach, frontReach) };
 }
 
 /** Real-valued ζ(s, a) for real s, a — the shape compute-engine's compiled
  * (JS/GPU) plotting pipeline consumes, which is real-scalar. */
-export const hurwitzZetaReal = (s: number, a: number): number => hurwitzZeta({ re: s, im: 0 }, { re: a, im: 0 }).re;
+export const hurwitzZetaReal = (s: number, a: number): number =>
+  hurwitzZetaChecked({ re: s, im: 0 }, { re: a, im: 0 })?.re ?? Number.NaN;
 export const zetaGeneralizedReal = (s: number, a: number): number =>
-  zetaGeneralized({ re: s, im: 0 }, { re: a, im: 0 }).re;
+  zetaGeneralizedChecked({ re: s, im: 0 }, { re: a, im: 0 })?.re ?? Number.NaN;

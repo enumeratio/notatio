@@ -9,7 +9,11 @@ import {
   lerchPhi,
   applyAllPatches,
   hurwitzZeta,
+  evaluateHurwitz,
+  hurwitzZetaChecked,
   hurwitzZetaReal,
+  setZetaKernel,
+  zetaGeneralizedChecked,
   zetaGeneralized,
   zetaGeneralizedReal,
 } from "../src/index.ts";
@@ -129,7 +133,6 @@ const offBy = (rows: ZetaGolden[], value: (g: ZetaGolden) => { re: number; im: n
 test("the double ζ(s, a) kernel matches mpmath, complex s and left of the strip", () => {
   expect(offBy(zetaGoldens, (g) => hurwitzZeta(cx(...g.s), cx(g.a)))).toEqual([]);
 });
-
 // mpmath.zeta(s, a) at dps 30. Off the axis the Taylor series in a and Euler–Maclaurin's direct
 // terms both cancel left of the strip (the last two lost ten digits); Hermite's integral doesn't.
 const complexA: [[number, number], [number, number], [number, number]][] = [
@@ -390,5 +393,43 @@ test("ζ(s, conj a) = conj ζ(conj s, a)", () => {
     expect(Math.hypot(below.re - mirrored.re, below.im + mirrored.im) / Math.hypot(below.re, below.im)).toBeLessThan(
       1e-10,
     );
+  }
+});
+
+// --- The double kernel declines where cancellation eats its digits (BL-350) -------------
+
+// mpmath.zeta at dps 60. Far down-left at large Im s the terms are up to ~1e14 times the sum.
+const S_BAD = cx(1.5, 12);
+const A_BAD = cx(-47.85, -7);
+const WANT_BAD = cx(-2.611574719192654e-18, -1.210324925299614e-18);
+// Cancelling by ~1e3, still within the kernel's bound.
+const A_CANCELLING = cx(-32.065, -1.863);
+const WANT_CANCELLING = cx(2.957569811275495e-6, -3.141578904271494e-6);
+
+test("the double kernel declines a sum whose terms cancel away its digits", () => {
+  expect(hurwitzZetaChecked(S_BAD, A_BAD)).toBeUndefined();
+  // Zeta(s, a) is HurwitzZeta for Re(a) > 0, and a different function left of 0.
+  expect(zetaGeneralizedChecked(cx(0.5, 40), cx(0.3, -40))).toBeUndefined();
+});
+
+test("the double kernel still answers a cancelling sum within its bound, to the digits it claims", () => {
+  const got = hurwitzZetaChecked(S_BAD, A_CANCELLING)!;
+  expect(
+    Math.hypot(got.re - WANT_CANCELLING.re, got.im - WANT_CANCELLING.im) /
+      Math.hypot(...Object.values(WANT_CANCELLING)),
+  ).toBeLessThan(1e-8);
+});
+
+test("the bad point is exact on the bignum kernel and unevaluated on the double one", () => {
+  const ops = [ce.box(["Complex", 1.5, 12]), ce.box(["Complex", -47.85, -7])];
+  try {
+    setZetaKernel("bignum");
+    const value = evaluateHurwitz(ce, ops, true)!;
+    expect(value.re).toBeCloseTo(WANT_BAD.re, 24);
+    expect(value.im).toBeCloseTo(WANT_BAD.im, 24);
+    setZetaKernel("double");
+    expect(evaluateHurwitz(ce, ops, true)).toBeUndefined();
+  } finally {
+    setZetaKernel("bignum");
   }
 });
