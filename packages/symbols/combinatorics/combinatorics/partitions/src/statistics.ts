@@ -862,6 +862,90 @@ const orderedRefinementTable: MathJSON = bind(
   "list<integer>",
 );
 
+/**
+ * The cycle lengths of the square of a permutation of this cycle type, as the count of cycles of each length d = 1 .. largest part:
+ * an odd cycle stays, an even cycle of length 2d splits into two of length d.
+ */
+const squareCycleCounts: MathJSON = forEach(
+  upTo(largest),
+  add(
+    ["If", equals(["Mod", "d", 2], 1), count(positions, equals(here, "d")), 0],
+    ["Multiply", 2, count(positions, equals(here, ["Multiply", 2, "d"]))],
+  ),
+  "d",
+);
+/**
+ * The square roots of a permutation with `m` cycles of length `d`: s pairs of cycles each have d roots (a cycle of length 2d), and the
+ * other m - 2s cycles are each the square of one cycle of length d, which exists only for odd d.
+ */
+const squareRoots = (d: MathJSON, m: MathJSON): MathJSON =>
+  sumOver(
+    ["Range", 0, ["Divide", subtract(m, ["Mod", m, 2]), 2], 1],
+    [
+      "If",
+      or(equals(["Mod", d, 2], 1), equals(m, ["Multiply", 2, "s"])),
+      [
+        "Multiply",
+        [
+          "Divide",
+          factorialOf(m),
+          ["Multiply", factorialOf(subtract(m, ["Multiply", 2, "s"])), factorialOf("s"), ["Power", 2, "s"]],
+        ],
+        ["Power", d, "s"],
+      ],
+      0,
+    ],
+    "s",
+  );
+/** The beta-numbers of the shape: part i plus the number of parts after it. */
+const betaNumbers: MathJSON = forEach(positions, add(here, subtract(length(), "i")));
+/** Half of beta number `b`, rounded down: the position within its parity class, on the 2-quotient. */
+const halfBeta = (b: MathJSON): MathJSON => ["Divide", subtract(b, ["Mod", b, 2]), 2];
+/** The cells of the two partitions of the 2-quotient: the sum of the halved beta numbers less the staircases of the even and the odd classes. */
+const twoQuotientSize: MathJSON = subtract(
+  ["Sum", forEach("t", halfBeta("j"), "j")],
+  add(choose2(count("t", equals(["Mod", "j", 2], 0), "j")), choose2(count("t", equals(["Mod", "j", 2], 1), "j"))),
+);
+/**
+ * The self-evacuating standard tableaux, which are the standard domino tableaux: the shape has 2-core of at most one cell, and then the
+ * pairs of standard tableaux of its 2-quotient, interleaved: (n div 2)! over the hook-length products, which on beta numbers are the
+ * products of the factorials of the halved numbers over the differences of halved numbers in the same parity class.
+ */
+const selfEvacuatingTableauxCount: MathJSON = bind(
+  "t",
+  betaNumbers,
+  [
+    "If",
+    equals(twoQuotientSize, halfBeta(total)),
+    [
+      "Divide",
+      [
+        "Multiply",
+        factorialOf(halfBeta(total)),
+        [
+          "Product",
+          forEach(upTo(length("t")), [
+            "Product",
+            forEach(
+              upTo(length("t")),
+              [
+                "If",
+                and(less("j", "i"), equals(["Mod", subtract(at("j", "t"), at("i", "t")), 2], 0)),
+                ["Divide", subtract(at("j", "t"), at("i", "t")), 2],
+                1,
+              ],
+              "j",
+            ),
+          ]),
+        ],
+      ],
+      ["Product", forEach("t", factorialOf(halfBeta("j")), "j")],
+    ],
+    0,
+  ],
+  "list<integer>",
+);
+
 export const PARTITION_STATISTICS: readonly Definition[] = [
   stat("LargestPart", "The largest part.", nonEmpty(largest)),
   stat(
@@ -2062,5 +2146,39 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     nonEmpty(nonDominatingSubmultisets),
     "FindStat calls the sub-multisets subpartitions. The partitions with none are the wide ones.",
     TABLE_CHECK_WEIGHT,
+  ),
+
+  // ── FindStat's integer-partition statistics, batch 9 ────────────────────────────────────
+
+  stat(
+    "CharacterPolynomialConstantTerm",
+    "The constant term of the character polynomial: 1 for the partition of all ones (the empty one included), 0 otherwise.",
+    nonEmpty(["If", equals(largest, 1), 1, 0], 1),
+  ),
+  stat(
+    "InverseByConjugationCount",
+    "The permutations that a fixed permutation of this cycle type conjugates to their inverse: the square roots of its square, a product over the cycle lengths d of the roots of the cycles of length d.",
+    nonEmpty(
+      bind(
+        "m",
+        squareCycleCounts,
+        ["Product", forEach(upTo(largest), squareRoots("d", at("d", "m")), "d")],
+        "list<integer>",
+      ),
+      1,
+    ),
+    "alpha pi alpha^-1 = pi^-1 exactly when (pi alpha)^2 = alpha^2.",
+  ),
+  stat(
+    "StandardTableauCountWithMajorIndexDivisibleBySize",
+    "The standard Young tableaux whose major index is divisible by the size of the shape.",
+    nonEmpty(tableauxWithMajorIndexRemainder(0)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "SelfEvacuatingTableauCount",
+    "The standard Young tableaux of the shape that evacuation fixes, equivalently its standard domino tableaux.",
+    nonEmpty(selfEvacuatingTableauxCount),
   ),
 ];
