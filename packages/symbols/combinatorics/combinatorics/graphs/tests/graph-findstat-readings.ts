@@ -192,6 +192,62 @@ const overJoinedPairs = (g: Graph, term: (a: number, b: number, d: number) => nu
 const cutSizes = (g: Graph): number[] =>
   subsets(g.n).map((s) => g.edges.filter(([u, v]) => s.includes(u - 1) !== s.includes(v - 1)).length);
 
+/** The graph induced on `set` (vertices from 0), renamed 1 .. |set| in order. */
+const inducedOn = (g: Graph, set: readonly number[]): Graph => ({
+  n: set.length,
+  edges: g.edges
+    .filter(([u, v]) => set.includes(u - 1) && set.includes(v - 1))
+    .map(([u, v]) => [set.indexOf(u - 1) + 1, set.indexOf(v - 1) + 1] as [number, number]),
+});
+const inducedForests = (g: Graph): number[][] => subsets(g.n).filter((s) => cycleLengths(inducedOn(g, s)).length === 0);
+const closedNeighborhood = (m: boolean[][], v: number, n: number): number[] =>
+  range(0, n - 1).filter((w) => w === v || m[v]![w]);
+/** The sets of four vertices that induce a tree, with the greatest degree inside. */
+const inducedFourVertexTrees = (g: Graph): number[] =>
+  subsets(g.n)
+    .filter((s) => s.length === 4 && componentsOn(matrix(g), s) === 1 && inducedOn(g, s).edges.length === 3)
+    .map((s) => Math.max(...s.map((v) => neighborsIn(matrix(g), v, s).length)));
+const independentSets = (g: Graph): number[][] => subsets(g.n).filter((s) => isIndependent(matrix(g), s));
+/** The maximal sets of vertices that induce a connected graph with no cut vertex. */
+function blockSets(g: Graph): number[][] {
+  const m = matrix(g);
+  const plain = subsets(g.n).filter(
+    (s) =>
+      s.length === 1 ||
+      (s.length > 1 &&
+        componentsOn(m, s) === 1 &&
+        s.every(
+          (v) =>
+            componentsOn(
+              m,
+              s.filter((w) => w !== v),
+            ) === 1,
+        )),
+  );
+  return plain.filter((s) => !plain.some((t) => t.length > s.length && isSubset(s, t)));
+}
+const cliqueNumberOf = (g: Graph): number =>
+  Math.max(
+    0,
+    ...subsets(g.n)
+      .filter((s) => isClique(matrix(g), s))
+      .map((s) => s.length),
+  );
+const independenceNumberOf = (g: Graph): number => Math.max(0, ...independentSets(g).map((s) => s.length));
+const centerOf = (g: Graph): number[] => {
+  const e = eccentricities(g);
+  return allVertices(g).filter((v) => e[v] === Math.min(...e));
+};
+/** The vertices on a triangle. */
+const triangleVertexSet = (g: Graph): Set<number> =>
+  new Set(
+    subsets(g.n)
+      .filter((s) => s.length === 3 && isClique(matrix(g), s))
+      .flat(),
+  );
+/** Whether vertices `u` and `v` have the same neighbors. */
+const sameRow = (m: boolean[][], u: number, v: number): boolean => m[u]!.every((edge, w) => edge === m[v]![w]);
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -377,4 +433,124 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
         pairsOf(s).filter(([u, v]) => matrix(g)[u]![v]).length === 4 &&
         s.every((v) => neighborsIn(matrix(g), v, s).length <= 2),
     ).length,
+  GraphEdgeConnectivity: (g) => {
+    if (g.n < 2) return 0;
+    for (let k = 0; k <= g.edges.length; k++)
+      if (
+        edgeSubsets(g, k).some(
+          (removed) =>
+            componentsOn(matrix({ n: g.n, edges: g.edges.filter((edge) => !removed.includes(edge)) }), allVertices(g)) >
+            1,
+        )
+      )
+        return k;
+    return g.edges.length;
+  },
+  SpanningSubgraphCount: (g) => range(0, g.edges.length).reduce((total, k) => total + edgeSubsets(g, k).length, 0),
+  DegreeSum: (g) => sum(degrees(g)),
+  EulerFaceCount: (g) => g.edges.length - g.n + 2,
+  BlockCount: (g) => blockSets(g).length,
+  MaximumNeighborhoodMultiplicity: (g) => {
+    const m = matrix(g);
+    return Math.max(0, ...allVertices(g).map((v) => allVertices(g).filter((u) => sameRow(m, u, v)).length));
+  },
+  GraphPackingNumber: (g) => {
+    const m = matrix(g);
+    const closed = allVertices(g).map((v) => closedNeighborhood(m, v, g.n));
+    return Math.max(
+      0,
+      ...subsets(g.n)
+        .filter((s) => pairsOf(s).every(([u, v]) => !closed[u]!.some((w) => closed[v]!.includes(w))))
+        .map((s) => s.length),
+    );
+  },
+  GraphOpenPackingNumber: (g) => {
+    const m = matrix(g);
+    const open = allVertices(g).map((v) => neighborsIn(m, v, allVertices(g)));
+    return Math.max(
+      0,
+      ...subsets(g.n)
+        .filter((s) => pairsOf(s).every(([u, v]) => !open[u]!.some((w) => open[v]!.includes(w))))
+        .map((s) => s.length),
+    );
+  },
+  GraphTwoLimitedPackingNumber: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      0,
+      ...subsets(g.n)
+        .filter((s) =>
+          allVertices(g).every((v) => closedNeighborhood(m, v, g.n).filter((w) => s.includes(w)).length <= 2),
+        )
+        .map((s) => s.length),
+    );
+  },
+  CliqueCocliqueNumber: (g) => cliqueNumberOf(g) * independenceNumberOf(g),
+  AnnihilationNumber: (g) => {
+    const d = degrees(g).toSorted((a, b) => a - b);
+    let k = 0;
+    let total = 0;
+    while (k < g.n && total + d[k]! <= g.edges.length) total += d[k++]!;
+    return k;
+  },
+  InducedPathOnFourVerticesCount: (g) => inducedFourVertexTrees(g).filter((top) => top === 2).length,
+  InducedStarOnFourVerticesCount: (g) => inducedFourVertexTrees(g).filter((top) => top === 3).length,
+  InducedDiamondCount: (g) => subsets(g.n).filter((s) => s.length === 4 && inducedOn(g, s).edges.length === 5).length,
+  LargestInducedForestSize: (g) => Math.max(0, ...inducedForests(g).map((s) => s.length)),
+  IndependenceGap: (g) => {
+    const independent = independentSets(g);
+    const maximal = independent.filter((s) => !independent.some((t) => t.length > s.length && isSubset(s, t)));
+    return g.n === 0 ? 0 : Math.max(...independent.map((s) => s.length)) - Math.min(...maximal.map((s) => s.length));
+  },
+  FeedbackVertexSetNumber: (g) => g.n - Math.max(0, ...inducedForests(g).map((s) => s.length)),
+  CenterEdgeCount: (g) => {
+    const center = centerOf(g);
+    return g.edges.filter(([u, v]) => center.includes(u - 1) && center.includes(v - 1)).length;
+  },
+  SameNeighborhoodPairCount: (g) => pairsOf(allVertices(g)).filter(([u, v]) => sameRow(matrix(g), u, v)).length,
+  HalfAlbertsonIndex: (g) => sum(g.edges.map(([u, v]) => Math.abs(degrees(g)[u - 1]! - degrees(g)[v - 1]!))) / 2,
+  HalfTotalIrregularity: (g) =>
+    sum(pairsOf(allVertices(g)).map(([u, v]) => Math.abs(degrees(g)[u]! - degrees(g)[v]!))) / 2,
+  LargestInducedStarSize: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      0,
+      ...allVertices(g).flatMap((c) =>
+        subsets(g.n)
+          .filter((leaves) => leaves.every((w) => m[c]![w]) && isIndependent(m, leaves))
+          .map((leaves) => 1 + leaves.length),
+      ),
+    );
+  },
+  CelebrityCount: (g) => {
+    const m = matrix(g);
+    const d = degrees(g);
+    return allVertices(g).filter(
+      (v) => 2 * neighborsIn(m, v, allVertices(g)).filter((u) => d[u]! < d[v]!).length > d[v]!,
+    ).length;
+  },
+  KingCount: (g) => {
+    const m = matrix(g);
+    const d = degrees(g);
+    return allVertices(g).filter((v) => neighborsIn(m, v, allVertices(g)).every((u) => d[v]! > d[u]!)).length;
+  },
+  AboveAverageDegreeVertexCount: (g) => degrees(g).filter((d) => d * g.n > 2 * g.edges.length).length,
+  AbsoluteAdjacencyDeterminant: (g) => Math.abs(determinant(matrix(g).map((row) => row.map(Number)))),
+  DifferentDegreePairCount: (g) => pairsOf(allVertices(g)).filter(([u, v]) => degrees(g)[u] !== degrees(g)[v]).length,
+  ChromaticCliqueGap: (g) => chromaticNumber(g) - cliqueNumberOf(g),
+  TuranEdgeExcess: (g) => {
+    // The Turán graph on n vertices in r parts puts vertex v in part v mod r; its complement joins the vertices of a part.
+    const parts = independenceNumberOf(g);
+    const complementEdges = g.n === 0 ? 0 : pairsOf(allVertices(g)).filter(([u, v]) => u % parts === v % parts).length;
+    return g.edges.length - complementEdges;
+  },
+  MaximumLeafNeighborCount: (g) => {
+    const m = matrix(g);
+    const d = degrees(g);
+    return Math.max(
+      0,
+      ...allVertices(g).map((v) => neighborsIn(m, v, allVertices(g)).filter((u) => d[u] === 1).length),
+    );
+  },
+  NonTriangleVertexCount: (g) => g.n - triangleVertexSet(g).size,
 };
