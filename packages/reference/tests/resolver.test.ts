@@ -21,6 +21,10 @@ test("every library says what declaring it finds", () => {
   expect(LIBRARIES.filter((library) => library.declares === undefined).map((library) => library.name)).toEqual([]);
   // A row on a carrier type the package mints waits for something that makes one.
   expect([...packagesNeeded(["Inverse", "x"], LIBRARIES, undefined, TABLES)]).not.toContain("combinatorics");
+  // A generator is a plain symbol, so only the ordered-product rows tell the resolver who reads it.
+  expect([...packagesNeeded(["NonCommutativeMultiply", "e_1", "e_2"], LIBRARIES, undefined, TABLES)]).toContain(
+    "hypercomplex",
+  );
 });
 
 // The heads whose overloads live in tables (defineOverload), whatever order declares them, among them.

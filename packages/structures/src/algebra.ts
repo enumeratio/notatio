@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { symbolNameOf, wrapOperator } from "@enumeratio/engine";
+import { defineOverload, symbolNameOf, wrapOperator } from "@enumeratio/engine";
 import { conform, member } from "./conform.ts";
 import { ensureProtocols } from "./protocols.ts";
 
@@ -84,6 +84,12 @@ export interface AlgebraFamily {
   contains?(element: Expression, algebra: Expression): Expression | undefined;
   /** The ordered product of this family's elements. */
   product?: Product;
+  /**
+   * The package the product belongs to, when its elements are plain symbols (hypercomplex's
+   * `e_1`) that no head of the family names. The product is then a row in each product head's
+   * table, which is what tells the resolver to load the package for `NonCommutativeMultiply(e_1, e_2)`.
+   */
+  package?: string;
 }
 
 /** Make `family.type` a `FiniteDimensionalAlgebra` and register its product. */
@@ -96,5 +102,10 @@ export function declareAlgebra(ce: ComputeEngine, family: AlgebraFamily): void {
       HasElement: (a, x) => family.contains?.(x, a),
     },
   });
-  if (family.product !== undefined) registerProduct(ce, family.type, family.product);
+  const { product, package: owner } = family;
+  if (product === undefined) return;
+  if (owner === undefined) return registerProduct(ce, family.type, product);
+  for (const head of PRODUCT_HEADS) {
+    defineOverload(ce, head, { package: owner, evaluate: (ops) => product(ops, head) });
+  }
 }

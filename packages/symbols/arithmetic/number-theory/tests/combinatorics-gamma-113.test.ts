@@ -105,6 +105,12 @@ test("Pochhammer at a rational order routes through Gamma via evaluate, not N", 
     ["Gamma", ["Rational", 3, 2]],
   ]);
 });
+test("Pochhammer at a complex base and an integer order stays native's exact product", () => {
+  // (2+5i)_3 = -201+5i; the Gamma ratio in doubles gives -201.00000000000003.
+  for (const result of [run(["Pochhammer", ["Complex", 2, 5], 3]), run(["N", ["Pochhammer", ["Complex", 2, 5], 3]])]) {
+    expect([result.re, result.im]).toEqual([-201, 5]);
+  }
+});
 test("Pochhammer at a rational order matches the direct Gamma ratio numerically", () => {
   for (const [a, n] of [
     [1.5, 0.5],

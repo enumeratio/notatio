@@ -159,6 +159,7 @@ export function declareAlgebras(ce: Engine): void {
 
   declareAlgebra(ce, {
     type: "clifford_algebra",
+    package: "hypercomplex",
     basis: (expr) => {
       const algebra = algebraOf(expr);
       return algebra === undefined ? undefined : ce.function("List", basisBlades(algebra).map(blade));

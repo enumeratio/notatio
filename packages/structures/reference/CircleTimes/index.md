@@ -11,4 +11,9 @@ signatures:
     description: Wolfram's own CircleTimes, mapped through for the transpiler and the oracle but not yet written up here.
     library: enumeratio-structures
     type: (number*) -> number
+  - call: CircleTimes(...)
+    description: Wolfram's own CircleTimes, mapped through for the transpiler and the oracle but not yet written up here.
+    library: enumeratio-hypercomplex
+    type: (number*) -> number
+    overrides: enumeratio-structures
 ---
