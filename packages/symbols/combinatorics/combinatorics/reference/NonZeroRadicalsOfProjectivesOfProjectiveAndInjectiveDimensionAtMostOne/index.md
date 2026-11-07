@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: NonZeroRadicalsOfProjectivesOfProjectiveAndInjectiveDimensionAtMostOne(path)
+    description: The nonzero radicals of the indecomposable projective modules whose projective and injective dimensions are both at most one.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

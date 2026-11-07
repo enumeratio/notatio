@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: ThreeRegularSimpleModules(path)
+    description: The simple modules that are 3-regular.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

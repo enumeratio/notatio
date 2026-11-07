@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: SimplesOfInjectiveAndDominantDimensionOneWithDualProperty(path)
+    description: The simple modules whose injective and dominant dimensions are both one and whose projective and codominant dimensions are both one.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

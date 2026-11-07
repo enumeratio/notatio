@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: ProjectiveRadicalsOfVanishingFirstExtensionFromJacobsonRadical(path)
+    description: The indecomposable projective modules whose radical, zero included, has no first extension by the Jacobson radical.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

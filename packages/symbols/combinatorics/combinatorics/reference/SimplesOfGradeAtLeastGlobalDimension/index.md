@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: SimplesOfGradeAtLeastGlobalDimension(path)
+    description: "The simple modules of grade at least the global dimension: their extensions with the regular module vanish below it."
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

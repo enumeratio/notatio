@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: DualRegularModuleNonVanishingExtensionDegrees(path)
+    description: The degrees i from 1 to the global dimension at which the extensions of the direct sum of the indecomposable injective modules by the regular module do not vanish.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

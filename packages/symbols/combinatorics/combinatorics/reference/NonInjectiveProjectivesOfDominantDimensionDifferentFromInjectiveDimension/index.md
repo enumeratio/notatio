@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: NonInjectiveProjectivesOfDominantDimensionDifferentFromInjectiveDimension(path)
+    description: The indecomposable projective modules that are not injective and whose dominant dimension differs from their injective dimension.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

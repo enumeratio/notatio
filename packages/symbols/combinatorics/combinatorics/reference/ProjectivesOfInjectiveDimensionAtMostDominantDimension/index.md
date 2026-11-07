@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: ProjectivesOfInjectiveDimensionAtMostDominantDimension(path)
+    description: The indecomposable projective modules whose injective dimension is at most their dominant dimension.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: SphericalSimpleModules(path)
+    description: The simple modules with Ext^i(S, A) zero for 0 < i < the projective dimension of S; those of projective dimension at most one count.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: ProjectiveSquaredRadicalsOfInjectiveDimensionAtMostOne(path)
+    description: The indecomposable projective modules whose square radical, zero included, has injective dimension at most one.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

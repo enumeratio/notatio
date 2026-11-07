@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: ProjectivesOfDominantDimensionEqualToGlobalDimensionOrInjective(path)
+    description: The indecomposable projective modules that are injective or whose dominant dimension is the global dimension.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

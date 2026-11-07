@@ -10,6 +10,11 @@ catalog:
     on: DyckPath
 statOn:
   - DyckPath
+signatures:
+  - call: SimpleModulesSecondExtensionWithRegularModuleDimension(path)
+    description: The dimension of the second extensions of the direct sum of the simple modules by the regular module.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
