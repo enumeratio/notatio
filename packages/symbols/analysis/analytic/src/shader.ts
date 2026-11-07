@@ -273,9 +273,9 @@ fn hurwitzEM(s: vec2f, a: vec2f) -> vec2f {
 
 // A host whose device failed the df64 self-test (df64-selftest.ts) sets this false, and no df64 value is drawn.
 const DF64: bool = true;
-// A host whose device leaves fma unfused (fma(a, b, -a·b) is then 0) sets this false, and two-products
-// take Dekker's split.
-const DF_FMA: bool = true;
+// A host whose device breaks Dekker's split (Metal's fast-math, measured) sets this true, and two-products
+// take fma, which WGSL lets an implementation leave unfused; the self-test checks that it is fused.
+const DF_FMA: bool = false;
 // 1.0 that a compiler cannot see. A host sets it from a runtime value (the portrait's uniform).
 var<private> dfOne: f32 = 1.0;
 // x, passed through an integer xor with a 0 the compiler cannot see. Fast-math reassociates float
@@ -284,8 +284,8 @@ var<private> dfOne: f32 = 1.0;
 fn dfOpq(x: f32) -> f32 { return bitcast<f32>(bitcast<u32>(x) ^ (bitcast<u32>(dfOne) ^ 0x3f800000u)); }
 
 // ---- df64: a double-float is an f32 pair (hi, lo), hi + lo to 48 bits. A complex df is a vec4f of
-// (re.hi, re.lo, im.hi, im.lo). The error of a sum is Knuth's two-sum; of a product, fma where the
-// device fuses it (WGSL lets an implementation leave it unfused), else Dekker's split.
+// (re.hi, re.lo, im.hi, im.lo). The error of a sum is Knuth's two-sum; of a product, Dekker's split,
+// or fma where the split breaks (DF_FMA).
 fn dfTwoSum(a: f32, b: f32) -> vec2f {
   let s = dfOpq(a + b);
   let v = dfOpq(s - a);

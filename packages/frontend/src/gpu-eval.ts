@@ -151,7 +151,7 @@ fn main(@builtin(global_invocation_id) gid : vec3u) {
 `;
 
 /** The complete compute shader for a complex expression over `variable`. */
-export const complexComputeShader = (variable: string, code: string, df64: Df64Mode = "fma"): string =>
+export const complexComputeShader = (variable: string, code: string, df64: Df64Mode = "split"): string =>
   withDf64(withWGSL(COMPLEX_TAIL(variable, code)), df64);
 
 /** Bytes before the literal slots: the grid parameters. */
