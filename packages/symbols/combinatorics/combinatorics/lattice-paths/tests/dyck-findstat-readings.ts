@@ -434,9 +434,47 @@ const nakayama = (w: Word) => {
     right: readonly Interval[],
     f: (m: Interval, n: Interval) => number,
   ): number => sum(left.flatMap((m) => right.map((n) => f(m, n))));
+  /** The module after `steps` syzygies, stopping at a projective. */
+  const syzygyAfter = ([top, length]: Interval, steps: number): Interval => {
+    let [x, y] = [top, length];
+    for (let i = 0; i < steps && y !== series[x]; i++) [x, y] = [x + y, series[x]! - y];
+    return [x, y];
+  };
+  /** dim Ext^degree(M, A): the maps into A for degree 0, else Ext^1 of the (degree - 1)-th syzygy. */
+  const extensionAt = (m: Interval, degree: number): number =>
+    degree === 0
+      ? sumOverProjectives((target) => homDimension(m, target))
+      : extensionWithRegular(syzygyAfter(m, degree - 1));
+  /** The least degree with a nonzero Ext group into A; past the vertex count there is none. */
+  const grade = (m: Interval): number => {
+    for (let i = 0; i <= series.length; i++) if (extensionAt(m, i) > 0) return i;
+    return Infinity;
+  };
+  /** The indecomposable injective modules, one per socle vertex: the longest module ending there. */
+  const injectiveHulls = series.map((_, socle): Interval => [hullTop(socle), socle - hullTop(socle) + 1]);
+  const dualExtensionTotal = (degree: number): number => sum(injectiveHulls.map((m) => extensionAt(m, degree)));
+  /** The cosyzygy of M in its injective hull; a zero length is the zero module. */
+  const cosyzygy = ([x, y]: Interval): Interval => [hullTop(x + y - 1), x - hullTop(x + y - 1)];
+  /** The projective dimension of the `steps`-th term of the injective coresolution of the indecomposable projective (term 0 is its hull). */
+  const coresolutionTermDimension = ([x, y]: Interval, steps: number): number => {
+    let m: Interval = [x, y];
+    for (let i = 0; i < steps && m[1] > 0; i++) m = cosyzygy(m);
+    if (m[1] <= 0) return 0;
+    const hull = hullTop(m[0] + m[1] - 1);
+    return projectiveDimension(hull, m[0] + m[1] - hull);
+  };
+  const range = (from: number, to: number): number[] =>
+    Array.from({ length: Math.max(to - from + 1, 0) }, (_, k) => from + k);
   return {
     series,
     modules,
+    syzygyAfter,
+    extensionAt,
+    grade,
+    injectiveHulls,
+    dualExtensionTotal,
+    coresolutionTermDimension,
+    range,
     simpleModules: modules.filter(([, y]) => y === 1),
     projectives,
     homDimension,
@@ -470,6 +508,14 @@ const overNakayama =
   (w: Word): number =>
     w.length === 0 ? 0 : body(nakayama(w));
 const countOf = (xs: readonly number[], test: (d: number) => boolean): number => xs.filter(test).length;
+/** Simple modules that are k-regular: projective dimension k, Ext^k into the regular module one-dimensional, the lower groups zero. */
+const regularSimples = (a: ReturnType<typeof nakayama>, k: number): number =>
+  a.simples.filter(
+    (m) =>
+      a.projectiveDimension(...m) === k &&
+      a.extensionAt(m, k) === 1 &&
+      a.range(0, k - 1).every((i) => a.extensionAt(m, i) === 0),
+  ).length;
 const peaksOf = (w: Word): number => w.filter((s, i) => s === 1 && w[i + 1] === 0).length;
 
 export const DYCK_READINGS: Record<string, (w: Word) => number> = {
@@ -658,6 +704,107 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
       [...new Set(a.projectiveSocles.map(([x]) => x))].map((socle) => a.extensionWithRegular([socle, 1])),
       (d) => d === 0,
     ),
+  ),
+  // Batch 9: FindStat's St000998 and St001028 read the dominant dimension of the module itself.
+  ProjectivesOfInjectiveDimensionAtMostDominantDimension: overNakayama(
+    (a) => a.projectives.filter(([x, y]) => a.injectiveDimension(x, y) <= a.dominantDimension(x, y)).length,
+  ),
+  SimplesOfInjectiveDimensionEqualToDominantDimension: overNakayama(
+    (a) => a.simples.filter(([x, y]) => a.injectiveDimension(x, y) === a.dominantDimension(x, y)).length,
+  ),
+  NonInjectiveProjectivesOfDominantDimensionEqualToInjectiveDimension: overNakayama(
+    (a) =>
+      a.projectives.filter(([x, y]) => !a.isInjective(x, y) && a.dominantDimension(x, y) === a.injectiveDimension(x, y))
+        .length,
+  ),
+  NonInjectiveProjectivesOfDominantDimensionDifferentFromInjectiveDimension: overNakayama((a) => {
+    const nonInjective = a.projectives.filter(([x, y]) => !a.isInjective(x, y));
+    return (
+      nonInjective.length -
+      nonInjective.filter(([x, y]) => a.dominantDimension(x, y) === a.injectiveDimension(x, y)).length
+    );
+  }),
+  ProjectivesOfDominantDimensionEqualToGlobalDimensionOrInjective: overNakayama(
+    (a) =>
+      a.projectives.filter(([x, y]) => !a.isInjective(x, y) && a.dominantDimension(x, y) === a.global).length +
+      a.projectives.filter(([x, y]) => a.isInjective(x, y)).length,
+  ),
+  InjectivesOfGradeAtLeastOne: overNakayama((a) => a.injectiveModules.filter((m) => a.grade(m) >= 1).length),
+  InjectivesOfGradeAtLeastTwo: overNakayama((a) => a.injectiveModules.filter((m) => a.grade(m) >= 2).length),
+  InjectivesOfGradeAtLeastThree: overNakayama((a) => a.injectiveModules.filter((m) => a.grade(m) >= 3).length),
+  SimplesOfGradeAtLeastTwo: overNakayama((a) => a.simples.filter((m) => a.grade(m) >= 2).length),
+  SimplesOfGradeAtLeastThree: overNakayama((a) => a.simples.filter((m) => a.grade(m) >= 3).length),
+  // Ext^i(S, A) = 0 for i = 0 .. g - 1 is grade at least g; written out degree by degree.
+  SimplesOfGradeAtLeastGlobalDimension: overNakayama(
+    (a) => a.simples.filter((m) => a.range(0, a.global - 1).every((i) => a.extensionAt(m, i) === 0)).length,
+  ),
+  DualRegularModuleVanishingExtensionDegrees: overNakayama(
+    (a) => a.range(1, a.global).filter((i) => a.dualExtensionTotal(i) === 0).length,
+  ),
+  DualRegularModuleNonVanishingExtensionDegrees: overNakayama(
+    (a) => a.range(1, a.global).filter((i) => a.dualExtensionTotal(i) > 0).length,
+  ),
+  DualRegularModuleTopExtensionDimension: overNakayama((a) => a.dualExtensionTotal(a.global)),
+  NonZeroRadicalsOfProjectivesOfProjectiveAndInjectiveDimensionAtMostOne: overNakayama(
+    (a) => a.radicals.filter(([x, y]) => a.injectiveDimension(x, y) <= 1 && a.projectiveDimension(x, y) <= 1).length,
+  ),
+  // The module e_i J^2 of a projective too short to have one is zero, with injective dimension 0.
+  ProjectiveSquaredRadicalsOfInjectiveDimensionAtMostOne: overNakayama(
+    (a) => a.projectives.filter(([x, y]) => y <= 2 || a.injectiveDimension(x + 2, y - 2) <= 1).length,
+  ),
+  SimplesOfInjectiveAndDominantDimensionOneWithDualProperty: overNakayama(
+    (a) =>
+      a.simples.filter(
+        ([x, y]) =>
+          a.injectiveDimension(x, y) === 1 &&
+          a.dominantDimension(x, y) === 1 &&
+          a.projectiveDimension(x, y) === 1 &&
+          a.codominantDimension(x, y) === 1,
+      ).length,
+  ),
+  SimplesOfNonVanishingSecondExtensionWithRegularModule: overNakayama(
+    (a) => a.simples.filter((m) => a.extensionAt(m, 2) > 0).length,
+  ),
+  SimplesOfOneDimensionalSecondExtensionWithRegularModule: overNakayama(
+    (a) => a.simples.filter((m) => a.extensionAt(m, 2) === 1).length,
+  ),
+  SimpleModulesSecondExtensionWithRegularModuleDimension: overNakayama((a) =>
+    sum(a.simples.map((m) => a.extensionAt(m, 2))),
+  ),
+  // A dominant dimension of Infinity is a module whose coresolution is projective throughout.
+  NakayamaFinitisticDominantDimension: overNakayama((a) =>
+    Math.max(0, ...a.modules.map(([x, y]) => a.dominantDimension(x, y)).filter(Number.isFinite)),
+  ),
+  OneRegularSimpleModules: overNakayama((a) => regularSimples(a, 1)),
+  TwoRegularSimpleModules: overNakayama((a) => regularSimples(a, 2)),
+  ThreeRegularSimpleModules: overNakayama((a) => regularSimples(a, 3)),
+  SphericalSimpleModules: overNakayama(
+    (a) =>
+      a.simples.filter((m) => {
+        const dimension = a.projectiveDimension(...m);
+        return dimension <= 1 || a.range(1, dimension - 1).every((i) => a.extensionAt(m, i) === 0);
+      }).length,
+  ),
+  ProjectiveRadicalsOfVanishingFirstExtensionFromJacobsonRadical: overNakayama((a) => {
+    const jacobson = a.radicals;
+    return a.projectives.filter(([x, y]) => {
+      if (y === 1) return true;
+      const own: readonly [number, number] = [x + 1, y - 1];
+      return sum(jacobson.map((m) => a.extension(m, own))) === 0;
+    }).length;
+  }),
+  RegularModuleSecondInjectiveTermProjectiveDimension: overNakayama((a) =>
+    Math.max(...a.projectives.map((m) => a.coresolutionTermDimension(m, 1))),
+  ),
+  RegularModuleThirdInjectiveTermProjectiveDimension: overNakayama((a) =>
+    Math.max(...a.projectives.map((m) => a.coresolutionTermDimension(m, 2))),
+  ),
+  SimplesNotInSocleOrOfVanishingFirstExtensionWithRegularModule: overNakayama(
+    (a) =>
+      a.simples.filter(
+        ([x, y]) =>
+          !a.projectives.some(([top, length]) => top + length - 1 === x) || a.extensionWithRegular([x, y]) === 0,
+      ).length,
   ),
   Area: areaOf,
   Bounce: bounceOf,

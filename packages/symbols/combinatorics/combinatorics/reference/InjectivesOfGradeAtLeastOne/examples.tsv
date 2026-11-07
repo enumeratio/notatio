@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[InjectivesOfGradeAtLeastOne, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	1			the step word $UUDDUD$
+the-step-word-uduudd			[InjectivesOfGradeAtLeastOne, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	2			the step word $UDUUDD$
+findstat-st001184-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'InjectivesOfGradeAtLeastOne'"]	1	1	FindStat St001184	FindStat's value for [1,0]
+findstat-st001184-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'InjectivesOfGradeAtLeastOne'"]	1	1	FindStat St001184	FindStat's value for [1,0,1,0]
+findstat-st001184-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'InjectivesOfGradeAtLeastOne'"]	2	2	FindStat St001184	FindStat's value for [1,1,0,0]
