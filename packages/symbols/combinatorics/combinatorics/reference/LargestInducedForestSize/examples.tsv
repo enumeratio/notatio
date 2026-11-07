@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-graph-on-4-vertices-with-the-edges-12-23-24			[LargestInducedForestSize, [LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 2, 3], [List, 2, 4], [List, 3, 4]]]]]	3			the graph on 4 vertices with the edges 12, 23, 24 and 34
+findstat-st001321-1	Properties		[CombinatorialStat, [LabeledGraph, [Tuple, 1, [List]]], "'LargestInducedForestSize'"]	1	1	FindStat St001321	FindStat's value for ([],1)
+findstat-st001321-2	Properties		[CombinatorialStat, [LabeledGraph, [Tuple, 2, [List]]], "'LargestInducedForestSize'"]	2	2	FindStat St001321	FindStat's value for ([],2)
+findstat-st001321-3	Properties		[CombinatorialStat, [LabeledGraph, [Tuple, 3, [List]]], "'LargestInducedForestSize'"]	3	3	FindStat St001321	FindStat's value for ([],3)

@@ -822,9 +822,14 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["AdjacencyDeterminant", "AlbertsonIndex", "BipartiteEdgeDeletionNumber", "BridgeCount"],
+    "columns": [
+      "AboveAverageDegreeVertexCount",
+      "AbsoluteAdjacencyDeterminant",
+      "AdjacencyDeterminant",
+      "AlbertsonIndex"
+    ],
     "derived": true,
-    "statistics": 69
+    "statistics": 100
   },
   "LabeledGraphsByEdges": {
     "expr": "LabeledGraphsByEdges(4, 2)",
@@ -835,9 +840,14 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["AdjacencyDeterminant", "AlbertsonIndex", "ConnectedInducedSubgraphCount", "CutVertexCount"],
+    "columns": [
+      "AboveAverageDegreeVertexCount",
+      "AbsoluteAdjacencyDeterminant",
+      "AdjacencyDeterminant",
+      "AlbertsonIndex"
+    ],
     "derived": true,
-    "statistics": 69
+    "statistics": 100
   },
   "LabeledTrees": {
     "expr": "LabeledTrees(4)",

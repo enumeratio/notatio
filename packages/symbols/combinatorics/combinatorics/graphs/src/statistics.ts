@@ -486,6 +486,110 @@ const determinantOf = (name: string, size: MathJSON): MathJSON =>
 const withTotals = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
   withGraph(bindList("totals", vertexTotals, body), otherwise);
 
+/** The independent sets of vertices that no vertex can be added to, as 1 or 0 for the subset `mask`. */
+const isMaximalIndependent = (mask: MathJSON): MathJSON =>
+  times(
+    one(isIndependent(mask)),
+    one(
+      equals(
+        floored(
+          sumOver(
+            vertices,
+            [
+              "If",
+              less(["Mod", mask, ["Power", 2, "v"]], bitValue("v")),
+              one(isIndependent(add(mask, bitValue("v")))),
+              0,
+            ],
+            "v",
+          ),
+        ),
+        0,
+      ),
+    ),
+  );
+/** The least k with a coloring in k colors, from the independent sets within each subset. */
+const chromaticNumber: MathJSON = bindList("within", independentSetsWithin, [
+  "Min",
+  forEach(vertices, ["If", greater(coloringCount("k"), 0), "k", "n"], "k"),
+]);
+/** The vertices adjacent to both ends of some edge. */
+const triangleVertices: MathJSON = floored(
+  sumOver(
+    vertices,
+    one(greater(floored(sumOver("edges", times(adjacent("v", lower("e")), adjacent("v", upper("e"))), "e")), 0)),
+    "v",
+  ),
+);
+
+const withDegreesAndAdjacency = (body: MathJSON): MathJSON =>
+  withDegrees(bindList("adjacency", adjacencyMatrix, body, "list<list<integer>>"));
+/** The neighbors of vertex `v` whose degree satisfies `test`. */
+const neighborsWhere = (test: (degreeOfNeighbor: MathJSON) => MathJSON): MathJSON =>
+  floored(sumOver(vertices, times(adjacent("v", "w"), one(test(degree("w")))), "w"));
+/** Whether rows `u` and `v` of the adjacency matrix agree: the two vertices have the same neighbors. */
+const sameNeighbors = (u: MathJSON, v: MathJSON): MathJSON =>
+  one(equals(floored(sumOver(vertices, ["Abs", subtract(adjacent(u, "x"), adjacent(v, "x"))], "x")), 0));
+/** The vertices of the subset `mask` that have more than `limit` members of it at or next to them, counting the vertex itself when `closed`. */
+const overfull = (mask: MathJSON, limit: number, closed: boolean): MathJSON =>
+  floored(
+    sumOver(
+      vertices,
+      one(greater(closed ? add(neighborsIn(mask, "w"), one(hasBit(mask, "w"))) : neighborsIn(mask, "w"), limit)),
+      "w",
+    ),
+  );
+/** The largest subset for which no vertex is overfull. */
+const largestWithoutOverfull = (limit: number, closed: boolean): MathJSON =>
+  withNeighborsIn(["Max", forEach(masks, times(one(equals(overfull("m", limit, closed), 0)), total("m")), "m")]);
+
+/** Each subset's forest-ness, by mask + 1: 1 when it induces a forest, which has a vertex of at most one neighbor inside whose removal leaves a forest. */
+const forestMasks: MathJSON = typedFolding(
+  [
+    "Join",
+    "a",
+    [
+      "List",
+      [
+        "Min",
+        1,
+        floored(
+          sumOver(
+            vertices,
+            [
+              "If",
+              hasBit("b", "v"),
+              times(at(add(subtract("b", bitValue("v")), 1), "a"), one(less(neighborsIn("b", "v"), 2))),
+              0,
+            ],
+            "v",
+          ),
+        ),
+      ],
+    ],
+  ],
+  "a",
+  "b",
+  ["List", 1],
+  ["Range", 1, subtract(["Power", 2, "n"], 1)],
+  "list<integer>",
+);
+const largestForest: MathJSON = ["Max", forEach(masks, times(at(add("m", 1), "forests"), total("m")), "m")];
+/** The sets of four vertices with `edgeCount` edges among them and `misfitCount` members whose number of neighbors among them satisfies `misfit`. */
+const inducedFourVertexCount = (
+  edgeCount: number,
+  misfit: (inside: MathJSON) => MathJSON,
+  misfitCount: number,
+): MathJSON =>
+  withNeighborsIn(
+    overMasks(
+      times(
+        one(equals(total("m"), 4)),
+        times(one(equals(inside("m"), edgeCount)), one(equals(misfits("m", misfit), misfitCount))),
+      ),
+    ),
+  );
+
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
   stat(
@@ -602,15 +706,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "TriangleVertexCount",
     "The vertices on a triangle.",
-    withAdjacency(
-      floored(
-        sumOver(
-          vertices,
-          one(greater(floored(sumOver("edges", times(adjacent("v", lower("e")), adjacent("v", upper("e"))), "e")), 0)),
-          "v",
-        ),
-      ),
-    ),
+    withAdjacency(triangleVertices),
     `FindStat's St001995. A vertex lies on a triangle when it is adjacent to both ends of some edge. ${NO_VERTICES}`,
   ),
   stat(
@@ -799,12 +895,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "ChromaticNumber",
     "The fewest colors for the vertices so that adjacent vertices differ.",
-    withMasks(
-      bindList("within", independentSetsWithin, [
-        "Min",
-        forEach(vertices, ["If", greater(coloringCount("k"), 0), "k", "n"], "k"),
-      ]),
-    ),
+    withMasks(chromaticNumber),
     `FindStat's St000098. The colorings in k colors are counted as the covers of the vertices by k independent sets, Σ over the subsets S of (-1)^(n - |S|) i(S)^k with i(S) the independent sets inside S, and the number is the least k with one. ${NO_VERTICES}`,
   ),
   stat(
@@ -816,31 +907,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "MaximalIndependentSetCount",
     "The independent sets of vertices that no vertex can be added to.",
-    withMasks(
-      overMasks(
-        times(
-          one(isIndependent("m")),
-          one(
-            equals(
-              floored(
-                sumOver(
-                  vertices,
-                  [
-                    "If",
-                    less(["Mod", "m", ["Power", 2, "v"]], bitValue("v")),
-                    one(isIndependent(add("m", bitValue("v")))),
-                    0,
-                  ],
-                  "v",
-                ),
-              ),
-              0,
-            ),
-          ),
-        ),
-      ),
-      1,
-    ),
+    withMasks(overMasks(isMaximalIndependent("m")), 1),
     `FindStat's St001304. The graph with no vertices has the empty set, so 1.`,
   ),
   stat(
@@ -1238,5 +1305,347 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
       ),
     ),
     `FindStat's St001305. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphEdgeConnectivity",
+    "The fewest edges whose deletion leaves a disconnected graph: the fewest edges between a set of vertices and the rest.",
+    withMasks([
+      "If",
+      less("n", 2),
+      0,
+      ["Min", forEach(["Range", 1, subtract(["Power", 2, "n"], 2)], subtract(length("edges"), uncut("m")), "m")],
+    ]),
+    `FindStat's St000261. A disconnected graph gives 0, and so does the graph with one vertex. ${NO_VERTICES}`,
+  ),
+  stat(
+    "SpanningSubgraphCount",
+    "The subgraphs on all the vertices: 2 to the power of the number of edges.",
+    withGraph(["Power", 2, length("edges")], 1),
+    `FindStat's St000343, the Tutte polynomial at x = y = 2. The graph with no vertices has one, so 1.`,
+  ),
+  stat(
+    "DegreeSum",
+    "The sum of the degrees: twice the number of edges.",
+    times(2, length(at(2))),
+    `FindStat's St000350. ${NO_VERTICES}`,
+  ),
+  stat(
+    "EulerFaceCount",
+    "The edges less the vertices plus 2: the faces of a connected planar graph.",
+    add(subtract(length(at(2)), at(1)), 2),
+    `FindStat's St000450. The graph with no vertices gives 2, the formula as written.`,
+  ),
+  stat(
+    "BlockCount",
+    "The blocks: the maximal connected subgraphs with no cut vertex; an isolated vertex is a block.",
+    withAdjacency(
+      bind(
+        "components",
+        componentCount,
+        add(
+          "components",
+          floored(
+            sumOver(
+              vertices,
+              [
+                "If",
+                greater(floored(sumOver(vertices, adjacent("v", "w"), "w")), 0),
+                subtract(
+                  componentsOfMatrix(adjacencyWithout((u) => ["If", equals(u, "v"), 1, 0])),
+                  add("components", 1),
+                ),
+                0,
+              ],
+              "v",
+            ),
+          ),
+        ),
+        "integer",
+      ),
+    ),
+    `FindStat's St000553. The blocks of a component are one, plus for each cut vertex the components it leaves, less one; each vertex with an edge adds the components its deletion leaves in its own component, less one. The deleted vertex stays as an isolated one, a component of its own. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumNeighborhoodMultiplicity",
+    "The most vertices that have the same set of neighbors.",
+    withAdjacency(["Max", forEach(vertices, floored(sumOver(vertices, sameNeighbors("u", "v"), "u")), "v")]),
+    `FindStat's St000723. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphPackingNumber",
+    "The most vertices, no two within distance 2: the closed neighborhoods of the vertices are disjoint.",
+    largestWithoutOverfull(1, true),
+    `FindStat's St000916. A set is a packing when every vertex has at most one member among itself and its neighbors. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphOpenPackingNumber",
+    "The most vertices with pairwise disjoint sets of neighbors.",
+    largestWithoutOverfull(1, false),
+    `FindStat's St000917. A set is an open packing when every vertex has at most one member among its neighbors. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphTwoLimitedPackingNumber",
+    "The most vertices in a set that has at most two members among the closed neighborhood of any vertex.",
+    largestWithoutOverfull(2, true),
+    `FindStat's St000918. ${NO_VERTICES}`,
+  ),
+  stat(
+    "CliqueCocliqueNumber",
+    "The clique number times the independence number.",
+    withMasks(times(largestMask(isClique("m")), largestMask(isIndependent("m")))),
+    `FindStat's St000926. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AnnihilationNumber",
+    "The most vertices whose degrees add up to at most the number of edges.",
+    withMasks(
+      bindList("degrees", degreeList, [
+        "Max",
+        forEach(
+          masks,
+          times(
+            one(
+              less(floored(sumOver(vertices, times(one(hasBit("m", "v")), degree("v")), "v")), add(length("edges"), 1)),
+            ),
+            total("m"),
+          ),
+          "m",
+        ),
+      ]),
+    ),
+    `FindStat's St001286: the largest k with the k smallest degrees adding up to at most the edges; the best set of k vertices is those. ${NO_VERTICES}`,
+  ),
+  stat(
+    "InducedPathOnFourVerticesCount",
+    "The sets of four vertices that induce a path: three edges, and every vertex has one or two neighbors among the four.",
+    inducedFourVertexCount(3, (d) => greater(["Abs", subtract(times(2, d), 3)], 1), 0),
+    `FindStat's St001306. ${NO_VERTICES}`,
+  ),
+  stat(
+    "InducedStarOnFourVerticesCount",
+    "The sets of four vertices that induce a star: three edges, and one vertex has all three others as neighbors.",
+    inducedFourVertexCount(3, (d) => equals(d, 3), 1),
+    `FindStat's St001307. ${NO_VERTICES}`,
+  ),
+  stat(
+    "InducedDiamondCount",
+    "The sets of four vertices that induce a diamond: a cycle on four vertices with one chord, five edges.",
+    withMasks(overMasks(times(one(equals(total("m"), 4)), one(equals(inside("m"), 5))))),
+    `FindStat's St001310. The only graph on four vertices with five edges is the diamond. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestInducedForestSize",
+    "The most vertices that induce a graph with no cycle.",
+    withNeighborsIn(bindList("forests", forestMasks, largestForest)),
+    `FindStat's St001321. ${NO_VERTICES}`,
+  ),
+  stat(
+    "IndependenceGap",
+    "The independence number less the fewest vertices of a maximal independent set.",
+    withMasks(
+      subtract(largestMask(isIndependent("m")), [
+        "Min",
+        forEach(masks, ["If", equals(isMaximalIndependent("m"), 1), total("m"), "n"], "m"),
+      ]),
+    ),
+    `FindStat's St001323; 0 when every maximal independent set is as large as can be. ${NO_VERTICES}`,
+  ),
+  stat(
+    "FeedbackVertexSetNumber",
+    "The fewest vertices whose deletion leaves a graph with no cycle.",
+    withNeighborsIn(bindList("forests", forestMasks, subtract("n", largestForest))),
+    `FindStat's St001331: the vertices less the largest induced forest. ${NO_VERTICES}`,
+  ),
+  stat(
+    "CenterEdgeCount",
+    "The edges with both ends in the center.",
+    withDistances(
+      bindList(
+        "eccentricity",
+        forEach(vertices, ["Max", at("u", "distances")], "u"),
+        bind(
+          "least",
+          ["Min", "eccentricity"],
+          floored(
+            sumOver(
+              "edges",
+              times(
+                one(equals(at(lower("e"), "eccentricity"), "least")),
+                one(equals(at(upper("e"), "eccentricity"), "least")),
+              ),
+              "e",
+            ),
+          ),
+          "integer",
+        ),
+      ),
+    ),
+    `FindStat's St001341. In a disconnected graph every vertex is central, as for CenterVertexCount. ${NO_VERTICES}`,
+  ),
+  stat(
+    "SameNeighborhoodPairCount",
+    "The pairs of vertices that have the same set of neighbors.",
+    withAdjacency(overPairs(times(one(less("u", "w")), sameNeighbors("u", "w")))),
+    `FindStat's St001347. ${NO_VERTICES}`,
+  ),
+  stat(
+    "HalfAlbertsonIndex",
+    "Half the sum over the edges of the difference of the degrees of its ends.",
+    withDegrees(spread(floored(sumOver("edges", ["Abs", subtract(degree(lower("e")), degree(upper("e")))], "e")))),
+    `FindStat's St001350. The sum is always even. ${NO_VERTICES}`,
+  ),
+  stat(
+    "HalfTotalIrregularity",
+    "Half the sum over the unordered pairs of vertices of the difference of their degrees.",
+    withDegrees([
+      "Divide",
+      floored(sumOver("degrees", floored(sumOver("degrees", ["Abs", subtract("d", "q")], "q")), "d")),
+      4,
+    ]),
+    `FindStat's St001521. Four times it is the sum over the ordered pairs. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestInducedStarSize",
+    "The most vertices that induce a star: one vertex adjacent to all the others, which are not adjacent to each other. A single vertex is a star.",
+    withNeighborsIn([
+      "Max",
+      forEach(
+        masks,
+        times(
+          total("m"),
+          times(
+            one(equals(inside("m"), subtract(total("m"), 1))),
+            one(
+              greater(
+                misfits("m", (d) => equals(d, subtract(total("m"), 1))),
+                0,
+              ),
+            ),
+          ),
+        ),
+        "m",
+      ),
+    ]),
+    `FindStat's St001674. A set is a star when it has one fewer edges than vertices and a vertex with all the others as neighbors. ${NO_VERTICES}`,
+  ),
+  stat(
+    "CelebrityCount",
+    "The vertices of whom more than half the neighbors have a smaller degree.",
+    withDegreesAndAdjacency(
+      floored(
+        sumOver(
+          vertices,
+          one(
+            greater(
+              times(
+                2,
+                neighborsWhere((d) => less(d, degree("v"))),
+              ),
+              degree("v"),
+            ),
+          ),
+          "v",
+        ),
+      ),
+    ),
+    `FindStat's St001689. ${NO_VERTICES}`,
+  ),
+  stat(
+    "KingCount",
+    "The vertices whose neighbors all have a smaller degree; an isolated vertex counts.",
+    withDegreesAndAdjacency(
+      floored(
+        sumOver(
+          vertices,
+          one(
+            equals(
+              neighborsWhere((d) => atLeastValue(d, degree("v"))),
+              0,
+            ),
+          ),
+          "v",
+        ),
+      ),
+    ),
+    `FindStat's St001691. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AboveAverageDegreeVertexCount",
+    "The vertices whose degree is greater than the average degree.",
+    withDegrees(overDegrees(one(greater(times("d", "n"), times(2, length("edges")))))),
+    `FindStat's St001692. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AbsoluteAdjacencyDeterminant",
+    "The absolute value of the determinant of the adjacency matrix.",
+    withTotals(
+      bindList("adjacency", adjacencyMatrix, ["Abs", determinantOf("adjacency", "n")], "list<list<integer>>"),
+      1,
+    ),
+    `FindStat's St001702. The graph with no vertices has the empty determinant, 1.`,
+  ),
+  stat(
+    "DifferentDegreePairCount",
+    "The pairs of vertices whose degrees differ.",
+    withDegrees(
+      spread(floored(sumOver("degrees", floored(sumOver("degrees", one(["NotEqual", "d", "q"]), "q")), "d"))),
+    ),
+    `FindStat's St001708. ${NO_VERTICES}`,
+  ),
+  stat(
+    "ChromaticCliqueGap",
+    "The chromatic number less the clique number.",
+    withMasks(subtract(chromaticNumber, largestMask(isClique("m")))),
+    `FindStat's St001793, which is 0 on a weakly perfect graph. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TuranEdgeExcess",
+    "The edges less those of the complement of the Turán graph with as many parts as the independence number: disjoint cliques as equal in size as possible.",
+    withMasks(
+      bind(
+        "parts",
+        largestMask(isIndependent("m")),
+        bind(
+          "extra",
+          ["Mod", "n", "parts"],
+          bind(
+            "size",
+            ["Divide", subtract("n", "extra"), "parts"],
+            subtract(
+              length("edges"),
+              spread(
+                add(
+                  times("extra", times(add("size", 1), "size")),
+                  times(subtract("parts", "extra"), times("size", subtract("size", 1))),
+                ),
+              ),
+            ),
+            "integer",
+          ),
+          "integer",
+        ),
+        "integer",
+      ),
+    ),
+    `FindStat's St001798, nonnegative by Turán's theorem. The independence number is the number of cliques; n mod it of them have one more vertex than the rest. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumLeafNeighborCount",
+    "The most neighbors of degree 1 a vertex has.",
+    withDegreesAndAdjacency([
+      "Max",
+      forEach(
+        vertices,
+        neighborsWhere((d) => equals(d, 1)),
+        "v",
+      ),
+    ]),
+    `FindStat's St001826. ${NO_VERTICES}`,
+  ),
+  stat(
+    "NonTriangleVertexCount",
+    "The vertices on no triangle.",
+    withAdjacency(subtract("n", triangleVertices)),
+    `FindStat's St001996. ${NO_VERTICES}`,
   ),
 ];
