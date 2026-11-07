@@ -359,6 +359,20 @@ const sizeOf = (contents: unknown): number =>
     ? contents.slice(1).reduce((n: number, part) => n + (typeof part === "number" ? part : 0), 0)
     : 0;
 
+/** Pairs where compiled code may decline while the interpreter answers exactly: an intermediate
+ *  product passes 2^53, so the compiled parity tripwire declines rather than risk a rounded digit.
+ *  `answer` is the exact value from the product formula in BigInt (the numerator divides evenly).
+ *  Only E8 (degrees 2, 8, 12, 14, 18, 20, 24, 30; Coxeter number 30; |W| = 696729600) reaches it:
+ *  E7 and every smaller type stay below 2^53 and are compared as usual.
+ *  - ThirdWeylFussCatalanNumber: ∏ (d + 90) = 15543540607795200
+ *  - ThirdPositiveWeylFussCatalanNumber: ∏ (d + 88) = 13333481570304000
+ *  - CoxeterElementFactorizationCount: 8! 30^8 = 26453952000000000 */
+const DECLINES_PAST_2_53: readonly { signature: string; subject: unknown; answer: number }[] = [
+  { signature: "ThirdWeylFussCatalanNumber@CartanType", subject: ["Tuple", "'E'", 8], answer: 22309287 },
+  { signature: "ThirdPositiveWeylFussCatalanNumber@CartanType", subject: ["Tuple", "'E'", 8], answer: 19137240 },
+  { signature: "CoxeterElementFactorizationCount@CartanType", subject: ["Tuple", "'E'", 8], answer: 37968750 },
+];
+
 const compiledDefinitions = ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(signatureOf(d)));
 const headsOn = (carrier: string): number => compiledDefinitions.filter((d) => d.on === carrier).length;
 
@@ -373,9 +387,13 @@ for (const definition of compiledDefinitions) {
     for (const contents of selectSubjects(groups, cap)) {
       const interpreted = interpretDefinition(ce, definition, ce.box(contents as never)).json;
       const answer = run!(contents);
-      // Compiled code may decline only an infinite answer, which MathJSON can't carry as a number.
+      // Compiled code may decline only an infinite answer, which MathJSON can't carry as a number,
+      // or a listed pair (DECLINES_PAST_2_53) whose interpreted answer is its exact value.
       if (answer === undefined) {
-        expect(interpreted, JSON.stringify(contents)).toBe("PositiveInfinity");
+        const allowed = DECLINES_PAST_2_53.find(
+          (a) => a.signature === signatureOf(definition) && JSON.stringify(a.subject) === JSON.stringify(contents),
+        );
+        expect(interpreted, JSON.stringify(contents)).toBe(allowed?.answer ?? "PositiveInfinity");
         continue;
       }
       compared++;
