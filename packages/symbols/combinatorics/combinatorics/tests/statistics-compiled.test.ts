@@ -258,43 +258,94 @@ function labeledGraphs(n: number): unknown[] {
   ]);
 }
 
-/** Small subjects of each carrier, as MathJSON contents. */
-const SUBJECTS: Record<string, unknown[]> = {
+/** The subjects of one carrier a size at a time, smallest first, each as MathJSON contents. */
+const bySize = <T>(sizes: readonly number[], of: (n: number) => T[], toContents: (item: T) => unknown): unknown[][] =>
+  sizes.map((n) => of(n).map(toContents));
+const ofLists = (rows: readonly unknown[]): unknown => list((rows as unknown[][]).map(list));
+
+/** Small subjects of each carrier, as MathJSON contents, grouped by size. */
+const SUBJECTS: Record<string, unknown[][]> = {
   // Up to 4: the cubic statistics are slow to interpret, and the exhaustive sweeps elsewhere
   // already hold every statistic to an independent reading up to 6.
-  Permutation: [0, 1, 2, 3, 4].flatMap(permutations).map(list),
-  IntegerPartition: [0, 1, 2, 3, 4, 5, 6, 7].flatMap((n) => partitions(n)).map(list),
-  IntegerComposition: [0, 1, 2, 3, 4, 5, 6].flatMap(compositions).map(list),
-  DyckPath: [0, 1, 2, 3, 4].flatMap(dyckPaths).map(list),
-  BinaryWord: [0, 1, 2, 3, 4, 5, 6].flatMap(binaryWords).map(list),
-  BinaryTree: [0, 1, 2, 3, 4, 5].flatMap(binaryTrees),
-  OrderedTree: [1, 2, 3, 4, 5, 6].flatMap(orderedTrees),
-  SetPartition: [0, 1, 2, 3, 4].flatMap(setPartitions).map((blocks) => list(blocks.map(list))),
-  StandardTableau: [0, 1, 2, 3, 4, 5, 6].flatMap(standardTableaux).map((rows) => list(rows.map(list))),
-  PerfectMatching: [1, 2, 3, 4].flatMap(perfectMatchings).map((pairs) => list(pairs.map(list))),
-  SignedPermutation: [0, 1, 2, 3, 4].flatMap(signedPermutations).map(list),
-  // The build's own samples have no matrices (the family has no carrier). All to size 4; deep, all of size 5
-  // and every fourth of size 6 (7436 in all, too many to interpret within the file's timeout).
-  AlternatingSignMatrix: [
-    ...[1, 2, 3, 4].flatMap(alternatingSignMatrices),
-    ...(DEEP ? [...alternatingSignMatrices(5), ...alternatingSignMatrices(6).filter((_, i) => i % 4 === 0)] : []),
-  ].map((rows) => list(rows.map(list))),
+  Permutation: bySize([0, 1, 2, 3, 4], permutations, list),
+  IntegerPartition: bySize([0, 1, 2, 3, 4, 5, 6, 7], partitions, list),
+  IntegerComposition: bySize([0, 1, 2, 3, 4, 5, 6], compositions, list),
+  DyckPath: bySize([0, 1, 2, 3, 4], dyckPaths, list),
+  BinaryWord: bySize([0, 1, 2, 3, 4, 5, 6], binaryWords, list),
+  BinaryTree: bySize([0, 1, 2, 3, 4, 5], binaryTrees, (tree) => tree),
+  OrderedTree: bySize([1, 2, 3, 4, 5, 6], orderedTrees, (tree) => tree),
+  SetPartition: bySize([0, 1, 2, 3, 4], setPartitions, ofLists),
+  StandardTableau: bySize([0, 1, 2, 3, 4, 5, 6], standardTableaux, ofLists),
+  PerfectMatching: bySize([1, 2, 3, 4], perfectMatchings, ofLists),
+  SignedPermutation: bySize([0, 1, 2, 3, 4], signedPermutations, list),
+  // The build's own samples have no matrices (the family has no carrier). To size 4; deep, 5 and 6
+  // (7436 of size 6, thinned by the head's allowance like every carrier).
+  AlternatingSignMatrix: bySize(DEEP ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4], alternatingSignMatrices, ofLists),
   // Lengths to 3; deep, 4 and 5.
-  ParkingFunction: [1, 2, 3, ...(DEEP ? [4, 5] : [])].flatMap(parkingFunctions).map(list),
+  ParkingFunction: bySize([1, 2, 3, ...(DEEP ? [4, 5] : [])], parkingFunctions, list),
   // Up to 4 boxes; deep, 5 and 6.
-  PlanePartition: [1, 2, 3, 4, ...(DEEP ? [5, 6] : [])].flatMap(planePartitions).map((rows) => list(rows.map(list))),
+  PlanePartition: bySize([1, 2, 3, 4, ...(DEEP ? [5, 6] : [])], planePartitions, ofLists),
   // Up to 2; deep, up to 5 (the dynamic programs take about a tenth of a second a shape to interpret at 3 cells, and growing).
-  // Up to 3 vertices, every fourth graph on 4; deep, all of 4 and every 64th of 5 (the distance and component statistics
-  // take a second or more a graph to interpret).
+  // Up to 3 vertices, every fourth graph on 4; deep, all of 4 and 5 (the distance and component statistics
+  // take a second or more a graph to interpret, so a head's allowance thins them).
   LabeledGraph: [
-    ...[0, 1, 2, 3].flatMap(labeledGraphs),
-    ...labeledGraphs(4).filter((_, i) => DEEP || i % 4 === 0),
-    ...(DEEP ? labeledGraphs(5).filter((_, i) => i % 64 === 0) : []),
+    ...[0, 1, 2, 3].map(labeledGraphs),
+    labeledGraphs(4).filter((_, i) => DEEP || i % 4 === 0),
+    ...(DEEP ? [labeledGraphs(5)] : []),
   ],
   // Ranks to 6; deep, to 8 (the permanent's table doubles with each rank).
-  CartanType: cartanTypesUpTo(DEEP ? 8 : 6),
-  SkewPartition: (DEEP ? [1, 2, 3, 4, 5] : [1, 2]).flatMap(skewPartitions).map((shape) => list(shape.map(list))),
+  CartanType: [cartanTypesUpTo(DEEP ? 8 : 6)],
+  SkewPartition: bySize(DEEP ? [1, 2, 3, 4, 5] : [1, 2], skewPartitions, ofLists),
 };
+
+/** How many subjects of a carrier its heads interpret together, deep or not. The interpreter is the slow
+ *  side of the comparison, so a head's share is this over the carrier's compiled heads: the file's time
+ *  stays put as statistics are added, and each head sees fewer subjects. Sized from the mean seconds one
+ *  interpretation took on a 2-thread box (Permutation .01, SignedPermutation .01, PerfectMatching .02,
+ *  BinaryTree .02, OrderedTree .02, BinaryWord .04, IntegerComposition .04, StandardTableau .05,
+ *  IntegerPartition .07, SetPartition .07, AlternatingSignMatrix .07 to size 4, DyckPath .2) to give each
+ *  carrier a few minutes. */
+const CARRIER_ALLOWANCE: Readonly<Record<string, number>> = {
+  Permutation: 6000,
+  SignedPermutation: 4000,
+  IntegerPartition: 2700,
+  IntegerComposition: 2400,
+  DyckPath: 1300,
+  BinaryWord: 4000,
+  BinaryTree: 600,
+  OrderedTree: 900,
+  SetPartition: 1700,
+  StandardTableau: 2500,
+  PerfectMatching: 1300,
+  AlternatingSignMatrix: 2300,
+  ParkingFunction: 2000,
+  PlanePartition: 1000,
+  SkewPartition: 1000,
+  LabeledGraph: 150,
+  CartanType: 600,
+};
+
+/** The fewest subjects a head interprets however many heads share the carrier: the sizes up to a
+ *  Dyck path's 3 whole, and a few of the next size up. */
+const MIN_PER_HEAD = 12;
+
+/** Which of a carrier's subjects (grouped by size, smallest first) a head interprets, at most `cap`.
+ *  The smallest sizes stay whole while they fit in half the cap; the rest is shared equally by the
+ *  larger sizes, each spread evenly with its last subject taken, so every size is represented and so is
+ *  the carrier's largest. The same subjects every run. */
+function selectSubjects(groups: readonly (readonly unknown[])[], cap: number): unknown[] {
+  if (groups.reduce((n, g) => n + g.length, 0) <= cap) return groups.flat();
+  const chosen: unknown[] = [];
+  let g = 0;
+  while (g < groups.length && chosen.length + groups[g]!.length <= Math.ceil(cap / 2)) chosen.push(...groups[g++]!);
+  for (let left = groups.length - g; left > 0; left--, g++) {
+    const group = groups[g]!;
+    const share = Math.min(group.length, Math.max(1, Math.floor((cap - chosen.length) / left)));
+    // share positions evenly through the group, the last at its end
+    for (let k = 1; k <= share; k++) chosen.push(group[Math.ceil((k * group.length) / share) - 1]);
+  }
+  return chosen;
+}
 
 /** Statistics whose interpretation grows about threefold per size of partition: the largest size
  *  (the sum of the parts) their subjects reach in the standard run, every size under DEEP_TESTS.
@@ -308,13 +359,18 @@ const sizeOf = (contents: unknown): number =>
     ? contents.slice(1).reduce((n: number, part) => n + (typeof part === "number" ? part : 0), 0)
     : 0;
 
-for (const definition of ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(signatureOf(d)))) {
+const compiledDefinitions = ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(signatureOf(d)));
+const headsOn = (carrier: string): number => compiledDefinitions.filter((d) => d.on === carrier).length;
+
+for (const definition of compiledDefinitions) {
   test(`${signatureOf(definition)}: compiled agrees with interpreted`, () => {
     const run = compiledStatistic(ce, definition);
     expect(run).toBeDefined();
     let compared = 0;
     const largest = DEEP ? Infinity : (SLOW_TO_INTERPRET.get(signatureOf(definition)) ?? Infinity);
-    for (const contents of (SUBJECTS[definition.on] ?? []).filter((c) => sizeOf(c) <= largest)) {
+    const cap = Math.max(MIN_PER_HEAD, Math.floor((CARRIER_ALLOWANCE[definition.on] ?? 0) / headsOn(definition.on)));
+    const groups = (SUBJECTS[definition.on] ?? []).map((group) => group.filter((c) => sizeOf(c) <= largest));
+    for (const contents of selectSubjects(groups, cap)) {
       const interpreted = interpretDefinition(ce, definition, ce.box(contents as never)).json;
       const answer = run!(contents);
       // Compiled code may decline only an infinite answer, which MathJSON can't carry as a number.
