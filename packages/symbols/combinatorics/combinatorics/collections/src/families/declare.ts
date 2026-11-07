@@ -79,11 +79,13 @@ function handlersOf(
   // is just the element's own shape (`Permutation([2, 1])`).
   const carrierParams = family.carrierParams ?? 0;
   const carrierElements = family.carrierElements;
+  const carrierCodec = family.carrierCodec;
   // A nested sub-element's own carrier holds it the same way the element's own kind already
   // encodes it (bareEncode/bareDecode) -- e.g. `StandardTableauPair`'s two slots are each a
   // `StandardTableau`, holding its rows, not a flattened word (a word alone doesn't determine
   // a shape: two different tableaux can share one).
   const encode = (p: number[], value: unknown): unknown => {
+    if (carrier !== undefined && carrierCodec !== undefined) return [carrier, carrierCodec.encode(value, p)];
     if (carrier !== undefined && carrierElements !== undefined) {
       const parts = (value as readonly unknown[]).map((v, i) => [
         carrierElements[i],
@@ -96,9 +98,10 @@ function handlersOf(
     if (carrierParams === 0) return [carrier, encoded];
     return [carrier, ["Tuple", ...p.slice(0, carrierParams), encoded]];
   };
-  const decode = (b: Boxed): unknown => {
+  const decode = (b: Boxed, p: number[]): unknown => {
     if (carrier === undefined || (b as unknown as Expr).operator !== carrier) return bareDecode(b as never);
     const inner = b.ops?.[0];
+    if (carrierCodec !== undefined) return carrierCodec.decode(inner as Boxed, p);
     if (carrierElements !== undefined) {
       const tupleOps = inner?.ops ?? [];
       return tupleOps.map((sub) => bareDecode((sub.ops?.[0] ?? sub) as never));
@@ -162,7 +165,7 @@ function handlersOf(
       if (total === undefined) return undefined;
       let decoded: unknown;
       try {
-        decoded = decode(asBoxed(target));
+        decoded = decode(asBoxed(target), p);
         // Only a rejection here reads as "not an element".
         if (!family.valid(decoded, p)) return null;
       } catch {
@@ -247,7 +250,7 @@ function handlersOf(
       const p = params(c);
       if (p === undefined) return undefined;
       try {
-        return family.valid(decode(asBoxed(target)), p);
+        return family.valid(decode(asBoxed(target), p), p);
       } catch (error) {
         if (needsBigint(error)) return undefined;
         throw error;

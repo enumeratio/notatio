@@ -522,6 +522,17 @@
     "derived": true,
     "statistics": 171
   },
+  "FiniteCartanTypes": {
+    "expr": "FiniteCartanTypes(4)",
+    "columns": [
+      "AdjointRepresentationDimension",
+      "AlmostPositiveRootCount",
+      "AtomicLengthOfLongestElement",
+      "CartanMatrixDeterminant"
+    ],
+    "derived": false,
+    "statistics": 35
+  },
   "FiniteSetElements": null,
   "Finsets": null,
   "FractionalNumbers": null,

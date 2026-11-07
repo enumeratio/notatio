@@ -24,6 +24,11 @@
       "maxSize": 6
     },
     "Cardinal": null,
+    "CartanType": {
+      "collection": "FiniteCartanTypes",
+      "template": "FiniteCartanTypes({size})",
+      "maxSize": 6
+    },
     "CollatzTrajectory": null,
     "ColoredMotzkinPath": null,
     "ColoredPermutation": null,

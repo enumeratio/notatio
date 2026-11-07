@@ -2,6 +2,7 @@
 // the area files and the leftover data — both hand-maintained — agree with `CARRIERS`, the
 // record every host declares from.
 import { expect, test } from "vite-plus/test";
+import { CARTAN_CARRIERS } from "../cartan/src/carrier-data.ts";
 import { COMPOSITIONS_CARRIERS } from "../compositions/src/carrier-data.ts";
 import { FINDSTAT_CARRIERS } from "../findstat/src/carrier-data.ts";
 import { GRAPHS_CARRIERS } from "../graphs/src/carrier-data.ts";
@@ -24,6 +25,7 @@ const AREAS = {
   "set-partitions": SET_PARTITIONS_CARRIERS,
   tableaux: TABLEAUX_CARRIERS,
   graphs: GRAPHS_CARRIERS,
+  cartan: CARTAN_CARRIERS,
   findstat: FINDSTAT_CARRIERS,
 } as const;
 

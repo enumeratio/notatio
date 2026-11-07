@@ -18,8 +18,8 @@ const engine = () => {
 test("the catalog is the measured shape, folded to names", () => {
   // Stats and maps are folded from (collection, stat) rows to NAMES with overload sets.
   // If these move, https://github.com/enumeratio/notatio/wiki/Namespaces §1 is stale — that is the point of pinning them.
-  expect(COLLECTIONS.length).toBe(288);
-  expect(CARRIERS.length).toBe(93);
+  expect(COLLECTIONS.length).toBe(289);
+  expect(CARRIERS.length).toBe(94);
   // Folded to names: one row per stat name, however many carriers it is on.
   expect(new Set(STATS.map((s) => s.name)).size).toBe(STATS.length);
   expect(new Set(MAPS.map((m) => m.name)).size).toBe(MAPS.length);

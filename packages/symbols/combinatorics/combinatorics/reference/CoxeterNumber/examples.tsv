@@ -1,0 +1,13 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[CoxeterNumber, [CartanType, [Tuple, "'D'", 5]]]	8			the type $D_5$
+the-type-e-6			[CoxeterNumber, [CartanType, [Tuple, "'E'", 6]]]	12			the type $E_6$
+findstat-st000139-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'CoxeterNumber'"]	2	2	FindStat St000139	FindStat's value for ['A',1]
+findstat-st000139-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'CoxeterNumber'"]	3	3	FindStat St000139	FindStat's value for ['A',2]
+findstat-st000139-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'CoxeterNumber'"]	4	4	FindStat St000139	FindStat's value for ['A',3]
+bourbaki-a-3	Properties		[CoxeterNumber, [CartanType, [Tuple, "'A'", 3]]]	4	4	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $A_3$
+bourbaki-d-4	Properties		[CoxeterNumber, [CartanType, [Tuple, "'D'", 4]]]	6	6	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $D_4$
+bourbaki-e-6	Properties		[CoxeterNumber, [CartanType, [Tuple, "'E'", 6]]]	12	12	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $E_6$
+bourbaki-e-7	Properties		[CoxeterNumber, [CartanType, [Tuple, "'E'", 7]]]	18	18	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $E_7$
+bourbaki-e-8	Properties		[CoxeterNumber, [CartanType, [Tuple, "'E'", 8]]]	30	30	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $E_8$
+bourbaki-f-4	Properties		[CoxeterNumber, [CartanType, [Tuple, "'F'", 4]]]	12	12	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $F_4$
+bourbaki-g-2	Properties		[CoxeterNumber, [CartanType, [Tuple, "'G'", 2]]]	6	6	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the Coxeter number of $G_2$

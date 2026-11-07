@@ -45,6 +45,7 @@ import {
   pruferSequencesEntries as treesPruferSequencesEntries,
 } from "../../../trees/src/families/index.ts";
 import { coreEntries as graphsCoreEntries } from "../../../graphs/src/families/index.ts";
+import { finiteCartanTypes } from "../../../cartan/src/families/index.ts";
 import {
   coreSurjectionsEntries as setPartitionsSurjectionsEntries,
   coreEntries as setPartitionsCoreEntries,
@@ -98,6 +99,7 @@ const numberEntries = [
   ...treesPruferSequencesEntries,
   ...wordsTableauxTreesEntries,
   ...graphsCoreEntries,
+  finiteCartanTypes,
   ...tableauxTreesBeforeStandardTableaux,
   ...standardTableauxEntries,
   ...tableauxTreesAfterStandardTableaux,

@@ -74,6 +74,8 @@ export interface Sample {
   readonly list: Nested;
   /** The carrier's contents when they are not `list` read as nested lists: a tuple, say. */
   readonly contents?: MathJSONIn;
+  /** The subject's contents as MathJSON, where nested lists of integers can't write them (a Cartan type's letter). */
+  readonly subject?: unknown;
   readonly caption: string;
 }
 
@@ -223,7 +225,7 @@ export function areaStatisticsEntries(options: AreaEntriesOptions): {
   /** Every subject a head accepts for one sample: the carrier, and — for a definition also
    *  meaningful on a bare list (`alsoOnList`) — the bare list too. */
   function subjectsFor(definition: Definition, sample: Sample): unknown[] {
-    const value = sample.contents ?? listOf(sample.list);
+    const value = sample.contents ?? sample.subject ?? listOf(sample.list);
     const carrierValue = [definition.on, value];
     return definition.alsoOnList === true ? [carrierValue, value] : [carrierValue];
   }

@@ -30,6 +30,7 @@
 import type { Engine } from "@enumeratio/engine";
 import { declareCarrierElement, declareCarrierPlurals } from "@enumeratio/structures";
 import { declareCollections } from "../collections/src/index.ts";
+import { declareCartan } from "../cartan/src/declare.ts";
 import { declareCompositions } from "../compositions/src/declare.ts";
 import { declareFindStat } from "../findstat/src/declare.ts";
 import { declareGraphsArea } from "../graphs/src/declare.ts";
@@ -83,6 +84,7 @@ export { DYCK_STATISTICS } from "../lattice-paths/src/statistics.ts";
 export { SET_PARTITION_STATISTICS } from "../set-partitions/src/statistics.ts";
 export { TREE_STATISTICS } from "../trees/src/statistics.ts";
 export { COMPOSITION_STATISTICS } from "../compositions/src/statistics.ts";
+export { CARTAN_STATISTICS } from "../cartan/src/statistics.ts";
 export { WORD_STATISTICS } from "../words/src/statistics.ts";
 export { GRAPH_STATISTICS } from "../graphs/src/statistics.ts";
 export { TABLEAU_STATISTICS } from "../tableaux/src/statistics.ts";
@@ -113,6 +115,7 @@ export function declareCombinatorics(ce: Engine): void {
   declareSetPartitions(ce);
   declareTableaux(ce);
   declareGraphsArea(ce);
+  declareCartan(ce);
   declareFindStat(ce);
   // The carrier-less families — permutations' own fast statistic kernels already ran inside
   // `declarePermutations`, above (step 6b).

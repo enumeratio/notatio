@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[HighestRootMaximalCoefficient, [CartanType, [Tuple, "'D'", 5]]]	2			the type $D_5$
+the-type-e-6			[HighestRootMaximalCoefficient, [CartanType, [Tuple, "'E'", 6]]]	3			the type $E_6$
+findstat-st001369-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'HighestRootMaximalCoefficient'"]	1	1	FindStat St001369	FindStat's value for ['A',1]
+findstat-st001369-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'HighestRootMaximalCoefficient'"]	1	1	FindStat St001369	FindStat's value for ['A',2]
+findstat-st001369-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'HighestRootMaximalCoefficient'"]	1	1	FindStat St001369	FindStat's value for ['A',3]

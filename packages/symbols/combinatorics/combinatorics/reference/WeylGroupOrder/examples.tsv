@@ -1,0 +1,14 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[WeylGroupOrder, [CartanType, [Tuple, "'D'", 5]]]	1920			the type $D_5$
+the-type-e-6			[WeylGroupOrder, [CartanType, [Tuple, "'E'", 6]]]	51840			the type $E_6$
+findstat-st000106-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'WeylGroupOrder'"]	2	2	FindStat St000106	FindStat's value for ['A',1]
+findstat-st000106-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'WeylGroupOrder'"]	6	6	FindStat St000106	FindStat's value for ['A',2]
+findstat-st000106-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'WeylGroupOrder'"]	24	24	FindStat St000106	FindStat's value for ['A',3]
+bourbaki-a-3	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'A'", 3]]]	24	24	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $A_3$
+bourbaki-b-3	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'B'", 3]]]	48	48	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $B_3$
+bourbaki-d-4	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'D'", 4]]]	192	192	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $D_4$
+bourbaki-e-6	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'E'", 6]]]	51840	51840	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $E_6$
+bourbaki-e-7	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'E'", 7]]]	2903040	2903040	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $E_7$
+bourbaki-e-8	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'E'", 8]]]	696729600	696729600	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $E_8$
+bourbaki-f-4	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'F'", 4]]]	1152	1152	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $F_4$
+bourbaki-g-2	Properties		[WeylGroupOrder, [CartanType, [Tuple, "'G'", 2]]]	12	12	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the order of the Weyl group of $G_2$

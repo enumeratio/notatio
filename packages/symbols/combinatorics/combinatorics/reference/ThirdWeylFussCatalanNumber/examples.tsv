@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[ThirdWeylFussCatalanNumber, [CartanType, [Tuple, "'D'", 5]]]	10556			the type $D_5$
+the-type-e-6			[ThirdWeylFussCatalanNumber, [CartanType, [Tuple, "'E'", 6]]]	119966			the type $E_6$
+findstat-st000851-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'ThirdWeylFussCatalanNumber'"]	4	4	FindStat St000851	FindStat's value for ['A',1]
+findstat-st000851-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'ThirdWeylFussCatalanNumber'"]	22	22	FindStat St000851	FindStat's value for ['A',2]
+findstat-st000851-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'ThirdWeylFussCatalanNumber'"]	140	140	FindStat St000851	FindStat's value for ['A',3]

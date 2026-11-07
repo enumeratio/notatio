@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[MinusculeWeightCount, [CartanType, [Tuple, "'D'", 5]]]	3			the type $D_5$
+the-type-e-6			[MinusculeWeightCount, [CartanType, [Tuple, "'E'", 6]]]	2			the type $E_6$
+findstat-st001147-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'MinusculeWeightCount'"]	1	1	FindStat St001147	FindStat's value for ['A',1]
+findstat-st001147-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'MinusculeWeightCount'"]	2	2	FindStat St001147	FindStat's value for ['A',2]
+findstat-st001147-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'MinusculeWeightCount'"]	3	3	FindStat St001147	FindStat's value for ['A',3]

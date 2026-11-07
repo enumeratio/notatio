@@ -2,6 +2,7 @@
 // entry (notation.ts) both read. Light: the areas' carrier data and a type.
 
 import type { Carrier } from "@enumeratio/structures";
+import { CARTAN_CARRIERS } from "../cartan/src/carrier-data.ts";
 import { COMPOSITIONS_CARRIERS } from "../compositions/src/carrier-data.ts";
 import { FINDSTAT_CARRIERS } from "../findstat/src/carrier-data.ts";
 import { GRAPHS_CARRIERS } from "../graphs/src/carrier-data.ts";
@@ -29,6 +30,7 @@ export const CARRIERS: readonly Carrier[] = [
   ...SET_PARTITIONS_CARRIERS,
   ...TABLEAUX_CARRIERS,
   ...GRAPHS_CARRIERS,
+  ...CARTAN_CARRIERS,
   ...FINDSTAT_CARRIERS,
   ...LEFTOVER_CARRIERS,
 ];

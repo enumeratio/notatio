@@ -6,9 +6,9 @@
 
 import type { Engine } from "@enumeratio/engine";
 import { bareEngine } from "@enumeratio/engine/testing";
-import { compileTyped, definitionHash, fromJs, toJs } from "@enumeratio/engine/compiled";
+import { compileTyped, definitionHash, fromJs } from "@enumeratio/engine/compiled";
 import { evaluateEpsil, evaluateEpsilRepeatedly, type FlatCodec } from "@enumeratio/structures";
-import { FLAT_BY_NAME } from "../flat.ts";
+import { FLAT_BY_NAME, subjectToJs } from "../flat.ts";
 import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 
 /** A memo of the slow, pure cross-check (the build's own: see scripts/verdicts.ts). */
@@ -85,7 +85,7 @@ function agrees(
   codec?: FlatCodec,
 ): boolean {
   for (const subject of subjects) {
-    const nested = toJs(subject);
+    const nested = subjectToJs(subject);
     const value = codec === undefined || nested === undefined ? nested : codec.encode(nested);
     if (value === undefined) continue;
     let answer;

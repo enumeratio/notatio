@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[CartanRank, [CartanType, [Tuple, "'D'", 5]]]	5			the type $D_5$
+the-type-e-6			[CartanRank, [CartanType, [Tuple, "'E'", 6]]]	6			the type $E_6$
+findstat-st000113-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'CartanRank'"]	1	1	FindStat St000113	FindStat's value for ['A',1]
+findstat-st000113-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'CartanRank'"]	2	2	FindStat St000113	FindStat's value for ['A',2]
+findstat-st000113-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'CartanRank'"]	3	3	FindStat St000113	FindStat's value for ['A',3]

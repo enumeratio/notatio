@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[ExponentSquareSum, [CartanType, [Tuple, "'D'", 5]]]	100			the type $D_5$
+the-type-e-6			[ExponentSquareSum, [CartanType, [Tuple, "'E'", 6]]]	276			the type $E_6$
+findstat-st001680-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'ExponentSquareSum'"]	1	1	FindStat St001680	FindStat's value for ['A',1]
+findstat-st001680-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'ExponentSquareSum'"]	5	5	FindStat St001680	FindStat's value for ['A',2]
+findstat-st001680-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'ExponentSquareSum'"]	14	14	FindStat St001680	FindStat's value for ['A',3]

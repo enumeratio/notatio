@@ -20,6 +20,8 @@ import { COMPILED as LATTICE_PATHS_COMPILED } from "../lattice-paths/src/statist
 import { COMPILED as SET_PARTITIONS_COMPILED } from "../set-partitions/src/statistics.compiled.generated.js";
 import { COMPILED as TABLEAUX_COMPILED } from "../tableaux/src/statistics.compiled.generated.js";
 import { COMPILED as TREES_COMPILED } from "../trees/src/statistics.compiled.generated.js";
+import { COMPILED as CARTAN_COMPILED } from "../cartan/src/statistics.compiled.generated.js";
+import { cartanTypesUpTo } from "../cartan/src/sample-types.ts";
 import { COMPILED as WORDS_COMPILED } from "../words/src/statistics.compiled.generated.js";
 import { COMPILED as GRAPHS_COMPILED } from "../graphs/src/statistics.compiled.generated.js";
 
@@ -38,6 +40,7 @@ const AREAS = [
   { name: "trees", compiled: TREES_COMPILED },
   { name: "words", compiled: WORDS_COMPILED },
   { name: "graphs", compiled: GRAPHS_COMPILED },
+  { name: "cartan", compiled: CARTAN_COMPILED },
 ] as const;
 
 for (const area of AREAS) {
@@ -58,6 +61,7 @@ const COMPILED_SIGNATURES = new Set(
     TREES_COMPILED,
     WORDS_COMPILED,
     GRAPHS_COMPILED,
+    CARTAN_COMPILED,
   ].flatMap((table) => Object.keys(table)),
 );
 
@@ -287,6 +291,8 @@ const SUBJECTS: Record<string, unknown[]> = {
     ...labeledGraphs(4).filter((_, i) => DEEP || i % 4 === 0),
     ...(DEEP ? labeledGraphs(5).filter((_, i) => i % 64 === 0) : []),
   ],
+  // Ranks to 6; deep, to 8 (the permanent's table doubles with each rank).
+  CartanType: cartanTypesUpTo(DEEP ? 8 : 6),
   SkewPartition: (DEEP ? [1, 2, 3, 4, 5] : [1, 2]).flatMap(skewPartitions).map((shape) => list(shape.map(list))),
 };
 

@@ -48,6 +48,7 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   // FindStat's plane partition size is its boxes, the sum of the entries, as ours.
   PlanePartition: ["PlanePartitions", (n) => n],
   SkewPartition: ["SkewPartitions", (n) => n],
+  CartanType: ["FiniteCartanTypes", (n) => n],
 };
 
 /**

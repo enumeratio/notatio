@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[FullyCommutativeElementCount, [CartanType, [Tuple, "'D'", 5]]]	167			the type $D_5$
+the-type-e-6			[FullyCommutativeElementCount, [CartanType, [Tuple, "'E'", 6]]]	662			the type $E_6$
+findstat-st001653-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'FullyCommutativeElementCount'"]	2	2	FindStat St001653	FindStat's value for ['A',1]
+findstat-st001653-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'FullyCommutativeElementCount'"]	5	5	FindStat St001653	FindStat's value for ['A',2]
+findstat-st001653-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'FullyCommutativeElementCount'"]	14	14	FindStat St001653	FindStat's value for ['A',3]

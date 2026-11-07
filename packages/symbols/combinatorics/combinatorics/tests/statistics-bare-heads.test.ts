@@ -22,6 +22,7 @@ const SAMPLE: Record<string, unknown> = {
   // The family yields bare [outer, inner].
   SkewPartition: ["SkewPartition", ["At", ["SkewPartitions", 4], 7]],
   LabeledGraph: ["At", ["LabeledGraphs", 4], 37],
+  CartanType: ["At", ["FiniteCartanTypes", 4], 5],
 };
 
 test("every statistic is callable by its bare head on each of its carriers", () => {

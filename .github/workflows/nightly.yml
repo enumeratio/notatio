@@ -81,6 +81,8 @@ jobs:
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/map-findstat.test.ts
       # Our statistic distributions against FindStat's, per size, for every adopted statistic the pairs cover.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/distribution-crosscheck.test.ts
+      # Cartan type statistics over the larger types and the group-generating readings.
+      - run: pnpm --filter @enumeratio/combinatorics exec vp test run cartan/tests/cartan-statistics
       # Tree statistics over the larger trees.
       - run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/tree-statistics
       # Composition statistics over the larger compositions.

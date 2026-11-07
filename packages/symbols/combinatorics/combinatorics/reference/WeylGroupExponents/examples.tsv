@@ -1,0 +1,8 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[WeylGroupExponents, [CartanType, [Tuple, "'D'", 5]]]	[List, 1, 3, 4, 5, 7]			the type $D_5$
+the-type-e-6			[WeylGroupExponents, [CartanType, [Tuple, "'E'", 6]]]	[List, 1, 4, 5, 7, 8, 11]			the type $E_6$
+bourbaki-b-3	Properties		[WeylGroupExponents, [CartanType, [Tuple, "'B'", 3]]]	[List, 1, 3, 5]	[List, 1, 3, 5]	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the exponents of $B_3$
+bourbaki-e-6	Properties		[WeylGroupExponents, [CartanType, [Tuple, "'E'", 6]]]	[List, 1, 4, 5, 7, 8, 11]	[List, 1, 4, 5, 7, 8, 11]	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the exponents of $E_6$
+bourbaki-e-8	Properties		[WeylGroupExponents, [CartanType, [Tuple, "'E'", 8]]]	[List, 1, 7, 11, 13, 17, 19, 23, 29]	[List, 1, 7, 11, 13, 17, 19, 23, 29]	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the exponents of $E_8$
+bourbaki-f-4	Properties		[WeylGroupExponents, [CartanType, [Tuple, "'F'", 4]]]	[List, 1, 5, 7, 11]	[List, 1, 5, 7, 11]	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the exponents of $F_4$
+bourbaki-g-2	Properties		[WeylGroupExponents, [CartanType, [Tuple, "'G'", 2]]]	[List, 1, 5]	[List, 1, 5]	Bourbaki, Groupes et algèbres de Lie, chapitre VI, planches I-IX	the exponents of $G_2$
