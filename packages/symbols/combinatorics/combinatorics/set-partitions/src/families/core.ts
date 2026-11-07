@@ -114,6 +114,7 @@ function setPartitions(
   last: (open: string) => MathJSON,
   fastCount: FastKernel["count"] | undefined,
   word = false,
+  bigSamples?: EpsilFamily["bigSamples"],
 ): EpsilFamily {
   const T = cell("_tables", add(cap, 1));
   // A label below `open` names an open block, T(rem, open) completions each; `open` itself
@@ -151,6 +152,7 @@ function setPartitions(
     kind: word ? "ints" : "blocks",
     params,
     ...(fastCount === undefined ? {} : { fastCount }),
+    ...(bigSamples === undefined ? {} : { bigSamples }),
     epsil: {
       count: T("_n", 0),
       tables: rgsTable(cap, last),
@@ -170,6 +172,9 @@ const setPartitionsFamily = setPartitions(
   "_n",
   () => 1,
   ([n]) => bellExact(n),
+  false,
+  // Bell(n) first passes 2^53 at n = 23.
+  [[23], [30]],
 );
 const kBlocks = setPartitions(
   "SetPartitionsIntoKBlocks",
@@ -177,9 +182,20 @@ const kBlocks = setPartitions(
   "_k",
   (open) => iff(equal(open, "_k"), 1, 0),
   ([n, k]) => stirlingSecondExact(n, k),
+  false,
+  // S(n, k) passes 2^53 at (30, 10).
+  [[30, 10]],
 );
 /** The words themselves: a set partition's RGS, Bell(n) of them, in the same lex order. */
-export const restrictedGrowthStrings = setPartitions("RestrictedGrowthStrings", ["_n"], "_n", () => 1, undefined, true);
+export const restrictedGrowthStrings = setPartitions(
+  "RestrictedGrowthStrings",
+  ["_n"],
+  "_n",
+  () => 1,
+  undefined,
+  true,
+  [[23], [30]],
+);
 
 // ─── Surjections(n, k): words over 1..k using every letter, in lex order ───
 // T(rem, missing), the ways to finish rem letters with `missing` letters still unused, is

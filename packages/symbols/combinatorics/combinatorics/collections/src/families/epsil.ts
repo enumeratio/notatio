@@ -79,6 +79,9 @@ export interface EpsilFamily extends FamilyShape {
    *  (a sequence) each is `[rank]`, of a term past it. For definitions that are pure integer arithmetic;
    *  one that mixes in a real (a Log bound) is left interpreted by the build's check. */
   readonly bigSamples?: readonly (readonly number[])[];
+  /** True where the fiber's BigInt table is too big to build: the BigInt path leaves it alone, and with
+   *  `declinePastDoubles` the fiber declines past 2^53. */
+  readonly bigLimit?: (p: readonly number[]) => boolean;
   /** Answers settled before any table is built, for calls that would otherwise build one only to
    *  decline or to say no. Each is a necessary condition, written in plain JS. */
   readonly early?: {
@@ -319,6 +322,7 @@ export function kernelOn(
     declinePastDoubles,
     settle,
     bigSamples,
+    bigLimit,
     early,
     fast: fastKernel,
     fastCount,
@@ -397,7 +401,7 @@ export function kernelOn(
    *  to the interpreter. */
   const attemptBig = (operation: Operation, p: number[], extra: Record<string, unknown>): unknown => {
     const code = bigCompiled(operation);
-    if (code === null || !wellParamed(p)) return undefined;
+    if (code === null || !wellParamed(p) || bigLimit?.(p) === true) return undefined;
     const table = reads(operation) ? bigTables(p) : undefined;
     if (reads(operation) && table === undefined) return undefined;
     try {

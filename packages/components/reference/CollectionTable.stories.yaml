@@ -64,6 +64,33 @@
   category: Beyond 2⁵³
   notes: Row 9,007,199,254,740,991 is the last a double can name. The rows on either side are addressed by bigint index, so scrolling or paging carries on past it, unranked by the family's own digit-taking `At`.
   expr: [CollectionTable, [Permutations, 25], [Tuple, ScrollPosition, "'9007199254740989'"], [Tuple, Readonly, True]]
+- id: integer-partitions-400-middle
+  caption: IntegerPartitions(400), in the middle of its fiber
+  category: Beyond 2⁵³
+  notes: 6,727,090,051,741,041,926 partitions, listed largest part first. The rows come from a table of partition counts built over exact integers, so a row far past 2⁵³ is the one the order puts there.
+  expr:
+    [
+      CollectionTable,
+      [IntegerPartitions, 400],
+      [Tuple, ScrollPosition, "'3363545025870520963'"],
+      [Tuple, Readonly, True],
+    ]
+- id: subsets-60-middle
+  caption: Subsets(60), in the middle of its fiber
+  category: Beyond 2⁵³
+  notes: 2⁶⁰ subsets, by size and then in lexicographic order.
+  expr: [CollectionTable, [Subsets, 60], [Tuple, ScrollPosition, "'576460752303423488'"], [Tuple, Readonly, True]]
+- id: set-partitions-30-middle
+  caption: SetPartitions(30), in the middle of its fiber
+  category: Beyond 2⁵³
+  notes: The 846,749,014,511,809,332,450,147 set partitions of 30 elements, in restricted-growth order.
+  expr:
+    [
+      CollectionTable,
+      [SetPartitions, 30],
+      [Tuple, ScrollPosition, "'423374507255904666225073'"],
+      [Tuple, Readonly, True],
+    ]
 - id: non-negative-integers-endless
   caption: NonNegativeIntegers, scrolling without end
   category: Beyond 2⁵³

@@ -16,11 +16,28 @@ import { fibonacciWordsExact } from "./exact-recurrences.ts";
 import type { NumberKernel } from "./types.ts";
 
 // Closed-form families, defined in Epsil (./closed-forms.ts).
-const subsetsFamily = subsets({ head: "Subsets", params: ["_n"], carrier: "Finset", carrierParams: 1 });
+// 2^n first passes 2^53 at n = 54.
+const subsetsFamily = subsets({
+  head: "Subsets",
+  params: ["_n"],
+  carrier: "Finset",
+  carrierParams: 1,
+  bigSamples: [[54], [60]],
+});
 // Not carrier-typed here: out of scope for A-116 (only Subsets/KSubsets/Multisets asked for), though
 // its elements are the same Finset shape as Subsets'.
 const grayCodeSubsetsFamily = grayCodeSubsets({ head: "GrayCodeSubsets", params: ["_n"] });
-const kSubsetsFamily = kSubsets({ head: "KSubsets", params: ["_n", "_k"], carrier: "Finset", carrierParams: 1 });
+// C(n, k) passes 2^53 at (60, 25).
+const kSubsetsFamily = kSubsets({
+  head: "KSubsets",
+  params: ["_n", "_k"],
+  carrier: "Finset",
+  carrierParams: 1,
+  bigSamples: [
+    [60, 25],
+    [60, 30],
+  ],
+});
 const multisetsFamily = multisets({
   head: "Multisets",
   params: ["_n", "_k"],

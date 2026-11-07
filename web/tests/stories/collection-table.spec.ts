@@ -146,6 +146,39 @@ test.describe("CollectionTable past 2^53", () => {
     await expect(table.locator(".tvb-status")).toHaveText(/^rows near 1\.55 × 10²⁵, 12 shown, of/);
   });
 
+  for (const [id, label] of [
+    ["integer-partitions-400-middle", "IntegerPartitions(400)"],
+    ["subsets-60-middle", "Subsets(60)"],
+    ["set-partitions-30-middle", "SetPartitions(30)"],
+  ] as const) {
+    test(`${label}: rows past 2^53 are drawn and the table does not stop paging`, async ({ page }) => {
+      const table = await openStory(page, id);
+      const rows = table.locator(".tvb-row[data-index]:not([aria-busy])");
+      expect(await rows.count()).toBeGreaterThan(3);
+      const labels = await table.locator(".tvb-row[data-index] .tvb-idx").allInnerTexts();
+      expect(new Set(labels).size).toBe(labels.length);
+      const cells = await rows.locator(".tvb-cell:not(.tvb-idx)").allInnerTexts();
+      expect(cells.every((text) => text.trim() !== "")).toBe(true);
+      await expect(table.locator(".tvb-note")).not.toContainText("paging stops");
+      await expect(table.locator(".tvb-error")).toHaveCount(0);
+    });
+  }
+
+  test("the table footer wraps at 390 px, none of its text clipped", async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    const table = await openStory(page, "symmetric-group-25-last-row");
+    const clipped = await table.evaluate((el) => {
+      const foot = el.querySelector<HTMLElement>(".tvb-foot")!.getBoundingClientRect();
+      const host = el.getBoundingClientRect();
+      const parts = [...el.querySelectorAll<HTMLElement>(".tvb-status, .tvb-note")];
+      return {
+        text: parts.some((p) => p.scrollWidth > p.clientWidth + 1 || p.scrollHeight > p.clientHeight + 1),
+        insideHost: foot.bottom <= host.bottom + 1 && foot.left >= host.left - 1 && foot.right <= host.right + 1,
+      };
+    });
+    expect(clipped).toEqual({ text: false, insideHost: true });
+  });
+
   test("the component page does not scroll sideways at 390 px", async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await openStory(page, "symmetric-group-25-last-row");
