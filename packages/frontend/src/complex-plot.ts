@@ -104,7 +104,7 @@ fn gradient(t0: f32) -> vec3f {
 `;
 
 /** The complete domain-coloring shader for a complex-valued WGSL expression `code`. */
-export const portraitShader = (code: string, df64: Df64Mode = "split"): string =>
+export const portraitShader = (code: string, df64: Df64Mode = "plain"): string =>
   withDf64(withWGSL(HOST.replace("VALUE", `clogPolar(${code})`)), df64);
 
 /** Bytes before the literal slots: center, res, extent, mask, pad. */

@@ -278,10 +278,15 @@ const DF64: bool = true;
 const DF_FMA: bool = false;
 // 1.0 that a compiler cannot see. A host sets it from a runtime value (the portrait's uniform).
 var<private> dfOne: f32 = 1.0;
-// x, passed through an integer xor with a 0 the compiler cannot see. Fast-math reassociates float
-// arithmetic, so a two-sum's (a + b) - a folds to b, even through a multiply by dfOne (Metal, measured);
-// it does not look through integer bits.
-fn dfOpq(x: f32) -> f32 { return bitcast<f32>(bitcast<u32>(x) ^ (bitcast<u32>(dfOne) ^ 0x3f800000u)); }
+// A host whose device folds the two-sums sets this true. Fast-math reassociates float arithmetic, so
+// (a + b) - a folds to b, even through a multiply by dfOne (Metal, measured); dfOpq then passes x through
+// an integer xor with a 0 the compiler cannot see, which it does not look through. Off where the device
+// keeps the sums exact without it: the xor slows SwiftShader's portrait by half (measured).
+const DF_OPAQUE: bool = false;
+fn dfOpq(x: f32) -> f32 {
+  if (DF_OPAQUE) { return bitcast<f32>(bitcast<u32>(x) ^ (bitcast<u32>(dfOne) ^ 0x3f800000u)); }
+  return x;
+}
 
 // ---- df64: a double-float is an f32 pair (hi, lo), hi + lo to 48 bits. A complex df is a vec4f of
 // (re.hi, re.lo, im.hi, im.lo). The error of a sum is Knuth's two-sum; of a product, Dekker's split,

@@ -4,10 +4,10 @@ import { withWGSL } from "@enumeratio/analytic/shader";
 // df64 (the Hurwitz kernel's double-float sums) rests on error-free transforms a GPU compiler may
 // simplify away (Metal's fast-math folds (a + b) - a to b) or a device may leave inexact (an unfused
 // fma). A device that does so sums in f32 and still passes the kernel's own cancellation check, so each
-// device is tested once, on inputs it cannot fold because they arrive through a buffer: first with Dekker's
-// split, then with fma two-products; a device that fails both draws the f32 kernel, which hatches. The split
-// goes first: SwiftShader passes both, and its fma path drew a 12i portrait pixel whose sum it could not
-// vouch for (ratio 6e10, measured).
+// device is tested once, on inputs it cannot fold because they arrive through a buffer, cheapest first:
+// plain arithmetic, then two-sums kept opaque, then those with fma two-products; a device that fails all
+// three draws the f32 kernel, which hatches. fma goes last: SwiftShader passes with it too, and its fma path
+// drew a 12i portrait pixel whose sum it could not vouch for (ratio 6e10, measured).
 
 const HOST = /* wgsl */ `
 @group(0) @binding(0) var<storage, read> inp : array<f32, 8>;
@@ -44,16 +44,19 @@ const EXPECTED = [
 /** Whether `out` (the shader's eight floats) is what exact error-free transforms give. */
 export const df64Exact = (out: ArrayLike<number>): boolean => EXPECTED.every((x, i) => out[i] === x);
 
-/** How a device draws df64: two-products by Dekker's split or by fma, or not at all (f32, hatched). */
-export type Df64Mode = "fma" | "split" | "off";
+/**
+ * How a device draws df64: plain arithmetic, two-sums kept opaque to the compiler, those with fma
+ * two-products, or not at all (f32, hatched).
+ */
+export type Df64Mode = "plain" | "opaque" | "fma" | "off";
 
-/** `shader` (written for "split") set up for `mode`. */
-export const withDf64 = (shader: string, mode: Df64Mode): string =>
-  mode === "split"
-    ? shader
-    : mode === "fma"
-      ? shader.replace("const DF_FMA: bool = false;", "const DF_FMA: bool = true;")
-      : shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
+/** `shader` (written for "plain") set up for `mode`. */
+export const withDf64 = (shader: string, mode: Df64Mode): string => {
+  if (mode === "off") return shader.replace("const DF64: bool = true;", "const DF64: bool = false;");
+  const opaque =
+    mode === "plain" ? shader : shader.replace("const DF_OPAQUE: bool = false;", "const DF_OPAQUE: bool = true;");
+  return mode === "fma" ? opaque.replace("const DF_FMA: bool = false;", "const DF_FMA: bool = true;") : opaque;
+};
 
 const verdicts = new WeakMap<GPUDevice, Df64Mode>();
 
@@ -68,7 +71,7 @@ export async function testDf64(device: GPUDevice): Promise<Df64Mode> {
   let mode: Df64Mode = "off";
   try {
     if ((globalThis as { __notatioDf64SelfTest?: string }).__notatioDf64SelfTest === "fail") throw new Error("forced");
-    for (const m of ["split", "fma"] as const) {
+    for (const m of ["plain", "opaque", "fma"] as const) {
       if (await exactOn(device, m)) {
         mode = m;
         break;
