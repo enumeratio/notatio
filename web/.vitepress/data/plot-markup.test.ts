@@ -1,5 +1,9 @@
 // The Plot section draws pictures, not readouts: each panel's value lowers to its head's element.
 
+// Loaded here, not on plotMarkup's first call: the front end and the engine behind it take seconds to
+// load on a busy machine, and that load is not what the cases below measure.
+import "@enumeratio/formats/expression";
+import "@enumeratio/frontend";
 import { plotSectionOf } from "@enumeratio/frontend/function-view";
 import { expect, test } from "vite-plus/test";
 import { functionViewFor } from "./function-view.ts";
