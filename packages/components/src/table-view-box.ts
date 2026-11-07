@@ -165,6 +165,8 @@ export class TableViewBox extends HTMLElement {
     if (typeof ResizeObserver !== "undefined") {
       this.#resizeObserver = new ResizeObserver(() => this.#schedule());
       this.#resizeObserver.observe(this);
+      // The footer wraps, so the viewport's height changes with its text while the table's does not.
+      this.#resizeObserver.observe(this.#viewport);
     }
     this.#reset();
   }
@@ -908,7 +910,8 @@ function ensureTableViewStyles(): void {
 
 const CSS = `
 table-view-box {
-  display: block;
+  display: flex;
+  flex-direction: column;
   position: relative;
   contain: strict;
   height: 22rem;
@@ -919,7 +922,7 @@ table-view-box {
   font-size: 0.85rem;
   overflow: hidden;
 }
-.tvb-viewport { position: absolute; inset: 0 0 2.2rem 0; overflow: auto; overscroll-behavior: contain; }
+.tvb-viewport { position: relative; flex: 1 1 auto; min-height: 0; overflow: auto; overscroll-behavior: contain; }
 .tvb-space { position: relative; width: max(100%, var(--tvb-width, 100%)); }
 .tvb-layer { position: sticky; top: 0; left: 0; overflow: clip; width: max(100%, var(--tvb-width, 100%)); }
 .tvb-rows { will-change: transform; }
@@ -972,21 +975,21 @@ table-view-box {
 .tvb-sortable { cursor: pointer; text-decoration: underline dotted var(--vp-c-divider, #bbb); text-underline-offset: 3px; }
 .tvb-sortable:hover, .tvb-sortable[aria-sort="ascending"], .tvb-sortable[aria-sort="descending"] { color: var(--vp-c-brand-1, #3451b2); }
 .tvb-foot {
-  position: absolute;
-  inset: auto 0 0 0;
-  height: 2.2rem;
+  flex: none;
+  min-height: 2.2rem;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0 0.7rem;
+  gap: 0.15rem 0.75rem;
+  padding: 0.2rem 0.7rem;
   border-top: 1px solid var(--vp-c-divider, #e5e5e5);
   background: var(--vp-c-bg-soft, #f6f6f7);
   color: var(--vp-c-text-2, #555);
   font-size: 0.78rem;
-  white-space: nowrap;
 }
-.tvb-status { font-variant-numeric: tabular-nums; flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-.tvb-note { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; color: var(--vp-c-text-3, #888); font-style: italic; }
+.tvb-status { font-variant-numeric: tabular-nums; flex: 0 1 auto; min-width: 0; overflow-wrap: anywhere; }
+.tvb-note { flex: 1 1 8rem; min-width: 0; overflow-wrap: anywhere; color: var(--vp-c-text-3, #888); font-style: italic; }
+.tvb-note:empty { display: none; }
 .tvb-error { color: var(--vp-c-danger-1, #c0392b); font-style: normal; }
 .tvb-jump { display: inline-flex; align-items: center; gap: 0.35rem; margin-left: auto; }
 .tvb-input {
