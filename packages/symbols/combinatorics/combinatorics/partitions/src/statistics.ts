@@ -626,195 +626,192 @@ const oddStepHeaps: MathJSON = forEach(positions, [
   0,
 ]);
 
-/** Base for coding a partition of this size by its multiplicities: place j holds how many parts equal j. */
-const codeBase: MathJSON = add(total, 1);
-const placeValue = (j: MathJSON): MathJSON => ["Power", codeBase, j];
-/** How many parts equal j, read from the code. */
-const multiplicityIn = (code: MathJSON, j: MathJSON): MathJSON => [
-  "Mod",
-  ["Divide", subtract(code, ["Mod", code, placeValue(j)]), placeValue(j)],
-  codeBase,
-];
-/** The power of the base at exponent j, read from the bound list `pw` of powers 0 .. size. */
-const powerAt = (j: MathJSON): MathJSON => at(add(j, 1), "pw");
-/** How many parts equal j, read from the code, with the powers taken from `pw`. */
-const multiplicityBy = (code: MathJSON, j: MathJSON): MathJSON => [
-  "Mod",
-  ["Divide", subtract(code, ["Mod", code, powerAt(j)]), powerAt(j)],
-  codeBase,
-];
-const startCode: MathJSON = sumOver(positions, placeValue(here));
+/**
+ * The refinement, coarsening and chain counts walk the partitions reached from this one by single moves (a split of a
+ * part in two, or a merge of two parts), a level at a time: a move changes the number of parts by one, so a level holds
+ * the partitions with that many parts and none is in two levels. A partition is its multiplicities, place j holding
+ * how many parts equal j (1 .. size); a level is its partitions' multiplicities end to end, size places each.
+ */
+const multiplicities: MathJSON = forEach(upTo(total), count(positions, equals(here, "k")), "k");
 /** Whole division of the nonnegative integer m by d. */
 const quotientOf = (m: MathJSON, d: MathJSON): MathJSON => ["Divide", subtract(m, ["Mod", m, d]), d];
-/** The splits and merges of a code are indexed by a pair (j, k) of numbers 1 .. size - 1, so size - 1 squared in all. */
-const movePairs: MathJSON = ["Power", subtract(total, 1), 2];
-/** The code after move `q` (from 0) applied to `code`, or `otherwise` when the move does not apply. Split: a part j >= 2 becomes a and j - a with a <= j - a. */
-const splitCode = (code: MathJSON, q: MathJSON, otherwise: MathJSON): MathJSON =>
+const isPlace = (k: MathJSON, j: MathJSON): MathJSON => ["If", equals(k, j), 1, 0];
+/** The splits of a part j >= 2 into a and j - a with a <= j - a: the parts j, then the parts a, in step. */
+const splitBigs: MathJSON = [
+  "Flatten",
+  forEach(["Range", 2, total], forEach(["Range", 1, quotientOf("pj", 2)], "pj", "pa"), "pj"),
+  1,
+];
+const splitSmalls: MathJSON = [
+  "Flatten",
+  forEach(["Range", 2, total], forEach(["Range", 1, quotientOf("pj", 2)], "pa", "pa"), "pj"),
+  1,
+];
+/** The merges of two parts a <= b into a + b with a + b <= size: the parts a, then the parts b, in step. */
+const mergeFirsts: MathJSON = [
+  "Flatten",
+  forEach(["Range", 1, quotientOf(total, 2)], forEach(["Range", "pa", subtract(total, "pa")], "pa", "pb"), "pa"),
+  1,
+];
+const mergeSeconds: MathJSON = [
+  "Flatten",
+  forEach(["Range", 1, quotientOf(total, 2)], forEach(["Range", "pa", subtract(total, "pa")], "pb", "pb"), "pa"),
+  1,
+];
+/** The bound level `fl`'s place `k` of partition `e`. */
+const placeOf = (e: MathJSON, k: MathJSON): MathJSON => at(add(["Multiply", subtract(e, 1), total], k), "fl");
+/** `body` with `e` the partition of the level and `q` the move that candidate `t` (from 1) stands for. */
+const candidate = (t: MathJSON, body: MathJSON): MathJSON =>
   bind(
-    "sj",
-    add(2, quotientOf(q, subtract(total, 1))),
-    bind(
-      "sa",
-      add(1, ["Mod", q, subtract(total, 1)]),
-      [
-        "If",
-        and(atMostValue(["Multiply", 2, "sa"], "sj"), atLeastValue(multiplicityIn(code, "sj"), 1)),
-        subtract(code, subtract(placeValue("sj"), add(placeValue("sa"), placeValue(subtract("sj", "sa"))))),
-        otherwise,
-      ],
-      "integer",
-    ),
+    "e",
+    add(1, quotientOf(subtract(t, 1), length("mj"))),
+    bind("q", add(1, ["Mod", subtract(t, 1), length("mj")]), body, "integer"),
     "integer",
   );
-/** The codes reached from a list of codes by one more move, itself kept, without repeats. */
-const reachedByMoves = (move: (code: MathJSON, q: MathJSON) => MathJSON): MathJSON => [
-  "Unique",
-  [
-    "Join",
-    "a",
-    forEach(
-      ["Range", 1, ["Multiply", length("a"), movePairs]],
-      bind(
-        "mc",
-        at(add(1, quotientOf(subtract("e", 1), movePairs)), "a"),
-        move("mc", ["Mod", subtract("e", 1), movePairs]),
-        "integer",
-      ),
-      "e",
-    ),
-  ],
-];
-/** The partitions that refine this one (itself included): every code reachable by splitting parts, one split fewer than the size at most. */
-const refinementCodes: MathJSON = fold(
-  ["Range", 1, subtract(total, 1), 1],
-  ["List", startCode],
-  reachedByMoves((code, q) => splitCode(code, q, code)),
+const firstPart: MathJSON = at("q", "mj");
+const secondPart: MathJSON = at("q", "ma");
+const splitApplies: MathJSON = atLeastValue(placeOf("e", firstPart), 1);
+/** Place k after splitting firstPart into secondPart and the rest. */
+const splitCell = (k: MathJSON): MathJSON =>
+  add(
+    add(subtract(placeOf("e", k), isPlace(k, firstPart)), isPlace(k, secondPart)),
+    isPlace(k, subtract(firstPart, secondPart)),
+  );
+/** A merge needs two parts, or two of one size when they are equal. */
+const mergeNeeds: MathJSON = add(1, isPlace(firstPart, secondPart));
+const mergeApplies: MathJSON = and(
+  atLeastValue(placeOf("e", firstPart), mergeNeeds),
+  atLeastValue(placeOf("e", secondPart), mergeNeeds),
 );
+/** Place k after merging firstPart and secondPart. */
+const mergeCell = (k: MathJSON): MathJSON =>
+  add(
+    subtract(subtract(placeOf("e", k), isPlace(k, firstPart)), isPlace(k, secondPart)),
+    isPlace(k, add(firstPart, secondPart)),
+  );
 /**
- * The partitions this one refines (itself included): the parts are placed one at a time, each either as a block of its
- * own or into a block already there (a block of size s becomes s + part), so the codes after the last part are the block
- * sums of every set partition of the parts. A part with no block of size s to join (or s = 0, a block of its own) takes
- * the block of its own, a code already in the list.
+ * One level on from the bound level `fl` (end to end), whose partitions have `ways` chains each (when `weighted`).
+ * The candidates `ap` are the moves that apply, `cm` their partitions end to end; `sg` is a quick key that tells most
+ * unequal candidates apart, and equal candidates are then confirmed place by place. `kp` keeps the first of each.
  */
-const coarseningCodes: MathJSON = bind(
-  "pw",
-  fold(["Range", 1, total, 1], ["List", 1], ["Join", "a", ["List", ["Multiply", at(length("a"), "a"), codeBase]]]),
-  fold(
-    x,
-    ["List", 0],
-    [
-      "Unique",
+const levelStep = (applies: MathJSON, cell: (k: MathJSON) => MathJSON, weighted: boolean): MathJSON => {
+  const candidates = length("ap");
+  const cellOf = (s: MathJSON, k: MathJSON): MathJSON => at(add(["Multiply", subtract(s, 1), total], k), "cm");
+  const same = (s: MathJSON, u: MathJSON): MathJSON => [
+    "If",
+    equals(at(s, "sg"), at(u, "sg")),
+    equals(sumOver(upTo(total), ["Abs", subtract(cellOf(s, "k"), cellOf(u, "k"))], "k"), 0),
+    ["Equal", 1, 0],
+  ];
+  const kept = length("kp");
+  return bind(
+    "ap",
+    where(["Range", 1, ["Multiply", quotientOf(length("fl"), total), length("mj")]], candidate("t", applies), "t"),
+    bind(
+      "cm",
       forEach(
-        ["Range", 1, ["Multiply", length("a"), codeBase]],
+        ["Range", 1, ["Multiply", candidates, total]],
         bind(
-          "cc",
-          at(add(1, quotientOf(subtract("e", 1), codeBase)), "a"),
-          bind(
-            "cs",
-            ["Mod", subtract("e", 1), codeBase],
-            bind(
-              "cp",
-              "b",
-              [
-                "If",
-                and(less(0, "cs"), atLeastValue(multiplicityBy("cc", "cs"), 1)),
-                add(subtract("cc", powerAt("cs")), powerAt(add("cs", "cp"))),
-                add("cc", powerAt("cp")),
-              ],
-              "integer",
-            ),
-            "integer",
-          ),
+          "s",
+          add(1, quotientOf(subtract("g", 1), total)),
+          bind("c", add(1, ["Mod", subtract("g", 1), total]), candidate(at("s", "ap"), cell("c")), "integer"),
           "integer",
         ),
-        "e",
+        "g",
       ),
-    ],
-  ),
-  "list<integer>",
-);
-/** The move indexes (as in `splitCode`) of the splits that can apply to some partition of this size: a part j >= 2 into a and j - a with a <= j - a. */
-const splitPairs: MathJSON = [
-  "Flatten",
-  forEach(
-    ["Range", 2, total],
-    forEach(
-      ["Range", 1, quotientOf("pj", 2)],
-      add(["Multiply", subtract("pj", 2), subtract(total, 1)], subtract("pa", 1)),
-      "pa",
-    ),
-    "pj",
-  ),
-];
-/**
- * Chains of single splits from this partition to all ones, by levels: the accumulator holds the codes reached, then the
- * number of chains to each, in one list (code 0, never a partition, takes the moves that do not apply). Each level has
- * exactly one more part, so every chain takes size - length splits.
- */
-const refinementChains: MathJSON = bind(
-  "sp",
-  splitPairs,
-  bind(
-    "levels",
-    fold(
-      ["Range", 1, subtract(total, length()), 1],
-      ["List", startCode, 1],
       bind(
-        "half",
-        ["Divide", length("a"), 2],
-        bind(
-          "to",
-          forEach(
-            ["Range", 1, ["Multiply", "half", length("sp")]],
-            splitCode(
-              at(add(1, quotientOf(subtract("e", 1), length("sp"))), "a"),
-              at(add(1, ["Mod", subtract("e", 1), length("sp")]), "sp"),
-              0,
-            ),
-            "e",
-          ),
-          bind(
-            "wt",
-            forEach(
-              ["Range", 1, ["Multiply", "half", length("sp")]],
-              at(add("half", add(1, quotientOf(subtract("e", 1), length("sp")))), "a"),
-              "e",
-            ),
-            bind(
-              "next",
-              ["Unique", "to"],
-              [
-                "Join",
-                "next",
-                forEach(
-                  "next",
-                  [
-                    "If",
-                    equals("u", 0),
-                    0,
-                    sumOver(
-                      ["Range", 1, ["Multiply", "half", length("sp")]],
-                      ["If", equals(at("e", "to"), "u"), at("e", "wt"), 0],
-                      "e",
-                    ),
-                  ],
-                  "u",
-                ),
-              ],
-              "list<integer>",
-            ),
-            "list<integer>",
-          ),
-          "list<integer>",
+        "sg",
+        forEach(
+          ["Range", 1, candidates],
+          sumOver(upTo(total), ["Multiply", cellOf("s", "k"), add(["Multiply", "k", "k"], 1)], "k"),
+          "s",
         ),
-        "integer",
+        bind(
+          "kp",
+          where(
+            ["Range", 1, candidates],
+            equals(count(["Range", 1, candidates], and(less("u", "s"), same("s", "u")), "u"), 0),
+            "s",
+          ),
+          [
+            "List",
+            forEach(
+              ["Range", 1, ["Multiply", kept, total]],
+              bind(
+                "r",
+                add(1, quotientOf(subtract("g", 1), total)),
+                bind("c", add(1, ["Mod", subtract("g", 1), total]), cellOf(at("r", "kp"), "c"), "integer"),
+                "integer",
+              ),
+              "g",
+            ),
+            weighted
+              ? forEach(
+                  ["Range", 1, kept],
+                  sumOver(
+                    ["Range", 1, candidates],
+                    ["If", same(at("r", "kp"), "u"), candidate(at("u", "ap"), at("e", "ways")), 0],
+                    "u",
+                  ),
+                  "r",
+                )
+              : ["List", 1],
+            ["List", add(at(1, at(3, "a")), kept)],
+          ],
+          listOfIntegers,
+        ),
+        listOfIntegers,
       ),
+      listOfIntegers,
     ),
-    sumOver(["Range", 1, ["Divide", length("levels"), 2]], at(add(["Divide", length("levels"), 2], "i"), "levels")),
-    "list<integer>",
-  ),
-  "list<integer>",
+    listOfIntegers,
+  );
+};
+const listOfIntegers = "list<integer>";
+/** The walk of `steps` levels from this partition with the moves `firsts`, `seconds`: [last level, its chain counts, [partitions so far]]. */
+const levelWalk = (
+  steps: MathJSON,
+  firsts: MathJSON,
+  seconds: MathJSON,
+  applies: MathJSON,
+  cell: (k: MathJSON) => MathJSON,
+  weighted: boolean,
+): MathJSON =>
+  bind(
+    "mj",
+    firsts,
+    bind(
+      "ma",
+      seconds,
+      fold(
+        ["Range", 1, steps, 1],
+        ["List", multiplicities, ["List", 1], ["List", 1]],
+        bind(
+          "fl",
+          at(1, "a"),
+          bind("ways", at(2, "a"), levelStep(applies, cell, weighted), listOfIntegers),
+          listOfIntegers,
+        ),
+      ),
+      listOfIntegers,
+    ),
+    listOfIntegers,
+  );
+/** The partitions that refine this one (itself included): the splits of parts, one more part each level. */
+const refinementCount: MathJSON = at(
+  1,
+  at(3, levelWalk(subtract(total, length()), splitBigs, splitSmalls, splitApplies, splitCell, false)),
 );
+/** The partitions this one refines (itself included): the merges of two parts, one fewer part each level. */
+const coarseningCount: MathJSON = at(
+  1,
+  at(3, levelWalk(subtract(length(), 1), mergeFirsts, mergeSeconds, mergeApplies, mergeCell, false)),
+);
+/** The chains of single splits from this partition to all ones: size - length levels, the last holding only the all-ones partition. */
+const refinementChains: MathJSON = [
+  "Sum",
+  at(2, levelWalk(subtract(total, length()), splitBigs, splitSmalls, splitApplies, splitCell, true)),
+];
 
 /**
  * The ordered refinements, by a table over the totals t = 0 .. size. Entry (t, m) counts the weakly decreasing sequences of
@@ -2027,14 +2024,14 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
   stat(
     "RefinementCount",
     "The partitions that refine this one, whose parts subdivide to give theirs. Itself included.",
-    nonEmpty(["If", less(total, 2), 1, ["Length", refinementCodes]], 1),
+    nonEmpty(["If", less(total, 2), 1, refinementCount], 1),
     undefined,
     TABLE_CHECK_WEIGHT,
   ),
   stat(
     "CoarseningCount",
     "The partitions that coarsen this one, whose parts subdivide to give its. Itself included.",
-    nonEmpty(["If", less(total, 2), 1, ["Length", coarseningCodes]], 1),
+    nonEmpty(["If", less(total, 2), 1, coarseningCount], 1),
     undefined,
     TABLE_CHECK_WEIGHT,
   ),
