@@ -1,4 +1,5 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { constants } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOLE_TAGS, isBoxTag } from "@enumeratio/frontend/box-tags";
@@ -87,6 +88,20 @@ for (const [specifier, source] of sourceEntries) {
 
 const dev = process.argv.includes("dev");
 const webDir = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+
+// A build bundles the server side into `.vitepress/.temp` (about 180 MB) and removes it when it
+// ends; a build killed by a signal never gets there. A new build starts from a clean directory,
+// and a signal removes it before the process exits.
+if (process.argv.includes("build")) {
+  const temp = resolve(webDir, ".vitepress/.temp");
+  rmSync(temp, { recursive: true, force: true });
+  for (const signal of ["SIGINT", "SIGTERM", "SIGHUP"] as const) {
+    process.once(signal, () => {
+      rmSync(temp, { recursive: true, force: true });
+      process.exit(128 + constants.signals[signal]);
+    });
+  }
+}
 
 // Pages that moved into package docs keep their old URLs as redirects: Pages hosting has no
 // server-side redirects, so each is a static page that forwards.

@@ -27,6 +27,7 @@ import { CATALOG_REFERENCES } from "./catalog-references-data.ts";
 import { engineSymbols } from "../engine-symbols-data.ts";
 import { findstat } from "@enumeratio/combinatorics/findstat";
 import { oeis } from "../oeis-data.ts";
+import { isDocumentedName } from "../wolfram-documented-data.ts";
 import { fungrimSymbols } from "../fungrim-symbols-data.ts";
 import type { ReferenceEntry } from "../types.ts";
 import { CATALOG_ALIASES, CURATED, DLMF_NAMES, FUNGRIM_NAMES, WIKIDATA_FIXES } from "./curated-data.ts";
@@ -48,9 +49,11 @@ const ENGINE = byName(engineSymbols);
  * Build the link for a reference: the system's documentation index when it has the object
  * (an anchored page, better than a recorded module URL), else the reference's own URL, else
  * the system's URL scheme, else none. A recorded URL on a different page than the index
- * gives is kept -- the check script is where that disagreement surfaces.
+ * gives is kept -- the check script is where that disagreement surfaces. A Wolfram symbol
+ * without a reference page (a front-end box) keeps its identity and gets no link.
  */
 export function hrefOf(reference: Reference): string | undefined {
+  if (reference.system === "wolfram" && !reference.url && !isDocumentedName(reference.identity)) return undefined;
   const indexed = inventoryEntry(reference.system, reference.identity)?.url;
   if (indexed && (!reference.url || indexed.startsWith(reference.url))) return indexed;
   return reference.url ?? SOURCES[reference.system].href?.(reference.identity);
