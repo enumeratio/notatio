@@ -334,7 +334,9 @@ export function lerchPhiChecked(z: Cx, s: Cx, a: Cx): Cx | undefined {
   const r = lerchPhiWithError(z, s, a);
   const size = Math.hypot(r.value.re, r.value.im);
   if (!Number.isFinite(size)) return undefined;
-  if (size === 0) return r.error === 0 ? r.value : undefined;
+  // Terms that cancel to exactly 0 are a true zero when they were of order 1 (Φ(−1, −1, ½)); a zero left of terms
+  // far bigger has no digits to vouch for.
+  if (size === 0) return r.error <= MAX_RELATIVE_ERROR ? r.value : undefined;
   return r.error <= MAX_RELATIVE_ERROR * size ? r.value : undefined;
 }
 
