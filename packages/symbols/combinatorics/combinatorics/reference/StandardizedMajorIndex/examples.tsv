@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-semistandard-tableau-1-1-2-2-3			[StandardizedMajorIndex, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	2			the semistandard tableau $[[1,1,2],[2,3]]$
+findstat-st000116-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1]]], "'StandardizedMajorIndex'"]	0	0	FindStat St000116	FindStat's value for [[1]]
+findstat-st000116-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 2]]], "'StandardizedMajorIndex'"]	0	0	FindStat St000116	FindStat's value for [[2]]
+findstat-st000116-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 3]]], "'StandardizedMajorIndex'"]	0	0	FindStat St000116	FindStat's value for [[3]]

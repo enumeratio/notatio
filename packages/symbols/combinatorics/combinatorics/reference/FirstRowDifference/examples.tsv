@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-gelfand-tsetlin-pattern-3-1-0-2-0-1			[FirstRowDifference, [GelfandTsetlinPattern, [List, [List, 3, 1, 0], [List, 2, 0], [List, 1]]]]	3			the Gelfand-Tsetlin pattern $[[3,1,0],[2,0],[1]]$
+findstat-st001713-1	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 0], [List, 0]]], "'FirstRowDifference'"]	1	1	FindStat St001713	FindStat's value for [[1,0],[0]]
+findstat-st001713-2	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 0], [List, 1]]], "'FirstRowDifference'"]	1	1	FindStat St001713	FindStat's value for [[1,0],[1]]
+findstat-st001713-3	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 1], [List, 1]]], "'FirstRowDifference'"]	0	0	FindStat St001713	FindStat's value for [[1,1],[1]]

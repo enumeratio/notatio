@@ -6,7 +6,7 @@ import { readFileSync } from "node:fs";
 import { bareEngine } from "@enumeratio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
-import { COLLECTION_CARRIER, objectSize, readableCarriers, readObject } from "../src/objects.ts";
+import { COLLECTION_CARRIER, objectLevel, objectSize, readableCarriers, readObject } from "../src/objects.ts";
 
 const ce = bareEngine();
 declareCombinatorics(ce);
@@ -30,6 +30,11 @@ test("a few objects per new carrier", () => {
   ]);
   expect(readObject("SkewPartition", "[[3,1],[1]]")).toEqual(["SkewPartition", L(L(3, 1), L(1))]);
   expect(readObject("SkewPartition", "[[2],[]]")).toEqual(["SkewPartition", L(L(2), L())]);
+  expect(readObject("SemistandardTableau", "[[1,1,3],[2,3]]")).toEqual(["SemistandardTableau", L(L(1, 1, 3), L(2, 3))]);
+  expect(readObject("GelfandTsetlinPattern", "[[3,1,0],[2,0],[1]]")).toEqual([
+    "GelfandTsetlinPattern",
+    L(L(3, 1, 0), L(2, 0), L(1)),
+  ]);
   // Vertices count from 1 here and from 0 in the crawl; each edge is [lower, higher], the edges in order.
   expect(readObject("LabeledGraph", "([(0,1),(0,2),(1,2)],3)")).toEqual([
     "LabeledGraph",
@@ -45,6 +50,7 @@ test("the empty objects", () => {
   expect(readObject("BinaryTree", ".")).toEqual(["BinaryTree", 0]);
   expect(readObject("OrderedTree", "[]")).toEqual(["OrderedTree", L()]);
   expect(readObject("StandardTableau", "[]")).toEqual(["StandardTableau", L()]);
+  expect(readObject("GelfandTsetlinPattern", "[]")).toEqual(["GelfandTsetlinPattern", L()]);
 });
 
 test("a perfect matching is read as its pairs", () => {
@@ -71,8 +77,20 @@ test("sizes are what the collections grow by", () => {
   expect(objectSize("PlanePartition", "[[1],[1]]")).toBe(2);
   expect(objectSize("PlanePartition", "[[2,1]]")).toBe(3);
   expect(objectSize("SkewPartition", "[[3,1],[1]]")).toBe(3);
+  expect(objectSize("SemistandardTableau", "[[1,1,3],[2,3]]")).toBe(5);
+  expect(objectSize("GelfandTsetlinPattern", "[[3,1,0],[2,0],[1]]")).toBe(3);
+  expect(objectSize("GelfandTsetlinPattern", "[]")).toBe(0);
   expect(objectSize("LabeledGraph", "([(0,1),(0,2),(1,2)],3)")).toBe(3);
   expect(objectSize("LabeledGraph", "([],0)")).toBe(0);
+});
+
+test("a tableau is leveled by its cells and largest entry, a pattern by its rows and top entry", () => {
+  expect(objectLevel("SemistandardTableau", "[[1,1,3],[2,3]]")).toEqual([5, 3]);
+  expect(objectLevel("GelfandTsetlinPattern", "[[3,1,0],[2,0],[1]]")).toEqual([3, 3]);
+  expect(objectLevel("GelfandTsetlinPattern", "[[0,0],[0]]")).toEqual([2, 0]);
+  expect(objectLevel("GelfandTsetlinPattern", "[]")).toEqual([0, 0]);
+  expect(objectLevel("StandardTableau", "[[1,3],[2]]")).toEqual([3]);
+  expect(objectLevel("Graph", "([(0,1)],2)")).toBeUndefined();
 });
 
 interface Snapshot {
@@ -105,20 +123,22 @@ test("a binary tree is oriented as our Dyck path conversion, FindStat's Mp00034"
 });
 
 /** The collection of each size that our own carriers' elements are drawn from, and its size argument. */
-const FAMILY: Readonly<Record<string, [head: string, argument: (size: number) => number]>> = {
-  BinaryWord: ["BinaryWords", (n) => n],
-  IntegerComposition: ["IntegerCompositions", (n) => n],
-  SignedPermutation: ["SignedPermutations", (n) => n],
-  BinaryTree: ["BinaryTrees", (n) => n],
-  OrderedTree: ["OrderedTrees", (n) => n],
-  StandardTableau: ["StandardTableaux", (n) => n],
-  ParkingFunction: ["ParkingFunctions", (n) => n],
-  PerfectMatching: ["PerfectMatchings", (n) => n / 2],
-  AlternatingSignMatrix: ["AlternatingSignMatrices", (n) => n],
-  PlanePartition: ["PlanePartitions", (n) => n],
-  SetComposition: ["SetCompositions", (n) => n],
-  SkewPartition: ["SkewPartitions", (n) => n],
-  LabeledGraph: ["LabeledGraphs", (n) => n],
+const FAMILY: Readonly<Record<string, [head: string, argument: (level: readonly number[]) => number[]]>> = {
+  BinaryWord: ["BinaryWords", ([n]) => [n!]],
+  IntegerComposition: ["IntegerCompositions", ([n]) => [n!]],
+  SignedPermutation: ["SignedPermutations", ([n]) => [n!]],
+  BinaryTree: ["BinaryTrees", ([n]) => [n!]],
+  OrderedTree: ["OrderedTrees", ([n]) => [n!]],
+  StandardTableau: ["StandardTableaux", ([n]) => [n!]],
+  ParkingFunction: ["ParkingFunctions", ([n]) => [n!]],
+  PerfectMatching: ["PerfectMatchings", ([n]) => [n! / 2]],
+  AlternatingSignMatrix: ["AlternatingSignMatrices", ([n]) => [n!]],
+  PlanePartition: ["PlanePartitions", ([n]) => [n!]],
+  SetComposition: ["SetCompositions", ([n]) => [n!]],
+  SkewPartition: ["SkewPartitions", ([n]) => [n!]],
+  LabeledGraph: ["LabeledGraphs", ([n]) => [n!]],
+  SemistandardTableau: ["SemistandardTableaux", (level) => [...level]],
+  GelfandTsetlinPattern: ["GelfandTsetlin", (level) => [...level]],
 };
 
 test("every snapshot object of the new carriers is an element of our collection of its size", () => {
@@ -139,13 +159,21 @@ test("every snapshot object of the new carriers is an element of our collection 
   for (const [carrier, set] of texts) {
     const [head, argument] = FAMILY[carrier]!;
     for (const text of set) {
-      const size = objectSize(carrier, text)!;
-      if (size > 5) continue;
+      const level = objectLevel(carrier, text)!;
+      if (level[0]! > 5) continue;
       let value = readObject(carrier, text) as [string, unknown];
-      // AlternatingSignMatrices, PlanePartitions and SkewPartitions yield the bare contents.
-      if (carrier === "AlternatingSignMatrix" || carrier === "PlanePartition" || carrier === "SkewPartition")
+      // AlternatingSignMatrices, PlanePartitions, SkewPartitions, SemistandardTableaux and GelfandTsetlin yield the bare contents.
+      if (
+        [
+          "AlternatingSignMatrix",
+          "PlanePartition",
+          "SkewPartition",
+          "SemistandardTableau",
+          "GelfandTsetlinPattern",
+        ].includes(carrier)
+      )
         value = value[1] as never;
-      const member = ce.box(["Element", value, [head, argument(size)]] as never).evaluate().json;
+      const member = ce.box(["Element", value, [head, ...argument(level)]] as never).evaluate().json;
       expect(member, `${carrier} ${text}`).toBe("True");
     }
   }

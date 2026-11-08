@@ -36,6 +36,19 @@ const SAMPLES: readonly Sample[] = [
     list: [[3, 1], [1]],
     caption: "the skew partition $[[3,1],[1]]$",
   },
+  {
+    on: "SemistandardTableau",
+    list: [
+      [1, 1, 2],
+      [2, 3],
+    ],
+    caption: "the semistandard tableau $[[1,1,2],[2,3]]$",
+  },
+  {
+    on: "GelfandTsetlinPattern",
+    list: [[3, 1, 0], [2, 0], [1]],
+    caption: "the Gelfand-Tsetlin pattern $[[3,1,0],[2,0],[1]]$",
+  },
 ];
 
 // These heads are also partition heads, which own their records.
@@ -67,6 +80,8 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
     AlternatingSignMatrix: { subjectName: "matrix", domain: "Alternating sign matrix statistics" },
     PlanePartition: { subjectName: "planePartition", domain: "Plane partition statistics" },
     SkewPartition: { subjectName: "shape", domain: "Skew partition statistics" },
+    SemistandardTableau: { subjectName: "tableau", domain: "Semistandard tableau statistics" },
+    GelfandTsetlinPattern: { subjectName: "pattern", domain: "Gelfand-Tsetlin pattern statistics" },
   },
   curatedHeads: ["WeightedSize"],
   dir: REFERENCE_DIR,

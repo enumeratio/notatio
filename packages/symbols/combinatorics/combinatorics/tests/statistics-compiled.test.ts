@@ -258,6 +258,46 @@ function labeledGraphs(n: number): unknown[] {
   ]);
 }
 
+/** The semistandard tableaux of n cells with entries 1 .. k: rows weakly and columns strictly increasing. */
+function semistandardTableaux(n: number, k: number): number[][][] {
+  const weakRows = (cells: number): number[][] =>
+    cells === 0
+      ? [[]]
+      : weakRows(cells - 1).flatMap((rest) =>
+          Array.from({ length: k - (rest.at(-1) ?? 1) + 1 }, (_, i) => [...rest, (rest.at(-1) ?? 1) + i]),
+        );
+  const fill = (shape: number[], rows: number[][]): number[][][] => {
+    if (rows.length === shape.length) return [rows];
+    const above = rows.at(-1);
+    return weakRows(shape[rows.length]!)
+      .filter((row) => above === undefined || row.every((entry, c) => above[c]! < entry))
+      .flatMap((row) => fill(shape, [...rows, row]));
+  };
+  return partitions(n).flatMap((shape) => fill(shape, []));
+}
+
+/** The Gelfand-Tsetlin patterns of n rows with entries 0 .. k, the longest row first. */
+function gelfandTsetlinPatterns(n: number, k: number): number[][][] {
+  const tops = (cells: number, most: number): number[][] =>
+    cells === 0
+      ? [[]]
+      : Array.from({ length: most + 1 }, (_, i) => most - i).flatMap((first) =>
+          tops(cells - 1, first).map((rest) => [first, ...rest]),
+        );
+  const interlacing = (above: number[]): number[][] =>
+    above.length === 1
+      ? [[]]
+      : interlacing(above.slice(0, -1)).flatMap((shorter) =>
+          Array.from({ length: above[above.length - 2]! - above[above.length - 1]! + 1 }, (_, i) => [
+            ...shorter,
+            above[above.length - 1]! + i,
+          ]),
+        );
+  const below = (row: number[]): number[][][] =>
+    row.length === 1 ? [[row]] : interlacing(row).flatMap((next) => below(next).map((rest) => [row, ...rest]));
+  return n === 0 ? [[]] : tops(n, k).flatMap(below);
+}
+
 /** The subjects of one carrier a size at a time, smallest first, each as MathJSON contents. */
 const bySize = <T>(sizes: readonly number[], of: (n: number) => T[], toContents: (item: T) => unknown): unknown[][] =>
   sizes.map((n) => of(n).map(toContents));
@@ -296,6 +336,13 @@ const SUBJECTS: Record<string, unknown[][]> = {
   // Ranks to 6; deep, to 8 (the permanent's table doubles with each rank).
   CartanType: [cartanTypesUpTo(DEEP ? 8 : 6)],
   SkewPartition: bySize(DEEP ? [1, 2, 3, 4, 5] : [1, 2], skewPartitions, ofLists),
+  // Up to 4 cells with entries to 3; deep, up to 6.
+  SemistandardTableau: bySize(DEEP ? [1, 2, 3, 4, 5, 6] : [1, 2, 3, 4], (n) => semistandardTableaux(n, 3), ofLists),
+  // Up to 3 rows with entries to 2, and 4 rows with entries to 1 (a tile takes seconds to interpret); deep, 4 rows to 2.
+  GelfandTsetlinPattern: [
+    ...[0, 1, 2, 3].map((n) => gelfandTsetlinPatterns(n, 2).map(ofLists)),
+    gelfandTsetlinPatterns(4, DEEP ? 2 : 1).map(ofLists),
+  ],
 };
 
 /** How many subjects of a carrier its heads interpret together, deep or not. The interpreter is the slow
@@ -321,6 +368,8 @@ const CARRIER_ALLOWANCE: Readonly<Record<string, number>> = {
   ParkingFunction: 2000,
   PlanePartition: 1000,
   SkewPartition: 1000,
+  SemistandardTableau: 1500,
+  GelfandTsetlinPattern: 200,
   LabeledGraph: 150,
   CartanType: 600,
 };

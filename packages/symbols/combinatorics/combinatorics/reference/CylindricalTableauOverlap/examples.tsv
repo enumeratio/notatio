@@ -1,5 +1,9 @@
 id	section	role	expr	expected	known	source	caption
 the-standard-tableau-1-2-4-3-6-5			[CylindricalTableauOverlap, [StandardTableau, [List, [List, 1, 2, 4], [List, 3, 6], [List, 5]]]]	1			the standard tableau $[[1,2,4],[3,6],[5]]$
+the-semistandard-tableau-1-1-2-2-3			[CylindricalTableauOverlap, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	1			the semistandard tableau $[[1,1,2],[2,3]]$
 findstat-st001803-1	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1]]], "'CylindricalTableauOverlap'"]	0	0	FindStat St001803	FindStat's value for [[1]]
 findstat-st001803-2	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2]]], "'CylindricalTableauOverlap'"]	0	0	FindStat St001803	FindStat's value for [[1,2]]
 findstat-st001803-3	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2, 3]]], "'CylindricalTableauOverlap'"]	0	0	FindStat St001803	FindStat's value for [[1,2,3]]
+findstat-st001805-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 2]]], "'CylindricalTableauOverlap'"]	0	0	FindStat St001805	FindStat's value for [[1,2]]
+findstat-st001805-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 3]]], "'CylindricalTableauOverlap'"]	0	0	FindStat St001805	FindStat's value for [[1,3]]
+findstat-st001805-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 4]]], "'CylindricalTableauOverlap'"]	0	0	FindStat St001805	FindStat's value for [[1,4]]

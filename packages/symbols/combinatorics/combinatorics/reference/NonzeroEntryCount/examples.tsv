@@ -1,5 +1,9 @@
 id	section	role	expr	expected	known	source	caption
 the-alternating-sign-matrix-0-1-0-1-1-1-0-1-0			[NonzeroEntryCount, [AlternatingSignMatrix, [List, [List, 0, 1, 0], [List, 1, -1, 1], [List, 0, 1, 0]]]]	5			the alternating sign matrix $[[0,1,0],[1,-1,1],[0,1,0]]$
+the-gelfand-tsetlin-pattern-3-1-0-2-0-1			[NonzeroEntryCount, [GelfandTsetlinPattern, [List, [List, 3, 1, 0], [List, 2, 0], [List, 1]]]]	4			the Gelfand-Tsetlin pattern $[[3,1,0],[2,0],[1]]$
 findstat-st000890-1	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 0, 1], [List, 1, 0]]], "'NonzeroEntryCount'"]	2	2	FindStat St000890	FindStat's value for [[0,1],[1,0]]
 findstat-st000890-2	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 1, 0], [List, 0, 1]]], "'NonzeroEntryCount'"]	2	2	FindStat St000890	FindStat's value for [[1,0],[0,1]]
 findstat-st000890-3	Properties		[CombinatorialStat, [AlternatingSignMatrix, [List, [List, 0, 0, 1], [List, 0, 1, 0], [List, 1, 0, 0]]], "'NonzeroEntryCount'"]	3	3	FindStat St000890	FindStat's value for [[0,0,1],[0,1,0],[1,0,0]]
+findstat-st001406-1	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 0], [List, 0]]], "'NonzeroEntryCount'"]	1	1	FindStat St001406	FindStat's value for [[1,0],[0]]
+findstat-st001406-2	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 0], [List, 1]]], "'NonzeroEntryCount'"]	2	2	FindStat St001406	FindStat's value for [[1,0],[1]]
+findstat-st001406-3	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 1], [List, 1]]], "'NonzeroEntryCount'"]	3	3	FindStat St001406	FindStat's value for [[1,1],[1]]

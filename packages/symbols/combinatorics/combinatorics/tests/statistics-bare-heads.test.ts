@@ -21,6 +21,9 @@ const SAMPLE: Record<string, unknown> = {
   PlanePartition: ["PlanePartition", ["At", ["PlanePartitions", 6], 10]],
   // The family yields bare [outer, inner].
   SkewPartition: ["SkewPartition", ["At", ["SkewPartitions", 4], 7]],
+  // And the bare rows of a tableau and of a pattern.
+  SemistandardTableau: ["SemistandardTableau", ["At", ["SemistandardTableaux", 5, 3], 20]],
+  GelfandTsetlinPattern: ["GelfandTsetlinPattern", ["At", ["GelfandTsetlin", 4, 2], 30]],
   LabeledGraph: ["At", ["LabeledGraphs", 4], 37],
   CartanType: ["At", ["FiniteCartanTypes", 4], 5],
 };

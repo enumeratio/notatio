@@ -1,0 +1,9 @@
+id	section	role	expr	expected	known	source	caption
+the-semistandard-tableau-1-1-2-2-3			[DistinctEntryCount, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	3			the semistandard tableau $[[1,1,2],[2,3]]$
+the-gelfand-tsetlin-pattern-3-1-0-2-0-1			[DistinctEntryCount, [GelfandTsetlinPattern, [List, [List, 3, 1, 0], [List, 2, 0], [List, 1]]]]	4			the Gelfand-Tsetlin pattern $[[3,1,0],[2,0],[1]]$
+findstat-st001401-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1]]], "'DistinctEntryCount'"]	1	1	FindStat St001401	FindStat's value for [[1]]
+findstat-st001401-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 1]]], "'DistinctEntryCount'"]	1	1	FindStat St001401	FindStat's value for [[1,1]]
+findstat-st001401-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 2]]], "'DistinctEntryCount'"]	2	2	FindStat St001401	FindStat's value for [[1,2]]
+findstat-st001404-1	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 0], [List, 0]]], "'DistinctEntryCount'"]	2	2	FindStat St001404	FindStat's value for [[1,0],[0]]
+findstat-st001404-2	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 0], [List, 1]]], "'DistinctEntryCount'"]	2	2	FindStat St001404	FindStat's value for [[1,0],[1]]
+findstat-st001404-3	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1, 1], [List, 1]]], "'DistinctEntryCount'"]	1	1	FindStat St001404	FindStat's value for [[1,1],[1]]

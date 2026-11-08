@@ -66,6 +66,8 @@ interface Reader {
   readonly read: (text: string) => MathJSON;
   /** The size FindStat's tables are cut at: the length, sum or node count the collection grows by. */
   readonly size: (text: string) => number | undefined;
+  /** The arguments of our collection FindStat's level of the object is counted at, where its levels take two: the size and the largest entry. */
+  readonly level?: (text: string) => readonly number[];
 }
 
 /** `['A', 3]` as its letter and rank. */
@@ -100,6 +102,27 @@ const READERS: Readonly<Record<string, Reader>> = {
   StandardTableau: {
     read: (t) => ["StandardTableau", rows(t)],
     size: (t) => sum((JSON.parse(t) as number[][]).map((r) => r.length)),
+  },
+  // Rows, English notation, entries weakly increasing along rows and strictly down columns; size the cells. FindStat's level
+  // is the cells and the largest entry (exactly), the arguments of `SemistandardTableaux`, whose entries are at most the second.
+  SemistandardTableau: {
+    read: (t) => ["SemistandardTableau", rows(t)],
+    size: (t) => sum((JSON.parse(t) as number[][]).map((r) => r.length)),
+    level: (t) => {
+      const tableau = JSON.parse(t) as number[][];
+      return [sum(tableau.map((r) => r.length)), Math.max(0, ...tableau.flat())];
+    },
+  },
+  // Rows from the top, the row of n entries first, weakly decreasing, each entry between the two above it, as ours; size the rows.
+  // FindStat's level is the rows and the first entry of the top row (exactly), the arguments of `GelfandTsetlin`, whose entries are
+  // at most the second. The empty pattern has no rows and no top row.
+  GelfandTsetlinPattern: {
+    read: (t) => ["GelfandTsetlinPattern", rows(t)],
+    size: (t) => (JSON.parse(t) as number[][]).length,
+    level: (t) => {
+      const pattern = JSON.parse(t) as number[][];
+      return [pattern.length, pattern[0]?.[0] ?? 0];
+    },
   },
   // 1-based: entry i is the spot car i prefers, as ours.
   ParkingFunction: { read: (t) => ["ParkingFunction", intList(t)], size: (t) => ints(t).length },
@@ -149,6 +172,14 @@ export const readObject = (carrier: string, text: string): MathJSON | undefined 
 
 /** The size of the object FindStat's `text` names, or `undefined` for a carrier we don't read. */
 export const objectSize = (carrier: string, text: string): number | undefined => READERS[carrier]?.size(text);
+
+/** The arguments of our collection of the level of the object FindStat's `text` names: its size, and for a tableau or a pattern also its largest entry. */
+export const objectLevel = (carrier: string, text: string): readonly number[] | undefined => {
+  const reader = READERS[carrier];
+  if (reader?.level) return reader.level(text);
+  const size = reader?.size(text);
+  return size === undefined ? undefined : [size];
+};
 
 /** FindStat's collections that are one of our carriers, whether or not we read their objects. */
 export const COLLECTION_CARRIER: Readonly<Record<string, string>> = {

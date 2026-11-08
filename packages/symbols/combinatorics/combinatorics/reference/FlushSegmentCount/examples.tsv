@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-semistandard-tableau-1-1-2-2-3			[FlushSegmentCount, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	0			the semistandard tableau $[[1,1,2],[2,3]]$
+findstat-st000174-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1]]], "'FlushSegmentCount'"]	0	0	FindStat St000174	FindStat's value for [[1]]
+findstat-st000174-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 2]]], "'FlushSegmentCount'"]	1	1	FindStat St000174	FindStat's value for [[2]]
+findstat-st000174-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 3]]], "'FlushSegmentCount'"]	1	1	FindStat St000174	FindStat's value for [[3]]

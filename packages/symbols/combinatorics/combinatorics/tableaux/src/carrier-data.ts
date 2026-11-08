@@ -15,7 +15,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   {
     name: "GelfandTsetlinPattern",
     type: "gelfand_tsetlin_pattern",
-    shape: "list<integer>",
+    shape: "list<list<integer>>",
     id: "gelfand_tsetlin_pattern",
     plural: "GelfandTsetlinPatterns",
   },
@@ -29,7 +29,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   {
     name: "SemistandardTableau",
     type: "semistandard_tableau",
-    shape: "tuple<list<integer>, list<integer>>",
+    shape: "list<list<integer>>",
     id: "semistandard_tableau",
     plural: "SemistandardTableaux",
   },

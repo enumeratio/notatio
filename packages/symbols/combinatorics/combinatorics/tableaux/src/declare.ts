@@ -35,6 +35,9 @@ export function declareTableaux(ce: Engine): void {
   registerCollectionCarrier(ce, "PlanePartitions", "PlanePartition");
   // Likewise SkewPartitions yields bare [outer, inner] lists.
   registerCollectionCarrier(ce, "SkewPartitions", "SkewPartition");
+  // And SemistandardTableaux and GelfandTsetlin the bare rows.
+  registerCollectionCarrier(ce, "SemistandardTableaux", "SemistandardTableau");
+  registerCollectionCarrier(ce, "GelfandTsetlin", "GelfandTsetlinPattern");
   // Its statistics, after its own carriers and families.
   declareStatistics(ce, TABLEAU_STATISTICS);
 }

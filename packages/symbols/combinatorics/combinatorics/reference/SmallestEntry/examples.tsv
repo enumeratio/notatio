@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-semistandard-tableau-1-1-2-2-3			[SmallestEntry, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	1			the semistandard tableau $[[1,1,2],[2,3]]$
+findstat-st001410-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 2]]], "'SmallestEntry'"]	1	1	FindStat St001410	FindStat's value for [[1,2]]
+findstat-st001410-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 3]]], "'SmallestEntry'"]	1	1	FindStat St001410	FindStat's value for [[1,3]]
+findstat-st001410-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 4]]], "'SmallestEntry'"]	1	1	FindStat St001410	FindStat's value for [[1,4]]
