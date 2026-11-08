@@ -29,7 +29,7 @@ import {
 } from "../../support/box.ts";
 import type { Cx } from "../numerics/complex-arithmetic.ts";
 import { logGamma } from "../numerics/log-gamma.ts";
-import { lerchPhi } from "../numerics/lerch-phi.ts";
+import { lerchPhiChecked } from "../numerics/lerch-phi.ts";
 import { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 import { lerchPhiBig } from "../numerics/lerch-phi-big.ts";
 import { hurwitzZetaChecked, zetaGeneralizedChecked } from "../numerics/hurwitz-zeta.ts";
@@ -63,6 +63,12 @@ export function principalAtZero(ops: readonly Expression[], numeric: boolean): b
   );
 }
 
+/** The double kernel's Φ boxed, or undefined (unevaluated) where its error passes `MAX_RELATIVE_ERROR`. */
+function checkedLerch(ce: ComputeEngine, z: Expression, s: Expression, a: Expression): Expression | undefined {
+  const r = lerchPhiChecked({ re: z.re, im: z.im }, { re: s.re, im: s.im }, { re: a.re, im: a.im });
+  return r === undefined ? undefined : numberResult(ce, r);
+}
+
 export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], numeric: boolean): Expression | undefined {
   const z = ops[0];
   const s = ops[1];
@@ -75,8 +81,7 @@ export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], num
   if (z.im === 0 && z.re === 1) return done(boxed(["HurwitzZeta", s.json, a.json]));
   // Φ(0, s, a) = a^(−s): only the n = 0 term survives (0⁰ = 1).
   if (z.is(0)) {
-    if (principalAtZero(ops, numeric))
-      return numberResult(ce, lerchPhi({ re: z.re, im: z.im }, { re: s.re, im: s.im }, { re: a.re, im: a.im }));
+    if (principalAtZero(ops, numeric)) return checkedLerch(ce, z, s, a);
     return done(boxed(["Power", a.json, ["Negate", s.json]]));
   }
   // Φ(z, 0, a) = 1/(1 − z), independent of a (the geometric series and its continuation).
@@ -106,7 +111,7 @@ export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], num
     if (phi !== undefined) return bigResult(ce, phi);
   }
   if (numeric && isFiniteNum(z) && isFiniteNum(s) && isFiniteNum(a)) {
-    return numberResult(ce, lerchPhi({ re: z.re, im: z.im }, { re: s.re, im: s.im }, { re: a.re, im: a.im }));
+    return checkedLerch(ce, z, s, a);
   }
   return undefined; // stay symbolic
 }
@@ -344,7 +349,7 @@ export { logGamma, logGammaReal, logGammaBig } from "../numerics/log-gamma.ts";
 export { clausen } from "../numerics/clausen.ts";
 export { stieltjesGamma, stieltjesGammaReal, STIELTJES_MAX_ORDER } from "../numerics/stieltjes.ts";
 export { stieltjesGammaBall, stieltjesGammaBig } from "../numerics/stieltjes-big.ts";
-export { lerchPhi, lerchPhiReal } from "../numerics/lerch-phi.ts";
+export { lerchPhi, lerchPhiChecked, lerchPhiReal, lerchPhiWithError } from "../numerics/lerch-phi.ts";
 export { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 export { lerchPhiBig, lerchPhiBall } from "../numerics/lerch-phi-big.ts";
 export {
