@@ -148,11 +148,21 @@ export function rulesInCalls(json: MathJsonExpression): void {
 }
 
 /**
+ * `json` without the program's own `Block`: Epsil keeps it around a program whose one statement
+ * is a `Block`, so `Block(a := 1, a)` would read as `Block(Block(a := 1, a))`.
+ */
+export function withoutProgramBlock<T>(json: T): T {
+  const fn = Array.isArray(json) ? json : (json as { fn?: unknown[] } | null)?.fn;
+  return Array.isArray(fn) && fn[0] === "Block" && fn.length === 2 && headOf(fn[1]) === "Block" ? (fn[1] as T) : json;
+}
+
+/**
  * Parse one Epsil expression. Returns the MathJSON, its slot wildcards, and any
  * diagnostics — an Epsil parse error, or a statement/effect head. Never throws.
  */
 export function parseExpression(src: string, options?: ParseExpressionOptions): ParseExpressionResult {
-  const [json, diagnostics] = parseEpsil(src, undefined, options);
+  const [parsed, diagnostics] = parseEpsil(src, undefined, options);
+  const json = withoutProgramBlock(parsed);
   resolveLibraryNames(json, src, options?.ce ?? libraryEngine());
   resolveRuleKeys(json, src, options?.ce ?? libraryEngine());
   rulesInCalls(json);

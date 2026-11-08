@@ -215,7 +215,12 @@ export function declareGraphics(ce: ComputeEngine): void {
 
   // A cell holds its input: `Cell(1 + 1)` is the pair "1 + 1 → 2", not a cell of 2.
   if (!ce.lookupDefinition("Cell")) {
-    ce.declare("Cell", { signature: "(any, any*) -> any", lazy: true });
+    // Its input is opaque, so `Cell(a := 5)` holds the assignment as written.
+    ce.declare("Cell", {
+      signature: "(any, any*) -> any",
+      lazy: true,
+      operands: (ops) => ops.map((_, i) => ({ kind: i === 0 ? "opaque" : "raw" })),
+    });
   }
 
   // `Notebook([Cell(...), ...])` -- Wolfram's transcript: a `DynamicModule` configured

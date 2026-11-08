@@ -14,12 +14,9 @@ export const at = (list: MathJSON, index: MathJSON): MathJSON => ["At", list, in
 export const equal = (a: MathJSON, b: MathJSON): MathJSON => ["Equal", a, b];
 export const less = (a: MathJSON, b: MathJSON): MathJSON => ["Less", a, b];
 export const and = (...xs: MathJSON[]): MathJSON => ["And", ...xs];
-export const iff = (condition: MathJSON, then: MathJSON, otherwise: MathJSON): MathJSON => [
-  "If",
-  condition,
-  then,
-  otherwise,
-];
+// A literal True/False guard is folded away: dead code, and compiled code declines on it.
+export const iff = (condition: MathJSON, then: MathJSON, otherwise: MathJSON): MathJSON =>
+  condition === "True" ? then : condition === "False" ? otherwise : ["If", condition, then, otherwise];
 /** With `accumulatorType` the accumulator is typed (an untyped one reads as `unknown` to the compiler).
  *  The compiler must prove the initial value and each step's result satisfy the type, so both go
  *  through a typed binding, which is how a value is asserted into a type. */

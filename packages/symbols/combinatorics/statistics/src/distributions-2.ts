@@ -526,7 +526,7 @@ export const meanOf2 = (ce: Engine, dist: Expr, options: EvaluateOptions | undef
       return finish(div(ce, mul(ce, n, sub(ce, ce.One, p)), p), options);
     }
     case "CauchyDistribution":
-      return finish(ce.Indeterminate, options);
+      return finish(ce.NaN, options);
     case "StudentTDistribution":
       // Exact only for nu > 1 — Student-t's mean is undefined at/below nu = 1. Unconditional
       // 0 here is a documented divergence (matches Wolfram's own numeric answer whenever the
@@ -663,7 +663,7 @@ export const varianceOf2 = (ce: Engine, dist: Expr, options: EvaluateOptions | u
       return finish(div(ce, mul(ce, n, sub(ce, ce.One, p)), pow(ce, p, ce.number(2))), options);
     }
     case "CauchyDistribution":
-      return finish(ce.Indeterminate, options);
+      return finish(ce.NaN, options);
     case "StudentTDistribution": {
       const params = one(dist);
       if (params === undefined) return undefined;

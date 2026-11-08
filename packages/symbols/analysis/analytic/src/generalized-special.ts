@@ -88,17 +88,9 @@ export function declareGeneralizedBeta(ce: ComputeEngine): void {
       if (ops.length === 2) {
         const r = nativeBeta?.(ops, options);
         const [a, b] = ops;
-        // Native answers an exact pole-cancelling call like Beta(∞, 0) with the float
-        // sentinel `NaN` rather than declining it -- an exact operand pair calls that
-        // `Indeterminate` instead (same convention `incomplete-gamma.ts` applies), EXCEPT
-        // B(a, 0) with a → +∞: Γ(a)Γ(0)/Γ(a+0) has the same Γ(a) in numerator and
-        // denominator, which cancels to 1 for any finite a where Γ(a) is finite and
-        // nonzero -- and stays 1 as a → +∞, since Γ is smooth and nonzero all the way out.
-        // That leaves the lone Γ(0), a genuine simple pole: ComplexInfinity, not
-        // Indeterminate (confirmed against DLMF 5.12.1's B(a,0) reduction). a → −∞ does
-        // NOT get this: Γ oscillates through a pole at every negative integer along the
-        // way, so no single limit exists there -- it falls through to Indeterminate below,
-        // same as every other exact-NaN case (including B(0, 0), a genuine double pole).
+        // Native answers B(0, ∞) and B(∞, 0) with NaN. Γ(a)Γ(0)/Γ(a+0) cancels Γ(a), which is
+        // finite and nonzero all the way to a → +∞, leaving the simple pole Γ(0): ComplexInfinity
+        // (DLMF 5.12.1). a → −∞ crosses a pole of Γ at every negative integer, so it stays NaN.
         const isExact = (op: Expression): boolean => (op as Partial<{ isExact: boolean }>).isExact !== false;
         const isZero = (op: Expression): boolean => op.re === 0 && (op.im === 0 || op.im === undefined);
         const isPositiveInfinity = (op: Expression): boolean => op.re === Infinity;
@@ -106,7 +98,6 @@ export function declareGeneralizedBeta(ce: ComputeEngine): void {
           if ((isZero(a) && isPositiveInfinity(b)) || (isPositiveInfinity(a) && isZero(b))) {
             return ce.symbol("ComplexInfinity");
           }
-          return ce.symbol("Indeterminate");
         }
         if (!declined(r, "Beta")) return r;
         // B(a, 1) = Γ(a)Γ(1)/Γ(a+1) = 1/a, exact for any a (including symbolic).
@@ -198,7 +189,7 @@ export function declareGeneralizedErf(ce: ComputeEngine): void {
       // positive real axis, i*Infinity along the imaginary axis, ...) -- undirected
       // ComplexInfinity has no limit, so decline exactly, rather than let the widened
       // signature hand it to nativeErf, which has no ComplexInfinity case of its own.
-      if (x.json === "ComplexInfinity") return ce.symbol("Indeterminate");
+      if (x.json === "ComplexInfinity") return ce.NaN;
       if (x.operator === "Negate") {
         const inner = operandsOf(x)[0];
         if (inner !== undefined) {

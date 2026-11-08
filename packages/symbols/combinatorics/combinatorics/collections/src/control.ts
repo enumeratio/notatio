@@ -113,6 +113,9 @@ function declareModule(ce: Engine): void {
   ce.declare("Module", {
     signature: "(any, any) -> any",
     lazy: true,
+    // The body is kept as written: its assignments write the locals this handler declares,
+    // which no enclosing scope knows at canonicalization.
+    operands: () => [{ kind: "raw" }, { kind: "opaque" }] as const,
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       const [bindingsExpr, body] = ops;
       if (bindingsExpr === undefined || body === undefined) return undefined;
@@ -348,6 +351,9 @@ function declareDo(ce: Engine): void {
   ce.declare("Do", {
     signature: "(any, any) -> any",
     lazy: true,
+    // The body is kept as written: canonicalizing it would read the loop variable `i` as the
+    // imaginary unit, and any other name as the outer symbol, not the local this handler declares.
+    operands: () => [{ kind: "opaque" }, { kind: "raw" }] as const,
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       const [body, specExpr] = ops;
       if (body === undefined || specExpr === undefined) return undefined;
@@ -404,6 +410,7 @@ function declareWhile(ce: Engine): void {
   ce.declare("While", {
     signature: "(any, any?) -> any",
     lazy: true,
+    operands: () => [{ kind: "raw" }, { kind: "statement" }] as const,
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       const [test, body] = ops;
       if (test === undefined) return undefined;

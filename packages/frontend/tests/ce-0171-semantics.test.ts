@@ -13,10 +13,10 @@ const run = (code: string | undefined, scope: Record<string, unknown>): unknown 
   // oxlint-disable-next-line no-implied-eval -- the compiled code under test
   new Function("_SYS", "_", `return (${code});`)(SYS, scope);
 
-test("a nested assignment's target is read, not defined; only the top-level target is", () => {
+test("a nested assignment is an error operand: only the top-level target is defined, and nothing is read", () => {
   const b = cellBindings(ce, 1, "y := (k := 2)", ["Assign", "y", ["Assign", "k", 2]] as never);
   expect(b.assigns).toBe("y");
-  expect(b.reads).toEqual(["k"]);
+  expect(b.reads).toEqual([]);
 });
 
 test("N and D used as values are read as free symbols by the tracker", () => {
