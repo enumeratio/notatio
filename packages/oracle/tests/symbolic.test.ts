@@ -1,5 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { expect, test, vi } from "vite-plus/test";
+import { kernelUnavailable } from "../src/kernel-availability.ts";
 import { preludeFor, SYMPY_PREAMBLE } from "../src/run.ts";
 import {
   alignFunctions,
@@ -896,7 +897,7 @@ test.skipIf(!hasSage)(
 const hasWolfram = spawnSync("wolframscript", ["-version"]).status === 0;
 test.skipIf(!hasWolfram)(
   "wolfram proposition: inexact bounds agree to a relative 1e-12, exact ones exactly",
-  () => {
+  ({ skip }) => {
     const cases: [string, string, string][] = [
       ["y <= 0.5207864124022675", "y <= 0.5207864124022676", "True"],
       ["y <= 1.*^6", "y <= 1000000.0000001", "True"],
@@ -908,7 +909,15 @@ test.skipIf(!hasWolfram)(
       ["y <= 1/3", "y <= 333333333333/1000000000000", "False"],
     ];
     const sources = cases.map(([theirs, ours]) => propositionAgreementSource(theirs, ours, 10));
-    const run = spawnSync("wolframscript", ["-code", `{${sources.join(", ")}}`], { encoding: "utf8" });
+    const code = `{${sources.join(", ")}}`;
+    const attempt = () => {
+      const r = spawnSync("wolframscript", ["-code", code], { encoding: "utf8", timeout: 90_000 });
+      return { stdout: r.stdout, stderr: r.stderr, error: r.error, timedOut: r.signal === "SIGTERM" };
+    };
+    // Kernel slots are capped by license: retry once, then skip rather than call it a mismatch.
+    let run = attempt();
+    if (kernelUnavailable(run)) run = attempt();
+    if (kernelUnavailable(run)) skip("no Wolfram kernel answered (license slots busy?)");
     expect(run.stdout.trim()).toBe(`{${cases.map(([, , answer]) => answer).join(", ")}}`);
   },
   120_000,
