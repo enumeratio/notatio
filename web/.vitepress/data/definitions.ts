@@ -29,36 +29,45 @@ export const isEpsilFamily = (family: AnyFamily): family is EpsilFamily => "epsi
 
 const FAMILY_OPERATIONS = ["count", "unrank", "rank", "valid", "tables"] as const;
 
-const add = (byHead: Map<string, HeadDefinition[]>, head: string, definition: HeadDefinition): void => {
-  byHead.set(head, [...(byHead.get(head) ?? []), definition]);
+/** A statistic's definition as its page shows it. */
+export const statisticDefinition = ({ on, expr }: { on: string; expr: unknown }): HeadDefinition => ({
+  label: `on ${on}, over _x`,
+  source: print(expr),
+});
+
+const lazy = <T>(make: () => T): (() => T) => {
+  let memo: T | undefined;
+  return () => (memo ??= make());
 };
 
-// Printed on first use: printing every statistic takes seconds, which `vitepress preview` never needs.
-let memo: Map<string, HeadDefinition[]> | undefined;
-function definitions(): Map<string, HeadDefinition[]> {
-  if (memo !== undefined) return memo;
-  const byHead = new Map<string, HeadDefinition[]>();
-  for (const { head, on, expr } of ALL_STATISTICS)
-    add(byHead, head, { label: `on ${on}, over _x`, source: print(expr) });
+const familyDefinition = (family: EpsilFamily): HeadDefinition[] =>
+  FAMILY_OPERATIONS.flatMap((operation) => {
+    const expr = family.epsil[operation];
+    if (expr === undefined) return [];
+    const over =
+      operation === "unrank"
+        ? [...family.params, "_r"]
+        : operation === "count" || operation === "tables"
+          ? family.params
+          : [...family.params, "_x"];
+    return [{ label: `${operation}(${over.join(", ")})`, source: print(expr) }];
+  });
 
-  for (const family of allFamilies.filter(isEpsilFamily))
-    for (const operation of FAMILY_OPERATIONS) {
-      const expr = family.epsil[operation];
-      if (expr === undefined) continue;
-      const over =
-        operation === "unrank"
-          ? [...family.params, "_r"]
-          : operation === "count" || operation === "tables"
-            ? family.params
-            : [...family.params, "_x"];
-      add(byHead, family.head, { label: `${operation}(${over.join(", ")})`, source: print(expr) });
-    }
-  memo = byHead;
+// What prints a head's definitions, by head; nothing is printed until that head is asked for, since
+// printing every statistic takes seconds, which `vitepress preview` never needs.
+const printers = lazy(() => {
+  const byHead = new Map<string, (() => HeadDefinition[])[]>();
+  const add = (head: string, make: () => HeadDefinition[]): void => {
+    byHead.set(head, [...(byHead.get(head) ?? []), lazy(make)]);
+  };
+  for (const { head, on, expr } of ALL_STATISTICS) add(head, () => [statisticDefinition({ on, expr })]);
+  for (const family of allFamilies.filter(isEpsilFamily)) add(family.head, () => familyDefinition(family));
   return byHead;
-}
+});
 
 /** A head's definitions, in source order; empty for a head with none. */
-export const definitionsOf = (head: string): readonly HeadDefinition[] => definitions().get(head) ?? [];
+export const definitionsOf = (head: string): readonly HeadDefinition[] =>
+  (printers().get(head) ?? []).flatMap((printed) => printed());
 
 /** Every head with a definition, for the test that sweeps them all. */
-export const definedHeads = (): string[] => [...definitions().keys()];
+export const definedHeads = (): string[] => [...printers().keys()];

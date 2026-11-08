@@ -248,6 +248,93 @@ const triangleVertexSet = (g: Graph): Set<number> =>
 /** Whether vertices `u` and `v` have the same neighbors. */
 const sameRow = (m: boolean[][], u: number, v: number): boolean => m[u]!.every((edge, w) => edge === m[v]![w]);
 
+/** The Laplacian (`signless` false) or signless Laplacian of the graph as numbers. */
+const laplacianOf = (g: Graph, signless: boolean): number[][] => {
+  const m = matrix(g);
+  const d = degrees(g);
+  return m.map((row, u) => row.map((edge, v) => (u === v ? d[u]! : edge ? (signless ? 1 : -1) : 0)));
+};
+/** The eigenvalues of a symmetric matrix by cyclic Jacobi rotations, ascending. */
+function eigenvaluesOf(rows: readonly (readonly number[])[]): number[] {
+  const a = rows.map((row) => [...row]);
+  const n = a.length;
+  for (let sweep = 0; sweep < 100; sweep++) {
+    let off = 0;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += a[p]![q]! ** 2;
+    if (off < 1e-24) break;
+    for (let p = 0; p < n; p++)
+      for (let q = p + 1; q < n; q++) {
+        if (Math.abs(a[p]![q]!) < 1e-300) continue;
+        const theta = (a[q]![q]! - a[p]![p]!) / (2 * a[p]![q]!);
+        const t = Math.sign(theta || 1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+        const c = 1 / Math.sqrt(t * t + 1);
+        const s = t * c;
+        for (let k = 0; k < n; k++) {
+          const kp = a[k]![p]!;
+          const kq = a[k]![q]!;
+          a[k]![p] = c * kp - s * kq;
+          a[k]![q] = s * kp + c * kq;
+        }
+        for (let k = 0; k < n; k++) {
+          const pk = a[p]![k]!;
+          const qk = a[q]![k]!;
+          a[p]![k] = c * pk - s * qk;
+          a[q]![k] = s * pk + c * qk;
+        }
+      }
+  }
+  return a.map((row, i) => row[i]!).toSorted((x, y) => x - y);
+}
+const EIGENVALUE_TOLERANCE = 1e-7;
+/** The eigenvalues grouped into equal ones: eigenvalues of these small graphs are separated by far more than the tolerance. */
+const eigenvalueGroups = (values: readonly number[]): number[][] => {
+  const groups: number[][] = [];
+  for (const v of values) {
+    const last = groups.at(-1);
+    if (last !== undefined && Math.abs(v - last.at(-1)!) < EIGENVALUE_TOLERANCE) last.push(v);
+    else groups.push([v]);
+  }
+  return groups;
+};
+const positiveCount = (values: readonly number[]): number => values.filter((v) => v > EIGENVALUE_TOLERANCE).length;
+const negativeCount = (values: readonly number[]): number => values.filter((v) => v < -EIGENVALUE_TOLERANCE).length;
+const adjacencyEigenvalues = (g: Graph): number[] => eigenvaluesOf(matrix(g).map((row) => row.map(Number)));
+const laplacianEigenvalues = (g: Graph): number[] => eigenvaluesOf(laplacianOf(g, false));
+/** The rank of an integer matrix by fraction-free elimination in big integers. */
+function rankOf(rows: readonly (readonly number[])[]): number {
+  const a = rows.map((row) => row.map(BigInt));
+  let rank = 0;
+  const n = a[0]?.length ?? 0;
+  for (let col = 0; col < n && rank < a.length; col++) {
+    const pivot = a.findIndex((row, r) => r >= rank && row[col] !== 0n);
+    if (pivot < 0) continue;
+    [a[rank], a[pivot]] = [a[pivot]!, a[rank]!];
+    for (let r = rank + 1; r < a.length; r++) {
+      const factor = a[r]![col]!;
+      const lead = a[rank]![col]!;
+      a[r] = a[r]!.map((entry, c) => entry * lead - factor * a[rank]![c]!);
+    }
+    rank++;
+  }
+  return rank;
+}
+/** The incidence matrix times its transpose, whose determinant FindStat's St000368 takes. */
+const incidenceProductDeterminant = (g: Graph): number => {
+  const incidence = range(0, g.n - 1).map((v) => g.edges.map(([a, b]) => (a - 1 === v || b - 1 === v ? 1 : 0)));
+  const product = incidence.map((row) => incidence.map((other) => sum(row.map((x, k) => x * other[k]!))));
+  return determinant(product);
+};
+/** The distance matrix of a connected graph, by breadth-first search from each vertex; null when the graph is not connected. */
+const distanceMatrixOf = (g: Graph): number[][] | null => {
+  const m = matrix(g);
+  const all = allVertices(g);
+  const rows = all.map((v) => distancesFrom(m, v, all));
+  return rows.every((row) => row.size === g.n) ? rows.map((row) => all.map((w) => row.get(w)!)) : null;
+};
+/** The distance Laplacian: each row's sum on the diagonal and the negated distances off it. */
+const distanceLaplacianOf = (distances: number[][]): number[][] =>
+  distances.map((row, u) => row.map((d, v) => (u === v ? sum(row) : -d)));
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -553,4 +640,35 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
     );
   },
   NonTriangleVertexCount: (g) => g.n - triangleVertexSet(g).size,
+  AdjacencyPositiveEigenvalueCount: (g) => positiveCount(adjacencyEigenvalues(g)),
+  AdjacencyNegativeEigenvalueCount: (g) => negativeCount(adjacencyEigenvalues(g)),
+  AdjacencyNullity: (g) => g.n - positiveCount(adjacencyEigenvalues(g)) - negativeCount(adjacencyEigenvalues(g)),
+  AdjacencyRank: (g) => rankOf(matrix(g).map((row) => row.map(Number))),
+  GraphSignature: (g) => positiveCount(adjacencyEigenvalues(g)) - negativeCount(adjacencyEigenvalues(g)),
+  NegativeEigenvaluePairGap: (g) => {
+    const negative = negativeCount(adjacencyEigenvalues(g));
+    return (negative * (negative + 1)) / 2 - positiveCount(adjacencyEigenvalues(g));
+  },
+  LaplacianPositiveEigenvalueCount: (g) => g.n - componentsOn(matrix(g), allVertices(g)),
+  DistinctEigenvalueCount: (g) => eigenvalueGroups(adjacencyEigenvalues(g)).length,
+  DistinctLaplacianEigenvalueCount: (g) => eigenvalueGroups(laplacianEigenvalues(g)).length,
+  MaximumEigenvalueMultiplicity: (g) => Math.max(0, ...eigenvalueGroups(adjacencyEigenvalues(g)).map((x) => x.length)),
+  MaximumLaplacianEigenvalueMultiplicity: (g) =>
+    Math.max(0, ...eigenvalueGroups(laplacianEigenvalues(g)).map((x) => x.length)),
+  AltshulerSteinbergDeterminant: (g) => incidenceProductDeterminant(g),
+  AltshulerSteinbergQuarter: (g) => (g.n === 0 ? 0 : incidenceProductDeterminant(g) / 4),
+  DistanceMatrixDeterminant: (g) => {
+    const distances = distanceMatrixOf(g);
+    return g.n === 0 || distances === null ? 0 : determinant(distances);
+  },
+  DistinctDistanceLaplacianEigenvalueCount: (g) => {
+    const distances = distanceMatrixOf(g);
+    return g.n === 0 || distances === null ? 0 : eigenvalueGroups(eigenvaluesOf(distanceLaplacianOf(distances))).length;
+  },
+  MaximumDistanceLaplacianEigenvalueMultiplicity: (g) => {
+    const distances = distanceMatrixOf(g);
+    return g.n === 0 || distances === null
+      ? 0
+      : Math.max(...eigenvalueGroups(eigenvaluesOf(distanceLaplacianOf(distances))).map((x) => x.length));
+  },
 };

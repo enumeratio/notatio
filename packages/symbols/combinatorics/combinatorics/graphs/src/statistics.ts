@@ -583,6 +583,324 @@ const inducedFourVertexCount = (
     ),
   );
 
+// ─── Spectra of a symmetric integer matrix, read from its characteristic polynomial ───
+// The matrix is symmetric, so its eigenvalues are real and Descartes' rule counts them exactly: the positive
+// ones are the sign changes in the coefficients, the negative ones those of p(-x), the zero ones the trailing
+// zero coefficients. The distinct ones and the multiplicities come from the greatest common divisor of p
+// and its derivative, by Euclid's algorithm on integer coefficients. No eigenvalue is ever approximated.
+
+/** 0, unless `bound` passes the integers compiled code holds exactly, when compiling it declines (GCD refuses the argument) and the interpreter answers. A bound on the products a step forms keeps a product that rounds from passing for exact. */
+const rangeGuard = (bound: MathJSON): MathJSON => ["Min", ["GCD", bound, 0], 0];
+/** The largest absolute entry of the matrix called `name`. */
+const largestEntry = (name: string, row: string, column: string): MathJSON => [
+  "Max",
+  forEach(vertices, ["Max", forEach(vertices, ["Abs", entry(name, row, column)], column)], row),
+];
+/** The determinant from the constant coefficient of the characteristic polynomial, whose sign is (-1)^n; 0 stays 0, not -0. */
+const determinantFromCoefficients = (divisor: number): MathJSON =>
+  bind(
+    "constant",
+    at(add("n", 1), "coefficients"),
+    [
+      "If",
+      equals("constant", 0),
+      0,
+      ["Divide", ["If", equals(["Mod", "n", 2], 0), "constant", subtract(0, "constant")], divisor],
+    ],
+    "integer",
+  );
+/** The `n` x `n` identity, row by row. */
+const identityRows: MathJSON = forEach(vertices, forEach(vertices, one(equals("i", "j")), "j"), "i");
+/**
+ * The coefficients of det(xI - M) for the matrix called `name`, highest power first (n + 1 of them, the first 1),
+ * by Faddeev-LeVerrier: with M_1 = I, M_(k+1) = M M_k + c_(n-k) I and c_(n-k) = -trace(M M_k) / k, all in integers.
+ * The fold carries M_k as `n` rows and the coefficients found so far as an extra row.
+ */
+const characteristicCoefficients = (name: string): MathJSON =>
+  bindList(
+    "steps",
+    typedFolding(
+      bindList(
+        "product",
+        forEach(
+          vertices,
+          forEach(
+            vertices,
+            signedSum(sumOver(vertices, times(entry(name, "i", "l"), entry("state", "l", "j")), "l")),
+            "j",
+          ),
+          "i",
+        ),
+        bind(
+          "coefficient",
+          add(
+            ["Divide", subtract(0, signedSum(sumOver(vertices, entry("product", "i", "i"), "i"))), "k"],
+            rangeGuard(
+              times(times(2, times("n", "n")), times(largestEntry(name, "i", "l"), largestEntry("state", "i", "l"))),
+            ),
+          ),
+          [
+            "Join",
+            forEach(
+              vertices,
+              forEach(vertices, add(entry("product", "i", "j"), times(one(equals("i", "j")), "coefficient")), "j"),
+              "i",
+            ),
+            [
+              "List",
+              forEach(vertices, ["If", equals("j", "k"), "coefficient", at("j", at(add("n", 1), "state"))], "j"),
+            ],
+          ],
+          "integer",
+        ),
+        "list<list<integer>>",
+      ),
+      "state",
+      "k",
+      ["Join", identityRows, ["List", forEach(vertices, 0, "j")]],
+      vertices,
+      "list<list<integer>>",
+    ),
+    ["Join", ["List", 1], at(add("n", 1), "steps")],
+    "list<list<integer>>",
+  );
+/** The sign changes of the nonzero entries of `values`, a list of integers. */
+const signChanges = (values: MathJSON): MathJSON =>
+  at(
+    2,
+    typedFolding(
+      [
+        "If",
+        equals("b", 0),
+        "a",
+        [
+          "List",
+          ["If", greater("b", 0), 1, -1],
+          add(at(2, "a"), one(equals(times(at(1, "a"), ["If", greater("b", 0), 1, -1]), -1))),
+        ],
+      ],
+      "a",
+      "b",
+      ["List", 0, 0],
+      values,
+      "list<integer>",
+    ),
+  );
+/** The positions of a polynomial of `n` + 1 coefficients. */
+const coefficientPositions: MathJSON = ["Range", 1, add("n", 1)];
+/** The positive eigenvalues, from the coefficients bound as `coefficients`. */
+const positiveEigenvalues: MathJSON = signChanges("coefficients");
+/** The negative eigenvalues: the positive roots of p(-x), whose coefficients alternate in sign. */
+const negativeEigenvalues: MathJSON = signChanges(
+  forEach(coefficientPositions, times(at("j", "coefficients"), ["If", equals(["Mod", "j", 2], 0), 1, -1]), "j"),
+);
+/** The matrix called `name` has its characteristic coefficients bound as `coefficients` around `body`. */
+const withCoefficients = (name: string, body: MathJSON): MathJSON =>
+  bindList("coefficients", characteristicCoefficients(name), body);
+
+// Polynomials below are lists of `n` + 1 integers, the lowest power first.
+const polynomialLength: MathJSON = add("n", 1);
+const polynomialPositions: MathJSON = ["Range", 1, polynomialLength];
+/** The largest absolute coefficient. */
+const largestCoefficient = (poly: MathJSON): MathJSON => [
+  "Max",
+  forEach(polynomialPositions, ["Abs", at("j", poly)], "j"),
+];
+const degreeOf = (poly: MathJSON): MathJSON => [
+  "Max",
+  forEach(polynomialPositions, times(subtract("j", 1), one(["NotEqual", at("j", poly), 0])), "j"),
+];
+const isZero = (poly: MathJSON): MathJSON =>
+  equals(floored(sumOver(polynomialPositions, ["Abs", at("j", poly)], "j")), 0);
+/** The derivative, with the top coefficient zero. */
+const derivative = (poly: MathJSON): MathJSON =>
+  forEach(polynomialPositions, ["If", less("j", polynomialLength), times("j", at(add("j", 1), poly)), 0], "j");
+/**
+ * The greatest common divisor of two polynomials, up to a constant factor, by Euclid's algorithm. Each round
+ * leaves a zero second polynomial alone, swaps a first of lower degree (or zero) with the second, and
+ * otherwise cancels the first's leading term against the second's and divides out the content so the entries stay
+ * small. Every round but a swap lowers the degree sum, which starts under 2n, and a swap is followed by a
+ * cancellation, so 4n + 2 rounds finish it.
+ */
+const gcdRound: MathJSON = bindList(
+  "front",
+  at(1, "pair"),
+  bindList(
+    "back",
+    at(2, "pair"),
+    [
+      "If",
+      isZero("back"),
+      "pair",
+      bind(
+        "frontDegree",
+        degreeOf("front"),
+        bind(
+          "backDegree",
+          degreeOf("back"),
+          [
+            "If",
+            isZero("front"),
+            ["List", "back", "front"],
+            [
+              "If",
+              less("frontDegree", "backDegree"),
+              ["List", "back", "front"],
+              bind(
+                "common",
+                ["GCD", at(add("frontDegree", 1), "front"), at(add("backDegree", 1), "back")],
+                bindList(
+                  "cancelled",
+                  forEach(
+                    polynomialPositions,
+                    subtract(
+                      times(["Divide", at(add("backDegree", 1), "back"), "common"], at("j", "front")),
+                      times(
+                        ["Divide", at(add("frontDegree", 1), "front"), "common"],
+                        [
+                          "If",
+                          greater("j", subtract("frontDegree", "backDegree")),
+                          at(subtract("j", subtract("frontDegree", "backDegree")), "back"),
+                          0,
+                        ],
+                      ),
+                    ),
+                    "j",
+                  ),
+                  bind(
+                    "content",
+                    add(
+                      ["Max", ["GCD", forEach(polynomialPositions, ["Abs", at("j", "cancelled")], "j")], 1],
+                      rangeGuard(
+                        add(
+                          times(
+                            ["Divide", ["Abs", at(add("backDegree", 1), "back")], "common"],
+                            largestCoefficient("front"),
+                          ),
+                          times(
+                            ["Divide", ["Abs", at(add("frontDegree", 1), "front")], "common"],
+                            largestCoefficient("back"),
+                          ),
+                        ),
+                      ),
+                    ),
+                    ["List", forEach(polynomialPositions, ["Divide", at("j", "cancelled"), "content"], "j"), "back"],
+                    "integer",
+                  ),
+                ),
+                "integer",
+              ),
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+    ],
+    "list<integer>",
+  ),
+  "list<integer>",
+);
+const polynomialGcd = (first: MathJSON, second: MathJSON, rounds: MathJSON = add(times(4, "n"), 2)): MathJSON =>
+  at(1, typedFolding(gcdRound, "pair", "round", ["List", first, second], ["Range", 1, rounds], "list<list<integer>>"));
+/** The coefficients bound as `coefficients`, lowest power first. */
+const ascendingCoefficients: MathJSON = forEach(
+  polynomialPositions,
+  at(subtract(add("n", 2), "j"), "coefficients"),
+  "j",
+);
+/** The distinct eigenvalues: the degree of p less that of gcd(p, p'), the multiple roots counted once less. */
+const distinctEigenvalues: MathJSON = bindList(
+  "polynomial",
+  ascendingCoefficients,
+  subtract("n", degreeOf(polynomialGcd("polynomial", derivative("polynomial")))),
+);
+/** The greatest multiplicity of an eigenvalue: 1 more than the times gcd(p, p'), gcd of that and its derivative, ... stays nonconstant. */
+const maximumMultiplicity: MathJSON = bindList(
+  "polynomial",
+  ascendingCoefficients,
+  at(
+    1,
+    at(
+      2,
+      typedFolding(
+        bindList(
+          "current",
+          at(1, "chain"),
+          [
+            "If",
+            equals(degreeOf("current"), 0),
+            "chain",
+            [
+              "List",
+              polynomialGcd("current", derivative("current")),
+              forEach(polynomialPositions, ["If", equals("j", 1), add(at(1, at(2, "chain")), 1), 0], "j"),
+            ],
+          ],
+          "list<integer>",
+        ),
+        "chain",
+        "turn",
+        ["List", "polynomial", forEach(polynomialPositions, 0, "j")],
+        ["Range", 1, "n"],
+        "list<list<integer>>",
+      ),
+    ),
+  ),
+);
+
+/** The Laplacian, degrees on the diagonal and minus the adjacency off it. */
+const laplacianRows: MathJSON = forEach(
+  vertices,
+  forEach(vertices, ["If", equals("i", "j"), degree("i"), subtract(0, adjacent("i", "j"))], "j"),
+  "i",
+);
+/** The signless Laplacian, degrees on the diagonal and the adjacency off it. */
+const signlessLaplacianRows: MathJSON = forEach(
+  vertices,
+  forEach(vertices, ["If", equals("i", "j"), degree("i"), adjacent("i", "j")], "j"),
+  "i",
+);
+const withMatrix = (name: string, rows: MathJSON, body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withDegrees(
+    bindList(
+      "adjacency",
+      adjacencyMatrix,
+      bindList(name, rows, withCoefficients(name, body), "list<list<integer>>"),
+      "list<list<integer>>",
+    ),
+    otherwise,
+  );
+const withAdjacencySpectrum = (body: MathJSON): MathJSON => withAdjacency(withCoefficients("adjacency", body));
+const withLaplacianSpectrum = (body: MathJSON): MathJSON => withMatrix("laplacian", laplacianRows, body);
+const withSignlessSpectrum = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withMatrix("signless", signlessLaplacianRows, body, otherwise);
+const withEigenvalueSigns = (body: MathJSON): MathJSON =>
+  withAdjacencySpectrum(
+    bind("positive", positiveEigenvalues, bind("negative", negativeEigenvalues, body, "integer"), "integer"),
+  );
+
+/** The distance Laplacian, each vertex's distances to the others summed on the diagonal and minus the distance off it. */
+const distanceLaplacianRows: MathJSON = forEach(
+  vertices,
+  forEach(
+    vertices,
+    ["If", equals("i", "j"), floored(sumOver(vertices, distance("i", "w"), "w")), subtract(0, distance("i", "j"))],
+    "j",
+  ),
+  "i",
+);
+/** `body` over the matrix called `name`, for a connected graph; any other gives 0. */
+const withConnectedSpectrum = (name: string, rows: MathJSON, body: MathJSON): MathJSON =>
+  withDistances([
+    "If",
+    equals(componentsIn("distances"), 1),
+    name === "distances"
+      ? withCoefficients(name, body)
+      : bindList(name, rows, withCoefficients(name, body), "list<list<integer>>"),
+    0,
+  ]);
+
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
   stat(
@@ -1640,5 +1958,101 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The vertices on no triangle.",
     withAdjacency(subtract("n", triangleVertices)),
     `FindStat's St001996. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AdjacencyPositiveEigenvalueCount",
+    "The positive eigenvalues of the adjacency matrix, with multiplicity.",
+    withAdjacencySpectrum(positiveEigenvalues),
+    `FindStat's St000985. The adjacency matrix is symmetric, so the eigenvalues are real and Descartes' rule counts the positive ones as the sign changes of the characteristic polynomial. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AdjacencyNegativeEigenvalueCount",
+    "The negative eigenvalues of the adjacency matrix, with multiplicity.",
+    withAdjacencySpectrum(negativeEigenvalues),
+    `FindStat's St001971: the sign changes of the characteristic polynomial at -x. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AdjacencyNullity",
+    "The multiplicity of the eigenvalue zero of the adjacency matrix: the vertices less the positive and negative eigenvalues.",
+    withEigenvalueSigns(subtract("n", add("positive", "negative"))),
+    `FindStat's St000986. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AdjacencyRank",
+    "The rank of the adjacency matrix: its nonzero eigenvalues, with multiplicity.",
+    withEigenvalueSigns(add("positive", "negative")),
+    `FindStat's St001458. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphSignature",
+    "The positive less the negative eigenvalues of the adjacency matrix.",
+    withEigenvalueSigns(subtract("positive", "negative")),
+    `FindStat's St001970. ${NO_VERTICES}`,
+  ),
+  stat(
+    "NegativeEigenvaluePairGap",
+    "The ways to choose a pair of negative eigenvalues of the adjacency matrix, or one of them twice, less the positive eigenvalues.",
+    withEigenvalueSigns(subtract(spread(times("negative", add("negative", 1))), "positive")),
+    `FindStat's St001969: C(negative + 1, 2) less positive, conjectured nonnegative. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LaplacianPositiveEigenvalueCount",
+    "The positive eigenvalues of the Laplacian, with multiplicity.",
+    withLaplacianSpectrum(positiveEigenvalues),
+    `FindStat's St000987: the vertices less the components. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DistinctEigenvalueCount",
+    "The distinct eigenvalues of the adjacency matrix.",
+    withAdjacencySpectrum(distinctEigenvalues),
+    `FindStat's St000452. The characteristic polynomial has as many distinct roots as its degree less that of its greatest common divisor with its derivative. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DistinctLaplacianEigenvalueCount",
+    "The distinct eigenvalues of the Laplacian.",
+    withLaplacianSpectrum(distinctEigenvalues),
+    `FindStat's St000453. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumEigenvalueMultiplicity",
+    "The greatest multiplicity of an eigenvalue of the adjacency matrix.",
+    withAdjacencySpectrum(maximumMultiplicity),
+    `FindStat's St000776. A root of multiplicity m is a root of the m - 1 greatest common divisors of the polynomial with its derivatives in turn. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumLaplacianEigenvalueMultiplicity",
+    "The greatest multiplicity of an eigenvalue of the Laplacian.",
+    withLaplacianSpectrum(maximumMultiplicity),
+    `FindStat's St000774. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AltshulerSteinbergDeterminant",
+    "The determinant of the signless Laplacian, the incidence matrix times its transpose.",
+    withSignlessSpectrum(determinantFromCoefficients(1), 1),
+    `FindStat's St000368: the constant coefficient of the characteristic polynomial, up to the sign (-1)^n. The graph with no vertices has the empty determinant, 1.`,
+  ),
+  stat(
+    "AltshulerSteinbergQuarter",
+    "The determinant of the signless Laplacian divided by 4.",
+    withSignlessSpectrum(determinantFromCoefficients(4)),
+    `FindStat's St000303. The determinant is a multiple of 4 when it is not 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DistanceMatrixDeterminant",
+    "The determinant of the distance matrix.",
+    withConnectedSpectrum("distances", "distances", determinantFromCoefficients(1)),
+    `FindStat's St000302, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "DistinctDistanceLaplacianEigenvalueCount",
+    "The distinct eigenvalues of the distance Laplacian.",
+    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, distinctEigenvalues),
+    `FindStat's St000777, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumDistanceLaplacianEigenvalueMultiplicity",
+    "The greatest multiplicity of an eigenvalue of the distance Laplacian.",
+    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, maximumMultiplicity),
+    `FindStat's St000771, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
   ),
 ];
