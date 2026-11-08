@@ -22,6 +22,12 @@ test("HurwitzZeta and Zeta throw Uncertain where the double sum has cancelled it
   expect(() => hurwitz([2, 0])).not.toThrow();
 });
 
+// Hermite's integral cancels to 1e-28 here from a peak of 1e-11 past where the integrand looked finished (BL-353).
+test("HurwitzZeta throws Uncertain where Hermite's integral cancels at large Im s", () => {
+  expect(() => fn(["HurwitzZeta", ["Complex", -1, 40], "z"])([0.4258, -10.7278])).toThrow(Uncertain);
+  expect(() => fn(["HurwitzZeta", ["Complex", -10, 40], "z"])([-1.834, -12.915])).toThrow(Uncertain);
+});
+
 test("DirichletBeta, a difference of two Hurwitz zetas, answers to its digits (mpmath at dps 40)", () => {
   const beta = fn(["DirichletBeta", "z"]);
   expect(relative(beta([1.5, 4]), [1.1314630791900349, -0.1625016057077166])).toBeLessThan(1e-10);

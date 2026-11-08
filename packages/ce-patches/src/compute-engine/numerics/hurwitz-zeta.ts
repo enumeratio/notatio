@@ -229,8 +229,17 @@ export const MAX_RELATIVE_ERROR = 1e-8;
 /** Measured worst relative error per unit of (1 + reach) · ratio is 7.7e-16; this is that with a margin. */
 const ERROR_PER_LOSS = 2.5e-15;
 
-/** The relative error to expect of a sum whose largest term is `lost` times its value, its powers reaching `reach`. */
-const errorBound = (reach: number, lost: number): number => ERROR_PER_LOSS * (1 + reach) * lost;
+/** A value with the roundoff (`lost`, `reach`) and quadrature (`quad`, absolute) errors it may carry. */
+interface Measured {
+  value: Cx;
+  lost: number;
+  reach: number;
+  quad: number;
+}
+
+/** The relative error to expect of `r`: roundoff in a sum whose largest term is `lost` times its value, plus its quadrature error. */
+const errorBound = (r: Measured): number =>
+  ERROR_PER_LOSS * (1 + r.reach) * r.lost + r.quad / Math.hypot(r.value.re, r.value.im);
 
 /**
  * `hurwitzZeta`, or undefined where the digits it could return are below `MAX_RELATIVE_ERROR`
@@ -239,7 +248,7 @@ const errorBound = (reach: number, lost: number): number => ERROR_PER_LOSS * (1 
  */
 export function hurwitzZetaChecked(s: Cx, a: Cx): Cx | undefined {
   const r = hurwitzZetaWithLoss(s, a);
-  return errorBound(r.reach, r.lost) > MAX_RELATIVE_ERROR ? undefined : r.value;
+  return !(errorBound(r) <= MAX_RELATIVE_ERROR) ? undefined : r.value;
 }
 
 /**
@@ -252,30 +261,33 @@ export function hurwitzZetaWithError(s: Cx, a: Cx): { value: Cx; error: number }
   return withError(hurwitzZetaWithLoss(s, a));
 }
 
-function withError(r: { value: Cx; lost: number; reach: number }): { value: Cx; error: number } {
+function withError(r: Measured): { value: Cx; error: number } {
   const size = Math.hypot(r.value.re, r.value.im);
   if (!Number.isFinite(size)) return { value: r.value, error: Number.NaN };
-  return { value: r.value, error: size === 0 ? (r.lost === 1 ? 0 : Infinity) : errorBound(r.reach, r.lost) * size };
+  return { value: r.value, error: size === 0 ? (r.lost === 1 && r.quad === 0 ? 0 : Infinity) : errorBound(r) * size };
 }
 
 /** ζ(s, a), its cancellation ratio (the largest term summed over the result) and the `reach` of its powers. */
-export function hurwitzZetaWithLoss(s: Cx, a: Cx): { value: Cx; lost: number; reach: number } {
+export function hurwitzZetaWithLoss(s: Cx, a: Cx): Measured {
   const atZero = hurwitzAtZero(s, a);
-  if (atZero) return { value: atZero, lost: 1, reach: 0 };
+  if (atZero) return { value: atZero, lost: 1, reach: 0, quad: 0 };
   _reach = 0;
   const r = hurwitzZetaRoute(s, a);
   return { ...r, reach: _reach };
 }
 
-function hurwitzZetaRoute(s: Cx, a: Cx): { value: Cx; lost: number } {
+function hurwitzZetaRoute(s: Cx, a: Cx): { value: Cx; lost: number; quad: number } {
   if (s.re >= 0 || a.re >= EM_BEYOND * emEdge(s) || !Number.isFinite(a.re) || !Number.isFinite(a.im)) {
     const { value, largest } = hurwitzEMWithLargest(s, a);
-    return { value, lost: largest / Math.hypot(value.re, value.im) };
+    return { value, lost: largest / Math.hypot(value.re, value.im), quad: 0 };
   }
   const taylor = hurwitzTaylor(s, a);
-  if (taylor && taylor.lost <= TAYLOR_TRUSTED) return taylor;
+  if (taylor && taylor.lost <= TAYLOR_TRUSTED) return { ...taylor, quad: 0 };
   const hermite = hurwitzHermite(s, a);
-  return taylor && !(hermite.lost < taylor.lost) ? taylor : hermite;
+  if (!taylor) return hermite;
+  // The smaller total error: Hermite's roundoff and quadrature against the Taylor series' roundoff.
+  const hermiteError = hermite.lost + hermite.quad / Math.hypot(hermite.value.re, hermite.value.im) / ERROR_PER_LOSS;
+  return hermiteError < taylor.lost ? hermite : { ...taylor, quad: 0 };
 }
 
 /**
@@ -304,7 +316,20 @@ function hurwitzTaylor(s: Cx, a: Cx): { value: Cx; lost: number } | undefined {
 /** Hermite's integral shifts a no nearer the axis than this; past it the shift's a^(−s) cancels. */
 const HERMITE_MIN_RE = 0.125;
 
-/** Past this t, e^(−2πt) is below any term a double could hold beside ζ. */
+/**
+ * A Hermite panel is split until its two rules agree to this fraction of the largest thing
+ * summed. Near the branch point t = −Im(a) the integrand swings by up to e^(π|Im s|/2) over a
+ * panel of width Re(a); below 1e-14 the rules disagree by their own roundoff and the splits never end.
+ */
+const QUAD_TOLERANCE = 1e-14;
+
+/** The tail past a Hermite panel is dropped once its bound is under this fraction of the largest thing summed. */
+const TAIL_TOLERANCE = 1e-17;
+
+/** Most halvings of one Hermite panel; a panel still disagreeing past it declines through `quad`. */
+const QUAD_DEPTH = 5;
+
+/** The integral is cut here whatever its tail bound; past it e^(π|Im s|/2 − 2πt) is under e^(−60) up to |Im s| ≈ 100 or so. */
 const HERMITE_T_MAX = 60;
 
 /**
@@ -316,9 +341,10 @@ const HERMITE_T_MAX = 60;
  * panels no wider than that. An a nearer the axis than `HERMITE_MIN_RE` is first shifted by
  * ζ(s, a) = a^(−s) + ζ(s, a+1). Left of Re(s) = 0 with a off the axis nothing here is much
  * bigger than ζ itself (a digit or so), where the direct terms of Euler–Maclaurin or the Taylor
- * series in a lose up to seven or more. `lost` is the largest part over the result.
+ * series in a lose up to seven or more. `lost` is the largest part over the result; `quad` is the
+ * absolute error of the quadrature (panel disagreements and the bounded tail), which `errorBound` adds.
  */
-function hurwitzHermite(s: Cx, a: Cx): { value: Cx; lost: number } {
+function hurwitzHermite(s: Cx, a: Cx): { value: Cx; lost: number; quad: number } {
   let headR = 0;
   let headI = 0;
   let largest = 0; // the biggest thing summed, for `lost`
@@ -346,45 +372,111 @@ function hurwitzHermite(s: Cx, a: Cx): { value: Cx; lost: number } {
   sumI += qi;
   largest = Math.max(largest, 0.5 * Math.hypot(_pr, _pi), Math.hypot(qr, qi));
 
-  // The integrand peaks near t = −Re(s)/2π and then falls like e^(−2πt); stop once two
-  // panels past the peak add nothing a double can see.
-  const { x, w } = GAUSS_LEGENDRE_20;
-  const peak = Math.max(0, -s.re) / (2 * Math.PI);
+  // Each panel is split in halves until Gauss–Legendre on the whole and on its halves agree, and
+  // the disagreements add into `quad`. The loop ends where `hermiteTail` bounds everything past
+  // the panel by `TAIL_TOLERANCE` of the largest thing summed, and that bound adds into `quad` too.
   const width = Math.min(1, bRe);
+  const tailStart = Math.abs(s.re) / Math.PI;
   let intR = 0;
   let intI = 0;
   let intAbs = 0; // ∫ |integrand|
-  let panelLargest = 0;
-  let small = 0;
-  for (let p = 0; p * width < HERMITE_T_MAX; p++) {
-    let panR = 0;
-    let panI = 0;
-    let panAbs = 0;
-    for (let i = 0; i < x.length; i++) {
-      const t = width * (p + 0.5 + 0.5 * x[i]);
-      cpowInto(bRe, bIm + t, -s.re, -s.im);
-      const uR = _pr;
-      const uI = _pi;
-      cpowInto(bRe, bIm - t, -s.re, -s.im);
-      const k = (0.5 * width * w[i]) / Math.expm1(2 * Math.PI * t);
-      // i·(u − v)
-      const vR = k * (uR - _pr);
-      const vI = k * (uI - _pi);
-      panR -= vI;
-      panI += vR;
-      panAbs += Math.hypot(vR, vI);
+  let quad = 0;
+  for (let p = 0; ; p++) {
+    const t0 = p * width;
+    const t1 = t0 + width;
+    const whole = hermitePanel(s, bRe, bIm, t0, t1);
+    const scale = Math.max(largest, intAbs + whole.abs);
+    const pan = refinePanel(s, bRe, bIm, t0, t1, whole, QUAD_TOLERANCE * scale, 0);
+    intR += pan.re;
+    intI += pan.im;
+    intAbs += pan.abs;
+    quad += pan.err;
+    const tail = t1 >= tailStart ? hermiteTail(s, Math.hypot(bRe, bIm), t1) : Infinity;
+    if (tail <= TAIL_TOLERANCE * Math.max(largest, intAbs)) {
+      quad += tail;
+      break;
     }
-    intR += panR;
-    intI += panI;
-    intAbs += panAbs;
-    const size = panAbs;
-    panelLargest = Math.max(panelLargest, size);
-    if ((p + 1) * width > peak && size <= 1e-17 * panelLargest) {
-      if (++small === 2) break;
-    } else small = 0;
+    if (t1 >= HERMITE_T_MAX) {
+      quad += tail; // too wide to vouch for: the error says so
+      break;
+    }
   }
   const value = cx(sumR + intR, sumI + intI);
-  return { value, lost: Math.max(largest, intAbs) / Math.hypot(value.re, value.im) };
+  return { value, lost: Math.max(largest, intAbs) / Math.hypot(value.re, value.im), quad };
+}
+
+/**
+ * A bound on Hermite's integral past t, for Re s < 0 and t ≥ |Re s|/π: the integrand is at most
+ * 2·(|b| + t)^|Re s|·e^(π|Im s|/2) / (e^(2πt) − 1), since |arg(b ± it)| < π/2 for Re b > 0, and that
+ * falls faster than e^(−πt), so the integral past t is under it. Its e^(π|Im s|/2) is why a
+ * large |Im s| needs t far past the peak: at s = −1+40i the integrand is 1e−46 at t = 8 and 1e−11
+ * at t = 12.
+ */
+function hermiteTail(s: Cx, bAbs: number, t: number): number {
+  const ln =
+    Math.LN2 +
+    Math.abs(s.re) * Math.log(bAbs + t) +
+    0.5 * Math.PI * Math.abs(s.im) -
+    Math.log(Math.expm1(2 * Math.PI * t));
+  return Math.exp(ln);
+}
+
+interface Panel {
+  re: number;
+  im: number;
+  abs: number;
+  err: number;
+}
+
+/** Gauss–Legendre on [t0, t1] of Hermite's integrand i·((b+it)^(−s) − (b−it)^(−s)) / (e^(2πt) − 1). */
+function hermitePanel(s: Cx, bRe: number, bIm: number, t0: number, t1: number): Panel {
+  const { x, w } = GAUSS_LEGENDRE_20;
+  const half = 0.5 * (t1 - t0);
+  let re = 0;
+  let im = 0;
+  let abs = 0;
+  for (let i = 0; i < x.length; i++) {
+    const t = t0 + half * (1 + x[i]);
+    cpowInto(bRe, bIm + t, -s.re, -s.im);
+    const uR = _pr;
+    const uI = _pi;
+    cpowInto(bRe, bIm - t, -s.re, -s.im);
+    const k = (half * w[i]) / Math.expm1(2 * Math.PI * t);
+    // i·(u − v)
+    const vR = k * (uR - _pr);
+    const vI = k * (uI - _pi);
+    re -= vI;
+    im += vR;
+    abs += Math.hypot(vR, vI);
+  }
+  return { re, im, abs, err: 0 };
+}
+
+/**
+ * `whole` (the panel [t0, t1] in one rule) against its two halves. The halves stand, with their
+ * disagreement as the error, once it is within `tol` or `QUAD_DEPTH` halvings have been spent;
+ * otherwise each half is refined in turn.
+ */
+function refinePanel(
+  s: Cx,
+  bRe: number,
+  bIm: number,
+  t0: number,
+  t1: number,
+  whole: Panel,
+  tol: number,
+  depth: number,
+): Panel {
+  const mid = 0.5 * (t0 + t1);
+  const lo = hermitePanel(s, bRe, bIm, t0, mid);
+  const hi = hermitePanel(s, bRe, bIm, mid, t1);
+  const err = Math.hypot(lo.re + hi.re - whole.re, lo.im + hi.im - whole.im);
+  if (err <= tol || depth >= QUAD_DEPTH) {
+    return { re: lo.re + hi.re, im: lo.im + hi.im, abs: lo.abs + hi.abs, err };
+  }
+  const a = refinePanel(s, bRe, bIm, t0, mid, lo, 0.5 * tol, depth + 1);
+  const b = refinePanel(s, bRe, bIm, mid, t1, hi, 0.5 * tol, depth + 1);
+  return { re: a.re + b.re, im: a.im + b.im, abs: a.abs + b.abs, err: a.err + b.err };
 }
 
 /** Where `hurwitzEM` starts its asymptotic tail; a at or past it sums no cancelling terms. */
@@ -480,7 +572,7 @@ export function zetaGeneralized(s: Cx, a: Cx): Cx {
 /** `zetaGeneralized`, or undefined where `hurwitzZetaChecked` would decline, the front terms counted in the cancellation. */
 export function zetaGeneralizedChecked(s: Cx, a: Cx): Cx | undefined {
   const r = zetaGeneralizedWithLoss(s, a);
-  return errorBound(r.reach, r.lost) > MAX_RELATIVE_ERROR ? undefined : r.value;
+  return !(errorBound(r) <= MAX_RELATIVE_ERROR) ? undefined : r.value;
 }
 
 /** `zetaGeneralized` with its absolute error, as `hurwitzZetaWithError`. */
@@ -488,9 +580,9 @@ export function zetaGeneralizedWithError(s: Cx, a: Cx): { value: Cx; error: numb
   return withError(zetaGeneralizedWithLoss(s, a));
 }
 
-function zetaGeneralizedWithLoss(s: Cx, a: Cx): { value: Cx; lost: number; reach: number } {
+function zetaGeneralizedWithLoss(s: Cx, a: Cx): Measured {
   const atZero = hurwitzAtZero(s, a);
-  if (atZero) return { value: atZero, lost: 1, reach: 0 };
+  if (atZero) return { value: atZero, lost: 1, reach: 0, quad: 0 };
   const negHalfS = scale(s, -0.5);
   let acc = cx(0, 0);
   let largest = 0;
@@ -509,7 +601,12 @@ function zetaGeneralizedWithLoss(s: Cx, a: Cx): { value: Cx; lost: number; reach
   const tail = hurwitzZetaWithLoss(s, cur);
   const value = add(acc, tail.value);
   largest = Math.max(largest, tail.lost * Math.hypot(tail.value.re, tail.value.im));
-  return { value, lost: largest / Math.hypot(value.re, value.im), reach: Math.max(tail.reach, frontReach) };
+  return {
+    value,
+    lost: largest / Math.hypot(value.re, value.im),
+    reach: Math.max(tail.reach, frontReach),
+    quad: tail.quad,
+  };
 }
 
 /** Real-valued ζ(s, a) for real s, a — the shape compute-engine's compiled
