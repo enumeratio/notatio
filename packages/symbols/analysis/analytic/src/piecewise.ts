@@ -1,7 +1,8 @@
 import { isNumber, isSymbol, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { type Json, operandsOf } from "@enumeratio/engine";
 import { type Knowledge, knowledgeOf, narrowPiecewise, withAssumed } from "./piecewise-assumptions.ts";
 import { compose } from "./piecewise-compose.ts";
+import { equation, type Relation, relation } from "./piecewise-linear.ts";
 import { expandStep, STEP_HEADS } from "./piecewise-rewrites.ts";
 
 // Piecewise({{v1, c1}, {v2, c2}, ...}, default) — Wolfram's conditional-value head. The
@@ -60,6 +61,28 @@ function isKnownReal(ce: ComputeEngine, v: Expression): boolean {
   return ce.ask(["Element", v.json, "RealNumbers"] as never).length > 0;
 }
 
+const INEQUALITIES = new Set<string>(["Less", "LessEqual", "Greater", "GreaterEqual"]);
+
+/** A condition as Wolfram writes it: a relation solved for its one unknown (`x > 1/2`), else as a difference against 0 (`x - y < 0`). */
+function written(c: Expression): Json {
+  const ops = operandsOf(c);
+  if (c.operator === "And" || c.operator === "Or") return [c.operator, ...ops.map(written)] as Json;
+  if (ops.length === 2 && INEQUALITIES.has(c.operator))
+    return relation(c.operator as Relation, ops[0] as never, ops[1] as never) ?? c.json;
+  if (c.operator === "Equal" && ops.length === 2) return equation(ops[0] as never, ops[1] as never) ?? c.json;
+  return c.json;
+}
+
+/** Neighbouring arguments equal: `x == y && y == z`, a lone argument equal to 0. */
+function equalChain(ce: ComputeEngine, ops: readonly Expression[]): Json {
+  const zero = ce.number(0) as never;
+  const pairs = ops.length === 1 ? [[ops[0], zero]] : ops.slice(1).map((o, i) => [ops[i], o]);
+  const eqs = pairs.map(
+    ([a, b]) => equation(a as never, b as never) ?? (["Equal", ["Subtract", a.json, b.json], 0] as Json),
+  );
+  return eqs.length === 1 ? eqs[0] : (["And", ...eqs] as Json);
+}
+
 function expandOne(ce: ComputeEngine, e: Expression, allReal: boolean, kn: Knowledge): Expression | undefined {
   const op = e.operator;
   const ops = operandsOf(e);
@@ -81,17 +104,18 @@ function expandOne(ce: ComputeEngine, e: Expression, allReal: boolean, kn: Knowl
   // Wolfram's If, Boole and the deltas are conditional values already: no argument need be real.
   const clause = (value: unknown, cond: unknown) => ["List", value, cond];
   if (op === "If" && (ops.length === 2 || ops.length === 3)) {
-    return ce.box(["Piecewise", ["List", clause(ops[1].json, ops[0].json)], ops[2]?.json ?? 0] as never);
+    const branches = ce.box(["Piecewise", ["List", clause(ops[1].json, written(ops[0]))], ops[2]?.json ?? 0] as never);
+    // Both branches are written, in Wolfram's order: the greater value the default.
+    return compose(ce, kn, "Add", [branches]) ?? branches;
   }
   if (op === "Boole" && ops.length === 1) {
-    return ce.box(["Piecewise", ["List", clause(1, ops[0].json)], 0] as never);
+    return ce.box(["Piecewise", ["List", clause(1, written(ops[0]))], 0] as never);
   }
-  if (op === "KroneckerDelta" && (ops.length === 1 || ops.length === 2)) {
-    const diff = ops.length === 1 ? ops[0].json : ["Subtract", ops[0].json, ops[1].json];
-    return ce.box(["Piecewise", ["List", clause(1, ["Equal", diff, 0])], 0] as never);
+  if (op === "KroneckerDelta" && ops.length >= 1) {
+    return ce.box(["Piecewise", ["List", clause(1, equalChain(ce, ops))], 0] as never);
   }
   if (op === "DiscreteDelta" && ops.length > 0) {
-    const zero = ops.map((o) => ["Equal", o.json, 0]);
+    const zero = ops.map((o) => equation(o as never, ce.number(0) as never) ?? ["Equal", o.json, 0]);
     return ce.box(["Piecewise", ["List", clause(1, zero.length === 1 ? zero[0] : ["And", ...zero])], 0] as never);
   }
   // The real cube root, which is negative below zero: Wolfram's `Piecewise[{{-(-x)^(1/3), x < 0}}, x^(1/3)]`.
@@ -124,6 +148,8 @@ function expand(ce: ComputeEngine, e: Expression, allReal: boolean, kn: Knowledg
     if (STEP_HEADS.has(e.operator)) return e;
   }
   const rebuilt = ce.box([e.operator, ...inner.map((o) => o.json)] as never);
+  // A Piecewise given is written afresh: cut to the assumptions, its branches in Wolfram's order and default.
+  if (rebuilt.operator === "Piecewise") return compose(ce, kn, "Add", [rebuilt]) ?? rebuilt;
   return expandOne(ce, rebuilt, allReal, kn) ?? rebuilt;
 }
 

@@ -143,6 +143,12 @@ export function relation(op: Relation, a: Expr, b: Expr): Json | undefined {
   ] as Json;
 }
 
+/** `a == b` the way `relation` writes an inequality: one unknown solved for (`x == 1/2`), else the difference against 0 (`x - y == 0`). */
+export function equation(a: Expr, b: Expr): Json | undefined {
+  const r = relation("LessEqual", a, b);
+  return r === undefined ? undefined : (["Equal", (r as unknown as Json[])[1], (r as unknown as Json[])[2]] as Json);
+}
+
 export const and = (conds: readonly Json[]): Json => (conds.length === 1 ? conds[0] : (["And", ...conds] as Json));
 export const or = (conds: readonly Json[]): Json => (conds.length === 1 ? conds[0] : (["Or", ...conds] as Json));
 const clause = ([value, cond]: readonly [Json, Json]): Json => ["List", value, cond] as Json;

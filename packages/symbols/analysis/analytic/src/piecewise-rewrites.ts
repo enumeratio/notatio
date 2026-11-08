@@ -7,6 +7,7 @@ import {
   compact,
   hasPiecewise,
   isNonReal,
+  nameOrder,
   type Linear,
   linear,
   or,
@@ -31,11 +32,15 @@ import {
   cmpNum,
   type Interval,
   intervalOf,
+  isBounded,
   type Knowledge,
+  type Lin,
   narrowPiecewise,
   num,
   type Num,
   numQ,
+  numScale,
+  rangeOf,
   ratioInterval,
 } from "./piecewise-assumptions.ts";
 
@@ -412,6 +417,7 @@ const triangleCells =
 /** What a staircase's argument is a function of: a symbol, linearly (`2 x - 1`, or bare), or a power or root of one. */
 type Argument =
   | { kind: "affine"; symbol: string; a: Q; b: Q; lin: Linear }
+  | { kind: "sum"; lin: Linear; json: Json }
   | { kind: "power"; symbol: string; n: number }
   | { kind: "sqrt"; symbol: string }
   | { kind: "cuberoot"; symbol: string };
@@ -421,6 +427,14 @@ function argumentOf(g: Expr): Argument | undefined {
   const atoms = compact(l);
   if (atoms.length === 1 && typeof atoms[0].atom === "string" && !atoms[0].constant)
     return { kind: "affine", symbol: atoms[0].atom, a: atoms[0].coeff, b: l.constant, lin: l };
+  // Several unknowns, linearly (`x + y`, `x - y`): the staircase is cut on the sum itself, as Wolfram writes it.
+  if (
+    atoms.length >= 2 &&
+    qIsZero(l.constant) &&
+    atoms.every((a) => typeof a.atom === "string" && !a.constant) &&
+    qNum(atoms.toSorted((a, b) => nameOrder(a.atom as string, b.atom as string))[0].coeff) > 0
+  )
+    return { kind: "sum", lin: l, json: g.json };
   const ops = operandsOf(g);
   const base = ops[0] && isSymbol(ops[0]) ? ops[0].symbol : undefined;
   if (base === undefined || base === "Pi") return undefined;
@@ -582,7 +596,7 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
   const arg = argumentOf(g);
   if (!m || !arg) return undefined;
   const interval = (symbol: string): Interval | undefined => intervalOf(kn, symbol) ?? typedInterval(box(ce, symbol));
-  const symbolJson: Json = arg.symbol;
+  const symbolJson: Json = arg.kind === "sum" ? arg.json : arg.symbol;
 
   let axis: Axis | undefined;
   let family: Family | undefined;
@@ -631,6 +645,17 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
         break;
     }
     if (toMultiple && family) family = multiples(family, pLin);
+  } else if (arg.kind === "sum") {
+    if (INTEGER_VALUED.has(op) && !modular) {
+      const lin: Lin = {
+        atoms: new Map(compact(arg.lin).map((a) => [JSON.stringify(a.atom), { atom: a.atom, coeff: a.coeff }])),
+        constant: numQ(arg.lin.constant),
+      };
+      const range = rangeOf(lin, kn.box);
+      if (isBounded(range)) axis = { variable: arg.json, falling: false, at: (e) => qJson(e), domain: range };
+      family =
+        op === "Floor" ? floorCell : op === "Round" ? roundCell : op === "IntegerPart" ? integerPartCell : ceilCell;
+    }
   } else if (INTEGER_VALUED.has(op) && m.kind === "number") {
     const i = interval(arg.symbol);
     if (arg.kind === "power") axis = i && powerAxis(i, arg.n, symbolJson);
@@ -638,6 +663,17 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
     else axis = i && rootAxis(i, 2, g.json);
     family =
       op === "Floor" ? floorCell : op === "Round" ? roundCell : op === "IntegerPart" ? integerPartCell : ceilCell;
+    // `Floor(g, p)` is `p Floor(g / p)`: the cells are of `g / p`.
+    if (axis && toMultiple && m.kind === "number") {
+      const inner = axis;
+      const by = qDiv(q(1), m.p);
+      axis = {
+        ...inner,
+        at: (e) => inner.at(qMul(e, m.p)),
+        domain: { ...inner.domain, lo: numScale(inner.domain.lo, by), hi: numScale(inner.domain.hi, by) },
+      };
+      family = multiples(family, constantLinear(m.p));
+    }
   }
   return axis && family ? staircase(axis, family) : undefined;
 }

@@ -779,3 +779,67 @@ test("a condition is cut by what the other conditions in its branch say", () => 
   ])
     expect(at(pw, { x, y })).toBe(Math.min(x, 0, y));
 });
+
+test("a staircase of a sum of unknowns is cut on the sum", () => {
+  const box = ["And", ["Less", 0, "x", 2], ["Less", 0, "y", 2]];
+  const grid = [0.25, 0.5, 1, 1.25, 1.5, 1.75];
+  for (const [name, ref] of [
+    ["Floor", floor],
+    ["Ceil", ceil],
+    ["Round", roundEven],
+    ["IntegerPart", trunc],
+  ] as const) {
+    const pw = expand([name, ["Add", "x", "y"]], box);
+    expect(head(pw), name).toBe("Piecewise");
+    for (const x of grid) for (const y of grid) expect(at(pw, { x, y }), `${name} at ${x}, ${y}`).toBe(ref(x + y));
+  }
+  expect(expand(["Floor", ["Subtract", "x", "y"]], ["And", ["Less", 0, "x", 2], ["Less", 0, "y", 1]])).toEqual([
+    "Piecewise",
+    [
+      "List",
+      ["List", -1, ["Less", ["Add", "x", ["Negate", "y"]], 0]],
+      ["List", 1, ["LessEqual", 1, ["Add", "x", ["Negate", "y"]]]],
+    ],
+    0,
+  ]);
+});
+
+test("two-argument Floor of a square steps by the multiple", () => {
+  const pw = expand(["Floor", ["Power", "x", 2], 2], ["Less", 0, "x", 3]);
+  for (const x of [0.5, 1, 1.5, 1.75, 2, 2.4, 2.5, 2.7, 2.8, 2.9]) expect(at(pw, { x })).toBe(2 * floor((x * x) / 2));
+});
+
+test("a Piecewise given is cut to the assumptions and written in Wolfram's order", () => {
+  const pw = ["Piecewise", ["List", ["List", "x", ["Less", "x", 1]], ["List", 2, ["Less", "x", 3]]], 5];
+  expect(expand(pw, ["Less", 0, "x", 2])).toEqual(["Piecewise", ["List", ["List", 2, ["LessEqual", 1, "x"]]], "x"]);
+  expect(expand(pw, ["Less", 0, "x", 4])).toEqual([
+    "Piecewise",
+    ["List", ["List", 2, ["And", ["LessEqual", 1, "x"], ["Less", "x", 3]]], ["List", 5, ["LessEqual", 3, "x"]]],
+    "x",
+  ]);
+});
+
+test("If, Boole and the deltas write their conditions as Wolfram does", () => {
+  const cond = (j: unknown) => (expand(j) as unknown as unknown[][])[1]![1];
+  expect(cond(["Boole", ["Less", "x", "y"]])).toEqual(["List", 1, ["Less", ["Add", "x", ["Negate", "y"]], 0]]);
+  expect(cond(["Boole", ["Greater", ["Multiply", 2, "x"], 1]])).toEqual(["List", 1, ["Less", ["Rational", 1, 2], "x"]]);
+  expect(cond(["KroneckerDelta", ["Subtract", ["Multiply", 2, "x"], 1], 0])).toEqual([
+    "List",
+    1,
+    ["Equal", "x", ["Rational", 1, 2]],
+  ]);
+  expect(cond(["KroneckerDelta", "x", "y", "z"])).toEqual([
+    "List",
+    1,
+    ["And", ["Equal", ["Add", "x", ["Negate", "y"]], 0], ["Equal", ["Add", "y", ["Negate", "z"]], 0]],
+  ]);
+});
+
+test("If is written with its branches in Wolfram's order", () => {
+  expect(expand(["If", ["Greater", "x", 0], "x", ["Negate", "x"]])).toEqual([
+    "Piecewise",
+    ["List", ["List", ["Negate", "x"], ["LessEqual", "x", 0]]],
+    "x",
+  ]);
+  expect(expand(["If", ["Greater", "x", 0], 1, 2])).toEqual(["Piecewise", ["List", ["List", 1, ["Less", 0, "x"]]], 2]);
+});
