@@ -194,6 +194,7 @@ export class ComplexPlotRenderer {
   #pipeline: GPURenderPipeline | undefined;
   #bind: GPUBindGroup | undefined;
   #literals: readonly (readonly [number, number])[] = [];
+  #latest = 0;
   #buf = new ArrayBuffer(UNIFORM_SIZE);
   #gradient: Gradient | undefined;
 
@@ -215,6 +216,7 @@ export class ComplexPlotRenderer {
    * (the cheap path a slider takes), or "failed" if the shader would not compile.
    */
   async setExpression(e: ComplexWGSL): Promise<"rebuilt" | "slots" | "failed"> {
+    const ticket = ++this.#latest;
     this.#literals = e.literals;
     const cached = this.#pipelines.get(e.shape);
     if (cached) {
@@ -233,7 +235,8 @@ export class ComplexPlotRenderer {
     });
     if (await this.#device.popErrorScope()) return "failed";
     this.#pipelines.set(e.shape, pipeline);
-    this.#use(pipeline);
+    // A newer call owns the literals; its pipeline, not this one, is the one in use.
+    if (ticket === this.#latest) this.#use(pipeline);
     return "rebuilt";
   }
 

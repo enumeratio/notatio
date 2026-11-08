@@ -87,6 +87,7 @@ export class NotatioComplexPlot extends LitElement {
 
   #canvas: HTMLCanvasElement | undefined;
   #renderer: ComplexPlotRenderer | undefined;
+  #compiling = 0;
   #view: ComplexPlotView = { center: [0, 0], extent: 2.4, mask: 0 };
   #home: ComplexPlotView = { center: [0, 0], extent: 2.4, mask: 0 };
   #w = 2;
@@ -164,20 +165,24 @@ export class NotatioComplexPlot extends LitElement {
     const renderer = this.#renderer;
     const value = this.value;
     if (!renderer || !value.trim()) return;
+    // Compiles overlap (the init's, then each `bindings` or `value` change, while the kernel is still
+    // answering); only the newest goes on, so a stale one never rebuilds the shader or paints a second frame.
+    const mine = ++this.#compiling;
     let canonical: unknown;
     try {
       canonical = bindWildcards(await canonicalOf(value), this.bindings);
     } catch {
-      this._status = `Could not parse: ${value}`;
+      if (mine === this.#compiling) this._status = `Could not parse: ${value}`;
       return;
     }
-    if (value !== this.value) return;
+    if (mine !== this.#compiling) return;
     const emitted = emitComplexWGSL(canonical as never, this.var);
     if (!emitted) {
       this._status = `No complex GPU lowering for: ${value}`;
       return;
     }
     const outcome = await renderer.setExpression(emitted);
+    if (mine !== this.#compiling) return;
     if (outcome === "failed") {
       this._status = `Shader did not compile for: ${this.value}`;
       return;
