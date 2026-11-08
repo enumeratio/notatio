@@ -123,3 +123,20 @@ test("a Cell's held expression rides as its Epsil value, whatever it lowers to",
   expect(tree.attributes.value).toContain("Slider");
   expect(tree.children).toEqual([]);
 });
+
+test("a Cell's and a Show's options reach the attributes on both routes", () => {
+  for (const text of [
+    "Cell(1 + 1, InForm -> InputForm, OutForm -> TeXForm, Expected -> 2)",
+    'Show(Plot(Sin(x), (x, 0, 1)), Caption -> "a sine")',
+  ]) {
+    const json = parseExpression(text).json;
+    const drawn = renderingOf(json);
+    const written = structuralOf(json);
+    expect(written.tag).toBe(drawn?.tag);
+    expect(written.attributes).toEqual(drawn?.attributes);
+  }
+  const cell = structuralOf(parseExpression("Cell(1 + 1, InForm -> InputForm, Expected -> 2)").json).attributes;
+  expect(cell["in-form"]).toBe("input");
+  expect(cell.expect).toBe("2");
+  expect(cell.expected).toBeUndefined();
+});

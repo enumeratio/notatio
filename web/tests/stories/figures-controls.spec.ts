@@ -456,6 +456,18 @@ test.describe("environments", () => {
     await expect(cell.locator("notatio-out")).not.toHaveText("", { timeout: 20_000 });
   });
 
+  test("a cell's InForm and Expected reach the attributes it reads", async ({ page }) => {
+    await page.goto("/docs/components/environments");
+    const shown = story(page, "a-cell-with-its-forms-and-expected-value");
+    const cell = shown.locator(".env-out notatio-cell");
+    await expect(cell).toBeVisible({ timeout: 120_000 });
+    await expect(cell).toHaveAttribute("in-form", "input");
+    await expect(cell).toHaveAttribute("expect", "2");
+    // The Out meets its assertion: 1 + 1 is the 2 asked for.
+    await expect(cell.locator("notatio-out")).toContainText("2", { timeout: 60_000 });
+    await expect(cell.locator("notatio-out")).not.toContainText("expected");
+  });
+
   test("a narrow column's plot follows its slider", async ({ page }) => {
     await page.goto("/docs/components/environments");
     const out = story(page, "a-narrow-column").locator(".env-out");

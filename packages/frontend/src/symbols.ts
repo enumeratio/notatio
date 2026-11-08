@@ -1160,9 +1160,9 @@ export const LAYOUT_SYMBOLS: readonly VisualSymbol[] = [
         const id = formId(value);
         return id === undefined ? {} : { "out-form": id };
       },
-      // Parser bookkeeping is not part of the value.
+      // The cell compares plain MathJSON (`2`, not `{"num":"2"}`); parser bookkeeping is not part of the value.
       Expected: (value) => ({
-        expect: JSON.stringify(value, (key, v: unknown) => (key === "sourceOffsets" ? undefined : v)),
+        expect: JSON.stringify(plainJson(value), (key, v: unknown) => (key === "sourceOffsets" ? undefined : v)),
       }),
     },
   },
@@ -1204,6 +1204,24 @@ export function lowerOptions(
     if (text !== undefined) attributes[attr] = text;
   }
   return { attributes, children };
+}
+
+/**
+ * A symbol's options split by who reads them: the `lowerable` ones become attributes (through
+ * the symbol's `options` rules), the `held` ones (`holdsOptions`, all but `Variables`) stay rules
+ * in the operands its `attributes` writes into `value`. Both the rendering path and the
+ * structural one call this, so a `Cell`'s `InForm` and a `Show`'s `Caption` land alike.
+ */
+export function splitHeldOptions(
+  symbol: Pick<VisualSymbol, "holdsOptions">,
+  options: Readonly<Record<string, Json>>,
+): { lowerable: Record<string, Json>; held: MathJsonExpression[] } {
+  if (!symbol.holdsOptions) return { lowerable: { ...options }, held: [] };
+  const entries = Object.entries(options);
+  return {
+    lowerable: Object.fromEntries(entries.filter(([k]) => k === "Variables")),
+    held: entries.filter(([k]) => k !== "Variables").map(([k, v]) => ["Rule", k, v] as MathJsonExpression),
+  };
 }
 
 const ALL_SYMBOLS: readonly VisualSymbol[] = [...VISUAL_SYMBOLS, ...CONTROL_SYMBOLS, ...LAYOUT_SYMBOLS];
@@ -1330,15 +1348,8 @@ function render(expr: Json, inScope: boolean): Rendering | undefined {
   }
   // The trailing rules are options, Wolfram's way; the rest are the positional operands.
   const { ops, options } = optionsOf(expr);
-  const lowered = lowerOptions(
-    symbol,
-    symbol.holdsOptions ? Object.fromEntries(Object.entries(options).filter(([k]) => k === "Variables")) : options,
-  );
-  const held = symbol.holdsOptions
-    ? Object.entries(options)
-        .filter(([k]) => k !== "Variables")
-        .map(([k, v]) => ["Rule", k, v] as MathJsonExpression)
-    : [];
+  const { lowerable, held } = splitHeldOptions(symbol, options);
+  const lowered = lowerOptions(symbol, lowerable);
   const attributes = { ...symbol.fixed, ...symbol.attributes([...ops, ...held]), ...lowered.attributes };
   const children = [
     ...(symbol.children?.(ops).map(
