@@ -121,7 +121,6 @@ function cornerFamily(kind: Kind): EpsilFamily {
     "sy_i",
     list("_r", -1),
     upTo(0, sub(shapeCount, 1)),
-    "list<integer>",
   );
   // Then n down to 1: n sits in the first corner whose tableaux hold the rank left. The state is
   // [rank left, the shape's n row lengths, the row each value sits in…], and the scan down the
@@ -143,7 +142,6 @@ function cornerFamily(kind: Kind): EpsilFamily {
     "sy_j",
     list(at("sy_u", 1), 0),
     upTo(1, n),
-    "list<integer>",
   );
   const down = lets(
     [
@@ -163,7 +161,7 @@ function cornerFamily(kind: Kind): EpsilFamily {
       ["sy_shape", shapeAt(at("sy_found", 2)), "list<integer>"],
       [
         "sy_end",
-        fold(down, "sy_u", "sy_t", join(list(at("sy_found", 1)), "sy_shape", zeros(n)), upTo(1, n), "list<integer>"),
+        fold(down, "sy_u", "sy_t", join(list(at("sy_found", 1)), "sy_shape", zeros(n)), upTo(1, n)),
         "list<integer>",
       ],
       ["sy_rows", drop("sy_end", add(n, 1)), "list<integer>"],
@@ -181,20 +179,12 @@ function cornerFamily(kind: Kind): EpsilFamily {
   const rowOfValue = fold(
     lets(
       [["sy_r", at("_x", "sy_i"), "list<integer>"]],
-      fold(
-        ["ReplaceAt", "sy_m", at("sy_r", "sy_k"), "sy_i"],
-        "sy_m",
-        "sy_k",
-        "sy_a",
-        upTo(1, length("sy_r")),
-        "list<integer>",
-      ),
+      fold(["ReplaceAt", "sy_m", at("sy_r", "sy_k"), "sy_i"], "sy_m", "sy_k", "sy_a", upTo(1, length("sy_r"))),
     ),
     "sy_a",
     "sy_i",
     zeros(n),
     upTo(1, len),
-    "list<integer>",
   );
   const above = fold(
     add(
@@ -225,7 +215,7 @@ function cornerFamily(kind: Kind): EpsilFamily {
     ],
     add(
       fold(add("sy_b", countOfShape("sy_i")), "sy_b", "sy_i", 0, upTo(0, sub("sy_place", 1))),
-      at(fold(up, "sy_u", "sy_v", join(list(0), padded("sy_h")), ["Range", n, 1, -1], "list<integer>"), 1),
+      at(fold(up, "sy_u", "sy_v", join(list(0), padded("sy_h")), ["Range", n, 1, -1]), 1),
     ),
   );
 

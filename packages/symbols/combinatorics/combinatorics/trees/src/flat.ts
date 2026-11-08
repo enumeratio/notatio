@@ -237,7 +237,6 @@ export const heightFlat: MathJSON = fold(
         "hj",
         ["List", "hk", 0],
         positions("_x"),
-        "list<integer>",
       ),
       2,
     ),

@@ -86,7 +86,6 @@ const eulerTable: MathJSON = rowTable(
       "tr_k",
       0,
       upTo(0, quotient(c, s)),
-      "integer",
     ),
 );
 
@@ -110,7 +109,6 @@ const greatest = (tag: string, lo: MathJSON, hi: MathJSON, holds: (x: MathJSON) 
       `${tag}_h`,
       list(lo, hi),
       HALVINGS,
-      "list<integer>",
     ),
     1,
   );
@@ -158,7 +156,6 @@ function subtrees(tag: string, depth: MathJSON, rem0: MathJSON, cap: MathJSON, r
           k,
           list(0, 0, at(s, 2)),
           upTo(0, quotient(rem, u)),
-          "list<integer>",
         ),
         "list<integer>",
       ],
@@ -183,7 +180,6 @@ function subtrees(tag: string, depth: MathJSON, rem0: MathJSON, cap: MathJSON, r
           i,
           list(quotient(at(sc, 3), ways), add(T(u), sub(kk, 1))),
           down(kk, 1),
-          "list<integer>",
         ),
         "list<integer>",
       ],
@@ -198,11 +194,10 @@ function subtrees(tag: string, depth: MathJSON, rem0: MathJSON, cap: MathJSON, r
         j,
         list(),
         upTo(1, kk),
-        "list<integer>",
       ),
     ),
   );
-  return drop(fold(step, s, u, list(rem0, rank), down(cap, 1), "list<integer>"), 2);
+  return drop(fold(step, s, u, list(rem0, rank), down(cap, 1)), 2);
 }
 
 /** A walk's state is [pairs out of order, pairs too heavy to order, sizes of 1..n, ranks of 1..n]:
@@ -238,7 +233,6 @@ const hop = (state: string, xs: string, i: MathJSON): MathJSON =>
     "wk_t",
     list(add(i, 1)),
     upTo(1, sub(n, i)),
-    "list<integer>",
   );
 
 /**
@@ -323,14 +317,7 @@ function ranking(tag: string, kids: MathJSON, rem0: MathJSON): MathJSON {
   );
   return lets(
     [[pad, join(kids, list(0, 0, 0)), "list<integer>"]],
-    fold(
-      step,
-      z,
-      t,
-      list(0, rem0, 0, 0, 0, add(n, 1), 0, 0, 0, 0),
-      upTo(1, add(quotient(length(kids), 3), 1)),
-      "list<integer>",
-    ),
+    fold(step, z, t, list(0, rem0, 0, 0, 0, add(n, 1), 0, 0, 0, 0), upTo(1, add(quotient(length(kids), 3), 1))),
   );
 }
 
@@ -367,7 +354,6 @@ const walk = (last: MathJSON): MathJSON =>
     "wk_i",
     join(list(0, 0), constant(1, n), constant(0, n)),
     down(n, last),
-    "list<integer>",
   );
 
 /** The root's children as the walk left them: (start, size, rank) triples. */
@@ -423,7 +409,6 @@ const expand = (first: MathJSON, from: number): MathJSON =>
       "tu_i",
       first,
       upTo(from, n),
-      "list<integer>",
     ),
     n,
   );

@@ -94,7 +94,6 @@ const ways = (shape: string): MathJSON => {
     "ss_h",
     join(list(0), ones("ss_m2")),
     upTo(1, rowCount("ss_m2")),
-    "list<integer>",
   );
   // The walk over a level's rows: [the row at hand, W so far].
   const level = fold(
@@ -112,7 +111,6 @@ const ways = (shape: string): MathJSON => {
     "ss_g",
     join(ones("ss_m"), "ss_state"),
     upTo(1, rowCount("ss_m")),
-    "list<integer>",
   );
   return lets(
     [["ss_L", rowsOf(shape), "integer"]],
@@ -132,7 +130,6 @@ const ways = (shape: string): MathJSON => {
       // The last level's rows each finish in one way.
       ones(rowsBefore(shape, add("ss_L", 1))),
       upTo(1, sub("ss_L", 1)),
-      "list<integer>",
     ),
   );
 };
@@ -202,7 +199,6 @@ export const semistandardTableaux: EpsilFamily = (() => {
     "ss_i",
     list("_r", -1),
     upTo(0, sub(shapeCount, 1)),
-    "list<integer>",
   );
   const rowSearch = fold(
     iff(
@@ -228,7 +224,6 @@ export const semistandardTableaux: EpsilFamily = (() => {
     "ss_i",
     join(list(at("ss_u", 1), 0), ones("ss_m")),
     upTo(1, rowCount("ss_m")),
-    "list<integer>",
   );
   const unrank = lets(
     [
@@ -270,7 +265,6 @@ export const semistandardTableaux: EpsilFamily = (() => {
               "ss_j",
               list(at("ss_found", 1)),
               upTo(1, rowsOf("ss_S")),
-              "list<integer>",
             ),
             "list<integer>",
           ],
@@ -310,7 +304,6 @@ export const semistandardTableaux: EpsilFamily = (() => {
     "ss_i",
     join(list(0, 0), ones("ss_m")),
     upTo(1, rowCount("ss_m")),
-    "list<integer>",
   );
   const rank = lets(
     [

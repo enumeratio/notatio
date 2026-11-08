@@ -56,7 +56,7 @@ const withDegrees = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
 const degree = (vertex: MathJSON): MathJSON => at(vertex, "degrees");
 const overDegrees = (body: MathJSON): MathJSON => floored(sumOver("degrees", body, "d"));
 
-/** A fold whose accumulator is typed, as `type`. */
+/** `fold`, as this file's `MathJSON`. */
 const typedFolding = (...args: Parameters<typeof typedFold>): MathJSON => typedFold(...args) as MathJSON;
 const spread = (body: MathJSON): MathJSON => ["Divide", body, 2];
 
@@ -111,7 +111,6 @@ const distancesOf = (matrix: MathJSON): MathJSON =>
         "i",
       ),
       vertices,
-      "list<list<integer>>",
     ),
     "list<list<integer>>",
   );
@@ -224,7 +223,6 @@ const connectedMasks: MathJSON = typedFolding(
   "b",
   ["List", 0],
   ["Range", 1, subtract(["Power", 2, "n"], 1)],
-  "list<integer>",
 );
 /** The lowest vertex of the subset `mask`. */
 const lowest = (mask: MathJSON): MathJSON => [
@@ -248,7 +246,6 @@ const independentSetsWithin: MathJSON = typedFolding(
   "k",
   forEach(masks, one(isIndependent("m")), "m"),
   vertices,
-  "list<integer>",
 );
 /** The ways to color the vertices in `k` colors, each a cover by `k` independent sets, by inclusion-exclusion over the subsets left uncovered. */
 const coloringCount = (k: MathJSON): MathJSON =>
@@ -306,7 +303,6 @@ const matchingTable = (
       "b",
       ["List", start],
       ["Range", 1, subtract(["Power", 2, "n"], 1)],
-      "list<integer>",
     ),
     "list<list<integer>>",
   );
@@ -417,7 +413,6 @@ const pathTable = (fromLowest: boolean): MathJSON => {
     "b",
     ["List", 0],
     masksFromOne,
-    "list<integer>",
   );
 };
 const withPaths = (fromLowest: boolean, body: MathJSON): MathJSON =>
@@ -480,7 +475,6 @@ const determinantOf = (name: string, size: MathJSON): MathJSON =>
       "b",
       ["List", 1],
       ["Range", 1, subtract(["Power", 2, size], 1)],
-      "list<integer>",
     ),
   );
 const withTotals = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
@@ -572,7 +566,6 @@ const forestMasks: MathJSON = typedFolding(
   "b",
   ["List", 1],
   ["Range", 1, subtract(["Power", 2, "n"], 1)],
-  "list<integer>",
 );
 const largestForest: MathJSON = ["Max", forEach(masks, times(at(add("m", 1), "forests"), total("m")), "m")];
 /** The sets of four vertices with `edgeCount` edges among them and `misfitCount` members whose number of neighbors among them satisfies `misfit`. */
