@@ -43,6 +43,8 @@ const CORE = [
   "Filter",
   "Flatten",
   "Fold",
+  // The Euclidean algorithm of the distinct-eigenvalue statistics (St000452) cancels leading terms and removes content.
+  "GCD",
   "Greater",
   "GreaterEqual",
   "If",

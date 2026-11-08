@@ -826,10 +826,10 @@
       "AboveAverageDegreeVertexCount",
       "AbsoluteAdjacencyDeterminant",
       "AdjacencyDeterminant",
-      "AlbertsonIndex"
+      "AdjacencyNegativeEigenvalueCount"
     ],
     "derived": true,
-    "statistics": 100
+    "statistics": 116
   },
   "LabeledGraphsByEdges": {
     "expr": "LabeledGraphsByEdges(4, 2)",
@@ -844,10 +844,10 @@
       "AboveAverageDegreeVertexCount",
       "AbsoluteAdjacencyDeterminant",
       "AdjacencyDeterminant",
-      "AlbertsonIndex"
+      "AdjacencyNegativeEigenvalueCount"
     ],
     "derived": true,
-    "statistics": 100
+    "statistics": 116
   },
   "LabeledTrees": {
     "expr": "LabeledTrees(4)",

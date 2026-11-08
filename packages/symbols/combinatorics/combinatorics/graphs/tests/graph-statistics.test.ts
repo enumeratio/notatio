@@ -45,6 +45,22 @@ const BATCH_TWO = new Set([
   "DissociationNumber",
   "GraphVertexConnectivity",
   "InducedFourCycleCount",
+  "AdjacencyPositiveEigenvalueCount",
+  "AdjacencyNegativeEigenvalueCount",
+  "AdjacencyNullity",
+  "AdjacencyRank",
+  "GraphSignature",
+  "NegativeEigenvaluePairGap",
+  "LaplacianPositiveEigenvalueCount",
+  "DistinctEigenvalueCount",
+  "DistinctLaplacianEigenvalueCount",
+  "MaximumEigenvalueMultiplicity",
+  "MaximumLaplacianEigenvalueMultiplicity",
+  "AltshulerSteinbergDeterminant",
+  "AltshulerSteinbergQuarter",
+  "DistanceMatrixDeterminant",
+  "DistinctDistanceLaplacianEigenvalueCount",
+  "MaximumDistanceLaplacianEigenvalueMultiplicity",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 
