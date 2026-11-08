@@ -134,7 +134,9 @@ const linked = computed(() => shown.value.filter((r) => r.references?.length).le
   background: var(--vp-c-bg-soft);
 }
 .ref-cat-name {
-  white-space: nowrap;
+  /* A 70-letter name wraps rather than widening the column past the page. */
+  min-width: 12rem;
+  overflow-wrap: anywhere;
 }
 .ref-cat-name code {
   background: none;

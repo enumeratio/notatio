@@ -1,3 +1,7 @@
+---
+aside: false
+---
+
 # Combinatorial maps
 
 Every combinatorial map in `@enumeratio/combinatorics/domains` — a structure-respecting function

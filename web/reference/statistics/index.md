@@ -1,3 +1,7 @@
+---
+aside: false
+---
+
 # Combinatorial statistics
 
 Every combinatorial statistic in `@enumeratio/statistics` — a head applied to a
