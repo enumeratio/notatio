@@ -63,6 +63,15 @@ evaluates on its own and reduces there, for the environment around it.
 </Story>
 
 <Story
+  title="A cell with its forms and expected value">
+<template #description>
+A <code>Cell</code>'s options reach the attributes the cell reads: <code>InForm -> InputForm</code>
+picks the text editor and <code>Expected</code> is the assertion its Out is held to.
+</template>
+<EnvironmentPreview expr='Cell(1 + 1, InForm -> InputForm, Expected -> 2)' env="print" />
+</Story>
+
+<Story
   title="A choice, enumerated">
 <template #description>
 A toggler's entries are the sample: one cell per choice, labelled. Each entry shows a

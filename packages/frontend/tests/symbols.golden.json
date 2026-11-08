@@ -510,10 +510,10 @@
         "value": "1 + 1",
         "in-form": "input",
         "out-form": "traditional",
-        "expect": "{\"num\":\"2\"}"
+        "expect": "2"
       }
     },
-    "markup": "<notatio-cell value=\"1 + 1\" in-form=\"input\" out-form=\"traditional\" expect=\"{&quot;num&quot;:&quot;2&quot;}\"></notatio-cell>"
+    "markup": "<notatio-cell value=\"1 + 1\" in-form=\"input\" out-form=\"traditional\" expect=\"2\"></notatio-cell>"
   },
   "DynamicModule([Cell(1 + 1), Cell(2 + 2)])": {
     "rendering": {

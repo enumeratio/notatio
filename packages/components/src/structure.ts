@@ -173,6 +173,9 @@ export function adoptStructure(el: Element): void {
   defineUsed(el);
   customElements.upgrade(el);
   let args = argumentsOf(el);
+  // An element written in its own attributes (a `value`, no argument children) is already lowered:
+  // its `in-form="input"` is the cell's id, not the Wolfram option `InForm -> Input` to parse.
+  if (args.length === 0 && el.hasAttribute("value")) return;
   const options = optionsOn(el, symbol);
   if (args.length === 0 && Object.keys(options).length === 0) return;
   ADOPTED.add(el);

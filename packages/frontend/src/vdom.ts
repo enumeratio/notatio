@@ -14,7 +14,15 @@ import { LAYOUT_HEADS, PROSE_HEADS } from "@enumeratio/boxes";
 import { isBoxTag } from "./box-tags.ts";
 import { CHART_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";
-import { HELD_HEADS, layoutRendering, optionAttribute, type Rendering, renderingOf, visualSymbol } from "./symbols.ts";
+import {
+  HELD_HEADS,
+  layoutRendering,
+  optionAttribute,
+  type Rendering,
+  renderingOf,
+  splitHeldOptions,
+  visualSymbol,
+} from "./symbols.ts";
 
 type Json = MathJsonExpression;
 
@@ -101,7 +109,12 @@ export function structuralOf(expr: Json): StructuralNode {
   // A held head's arguments are source its element evaluates itself, and a layout among them
   // would lower to boxes that cannot be read back: they ride as the element's Epsil `value`.
   const held = HELD_HEADS.has(head) ? visualSymbol(head) : undefined;
-  if (held !== undefined) Object.assign(attributes, held.attributes(ops));
+  // Its options map as `renderingOf` maps them: held ones stay in `value`, the rest go through the
+  // symbol's rules (`InForm -> InputForm` is `in-form="input"`, `Expected` is `expect`).
+  const split = held === undefined ? undefined : splitHeldOptions(held, options);
+  if (held !== undefined && split !== undefined) {
+    Object.assign(attributes, held.fixed, held.attributes([...ops, ...split.held]));
+  }
   for (const op of held === undefined ? ops : []) {
     const token = leafOf(op) === undefined ? undefined : tokenOf(stripMetadata(op));
     const last = children.at(-1);
@@ -109,8 +122,13 @@ export function structuralOf(expr: Json): StructuralNode {
     else if (typeof last === "string") children[children.length - 1] = `${last} ${token}`;
     else children.push(token);
   }
-  for (const [name, value] of Object.entries(options)) {
-    const attr = optionAttribute(name);
+  for (const [name, value] of Object.entries(split?.lowerable ?? options)) {
+    const rule = held?.options?.[name];
+    if (typeof rule === "function") {
+      Object.assign(attributes, rule(value));
+      continue;
+    }
+    const attr = rule ?? optionAttribute(name);
     const valueHead = headOf(value);
     if (valueHead !== undefined && !PRIMITIVE_HEADS.has(valueHead)) {
       const child = structuralOf(value);
