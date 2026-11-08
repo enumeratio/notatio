@@ -448,12 +448,12 @@ test.describe("environments", () => {
     await expect(out).not.toContainText("sin(");
   });
 
-  // The vdom of `Cell(...)` carries its held expression as children, so the cell has no source.
-  test.fail("a control in a cell shows its In and Out when printed", async ({ page }) => {
+  test("a control in a cell shows its In and Out when printed", async ({ page }) => {
     await page.goto("/docs/components/environments");
     const cell = story(page, "a-control-in-a-cell").locator(".env-out notatio-cell");
     await expect(cell).toBeVisible({ timeout: 120_000 });
     await expect(cell.locator("notatio-in")).not.toHaveText("", { timeout: 20_000 });
+    await expect(cell.locator("notatio-out")).not.toHaveText("", { timeout: 20_000 });
   });
 
   test("a narrow column's plot follows its slider", async ({ page }) => {
