@@ -868,6 +868,18 @@ const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS_2: readonly Definition[] = [
     "FindStat's St000187. The 0 by 0 matrix has determinant 1.",
   ),
   matrix(
+    "AlternatingSignMatrixRank",
+    "The rank.",
+    nonEmpty(["MatrixRank", x], 0),
+    "FindStat's St001974. The 0 by 0 matrix has rank 0, the one value FindStat's Sage code does not reach.",
+  ),
+  matrix(
+    "AlternatingSignMatrixCorank",
+    "The size minus the rank.",
+    nonEmpty(["Subtract", ["Length", x], ["MatrixRank", x]], 0),
+    "FindStat's St001975, the number of rows less the rank. The 0 by 0 matrix has corank 0.",
+  ),
+  matrix(
     "CornerSumLatticeDegree",
     "The positions of the corner sum matrix whose entry can be lowered or raised by one to give another alternating sign matrix's corner sum matrix.",
     withCells(["If", less("side", 2), 0, add(decreasablePositions, increasablePositions)]),

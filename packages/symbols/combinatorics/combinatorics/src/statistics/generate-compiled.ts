@@ -4,6 +4,7 @@
 // its own `statistics.compiled.generated.js` — see `../../src/statistics/compiled.ts`, which
 // merges every area's table back into one lookup for `compiledStatistic`.
 
+import { applyPatch, matrixRankCompiles } from "@enumeratio/ce-patches";
 import type { Engine } from "@enumeratio/engine";
 import { bareEngine } from "@enumeratio/engine/testing";
 import { compileTyped, definitionHash, fromJs } from "@enumeratio/engine/compiled";
@@ -38,6 +39,8 @@ export function compiledDefinitionsFor(
   mine: (signature: string) => boolean = () => true,
 ): { compiled: CompiledDefinition[]; disagreed: string[] } {
   const ce = bareEngine();
+  // `MatrixRank` has no lowering of compute-engine's own.
+  applyPatch(ce, matrixRankCompiles);
   const subjects = new Map<string, readonly unknown[]>();
   const compiled: CompiledDefinition[] = [];
   const disagreed: string[] = [];
