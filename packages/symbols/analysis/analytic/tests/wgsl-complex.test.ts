@@ -316,6 +316,24 @@ test("poles come out huge and finite, never NaN", () => {
 
 test("the Hurwitz kernels flag a sum whose terms dwarf it, for a host to hatch (S#5)", () => {
   expect(zetaWGSL).toContain("var<private> uncertain: f32");
-  // Both sums that lose digits to cancellation vouch for their result before returning it.
-  expect(zetaWGSL.replace(complexWGSL, "").match(/vouch\(largest, /g)?.length).toBe(3);
+  // The Taylor sum vouches for itself in f32; the Euler–Maclaurin sum, where f32 cancels it, is redone
+  // in df64 and that vouches.
+  const hurwitz = zetaWGSL.replace(complexWGSL, "");
+  expect(hurwitz.match(/vouch\(largest, /g)?.length).toBe(3);
+  expect(hurwitz).toContain("if (DF64 && largest > SUM_COND_LIMIT * length(sum)) { return hurwitzEMDf(s, a, largest);");
+  expect(hurwitz.match(/vouchDf\(largest, /g)?.length).toBe(1);
+});
+
+test("the df64 constants are pairs of f32 that sum to the double they stand for", () => {
+  // Euler–Maclaurin's B₂ₖ/(2k)!, written as vec2f(hi, lo): hi + lo is the double to well under df64's 2⁻⁴⁸.
+  const row = /var em = array<vec2f, 9>\((.*)\);/.exec(zetaWGSL)![1]!;
+  const pairs = [...row.matchAll(/vec2f\(([^,]+), ([^)]+)\)/g)].map(
+    (m) => [Math.fround(Number(m[1])), Math.fround(Number(m[2]))] as const,
+  );
+  const exact = [0, 1 / 12, -1 / 720, 1 / 30240, -1 / 1209600, 1 / 47900160, -691 / 1307674368000];
+  expect(pairs).toHaveLength(9);
+  for (const [i, x] of exact.entries()) {
+    const [hi, lo] = pairs[i]!;
+    expect(Math.abs(hi + lo - x)).toBeLessThanOrEqual(Math.abs(x) * 2 ** -48);
+  }
 });

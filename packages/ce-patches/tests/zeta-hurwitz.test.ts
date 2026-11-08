@@ -340,7 +340,7 @@ test("Zeta and HurwitzZeta at a negative non-integer a agree across routes", () 
 });
 
 // --- Below the real axis (S#5) --------------------------------------------------------------
-// The double kernel is right there; the GPU's f32 sum is what loses the digits, and declines.
+// The double kernel is right there; the GPU's f32 sum is what loses the digits, so it sums again in df64 and declines past a ratio of 1e9.
 
 test("ζ(s, a) with Im a < 0 matches mpmath", () => {
   // [s, a, ζ(s, a)] from mpmath.zeta at 30 digits.

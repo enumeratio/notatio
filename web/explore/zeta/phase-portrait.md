@@ -44,10 +44,16 @@ that differs between the two pictures.
 
 **Hatched.** Below the real axis $\zeta(s, a)$ is far smaller than the terms it sums: for
 $\operatorname{Im}(s) = t$ the value is about $e^{-t|\arg a|}$ times its largest term (across the cut along
-$a \le 0$ the two sides differ by that factor). The GPU's `f32` sum cancels away its digits there, so the portrait declines: where the kernel finds its terms more than 100 times the sum it draws
-a grey hatch rather than a hue. The test against the `f64` kernel holds the drawn pixels to a relative
-error under 0.05 (a phase error under 0.05 rad) and finds the upper half never hatched; the CPU
-kernel, and the mpmath oracle it matches, are the way to read the hatched region.
+$a \le 0$ the two sides differ by that factor). The GPU's `f32` sum cancels away its digits there, so where the terms
+are more than 100 times the sum it sums again in double-float arithmetic (`df64`, a pair of `f32`),
+which keeps the digits down to a ratio of $10^9$. Where even that cannot vouch for the value the portrait
+declines: it draws a grey hatch rather than a hue. At the default window nothing is hatched at $t = 4$
+or $t = 12$ (`f32` alone hatched about a third and two fifths of the half plane below the axis); zoomed out to
+its widest, a third of the lower half is hatched at $t = 12$, where $e^{-12|\arg a|}$ is below $10^{-9}$, and
+so is everything left of $\operatorname{Re}(a) = -82$, past the 96 direct terms the kernel sums. The test against
+the `f64` kernel holds the drawn pixels to a relative error under 0.05 (a phase error under 0.05 rad), and
+those that needed `df64` to under $10^{-3}$. The CPU kernel, and the mpmath oracle it matches, are the way to read
+the hatched region.
 
 **s up the critical strip.** Play the $si$ slider: at large imaginary part the
 portrait develops the fine oscillatory texture that makes zeta on the critical line so
