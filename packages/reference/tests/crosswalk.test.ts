@@ -322,3 +322,20 @@ test("a head's examples run in another kernel score its chip there", () => {
   ).find((r) => r.system === "wolfram");
   expect(lcm?.verified?.disagree).toBe(3);
 });
+
+test("a Wolfram symbol without a reference page keeps its identity and gets no link", () => {
+  expect(hrefOf({ system: "wolfram", identity: "Binomial" })).toBe(
+    "https://reference.wolfram.com/language/ref/Binomial.html",
+  );
+  expect(hrefOf({ system: "wolfram", identity: "ArrowBox" })).toBeUndefined();
+  // A URL recorded with the reference is the recorder's claim and stays.
+  expect(hrefOf({ system: "wolfram", identity: "ArrowBox", url: "https://example.org/x" })).toBe(
+    "https://example.org/x",
+  );
+  const box = crosswalkFor(
+    "ArrowBox",
+    entries.find((e) => e.name === "ArrowBox"),
+  ).find((r) => r.system === "wolfram");
+  expect(box?.identity).toBe("ArrowBox");
+  expect(box?.href).toBeUndefined();
+});
