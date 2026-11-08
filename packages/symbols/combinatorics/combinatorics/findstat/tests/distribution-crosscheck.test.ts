@@ -17,7 +17,7 @@ import { bareEngine } from "@enumeratio/engine/testing";
 import { declareStructures } from "@enumeratio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
-import { COLLECTION_CARRIER, objectSize, readObject } from "../src/objects.ts";
+import { COLLECTION_CARRIER, objectLevel, objectSize, readObject } from "../src/objects.ts";
 import { findstat } from "../src/findstat-data.ts";
 
 const DEEP = process.env.DEEP_TESTS === "1";
@@ -50,6 +50,20 @@ const COLLECTIONS: Readonly<Record<string, [head: string, argument: (size: numbe
   SkewPartition: ["SkewPartitions", (n) => n],
   CartanType: ["FiniteCartanTypes", (n) => n],
 };
+
+/**
+ * Carriers FindStat levels by (size, maximal entry exactly), a tableau by its cells and largest entry, a pattern by its rows
+ * and the first entry of its top row. Ours is the collection of both, `Coll(size, k)`, whose elements have the maximal entry
+ * at most k: the level is `Coll(size, k)` less `Coll(size, k - 1)`, where `least` is the smallest k that has any element.
+ */
+const EXACT_MAXIMUM: Readonly<Record<string, { collection: string; least: number }>> = {
+  SemistandardTableau: { collection: "SemistandardTableaux", least: 1 },
+  GelfandTsetlinPattern: { collection: "GelfandTsetlin", least: 0 },
+};
+
+/** Whether a statistic on `carrier` is compared by distributions of levels. */
+const LEVELLED = (carrier: string): boolean =>
+  COLLECTIONS[carrier] !== undefined || EXACT_MAXIMUM[carrier] !== undefined;
 
 /**
  * Carriers whose FindStat collection is not one of ours by size: graphs are listed up to isomorphism, ours by labeling, so a
@@ -102,15 +116,42 @@ const tallyOf = (values: readonly number[]): Record<string, number> => {
 const sameTally = (a: Record<string, number>, b: Record<string, number>): boolean =>
   Object.keys(a).length === Object.keys(b).length && Object.entries(a).every(([k, n]) => b[k] === n);
 
-/** Ours: the call the distribution pane makes, read as `{value: count}`. */
-function ourTally(carrier: string, size: number, head: string): Record<string, number> | undefined {
-  const [collection, argument] = COLLECTIONS[carrier]!;
-  const answer = value(["Tally", ["CombinatorialStat", [collection, argument(size)], `'${head}'`]]) as unknown;
+/** The `Tally` of the collection `collection` for the statistic `head`, read as `{value: count}`. */
+function tallyOf1(collection: unknown, head: string): Record<string, number> | undefined {
+  const answer = value(["Tally", ["CombinatorialStat", collection, `'${head}'`]]) as unknown;
   if (!Array.isArray(answer) || answer[0] !== "Tuple") return undefined;
   const values = (answer[1] as unknown[]).slice(1).map(Number);
   const counts = (answer[2] as unknown[]).slice(1).map(Number);
   if (values.some((v) => !Number.isFinite(v))) return undefined;
   return Object.fromEntries(values.map((v, i) => [v, counts[i]!]));
+}
+
+/** The number of objects of FindStat's level of `carrier`: its collection's, less the next smaller level's where the level is exact. */
+function levelCount(carrier: string, level: readonly number[]): number {
+  const exact = EXACT_MAXIMUM[carrier];
+  if (exact === undefined) {
+    const [collection, argument] = COLLECTIONS[carrier]!;
+    return Number(value(["Count", [collection, argument(level[0]!)]]));
+  }
+  const [size, k] = level as [number, number];
+  const count = (entry: number): number => Number(value(["Count", [exact.collection, size, entry]]));
+  return count(k) - (k > exact.least ? count(k - 1) : 0);
+}
+
+/** Ours: the call the distribution pane makes, read as `{value: count}`. */
+function ourTally(carrier: string, level: readonly number[], head: string): Record<string, number> | undefined {
+  const exact = EXACT_MAXIMUM[carrier];
+  if (exact === undefined) {
+    const [collection, argument] = COLLECTIONS[carrier]!;
+    return tallyOf1([collection, argument(level[0]!)], head);
+  }
+  const [size, k] = level as [number, number];
+  const upper = tallyOf1([exact.collection, size, k], head);
+  const lower = k > exact.least ? tallyOf1([exact.collection, size, k - 1], head) : {};
+  if (upper === undefined || lower === undefined) return undefined;
+  const out: Record<string, number> = {};
+  for (const [v, n] of Object.entries(upper)) if (n - (lower[v] ?? 0) !== 0) out[v] = n - (lower[v] ?? 0);
+  return out;
 }
 
 /** Ours on one object of a carrier compared object by object: the statistic's call on the carrier value, as FindStat's `text` reads. */
@@ -135,20 +176,26 @@ function sweep(only?: readonly string[]): Report {
   const counts = new Map<string, number>();
   let objectsRead = 0;
   for (const match of findstat) {
-    if (!COLLECTIONS[match.on] && !OBJECT_WISE[match.on]) continue;
+    if (!LEVELLED(match.on) && !OBJECT_WISE[match.on]) continue;
     if (only && !only.includes(`${match.head}@${match.on}`)) continue;
     for (const id of match.findstat) {
-      const bySize = new Map<number, Map<string, number>>();
+      const bySize = new Map<string, { level: readonly number[]; objects: Map<string, number> }>();
       const entry = snapshot.items[id];
       if (!entry || COLLECTION_CARRIER[entry.collection] !== match.on) continue;
       for (const [object, v] of pairsOf(id)) {
         const size = objectSize(match.on, object);
         const cap = OBJECT_WISE[match.on] ? objectCap(match.on) : MAX_SIZE;
         if (size === undefined || size > cap || typeof v !== "number") continue;
-        (bySize.get(size) ?? bySize.set(size, new Map()).get(size)!).set(object, v);
+        const level = objectLevel(match.on, object) ?? [size];
+        const group = bySize.get(level.join(",")) ?? { level, objects: new Map<string, number>() };
+        bySize.set(level.join(","), group);
+        group.objects.set(object, v);
       }
-      for (const [size, objects] of [...bySize].toSorted((a, b) => a[0] - b[0])) {
-        const label = `${match.head}@${match.on} ${id} n=${size}`;
+      for (const { level, objects } of [...bySize.values()].toSorted(
+        (a, b) => a.level[0]! - b.level[0]! || a.level[1]! - b.level[1]!,
+      )) {
+        const size = level[0]!;
+        const label = `${match.head}@${match.on} ${id} n=${size}${level.length > 1 ? `,k=${level[1]}` : ""}`;
         if (OBJECT_WISE[match.on]) {
           const ours: Record<string, number> = {};
           const theirs: Record<string, number> = {};
@@ -176,18 +223,15 @@ function sweep(only?: readonly string[]): Report {
             };
           continue;
         }
-        const key = `${match.on}:${size}`;
+        const key = `${match.on}:${level.join(",")}`;
         let ours: Record<string, number> | undefined;
         try {
-          if (!counts.has(key)) {
-            const [collection, argument] = COLLECTIONS[match.on]!;
-            counts.set(key, Number(value(["Count", [collection, argument(size)]])));
-          }
+          if (!counts.has(key)) counts.set(key, levelCount(match.on, level));
           if (objects.size !== counts.get(key)) {
             skipped.push(`${label}: ${objects.size} of ${counts.get(key)} objects`);
             continue;
           }
-          ours = ourTally(match.on, size, match.head);
+          ours = ourTally(match.on, level, match.head);
         } catch (error) {
           skipped.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
           continue;

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-semistandard-tableau-1-1-2-2-3			[MaximalEntryCount, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	1			the semistandard tableau $[[1,1,2],[2,3]]$
+findstat-st001408-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 2]]], "'MaximalEntryCount'"]	0	0	FindStat St001408	FindStat's value for [[1,2]]
+findstat-st001408-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 3]]], "'MaximalEntryCount'"]	0	0	FindStat St001408	FindStat's value for [[1,3]]
+findstat-st001408-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 4]]], "'MaximalEntryCount'"]	0	0	FindStat St001408	FindStat's value for [[1,4]]

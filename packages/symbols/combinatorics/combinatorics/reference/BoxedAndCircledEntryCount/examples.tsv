@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-gelfand-tsetlin-pattern-3-1-0-2-0-1			[BoxedAndCircledEntryCount, [GelfandTsetlinPattern, [List, [List, 3, 1, 0], [List, 2, 0], [List, 1]]]]	0			the Gelfand-Tsetlin pattern $[[3,1,0],[2,0],[1]]$
+findstat-st000077-1	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 0]]], "'BoxedAndCircledEntryCount'"]	0	0	FindStat St000077	FindStat's value for [[0]]
+findstat-st000077-2	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 1]]], "'BoxedAndCircledEntryCount'"]	0	0	FindStat St000077	FindStat's value for [[1]]
+findstat-st000077-3	Properties		[CombinatorialStat, [GelfandTsetlinPattern, [List, [List, 2]]], "'BoxedAndCircledEntryCount'"]	0	0	FindStat St000077	FindStat's value for [[2]]

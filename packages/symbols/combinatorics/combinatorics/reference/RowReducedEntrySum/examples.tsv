@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-semistandard-tableau-1-1-2-2-3			[RowReducedEntrySum, [SemistandardTableau, [List, [List, 1, 1, 2], [List, 2, 3]]]]	2			the semistandard tableau $[[1,1,2],[2,3]]$
+findstat-st000112-1	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1]]], "'RowReducedEntrySum'"]	0	0	FindStat St000112	FindStat's value for [[1]]
+findstat-st000112-2	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 2]]], "'RowReducedEntrySum'"]	1	1	FindStat St000112	FindStat's value for [[2]]
+findstat-st000112-3	Properties		[CombinatorialStat, [SemistandardTableau, [List, [List, 1, 1]]], "'RowReducedEntrySum'"]	0	0	FindStat St000112	FindStat's value for [[1,1]]

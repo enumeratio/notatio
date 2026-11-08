@@ -6,7 +6,24 @@
 // each reading position, and `IndexOf` finds the position of an entry.
 
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
+import { FINDSTAT_GELFAND_TSETLIN_STATISTICS } from "./gelfand-tsetlin-statistics.ts";
+import { FINDSTAT_SEMISTANDARD_TABLEAU_STATISTICS } from "./semistandard-statistics.ts";
 import { FINDSTAT_SKEW_PARTITION_STATISTICS } from "./skew-statistics.ts";
+import {
+  cellsAtLeast,
+  eachCell,
+  firsts,
+  firstEntryInLastRow,
+  lastEntryInFirstRow,
+  lastEntryOnMainDiagonal,
+  lasts,
+  lengths,
+  reading,
+  through,
+  withColumns,
+  withReading,
+  withRows,
+} from "./tableau-reading.ts";
 import {
   add,
   and,
@@ -40,24 +57,8 @@ const stat = (head: string, summary: string, expr: MathJSON, note?: string): Def
   ...(note ? { note } : {}),
 });
 
-const through = (n: MathJSON): MathJSON => ["Range", 1, n, 1];
-
-const reading: MathJSON = ["Flatten", x];
-const lengths: MathJSON = forEach(x, length("r"), "r");
-const firsts: MathJSON = forEach(x, at(1, "r"), "r");
-const lasts: MathJSON = forEach(x, ["Last", "r"], "r");
-/** `body` with the entries row by row as `reading` and the row lengths as `lengths`. */
-const withReading = (body: MathJSON): MathJSON => bindList("reading", reading, bindList("lengths", lengths, body));
-/** `body` for a tableau of at least `m` entries, 0 otherwise. */
-const cellsAtLeast = (m: number, body: MathJSON): MathJSON => ["If", less(length(reading), m), 0, body];
-
-/** The row and the column of the cell at each position of `reading`. */
-const rowIds: MathJSON = ["Flatten", forEach(positions, forEach(through(at("i", "lengths")), "i", "j"), "i")];
-const columnIds: MathJSON = ["Flatten", forEach(positions, through(at("i", "lengths")), "i")];
 const rowOf = (entry: MathJSON): MathJSON => at(["IndexOf", "reading", entry], "rowIds");
 const columnOf = (entry: MathJSON): MathJSON => at(["IndexOf", "reading", entry], "columnIds");
-const withRows = (body: MathJSON): MathJSON => withReading(bindList("rowIds", rowIds, body));
-const withColumns = (body: MathJSON): MathJSON => withRows(bindList("columnIds", columnIds, body));
 
 /** The entries e = 1 .. n - 1, those with a successor, counted (or summed, `weight` being e) where `test` holds. */
 const overSuccessors = (test: MathJSON, weight: MathJSON = 1): MathJSON =>
@@ -69,12 +70,6 @@ const successorNotBelow = atMostValue(rowOf(successor), rowOf("e"));
 /** Each entry e with a successor counts n - e, the entries from e + 1 on. */
 const entriesAfter = subtract(length("reading"), "e");
 
-/** The rows 1 .. d reach their own column; the cell (d, d) is the cells of the rows above it, then d along. */
-const diagonalLength = floored(sumOver(positions, ["If", atLeastValue(at("i", "lengths"), "i"), 1, 0]));
-const diagonalPosition = add(
-  floored(sumOver(positions, ["If", less("i", "diagonal"), at("i", "lengths"), 0])),
-  "diagonal",
-);
 /** The largest entry is the last of the row it is in. */
 const rowOfLargest: MathJSON = ["IndexOf", "lasts", max("lasts")];
 
@@ -89,7 +84,6 @@ const largestEntryPath = bindList(
 /** Each cell by its position in `reading`: how many cells lie west of it in its row, and whether it has a row above. */
 const cellsWest: MathJSON = subtract(at("i", "columnIds"), 1);
 const belowFirstRow: MathJSON = greater(at("i", "rowIds"), 1);
-const eachCell: MathJSON = through(length("reading"));
 
 /** The row and the column of each entry 1 .. n, by entry. */
 const entryRows: MathJSON = forEach(eachCell, rowOf("e"), "e");
@@ -914,24 +908,9 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
     nonEmpty(bindList("lasts", lasts, rowOfLargest)),
     EMPTY,
   ),
-  stat(
-    "LastEntryInFirstRow",
-    "The last entry in the first row.",
-    nonEmpty(withReading(at(at(1, "lengths"), "reading"))),
-    EMPTY,
-  ),
-  stat(
-    "LastEntryOnMainDiagonal",
-    "The last entry on the main diagonal.",
-    nonEmpty(withReading(bindList("diagonal", diagonalLength, at(diagonalPosition, "reading"), "integer"))),
-    EMPTY,
-  ),
-  stat(
-    "FirstEntryInLastRow",
-    "The first entry in the last row.",
-    nonEmpty(withReading(at(add(subtract(length("reading"), at(length(), "lengths")), 1), "reading"))),
-    EMPTY,
-  ),
+  stat("LastEntryInFirstRow", "The last entry in the first row.", lastEntryInFirstRow, EMPTY),
+  stat("LastEntryOnMainDiagonal", "The last entry on the main diagonal.", lastEntryOnMainDiagonal, EMPTY),
+  stat("FirstEntryInLastRow", "The first entry in the last row.", firstEntryInLastRow, EMPTY),
   stat(
     "AdjacentSuccessorCount",
     "Entries whose successor is the neighbor to their right or directly below them.",
@@ -1003,4 +982,6 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PLANE_PARTITION_STATISTICS,
   ...FINDSTAT_PLANE_PARTITION_STATISTICS_2,
   ...FINDSTAT_SKEW_PARTITION_STATISTICS,
+  ...FINDSTAT_SEMISTANDARD_TABLEAU_STATISTICS,
+  ...FINDSTAT_GELFAND_TSETLIN_STATISTICS,
 ];

@@ -9,16 +9,21 @@ signatures:
   - call: "Trace(list<number> | number, axis1: integer?, axis2: integer?) -> list<number> | number"
     description: Trace of a matrix or pair of tensor axes.
     library: enumeratio-combinatorics
-    type: "((plane_partition) -> number) & ((number | tensor, axis1: integer?, axis2: integer?) -> number | tensor)"
+    type: "((semistandard_tableau) -> number) & ((plane_partition) -> number) & ((number | tensor, axis1: integer?, axis2: integer?) -> number | tensor)"
     overrides: compute-engine
 catalog:
   - system: findstat
     identity: St001919
     url: https://www.findstat.org/St001919
     on: PlanePartition
+  - system: findstat
+    identity: St000170
+    url: https://www.findstat.org/St000170
+    on: SemistandardTableau
 stub: engine
 statOn:
   - PlanePartition
+  - SemistandardTableau
 names:
   wolfram: Tr
 bindings:

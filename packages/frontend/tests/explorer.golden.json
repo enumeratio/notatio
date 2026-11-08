@@ -563,7 +563,7 @@
     "expr": "GelfandTsetlin(3, 2)",
     "columns": [],
     "derived": false,
-    "statistics": 0
+    "statistics": 13
   },
   "GiugaNumbers": {
     "expr": "Take(GiugaNumbers, 4)",
@@ -1637,7 +1637,7 @@
     "glyph": "tableau",
     "columns": ["Length"],
     "derived": false,
-    "statistics": 0
+    "statistics": 15
   },
   "SeparablePermutations": {
     "expr": "SeparablePermutations(4)",

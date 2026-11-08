@@ -15,5 +15,5 @@ signatures:
   - call: SemistandardTableau(list)
     description: The singular-inhabitant constructor for a semistandard Young tableau, as its rows.
     library: enumeratio-combinatorics
-    type: (tuple<list<integer>, list<integer>>) -> semistandard_tableau
+    type: (list<list<integer>>) -> semistandard_tableau
 ---
