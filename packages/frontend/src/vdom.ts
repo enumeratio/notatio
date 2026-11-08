@@ -14,7 +14,7 @@ import { LAYOUT_HEADS, PROSE_HEADS } from "@enumeratio/boxes";
 import { isBoxTag } from "./box-tags.ts";
 import { CHART_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";
-import { layoutRendering, optionAttribute, type Rendering, renderingOf, visualSymbol } from "./symbols.ts";
+import { HELD_HEADS, layoutRendering, optionAttribute, type Rendering, renderingOf, visualSymbol } from "./symbols.ts";
 
 type Json = MathJsonExpression;
 
@@ -98,7 +98,11 @@ export function structuralOf(expr: Json): StructuralNode {
   const { ops, options } = optionsOf(expr);
   const attributes: Record<string, string> = {};
   const children: (StructuralNode | string)[] = [];
-  for (const op of ops) {
+  // A held head's arguments are source its element evaluates itself, and a layout among them
+  // would lower to boxes that cannot be read back: they ride as the element's Epsil `value`.
+  const held = HELD_HEADS.has(head) ? visualSymbol(head) : undefined;
+  if (held !== undefined) Object.assign(attributes, held.attributes(ops));
+  for (const op of held === undefined ? ops : []) {
     const token = leafOf(op) === undefined ? undefined : tokenOf(stripMetadata(op));
     const last = children.at(-1);
     if (token === undefined) children.push(structuralOf(op));

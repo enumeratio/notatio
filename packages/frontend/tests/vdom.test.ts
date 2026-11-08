@@ -1,6 +1,6 @@
 import { parseExpression } from "@enumeratio/formats/expression";
 import { expect, test } from "vite-plus/test";
-import { scopeOf } from "../src/symbols.ts";
+import { renderingOf, scopeOf } from "../src/symbols.ts";
 import { type StructuralNode, structuralOf, tagOf, toVNode, vdomOf } from "../src/vdom.ts";
 
 /** A vnode factory that keeps everything, for looking at. */
@@ -110,4 +110,16 @@ test("controls in an expression scope it: the structural tree is a module whose 
   expect(find(tree, "animator-box")).toBeDefined();
   const plain = parseExpression("Sin(Pi * t)").json;
   expect(scopeOf(plain)).toBe(plain);
+});
+
+test("a Cell's held expression rides as its Epsil value, whatever it lowers to", () => {
+  const tree = structuralOf(
+    parseExpression("Cell(Row([Slider((k, 2), (0, 5)), Dynamic(k^2)]), InForm -> InputForm)").json,
+  );
+  expect(tree.tag).toBe("notatio-cell");
+  expect(tree.attributes.value).toBe(
+    renderingOf(parseExpression("Cell(Row([Slider((k, 2), (0, 5)), Dynamic(k^2)]))").json)?.attributes.value,
+  );
+  expect(tree.attributes.value).toContain("Slider");
+  expect(tree.children).toEqual([]);
 });

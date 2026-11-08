@@ -314,12 +314,31 @@ export class NotatioCell extends LitElement {
       }
     }
     this.addEventListener("notatio-assert", this.#onRendered);
+    void this.#adoptChild();
     // Light DOM has no native slotting; grab the aside children once, before the
     // first render would otherwise clear them along with the rest of our content.
     if (this.#aside.length === 0) {
       this.#aside = [...this.querySelectorAll(':scope > [slot="aside"]')];
       for (const node of this.#aside) node.remove();
     }
+  }
+
+  /**
+   * `Cell(expr)` written as markup holds `expr` as its child, as every head's arguments are
+   * (`<notatio-cell><notatio-sin>x</notatio-sin></notatio-cell>`); with no `value`, the child
+   * is the input. It becomes Epsil `value` and the child gives way to our own render.
+   */
+  async #adoptChild(): Promise<void> {
+    if (this.value.trim()) return;
+    // Structure only: the serializer (and its engine) loads when there is a child to read.
+    const child = [...this.children].find((c) => !c.hasAttribute("slot") && "expression" in c);
+    if (child === undefined) return;
+    const { serializeExpression } = await import("@enumeratio/formats/expression");
+    const expr = (child as { expression?: Parameters<typeof serializeExpression>[0] }).expression;
+    if (expr === undefined || this.value.trim()) return;
+    this.value = serializeExpression(expr);
+    this.format = "epsil";
+    child.remove();
   }
 
   // The Out has rendered: what the build wrote for this cell gives way (`data-rendered`).
