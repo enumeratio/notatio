@@ -622,14 +622,19 @@ export function declareListHeads(ce: Engine): void {
   // Join(a, b, …): any head, as long as every argument shares it — not just List or Set. A
   // bare symbol's `.operator` is the pseudo-head `"Symbol"`, shared by every free variable,
   // so two unrelated frees (`Join(aa, bb)`) would otherwise "share a head" and fold to a
-  // bogus `Symbol()` — excluded the same way `Sort`'s equivalent wrapper above is.
+  // bogus `Symbol()` — excluded the same way `Sort`'s equivalent wrapper above is. A lazy
+  // collection (`Map`, `Take`, `Range`, …) is excluded too: its operands are its recipe, not its
+  // elements, so two of the same head would merge into one garbled recipe.
   wrapOperator(
     ce,
     ["Join", 1, 1],
     (ops) =>
       joinsAtLevel(ops) !== undefined ||
       ops.length === 0 ||
-      (ops.length >= 1 && symbolNameOf(ops[0]) === undefined && ops.every((op) => op.operator === ops[0].operator)),
+      (ops.length >= 1 &&
+        symbolNameOf(ops[0]) === undefined &&
+        !ops[0].isLazyCollection &&
+        ops.every((op) => op.operator === ops[0].operator)),
     () => (ops) => {
       const join = joinsAtLevel(ops);
       if (join !== undefined) return joinAtLevel(ce, join.lists, join.level);

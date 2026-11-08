@@ -78,6 +78,15 @@ test("Sort(f(a, b, ...)) still sorts any head's own operands", () => {
 test("Join(aa, bb) stays unevaluated for two free symbols, rather than folding to Symbol()", () => {
   expect(run(["Join", "aa", "bb"])).toEqual(["Join", "aa", "bb"]);
 });
+// Two lazy collections of one head (`Map`, `Take`, …) hold their recipe as operands, not their
+// elements: joining those operands read as elements gave a garbled recipe (SemistandardTableaux's
+// interpreted unrank hit it).
+test("Join of two lazy collections of the same head joins their elements", () => {
+  const map = (to: number) => ["Map", ["Function", ["Multiply", "x", 10], "x"], ["Range", 1, to]];
+  const joined = ce.box(["Join", map(2), map(3)] as never).evaluate({ materialization: true }).json;
+  expect(joined).toEqual(["List", 10, 20, 10, 20, 30]);
+});
+
 test("Join(f(...), f(...)) still joins matching heads' own operands", () => {
   expect(run(["Join", ["f", 1, 2], ["f", 3, 4]])).toEqual(["f", 1, 2, 3, 4]);
 });
