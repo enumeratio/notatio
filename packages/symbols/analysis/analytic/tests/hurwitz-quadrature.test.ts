@@ -24,3 +24,14 @@ test("HurwitzZeta at large Im s left of the strip keeps its digits on N, evaluat
     }
   }
 });
+
+// mpmath.lerchphi at dps 60 (BL-352). The double sum for the second point cancels 1e18 of its terms away,
+// so the head stays unevaluated; the third was 0.69 off.
+test("LerchPhi at large |Re s| or Im s answers right or stays unevaluated on N and evaluate", () => {
+  const boxed = ce.box(["LerchPhi", 0.99, ["Complex", 3, 24], ["Complex", 0.5, -6]]);
+  for (const result of [boxed.N(), boxed.evaluate()]) expect(result.operator).toBe("LerchPhi");
+  const right = ce.box(["LerchPhi", -0.99, -60.076977572044065, -0.2807513716569061]);
+  for (const result of [right.N(), right.evaluate()]) {
+    expect(Math.abs(result.re / -7.103889709188545e51 - 1)).toBeLessThan(1e-10);
+  }
+});

@@ -2,7 +2,7 @@ import {
   digamma,
   hurwitzZetaChecked,
   hurwitzZetaWithError,
-  lerchPhi,
+  lerchPhiChecked,
   logGamma,
   MAX_RELATIVE_ERROR,
   polygamma,
@@ -226,7 +226,7 @@ function compile(j: Json, variable: string): ComplexFunction {
       if (fs.length === 2) return (z) => ofCx(polyLog(toCx(f(0)(z)), toCx(f(1)(z))));
       break;
     case "LerchPhi":
-      if (fs.length === 3) return (z) => ofCx(lerchPhi(toCx(f(0)(z)), toCx(f(1)(z)), toCx(f(2)(z))));
+      if (fs.length === 3) return (z) => ofCx(vouched(lerchPhiChecked(toCx(f(0)(z)), toCx(f(1)(z)), toCx(f(2)(z)))));
       break;
     case "PolyGamma": {
       // The order is a literal integer: the kernel is ζ(m+1, z) scaled, not analytic in m.

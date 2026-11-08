@@ -1,5 +1,5 @@
 import { abs, add, cexp, clog, cosPi, cx, type Cx, mul, scale, sinPi, sub } from "./complex-arithmetic.ts";
-import { hurwitzZeta } from "./hurwitz-zeta.ts";
+import { ERROR_PER_LOSS, hurwitzZetaWithError, MAX_RELATIVE_ERROR } from "./hurwitz-zeta.ts";
 import { logGamma } from "./log-gamma.ts";
 
 // Lerch transcendent Φ(z, s, a) = Σ_{n≥0} zⁿ (n+a)^(−s), by direct summation.
@@ -23,6 +23,9 @@ import { logGamma } from "./log-gamma.ts";
 let _pr = 0;
 let _pi = 0;
 
+/** Largest |ln m| or |arg| of any power taken since the route's caller reset it; see hurwitz-zeta.ts. */
+let _reach = 0;
+
 /** (zr+zi·i)^(wr+wi·i), principal branch; result in _pr/_pi. */
 function cpowInto(zr: number, zi: number, wr: number, wi: number): void {
   if (zi === 0 && zr > 0 && wi === 0) {
@@ -43,6 +46,8 @@ function cpowInto(zr: number, zi: number, wr: number, wi: number): void {
   const th = Math.atan2(zi, zr);
   const er = wr * logr - wi * th;
   const ei = wr * th + wi * logr;
+  const reach = Math.max(Math.abs(er), Math.abs(ei));
+  if (reach > _reach) _reach = reach;
   const m = Math.exp(er);
   _pr = m * Math.cos(ei);
   _pi = m * Math.sin(ei);
@@ -51,13 +56,16 @@ function cpowInto(zr: number, zi: number, wr: number, wi: number): void {
 // Increments in a row below 1e-17 of the sum before the Euler transform stops.
 const EULER_CONSECUTIVE_SMALL = 3;
 
+/** Times its last increment that an Euler transform cut off by its term cap may still be off. */
+const EULER_UNCONVERGED = 1e3;
+
 /**
  * Σ_{n≥0} zⁿ (n+a)^(−s) for real z < 0 by the van Wijngaarden Euler transform
  * (Numerical Recipes `eulsum`, carried through the complex terms). The signed,
  * alternating terms are fed in; on the |z| = 1 rim direct summation stalls but the
  * repeated-averaging table reaches double precision in a few dozen terms.
  */
-function lerchEuler(zRe: number, s: Cx, a: Cx): Cx {
+function lerchEuler(zRe: number, s: Cx, a: Cx): { value: Cx; absFed: number; tail: number } {
   const negSr = -s.re;
   const negSi = -s.im;
   const wR: number[] = [];
@@ -67,6 +75,8 @@ function lerchEuler(zRe: number, s: Cx, a: Cx): Cx {
   let sumI = 0;
   let zpow = 1; // zⁿ (signed: z < 0 makes the terms alternate)
   let smallRun = 0;
+  let absFed = 0; // Σ |termₙ| fed in: every table entry is an average of these
+  let incAbs = 0;
   for (let n = 0; n < 512; n++, zpow *= zRe) {
     const br = a.re + n;
     // termₙ = zⁿ (n+a)^(−s), the signed term the Euler transform averages.
@@ -76,6 +86,7 @@ function lerchEuler(zRe: number, s: Cx, a: Cx): Cx {
       cpowInto(br, a.im, negSr, negSi);
       aR = zpow * _pr;
       aI = zpow * _pi;
+      absFed += Math.hypot(aR, aI);
     }
     let incR: number;
     let incI: number;
@@ -111,13 +122,16 @@ function lerchEuler(zRe: number, s: Cx, a: Cx): Cx {
     }
     sumR += incR;
     sumI += incI;
+    incAbs = Math.hypot(incR, incI);
     // A single tiny increment is not convergence: for a polynomial times zⁿ (s a non-positive
     // integer, Φ(−1/3, −1, 1)) a table entry can vanish while later terms still matter.
     if (n > 4 && Math.hypot(incR, incI) < 1e-17 * (Math.hypot(sumR, sumI) + 1e-17)) {
       if (++smallRun === EULER_CONSECUTIVE_SMALL) break;
     } else smallRun = 0;
   }
-  return { re: sumR, im: sumI };
+  // Converged: the increments are down to rounding. Out of terms: the last increment is all the error it admits.
+  const tail = smallRun === EULER_CONSECUTIVE_SMALL ? 0 : EULER_UNCONVERGED * incAbs;
+  return { value: { re: sumR, im: sumI }, absFed, tail };
 }
 
 /**
@@ -127,44 +141,75 @@ function lerchEuler(zRe: number, s: Cx, a: Cx): Cx {
  * Φ(z, s, a) = z^(−m) [Φ(z, s, a−m) − Σ_{j<m} zʲ (a−m+j)^(−s)]: ζ(s−k, a) grows like aᵏ,
  * and at arg z near ±π the series would cancel like e^(a·|L|) otherwise.
  */
-function lerchAboutOne(z: Cx, s: Cx, a: Cx): { value: Cx; lost: number } {
+function lerchAboutOne(z: Cx, s: Cx, a: Cx): { value: Cx; error: number } {
   const L = clog(z);
-  const m = Math.max(0, Math.ceil(a.re) - 1);
+  // b = a − m has Re b in (0, 1]: the series needs Re a > 0, and ζ(s−k, a) at a ≤ 0 reads the terms
+  // (n+a)^(−s) left of the axis on a different branch than Φ(z, s, a−m) would.
+  const m = a.re > 1 ? Math.ceil(a.re) - 1 : a.re > 0 ? 0 : -(Math.floor(-a.re) + 1);
   const b = cx(a.re - m, a.im);
-  const closed = cexp(add(logGamma(sub(cx(1), s)), mul(sub(s, cx(1)), clog(scale(L, -1)))));
+  const closedLog = add(logGamma(sub(cx(1), s)), mul(sub(s, cx(1)), clog(scale(L, -1))));
+  const closed = cexp(closedLog);
   let inner = closed;
-  let largest = abs(closed);
+  let error = reachError(closedLog) * abs(closed);
   let lk = cx(1); // Lᵏ/k!
   let small = 0;
+  let largest = abs(closed);
+  let last = 0;
+  const ratio = abs(L) / (2 * Math.PI);
+  // The terms ζ(s−k, b)·Lᵏ/k! grow by about (k + |s|)·ratio/k so they peak near |s|·ratio/(1 − ratio); a small term before that is not the end (s = −60, z = −0.99: the
+  // first two are 1e−17 of the closed form's size and the sum was off by 0.7).
+  const peak = (abs(s) * ratio) / (1 - ratio);
   for (let k = 0; k < 400; k++) {
-    const t = mul(hurwitzZeta(cx(s.re - k, s.im), b), lk);
+    const h = hurwitzZetaWithError(cx(s.re - k, s.im), b);
+    const t = mul(h.value, lk);
     inner = add(inner, t);
     const size = abs(t);
+    // A ζ(s−k, b) past a double's range (or one that declined) leaves no value to vouch for.
+    if (!Number.isFinite(size) || !Number.isFinite(h.error))
+      return { value: cx(Number.NaN, Number.NaN), error: Number.NaN };
+    // ζ's own error, and the (k + 1) roundings lk has carried.
+    error += h.error * abs(lk) + ERROR_PER_LOSS * (1 + k) * size;
     largest = Math.max(largest, size);
     // Two in a row: ζ(s−k, b) can pass near a zero.
-    if (size <= 1e-17 * largest) {
-      if (++small === 2) break;
+    if (size <= 1e-17 * largest && k >= peak) {
+      if (++small === 2) {
+        // The terms fall like (|L|/2π)ᵏ; what is left is that geometric tail of the last two.
+        error += ((size + last) * ratio) / (1 - ratio);
+        break;
+      }
     } else small = 0;
+    last = size;
     lk = scale(mul(lk, L), 1 / (k + 1));
+    if (k === 399) error = Number.POSITIVE_INFINITY; // out of terms
   }
-  const phiB = mul(cexp(scale(mul(L, b), -1)), inner);
-  let lost = largest / abs(inner);
+  const lb = scale(mul(L, b), -1);
+  const phiB = mul(cexp(lb), inner);
+  let phiError = abs(cexp(lb)) * error + reachError(lb) * abs(phiB);
+  _reach = 0;
   let head = cx(0);
-  let headLargest = abs(phiB);
+  let headLargest = 0;
   let zj = cx(1);
-  for (let j = 0; j < m; j++) {
-    if (!(b.re + j === 0 && b.im === 0)) {
-      cpowInto(b.re + j, b.im, -s.re, -s.im);
+  // m > 0: Φ(z, s, a) = z^(−m) [Φ(z, s, b) − Σ_{j<m} zʲ (b+j)^(−s)];
+  // m < 0: Φ(z, s, a) = Σ_{j<−m} zʲ (a+j)^(−s) + z^(−m) Φ(z, s, b).
+  const base = m > 0 ? b : a;
+  for (let j = 0; j < Math.abs(m); j++) {
+    if (!(base.re + j === 0 && base.im === 0)) {
+      cpowInto(base.re + j, base.im, -s.re, -s.im);
       const t = mul(zj, cx(_pr, _pi));
       head = add(head, t);
       headLargest = Math.max(headLargest, abs(t));
     }
     zj = mul(zj, z);
   }
-  const diff = sub(phiB, head);
-  lost = Math.max(lost, headLargest / abs(diff));
-  return { value: mul(cexp(scale(L, -m)), diff), lost };
+  const headError = ERROR_PER_LOSS * (1 + _reach + Math.abs(m)) * headLargest;
+  const shift = cexp(scale(L, -m));
+  const value = m > 0 ? mul(shift, sub(phiB, head)) : add(head, mul(shift, phiB));
+  const shifted = m > 0 ? abs(shift) * (phiError + headError) : abs(shift) * phiError + headError;
+  return { value, error: shifted + reachError(scale(L, -m)) * abs(value) };
 }
+
+/** The relative error of a result exp(w): the argument w is good to eps·max(|Re w|, |Im w|), and the sum or product to a few more. */
+const reachError = (w: Cx): number => ERROR_PER_LOSS * (1 + Math.max(Math.abs(w.re), Math.abs(w.im)));
 
 /**
  * Terms until |z|ⁿ (n+|a|)^(−Re s) is below 1e−17. Left of Re(s) = 0 the polynomial factor
@@ -180,16 +225,40 @@ function seriesLength(absZ: number, s: Cx, a: Cx): number {
   return Math.min(2_000_000, Math.ceil(n) + 64);
 }
 
-/** Σ zⁿ (n+a)^(−s) summed directly, with Σ |zⁿ (n+a)^(−s)|. */
-function lerchDirect(z: Cx, s: Cx, a: Cx, maxN: number): { value: Cx; absSum: number } {
+/**
+ * A bound on what Σ_{k≥n} zᵏ (k+a)^(−s) leaves out, for n with n + Re a > 0: |(k+a)^(−s)| is at most
+ * k^|Re s| e^(|Im s|·|Im a|/(k+Re a)) (|arg(k+a)| ≤ |Im a|/(k+Re a)), and the terms' bound falls by
+ * at most `ratio` a step, a geometric tail. Infinity where that ratio is not under 1. The
+ * bound is what a term rising late costs: s = 3+24i, a = ½−6i has terms of e^−36 for n < 20 and 1
+ * after, and a sum stopped at its first small term was off by 3e−3.
+ */
+function directTail(absZ: number, s: Cx, a: Cx, n: number): number {
+  if (absZ === 0) return 0;
+  if (!(n + a.re > 0)) return Number.POSITIVE_INFINITY;
+  const reachA = Math.hypot(a.re, a.im);
+  const ratio = absZ * Math.exp(Math.max(0, -s.re) / (n + reachA));
+  if (!(ratio < 1)) return Number.POSITIVE_INFINITY;
+  const power = s.re >= 0 ? -s.re * Math.log(n + a.re) : -s.re * Math.log(n + reachA);
+  const phase = (Math.abs(s.im) * Math.abs(a.im)) / (n + a.re);
+  return Math.exp(n * Math.log(absZ) + power + phase) / (1 - ratio);
+}
+
+/** Past this fraction of the largest thing summed, a tail no longer shows beside the rounding. */
+const TAIL_TOLERANCE = 1e-17;
+
+/** Σ zⁿ (n+a)^(−s) summed directly, with Σ |zⁿ (n+a)^(−s)|, the terms taken and the bound on the tail left. */
+function lerchDirect(z: Cx, s: Cx, a: Cx, maxN: number): { value: Cx; absSum: number; count: number; tail: number } {
   const negSr = -s.re;
   const negSi = -s.im;
+  const absZ = Math.hypot(z.re, z.im);
   let sumR = 0;
   let sumI = 0;
   let absSum = 0;
   let zpR = 1; // zⁿ
   let zpI = 0;
-  for (let n = 0; n <= maxN; n++) {
+  let n = 0;
+  let tail = Number.POSITIVE_INFINITY;
+  for (; n <= maxN; n++) {
     const br = a.re + n;
     if (!(br === 0 && a.im === 0)) {
       cpowInto(br, a.im, negSr, negSi); // (n+a)^(−s)
@@ -197,61 +266,82 @@ function lerchDirect(z: Cx, s: Cx, a: Cx, maxN: number): { value: Cx; absSum: nu
       const tI = zpR * _pi + zpI * _pr;
       sumR += tR;
       sumI += tI;
-      const size = Math.hypot(tR, tI);
-      absSum += size;
-      if (n > 8 && size < 1e-16 * (Math.hypot(sumR, sumI) + 1e-16)) break;
+      absSum += Math.hypot(tR, tI);
+    }
+    if (n % 8 === 7) {
+      tail = directTail(absZ, s, a, n + 1);
+      if (tail <= TAIL_TOLERANCE * Math.max(absSum, Math.hypot(sumR, sumI))) break;
     }
     const nzR = zpR * z.re - zpI * z.im; // zⁿ⁺¹
     const nzI = zpR * z.im + zpI * z.re;
     zpR = nzR;
     zpI = nzI;
   }
-  return { value: { re: sumR, im: sumI }, absSum };
+  if (n > maxN) tail = directTail(absZ, s, a, n);
+  return { value: { re: sumR, im: sumI }, absSum, count: n, tail };
 }
 
-/** Σ |zⁿ (n+a)^(−s)|, for the Euler transform, which doesn't see every term. */
-function termSum(absZ: number, s: Cx, a: Cx, maxN: number): number {
-  if (absZ >= 1) return Infinity; // left of Re(s) = 0 the rim's terms never fall
-  let total = 0;
-  let zn = 1; // |z|ⁿ
-  for (let n = 0; n <= maxN; n++, zn *= absZ) {
-    if (a.re + n === 0 && a.im === 0) continue;
-    cpowInto(a.re + n, a.im, -s.re, -s.im);
-    const size = zn * Math.hypot(_pr, _pi);
-    total += size;
-    if (n > 8 && size < 1e-17 * total) break;
-  }
-  return total;
-}
-
-export function lerchPhi(z: Cx, s: Cx, a: Cx): Cx {
-  if (z.im === 0 && z.re === 1) return hurwitzZeta(s, a); // Φ(1, s, a) = ζ(s, a)
+/**
+ * Φ(z, s, a) with the absolute error it may carry: the rounding of its sum (`ERROR_PER_LOSS` per
+ * unit of (1 + reach) times the terms' size) and what the truncated series leaves out. NaN error for a
+ * z past the rim, which the series cannot reach, and Infinity where a route ran out of terms.
+ */
+export function lerchPhiWithError(z: Cx, s: Cx, a: Cx): { value: Cx; error: number } {
+  if (z.im === 0 && z.re === 1) return hurwitzZetaWithError(s, a); // Φ(1, s, a) = ζ(s, a)
   const absZ = Math.hypot(z.re, z.im);
-  if (absZ > 1) return { re: Number.NaN, im: Number.NaN }; // continuation, not the series
+  if (absZ > 1) return { value: { re: Number.NaN, im: Number.NaN }, error: Number.NaN }; // continuation, not the series
   const maxN = seriesLength(absZ, s, a);
+  _reach = 0;
   let value: Cx;
-  let absSum: number;
+  let error: number;
   if (z.im === 0 && z.re < 0) {
-    // −1 ≤ z < 0: alternating. The transform's terms only cancel badly when they grow.
-    value = lerchEuler(z.re, s, a);
-    absSum = s.re < 0 ? termSum(absZ, s, a, maxN) : 0;
-  } else ({ value, absSum } = lerchDirect(z, s, a, maxN));
-  const lost = absSum / Math.hypot(value.re, value.im);
-  // Past three digits lost (or no sum at all), see if the series about z = 1 does better. Its
-  // own measure keeps it out where it can't: near a positive integer s, Γ(1−s) and a ζ(s−k, a)
+    // −1 ≤ z < 0: alternating, summed by the Euler transform.
+    const e = lerchEuler(z.re, s, a);
+    value = e.value;
+    error = ERROR_PER_LOSS * (1 + _reach) * e.absFed + e.tail;
+  } else {
+    const d = lerchDirect(z, s, a, maxN);
+    value = d.value;
+    // zⁿ by repeated multiplication drifts like √n roundings.
+    error = ERROR_PER_LOSS * (1 + _reach + Math.sqrt(d.count)) * d.absSum + d.tail;
+  }
+  const size = Math.hypot(value.re, value.im);
+  // Past `ABOUT_ONE_ERROR` of error (or no sum at all), see if the series about z = 1 does better.
+  // Its own error keeps it out where it can't: near a positive integer s, Γ(1−s) and a ζ(s−k, a)
   // pole cancel. Near arg z = ±π with a off the axis both routes can still lose digits, the
   // series about z = 1 by about e^(π|Im a|). An exact zero stays: terms that cancel to exactly
   // 0 are a true zero (Φ(−1, −1, ½)), where the other series could only add its rounding.
-  if (!(lost <= 1e3) && !(value.re === 0 && value.im === 0)) {
+  if (!(error <= ABOUT_ONE_ERROR * size) && !(value.re === 0 && value.im === 0)) {
     const about = lerchAboutOne(z, s, a);
-    if (!(about.lost >= lost) && Number.isFinite(about.value.re) && Number.isFinite(about.value.im)) return about.value;
+    const aboutSize = Math.hypot(about.value.re, about.value.im);
+    if (about.error / aboutSize < error / size && Number.isFinite(about.value.re) && Number.isFinite(about.value.im))
+      return about;
+    if (!(error / size >= 0)) return about; // a NaN or Infinity here: whatever the other can say
   }
-  return value;
+  return { value, error };
+}
+
+/** The relative error past which the series about z = 1 is tried: about 1e3 roundings. */
+const ABOUT_ONE_ERROR = 1e3 * ERROR_PER_LOSS;
+
+/** Φ(z, s, a), best effort: where terms cancel it carries the error `lerchPhiWithError` reports. */
+export function lerchPhi(z: Cx, s: Cx, a: Cx): Cx {
+  return lerchPhiWithError(z, s, a).value;
+}
+
+/** `lerchPhi`, or undefined where its error passes `MAX_RELATIVE_ERROR` of the value (or is unknown). */
+export function lerchPhiChecked(z: Cx, s: Cx, a: Cx): Cx | undefined {
+  const r = lerchPhiWithError(z, s, a);
+  const size = Math.hypot(r.value.re, r.value.im);
+  if (!Number.isFinite(size)) return undefined;
+  if (size === 0) return r.error === 0 ? r.value : undefined;
+  return r.error <= MAX_RELATIVE_ERROR * size ? r.value : undefined;
 }
 
 /** Real-valued Φ(z, s, a) for real z, s, a — for compiled (JS/GPU) plotting. NaN where the value
  * is not real (a^(−s) at a < 0 and a non-integer s). */
 export const lerchPhiReal = (z: number, s: number, a: number): number => {
-  const v = lerchPhi({ re: z, im: 0 }, { re: s, im: 0 }, { re: a, im: 0 });
+  const v = lerchPhiChecked({ re: z, im: 0 }, { re: s, im: 0 }, { re: a, im: 0 });
+  if (v === undefined) return Number.NaN;
   return Math.abs(v.im) > 1e-12 * Math.abs(v.re) + 1e-300 ? Number.NaN : v.re;
 };

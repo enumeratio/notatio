@@ -60,7 +60,9 @@ export {
 export {
   lerchPhiPatch,
   lerchPhi,
+  lerchPhiChecked,
   lerchPhiReal,
+  lerchPhiWithError,
   lerchContinued,
   lerchPhiBig,
   lerchPhiBall,

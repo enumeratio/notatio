@@ -227,7 +227,7 @@ export function hurwitzZeta(s: Cx, a: Cx): Cx {
 export const MAX_RELATIVE_ERROR = 1e-8;
 
 /** Measured worst relative error per unit of (1 + reach) · ratio is 7.7e-16; this is that with a margin. */
-const ERROR_PER_LOSS = 2.5e-15;
+export const ERROR_PER_LOSS = 2.5e-15;
 
 /** A value with the roundoff (`lost`, `reach`) and quadrature (`quad`, absolute) errors it may carry. */
 interface Measured {
@@ -541,6 +541,8 @@ function reflectedZeta(s: Cx): Cx {
     add(scale(s, Math.LN2), scale(cx(s.re - 1, s.im), Math.log(Math.PI))),
     add(logGamma(r), logSin(scale(s, Math.PI / 2))),
   );
+  // exp of an argument this large carries an error of that many ulps, and logΓ(1−s) is good only to as many.
+  _reach = Math.max(_reach, Math.abs(log.re), Math.abs(log.im));
   return mul(cexp(log), hurwitzEM(r, cx(1, 0)));
 }
 

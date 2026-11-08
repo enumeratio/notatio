@@ -83,7 +83,9 @@ export const lerchPhiPatch: Patch = {
 export {
   evaluateLerch,
   lerchPhi,
+  lerchPhiChecked,
   lerchPhiReal,
+  lerchPhiWithError,
   lerchContinued,
   lerchPhiBig,
   lerchPhiBall,
