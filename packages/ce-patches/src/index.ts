@@ -4,6 +4,7 @@ import { integratePolynomialPowers } from "./patches/integrate-polynomial-powers
 import { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 import { agmComplex } from "./patches/agm-complex.ts";
 import { shapeOfUnknownElements } from "./patches/shape-of-unknown-elements.ts";
+import { matrixRankCompiles } from "./patches/matrix-rank-compiles.ts";
 import { solveDeclines } from "./patches/solve-declines.ts";
 import { solveDomains } from "./patches/solve-domains.ts";
 import { PATCHES } from "./patches/registry-data.ts";
@@ -90,6 +91,7 @@ export { integratePolynomialPowers, integrateExpandsPolynomials } from "./patche
 export { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 export { shapeOfUnknownElements, evaluateShapeOfUnknownElements } from "./patches/shape-of-unknown-elements.ts";
 export { dictionaryOf, entriesOf } from "./compute-engine/library/core.ts";
+export { matrixRankCompiles, compileMatrixRank, matrixRank } from "./patches/matrix-rank-compiles.ts";
 export { valuesAtZero } from "./patches/values-at-zero.ts";
 export { clausen } from "./compute-engine/numerics/clausen.ts";
 export { stieltjesGamma, stieltjesGammaReal, STIELTJES_MAX_ORDER } from "./compute-engine/numerics/stieltjes.ts";
@@ -202,6 +204,7 @@ export function applyNativeHeadPatches(ce: ComputeEngine): void {
     solveDomains,
     iteratorUpperBound,
     shapeOfUnknownElements,
+    matrixRankCompiles,
     integratePolynomialPowers,
   ])
     applyPatch(ce, patch);
