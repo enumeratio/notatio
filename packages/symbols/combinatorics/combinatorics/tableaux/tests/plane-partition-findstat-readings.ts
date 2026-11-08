@@ -38,7 +38,24 @@ const missingPart = (p: Plane): number => {
   return i;
 };
 
+/** FindStat's St001921: for each row, with a row of one zero added, and each entry, with a zero added, a box can go there when it is below its left and upper neighbors. */
+const addableBoxes = (p: Plane): number => {
+  let total = 0;
+  [...p, [0]].forEach((row, i) => {
+    [...row, 0].forEach((entry, j) => {
+      const left = j === 0 ? undefined : row[j - 1];
+      const above = i === 0 || p[i - 1]!.length === j ? undefined : p[i - 1]![j];
+      if ((left === undefined || entry < left) && (above === undefined || entry < above)) total++;
+    });
+  });
+  return total;
+};
+
 export const PLANE_PARTITION_READINGS: Record<string, (p: Plane) => number> = {
+  // St001598: the cells (row, column, level) of the stack of boxes, counted from 0, and the largest coordinate sum.
+  MaximalCellDistance: (p) =>
+    Math.max(...p.flatMap((row, i) => row.flatMap((height, j) => Array.from({ length: height }, (_, k) => i + j + k)))),
+  AddableBoxCount: (p) => (p.length === 0 ? 1 : addableBoxes(p)),
   LargestPart: (p) => p[0]![0]!,
   Trace: (p) => sum(p.flatMap((row, i) => (row.length > i ? [row[i]!] : []))),
   BoxCount: (p) => sum(p.map(sum)),

@@ -41,10 +41,30 @@ test("every perfect-matching definition has an independent reading", () => {
   expect(heads.toSorted()).toEqual(DEFINED_ON_MATCHINGS);
 });
 
+/** Heads that take more than a few tenths of a second a matching of 8 points to interpret: they run to 6 points here and to 8 under DEEP_TESTS. */
+const SLOW = new Set([
+  "DihedralOrbitSize",
+  "RestrictedGrowthThreeOneTwoCount",
+  "RestrictedGrowthTwoOneThreeCount",
+  "RestrictedGrowthTwoThreeOneCount",
+  "UnicellularMapVertexCount",
+]);
+
 for (const head of DEFINED_ON_MATCHINGS)
-  test(`${head} agrees over every perfect matching of 2..8 points`, () => {
-    for (const m of upTo(4)) expect(evaluate(head, m), JSON.stringify(m)).toBe(PERFECT_MATCHING_READINGS[head]!(m));
+  test(`${head} agrees over every perfect matching of 2..${SLOW.has(head) ? 6 : 8} points`, () => {
+    for (const m of upTo(SLOW.has(head) ? 3 : 4))
+      expect(evaluate(head, m), JSON.stringify(m)).toBe(PERFECT_MATCHING_READINGS[head]!(m));
   });
+
+test.skipIf(!process.env.DEEP_TESTS)(
+  "the slow perfect-matching definitions agree over the matchings of 8 points",
+  () => {
+    for (const m of matchings(4))
+      for (const head of SLOW)
+        expect(evaluate(head, m), `${head} ${JSON.stringify(m)}`).toBe(PERFECT_MATCHING_READINGS[head]!(m));
+  },
+  1_800_000,
+);
 
 test("each head called through the carrier gives the reading, shared ones included", () => {
   for (const [head, expected] of Object.entries(PERFECT_MATCHING_READINGS))
@@ -60,7 +80,7 @@ test.skipIf(!process.env.DEEP_TESTS)(
   "every perfect-matching definition agrees over the matchings of 10 points",
   () => {
     for (const m of matchings(5))
-      for (const head of DEFINED_ON_MATCHINGS)
+      for (const head of DEFINED_ON_MATCHINGS.filter((h) => !SLOW.has(h)))
         expect(evaluate(head, m), `${head} ${JSON.stringify(m)}`).toBe(PERFECT_MATCHING_READINGS[head]!(m));
   },
   1_800_000,

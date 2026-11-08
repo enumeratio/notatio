@@ -19,6 +19,10 @@ const upTo = (n: number): number[][] => Array.from({ length: n + 1 }, (_, k) => 
 const DEEP = process.env.DEEP_TESTS === "1";
 /** FindStat heads that cost tens of milliseconds a word: the standard run reads them on words up to length 4, DEEP_TESTS up to 8. */
 const COSTLY = new Set([
+  "MaximalComplexityFactorLength",
+  "PalindromicDefect",
+  "RecursiveBitPairCount",
+  "RulerGrundyValue",
   "DistinctFactorCount",
   "BorderLength",
   "DistinctSubsequenceCount",

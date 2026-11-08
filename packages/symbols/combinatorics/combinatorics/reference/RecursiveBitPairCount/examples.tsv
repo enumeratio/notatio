@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[RecursiveBitPairCount, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	5			the word $110100111$
+findstat-st001984-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'RecursiveBitPairCount'"]	0	0	FindStat St001984	FindStat's value for 0
+findstat-st001984-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'RecursiveBitPairCount'"]	1	1	FindStat St001984	FindStat's value for 1
+findstat-st001984-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'RecursiveBitPairCount'"]	0	0	FindStat St001984	FindStat's value for 00

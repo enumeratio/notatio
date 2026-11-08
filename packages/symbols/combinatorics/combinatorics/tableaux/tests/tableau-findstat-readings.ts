@@ -99,7 +99,29 @@ function haglundStevensInversions(t: Tableau): number {
 /** The sum of the rows' numbers (from 0) times their lengths: FindStat's weighted size of the shape. */
 const weightedSize = (t: Tableau): number => sum(t.map((row, r) => r * row.length));
 
+/** Whether the rows, after trailing empty rows go, are a standard tableau once relabeled 1 .. m. */
+const standardRows = (rows: number[][]): boolean => {
+  const kept = rows.slice();
+  while (kept.length > 0 && kept.at(-1)!.length === 0) kept.pop();
+  if (kept.some((row) => row.length === 0)) return false;
+  const rowsIncrease = kept.every((row) => row.every((e, c) => c === 0 || row[c - 1]! < e));
+  const shape = kept.every((row, r) => r === 0 || row.length <= kept[r - 1]!.length);
+  const columnsIncrease = kept.every((row, r) => r === 0 || row.every((e, c) => kept[r - 1]![c]! < e));
+  return rowsIncrease && shape && columnsIncrease;
+};
+/** FindStat's St001462: split at the first i after which the entries above i, less i, are a standard tableau, and count the pieces. */
+const tableauFactors = (t: Tableau): number => {
+  const n = size(t);
+  if (n === 0) return 0;
+  for (let i = 1; i < n; i++) {
+    const rest = t.map((row) => row.filter((e) => e > i).map((e) => e - i));
+    if (standardRows(rest)) return 1 + tableauFactors(rest.filter((row) => row.length > 0));
+  }
+  return 1;
+};
+
 export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
+  TableauFactorCount: tableauFactors,
   // The first row whose largest entry beats those above it is the one holding n.
   RowOfLargestEntry: (t) => {
     let found = 0;

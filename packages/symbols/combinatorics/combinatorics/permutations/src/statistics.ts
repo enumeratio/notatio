@@ -6,6 +6,7 @@
 // an independent reading over every permutation of 1..6.
 
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
+import { FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2 } from "./signed-statistics.ts";
 import {
   adjacent,
   and,
@@ -3531,5 +3532,6 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_11,
   ...FINDSTAT_PERMUTATION_STATISTICS_12,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
+  ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
   ...FINDSTAT_PERMUTATION_WINDOW_STATISTICS,
 ];

@@ -949,6 +949,115 @@ const BINARY_WORD_STATISTICS: readonly Definition[] = [
   ),
 ];
 
+// ── more binary-word statistics ──────────────────────────────────────────────────────────
+
+/** The number of distinct factors of each length l = 0 .. n - 1: entry l + 1 of the list. */
+const factorComplexities: MathJSON = forEach(
+  span(0, subtract(k, 1)),
+  [
+    "If",
+    equals("l", 0),
+    1,
+    ["Length", ["Unique", forEach(span(1, add(subtract(k, "l"), 1)), factorNumeral("i", "l"))]],
+  ],
+  "l",
+);
+
+/** The levels e with 2^e at most n: a position j has 2-adic valuation e when j mod 2^(e+1) is 2^e. */
+const rulerLevels: MathJSON = where(span(0, k), atMostValue(power(2, "e"), k), "e");
+
+const FINDSTAT_BINARY_WORD_STATISTICS_6: readonly Definition[] = [
+  stat(
+    "RulerGrundyValue",
+    "The exclusive or of 2^e over the 1s at positions with 2-adic valuation e.",
+    nonEmpty(
+      floored(
+        sumOver(
+          rulerLevels,
+          times(power(2, "e"), [
+            "Mod",
+            count(positions, and(equals(here, 1), equals(["Mod", "i", power(2, add("e", 1))], power(2, "e")))),
+            2,
+          ]),
+          "e",
+        ),
+      ),
+    ),
+    "FindStat's St000792, the Grundy value of the game of ruler. The exclusive or of distinct powers of 2 adds them, and a power occurs when an odd number of its positions hold a 1.",
+  ),
+  stat(
+    "MaximalComplexityFactorLength",
+    "The largest length of a factor at which the number of distinct factors is greatest.",
+    nonEmpty(
+      bindList(
+        "c",
+        factorComplexities,
+        max(forEach(span(0, subtract(k, 1)), ["If", equals(at(add("l", 1), "c"), max("c")), "l", 0], "l")),
+      ),
+    ),
+    "FindStat's St000519, the largest length at which the subword complexity is greatest, over the lengths 0 .. n - 1.",
+  ),
+  stat(
+    "PalindromicDefect",
+    "The length less the number of distinct nonempty palindromic factors: the palindromes a word of that length can have, one per length plus the empty one, less those it has.",
+    nonEmpty(
+      subtract(
+        k,
+        floored(
+          sumOver(
+            span(1, k),
+            floored(
+              sumOver(
+                [
+                  "Unique",
+                  forEach(
+                    span(1, add(subtract(k, "l"), 1)),
+                    ["If", isPalindrome("i", "l"), factorNumeral("i", "l"), 0],
+                    "i",
+                  ),
+                ],
+                ifThen(greater("n", 0)),
+                "n",
+              ),
+            ),
+            "l",
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St000629. A word of length n has at most n + 1 distinct palindromic factors, the empty one included.",
+  ),
+  stat(
+    "RecursiveBitPairCount",
+    "Dropping the last letter after 00 and the last two otherwise, counting each time, the number of drops of two, with 1 for the word 1.",
+    nonEmpty(
+      tableAt(
+        prefixTable(
+          [0],
+          [
+            "If",
+            equals(visiting, 1),
+            at(1),
+            [
+              "If",
+              equals(visiting, 2),
+              max2(at(1), at(2)),
+              [
+                "If",
+                and(equals(at(visiting), 0), equals(at(subtract(visiting, 1)), 0)),
+                at(visiting, "a"),
+                add(at(subtract(visiting, 1), "a"), 1),
+              ],
+            ],
+          ],
+        ),
+        k,
+      ),
+    ),
+    "FindStat's St001984. Entry j + 1 of the table is the count for the first j letters: the last letter after a 0 is dropped alone, else the last two are dropped for 1.",
+  ),
+];
+
 // ── parking functions ────────────────────────────────────────────────────────────────────
 //
 // `_x` is the preferences: car i prefers spot `_x(i)`, and the spots are 1 .. n.
@@ -1076,4 +1185,105 @@ const PARKING_FUNCTION_STATISTICS: readonly Definition[] = [
   ),
 ];
 
-export const WORD_STATISTICS: readonly Definition[] = [...BINARY_WORD_STATISTICS, ...PARKING_FUNCTION_STATISTICS];
+/** Car i's row in the labeled Dyck path: the cars are stacked by spot and, within a spot, by label. Entry i is 1 plus the cars below it. */
+const rowOfCar: MathJSON = forEach(
+  positions,
+  add(1, count(positions, or(less(at("j"), at("i")), and(equals(at("j"), at("i")), less("j", "i"))), "j")),
+);
+/** Entry i is the area of car i's row: the cells between the path and the diagonal, its row less its spot. */
+const rowAreas: MathJSON = forEach(positions, subtract(at("i", "r"), at("i")));
+/** The pairs of cars (i, j) in rows r(i) < r(j) meeting `relation`. */
+const dinversionPairs = (relation: MathJSON): MathJSON =>
+  floored(sumOver(positions, count(positions, and(less(at("i", "r"), at("j", "r")), relation), "j")));
+/** Primary: equal areas and the labels rising with the rows. */
+const primaryDinversions: MathJSON = dinversionPairs(and(less("i", "j"), equals(at("i", "d"), at("j", "d"))));
+/** Secondary: the lower row one area larger and the labels falling. */
+const secondaryDinversions: MathJSON = dinversionPairs(
+  and(greater("i", "j"), equals(at("i", "d"), add(at("j", "d"), 1))),
+);
+const withRowAreas = (body: MathJSON): MathJSON => nonEmpty(bindList("r", rowOfCar, bindList("d", rowAreas, body)));
+
+/** The preference of the j-th car from the end. */
+const fromEnd = (j: MathJSON): MathJSON => at(subtract(add(length(), 1), j));
+/** The first reversed position after `from` whose car is not yet taken and prefers a spot of at most the take number; n + 1 for none. */
+const nextTaker = (from: MathJSON): MathJSON =>
+  min(
+    forEach(
+      positions,
+      [
+        "If",
+        ["And", greater("j", from), equals(at(add("j", 3), "a"), 0), atMostValue(fromEnd("j"), visiting)],
+        "j",
+        add(length(), 1),
+      ],
+      "j",
+    ),
+  );
+/** The pmaj walk, over the cars from the last: take number t takes the first car after the last one taken, going on from the start with a new pass when none is left, whose spot is at most t. The state is the last car taken, the pass, the sum of the passes and a 1 for each car taken. */
+const parkingMajorWalk: MathJSON = listFold(
+  bind(
+    "l",
+    nextTaker(at(1, "a")),
+    bind(
+      "q",
+      nextTaker(0),
+      bind(
+        "w",
+        ["If", greater("l", length()), 1, 0],
+        bind(
+          "c",
+          ["If", equals("w", 1), "q", "l"],
+          [
+            "ReplaceAt",
+            ["ReplaceAt", ["ReplaceAt", ["ReplaceAt", "a", add("c", 3), 1], 1, "c"], 2, add(at(2, "a"), "w")],
+            3,
+            add(at(3, "a"), add(at(2, "a"), "w")),
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+    "integer",
+  ),
+  "a",
+  "b",
+  ["Join", list(0, 0, 0), forEach(positions, 0, "z")],
+  positions,
+  "list<integer>",
+);
+
+const FINDSTAT_PARKING_FUNCTION_STATISTICS_2: readonly Definition[] = [
+  parkingStat(
+    "PrimaryDinversionPairCount",
+    "The pairs of cars in rows r < s of the labeled Dyck path with equal areas and the lower label first.",
+    withRowAreas(primaryDinversions),
+    "FindStat's St000194. The cars stack by spot, then label; the area of a row is its height less the spot of its car.",
+  ),
+  parkingStat(
+    "SecondaryDinversionPairCount",
+    "The pairs of cars in rows r < s with the area of the first one more than the second's and the larger label first.",
+    withRowAreas(secondaryDinversions),
+    "FindStat's St000195.",
+  ),
+  parkingStat(
+    "ParkingFunctionDinv",
+    "The primary and the secondary dinversion pairs.",
+    withRowAreas(add(primaryDinversions, secondaryDinversions)),
+    "FindStat's St000136, Haglund's dinv of the labeled Dyck path. Not Dinv, which reads a Dyck path without its labels.",
+  ),
+  parkingStat(
+    "ParkingMajorIndex",
+    "The sum of the passes in which the cars are taken, scanning from the last car for a spot at most the cars taken so far plus one.",
+    nonEmpty(at(3, parkingMajorWalk)),
+    "FindStat's St001209, the pmaj statistic. Each pass marks the cars it takes with the number of passes before it, and the marks add up.",
+  ),
+];
+
+export const WORD_STATISTICS: readonly Definition[] = [
+  ...BINARY_WORD_STATISTICS,
+  ...FINDSTAT_BINARY_WORD_STATISTICS_6,
+  ...PARKING_FUNCTION_STATISTICS,
+  ...FINDSTAT_PARKING_FUNCTION_STATISTICS_2,
+];

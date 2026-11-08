@@ -34,9 +34,13 @@ test("every tableau definition has an independent reading", () => {
   expect(Object.keys(TABLEAU_READINGS).length).toBe(heads.length);
 });
 
+/** Heads that take a third of a second a tableau to interpret: 0..4 entries here, 0..6 under DEEP_TESTS, never 7 and 8. */
+const COSTLY = new Set(["TableauFactorCount"]);
+const largest = (head: string): number => (COSTLY.has(head) && !process.env.DEEP_TESTS ? 4 : 6);
+
 for (const [head, expected] of Object.entries(TABLEAU_READINGS))
-  test(`${head} agrees over every standard tableau of 0..6 entries`, () => {
-    for (const t of upTo(6)) expect(evaluate(head, t), JSON.stringify(t)).toBe(expected(t));
+  test(`${head} agrees over every standard tableau of 0..${largest(head)} entries`, () => {
+    for (const t of upTo(largest(head))) expect(evaluate(head, t), JSON.stringify(t)).toBe(expected(t));
   });
 
 test("each head called on the carrier value gives the reading", () => {
@@ -53,7 +57,7 @@ test.skipIf(!process.env.DEEP_TESTS)(
   "every tableau definition agrees over the standard tableaux of 7 and 8 entries",
   () => {
     for (const t of [...tableaux(7), ...tableaux(8)])
-      for (const [head, expected] of Object.entries(TABLEAU_READINGS))
+      for (const [head, expected] of Object.entries(TABLEAU_READINGS).filter(([h]) => !COSTLY.has(h)))
         expect(evaluate(head, t), `${head} ${JSON.stringify(t)}`).toBe(expected(t));
   },
   1_800_000,

@@ -705,6 +705,208 @@ const FINDSTAT_PLANE_PARTITION_STATISTICS: readonly Definition[] = [
   ),
 ];
 
+// ── more tableau, matrix and plane partition statistics ─────────────────────────────────
+
+const ifOne = (test: MathJSON): MathJSON => ["If", test, 1, 0];
+
+/** Where row j starts in `reading`: the cells in the rows before it. */
+const rowStarts: MathJSON = forEach(
+  positions,
+  floored(sumOver(positions, ["If", less("q", "j"), at("q", "lengths"), 0], "q")),
+  "j",
+);
+const rowLength = (j: MathJSON): MathJSON => at(j, "lengths");
+/** Entry c of row j. */
+const rowEntry = (j: MathJSON, c: MathJSON): MathJSON => at(add(at(j, "starts"), c), "reading");
+/** The entries of row j that are at most the cut `i`. */
+const takenFromRow = (j: MathJSON): MathJSON => count(through(rowLength(j)), atMostValue(rowEntry(j, "u"), "i"), "u");
+const remainingInRow = (j: MathJSON): MathJSON => subtract(rowLength(j), takenFromRow(j));
+/** The ways the rows left once the entries up to the cut `i` go are not a standard tableau: a row longer than the one above, or an entry not larger than the one above it. */
+const brokenAfterCut: MathJSON = floored(
+  sumOver(
+    positions,
+    [
+      "If",
+      less("j", length()),
+      add(
+        ifOne(less(remainingInRow("j"), remainingInRow(add("j", 1)))),
+        floored(
+          sumOver(
+            through(rowLength(add("j", 1))),
+            [
+              "If",
+              atMostValue("c", ["Min", ["List", remainingInRow("j"), remainingInRow(add("j", 1))]]),
+              ifOne(
+                atMostValue(
+                  rowEntry(add("j", 1), add(takenFromRow(add("j", 1)), "c")),
+                  rowEntry("j", add(takenFromRow("j"), "c")),
+                ),
+              ),
+              0,
+            ],
+            "c",
+          ),
+        ),
+      ),
+      0,
+    ],
+    "j",
+  ),
+);
+
+const FINDSTAT_TABLEAU_STATISTICS_5: readonly Definition[] = [
+  stat(
+    "TableauFactorCount",
+    "The factors the tableau splits into under concatenation: 1 more than the cuts i after which the entries above i, less i, are a standard tableau.",
+    cellsAtLeast(
+      1,
+      withReading(
+        bindList(
+          "starts",
+          rowStarts,
+          add(
+            1,
+            floored(
+              sumOver(
+                through(length("reading")),
+                ["If", less("i", length("reading")), ifOne(equals(brokenAfterCut, 0)), 0],
+                "i",
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001462. Concatenation lays the second tableau's rows below the first's, with the first's largest entry added to them. The empty tableau has no factors.",
+  ),
+];
+
+const FINDSTAT_PLANE_PARTITION_STATISTICS_2: readonly Definition[] = [
+  planePartition(
+    "MaximalCellDistance",
+    "The largest sum of the coordinates of a cell: the largest of row + column + entry less 3.",
+    withGrid(max(forEach(eachCell, subtract(add(add(partRow, partColumn), entryAt("u")), 3), "u"))),
+    "FindStat's St001598. The cells of the plane partition are the boxes (row, column, height), counted from 0, and the empty plane partition gives 0.",
+  ),
+  planePartition(
+    "AddableBoxCount",
+    "The boxes that can be added to give a plane partition: one past the end of each row, one in a new row, and each cell lower than its left and upper neighbors.",
+    [
+      "If",
+      less(length(reading), 1),
+      1,
+      withColumns(
+        add(
+          add(length(), 1),
+          floored(
+            sumOver(
+              eachCell,
+              [
+                "Multiply",
+                ["If", equals(partColumn, 1), 1, ifOne(less(entryAt("u"), entryAt(subtract("u", 1))))],
+                [
+                  "If",
+                  equals(partRow, 1),
+                  1,
+                  ifOne(less(entryAt("u"), entryAt(subtract("u", at(subtract(partRow, 1), "lengths"))))),
+                ],
+              ],
+              "u",
+            ),
+          ),
+        ),
+      ),
+    ],
+    "FindStat's St001921. A cell can take a box when its entry is below its left neighbor's and its upper neighbor's, the first column and row having no such neighbor; so can the cell past the end of each row and the first of a new row. The empty plane partition has the one corner.",
+  ),
+];
+
+/** The corner sum matrix's interior positions where its entry can be raised by one, the mirror of `decreasablePositions`. */
+const increasablePositions: MathJSON = floored(
+  sumOver(
+    ["Range", 1, subtract("side", 1)],
+    floored(
+      sumOver(
+        ["Range", 1, subtract("side", 1)],
+        [
+          "If",
+          and(
+            and(
+              equals(cornerSum("i", "j"), cornerSum(subtract("i", 1), "j")),
+              equals(cornerSum("i", "j"), cornerSum("i", subtract("j", 1))),
+            ),
+            and(
+              equals(cornerSum("i", "j"), subtract(cornerSum(add("i", 1), "j"), 1)),
+              equals(cornerSum("i", "j"), subtract(cornerSum("i", add("j", 1)), 1)),
+            ),
+          ),
+          1,
+          0,
+        ],
+        "j",
+      ),
+    ),
+    "i",
+  ),
+);
+
+/** The partial column sums after k rows: the columns j holding a 1 form row k of the monotone triangle. */
+const columnSumAfter = (k: MathJSON, j: MathJSON): MathJSON =>
+  floored(sumOver(positions, ["If", atMostValue("r", k), cell("r", j), 0], "r"));
+/** The smallest column with a 1 in the partial column sums after k rows; side + 1 for none. */
+const smallestColumnAfter = (k: MathJSON): MathJSON =>
+  min(forEach(positions, ["If", equals(columnSumAfter(k, "c"), 1), "c", add("side", 1)], "c"));
+/** The next smallest. */
+const secondColumnAfter = (k: MathJSON): MathJSON =>
+  min(
+    forEach(
+      positions,
+      ["If", and(equals(columnSumAfter(k, "c"), 1), greater("c", at(k, "lows"))), "c", add("side", 1)],
+      "c",
+    ),
+  );
+
+const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS_2: readonly Definition[] = [
+  matrix(
+    "MatrixDeterminant",
+    "The determinant.",
+    nonEmpty(["Determinant", x], 1),
+    "FindStat's St000187. The 0 by 0 matrix has determinant 1.",
+  ),
+  matrix(
+    "CornerSumLatticeDegree",
+    "The positions of the corner sum matrix whose entry can be lowered or raised by one to give another alternating sign matrix's corner sum matrix.",
+    withCells(["If", less("side", 2), 0, add(decreasablePositions, increasablePositions)]),
+    "FindStat's St001977, the degree in the Hasse diagram of the corner sum lattice: the positions of DecreasableCornerSumPositions and those where the entry can instead rise.",
+  ),
+  matrix(
+    "MonotoneTriangleMaximalLastDiagonalCount",
+    "The rows k of the monotone triangle whose smallest entry is the second smallest entry of the row below it, or one less than its own second smallest.",
+    withCells(
+      bindList(
+        "lows",
+        forEach(positions, smallestColumnAfter("k"), "k"),
+        floored(
+          sumOver(
+            positions,
+            [
+              "If",
+              or(
+                ["If", less("k", "side"), equals(at("k", "lows"), secondColumnAfter(add("k", 1))), "False"],
+                ["If", greater("k", 1), equals(secondColumnAfter("k"), add(at("k", "lows"), 1)), "False"],
+              ),
+              1,
+              0,
+            ],
+            "k",
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St000898. Row k of the monotone triangle lists the columns holding a 1 in the column sums of the first k rows, the last diagonal being the smallest entry of each row; an entry is maximal when it equals the second smallest entry of the row below, or one less than the second smallest of its own row.",
+  ),
+];
+
 export const TABLEAU_STATISTICS: readonly Definition[] = [
   stat(
     "RowOfLargestEntry",
@@ -795,7 +997,10 @@ export const TABLEAU_STATISTICS: readonly Definition[] = [
   ),
   ...FINDSTAT_TABLEAU_STATISTICS_3,
   ...FINDSTAT_TABLEAU_STATISTICS_4,
+  ...FINDSTAT_TABLEAU_STATISTICS_5,
   ...FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS,
+  ...FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS_2,
   ...FINDSTAT_PLANE_PARTITION_STATISTICS,
+  ...FINDSTAT_PLANE_PARTITION_STATISTICS_2,
   ...FINDSTAT_SKEW_PARTITION_STATISTICS,
 ];

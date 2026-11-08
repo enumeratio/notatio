@@ -158,7 +158,40 @@ const pathsAbove = (w: readonly number[], sameEnd: boolean): number => {
 
 export type Reading = (w: readonly number[]) => number;
 
+/** The 2-adic valuation of a positive integer. */
+const twoAdic = (m: number): number => (m % 2 === 1 ? 0 : 1 + twoAdic(m / 2));
+/** The distinct factors of each length 0 .. n - 1, as FindStat's `factor_set(n)`. */
+const factorSetSizes = (w: readonly number[]): number[] =>
+  indices(w.length).map((l) => new Set(indices(w.length - l + 1).map((i) => text(w).slice(i, i + l))).size);
+/** FindStat's recursive count: drop the last letter after a 00, else the last two, adding one. */
+const recursivePairCount = (t: readonly number[]): number => {
+  if (t.length === 0) return 0;
+  if (t.length <= 2) return Math.max(...t);
+  if (t.at(-2) === 0 && t.at(-1) === 0) return recursivePairCount(t.slice(0, -1));
+  return 1 + recursivePairCount(t.slice(0, -2));
+};
+
 export const WORD_READINGS: Record<string, Reading> = {
+  // St000792: the nim-sum of 2^(2-adic valuation of the position) over the ones, positions from 1.
+  RulerGrundyValue: (w) => w.reduce((value, letter, i) => (letter === 1 ? value ^ (2 ** twoAdic(i + 1)) : value), 0),
+  // St000519: the last length at which the number of distinct factors is largest.
+  MaximalComplexityFactorLength: (w) => {
+    const sizes = factorSetSizes(w);
+    return w.length === 0 ? 0 : sizes.lastIndexOf(Math.max(...sizes));
+  },
+  // St000629: a word of length n has at most n + 1 palindromic factors, the empty one included.
+  PalindromicDefect: (w) => {
+    if (w.length === 0) return 0;
+    const found = new Set<string>([""]);
+    for (let from = 0; from < w.length; from++)
+      for (let to = from + 1; to <= w.length; to++) {
+        const factor = text(w).slice(from, to);
+        if (factor === factor.split("").toReversed().join("")) found.add(factor);
+      }
+    return w.length + 1 - found.size;
+  },
+  // St001984.
+  RecursiveBitPairCount: recursivePairCount,
   HammingWeight: (w) => ones(text(w)),
   LeadingOnesCount: (w) => text(w).length - text(w).replace(/^1+/, "").length,
   OnePositionSum: (w) => sum(indices(w.length).map((i) => (w[i] === 1 ? i + 1 : 0))),

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-parking-function-2-1-1-4-2			[SecondaryDinversionPairCount, [ParkingFunction, [List, 2, 1, 1, 4, 2]]]	1			the parking function $[2,1,1,4,2]$
+findstat-st000195-1	Properties		[CombinatorialStat, [ParkingFunction, [List, 1]], "'SecondaryDinversionPairCount'"]	0	0	FindStat St000195	FindStat's value for [1]
+findstat-st000195-2	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 1]], "'SecondaryDinversionPairCount'"]	0	0	FindStat St000195	FindStat's value for [1,1]
+findstat-st000195-3	Properties		[CombinatorialStat, [ParkingFunction, [List, 1, 2]], "'SecondaryDinversionPairCount'"]	0	0	FindStat St000195	FindStat's value for [1,2]

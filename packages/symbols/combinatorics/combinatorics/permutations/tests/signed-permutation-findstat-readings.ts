@@ -21,9 +21,137 @@ const inverse = (p: readonly number[]): number[] => {
   return q;
 };
 
+/** FindStat's p(k) for k in -n .. n: p(-k) = -p(k) and p(0) = 0. */
+const signedAt = (p: readonly number[], k: number): number => (k > 0 ? p[k - 1]! : k < 0 ? -p[-k - 1]! : 0);
+/** The nonzero points -n .. n. */
+const signedPoints = (n: number): number[] => [...indices(n).map((i) => i - n), ...indices(n).map((i) => i + 1)];
+/** The blocks of the direct sum decomposition, FindStat's `decomposition`: cut where the first i entries have absolute values at most i. */
+const signBlocks = (p: readonly number[]): number[][] => {
+  const blocks: number[][] = [];
+  let start = 0;
+  for (let i = 1; i < p.length; i++)
+    if (Math.max(...p.slice(0, i).map(Math.abs)) <= i) {
+      blocks.push(p.slice(start, i));
+      start = i;
+    }
+  if (p.length > 0) blocks.push(p.slice(start));
+  return blocks;
+};
+const oddSignBlocks = (p: readonly number[]): number => signBlocks(p).filter((b) => negatives(b) % 2 === 1).length;
+/** FindStat's Sparre Andersen walk, with the weights 1, 2, 4, ...: x_i adds 2^(|p(i)| - 1) times the sign of the entry at position |p(i)|. */
+const andersenWalk = (p: readonly number[]): number[] => {
+  let total = 0;
+  return p.map((a) => {
+    total += 2 ** (Math.abs(a) - 1) * Math.sign(p[Math.abs(a) - 1]!);
+    return total;
+  });
+};
+/** For each signed permutation of 1..n (as its key), the generators a reduced word uses, found on shortest paths from the identity: s_i swaps the entries i and i + 1, s_n negates the last. */
+const supports = new Map<number, Map<string, Set<number>>>();
+const generatorSupports = (n: number): Map<string, Set<number>> => {
+  const known = supports.get(n);
+  if (known) return known;
+  const start = indices(n).map((i) => i + 1);
+  const used = new Map<string, Set<number>>([[start.join(","), new Set()]]);
+  let layer = [start];
+  while (layer.length > 0) {
+    const next: number[][] = [];
+    for (const w of layer)
+      for (let g = 1; g <= n; g++) {
+        const v = [...w];
+        if (g < n) [v[g - 1], v[g]] = [v[g]!, v[g - 1]!];
+        else v[n - 1] = -v[n - 1]!;
+        if (used.has(v.join(","))) continue;
+        used.set(v.join(","), new Set([...used.get(w.join(","))!, g]));
+        next.push(v);
+      }
+    layer = next;
+  }
+  supports.set(n, used);
+  return used;
+};
+const generatorsUsed = (p: readonly number[]): Set<number> => generatorSupports(p.length).get(p.join(",")) ?? new Set();
+
 export type Reading = (p: readonly number[]) => number;
 
 export const SIGNED_PERMUTATION_READINGS: Record<string, Reading> = {
+  // St001907: floor((2 exc + neg + 1) / 2), the excedances being the entries above their positions.
+  BastidasHohlwegSaliolaExcedanceCount: (p) =>
+    p.length === 0 ? 0 : Math.floor((2 * p.filter((a, i) => a > i + 1).length + negatives(p) + 1) / 2),
+  // St001862: FindStat's three sums over index pairs.
+  SignedCrossingCount: (p) => {
+    const n = p.length;
+    let total = 0;
+    for (let j = 0; j < n; j++) for (let i = 0; i < j; i++) if (j + 1 <= p[i]! && p[i]! < p[j]!) total++;
+    for (let j = 0; j < n; j++) for (let i = 0; i < n; i++) if (j + 1 <= -p[i]! && -p[i]! < p[j]!) total++;
+    for (let i = 0; i < n; i++) for (let j = 0; j < i; j++) if (j + 1 > p[i]! && p[i]! > p[j]!) total++;
+    return total;
+  },
+  // St001865: the pairs -n <= i < j <= n, i, j != 0, meeting the first of FindStat's four cases that applies.
+  SignedSymmetricAlignmentCount: (p) => {
+    let total = 0;
+    for (const j of signedPoints(p.length))
+      for (const i of signedPoints(p.length).filter((k) => k < j)) {
+        const [a, b] = [signedAt(p, i), signedAt(p, j)];
+        if (i < j && j <= b && b < a && (j < b || j > 0)) total++;
+        else if (b < a && a <= i && i < j && (a < i || i < 0)) total++;
+        else if (i <= a && a < b && b <= j && (i < a || i > 0) && (b < j || j < 0)) total++;
+        else if (a <= i && i < j && j <= b && (a < i || i < 0) && (j < b || j > 0)) total++;
+      }
+    return total;
+  },
+  // St001866, St001867 and St001868: FindStat's pair lists over 1 .. n.
+  SignedNestingAlignmentCount: (p) => {
+    let total = 0;
+    for (let i = 1; i <= p.length; i++)
+      for (let j = 1; j <= p.length; j++) {
+        const [a, b] = [signedAt(p, i), signedAt(p, j)];
+        if ((-i < -j && -j < -b && -b < -a) || (-i < j && j <= b && b < -a) || (i < j && j <= b && b < a)) total++;
+      }
+    return total;
+  },
+  SignedEastNorthAlignmentCount: (p) => {
+    let total = 0;
+    for (let i = 1; i <= p.length; i++)
+      for (let j = 1; j <= p.length; j++) {
+        const [a, b] = [signedAt(p, i), signedAt(p, j)];
+        if ((-i < 0 && 0 < -a && -a < b && b < j) || (i <= a && a < b && b < j)) total++;
+      }
+    return total;
+  },
+  SignedNorthEastAlignmentCount: (p) => {
+    let total = 0;
+    for (let i = 1; i <= p.length; i++)
+      for (let j = 1; j <= p.length; j++) if (signedAt(p, i) < i && i < j && j <= signedAt(p, j)) total++;
+    return total;
+  },
+  // St001882: FindStat's triples -n <= i < j < k <= n with 1 <= j.
+  TypeBPatternTwoThreeOneCount: (p) => {
+    const n = p.length;
+    let total = 0;
+    for (let i = -n; i <= n; i++)
+      for (let j = Math.max(1, i + 1); j <= n; j++)
+        for (let k = Math.max(1, j + 1); k <= n; k++) {
+          if (i === 0 || j === 0 || k === 0) continue;
+          const [a, b, c] = [signedAt(p, i), signedAt(p, j), signedAt(p, k)];
+          if (b > a && a === (c === -1 ? 1 : c + 1)) total++;
+        }
+    return total;
+  },
+  // St001895: the blocks with an odd number of signs.
+  OddSignBlockCount: oddSignBlocks,
+  // St001894: the excedance heights, the negative entries' absolute values and half the odd blocks less the signs.
+  SignedPermutationDepth: (p) =>
+    p.reduce((total, a, i) => total + (a > i + 1 ? a - (i + 1) : 0) + (a < 0 ? -a : 0), 0) +
+    (oddSignBlocks(p) - negatives(p)) / 2,
+  // St001927 and St001926: the strictly positive values of the walk, and the last place of its maximum, the start included.
+  SparreAndersenPositiveCount: (p) => andersenWalk(p).filter((x) => x > 0).length,
+  SparreAndersenMaximumPosition: (p) => {
+    const walk = [0, ...andersenWalk(p)];
+    return walk.lastIndexOf(Math.max(...walk));
+  },
+  // St001889: n less the generators in a reduced word.
+  SignedConnectivitySetSize: (p) => p.length - generatorsUsed(p).size,
   NegativeEntryCount: (p) => p.filter((a) => a < 0).length,
   PositiveEntryCount: (p) => p.filter((a) => a > 0).length,
   // St001428: pairs i < j with p(i) > p(j), and pairs i <= j with -p(i) > p(j).
