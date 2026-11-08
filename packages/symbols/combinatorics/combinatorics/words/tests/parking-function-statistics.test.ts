@@ -40,14 +40,23 @@ test("every parking-function definition has an independent reading", () => {
   expect(heads.toSorted()).toEqual(Object.keys(PARKING_FUNCTION_READINGS).toSorted());
 });
 
+/** Heads that take about a tenth of a second a parking function to interpret: lengths 1..2 here, 1..3 under DEEP_TESTS. */
+const COSTLY = new Set([
+  "ParkingFunctionDinv",
+  "ParkingMajorIndex",
+  "PrimaryDinversionPairCount",
+  "SecondaryDinversionPairCount",
+]);
+const largest = (head: string): number => (COSTLY.has(head) && !process.env.DEEP_TESTS ? 2 : 3);
+
 for (const [head, expected] of Object.entries(PARKING_FUNCTION_READINGS))
-  test(`${head} agrees over every parking function of length 1..3`, () => {
-    for (const p of upTo(3)) expect(evaluate(head, p), JSON.stringify(p)).toBe(expected(p));
+  test(`${head} agrees over every parking function of length 1..${largest(head)}`, () => {
+    for (const p of upTo(largest(head))) expect(evaluate(head, p), JSON.stringify(p)).toBe(expected(p));
   });
 
 test("each head called on the carrier value gives the reading, shared heads included", () => {
   for (const [head, expected] of Object.entries({ ...PARKING_FUNCTION_READINGS, ...SHARED_PARKING_FUNCTION_READINGS }))
-    for (const p of upTo(3))
+    for (const p of upTo(COSTLY.has(head) ? 2 : 3))
       expect(
         ce.box(["CombinatorialStat", ["ParkingFunction", listOf(p)], `'${head}'`] as never).evaluate().re,
         `${head} ${JSON.stringify(p)}`,

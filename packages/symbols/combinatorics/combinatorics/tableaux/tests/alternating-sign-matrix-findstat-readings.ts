@@ -81,9 +81,74 @@ const permanent = (m: Matrix): number => {
   return extend(0, []);
 };
 
+/** The determinant by the Leibniz formula: the signed sum over the permutations of the products down the chosen entries. */
+const determinant = (m: Matrix): number => {
+  const n = m.length;
+  const sign = (p: readonly number[]): number =>
+    p.reduce((s, a, i) => s * p.slice(i + 1).reduce((t, b) => t * (a > b ? -1 : 1), 1), 1);
+  const extend = (chosen: number[]): number =>
+    chosen.length === n
+      ? sign(chosen) * chosen.reduce((product, column, row) => product * m[row]![column]!, 1)
+      : sum(
+          indices(n)
+            .filter((c) => !chosen.includes(c))
+            .map((c) => extend([...chosen, c])),
+        );
+  return extend([]);
+};
+/** FindStat's corner_sum_matrix: the sum of the first i rows and j columns, i, j from 0 to n. */
+const cornerSums = (m: Matrix): number[][] =>
+  indices(m.length + 1).map((i) =>
+    indices(m.length + 1).map((j) => sum(m.slice(0, i).map((row) => sum(row.slice(0, j))))),
+  );
+/** FindStat's St001977: the interior positions where the corner sum can go down by one or up by one. */
+const cornerSumDegree = (m: Matrix): number => {
+  const c = cornerSums(m);
+  const n = c.length;
+  const at = (i: number, j: number): number => c[i]![j]!;
+  let total = 0;
+  for (let i = 1; i < n - 1; i++)
+    for (let j = 1; j < n - 1; j++) {
+      if (
+        at(i, j) === at(i + 1, j) &&
+        at(i, j) === at(i, j + 1) &&
+        at(i, j) === at(i - 1, j) + 1 &&
+        at(i, j) === at(i, j - 1) + 1
+      )
+        total++;
+      if (
+        at(i, j) === at(i - 1, j) &&
+        at(i, j) === at(i, j - 1) &&
+        at(i, j) === at(i + 1, j) - 1 &&
+        at(i, j) === at(i, j + 1) - 1
+      )
+        total++;
+    }
+  return total;
+};
+/** FindStat's monotone triangle, rows from the longest: the columns holding a 1 in the column sums of the first n - k rows, descending. */
+const monotoneTriangle = (m: Matrix): number[][] =>
+  indices(m.length).map((k) =>
+    indices(m.length)
+      .filter((c) => sum(m.slice(0, m.length - k).map((row) => row[c]!)) === 1)
+      .map((c) => c + 1)
+      .toReversed(),
+  );
+/** FindStat's St000898: the last entry of a row is maximal when it equals the second last entry of the row above, or one less than the second last of its own row. */
+const maximalLastDiagonal = (m: Matrix): number => {
+  const rows = monotoneTriangle(m);
+  return rows.filter((row, i) => {
+    const last = row.at(-1)!;
+    return (i >= 1 && last === rows[i - 1]!.at(-2)) || (i < rows.length - 1 && last === row.at(-2)! - 1);
+  }).length;
+};
+
 export type Reading = (m: Matrix) => number;
 
 export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
+  MatrixDeterminant: (m) => (m.length === 0 ? 1 : determinant(m)),
+  CornerSumLatticeDegree: cornerSumDegree,
+  MonotoneTriangleMaximalLastDiagonalCount: maximalLastDiagonal,
   NegativeOneCount: (m) => entries(m).filter((a) => a === -1).length,
   PositiveOneCount: (m) => entries(m).filter((a) => a === 1).length,
   OnesOnMainDiagonal: (m) => indices(m.length).filter((i) => m[i]![i] === 1).length,

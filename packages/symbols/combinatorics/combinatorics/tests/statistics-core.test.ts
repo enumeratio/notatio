@@ -36,6 +36,8 @@ const CORE = [
   "Binomial",
   "Contains",
   "Count",
+  // MatrixDeterminant (St000187) is the determinant of an alternating sign matrix.
+  "Determinant",
   "Divide",
   "Equal",
   "Filter",

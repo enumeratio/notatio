@@ -876,6 +876,156 @@ const FINDSTAT_PERFECT_MATCHING_STATISTICS: readonly Definition[] = [
   ),
 ];
 
+// ── more perfect matchings ───────────────────────────────────────────────────────────────
+//
+// The points are 1 .. 2n; `m` lists the partner of each, and `openers` the smaller point of each pair.
+
+const times = (a: MathJSON, b: MathJSON): MathJSON => ["Multiply", a, b];
+const ifThen = (condition: MathJSON): MathJSON => ["If", condition, 1, 0];
+const points: MathJSON = ["Range", 1, times(2, length())];
+const pointCount: MathJSON = times(2, length());
+/** Entry p of `m` is the point matched with p. */
+const partners: MathJSON = bindList(
+  "openers",
+  firsts,
+  bindList(
+    "closers",
+    lasts,
+    forEach(
+      points,
+      max([
+        "Join",
+        ["List", 0],
+        forEach(
+          positions,
+          [
+            "If",
+            equals(at("i", "openers"), "p"),
+            at("i", "closers"),
+            ["If", equals(at("i", "closers"), "p"), at("i", "openers"), 0],
+          ],
+          "i",
+        ),
+      ]),
+      "p",
+    ),
+  ),
+);
+/** `body` for a matching with at least one pair, with `m` bound to the partners and `openers` to the smaller points. */
+const withPartners = (body: MathJSON, empty: MathJSON = 0): MathJSON =>
+  nonEmpty(bindList("openers", firsts, bindList("m", partners, body)), empty);
+const partnerOf = (p: MathJSON): MathJSON => at(p, "m");
+
+/** Where p is after one step: its partner, then one on, from 2n round to 1. */
+const stepAfterMatching = (p: MathJSON): MathJSON => add(["Mod", partnerOf(p), pointCount], 1);
+/** Where p is after k such steps. */
+const stepsFrom = (p: MathJSON, k: MathJSON): MathJSON => [
+  "Fold",
+  ["Function", stepAfterMatching("w"), "w", "t"],
+  p,
+  ["Range", 1, k],
+];
+/** p is the least point of its cycle: no later step reaches a smaller point. */
+const leadsCycle = (p: MathJSON): MathJSON => equals(count(points, less(stepsFrom(p, "k"), p), "k"), 0);
+
+/** The letter of each point in the restricted growth word: the pairs opening no later than its own pair. */
+const growthWord: MathJSON = forEach(
+  points,
+  count(positions, atMostValue(at("i", "openers"), ["Min", ["List", "p", partnerOf("p")]]), "i"),
+  "p",
+);
+/** The triples i < j < k of points whose letters in the growth word `w` satisfy `pattern`. */
+const growthPatternCount = (pattern: (a: MathJSON, b: MathJSON, c: MathJSON) => MathJSON): MathJSON =>
+  withPartners(
+    bindList(
+      "w",
+      growthWord,
+      floored(
+        sumOver(
+          points,
+          floored(
+            sumOver(
+              points,
+              count(
+                points,
+                and(and(greater("j", "i"), greater("k", "j")), pattern(at("i", "w"), at("j", "w"), at("k", "w"))),
+                "k",
+              ),
+              "j",
+            ),
+          ),
+          "i",
+        ),
+      ),
+    ),
+  );
+
+/** The point p after k points on, from 2n round to 1. */
+const rotatedPoint = (p: MathJSON, k: MathJSON): MathJSON => add(["Mod", add(p, subtract(k, 1)), pointCount], 1);
+/** The point p reflected: k - p, from 2n round to 1. */
+const reflectedPoint = (p: MathJSON, k: MathJSON): MathJSON =>
+  add(["Mod", subtract(add(k, pointCount), p), pointCount], 1);
+/** The symmetry `image` keeps the matching: it takes the partner of every point to the partner of the image. */
+const keepsMatching = (image: (p: MathJSON) => MathJSON): MathJSON =>
+  equals(count(points, ["NotEqual", partnerOf(image("p")), image(partnerOf("p"))], "p"), 0);
+
+const FINDSTAT_PERFECT_MATCHING_STATISTICS_2: readonly Definition[] = [
+  matched(
+    "ArcDiagramComponentCount",
+    "The points i such that the points 1 .. i are matched among themselves.",
+    nonEmpty(
+      count(points, equals(matchedPairsWhere(and(atMostValue(["At", "b", 1], "i"), less("i", ["Last", "b"]))), 0)),
+    ),
+    "FindStat's St000843, the decomposition number: the components of the arc diagram, cut at each point no pair spans.",
+  ),
+  matched(
+    "UnicellularMapVertexCount",
+    "The cycles of the matching, as a fixed-point-free involution, followed by the long cycle 1 -> 2 -> ... -> 2n -> 1.",
+    withPartners(count(points, leadsCycle("i"))),
+    "FindStat's St000044, the vertices of the unicellular map the matching gives.",
+  ),
+  matched(
+    "RestrictedGrowthTwoThreeOneCount",
+    "The triples i < j < k of points whose letters in the restricted growth word are in the order 2 3 1.",
+    growthPatternCount((a, b, c) => and(less(c, a), less(a, b))),
+    "FindStat's St001835. The restricted growth word has for each point the number of its pair among the pairs by smaller point.",
+  ),
+  matched(
+    "RestrictedGrowthTwoOneThreeCount",
+    "The triples i < j < k of points whose letters in the restricted growth word are in the order 2 1 3.",
+    growthPatternCount((a, b, c) => and(less(b, a), less(a, c))),
+    "FindStat's St001836.",
+  ),
+  matched(
+    "RestrictedGrowthThreeOneTwoCount",
+    "The triples i < j < k of points whose letters in the restricted growth word are in the order 3 1 2.",
+    growthPatternCount((a, b, c) => and(less(b, c), less(c, a))),
+    "FindStat's St001837.",
+  ),
+  matched(
+    "DihedralOrbitSize",
+    "The matchings the rotations and reflections of the 2n points take this one to.",
+    withPartners(
+      [
+        "Divide",
+        times(4, length()),
+        floored(
+          sumOver(
+            ["Range", 0, subtract(pointCount, 1)],
+            add(
+              ifThen(keepsMatching((p) => rotatedPoint(p, "g"))),
+              ifThen(keepsMatching((p) => reflectedPoint(p, "g"))),
+            ),
+            "g",
+          ),
+        ),
+      ],
+      1,
+    ),
+    "FindStat's St000945. By the orbit-stabilizer theorem the orbit has the 4n symmetries divided by those that keep the matching. The empty matching is its own orbit.",
+  ),
+];
+
 export const SET_PARTITION_STATISTICS: readonly Definition[] = [
   stat("Blocks", "The number of blocks.", ["Length", "_x"]),
   stat("LargestBlock", "The size of the largest block.", nonEmpty(["Max", sizes])),
@@ -1389,4 +1539,5 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
     "FindStat's St000925. A singleton, which has no arc, is a component of its own.",
   ),
   ...FINDSTAT_PERFECT_MATCHING_STATISTICS,
+  ...FINDSTAT_PERFECT_MATCHING_STATISTICS_2,
 ];
