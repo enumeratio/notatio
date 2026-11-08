@@ -72,13 +72,18 @@ const headers = {
   "User-Agent": "Mozilla/5.0 (Macintosh) AppleWebKit/537.36 Chrome/120 Safari/537.36",
 };
 
-const probe = async (url: string, attempt = 0): Promise<number> => {
+// A host that never answers would stall the run, so each request has a deadline; one that
+// passes it is reported apart from the links that answered with an error.
+const REQUEST_TIMEOUT_MS = 15_000;
+const TIMED_OUT = "timed out";
+
+const probe = async (url: string, attempt = 0): Promise<number | typeof TIMED_OUT> => {
   try {
     // HEAD first; a few hosts answer HEAD with 405 and GET with 200.
-    let response = await fetch(url, { method: "HEAD", redirect: "follow", headers });
-    if (response.status >= 400) {
-      response = await fetch(url, { method: "GET", redirect: "follow", headers });
-    }
+    const request = (method: string) =>
+      fetch(url, { method, redirect: "follow", headers, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
+    let response = await request("HEAD");
+    if (response.status >= 400) response = await request("GET");
     // Rate limiting and a gateway hiccup are the checker's fault, not the link's.
     if ((response.status === 429 || response.status >= 500) && attempt < 3) {
       await new Promise((resolve) => setTimeout(resolve, 3000 * 2 ** attempt));
@@ -86,32 +91,57 @@ const probe = async (url: string, attempt = 0): Promise<number> => {
     }
     return response.status;
   } catch (error) {
+    if ((error as Error).name === "TimeoutError") return TIMED_OUT;
     if (attempt >= 2) throw error;
     await new Promise((resolve) => setTimeout(resolve, 750 * (attempt + 1)));
     return probe(url, attempt + 1);
   }
 };
 
+// Hosts in parallel, and at most PER_HOST requests to any one site at once (Wikipedia carries most
+// of the links, so one stream per host would leave it the whole run).
+const STREAMS = 16;
+const PER_HOST = 3;
 const urls = [...targets.keys()];
-const bad: { url: string; status: number | string; who: string[] }[] = [];
-const BATCH = 4;
-for (let i = 0; i < urls.length; i += BATCH) {
-  const slice = urls.slice(i, i + BATCH);
-  const statuses = await Promise.all(slice.map((url) => probe(url).catch((error: Error) => error.message)));
-  slice.forEach((url, j) => {
-    const status = statuses[j]!;
-    if (typeof status === "number" && status >= 200 && status < 300) return;
-    bad.push({ url, status, who: [...targets.get(url)!].toSorted() });
-  });
-  process.stderr.write(`\r${Math.min(i + BATCH, urls.length)}/${urls.length}`);
+const byHost = new Map<string, string[][]>();
+for (const [i, url] of urls.entries()) {
+  const host = new URL(url).host;
+  const streams = byHost.get(host) ?? Array.from({ length: PER_HOST }, () => []);
+  streams[i % PER_HOST]!.push(url);
+  byHost.set(host, streams);
 }
-process.stderr.write("\n");
+const bad: { url: string; status: number | string; who: string[] }[] = [];
+const timedOut: string[] = [];
+let done = 0;
+const checkHost = async (hostUrls: string[]) => {
+  for (const url of hostUrls) {
+    const status = await probe(url).catch((error: Error) => error.message);
+    if (status === TIMED_OUT) timedOut.push(url);
+    else if (!(typeof status === "number" && status >= 200 && status < 300)) {
+      bad.push({ url, status, who: [...targets.get(url)!].toSorted() });
+    }
+    if (++done % 100 === 0) process.stdout.write(`${done}/${urls.length} checked\n`);
+  }
+};
+const queue = [...byHost.values()].flat().filter((stream) => stream.length);
+await Promise.all(
+  Array.from({ length: STREAMS }, async () => {
+    for (let next = queue.shift(); next; next = queue.shift()) await checkHost(next);
+  }),
+);
+// A small site (FindStat) times out under even PER_HOST requests at once and answers one in a second,
+// so what timed out is asked again one at a time.
+const slow = timedOut.splice(0);
+done = urls.length - slow.length;
+await checkHost(slow);
 
 if (unindexed.length && !only) {
   process.stdout.write(`not in any documentation index:\n  ${unindexed.join("\n  ")}\n`);
 }
-for (const { url, status, who } of bad) {
+for (const { url, status, who } of bad.toSorted((x, y) => x.url.localeCompare(y.url))) {
   process.stdout.write(`${status}  ${url}  ← ${who.join(", ")}\n`);
 }
-process.stdout.write(`${urls.length} links checked, ${bad.length} not resolving\n`);
+if (timedOut.length)
+  process.stdout.write(`no answer within ${REQUEST_TIMEOUT_MS / 1000} s:\n  ${timedOut.toSorted().join("\n  ")}\n`);
+process.stdout.write(`${urls.length} links checked, ${bad.length} not resolving, ${timedOut.length} timed out\n`);
 process.exitCode = bad.length ? 1 : 0;
