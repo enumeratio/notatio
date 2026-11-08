@@ -23,7 +23,7 @@ import {
 } from "../../src/statistics/vocabulary.ts";
 import { fold as foldOf } from "../../collections/src/families/tables.ts";
 
-/** A fold whose accumulator has the type given last (an untyped one declines to compile). */
+/** `fold`, as this file's `MathJSON`. */
 const typedFold = (...args: Parameters<typeof foldOf>): MathJSON => foldOf(...args) as MathJSON;
 
 const on = "CartanType";
@@ -149,7 +149,6 @@ const poincareCoefficients: MathJSON = typedFold(
   "pd",
   ["List", 1],
   degrees,
-  "list<integer>",
 );
 
 /**
@@ -219,7 +218,6 @@ const permanentTable: MathJSON = (() => {
     "pr",
     forEach(masks, ["If", equals("pz", 0), 1, 0], "pz"),
     columns,
-    "list<integer>",
   );
 })();
 
@@ -233,7 +231,7 @@ export const CARTAN_STATISTICS: readonly Definition[] = [
   stat(
     "WeylGroupExponents",
     "The exponents of the Weyl group of the type: one less than each degree.",
-    withDegrees(typedFold(["Join", "xs", ["List", subtract("x", 1)]], "xs", "x", ["List"], degrees, "list<integer>")),
+    withDegrees(typedFold(["Join", "xs", ["List", subtract("x", 1)]], "xs", "x", ["List"], degrees)),
     undefined,
     "list<integer>",
   ),
@@ -341,23 +339,12 @@ export const CARTAN_STATISTICS: readonly Definition[] = [
       [
         "Join",
         "mx",
-        [
-          "List",
-          typedFold(
-            ["Join", "my", ["List", cartanEntry("mi", "mj")]],
-            "my",
-            "mj",
-            ["List"],
-            upTo(rank),
-            "list<integer>",
-          ),
-        ],
+        ["List", typedFold(["Join", "my", ["List", cartanEntry("mi", "mj")]], "my", "mj", ["List"], upTo(rank))],
       ],
       "mx",
       "mi",
       ["List"],
       upTo(rank),
-      "list<list<integer>>",
     ),
     undefined,
     "list<list<integer>>",

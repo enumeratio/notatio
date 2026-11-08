@@ -399,7 +399,7 @@ const pathsWeaklyAbove: MathJSON = bindList(
             ),
             "next",
           ),
-          ["Typed", "a", "'list<integer>'"],
+          "a",
           "b",
         ],
         "start",

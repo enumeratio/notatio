@@ -17,8 +17,6 @@
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import { at, lets, type MathJSON } from "../../src/map-helpers.ts";
 
-/** Every flat-state accumulator is a list of integers; an untyped one reads as unknown to the compiler. */
-const LIST = "list<integer>";
 const fold = (...args: Parameters<typeof typedFold>): MathJSON => typedFold(...args) as MathJSON;
 const upTo = (n: MathJSON): MathJSON => ["Range", 1, n, 1];
 const add = (...terms: MathJSON[]): MathJSON => ["Add", ...terms];
@@ -41,7 +39,7 @@ const forEach = (over: MathJSON, body: MathJSON, variable: string): MathJSON => 
 /** `forEach` as a fold, for a list that is a state (a `Map` over a range stays lazy, so each step's state would
  *  be re-derived from the last wherever it is read). */
 const built = (over: MathJSON, body: MathJSON, variable: string): MathJSON =>
-  fold(["Join", `${variable}_built`, ["List", body]], `${variable}_built`, variable, ["List"], over, LIST);
+  fold(["Join", `${variable}_built`, ["List", body]], `${variable}_built`, variable, ["List"], over);
 
 /** `tag`'s names, one per key: two passes in one body keep theirs apart. */
 const named = <K extends string>(tag: string, keys: readonly K[]): Record<K, string> =>
@@ -113,7 +111,7 @@ export const rskState = (tag: string, word: MathJSON, recording = false): MathJS
     );
 
   const step: MathJSON = lets(
-    [[chain, fold(chainStep, acc, q, ["List", at(k, w)], upTo(n), LIST), "list<integer>"]],
+    [[chain, fold(chainStep, acc, q, ["List", at(k, w)], upTo(n)), "list<integer>"]],
     [
       "Join",
       built(upTo(n), when(grown(q), add(length(q), 1), length(q)), q),
@@ -133,7 +131,7 @@ export const rskState = (tag: string, word: MathJSON, recording = false): MathJS
       [rowOf, forEach(upTo(nn), add(["Floor", ["Divide", sub(j, 1), n]], 1), j), "list<integer>"],
       [colOf, forEach(upTo(nn), add(["Mod", sub(j, 1), n], 1), j), "list<integer>"],
     ],
-    fold(step, s, k, forEach(upTo(add(n, times(recording ? 2 : 1, nn))), 0, j), upTo(n), LIST),
+    fold(step, s, k, forEach(upTo(add(n, times(recording ? 2 : 1, nn))), 0, j), upTo(n)),
   );
 };
 
@@ -215,7 +213,6 @@ export const readingWord = (tag: string, word: MathJSON): MathJSON =>
         "fl_r",
         ["List"],
         upTo(`${tag}_rows`),
-        LIST,
       ),
     ),
   );
@@ -262,7 +259,6 @@ export const inverseRsk = (tag: string, p: string, q: string, n: MathJSON): Math
     j,
     ["List", held(row, length(row))],
     upTo(n),
-    LIST,
   );
 
   const step: MathJSON = lets(
@@ -311,14 +307,7 @@ export const inverseRsk = (tag: string, p: string, q: string, n: MathJSON): Math
       [colOf, forEach(upTo(nn), add(["Mod", sub(j, 1), n], 1), j), "list<integer>"],
       [
         done,
-        fold(
-          step,
-          s,
-          c,
-          forEach(upTo(add(n, nn, n)), when(["LessEqual", j, add(n, nn)], at(j, p), 0), j),
-          upTo(n),
-          LIST,
-        ),
+        fold(step, s, c, forEach(upTo(add(n, nn, n)), when(["LessEqual", j, add(n, nn)], at(j, p), 0), j), upTo(n)),
         "list<integer>",
       ],
     ],
@@ -386,7 +375,6 @@ const compact = (table: string, body: MathJSON): MathJSON =>
           "fl_r",
           ["List", 0],
           upTo("fl_rows"),
-          LIST,
         ),
         "list<integer>",
       ],
@@ -433,7 +421,6 @@ const walk = (start: MathJSON, choose: MathJSON): MathJSON =>
     "fl_step",
     start,
     upTo("fl_n"),
-    LIST,
   );
 
 /** Promotion of the standard tableau `table` (a bound name): the hole starts at the largest entry and slides to the

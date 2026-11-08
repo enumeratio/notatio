@@ -47,7 +47,6 @@ const catalanTable: MathJSON = fold(
   "ck",
   ["Join", ["List", 1], zeros(N)],
   upTo(0, sub(N, 1)),
-  "list<integer>",
 );
 
 // ─── unrank: state [height, parent of each of 1..n, frames (lo, size, parent, rank)] ───────────
@@ -79,7 +78,6 @@ const unrankState: MathJSON = fold(
           "uj",
           ["List", field(4), 0, 0],
           upTo(0, sub("usz", 1)),
-          "list<integer>",
         ),
         "list<integer>",
       ],
@@ -103,7 +101,6 @@ const unrankState: MathJSON = fold(
   "uk",
   ["Join", ["List", 1], zeros(N), ["List", 1, N, 0, "_r"], zeros(mul(4, add(N, 1)))],
   upTo(1, N),
-  "list<integer>",
 );
 const unrank: MathJSON = lets(
   [["ufinal", unrankState, "list<integer>"]],
@@ -160,7 +157,6 @@ const rankState: MathJSON = fold(
   "rk",
   ["Join", ["List", 1, 0, 1, N, 1], zeros(mul(3, add(N, 1)))],
   upTo(1, N),
-  "list<integer>",
 );
 const rank: MathJSON = at(rankState, 2);
 
@@ -192,7 +188,6 @@ const checkState: MathJSON = fold(
   "ck",
   ["Join", ["List", 1, 1, 1, N, 0], zeros(mul(3, add(N, 1)))],
   upTo(1, N),
-  "list<integer>",
 );
 
 const binaryTreeParentArrays: EpsilFamily = {

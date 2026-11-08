@@ -331,7 +331,7 @@ const carPermutationBody: MathJSON = [
   "If",
   ["Equal", n, 0],
   ["List"],
-  fold(carParks, "cp_spots", "cp_car", fill(0, n), positions, "list<integer>") as MathJSON,
+  fold(carParks, "cp_spots", "cp_car", fill(0, n), positions) as MathJSON,
 ];
 
 export const WORDS_MAPS: readonly CombinatorialMap[] = [

@@ -51,7 +51,7 @@ const stat = (head: string, summary: string, expr: MathJSON, note?: string): Def
 });
 
 const k = length();
-/** A fold whose accumulator is a typed list of integers. */
+/** `fold`, as this file's `MathJSON`. */
 const listFold = (...args: Parameters<typeof typedFold>): MathJSON => typedFold(...args) as MathJSON;
 const list = (...items: MathJSON[]): MathJSON => ["List", ...items];
 const times = (a: MathJSON, b: MathJSON): MathJSON => ["Multiply", a, b];
@@ -154,7 +154,7 @@ const isPalindrome = (from: MathJSON, size: MathJSON): MathJSON =>
 
 /** A list over the prefixes of the word, built by `typedFold` from `initial`: entry j + 1 holds the value for the first j letters; `entry` reads the list so far as `a` and the last letter's position as `b`. */
 const prefixTable = (initial: readonly MathJSON[], entry: MathJSON): MathJSON =>
-  listFold(["Join", "a", list(entry)], "a", "b", list(...initial), positions, "list<integer>");
+  listFold(["Join", "a", list(entry)], "a", "b", list(...initial), positions);
 /** Entry `j` of a prefix table, `j` letters in. */
 const tableAt = (table: MathJSON, letters: MathJSON): MathJSON => at(add(letters, 1), table);
 
@@ -278,7 +278,6 @@ const pathsAboveByHeight: MathJSON = listFold(
   "b",
   ["Join", list(0, 1), forEach(span(1, add(k, 1)), 0, "z")],
   x,
-  "list<integer>",
 );
 
 /** The half lengths 1 .. n/2 of the even factors. */
@@ -324,14 +323,7 @@ const descentWordPreimages: MathJSON = bindList(
   ["Join", x, list(1)],
   bindList(
     "c",
-    listFold(
-      ["Join", "a", list(add(at(["Length", "a"], "a"), at(visiting, "y")))],
-      "a",
-      "b",
-      list(0),
-      upTo(add(k, 1)),
-      "list<integer>",
-    ),
+    listFold(["Join", "a", list(add(at(["Length", "a"], "a"), at(visiting, "y")))], "a", "b", list(0), upTo(add(k, 1))),
     at(
       add(k, 2),
       listFold(
@@ -359,7 +351,6 @@ const descentWordPreimages: MathJSON = bindList(
         "b",
         list(["Product", span(1, add(k, 1))]),
         upTo(add(k, 1)),
-        "list<integer>",
       ),
     ),
   ),
@@ -624,7 +615,6 @@ const BINARY_WORD_STATISTICS: readonly Definition[] = [
             "b",
             list(0, 0),
             positions,
-            "list<integer>",
           ),
           ["Divide", max2(at(1, "g"), at(2, "g")), 2],
         ),
@@ -787,7 +777,6 @@ const BINARY_WORD_STATISTICS: readonly Definition[] = [
           "b",
           ["Map", ["Function", 0, "z"], span(0, k)],
           positions,
-          "list<integer>",
         ),
       ),
     ),

@@ -187,14 +187,7 @@ export function colexDigits(
     ],
     ["ReplaceAt", ["ReplaceAt", state, 1, sub(left, choose(found, i))], add(i, 1), found],
   );
-  return fold(
-    step,
-    state,
-    i,
-    ["Join", ["List", "_r"], map(0, `${tag}_z`, upTo(1, digits))],
-    ["Range", digits, 1, -1],
-    "list<integer>",
-  );
+  return fold(step, state, i, ["Join", ["List", "_r"], map(0, `${tag}_z`, upTo(1, digits))], ["Range", digits, 1, -1]);
 }
 
 /** T(s, c) of a table from `rowTable` bound as `name`, starting `offset` cells in when several
@@ -232,7 +225,6 @@ export function primeQuotient(
       j,
       ["List", 0, p],
       upTo(1, bound),
-      "list<integer>",
     ),
     1,
   );

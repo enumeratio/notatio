@@ -50,7 +50,6 @@ const unrank: MathJSON = lets(
       "ui",
       ["Join", degreesOfSequence("sq", N), zeros(n)],
       upTo(1, sub(N, 2)),
-      "list<integer>",
     ),
     N,
   ],
@@ -81,13 +80,13 @@ const rank: MathJSON = at(
     "ri",
     ["Join", degrees, ["List", 0]],
     upTo(1, sub(N, 2)),
-    "list<integer>",
   ),
   add(N, 1),
 );
 
 /** Whether following parents from vertex i reaches a root (0) within n steps. */
 const reachesRoot = (i: MathJSON): MathJSON =>
+  // The accumulator type stays: untyped, `valid` declines to compile (compute-engine 0.181).
   equal(fold(iff(equal("vp", 0), 0, at(parents, "vp")), "vp", "vk", i, upTo(1, n), "integer"), 0);
 
 const rootedForests: EpsilFamily = {

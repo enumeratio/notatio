@@ -294,7 +294,7 @@ const arcComponents: MathJSON = [
                 ),
                 "pass",
               ),
-              ["Typed", "a", "'list<integer>'"],
+              "a",
               "b",
             ],
             "start",

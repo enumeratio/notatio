@@ -392,7 +392,6 @@ const primorials = (): EpsilFamily => {
           k,
           ["List", 0, 1],
           candidates(primeBound("pm_n")),
-          "list<integer>",
         ),
         "list<integer>",
       ],
@@ -413,7 +412,7 @@ const primorials = (): EpsilFamily => {
     ),
   );
   const walked = lets(
-    [["pm_w", fold(step, state, k, ["List", 0, 1, -1], primes, "list<integer>"), "list<integer>"]],
+    [["pm_w", fold(step, state, k, ["List", 0, 1, -1], primes), "list<integer>"]],
     iff(less(at("pm_w", 2), "_x"), "NaN", at("pm_w", 3)),
   );
   return {

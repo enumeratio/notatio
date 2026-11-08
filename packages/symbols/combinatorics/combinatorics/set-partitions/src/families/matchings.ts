@@ -127,7 +127,6 @@ const tailUnrankStep = (mode: TailMode): MathJSON =>
               "tq",
               ["List", sub("tr", "to"), 0],
               upTo(1, "ta"),
-              "list<integer>",
             ),
             "list<integer>",
           ],
@@ -208,7 +207,7 @@ const noBadArcs = (bad: (earlier: (point: string) => MathJSON, i: string, k: str
   );
 
 function tailPartitions(head: string, mode: TailMode, bad: Parameters<typeof noBadArcs>[0]): EpsilFamily {
-  const walked = fold(tailUnrankStep(mode), "ts", "ti", ["List", "_r", 0, 0], upTo(1, "_n"), "list<integer>");
+  const walked = fold(tailUnrankStep(mode), "ts", "ti", ["List", "_r", 0, 0], upTo(1, "_n"));
   return {
     head,
     carrier: "SetPartition",
@@ -278,7 +277,6 @@ const heights: MathJSON = fold(
   "hj",
   ["List", 0],
   allPoints,
-  "list<integer>",
 );
 const matchingsFrom = (head: string, mode: "stack" | "queue", bad: MathJSON): EpsilFamily => ({
   head,
