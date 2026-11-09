@@ -23,4 +23,4 @@ signatures:
 ---
 
 - Takes a `Permutation` and returns a `Permutation` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- FindStat's Mp00277, the catalanization of a permutation. It fixes exactly the 231-avoiding permutations.
+- FindStat's Mp00277. Fixes exactly the 231-avoiding permutations.

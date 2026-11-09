@@ -25,4 +25,4 @@ signatures:
 ---
 
 - Takes a `IntegerPartition` and returns a `IntegerPartition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- FindStat's Mp00321, the case s = 2 of an involution for every s that is conjugation at s = 1.
+- FindStat's Mp00321, a bijection and an involution: the remainder diagram of the partition mod 2, taken through the green and yellow construction, conjugated and taken back.

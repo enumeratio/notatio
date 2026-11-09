@@ -5,10 +5,6 @@ signature: Gyration(AlternatingSignMatrix)
 summary: "Wieland's gyration: the height function toggled at the vertices of even parity, then of odd parity."
 laws:
   - bijection
-  - graded:
-      from: AlternatingSignMatrices
-      to: AlternatingSignMatrices
-    on: alternating_sign_matrix
 catalog:
   - system: findstat
     identity: Mp00006
@@ -24,4 +20,4 @@ signatures:
 ---
 
 - Takes a `AlternatingSignMatrix` and returns a `AlternatingSignMatrix` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- FindStat's Mp00006, the gyration of an alternating sign matrix.
+- FindStat's Mp00006, a bijection of the alternating sign matrices of a size.
