@@ -32,7 +32,7 @@ const carrierByType = new Map(CARRIERS.map((carrier) => [carrier.type, carrier])
 const carrierByName = new Map(CARRIERS.map((carrier) => [carrier.name, carrier]));
 
 /** Small elements of every family whose elements are values of `carrier`, as its contents. */
-const subjectsOf = (carrier: string): unknown[] => smallElements(ce, carrier, MAX_SIZE, PER_FAMILY);
+const subjectsOf = (carrier: string): unknown[] => smallElements(ce, carrier, MAX_SIZE, PER_FAMILY, true);
 
 const ce = bareEngine();
 

@@ -58,6 +58,22 @@ const SAMPLES: Record<string, { contents: unknown; caption: string }> = {
   },
   parking_function: { contents: ["List", 2, 1, 1, 3], caption: "the parking function $2113$" },
   binary_word: { contents: ["List", 0, 1, 1, 0, 0], caption: "the binary word $01100$" },
+  perfect_matching: {
+    contents: ["List", ["List", 1, 3], ["List", 2, 6], ["List", 4, 5]],
+    caption: "the perfect matching $\\{1,3\\} \\mid \\{2,6\\} \\mid \\{4,5\\}$",
+  },
+  alternating_sign_matrix: {
+    contents: ["List", ["List", 1, 0, 0], ["List", 0, 0, 1], ["List", 0, 1, 0]],
+    caption: "the alternating sign matrix with rows $100$, $001$ and $010$",
+  },
+  skew_partition: {
+    contents: ["List", ["List", 3, 2, 1], ["List", 1, 1]],
+    caption: "the skew shape $321/11$",
+  },
+  labeled_graph: {
+    contents: ["Tuple", 5, ["List", ["List", 1, 2], ["List", 2, 3], ["List", 4, 5]]],
+    caption: "the graph on 5 vertices with the edges 12, 23 and 45",
+  },
   standard_tableau: {
     contents: ["List", ["List", 1, 3], ["List", 2]],
     caption: "the standard tableau with rows $13$ and $2$",

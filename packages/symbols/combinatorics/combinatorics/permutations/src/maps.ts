@@ -185,6 +185,39 @@ const inverseToricPromotionBody: MathJSON = [
   ),
 ];
 
+/** The entry at i with each excedance π(i) > i lowered below every value, to π(i) - n - 1: Mp00248's barred letters. */
+const dexLetter = (i: MathJSON): MathJSON => [
+  "If",
+  ["Greater", at(i), i],
+  ["Subtract", at(i), ["Add", size, 1]],
+  at(i),
+];
+
+/** Mp00248: the composition cut after each descent of the barred word, and after the last position. */
+const dexCompositionBody: MathJSON = [
+  "If",
+  ["Equal", size, 0],
+  ["List"],
+  bind(
+    "dx_ends",
+    [
+      "Filter",
+      positions,
+      [
+        "Function",
+        ["Or", ["Equal", "e", size], ["Greater", dexLetter("e"), dexLetter(["Min", ["Add", "e", 1], size])]],
+        "e",
+      ],
+    ],
+    forEach(
+      ["Range", 1, ["Count", "dx_ends"], 1],
+      ["Subtract", at("k", "dx_ends"), ["If", ["Equal", "k", 1], 0, at(["Max", ["Subtract", "k", 1], 1], "dx_ends")]],
+      "k",
+    ),
+    "list<integer>",
+  ),
+];
+
 export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
   {
     name: "DescentWord",
@@ -858,6 +891,45 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     summary:
       "The Foata–Riordan Prüfer code of the permutation's tree, with 0 in front and cyclically shifted so that no entry is 0.",
     note: "FindStat's Mp00325, a bijection: OnesToLeading on the parking functions that are permutations.",
+  },
+  {
+    name: "Restriction",
+    from: "permutation",
+    to: "permutation",
+    body: ["Filter", "_raw", ["Function", ["Less", "x", size], "x"]],
+    // The empty permutation has no largest letter.
+    guard: ["Greater", size, 0],
+    summary: "The permutation with its largest letter removed.",
+    note: "FindStat's Mp00252. Undefined for the empty permutation. Lossy: the position of the largest letter is forgotten.",
+  },
+  {
+    name: "DexComposition",
+    from: "permutation",
+    to: "composition",
+    body: dexCompositionBody,
+    summary:
+      "The composition cut at the descents of the word whose excedances are barred, so that they sit below every unbarred letter.",
+    note: "FindStat's Mp00248, Sage's DEX composition (Assaf's dual equivalence). Not injective.",
+  },
+  {
+    name: "AlternatingSignMatrix",
+    convert: true,
+    from: "permutation",
+    to: "alternating_sign_matrix",
+    body: forEach(positions, forEach(positions, ["If", ["Equal", at("j"), "i"], 1, 0], "j")),
+    summary: "The permutation matrix whose entry (π(j), j) is 1, as an alternating sign matrix.",
+    note: "FindStat's Mp00063, Sage's to_alternating_sign_matrix. Injective: the alternating sign matrices without a negative entry.",
+    findstat: ["Mp00063"],
+  },
+  {
+    name: "ParkingFunction",
+    convert: true,
+    from: "permutation",
+    to: "parking_function",
+    body: "_raw",
+    summary: "The permutation read as a parking function: car i prefers the spot π(i).",
+    note: "FindStat's Mp00305. Injective.",
+    findstat: ["Mp00305"],
   },
 ];
 

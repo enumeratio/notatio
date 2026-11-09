@@ -140,7 +140,7 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
   const carrierOf = new Map(CARRIERS.map((carrier) => [carrier.type, carrier]));
   const samples = new Map<string, unknown[]>();
   const subjectsOf = (carrier: string): unknown[] => {
-    if (!samples.has(carrier)) samples.set(carrier, smallElements(ce, carrier));
+    if (!samples.has(carrier)) samples.set(carrier, smallElements(ce, carrier, undefined, undefined, true));
     return samples.get(carrier)!;
   };
 

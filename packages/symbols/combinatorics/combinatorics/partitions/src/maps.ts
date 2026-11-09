@@ -38,6 +38,52 @@ const bit = (m: MathJSON, k: MathJSON): MathJSON => ["Mod", ["Floor", ["Divide",
 /** The parts 1 .. largest, as the range to read multiplicities over. */
 const sizes: MathJSON = upTo(["Max", "_raw"]);
 
+/** A skew partition `_raw` is [outer, inner]: the outer partition, and the inner one, which may have fewer parts. */
+const outer: MathJSON = at(1);
+const inner: MathJSON = at(2);
+const rowCount: MathJSON = ["Length", outer];
+/** Row r of the inner partition, 0 below its last part. */
+const innerRow = (r: MathJSON): MathJSON => ["If", ["LessEqual", r, ["Length", inner]], at(r, inner), 0];
+/** The cells of row r. */
+const rowLength = (r: MathJSON): MathJSON => ["Subtract", at(r, outer), innerRow(r)];
+
+/** The conjugate of the partition `lambda`: entry j counts the parts that are at least j. */
+const conjugateOf = (lambda: MathJSON): MathJSON => [
+  "If",
+  ["Equal", ["Length", lambda], 0],
+  ["List"],
+  forEach(
+    upTo(["Max", lambda]),
+    ["Max", ["Sum", forEach(lambda, ["If", ["GreaterEqual", "p", "j"], 1, 0], "p")], 0],
+    "j",
+  ),
+];
+
+/** The cells of each column of the skew shape, left to right: the rows whose cells reach that column. */
+const columnLengths: MathJSON = forEach(
+  upTo(["Max", outer]),
+  [
+    "Max",
+    [
+      "Sum",
+      forEach(
+        upTo(rowCount),
+        ["If", ["And", ["GreaterEqual", "c", ["Add", innerRow("r"), 1]], ["LessEqual", "c", at("r", outer)]], 1, 0],
+        "r",
+      ),
+    ],
+    0,
+  ],
+  "c",
+);
+
+/** The inner shape of the rotated skew partition: the outer partition's complement in its first row, read upward. */
+const rotatedInner: MathJSON = forEach(
+  upTo(rowCount),
+  ["Subtract", at(1, outer), at(["Subtract", ["Add", rowCount, 1], "r"], outer)],
+  "r",
+);
+
 export const PARTITIONS_MAPS: readonly CombinatorialMap[] = [
   {
     name: "TransposePartition",
@@ -281,5 +327,79 @@ export const PARTITIONS_MAPS: readonly CombinatorialMap[] = [
     summary:
       "The inverse of GlaisherFranklin: repeated parts merge into doubled parts, and a leftover part splits into copies of its odd part.",
     note: "FindStat's Mp00313. It sends the number of distinct repeated part sizes to the number of distinct even part sizes.",
+  },
+  {
+    name: "OuterShape",
+    from: "skew_partition",
+    to: "integer_partition",
+    body: outer,
+    summary: "The outer partition λ of the skew shape λ/μ.",
+    note: "FindStat's Mp00182.",
+  },
+  {
+    name: "InnerShape",
+    from: "skew_partition",
+    to: "integer_partition",
+    body: inner,
+    summary: "The inner partition μ of the skew shape λ/μ.",
+    note: "FindStat's Mp00183.",
+  },
+  {
+    name: "DominatingPartition",
+    from: "skew_partition",
+    to: "integer_partition",
+    // The conjugate of the sorted column lengths is the conjugate of their multiset, which needs no sorting.
+    body: ["If", ["Equal", rowCount, 0], ["List"], conjugateOf(columnLengths)],
+    summary:
+      "The largest partition in dominance order in the Schur expansion of the skew Schur function: the conjugate of the column lengths, sorted.",
+    note: "FindStat's Mp00186 (Lam, Postnikov and Pylyavskyy).",
+  },
+  {
+    name: "RowLengths",
+    from: "skew_partition",
+    to: "composition",
+    body: ["If", ["Equal", rowCount, 0], ["List"], forEach(upTo(rowCount), rowLength("r"), "r")],
+    summary: "The number of cells in each row, from the top.",
+    note: "FindStat's Mp00181. Every row of a skew shape has a cell, so these are the parts of a composition.",
+  },
+  {
+    name: "TransposeSkewPartition",
+    from: "skew_partition",
+    to: "skew_partition",
+    body: ["List", conjugateOf(outer), conjugateOf(inner)],
+    summary: "The conjugate skew shape: rows become columns.",
+    note: "FindStat's Mp00187, an involution: λ/μ becomes λ'/μ'.",
+  },
+  {
+    name: "RotateSkewPartition",
+    from: "skew_partition",
+    to: "skew_partition",
+    // The half turn takes row r to row n + 1 - r and the cells (i, j) to (n + 1 - i, w + 1 - j), for w the first part of λ.
+    body: [
+      "If",
+      ["Equal", rowCount, 0],
+      ["List", ["List"], ["List"]],
+      [
+        "List",
+        forEach(
+          upTo(rowCount),
+          ["Add", at("r", rotatedInner), rowLength(["Subtract", ["Add", rowCount, 1], "r"])],
+          "r",
+        ),
+        ["Filter", rotatedInner, ["Function", ["Greater", "x", 0], "x"]],
+      ],
+    ],
+    summary: "The shape turned half way around: the rotation of the diagram by 180 degrees.",
+    note: "FindStat's Mp00189, an involution.",
+  },
+  {
+    name: "SkewPartition",
+    convert: true,
+    from: "integer_partition",
+    to: "skew_partition",
+    body: ["List", "_raw", ["List"]],
+    summary: "The partition as the skew shape λ/∅.",
+    note: "FindStat's Mp00179. Injective.",
+    findstat: ["Mp00179"],
   },
 ];

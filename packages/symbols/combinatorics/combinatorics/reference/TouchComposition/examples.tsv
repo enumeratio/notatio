@@ -1,2 +1,3 @@
 id	section	role	expr	expected	caption
 the-dyck-path-uuddud			[TouchComposition, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	[IntegerComposition, [List, 2, 1]]	the Dyck path $UUDDUD$
+the-parking-function-2113			[TouchComposition, [ParkingFunction, [List, 2, 1, 1, 3]]]	[IntegerComposition, [List, 4]]	the parking function $2113$
