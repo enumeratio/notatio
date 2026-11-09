@@ -34,6 +34,7 @@ import {
 } from "../../tableaux/src/flat.ts";
 import { cactusEvacuationKernel } from "../../tableaux/src/promotion.ts";
 import { rskInsertionKernel, rskKernel, rskRecordingKernel, rskShapeKernel } from "../../tableaux/src/rsk-kernels.ts";
+import { onesToLeadingPermutationBody } from "../../words/src/pruefer.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "./foata-bijection.ts";
 import { lehmerCode, majorCode, permutationOfLehmerCode, permutationOfMajorCode } from "./codes.ts";
 import {
@@ -848,6 +849,15 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     body: inverseToricPromotionBody,
     summary: "The same swaps as ToricPromotion in the opposite order: n and 1, then n - 1 and n, down to 1 and 2.",
     note: "FindStat's Mp00309, titled the inverse of toric promotion.",
+  },
+  {
+    name: "OnesToLeading",
+    from: "permutation",
+    to: "permutation",
+    body: onesToLeadingPermutationBody,
+    summary:
+      "The Foata–Riordan Prüfer code of the permutation's tree, with 0 in front and cyclically shifted so that no entry is 0.",
+    note: "FindStat's Mp00325, a bijection: OnesToLeading on the parking functions that are permutations.",
   },
 ];
 

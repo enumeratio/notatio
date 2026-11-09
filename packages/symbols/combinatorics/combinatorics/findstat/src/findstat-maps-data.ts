@@ -228,6 +228,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00309", rows: 1200, compared: 873, skipped: 0 }],
   },
   {
+    name: "OnesToLeading",
+    from: "Permutation",
+    to: "Permutation",
+    findstat: [{ id: "Mp00325", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
     name: "Reverse",
     from: "SignedPermutation",
     to: "SignedPermutation",
@@ -1126,6 +1132,36 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     from: "ParkingFunction",
     to: "ParkingFunction",
     findstat: [{ id: "Mp00320", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "OrderedTree",
+    from: "ParkingFunction",
+    to: "OrderedTree",
+    findstat: [{ id: "Mp00297", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "OnesToLeading",
+    from: "ParkingFunction",
+    to: "ParkingFunction",
+    findstat: [{ id: "Mp00299", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "LeadingToOnes",
+    from: "ParkingFunction",
+    to: "ParkingFunction",
+    findstat: [{ id: "Mp00300", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "SetComposition",
+    from: "ParkingFunction",
+    to: "SetComposition",
+    findstat: [{ id: "Mp00290", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "InverseDescentComposition",
+    from: "ParkingFunction",
+    to: "IntegerComposition",
+    findstat: [{ id: "Mp00054", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
     name: "FoataHan",

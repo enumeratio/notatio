@@ -141,6 +141,7 @@ const normalize = (text: string): string => text.replace(/\s+/g, "");
 const SLOW: Readonly<Record<string, number>> = {
   "DemazureProductWithInverse@SignedPermutation": 3,
   "RowDescentsToColumnDescents@StandardTableau": 4,
+  "OrderedTree@ParkingFunction": 3,
 };
 
 for (const [key, reading] of Object.entries(MAP_READINGS)) {
@@ -339,6 +340,12 @@ const IDS: Readonly<Record<string, string>> = {
   "CyclicShift@ParkingFunction": "Mp00293",
   "InverseCyclicShift@ParkingFunction": "Mp00304",
   "Reverse@ParkingFunction": "Mp00320",
+  "OrderedTree@ParkingFunction": "Mp00297",
+  "OnesToLeading@ParkingFunction": "Mp00299",
+  "LeadingToOnes@ParkingFunction": "Mp00300",
+  "OnesToLeading@Permutation": "Mp00325",
+  "SetComposition@ParkingFunction": "Mp00290",
+  "InverseDescentComposition@ParkingFunction": "Mp00054",
 };
 
 test("every reading names the FindStat map it is", () => {

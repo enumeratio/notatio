@@ -16,6 +16,14 @@ import {
   sortedRuns,
 } from "../../src/map-helpers.ts";
 import { fold } from "../../collections/src/families/tables.ts";
+import {
+  inverseDescentCompositionBody,
+  leadingToOnesBody,
+  onesToLeadingBody,
+  orderedSetPartitionBody,
+  pollakRiordanTreeBody,
+} from "./pruefer.ts";
+import { standardRanks } from "./standard-ranks.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "../../permutations/src/foata-bijection.ts";
 
 /** The composition of m + 1 a cut word of length m describes: the parts between the cuts. */
@@ -279,19 +287,6 @@ const supportDyckPathBody: MathJSON = [
     forEach(["Range", 1, ["Multiply", 2, ["Length", "_raw"]], 1], ["If", ["Element", "p", "sd_ups"], 1, 0], "p"),
     "list<integer>",
   ),
-];
-
-/** Mp00336, and the rank of every entry of a parking function: the entries below entry i, plus those equal to it up to
- *  and including i, so equal entries rank left to right. */
-const standardRanks: MathJSON = [
-  "If",
-  ["Equal", n, 0],
-  ["List"],
-  forEach(positions, [
-    "Add",
-    ["Fold", ["Function", ["If", ["Less", at("j"), at("i")], ["Add", "sr_c", 1], "sr_c"], "sr_c", "j"], 0, positions],
-    ["Fold", ["Function", ["If", ["Equal", at("j"), at("i")], ["Add", "sr_d", 1], "sr_d"], "sr_d", "j"], 0, upTo("i")],
-  ]),
 ];
 
 /** Mp00055: the labeling of the support Dyck path, the inverse of the standard permutation: entry k is the position
@@ -575,5 +570,53 @@ export const WORDS_MAPS: readonly CombinatorialMap[] = [
     to: "parking_function",
     body: reversedWord,
     summary: "The word read backwards.",
+  },
+  {
+    name: "OrderedTree",
+    convert: true,
+    from: "parking_function",
+    to: "ordered_tree",
+    body: pollakRiordanTreeBody,
+    summary:
+      "The ordered tree of Pollak's Prüfer code of the parking function, the differences of consecutive entries mod n + 1.",
+    note: "FindStat's Mp00297, after Riordan. A surjection onto the ordered trees with n edges. The children of a vertex are ordered by how many children they have, then by label, which the crawl's rows, through size 5, fix.",
+    findstat: ["Mp00297"],
+  },
+  {
+    name: "OnesToLeading",
+    from: "parking_function",
+    to: "parking_function",
+    body: onesToLeadingBody,
+    summary:
+      "The Foata–Riordan Prüfer code of the parking function's tree, with 0 in front and cyclically shifted into a parking function.",
+    note: "FindStat's Mp00299. A bijection sending the number of ones to the number of occurrences of the first entry; the inverse is LeadingToOnes.",
+  },
+  {
+    name: "LeadingToOnes",
+    from: "parking_function",
+    to: "parking_function",
+    body: leadingToOnesBody,
+    summary:
+      "The parking function whose Prüfer code is the entries less the first, mod n + 1, taken back through the Foata–Riordan map.",
+    note: "FindStat's Mp00300, the inverse of OnesToLeading.",
+  },
+  {
+    name: "SetComposition",
+    convert: true,
+    from: "parking_function",
+    to: "set_composition",
+    body: orderedSetPartitionBody,
+    summary:
+      "The cars grouped by preference, the groups in order of preference: the labels of the runs of the labelled Dyck path.",
+    note: "FindStat's Mp00290. A surjection: the cars that prefer the same spot are one block, in increasing order.",
+    findstat: ["Mp00290"],
+  },
+  {
+    name: "InverseDescentComposition",
+    from: "parking_function",
+    to: "composition",
+    body: inverseDescentCompositionBody,
+    summary: "The descents composition of the inverse of the parking function's diagonal reading word.",
+    note: "FindStat's Mp00054, Sage's diagonal_reading_word().inverse().descents_composition(). The word reads the cars of the Dyck path by diagonal, the largest area first, and each diagonal from the top row down. A surjection.",
   },
 ];

@@ -9,6 +9,7 @@ import { BATCH_EIGHT_READINGS } from "./map-findstat-readings-8.ts";
 import { BATCH_NINE_READINGS } from "./map-findstat-readings-9.ts";
 import { BATCH_TEN_READINGS } from "./map-findstat-readings-10.ts";
 import { BATCH_ELEVEN_READINGS } from "./map-findstat-readings-11.ts";
+import { BATCH_THIRTEEN_READINGS } from "./map-findstat-readings-13.ts";
 
 export type Reading = (text: string) => string;
 
@@ -770,6 +771,7 @@ export const MAP_READINGS: Readonly<Record<string, Reading>> = {
   ...BATCH_NINE_READINGS,
   ...BATCH_TEN_READINGS,
   ...BATCH_ELEVEN_READINGS,
+  ...BATCH_THIRTEEN_READINGS,
   // Binary words are strings of 0s and 1s.
   "Reverse@BinaryWord": (w) => w.split("").toReversed().join(""),
   "Complement@BinaryWord": (w) =>
