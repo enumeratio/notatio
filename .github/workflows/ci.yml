@@ -96,7 +96,7 @@ jobs:
           name: dist-cache
           path: ${{ runner.temp }}/dist-cache
           compression-level: 1
-          retention-days: 1
+          retention-days: 3
       # Keep main's newest few entries (a PR forks from a recent main, not always the latest) and drop
       # the rest; no other ref saves one, so what's left over from before is dropped too.
       - name: prune dist cache entries
