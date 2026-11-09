@@ -484,6 +484,29 @@ test("a staircase over the square or square root of x is in x, or in the root", 
   ]);
 });
 
+test("a staircase over a constant multiple, Exp, Ln or a modulus of the square matches its values", () => {
+  const cases: { fn: unknown; ref: (x: number) => number; lo: number; hi: number }[] = [
+    { fn: ["Floor", ["Multiply", "Pi", "x"]], ref: (x) => floor(Math.PI * x), lo: 0, hi: 2 },
+    { fn: ["Ceil", ["Multiply", "Pi", "x"]], ref: (x) => ceil(Math.PI * x), lo: 0, hi: 2 },
+    { fn: ["Round", ["Multiply", ["Sqrt", 2], "x"]], ref: (x) => roundEven(Math.SQRT2 * x), lo: 0, hi: 3 },
+    { fn: ["Floor", ["Exp", "x"]], ref: (x) => floor(Math.exp(x)), lo: 0, hi: 3 },
+    { fn: ["Floor", ["Ln", "x"]], ref: (x) => floor(Math.log(x)), lo: 1, hi: 10 },
+    { fn: ["Mod", ["Power", "x", 2], 2], ref: (x) => x * x - 2 * floor((x * x) / 2), lo: 0, hi: 3 },
+  ];
+  for (const { fn, ref, lo, hi } of cases) {
+    const pw = expand(fn, ["Less", lo, "x", hi]);
+    expect(head(pw), JSON.stringify(fn)).toBe("Piecewise");
+    for (let i = 1; i < 200; i++) {
+      const x = lo + ((hi - lo) * i) / 200 + 1e-4;
+      expect(at(pw, { x }), `${JSON.stringify(fn)} at ${x}`).toBeCloseTo(ref(x), 9);
+    }
+  }
+  // The edges are exact: k / Pi, Log(k), Exp(k).
+  expect(JSON.stringify(expand(["Floor", ["Multiply", "Pi", "x"]], ["Less", 0, "x", 2]))).toContain('"Pi"');
+  expect(JSON.stringify(expand(["Floor", ["Exp", "x"]], ["Less", 0, "x", 3]))).toContain('["Ln",2]');
+  expect(JSON.stringify(expand(["Floor", ["Ln", "x"]], ["Less", 1, "x", 10]))).toContain('"ExponentialE"');
+});
+
 test("bounds that are curved, scaled or linked to another unknown's range give the interval", () => {
   // x^2 < 3 is -sqrt(3) < x < sqrt(3): the cells are the integers in it.
   const circle = expand(["Floor", "x"], ["Less", ["Power", "x", 2], 3]);
