@@ -10,21 +10,14 @@ import {
 } from "@enumeratio/engine";
 import { symbolInfo } from "@enumeratio/manifest";
 
-// Wolfram-frontier scoping/control heads: With, Module, Reap/Sow, Do, Switch, NestWhile(List),
+// Wolfram-frontier scoping/control heads: With, Reap/Sow, Do, Switch, NestWhile(List),
 // While, FixedPointList, Throw/Catch, Echo, AbsoluteTiming, Attributes/SetAttributes/ClearAttributes, AppendTo.
 //
-// None of these exist on compute-engine (probed via `ce.lookupDefinition` for every one) --
-// they're declared fresh below. Compute-engine DOES already declare `Block` (a scoped,
-// lazy `(unknown*) -> unknown`), `Loop`, `Assign`, `Declare`, `Function`, `If`, `Which`,
-// `Break` and `Continue`, none of which are reused here: `Block`'s own scoping semantics
-// aren't documented enough to trust for Module's "fresh local, no leak, no clobber"
-// contract, and building directly on `ce.createScope`/`pushScope`/`popScope` (the same
-// public API `Transcript` uses, in @enumeratio/frontend's `transcript.ts`) is both simpler
-// and verified below to do exactly what's needed: a pre-boxed body expression's symbol
-// references re-resolve against whatever scope is CURRENT at `.evaluate()` time, not at
-// box time, so pushing a scope, declaring locals into it, evaluating the (already-boxed,
-// held) body, and popping in a `finally` is sufficient -- no gensym hygiene required, since
-// each call gets its own scope object.
+// None of these exist on compute-engine, so they're declared fresh below. Wolfram's `Module`
+// is compute-engine's `Block` with a `Declare` per local; the head `Module` is
+// compute-engine's qualified library name. A head that needs a local (`Do`'s loop variable)
+// pushes its own scope, declares the local into it, evaluates the held body and pops it in a
+// `finally`: the body's symbols resolve against the scope current at `.evaluate()` time.
 //
 // `Return` is undeclared on compute-engine (surprisingly, given `Break`/`Continue` exist) --
 // not implemented here; nothing in this wave's heads needs it.
@@ -43,7 +36,7 @@ import { symbolInfo } from "@enumeratio/manifest";
 // (which requires a value) and `ce.declare` (which throws redeclaring an existing symbol).
 // A faithful Clear needs an engine-internal hook this package doesn't have.
 //
-// Binding-list shape for With/Module: our own `ce.parse("x = 1")` reads `=` as `Equal`, not
+// Binding-list shape for With: our own `ce.parse("x = 1")` reads `=` as `Equal`, not
 // as an `Assign` -- compute-engine's `Set` head is the SET data type (`{1, 2, 3}`), not
 // assignment, and `Assign`'s call shape (`["Assign", "x", 1]`) is not what `x = 1` parses
 // to. So a binding list is `[List, [Equal, "x", 1], [Equal, "y", 2], ...]`, matching
@@ -60,28 +53,18 @@ const isTrue = (expr: Expr): boolean => symbolNameOf(expr) === "True";
  *  for `While`, `Nothing`) is returned rather than looping forever. */
 const MAX_ITERATIONS = 4096;
 
-// --- With / Module -------------------------------------------------------------------------
+// --- With --------------------------------------------------------------------------------
 
-/** Read a `[List, [Equal, sym, val]?, ...]` binding list. `requireValue` rejects a bare
- *  symbol with no `= val` (With requires one; Module allows an uninitialized local). */
-function readBindings(
-  bindings: Expr,
-  requireValue: boolean,
-): readonly { readonly name: string; readonly value: Expr | undefined }[] | undefined {
+/** Read a `[List, [Equal, sym, val], ...]` binding list; a binding with no value is refused. */
+function readBindings(bindings: Expr): readonly { readonly name: string; readonly value: Expr }[] | undefined {
   if (bindings.operator !== "List") return undefined;
-  const result: { readonly name: string; readonly value: Expr | undefined }[] = [];
+  const result: { readonly name: string; readonly value: Expr }[] = [];
   for (const b of operandsOf(bindings)) {
-    if (b.operator === "Equal") {
-      const [sym, val] = operandsOf(b);
-      const name = sym !== undefined ? symbolNameOf(sym) : undefined;
-      if (name === undefined || val === undefined) return undefined;
-      result.push({ name, value: val });
-    } else {
-      if (requireValue) return undefined;
-      const name = symbolNameOf(b);
-      if (name === undefined) return undefined;
-      result.push({ name, value: undefined });
-    }
+    if (b.operator !== "Equal") return undefined;
+    const [sym, val] = operandsOf(b);
+    const name = sym !== undefined ? symbolNameOf(sym) : undefined;
+    if (name === undefined || val === undefined) return undefined;
+    result.push({ name, value: val });
   }
   return result;
 }
@@ -97,43 +80,11 @@ function declareWith(ce: Engine): void {
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       const [bindingsExpr, body] = ops;
       if (bindingsExpr === undefined || body === undefined) return undefined;
-      const bindings = readBindings(bindingsExpr, true);
+      const bindings = readBindings(bindingsExpr);
       if (bindings === undefined) return undefined;
       const subs: Record<string, Expr> = {};
-      for (const { name, value } of bindings) subs[name] = value!.evaluate();
+      for (const { name, value } of bindings) subs[name] = value.evaluate();
       return body.subs(subs).evaluate();
-    },
-  });
-}
-
-/** `Module({x, y = 2}, body)`: a fresh scope per call, holding one local per binding
- *  (declared, then assigned when the binding gave a value) -- popped in a `finally` so a
- *  thrown error (including our own `Throw`, below) still unwinds the scope. */
-function declareModule(ce: Engine): void {
-  ce.declare("Module", {
-    signature: "(any, any) -> any",
-    lazy: true,
-    // The body is kept as written: its assignments write the locals this handler declares,
-    // which no enclosing scope knows at canonicalization.
-    operands: () => [{ kind: "raw" }, { kind: "opaque" }] as const,
-    evaluate: (ops: readonly Expr[]): Expr | undefined => {
-      const [bindingsExpr, body] = ops;
-      if (bindingsExpr === undefined || body === undefined) return undefined;
-      const bindings = readBindings(bindingsExpr, false);
-      if (bindings === undefined) return undefined;
-      // Values are computed in the OUTER context, like With, before any local shadows them.
-      const inits = bindings.map(({ name, value }) => ({ name, value: value?.evaluate() }));
-      const scope = ce.createScope({});
-      ce.pushScope(scope, "Module");
-      try {
-        for (const { name, value } of inits) {
-          ce.declare(name, "any", scope);
-          if (value !== undefined) ce.assign(name, value);
-        }
-        return body.evaluate();
-      } finally {
-        ce.popScope();
-      }
     },
   });
 }
@@ -701,8 +652,7 @@ const declareClearAttributes = (ce: Engine): void => declareAttributeWriter(ce, 
 /** `AppendTo(s, elem)`: reads `s`'s current value, appends `elem`, reassigns `s` to the
  *  result, and returns it -- Wolfram's own in-place update. `s` is held (its NAME, not its
  *  value, is the first operand) so it can be reassigned; works for any symbol already
- *  carrying a value via `ce.assign`, including a `Module` local (assignment into a bound
- *  variable was checked to work across a scope boundary the same way `Module` itself does). */
+ *  carrying a value via `ce.assign`, including a local of an enclosing scope. */
 function declareAppendTo(ce: Engine): void {
   ce.declare("AppendTo", {
     signature: "(symbol, any) -> any",
@@ -722,14 +672,13 @@ function declareAppendTo(ce: Engine): void {
   });
 }
 
-/** Declare the Wolfram-frontier scoping/control heads: `With`, `Module`, `Reap`/`Sow`,
+/** Declare the Wolfram-frontier scoping/control heads: `With`, `Reap`/`Sow`,
  *  `Do`, `Switch`, `While`, `NestWhile`/`NestWhileList`, `FixedPointList`, `Throw`/`Catch`,
  *  `Echo`, `AbsoluteTiming`, `Attributes`/`SetAttributes`/`ClearAttributes`, `AppendTo`. `Clear`,
  *  `Attributes`' `idempotent`/`involution` flags, and `Return` are deliberately left out --
  *  see the module doc and `declareAttributes`'s own comment for why. */
 export function declareControl(ce: Engine): void {
   declareWith(ce);
-  declareModule(ce);
   declareSow(ce);
   declareReap(ce);
   declareThrow(ce);

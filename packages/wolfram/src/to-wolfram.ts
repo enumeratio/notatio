@@ -361,13 +361,13 @@ const SPECIAL: Record<string, (args: MathJson[]) => string> = {
     if (params.length === 1) return `Function[${toWolfram(params[0])}, ${toWolfram(body)}]`;
     return `Function[List[${params.map((p) => toWolfram(p)).join(", ")}], ${toWolfram(body)}]`;
   },
-  // Module(vars, body)/With(vars, body): compute-engine spells a local's initial value
-  // `Equal(n, 10)` (`n == 10`, a mathematical equality) — the same head an actual equation
-  // uses. Wolfram's Module/With need an ASSIGNMENT there (`Set[n, 10]`, its FullForm for
-  // `n = 10`); left as `Equal`, Wolfram reads a boolean test where it expects a binding, so
-  // the vars list isn't a valid local-variable spec at all and the whole call stays
-  // unevaluated. Only a binding's own `Equal` is rewritten, not one deeper in the body.
-  Module: (a) => localScope("Module", a),
+  // `Module(name)` is compute-engine's qualified library name (`std::pi`): Wolfram reads the
+  // bare name.
+  Module: (a) => toWolfram(a[0]),
+  // With(vars, body): compute-engine spells a binding `Equal(n, 10)`, the head an equation
+  // uses. Wolfram's With needs an assignment there (`Set[n, 10]`); left as `Equal`, the vars
+  // list isn't a local-variable spec and the call stays unevaluated. Only a binding's own
+  // `Equal` is rewritten, not one deeper in the body.
   With: (a) => localScope("With", a),
   // Limit(Function(body[, x]), point[, dir]): our `Function` argument stays a pure function
   // (Slot-based `body&`, or `x |-> body`) all the way through -- Wolfram's `Limit` instead
