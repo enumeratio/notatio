@@ -2,7 +2,7 @@
 name: BlockEdgePartition
 domain: Combinatorial maps
 signature: BlockEdgePartition(LabeledGraph)
-summary: "The number of edges in each block (biconnected component) of the graph, largest first."
+summary: The number of edges in each block (biconnected component) of the graph, largest first.
 catalog:
   - system: findstat
     identity: Mp00276
@@ -12,7 +12,7 @@ mapOn:
   - LabeledGraph
 signatures:
   - call: BlockEdgePartition(LabeledGraph)
-    description: "The number of edges in each block (biconnected component) of the graph, largest first."
+    description: The number of edges in each block (biconnected component) of the graph, largest first.
     library: enumeratio-combinatorics
     type: (labeled_graph) -> integer_partition
 ---

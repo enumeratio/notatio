@@ -2,7 +2,7 @@
 name: Catalanization
 domain: Combinatorial maps
 signature: Catalanization(Permutation)
-summary: "The product of the transpositions (i j), one for each inversion at positions i < j in lexicographic order, each exchanging the entries i and j."
+summary: The product of the transpositions (i j), one for each inversion at positions i < j in lexicographic order, each exchanging the entries i and j.
 laws:
   - graded:
       from: Permutations
@@ -17,7 +17,7 @@ mapOn:
   - Permutation
 signatures:
   - call: Catalanization(Permutation)
-    description: "The product of the transpositions (i j), one for each inversion at positions i < j in lexicographic order, each exchanging the entries i and j."
+    description: The product of the transpositions (i j), one for each inversion at positions i < j in lexicographic order, each exchanging the entries i and j.
     library: enumeratio-combinatorics
     type: (permutation) -> permutation
 ---

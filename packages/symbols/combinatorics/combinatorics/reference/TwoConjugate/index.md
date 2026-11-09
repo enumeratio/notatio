@@ -2,7 +2,7 @@
 name: TwoConjugate
 domain: Combinatorial maps
 signature: TwoConjugate(IntegerPartition)
-summary: "The involution that keeps the odd parts' positions and swaps the number of even parts with the number of cells of zero leg length and odd arm length."
+summary: The involution that keeps the odd parts' positions and swaps the number of even parts with the number of cells of zero leg length and odd arm length.
 laws:
   - bijection
   - involution
@@ -19,7 +19,7 @@ mapOn:
   - IntegerPartition
 signatures:
   - call: TwoConjugate(IntegerPartition)
-    description: "The involution that keeps the odd parts' positions and swaps the number of even parts with the number of cells of zero leg length and odd arm length."
+    description: The involution that keeps the odd parts' positions and swaps the number of even parts with the number of cells of zero leg length and odd arm length.
     library: enumeratio-combinatorics
     type: (integer_partition) -> integer_partition
 ---
