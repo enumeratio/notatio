@@ -829,7 +829,7 @@
       "AdjacencyNegativeEigenvalueCount"
     ],
     "derived": true,
-    "statistics": 116
+    "statistics": 118
   },
   "LabeledGraphsByEdges": {
     "expr": "LabeledGraphsByEdges(4, 2)",
@@ -847,7 +847,7 @@
       "AdjacencyNegativeEigenvalueCount"
     ],
     "derived": true,
-    "statistics": 116
+    "statistics": 118
   },
   "LabeledTrees": {
     "expr": "LabeledTrees(4)",

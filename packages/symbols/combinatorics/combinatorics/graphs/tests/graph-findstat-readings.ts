@@ -318,6 +318,51 @@ function rankOf(rows: readonly (readonly number[])[]): number {
   }
   return rank;
 }
+/**
+ * A basis of the nullspace of an integer square matrix, as the rows of vectors: reduced row echelon
+ * form over the rationals (numerator and denominator in big integers), one vector per free column.
+ */
+function nullspaceBasis(rows: readonly (readonly number[])[]): [bigint, bigint][][] {
+  const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gcd(b, a % b));
+  const norm = ([p, q]: [bigint, bigint]): [bigint, bigint] => {
+    const d = gcd(p, q) || 1n;
+    return q < 0n ? [-p / d, -q / d] : [p / d, q / d];
+  };
+  const a = rows.map((row) => row.map((x): [bigint, bigint] => [BigInt(x), 1n]));
+  const columns = rows[0]?.length ?? 0;
+  const pivots: number[] = [];
+  for (let col = 0, r = 0; col < columns && r < a.length; col++) {
+    const pivot = a.findIndex((row, i) => i >= r && row[col]![0] !== 0n);
+    if (pivot < 0) continue;
+    [a[r], a[pivot]] = [a[pivot]!, a[r]!];
+    const lead = a[r]![col]!;
+    a[r] = a[r]!.map(([p, q]) => norm([p * lead[1], q * lead[0]]));
+    for (let i = 0; i < a.length; i++) {
+      if (i === r || a[i]![col]![0] === 0n) continue;
+      const f = a[i]![col]!;
+      a[i] = a[i]!.map(([p, q], c) => {
+        const [fp, fq] = a[r]![c]!;
+        return norm([p * fq * f[1] - fp * f[0] * q, q * fq * f[1]]);
+      });
+    }
+    pivots.push(col);
+    r++;
+  }
+  return Array.from({ length: columns }, (_, free) => free)
+    .filter((free) => !pivots.includes(free))
+    .map((free) =>
+      Array.from({ length: columns }, (_, c): [bigint, bigint] => {
+        if (c === free) return [1n, 1n];
+        const r = pivots.indexOf(c);
+        return r < 0 ? [0n, 1n] : norm([-a[r]![free]![0], a[r]![free]![1]]);
+      }),
+    );
+}
+/** The columns of the nullspace basis of the adjacency matrix, as the strings of their entries: FindStat's `K.columns()`. */
+const nullspaceColumns = (g: Graph): string[] => {
+  const basis = nullspaceBasis(matrix(g).map((row) => row.map(Number)));
+  return range(0, g.n - 1).map((v) => basis.map((vector) => `${vector[v]![0]}/${vector[v]![1]}`).join(","));
+};
 /** The incidence matrix times its transpose, whose determinant FindStat's St000368 takes. */
 const incidenceProductDeterminant = (g: Graph): number => {
   const incidence = range(0, g.n - 1).map((v) => g.edges.map(([a, b]) => (a - 1 === v || b - 1 === v ? 1 : 0)));
@@ -644,6 +689,9 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   AdjacencyNegativeEigenvalueCount: (g) => negativeCount(adjacencyEigenvalues(g)),
   AdjacencyNullity: (g) => g.n - positiveCount(adjacencyEigenvalues(g)) - negativeCount(adjacencyEigenvalues(g)),
   AdjacencyRank: (g) => rankOf(matrix(g).map((row) => row.map(Number))),
+  // St001459 and St001463 read the columns of a basis of the nullspace: zero ones, and distinct ones.
+  NullspaceZeroColumnCount: (g) => nullspaceColumns(g).filter((column) => /^(0\/1,?)*$/.test(column)).length,
+  NullspaceDistinctColumnCount: (g) => new Set(nullspaceColumns(g)).size,
   GraphSignature: (g) => positiveCount(adjacencyEigenvalues(g)) - negativeCount(adjacencyEigenvalues(g)),
   NegativeEigenvaluePairGap: (g) => {
     const negative = negativeCount(adjacencyEigenvalues(g));
