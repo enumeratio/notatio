@@ -5,8 +5,8 @@ name: Perf
 # one at a time so packages don't contend for the same cores, and records per-test/per-file durations
 # plus package wall time via tools/perf/src/collect.ts. History lives as JSON on a dedicated orphan
 # branch, `perf-data` — durable and `git show perf-data:history.json | jq` inspectable, no external
-# service. Hosted runners wobble ~2x run to run, so drift compares the current duration to the
-# trailing median (never a single number) and only flags a test past BOTH a ratio (1.5x) and an
+# service; the file is packed and bounded (tools/perf/README.md). Hosted runners wobble ~2x run to
+# run, so drift compares the current duration to the trailing median (never a single number) and only flags a test past BOTH a ratio (1.5x) and an
 # absolute floor (200ms) — see tools/perf/src/history.ts. A drift files/reopens ONE rolling issue
 # ("perf drift", labelled `nightly-fixup`, the same routine plausible.yml uses); a clean run closes
 # it. Never a required check — this workflow does not gate merges.

@@ -17,7 +17,17 @@ import { createHash } from "node:crypto";
 import { arch, cpus, tmpdir, type as osType } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { appendRun, detectDrift, slowestFiles, type History, type PackageRun, type RunRecord } from "./history.ts";
+import {
+  appendRun,
+  detectDrift,
+  serializeHistory,
+  slowestFiles,
+  unpackHistory,
+  type History,
+  type PackageRun,
+  type PackedHistory,
+  type RunRecord,
+} from "./history.ts";
 import { toPackageRun, type VitestJsonReport } from "./vitest-report.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,7 +80,7 @@ function gitShaOrUnknown(): string {
 
 function loadHistory(path: string): History {
   if (!existsSync(path)) return { runs: [] };
-  return JSON.parse(readFileSync(path, "utf8")) as History;
+  return unpackHistory(JSON.parse(readFileSync(path, "utf8")) as PackedHistory | History);
 }
 
 /** Packages under packages/* that declare a `test` script — that's the whole vp-test surface. */
@@ -140,9 +150,9 @@ async function main(): Promise<void> {
   const drift = detectDrift(run, priorHistory);
   const slowest = slowestFiles(run, 3);
 
-  const history = appendRun(priorHistory, run, 60);
+  const history = appendRun(priorHistory, run);
   ensureDir(args.historyFile);
-  writeFileSync(args.historyFile, `${JSON.stringify(history, null, 2)}\n`);
+  writeFileSync(args.historyFile, serializeHistory(history));
   ensureDir(args.driftReportFile);
   writeFileSync(args.driftReportFile, `${JSON.stringify(drift, null, 2)}\n`);
   ensureDir(args.slowestFile);

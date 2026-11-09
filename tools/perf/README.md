@@ -15,13 +15,19 @@ last 60, and pushes it back — durable, and inspectable with:
 git show origin/perf-data:history.json | jq '.runs[-1]'
 ```
 
+The file is packed: each (package, file, test) name is written once in `tests`, and a run holds
+`durations` as a flat `[index, ms, …]` list into it, so a run costs about 0.25 MB, not several. It keeps
+the last 60 runs and is cut further, oldest first, if it passes 50 MB (GitHub refuses a file over 100 MB).
+`collect.ts` also reads the older `{ runs: [{ packages: { tests } }] }` form, so the first run after the
+change migrates the file as it appends.
+
 A data branch beats Actions cache/artifacts here: cache entries evict under storage pressure and
 artifacts expire, but a branch is a normal git object nothing sweeps, and `git log perf-data` is
 a free audit trail of every run appended.
 
 ## Reading the history
 
-Each `RunRecord` is `{ sha, date, packages: { [pkgName]: PackageRun } }`, and each `PackageRun` is
+Unpacked (`unpackHistory`), each `RunRecord` is `{ sha, date, packages: { [pkgName]: PackageRun } }`, and each `PackageRun` is
 `{ wallMs, files: { [path]: durationMs }, tests: [{ file, name, durationMs }] }` — see
 `src/history.ts` for the exact shapes. `wallMs` sums the file durations vitest reports (not a
 wall-clock measurement of the whole `pnpm` invocation), so it's a rough package-level trend line,

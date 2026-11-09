@@ -3,7 +3,10 @@ import {
   appendRun,
   detectDrift,
   median,
+  packHistory,
+  serializeHistory,
   slowestFiles,
+  unpackHistory,
   trimHistory,
   type History,
   type RunRecord,
@@ -209,4 +212,50 @@ test("too few same-runner runs falls back to every runner, normalized; unfingerp
   expect(detectDrift(suite("gamma", 1500), prior)).toEqual([]);
   const flags = detectDrift(suite("gamma", 1500, { t0: 6000 }), prior);
   expect(flags.map((f) => [f.test, f.basis])).toEqual([["t0", "cross-runner"]]);
+});
+
+const sample: History = {
+  runs: [
+    {
+      sha: "a",
+      date: "2026-10-01T00:00:00.000Z",
+      machine: "m",
+      packages: {
+        p: {
+          wallMs: 30,
+          files: { "t.test.ts": 30 },
+          tests: [
+            { file: "t.test.ts", name: "one", durationMs: 12.3456 },
+            { file: "t.test.ts", name: "one", durationMs: 7 },
+          ],
+        },
+      },
+    },
+    { sha: "b", date: "2026-10-02T00:00:00.000Z", packages: { p: { wallMs: 5, files: {}, tests: [] } } },
+  ],
+};
+
+test("a packed history unpacks to the same runs, dates and durations to 0.01 ms, repeats included", () => {
+  const back = unpackHistory(JSON.parse(JSON.stringify(packHistory(sample))));
+  expect(back.runs.map((r) => [r.sha, r.date, r.machine])).toEqual([
+    ["a", "2026-10-01T00:00:00.000Z", "m"],
+    ["b", "2026-10-02T00:00:00.000Z", undefined],
+  ]);
+  expect(back.runs[0]!.packages.p!.tests.map((t) => t.durationMs)).toEqual([12.35, 7]);
+  expect(back.runs[0]!.packages.p!.files).toEqual({ "t.test.ts": 30 });
+});
+
+test("the older unpacked form still reads", () => {
+  expect(unpackHistory(sample)).toEqual(sample);
+});
+
+test("serializeHistory drops the oldest runs past the size bound but keeps the newest", () => {
+  const runs = Array.from({ length: 20 }, (_, i) => ({
+    sha: `s${i}`,
+    date: `d${i}`,
+    packages: { p: { wallMs: 1, files: {}, tests: [{ file: "f", name: "n", durationMs: i }] } },
+  }));
+  const kept = unpackHistory(JSON.parse(serializeHistory({ runs }, 1))).runs;
+  expect(kept.map((r) => r.sha)).toEqual(["s14", "s15", "s16", "s17", "s18", "s19"]);
+  expect(unpackHistory(JSON.parse(serializeHistory({ runs }))).runs).toHaveLength(20);
 });
