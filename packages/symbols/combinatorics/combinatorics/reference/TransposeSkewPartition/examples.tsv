@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-skew-shape-321-11			[TransposeSkewPartition, [SkewPartition, [List, [List, 3, 2, 1], [List, 1, 1]]]]	[SkewPartition, [List, [List, 3, 2, 1], [List, 2]]]	the skew shape $321/11$

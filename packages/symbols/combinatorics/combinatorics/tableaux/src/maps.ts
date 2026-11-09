@@ -1,7 +1,7 @@
 // Combinatorial maps whose `from` carrier is a tableaux carrier (conventions as in
 // `permutations/src/maps.ts`).
 
-import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
+import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON, positions } from "../../src/map-helpers.ts";
 import { capacityState, evacuation, insertionRows, inversePromotion, inverseRsk, promotion } from "./flat.ts";
 
 /** Rows must be nonempty and weakly shrinking: the carrier also holds the odd tableaux other families draw. */
@@ -491,5 +491,31 @@ export const TABLEAUX_MAPS: readonly CombinatorialMap[] = [
     guard: tableauGuard,
     summary: "The set partition whose blocks are the rows of the tableau.",
     note: "FindStat's Mp00284. Injective on the tableaux of a given shape; the shape is the sequence of block sizes.",
+  },
+  {
+    name: "CounterclockwiseRotation",
+    from: "alternating_sign_matrix",
+    to: "alternating_sign_matrix",
+    // Row i of the turn is column n + 1 - i of the matrix, read down.
+    body: forEach(positions, forEach(positions, at(["Subtract", ["Add", ["Length", "_raw"], 1], "i"], at("j")), "j")),
+    summary: "The quarter turn counterclockwise: the last column becomes the first row.",
+    note: "FindStat's Mp00003; the inverse is ClockwiseRotation.",
+  },
+  {
+    name: "ClockwiseRotation",
+    from: "alternating_sign_matrix",
+    to: "alternating_sign_matrix",
+    // Row i of the turn is column i of the matrix, read up.
+    body: forEach(positions, forEach(positions, at("i", at(["Subtract", ["Add", ["Length", "_raw"], 1], "j"])), "j")),
+    summary: "The quarter turn clockwise: the first column becomes the first row, read from the bottom.",
+    note: "FindStat's Mp00004; the inverse is CounterclockwiseRotation.",
+  },
+  {
+    name: "TransposeAlternatingSignMatrix",
+    from: "alternating_sign_matrix",
+    to: "alternating_sign_matrix",
+    body: forEach(positions, forEach(positions, at("i", at("j")), "j")),
+    summary: "The transpose: rows become columns.",
+    note: "FindStat's Mp00005, an involution.",
   },
 ];

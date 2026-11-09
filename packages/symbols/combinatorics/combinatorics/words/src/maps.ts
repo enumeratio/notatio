@@ -329,6 +329,128 @@ const carPermutationBody: MathJSON = [
   fold(carParks, "cp_spots", "cp_car", fill(0, n), positions) as MathJSON,
 ];
 
+/** Mp00052: entry i of the result is the entry of rank i, equal entries ranked left to right. */
+const nonDecreasingBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  bind("nd_rank", standardRanks, forEach(positions, at(["IndexOf", "nd_rank", "k"]), "k"), "list<integer>"),
+];
+
+/** Whether the shift s of the word `pc` (entries mod n + 1) puts at least v entries in 1 .. v: the count
+ *  of entries landing in 1 .. v, less v, is not negative. */
+const reachesAtLeast = (pc: string, shift: MathJSON, v: MathJSON): MathJSON => [
+  "GreaterEqual",
+  [
+    "Sum",
+    forEach(
+      positions,
+      [
+        "If",
+        [
+          "And",
+          ["GreaterEqual", ["Mod", ["Add", at("k", pc), shift], ["Add", n, 1]], 1],
+          ["LessEqual", ["Mod", ["Add", at("k", pc), shift], ["Add", n, 1]], v],
+        ],
+        1,
+        0,
+      ],
+      "k",
+    ),
+  ],
+  v,
+];
+
+/** The word `pc` (entries 0 .. n) shifted by the amount mod n + 1 that makes it a parking function. The cycle lemma
+ *  gives exactly one such shift among 0 .. n, so it is the sum of the shifts that work. */
+const cyclicParkingFunction = (pc: MathJSON): MathJSON =>
+  bind(
+    "cy_word",
+    pc,
+    bind(
+      "cy_shift",
+      [
+        "Sum",
+        forEach(
+          ["Range", 0, n, 1],
+          ["Multiply", "s", ["Min", forEach(upTo(n), ["If", reachesAtLeast("cy_word", "s", "v"), 1, 0], "v")]],
+          "s",
+        ),
+      ],
+      forEach(positions, ["Mod", ["Add", at("i", "cy_word"), "cy_shift"], ["Add", n, 1]]),
+      "integer",
+    ),
+    "list<integer>",
+  );
+
+/** Mp00298 (Pollak's map): the successive differences mod n + 1, behind a 0, shifted into a parking function. */
+const repeatsToLeadingBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  cyclicParkingFunction(
+    forEach(positions, [
+      "If",
+      ["Equal", "i", 1],
+      0,
+      ["Mod", ["Add", ["Subtract", at("i"), at(["Subtract", "i", 1])], n, 1], ["Add", n, 1]],
+    ]),
+  ),
+];
+
+/** Mp00301: the running sums of the entries' differences from the first, mod n + 1, shifted into a parking function. */
+const leadingToRepeatsBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  cyclicParkingFunction(
+    forEach(positions, [
+      "Mod",
+      ["Add", ["Sum", forEach(upTo("i"), ["Subtract", at("j"), at(1)], "j")], ["Multiply", n, ["Add", n, 1]]],
+      ["Add", n, 1],
+    ]),
+  ),
+];
+
+/** Mp00303: n + 1 less each entry, shifted into a parking function. */
+const complementBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  cyclicParkingFunction(forEach(positions, ["Subtract", ["Add", n, 1], at("i")])),
+];
+
+/** Mp00057: the gaps between the positions k whose k-th smallest entry is k (the path touches the diagonal there), and n + 1. */
+const touchCompositionBody: MathJSON = [
+  "If",
+  ["Equal", n, 0],
+  ["List"],
+  bind(
+    "tc_sorted",
+    nonDecreasingBody,
+    bind(
+      "tc_starts",
+      ["Flatten", forEach(positions, ["If", ["Equal", at("k", "tc_sorted"), "k"], ["List", "k"], ["List"]], "k")],
+      forEach(
+        upTo(["Count", "tc_starts"]),
+        [
+          "Subtract",
+          [
+            "If",
+            ["Equal", "j", ["Count", "tc_starts"]],
+            ["Add", n, 1],
+            at(["Min", ["Add", "j", 1], ["Count", "tc_starts"]], "tc_starts"),
+          ],
+          at("j", "tc_starts"),
+        ],
+        "j",
+      ),
+      "list<integer>",
+    ),
+    "list<integer>",
+  ),
+];
+
 export const WORDS_MAPS: readonly CombinatorialMap[] = [
   {
     name: "Reverse",
@@ -618,5 +740,55 @@ export const WORDS_MAPS: readonly CombinatorialMap[] = [
     body: inverseDescentCompositionBody,
     summary: "The descents composition of the inverse of the parking function's diagonal reading word.",
     note: "FindStat's Mp00054, Sage's diagonal_reading_word().inverse().descents_composition(). The word reads the cars of the Dyck path by diagonal, the largest area first, and each diagonal from the top row down. A surjection.",
+  },
+  {
+    name: "NonDecreasingParkingFunction",
+    from: "parking_function",
+    to: "parking_function",
+    body: nonDecreasingBody,
+    summary: "The entries sorted into increasing order.",
+    note: "FindStat's Mp00052. Lossy: the order of the cars is forgotten.",
+  },
+  {
+    name: "RepeatsToLeading",
+    from: "parking_function",
+    to: "parking_function",
+    body: repeatsToLeadingBody,
+    summary:
+      "Pollak's Prüfer code of the successive differences mod n + 1, behind a 0 and shifted cyclically into a parking function.",
+    note: "FindStat's Mp00298, a bijection; the inverse is LeadingToRepeats. It sends the number of repeated entries to the number of occurrences of the first entry.",
+  },
+  {
+    name: "LeadingToRepeats",
+    from: "parking_function",
+    to: "parking_function",
+    body: leadingToRepeatsBody,
+    summary:
+      "The running sums of the differences from the first entry, mod n + 1, shifted cyclically into a parking function.",
+    note: "FindStat's Mp00301, the inverse of RepeatsToLeading.",
+  },
+  {
+    name: "Complement",
+    from: "parking_function",
+    to: "parking_function",
+    body: complementBody,
+    summary: "The parking function whose entries add to those of the original, mod n + 1, up to one common shift.",
+    note: "FindStat's Mp00303, an involution.",
+  },
+  {
+    name: "ParkingFunctionComposition",
+    from: "parking_function",
+    to: "composition",
+    body: "_raw",
+    summary: "The entries read as the parts of an integer composition.",
+    note: "FindStat's Mp00319. Injective.",
+  },
+  {
+    name: "TouchComposition",
+    from: "parking_function",
+    to: "composition",
+    body: touchCompositionBody,
+    summary: "The touch composition of the parking function's support Dyck path.",
+    note: "FindStat's Mp00057. The support path returns to the diagonal at the positions k whose k-th smallest entry is k, so the parts are the gaps between those positions.",
   },
 ];

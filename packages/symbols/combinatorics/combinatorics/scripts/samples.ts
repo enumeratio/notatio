@@ -19,24 +19,31 @@ const DEFINING: Record<string, { family: string; params: (element: never) => num
 
 /** Elements (as MathJSON contents) of the families over `carrier` (its constructor name):
  *  one-parameter families up to `maxSize`, two-parameter ones (n, k) at k ≤ n. */
-export function smallElements(ce: Engine, carrier: string, maxSize = 5, perFamily = 8): unknown[] {
+export function smallElements(ce: Engine, carrier: string, maxSize = 5, perFamily = 8, declared = false): unknown[] {
   const seen = new Set<string>();
-  return allElements(ce, carrier, maxSize, perFamily).filter((sample) => {
+  return allElements(ce, carrier, maxSize, perFamily, declared).filter((sample) => {
     const key = JSON.stringify(sample);
     return !seen.has(key) && seen.add(key);
   });
 }
 
 /** `smallElements` before de-duplication. */
-export function allElements(ce: Engine, carrier: string, maxSize = 5, perFamily = 8): unknown[] {
+export function allElements(ce: Engine, carrier: string, maxSize = 5, perFamily = 8, declared = false): unknown[] {
   const out: unknown[] = [];
   const kernels = allKernels(ce);
   const defining = DEFINING[carrier];
   const definer = defining && kernels.find((f) => f.head === defining.family);
   // A carrier whose slots are other carriers' values (`carrierElements`) isn't sampled.
-  for (const family of kernels.filter(
-    (f) => f.carrier === carrier && f.paramCount >= 1 && f.paramCount <= 2 && f.carrierElements === undefined,
-  ))
+  const sampled = (f: (typeof kernels)[number]): boolean =>
+    f.paramCount >= 1 && f.paramCount <= 2 && f.carrierElements === undefined;
+  const direct = kernels.filter((f) => f.carrier === carrier && sampled(f));
+  // With `declared`, a carrier no family names at the top (the skew partitions, the alternating sign matrices) is
+  // sampled from the families that declare it: their elements are its contents.
+  const chosen =
+    direct.length > 0 || !declared
+      ? direct
+      : kernels.filter((f) => f.carrier === undefined && f.declared?.carrier === carrier && sampled(f));
+  for (const family of chosen)
     for (let n = 0; n <= maxSize; n++)
       for (const params of family.paramCount === 1 ? [[n]] : Array.from({ length: n + 1 }, (_, k) => [n, k])) {
         const total = family.count(params);

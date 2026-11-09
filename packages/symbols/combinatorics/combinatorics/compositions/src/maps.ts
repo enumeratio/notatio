@@ -16,6 +16,8 @@ import {
 } from "../../src/map-helpers.ts";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "../../permutations/src/foata-bijection.ts";
 
+const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
+
 /** A composition's partial sums, folded into a list. */
 const partialSums = (parts: MathJSON): MathJSON => [
   "Fold",
@@ -194,5 +196,36 @@ export const COMPOSITIONS_MAPS: readonly CombinatorialMap[] = [
     summary:
       "The Dyck path that bounces off the diagonal once for each part: a run of that many ups, then as many downs.",
     note: "FindStat's Mp00231. An injection; the paths it reaches are those made of runs of as many downs as ups.",
+  },
+  {
+    name: "SkewPartition",
+    convert: true,
+    from: "composition",
+    to: "skew_partition",
+    // Row r from the top has a_(k+1-r) cells and ends under the first cell of the row above it, so the inner partition
+    // is the sum of the parts below it, less one for each of those rows.
+    body: bind(
+      "rb_inner",
+      forEach(
+        upTo(["Length", "_raw"]),
+        ["Max", ["Sum", forEach(upTo(["Subtract", ["Length", "_raw"], "r"]), ["Subtract", at("s"), 1], "s")], 0],
+        "r",
+      ),
+      [
+        "List",
+        forEach(
+          upTo(["Length", "_raw"]),
+          ["Add", at("r", "rb_inner"), at(["Subtract", ["Add", ["Length", "_raw"], 1], "r"])],
+          "r",
+        ),
+        ["Filter", "rb_inner", ["Function", ["Greater", "x", 0], "x"]],
+      ],
+      "list<integer>",
+    ),
+    summary:
+      "The ribbon whose row r from the bottom has a_r cells, each row starting under the last cell of the one above.",
+    note: "FindStat's Mp00180. Injective. The empty composition has no ribbon.",
+    findstat: ["Mp00180"],
+    guard: ["Greater", ["Length", "_raw"], 0],
   },
 ];

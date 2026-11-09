@@ -25,12 +25,14 @@ import { COMPOSITIONS_MAPS } from "../compositions/src/maps.ts";
 import { DYCK_CONVERSION_MAPS } from "../lattice-paths/src/dyck-conversion-maps.ts";
 import { DYCK_MAPS } from "../lattice-paths/src/dyck-maps.ts";
 import { LATTICE_PATHS_MAPS } from "../lattice-paths/src/maps.ts";
+import { GRAPHS_MAPS } from "../graphs/src/maps.ts";
 import { PARTITIONS_MAPS } from "../partitions/src/maps.ts";
 import { declareCycleConversions } from "../permutations/src/cycles-conversion.ts";
 import { PERMUTATIONS_MAPS } from "../permutations/src/maps.ts";
 import { SIGNED_PERMUTATIONS_ALGORITHM_MAPS } from "../permutations/src/signed-algorithms.ts";
 import { SIGNED_PERMUTATIONS_MAPS } from "../permutations/src/signed-maps.ts";
 import { SET_PARTITION_INVOLUTION_MAPS } from "../set-partitions/src/involution-maps.ts";
+import { PERFECT_MATCHING_MAPS } from "../set-partitions/src/matching-maps.ts";
 import { SET_PARTITIONS_MAPS } from "../set-partitions/src/maps.ts";
 import { TABLEAUX_MAPS } from "../tableaux/src/maps.ts";
 import { TREES_MAPS } from "../trees/src/maps.ts";
@@ -57,9 +59,11 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...PARTITIONS_MAPS,
   ...SET_PARTITIONS_MAPS,
   ...SET_PARTITION_INVOLUTION_MAPS,
+  ...PERFECT_MATCHING_MAPS,
   ...TABLEAUX_MAPS,
   ...COMPOSITIONS_MAPS,
   ...WORDS_MAPS,
+  ...GRAPHS_MAPS,
   // After the words: Rowmotion's primary carrier is BinaryWord.
   ...SIGNED_PERMUTATIONS_ALGORITHM_MAPS,
 ].map(withLaws);

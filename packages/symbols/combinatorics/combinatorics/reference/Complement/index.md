@@ -28,9 +28,14 @@ catalog:
     identity: Mp00188
     url: https://www.findstat.org/Mp00188
     on: SignedPermutation
+  - system: findstat
+    identity: Mp00303
+    url: https://www.findstat.org/Mp00303
+    on: ParkingFunction
 mapOn:
   - BinaryWord
   - IntegerComposition
+  - ParkingFunction
   - Permutation
   - SetComposition
   - SetPartition
@@ -39,7 +44,7 @@ signatures:
   - call: Complement(Permutation)
     description: Each entry replaced by n + 1 minus itself.
     library: enumeratio-combinatorics
-    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((permutation) -> permutation) & ((set_composition) -> set_composition) & ((set_partition) -> set_partition) & ((signed_permutation) -> signed_permutation)
+    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((parking_function) -> parking_function) & ((permutation) -> permutation) & ((set_composition) -> set_composition) & ((set_partition) -> set_partition) & ((signed_permutation) -> signed_permutation)
     overrides: compute-engine
 laws:
   - involution
@@ -78,3 +83,5 @@ laws:
 - Also takes a `IntegerComposition`, returning a `IntegerComposition`: The composition cut exactly where this one is not: its cut set complemented.
 - Reverse then complement is TransposeComposition, and reversing commutes with complementing.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: Each letter swapped for the other: 0 for 1 and 1 for 0.
+- Also takes a `ParkingFunction`, returning a `ParkingFunction`: The parking function whose entries add to those of the original, mod n + 1, up to one common shift.
+- FindStat's Mp00303, an involution.

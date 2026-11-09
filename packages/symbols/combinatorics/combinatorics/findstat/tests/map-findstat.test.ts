@@ -111,6 +111,72 @@ const parkingFunctions = (n: number): number[][] =>
     .map((k) => range(0, n - 1).map((i) => (Math.floor(k / n ** i) % n) + 1))
     .filter((word) => word.toSorted((a, b) => a - b).every((value, i) => value <= i + 1));
 
+/** Perfect matchings of the points `points`, each as its arcs by least end. */
+const matchings = (points: number[]): number[][][] => {
+  const [first, ...rest] = points;
+  return first === undefined
+    ? [[]]
+    : rest.flatMap((other, k) =>
+        matchings(rest.filter((_, j) => j !== k)).map((matching) => [[first, other], ...matching]),
+      );
+};
+
+/** Alternating sign matrices of order n: rows of -1, 0, 1 whose partial row and column sums stay 0 or 1 and total 1. */
+const alternatingSignMatrices = (n: number): number[][][] => {
+  const extend = (rows: number[][], columns: number[]): number[][][] => {
+    if (rows.length === n) return columns.every((sum) => sum === 1) ? [rows] : [];
+    const row = (entries: number[], running: number): number[][] =>
+      entries.length === n
+        ? running === 1
+          ? [entries]
+          : []
+        : [-1, 0, 1].flatMap((value) => {
+            const next = running + value;
+            const column = columns[entries.length]! + value;
+            return next < 0 || next > 1 || column < 0 || column > 1 ? [] : row([...entries, value], next);
+          });
+    return row([], 0).flatMap((entries) =>
+      extend(
+        [...rows, entries],
+        columns.map((sum, k) => sum + entries[k]!),
+      ),
+    );
+  };
+  return extend(
+    [],
+    range(1, n).map(() => 0),
+  );
+};
+
+/** Skew shapes λ/μ of n cells with no empty row or column, as the part lists of λ and μ. */
+const skewPartitions = (n: number): number[][][] =>
+  range(n, 2 * n).flatMap((size) =>
+    integerPartitions(size).flatMap((outer) => {
+      const inners = (row: number, most: number): number[][] =>
+        row === outer.length
+          ? [[]]
+          : range(0, Math.min(most, outer[row]! - 1))
+              .toReversed()
+              .flatMap((part) => inners(row + 1, part).map((rest) => [part, ...rest]));
+      return inners(0, outer[0]! - 1)
+        .filter(
+          (inner) =>
+            sum(outer) - sum(inner) === n &&
+            range(0, outer[0]! - 1).every((column) =>
+              outer.some((length, r) => column < length && column >= inner[r]!),
+            ),
+        )
+        .map((inner) => [outer, inner.filter((part) => part > 0)]);
+    }),
+  );
+const sum = (items: readonly number[]): number => items.reduce((a, b) => a + b, 0);
+
+/** Graphs on the vertices 0 .. n - 1, every edge set, as FindStat writes `([(0,1)],2)`. */
+const labeledGraphs = (n: number): string[] => {
+  const pairs = range(0, n - 1).flatMap((a) => range(a + 1, n - 1).map((b) => `(${a},${b})`));
+  return range(0, 2 ** pairs.length - 1).map((mask) => `([${pairs.filter((_, k) => mask & (1 << k)).join(",")}],${n})`);
+};
+
 const through = <T>(max: number, from: number, make: (n: number) => T[]): T[] => range(from, max).flatMap(make);
 const OBJECTS: Readonly<Record<string, string[]>> = {
   Permutation: through(4, 1, permutations).map((p) => JSON.stringify(p).replaceAll(" ", "")),
@@ -125,6 +191,12 @@ const OBJECTS: Readonly<Record<string, string[]>> = {
   OrderedTree: through(5, 1, orderedTrees),
   ParkingFunction: through(4, 1, parkingFunctions).map((p) => JSON.stringify(p)),
   IntegerPartition: through(6, 1, integerPartitions).map((p) => JSON.stringify(p)),
+  PerfectMatching: range(1, 4).flatMap((k) =>
+    matchings(range(1, 2 * k)).map((m) => `[${m.map(([a, b]) => `(${a},${b})`).join(",")}]`),
+  ),
+  AlternatingSignMatrix: through(4, 1, alternatingSignMatrices).map((m) => JSON.stringify(m)),
+  SkewPartition: through(5, 1, skewPartitions).map((s) => JSON.stringify(s)),
+  LabeledGraph: through(4, 1, labeledGraphs),
 };
 
 /** Our map for a reading's `Head@Carrier` key. */
@@ -346,6 +418,33 @@ const IDS: Readonly<Record<string, string>> = {
   "OnesToLeading@Permutation": "Mp00325",
   "SetComposition@ParkingFunction": "Mp00290",
   "InverseDescentComposition@ParkingFunction": "Mp00054",
+  "NonDecreasingParkingFunction@ParkingFunction": "Mp00052",
+  "RepeatsToLeading@ParkingFunction": "Mp00298",
+  "LeadingToRepeats@ParkingFunction": "Mp00301",
+  "Complement@ParkingFunction": "Mp00303",
+  "ParkingFunctionComposition@ParkingFunction": "Mp00319",
+  "TouchComposition@ParkingFunction": "Mp00057",
+  "Restriction@Permutation": "Mp00252",
+  "DexComposition@Permutation": "Mp00248",
+  "AlternatingSignMatrix@Permutation": "Mp00063",
+  "ParkingFunction@Permutation": "Mp00305",
+  "CounterclockwiseRotation@AlternatingSignMatrix": "Mp00003",
+  "ClockwiseRotation@AlternatingSignMatrix": "Mp00004",
+  "TransposeAlternatingSignMatrix@AlternatingSignMatrix": "Mp00005",
+  "Reverse@PerfectMatching": "Mp00113",
+  "Rotation@PerfectMatching": "Mp00144",
+  "InverseRotation@PerfectMatching": "Mp00145",
+  "KasraouiZeng@PerfectMatching": "Mp00116",
+  "OuterShape@SkewPartition": "Mp00182",
+  "InnerShape@SkewPartition": "Mp00183",
+  "DominatingPartition@SkewPartition": "Mp00186",
+  "RowLengths@SkewPartition": "Mp00181",
+  "TransposeSkewPartition@SkewPartition": "Mp00187",
+  "RotateSkewPartition@SkewPartition": "Mp00189",
+  "SkewPartition@IntegerPartition": "Mp00179",
+  "SkewPartition@IntegerComposition": "Mp00180",
+  "ComponentSizePartition@LabeledGraph": "Mp00037",
+  "ComponentEdgePartition@LabeledGraph": "Mp00275",
 };
 
 test("every reading names the FindStat map it is", () => {

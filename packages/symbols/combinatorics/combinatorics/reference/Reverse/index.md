@@ -30,10 +30,15 @@ catalog:
     identity: Mp00320
     url: https://www.findstat.org/Mp00320
     on: ParkingFunction
+  - system: findstat
+    identity: Mp00113
+    url: https://www.findstat.org/Mp00113
+    on: PerfectMatching
 mapOn:
   - BinaryWord
   - IntegerComposition
   - ParkingFunction
+  - PerfectMatching
   - Permutation
   - SetComposition
   - SetPartition
@@ -42,7 +47,7 @@ signatures:
   - call: Reverse(Permutation)
     description: The word read backwards.
     library: enumeratio-combinatorics
-    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((parking_function) -> parking_function) & ((permutation) -> permutation) & ((set_composition) -> set_composition) & ((signed_permutation) -> signed_permutation)
+    type: ((binary_word) -> binary_word) & ((composition) -> composition) & ((parking_function) -> parking_function) & ((perfect_matching) -> perfect_matching) & ((permutation) -> permutation) & ((set_composition) -> set_composition) & ((signed_permutation) -> signed_permutation)
     overrides: compute-engine
 laws:
   - involution
@@ -73,6 +78,8 @@ laws:
 - FindStat's Mp00161.
 - Also takes a `SetComposition`, returning a `SetComposition`: The blocks in the opposite order.
 - FindStat's Mp00288.
+- Also takes a `PerfectMatching`, returning a `PerfectMatching`: The matching with every point i replaced by 2m + 1 - i.
+- FindStat's Mp00113, an involution.
 - Also takes a `IntegerComposition`, returning a `IntegerComposition`: The parts read backwards.
 - Also takes a `BinaryWord`, returning a `BinaryWord`: The word read backwards.
 - Also takes a `ParkingFunction`, returning a `ParkingFunction`: The word read backwards.

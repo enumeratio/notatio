@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-skew-shape-321-11			[RowLengths, [SkewPartition, [List, [List, 3, 2, 1], [List, 1, 1]]]]	[IntegerComposition, [List, 2, 1, 1]]	the skew shape $321/11$
