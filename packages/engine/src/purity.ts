@@ -19,7 +19,6 @@ export const IMPURE_HEADS: ReadonlySet<string> = new Set([
   "RandomFunction",
   "SeedRandom",
   // Scoping, control flow and state
-  "Module",
   "Do",
   "With",
   "Switch",

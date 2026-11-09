@@ -50,7 +50,7 @@ test("the scope is rebuilt each pass, so a removed binding really is gone", () =
 });
 
 test("a workworksheet's bindings do not leak to the next pass or to other elements", () => {
-  pass("leaked \\coloneq 42");
+  pass("\\mathrm{leaked} \\coloneq 42");
   expect(ce.box("leaked").evaluate().re).not.toBe(42);
 });
 
@@ -62,8 +62,8 @@ test("a binding does not write through to a symbol the page already mentions", (
   const engine = new ComputeEngine();
   void engine.box(["Add", "shared", 1]).unknowns; // some other element on the page
   const cells = [
-    { id: 1, value: "shared \\coloneq 2" },
-    { id: 2, value: "shared + 1" },
+    { id: 1, value: "\\mathrm{shared} \\coloneq 2" },
+    { id: 2, value: "\\mathrm{shared} + 1" },
   ];
   const out = runPass(engine, cells, {
     rejectOrdinals: true,

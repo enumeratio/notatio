@@ -19,23 +19,6 @@ test("With's bindings are simultaneous, not sequential", () => {
   expect(run(["With", ["List", ["Equal", "x", 1], ["Equal", "controlTestY", "x"]], "controlTestY"])).toEqual("x");
 });
 
-// Module
-
-test("Module locals are invisible outside the call", () => {
-  ce.assign("controlTestModA", 100);
-  expect(run(["Module", ["List", ["Equal", "controlTestModA", 5]], ["Add", "controlTestModA", 1]])).toEqual(6);
-  expect(run("controlTestModA")).toEqual(100);
-});
-test("Module does not clobber an outer binding of the same name", () => {
-  ce.assign("controlTestModB", 7);
-  run(["Module", ["List", "controlTestModB"], ["Assign", "controlTestModB", 999]]);
-  expect(run("controlTestModB")).toEqual(7);
-});
-test("nested Module locals of the same name don't collide", () => {
-  const expr = ["Module", ["List", ["Equal", "n", 1]], ["Module", ["List", ["Equal", "n", 2]], ["Add", "n", 1]]];
-  expect(run(expr)).toEqual(3);
-});
-
 // Reap / Sow
 
 // Sequencing several `Sow`s in one expression uses `[Last, [List, ...]]`, never

@@ -2483,7 +2483,6 @@ test("every head we invented is either novel or known to exist elsewhere", () =>
       "MixedRadix",
       "MixedRadixNumerals",
       "ModularLambda",
-      "Module",
       "MovingMap",
       "NMaximize",
       "NMinimize",

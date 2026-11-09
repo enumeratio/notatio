@@ -447,7 +447,6 @@ export const coverage: Readonly<Record<string, readonly string[]>> = {
   Mode: ["wolfram"],
   ModularInverse: ["wolfram"],
   ModularLambda: ["wolfram"],
-  Module: ["wolfram"],
   MoebiusMu: ["wolfram"],
   Most: ["wolfram"],
   MovingMap: ["wolfram"],

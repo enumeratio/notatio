@@ -1162,16 +1162,10 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
       const rest = packedOperands.slice(CARRIER_PARAMS.get(head) ?? 0);
       return rest.length === 1 ? walk(rest[0] as MathJSON) : walk(["Tuple", ...rest] as MathJSON);
     }
-    // Module(vars, body)/With(vars, body): a local's initial value is `Equal(n, 10)`
-    // (compute-engine's own equality head, `n == 10`), but Wolfram's Module/With need an
-    // ASSIGNMENT there (`Set[n, 10]`) — left as `Equal`, the vars list isn't a valid
-    // local-variable spec and the whole call stays unevaluated (found scanning #A-72 phase
-    // 2's newly-emitting rows: `Module[List[Equal[n,10]], ...]` never ran). `toWolfram`'s own
-    // `Module`/`With` SPECIAL cases do this rewrite already, but only see it when GIVEN the
-    // raw tree — the generic fallback below hands it pre-walked (already-stringified)
-    // operands, which is opaque to that rewrite, so this rewrite has to happen before
-    // walking, on the raw operand tree, leaf-by-leaf through `walk` (for `missing` tracking).
-    if (wl && (head === "Module" || head === "With") && operands.length === 2) {
+    // With(vars, body): a binding is `Equal(n, 10)`, but Wolfram's With needs an assignment
+    // (`Set[n, 10]`), or the vars list isn't a local-variable spec and the call stays
+    // unevaluated. Rewritten on the raw operands, since the generic fallback below walks them first.
+    if (wl && head === "With" && operands.length === 2) {
       const [vars, body] = operands;
       const rewriteBinding = (v: MathJSON): string =>
         isCall(v) && v[0] === "Equal" && v.length === 3 ? `Set[${walk(v[1])}, ${walk(v[2])}]` : walk(v);

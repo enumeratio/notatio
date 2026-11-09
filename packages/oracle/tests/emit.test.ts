@@ -583,28 +583,18 @@ test("a prefix-underscore pattern variable (_a) stays missing, not a free symbol
   expect(emit(["Add", "_1", 1], "wolfram")).toEqual({ ok: true, source: "Plus[Slot[1], 1]" });
 });
 
-// Found scanning the newly-emitting free-symbol rows against real kernels (#A-72 phase 2):
-// Module/With's binding list uses our own `Equal` head (`n == 10`), but Wolfram's Module/With
-// need an ASSIGNMENT there (`Set[n, 10]`) or the vars list isn't a valid local-variable spec
-// and the whole call stays unevaluated. Confirmed against wolframscript directly.
-test("Module/With rewrite an Equal binding to Set, so Wolfram actually localizes it", () => {
-  expect(emit(["Module", ["List", ["Equal", "n", 10]], ["Add", "n", 1]], "wolfram")).toEqual({
-    ok: true,
-    source: "Module[List[Set[n, 10]], Plus[n, 1]]",
-    freeSymbols: ["n"],
-  });
+// Wolfram's With needs an assignment (`Set[n, 10]`) in its binding list, not our `Equal`.
+test("With rewrites an Equal binding to Set, so Wolfram localizes it", () => {
   expect(emit(["With", ["List", ["Equal", "x", 3], ["Equal", "y", 5]], ["Add", "x", "y"]], "wolfram")).toEqual({
     ok: true,
     source: "With[List[Set[x, 3], Set[y, 5]], Plus[x, y]]",
-    // Module/With don't bind these the way Sum/Product's iterator does (emit.ts has no
-    // notion of a Module-local), so the names it assigns are reported free too — harmless
-    // for the emitted source (they're being assigned, not read), just imprecise metadata.
+    // The names With assigns are reported free too: emit.ts has no notion of a With-local.
     freeSymbols: ["x", "y"],
   });
-  // A single (non-List) binding, and a binding that isn't `Equal`, pass through unchanged.
-  expect(emit(["Module", ["Equal", "n", 10], "n"], "wolfram")).toEqual({
+  // A single (non-List) binding is rewritten too.
+  expect(emit(["With", ["Equal", "n", 10], "n"], "wolfram")).toEqual({
     ok: true,
-    source: "Module[Set[n, 10], n]",
+    source: "With[Set[n, 10], n]",
     freeSymbols: ["n"],
   });
 });
