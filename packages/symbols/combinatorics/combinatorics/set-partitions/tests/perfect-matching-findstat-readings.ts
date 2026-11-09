@@ -16,6 +16,24 @@ const crosses = ([a, b]: readonly [number, number], [c, d]: readonly [number, nu
 const nests = ([a, b]: readonly [number, number], [c, d]: readonly [number, number]): boolean =>
   (a < c && d < b) || (c < a && b < d);
 
+/** The rank of an integer matrix by fraction-free elimination in big integers. */
+function rankOf(rows: readonly (readonly number[])[]): number {
+  const a = rows.map((row) => row.map(BigInt));
+  let rank = 0;
+  for (let col = 0; col < (a[0]?.length ?? 0) && rank < a.length; col++) {
+    const pivot = a.findIndex((row, r) => r >= rank && row[col] !== 0n);
+    if (pivot < 0) continue;
+    [a[rank], a[pivot]] = [a[pivot]!, a[rank]!];
+    for (let r = rank + 1; r < a.length; r++) {
+      const factor = a[r]![col]!;
+      const lead = a[rank]![col]!;
+      a[r] = a[r]!.map((entry, c) => entry * lead - factor * a[rank]![c]!);
+    }
+    rank++;
+  }
+  return rank;
+}
+
 /** The size of the largest set of pairs that pairwise satisfy `related`, by trying every subset. */
 function largestMutualSet(
   m: Matching,
@@ -174,6 +192,13 @@ export const PERFECT_MATCHING_READINGS: Record<string, Reading> = {
       );
     return new Set(Array.from({ length: points(m) }, (_, k) => turned(k))).size;
   },
+  // St001444: FindStat's matrix, rows and columns over the sorted pairs, its rank halved.
+  CrossingFormHalfRank: (m) => {
+    const arcs = m.toSorted((p, q) => p[0] - q[0]);
+    const form = ([a, b]: readonly [number, number], [c, d]: readonly [number, number]): number =>
+      a < c && c < b && b < d ? 1 : c < a && a < d && d < b ? -1 : 0;
+    return Math.floor(rankOf(arcs.map((rowArc) => arcs.map((columnArc) => form(columnArc, rowArc)))) / 2);
+  },
   Nestings: (m) => sum(m.map((p, i) => m.slice(i + 1).filter((q) => nests(p, q)).length)),
 };
 
@@ -182,6 +207,7 @@ export const DEFINED_ON_MATCHINGS = [
   "AlignedPairCount",
   "ArcDiagramComponentCount",
   "ClosersBelowLargestOpener",
+  "CrossingFormHalfRank",
   "CrossingsPlusTwiceNestings",
   "DihedralOrbitSize",
   "EarlyCloserPairCount",

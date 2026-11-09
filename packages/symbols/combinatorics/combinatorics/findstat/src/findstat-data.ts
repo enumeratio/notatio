@@ -6116,6 +6116,12 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1000,
   },
   {
+    head: "CrossingFormHalfRank",
+    on: "PerfectMatching",
+    findstat: ["St001444"],
+    values: 1069,
+  },
+  {
     head: "Descents",
     on: "SignedPermutation",
     findstat: ["St001427"],
@@ -7608,6 +7614,18 @@ export const findstat: readonly FindStatMatch[] = [
     on: "LabeledGraph",
     findstat: ["St000771"],
     values: 996,
+  },
+  {
+    head: "NullspaceZeroColumnCount",
+    on: "LabeledGraph",
+    findstat: ["St001459"],
+    values: 1200,
+  },
+  {
+    head: "NullspaceDistinctColumnCount",
+    on: "LabeledGraph",
+    findstat: ["St001463"],
+    values: 1231,
   },
   {
     head: "WeylGroupOrder",

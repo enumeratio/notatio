@@ -61,6 +61,8 @@ const BATCH_TWO = new Set([
   "DistanceMatrixDeterminant",
   "DistinctDistanceLaplacianEigenvalueCount",
   "MaximumDistanceLaplacianEigenvalueMultiplicity",
+  "NullspaceZeroColumnCount",
+  "NullspaceDistinctColumnCount",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 

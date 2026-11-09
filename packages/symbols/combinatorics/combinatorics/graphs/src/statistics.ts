@@ -85,6 +85,27 @@ const withAdjacency = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
 const entry = (name: MathJSON, u: MathJSON, w: MathJSON): MathJSON => at(w, at(u, name));
 const adjacent = (u: MathJSON, w: MathJSON): MathJSON => entry("adjacency", u, w);
 
+/** The row of the n by n identity matrix at vertex `v`. */
+const unitRow = (v: MathJSON): MathJSON => forEach(vertices, one(equals("t", v)), "t");
+/**
+ * The rank of the adjacency matrix with `row` as an extra first row. `MatrixRank` takes a literal
+ * matrix, not a lazy `Map`, so the rows are appended one at a time.
+ */
+const rankWith = (row: MathJSON): MathJSON => [
+  "MatrixRank",
+  typedFolding(
+    ["Join", "rows", ["List", ["If", equals("k", 0), row, at("k", "adjacency")]]],
+    "rows",
+    "k",
+    ["List"],
+    ["Range", 0, "n"],
+    "list<list<integer>>",
+  ),
+];
+/** 1 when vertices u and v take equal values on every vector of the adjacency matrix's nullspace; reads `rank`, the adjacency matrix's. */
+const alikeInNullspace = (u: MathJSON, v: MathJSON): MathJSON =>
+  one(equals(rankWith(forEach(vertices, subtract(one(equals("t", u)), one(equals("t", v))), "t")), "rank"));
+
 /**
  * The distances of the graph with adjacency matrix `matrix`, by Floyd-Warshall; a pair with no path is
  * 2n apart, beyond any distance of a graph on n vertices.
@@ -1982,6 +2003,42 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The rank of the adjacency matrix: its nonzero eigenvalues, with multiplicity.",
     withEigenvalueSigns(add("positive", "negative")),
     `FindStat's St001458. ${NO_VERTICES}`,
+  ),
+  stat(
+    "NullspaceZeroColumnCount",
+    "The vertices whose coordinate is zero in every vector of the adjacency matrix's nullspace.",
+    withAdjacency(
+      bind(
+        "rank",
+        rankWith(forEach(vertices, 0, "t")),
+        floored(sumOver(vertices, one(equals(rankWith(unitRow("v")), "rank")), "v")),
+        "integer",
+      ),
+    ),
+    `FindStat's St001459. The adjacency matrix is symmetric, so a vertex's coordinate vanishes on the nullspace exactly when its unit row lies in the row space: appending it leaves the rank unchanged. ${NO_VERTICES}`,
+  ),
+  stat(
+    "NullspaceDistinctColumnCount",
+    "The vertices' distinct coordinate functions on the adjacency matrix's nullspace: vertices are alike when every nullspace vector agrees on them.",
+    withAdjacency(
+      bind(
+        "rank",
+        rankWith(forEach(vertices, 0, "t")),
+        floored(
+          sumOver(
+            vertices,
+            subtract(1, [
+              "Min",
+              1,
+              floored(sumOver(vertices, times(one(less("u", "v")), alikeInNullspace("u", "v")), "u")),
+            ]),
+            "v",
+          ),
+        ),
+        "integer",
+      ),
+    ),
+    `FindStat's St001463. Vertices u and v agree on every nullspace vector exactly when the unit row of u less that of v lies in the row space, so a vertex starts a new column when no earlier vertex is alike. ${NO_VERTICES}`,
   ),
   stat(
     "GraphSignature",

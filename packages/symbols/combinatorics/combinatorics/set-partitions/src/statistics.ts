@@ -5,6 +5,7 @@
 // each block (already ascending), link consecutive elements — and compare arcs pairwise. See
 // `ArcRepresentation` in @enumeratio/combinatorics for the same construction as a typed map.
 
+import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
 import {
   add,
@@ -882,6 +883,15 @@ const FINDSTAT_PERFECT_MATCHING_STATISTICS: readonly Definition[] = [
 
 const times = (a: MathJSON, b: MathJSON): MathJSON => ["Multiply", a, b];
 const ifThen = (condition: MathJSON): MathJSON => ["If", condition, 1, 0];
+
+/** 1 when pair i starts first and crosses pair j: a < c < b < d for i = (a, b), j = (c, d), reading `openers` and `closers`. */
+const crossesForward = (i: MathJSON, j: MathJSON): MathJSON =>
+  ifThen(
+    and(
+      and(less(at(i, "openers"), at(j, "openers")), less(at(j, "openers"), at(i, "closers"))),
+      less(at(i, "closers"), at(j, "closers")),
+    ),
+  );
 const points: MathJSON = ["Range", 1, times(2, length())];
 const pointCount: MathJSON = times(2, length());
 /** Entry p of `m` is the point matched with p. */
@@ -1023,6 +1033,39 @@ const FINDSTAT_PERFECT_MATCHING_STATISTICS_2: readonly Definition[] = [
       1,
     ),
     "FindStat's St000945. By the orbit-stabilizer theorem the orbit has the 4n symmetries divided by those that keep the matching. The empty matching is its own orbit.",
+  ),
+  matched(
+    "CrossingFormHalfRank",
+    "Half the rank of the skew-symmetric matrix on the pairs that is 1 where a pair (a, b) crosses a pair (c, d) with a < c < b < d, and -1 where it is crossed the other way.",
+    nonEmpty(
+      bindList(
+        "openers",
+        firsts,
+        bindList(
+          "closers",
+          lasts,
+          bindList(
+            "form",
+            // Built a row at a time: `MatrixRank` takes a literal matrix, not a lazy `Map`.
+            typedFold(
+              [
+                "Join",
+                "rows",
+                ["List", forEach(positions, subtract(crossesForward("k", "j"), crossesForward("j", "k")), "j")],
+              ],
+              "rows",
+              "k",
+              ["List"],
+              positions,
+              "list<list<integer>>",
+            ) as MathJSON,
+            ["Divide", ["MatrixRank", "form"], 2],
+            "list<list<integer>>",
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001444. The rank of a skew-symmetric matrix is even, so the half is exact.",
   ),
 ];
 
