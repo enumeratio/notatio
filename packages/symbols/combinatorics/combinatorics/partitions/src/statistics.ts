@@ -946,6 +946,74 @@ const selfEvacuatingTableauxCount: MathJSON = bind(
   "list<integer>",
 );
 
+/**
+ * The standard tableaux of `shape` by the parity of the entry that first descends, as alternating sums of the standard tableaux of the
+ * skew shape `shape / (d)` (those with 1 .. d in the first row), each counted by Aitken's determinant expanded along its first-row
+ * column: row i of the beta numbers t contributes (-1)^(i-1) times the Vandermonde product of the other beta numbers, times t_i!
+ * and (n - d)!/(t_i - length + 1 - d)!, all over the product of every t_i!: the one division comes last, so every term is an integer.
+ * `start` is the first d summed, and the d = start term is positive for 0 and negative for 1.
+ * The first descent of a tableau is d when 1 .. d lie in the first row and d + 1 does not: that is the difference of two counts.
+ */
+const firstRowSkewSum = (shape: MathJSON, start: 0 | 1): MathJSON => {
+  const t = (k: MathJSON): MathJSON => at(k, "t");
+  const rows: MathJSON = length("t");
+  const otherPairs = (row: MathJSON): MathJSON => [
+    "Product",
+    forEach(
+      upTo(rows),
+      [
+        "Product",
+        forEach(
+          upTo(rows),
+          ["If", and(and(less("r", "s"), ["NotEqual", "r", row]), ["NotEqual", "s", row]), subtract(t("r"), t("s")), 1],
+          "s",
+        ),
+      ],
+      "r",
+    ),
+  ];
+  const reach = subtract(t("i"), subtract(rows, 1));
+  return bind(
+    "u",
+    shape,
+    bind(
+      "t",
+      forEach(upTo(length("u")), add(at("i", "u"), subtract(length("u"), "i"))),
+      [
+        "Divide",
+        sumOver(upTo(rows), [
+          "Multiply",
+          ["If", equals(["Mod", "i", 2], 1), 1, -1],
+          otherPairs("i"),
+          factorialOf(t("i")),
+          [
+            "If",
+            atLeastValue(reach, start),
+            [
+              "Sum",
+              forEach(
+                ["Range", start, reach],
+                [
+                  "Multiply",
+                  ["If", equals(["Mod", add("d", start), 2], 0), 1, -1],
+                  ["Divide", factorialOf(subtract(total, "d")), factorialOf(subtract(reach, "d"))],
+                ],
+                "d",
+              ),
+            ],
+            0,
+          ],
+        ]),
+        ["Product", forEach("t", factorialOf("j"), "j")],
+      ],
+      "list<integer>",
+    ),
+    "list<integer>",
+  );
+};
+/** The standard tableaux of `shape` whose first descent (or n, when none) is even. */
+const evenFirstDescentTableaux = (shape: MathJSON): MathJSON => firstRowSkewSum(shape, 0);
+
 export const PARTITION_STATISTICS: readonly Definition[] = [
   stat("LargestPart", "The largest part.", nonEmpty(largest)),
   stat(
@@ -2180,5 +2248,28 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "SelfEvacuatingTableauCount",
     "The standard Young tableaux of the shape that evacuation fixes, equivalently its standard domino tableaux.",
     nonEmpty(selfEvacuatingTableauxCount),
+  ),
+
+  // ── FindStat's integer-partition statistics, batch 10 ───────────────────────────────────
+
+  stat(
+    "SquareRootCount",
+    "The permutations whose square is a fixed permutation of this cycle type: a product over the cycle lengths d of the roots of the cycles of length d, which is also the sum of the irreducible character values at that class.",
+    nonEmpty(["Product", forEach(upTo(largest), squareRoots("d", count(positions, equals(here, "d"))), "d")], 1),
+  ),
+  stat(
+    "StandardTableauCountWithEvenFirstDescent",
+    "The standard Young tableaux whose smallest descent, or the size when there is none, is even.",
+    nonEmpty(evenFirstDescentTableaux(x), 1),
+  ),
+  stat(
+    "StandardTableauCountWithOddFirstDescent",
+    "The standard Young tableaux whose smallest descent, or the size when there is none, is odd.",
+    nonEmpty(firstRowSkewSum(x, 1)),
+  ),
+  stat(
+    "DesarrangementTableauCount",
+    "The standard Young tableaux whose first ascent is even, which are the transposes of the tableaux of the conjugate shape with even first descent.",
+    nonEmpty(evenFirstDescentTableaux(conjugate), 1),
   ),
 ];

@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-partition-4-2-1-of-7			[StandardTableauCountWithOddFirstDescent, [IntegerPartition, [List, 4, 2, 1]]]	21			the partition $4 + 2 + 1$ of $7$
+the-partition-3-3-1-of-7			[StandardTableauCountWithOddFirstDescent, [IntegerPartition, [List, 3, 3, 1]]]	13			the partition $3 + 3 + 1$ of $7$
+findstat-st000620-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'StandardTableauCountWithOddFirstDescent'"]	0	0	FindStat St000620	FindStat's value for [2]
+findstat-st000620-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'StandardTableauCountWithOddFirstDescent'"]	1	1	FindStat St000620	FindStat's value for [3]
+findstat-st000620-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 4]], "'StandardTableauCountWithOddFirstDescent'"]	0	0	FindStat St000620	FindStat's value for [4]

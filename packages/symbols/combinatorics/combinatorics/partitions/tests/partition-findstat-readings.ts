@@ -509,15 +509,22 @@ const permutationsInvertedByConjugation = (l: Partition): number => {
 const squareCycleType = (l: Partition): number[] =>
   l.flatMap((p) => (p % 2 === 1 ? [p] : [p / 2, p / 2])).toSorted((a, b) => b - a);
 /**
- * The permutations whose square is a fixed permutation of the square's cycle type, by counting the pairs (root, square): the classes of
- * every cycle type that squares to that type, over the size of its class.
+ * The permutations whose square is a fixed permutation of cycle type `l`, by counting the pairs (root, square): the classes of
+ * every cycle type that squares to `l`, over the size of the class of `l`.
  */
-const rootsOfSquare = (l: Partition): number => {
+const permutationsSquaringTo = (l: Partition): number => {
   const n = sum(l);
-  const target = squareCycleType(l).join();
+  const target = l.join();
   const classSize = (m: Partition): bigint => bigFactorial(n) / BigInt(PARTITION_READINGS.CentralizerSize!(m));
   const roots = partitionsOf(n).filter((m) => squareCycleType(m).join() === target);
-  return Number(roots.reduce((total, m) => total + classSize(m), 0n) / classSize(squareCycleType(l)));
+  return Number(roots.reduce((total, m) => total + classSize(m), 0n) / classSize(l));
+};
+/** The permutations whose square is a fixed permutation of the square's cycle type. */
+const rootsOfSquare = (l: Partition): number => permutationsSquaringTo(squareCycleType(l));
+/** The permutations of the points whose square is a fixed permutation of this cycle type, tried one by one. */
+const squareRootsByTrial = (l: Partition): number => {
+  const alpha = permutationOfCycleType(l);
+  return allPermutations(sum(l)).filter((pi) => pi.every((image, v) => pi[image] === alpha[v])).length;
 };
 /** The standard tableaux of the shape, as rows of entries: 1 .. n placed one at a time at the end of a row that may grow. */
 const standardTableauxOf = (l: Partition): number[][][] => {
@@ -807,6 +814,48 @@ const nonDominatingSubmultisets = (l: Partition): number => {
   }).length;
 };
 
+/** The smallest descent of a standard tableau (entry i + 1 in a lower row than i), or its size when it has none. */
+const firstDescent = (tableau: number[][]): number => {
+  const rowOf = new Map(tableau.flatMap((row, r) => row.map((entry) => [entry, r] as const)));
+  const size = rowOf.size;
+  for (let i = 1; i < size; i++) if (rowOf.get(i + 1)! > rowOf.get(i)!) return i;
+  return size;
+};
+/** The smallest ascent of a standard tableau (entry i + 1 in the same row as i or a higher one), or its size when it has none. */
+const firstAscent = (tableau: number[][]): number => {
+  const rowOf = new Map(tableau.flatMap((row, r) => row.map((entry) => [entry, r] as const)));
+  const size = rowOf.size;
+  for (let i = 1; i < size; i++) if (rowOf.get(i + 1)! <= rowOf.get(i)!) return i;
+  return size;
+};
+/** The standard tableaux of the shape with first descent d, by walking every tableau. */
+const firstDescentsByTableaux = (l: Partition): number[] => {
+  const counts = Array.from({ length: sum(l) + 1 }, () => 0);
+  for (const tableau of standardTableauxOf(l)) counts[firstDescent(tableau)]!++;
+  return counts;
+};
+/**
+ * The same counts by shapes: the tableaux with 1 .. d in the first row are the tableaux of the shapes left when a horizontal strip of
+ * d cells leaves the shape, so they number the sum of those shapes' standard tableaux; the first descent is exactly d when d + 1 is
+ * not also in the first row.
+ */
+const firstDescentsByStrips = (l: Partition): number[] => {
+  const n = sum(l);
+  const inFirstRow = Array.from({ length: n + 2 }, () => 0);
+  const strip = (row: number, left: number[]): void => {
+    if (row === l.length) {
+      inFirstRow[n - sum(left)]! += standardTableaux(left.filter((p) => p > 0));
+      return;
+    }
+    for (let kept = l[row + 1] ?? 0; kept <= l[row]!; kept++) strip(row + 1, [...left, kept]);
+  };
+  strip(0, []);
+  return Array.from({ length: n + 1 }, (_, d) => (d === n ? inFirstRow[n]! : inFirstRow[d]! - inFirstRow[d + 1]!));
+};
+/** Standard tableaux of the shape by the parity of the first descent: walked for small shapes, by strips beyond. */
+const tableauxByFirstDescentParity = (l: Partition, even: boolean): number =>
+  sum((sum(l) <= 8 ? firstDescentsByTableaux(l) : firstDescentsByStrips(l)).filter((_, d) => (d % 2 === 0) === even));
+
 export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   PartRange: (l) => (l.length === 0 ? 0 : l[0]! - l.at(-1)!),
   ContainingRectangleShortSide: (l) => (l.length === 0 ? 0 : Math.min(l[0]!, l.length)),
@@ -1085,4 +1134,16 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
       : sum(l) <= 8
         ? standardTableauxOf(l).filter((t) => JSON.stringify(evacuation(t)) === JSON.stringify(t)).length
         : dominoTableaux(l),
+
+  // The eleventh batch.
+  // Tried against every permutation for small sizes.
+  SquareRootCount: (l) => (sum(l) <= 7 ? squareRootsByTrial(l) : permutationsSquaringTo(l)),
+  // The empty tableau has no descent, so its first descent is its size 0, which is even.
+  StandardTableauCountWithEvenFirstDescent: (l) => tableauxByFirstDescentParity(l, true),
+  StandardTableauCountWithOddFirstDescent: (l) => tableauxByFirstDescentParity(l, false),
+  // Walked for small shapes; beyond, the first ascent of a tableau is the first descent of its transpose.
+  DesarrangementTableauCount: (l) =>
+    sum(l) <= 8
+      ? standardTableauxOf(l).filter((tableau) => firstAscent(tableau) % 2 === 0).length
+      : tableauxByFirstDescentParity(conjugate(l), true),
 };
