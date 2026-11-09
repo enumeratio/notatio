@@ -1977,6 +1977,8 @@ const NOVEL = [
   "MatrixPermanent",
   "DecreasableCornerSumPositions",
   "MatrixDeterminant",
+  "AlternatingSignMatrixRank",
+  "AlternatingSignMatrixCorank",
   "CornerSumLatticeDegree",
   "MonotoneTriangleMaximalLastDiagonalCount",
   "DescentWordPreimageCount",

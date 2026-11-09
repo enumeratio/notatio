@@ -57,6 +57,8 @@ const CORE = [
   "LessEqual",
   "List",
   "Map",
+  // MatrixRank (St001974, St001975) is the rank of an alternating sign matrix.
+  "MatrixRank",
   "Max",
   "Min",
   "Mod",

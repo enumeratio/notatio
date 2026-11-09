@@ -43,7 +43,7 @@
     "expr": "AlternatingSignMatrices(4)",
     "columns": [],
     "derived": false,
-    "statistics": 23
+    "statistics": 25
   },
   "AmicableNumbers": null,
   "ArithmeticNumbers": {

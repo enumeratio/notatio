@@ -747,7 +747,8 @@ export function declareListHeads(ce: Engine): void {
       const matrix = materializeTabulate(ce, ops[0]);
       return matrix === undefined ? undefined : native?.([matrix], options);
     },
-    1,
+    // compile builtin: a Tabulate operand is the only case changed, and it has no lowering of its own
+    { arity: 1, compile: "builtin" },
   );
 
   // Append(f(a, b, …), value): any head's operands, not just a collection's — Wolfram's

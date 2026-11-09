@@ -6440,6 +6440,18 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1664,
   },
   {
+    head: "AlternatingSignMatrixRank",
+    on: "AlternatingSignMatrix",
+    findstat: ["St001974"],
+    values: 1200,
+  },
+  {
+    head: "AlternatingSignMatrixCorank",
+    on: "AlternatingSignMatrix",
+    findstat: ["St001975"],
+    values: 1200,
+  },
+  {
     head: "CornerSumLatticeDegree",
     on: "AlternatingSignMatrix",
     findstat: ["St001977"],

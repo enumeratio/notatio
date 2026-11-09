@@ -96,6 +96,26 @@ const determinant = (m: Matrix): number => {
         );
   return extend([]);
 };
+/** The rank by Gauss-Jordan elimination over exact fractions (a numerator and a denominator, as bigints). */
+const rank = (m: Matrix): number => {
+  type Fraction = readonly [bigint, bigint];
+  const times = ([a, b]: Fraction, [c, d]: Fraction): Fraction => [a * c, b * d];
+  const minus = ([a, b]: Fraction, [c, d]: Fraction): Fraction => [a * d - c * b, b * d];
+  const over = ([a, b]: Fraction, [c, d]: Fraction): Fraction => (c < 0n ? [-a * d, -b * c] : [a * d, b * c]);
+  const rows = m.map((row) => row.map((a): Fraction => [BigInt(a), 1n]));
+  let found = 0;
+  for (let column = 0; column < (m[0]?.length ?? 0); column++) {
+    const pivot = rows.findIndex((row, i) => i >= found && row[column]![0] !== 0n);
+    if (pivot < 0) continue;
+    [rows[found], rows[pivot]] = [rows[pivot]!, rows[found]!];
+    for (let i = found + 1; i < rows.length; i++) {
+      const factor = over(rows[i]![column]!, rows[found]![column]!);
+      rows[i] = rows[i]!.map((a, j) => minus(a, times(factor, rows[found]![j]!)));
+    }
+    found++;
+  }
+  return found;
+};
 /** FindStat's corner_sum_matrix: the sum of the first i rows and j columns, i, j from 0 to n. */
 const cornerSums = (m: Matrix): number[][] =>
   indices(m.length + 1).map((i) =>
@@ -147,6 +167,8 @@ export type Reading = (m: Matrix) => number;
 
 export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
   MatrixDeterminant: (m) => (m.length === 0 ? 1 : determinant(m)),
+  AlternatingSignMatrixRank: rank,
+  AlternatingSignMatrixCorank: (m) => m.length - rank(m),
   CornerSumLatticeDegree: cornerSumDegree,
   MonotoneTriangleMaximalLastDiagonalCount: maximalLastDiagonal,
   NegativeOneCount: (m) => entries(m).filter((a) => a === -1).length,

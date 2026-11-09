@@ -39,6 +39,7 @@ export function declareLinearAlgebra113(ce: ComputeEngine): void {
     ["MatrixRank", 1],
     (ops) => isDistinctSymbolMatrix(ops[0]) !== undefined,
     () => (ops) => ce.number(isDistinctSymbolMatrix(ops[0]) as number),
-    1,
+    // compile builtin: only a matrix of symbols is changed, and the lowering refuses one
+    { arity: 1, compile: "builtin" },
   );
 }
