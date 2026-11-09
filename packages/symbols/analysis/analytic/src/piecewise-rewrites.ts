@@ -27,6 +27,7 @@ import {
   sortedByWolfram,
   togetherJson,
   constantValue,
+  isConstant,
 } from "./piecewise-linear.ts";
 import {
   cmpNum,
@@ -420,7 +421,10 @@ type Argument =
   | { kind: "sum"; lin: Linear; json: Json }
   | { kind: "power"; symbol: string; n: number }
   | { kind: "sqrt"; symbol: string }
-  | { kind: "cuberoot"; symbol: string };
+  | { kind: "cuberoot"; symbol: string }
+  | { kind: "exp"; symbol: string }
+  | { kind: "log"; symbol: string }
+  | { kind: "scaled"; symbol: string; c: Json; value: number };
 
 function argumentOf(g: Expr): Argument | undefined {
   const l = linear(g);
@@ -436,7 +440,27 @@ function argumentOf(g: Expr): Argument | undefined {
   )
     return { kind: "sum", lin: l, json: g.json };
   const ops = operandsOf(g);
+  // An irrational positive constant times a symbol (`Pi x`): cut at the multiples of 1 / the constant.
+  if (g.operator === "Multiply") {
+    const unknown = ops.filter((o) => !isConstant(o));
+    const constants = ops.filter(isConstant);
+    const values = constants.map(constantValue);
+    if (unknown.length === 1 && isSymbol(unknown[0]) && values.every((v) => v !== undefined)) {
+      const value = values.reduce((a, v) => a! * v!, 1)!;
+      if (value > 0)
+        return {
+          kind: "scaled",
+          symbol: unknown[0].symbol,
+          c: constants.length === 1 ? constants[0].json : (["Multiply", ...constants.map((c) => c.json)] as Json),
+          value,
+        };
+    }
+  }
   const base = ops[0] && isSymbol(ops[0]) ? ops[0].symbol : undefined;
+  if (g.operator === "Exp" && ops.length === 1 && base !== undefined) return { kind: "exp", symbol: base };
+  if (g.operator === "Power" && base === "ExponentialE" && ops[1] && isSymbol(ops[1]))
+    return { kind: "exp", symbol: ops[1].symbol };
+  if (g.operator === "Ln" && ops.length === 1 && base !== undefined) return { kind: "log", symbol: base };
   if (base === undefined || base === "Pi") return undefined;
   if (g.operator === "Sqrt" && ops.length === 1) return { kind: "sqrt", symbol: base };
   if (g.operator === "CubeRoot" && ops.length === 1) return { kind: "cuberoot", symbol: base };
@@ -574,6 +598,17 @@ function rootAxis(i: Interval, n: number, variable: Json): Axis | undefined {
   };
 }
 
+/** `f(s)` for an increasing `f` over the ends of `i`, each snapped to the rational it is; `at` inverts `f`. */
+function increasingAxis(i: Interval, f: (v: number) => number, inverse: (e: Q) => Json, variable: Json): Axis {
+  const end = (n: Num): Num => snap(f(n.v));
+  return {
+    variable,
+    falling: false,
+    at: inverse,
+    domain: { lo: end(i.lo), hi: end(i.hi), loOpen: i.loOpen, hiOpen: i.hiOpen },
+  };
+}
+
 /** The heads whose second argument is a multiple to round to. */
 const STEPS_TO_MULTIPLE = new Set(["Floor", "Ceil", "Ceiling", "Round"]);
 
@@ -656,15 +691,31 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
       family =
         op === "Floor" ? floorCell : op === "Round" ? roundCell : op === "IntegerPart" ? integerPartCell : ceilCell;
     }
-  } else if (INTEGER_VALUED.has(op) && m.kind === "number") {
+  } else if ((INTEGER_VALUED.has(op) || op === "Mod" || op === "Quotient") && m.kind === "number") {
     const i = interval(arg.symbol);
-    if (arg.kind === "power") axis = i && powerAxis(i, arg.n, symbolJson);
+    const moduloOp = op === "Mod" || op === "Quotient";
+    if (arg.kind === "scaled") {
+      const c = arg.value;
+      const at = (e: Q): Json => ["Divide", qJson(e), arg.c] as Json;
+      axis = i && increasingAxis(i, (v) => v * c, at, symbolJson);
+    } else if (arg.kind === "exp") axis = i && increasingAxis(i, Math.exp, (e) => ["Ln", qJson(e)] as Json, symbolJson);
+    else if (arg.kind === "log")
+      axis = i && i.lo.v >= 0 ? increasingAxis(i, Math.log, (e) => ["Exp", qJson(e)] as Json, symbolJson) : undefined;
+    else if (arg.kind === "power") axis = i && powerAxis(i, arg.n, symbolJson);
     else if (arg.kind === "cuberoot") axis = i && rootAxis(i, 3, ["Power", symbolJson, ["Rational", 1, 3]] as Json);
     else axis = i && rootAxis(i, 2, g.json);
     family =
-      op === "Floor" ? floorCell : op === "Round" ? roundCell : op === "IntegerPart" ? integerPartCell : ceilCell;
+      op === "Mod"
+        ? floorCells(linear(g), constantLinear(m.p))
+        : op === "Floor" || op === "Quotient"
+          ? floorCell
+          : op === "Round"
+            ? roundCell
+            : op === "IntegerPart"
+              ? integerPartCell
+              : ceilCell;
     // `Floor(g, p)` is `p Floor(g / p)`: the cells are of `g / p`.
-    if (axis && toMultiple && m.kind === "number") {
+    if (axis && (toMultiple || moduloOp) && m.kind === "number") {
       const inner = axis;
       const by = qDiv(q(1), m.p);
       axis = {
@@ -672,7 +723,7 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
         at: (e) => inner.at(qMul(e, m.p)),
         domain: { ...inner.domain, lo: numScale(inner.domain.lo, by), hi: numScale(inner.domain.hi, by) },
       };
-      family = multiples(family, constantLinear(m.p));
+      if (toMultiple) family = multiples(family, constantLinear(m.p));
     }
   }
   return axis && family ? staircase(axis, family) : undefined;
