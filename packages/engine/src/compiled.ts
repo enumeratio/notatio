@@ -174,6 +174,16 @@ export function definitionHash(expression: unknown): string {
  */
 export const CACHEABLE_EFFECTS: ReadonlySet<string> = new Set(["console"]);
 
+/** `expression` with each recursive call `["self", "self", arg…]` (structures' `self`) read as the list of its
+ *  arguments: compute-engine gives an operator it doesn't know effects `"any"`, which would leave every
+ *  recursive definition uncached, and a recursive call has the effects of its arguments. */
+function withoutSelfCalls(expression: unknown): unknown {
+  if (!Array.isArray(expression)) return expression;
+  if (expression[0] === "self" && expression[1] === "self")
+    return ["List", ...expression.slice(2).map(withoutSelfCalls)];
+  return expression.map(withoutSelfCalls);
+}
+
 /** Whether a definition's answer depends only on the definition and its input, by compute-
  *  engine's effect system with its free variables typed: pure, or with only effects in
  *  `CACHEABLE_EFFECTS`. Such an answer can be shared across engines (`pureResult`). */
@@ -185,7 +195,7 @@ export function isCacheableDefinition(
   ce.pushScope();
   try {
     for (const [name, type] of Object.entries(types)) ce.declare(name, type);
-    const effects = ce.box(expression as never).effects;
+    const effects = ce.box(withoutSelfCalls(expression) as never).effects;
     return effects === undefined || (effects !== "any" && effects.every((label) => CACHEABLE_EFFECTS.has(label)));
   } catch {
     return false;

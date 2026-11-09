@@ -38,3 +38,13 @@ test("fromJs reads a complex value with a zero imaginary part as its real part",
   expect(fromJs({ re: 1, im: 1 })).toBeUndefined();
   expect(fromJs({ re: 0.5, im: 0 })).toBeUndefined();
 });
+
+const recursive = (leaf: unknown): unknown => {
+  const fn = ["Function", ["If", ["Equal", "n", 0], leaf, ["self", "self", ["Subtract", "n", 1]]], "self", "n"];
+  return [fn, fn, "_x"];
+};
+
+test("a recursive definition is as cacheable as its body", () => {
+  expect(cacheable(recursive(1))).toBe(true);
+  expect(cacheable(recursive(["RandomInteger", 1, 6]))).toBe(false);
+});

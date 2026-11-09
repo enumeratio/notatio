@@ -17,7 +17,7 @@ import type { NumberKernel } from "./types.ts";
 
 // Closed-form families, defined in Epsil (./closed-forms.ts).
 // 2^n first passes 2^53 at n = 54.
-const subsetsFamily = subsets({
+export const subsetsFamily = subsets({
   head: "Subsets",
   params: ["_n"],
   carrier: "Finset",
@@ -28,7 +28,7 @@ const subsetsFamily = subsets({
 // its elements are the same Finset shape as Subsets'.
 const grayCodeSubsetsFamily = grayCodeSubsets({ head: "GrayCodeSubsets", params: ["_n"] });
 // C(n, k) passes 2^53 at (60, 25).
-const kSubsetsFamily = kSubsets({
+export const kSubsetsFamily = kSubsets({
   head: "KSubsets",
   params: ["_n", "_k"],
   carrier: "Finset",

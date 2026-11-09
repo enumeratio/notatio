@@ -53,7 +53,8 @@ import {
   StirlingS2,
 } from "./kernels-combinatorics.ts";
 import { partsInSet } from "../../../partitions/src/families/partitions.ts";
-import { kSubsets, subsets, subsetsOfSizeAtMost } from "./closed-forms.ts";
+import { subsetsOfSizeAtMost } from "./closed-forms.ts";
+import { kSubsetsFamily, subsetsFamily } from "./core.ts";
 import { kernelOn } from "./epsil.ts";
 import { asBlockList, asIntList, type Boxed, blocksMJ, type FamilyKernel, listMJ } from "./types.ts";
 
@@ -387,9 +388,11 @@ interface SubsetKernels {
   readonly atMost: FamilyKernel;
 }
 
+// The declared families themselves: generated code is keyed by the definition's hash, and a copy
+// that differs (the `bigSamples`) misses it and compiles or interprets on every row.
 const subsetKernels = (ce: Engine): SubsetKernels => ({
-  all: kernelOn(ce, subsets({ head: "Subsets", params: ["_n"] })),
-  ofSize: kernelOn(ce, kSubsets({ head: "KSubsets", params: ["_n", "_k"] })),
+  all: kernelOn(ce, subsetsFamily),
+  ofSize: kernelOn(ce, kSubsetsFamily),
   atMost: kernelOn(ce, subsetsOfSizeAtMost({ head: "SubsetsOfSizeAtMost", params: ["_n", "_k"] })),
 });
 
