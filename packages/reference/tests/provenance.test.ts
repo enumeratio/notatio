@@ -2189,6 +2189,9 @@ const NOVEL = [
   "FreeTileCount",
   "FreeEntryCount",
   "FirstRowDifference",
+  "OnesToLeading",
+  "LeadingToOnes",
+  "InverseDescentComposition",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

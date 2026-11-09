@@ -10,7 +10,7 @@ signatures:
   - call: OrderedTree(...)
     description: Catalogued in the enumeratio database; not yet written up here.
     library: enumeratio-combinatorics
-    type: ((integer | list<any>) -> ordered_tree) & ((binary_tree) -> ordered_tree) & ((dyck_path) -> ordered_tree)
+    type: ((integer | list<any>) -> ordered_tree) & ((binary_tree) -> ordered_tree) & ((dyck_path) -> ordered_tree) & ((parking_function) -> ordered_tree)
 laws:
   - inverse: BinaryTree
     on: binary_tree
@@ -33,4 +33,8 @@ catalog:
     identity: Mp00026
     url: https://www.findstat.org/Mp00026
     on: DyckPath
+  - system: findstat
+    identity: Mp00297
+    url: https://www.findstat.org/Mp00297
+    on: ParkingFunction
 ---
