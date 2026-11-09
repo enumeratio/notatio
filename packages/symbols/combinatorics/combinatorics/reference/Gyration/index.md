@@ -3,8 +3,6 @@ name: Gyration
 domain: Combinatorial maps
 signature: Gyration(AlternatingSignMatrix)
 summary: "Wieland's gyration: the height function toggled at the vertices of even parity, then of odd parity."
-laws:
-  - bijection
 catalog:
   - system: findstat
     identity: Mp00006
