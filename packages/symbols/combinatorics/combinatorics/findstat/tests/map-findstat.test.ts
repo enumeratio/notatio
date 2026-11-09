@@ -214,6 +214,8 @@ const SLOW: Readonly<Record<string, number>> = {
   "DemazureProductWithInverse@SignedPermutation": 3,
   "RowDescentsToColumnDescents@StandardTableau": 4,
   "OrderedTree@ParkingFunction": 3,
+  "Gyration@AlternatingSignMatrix": 3,
+  "BlockEdgePartition@LabeledGraph": 3,
 };
 
 for (const [key, reading] of Object.entries(MAP_READINGS)) {
@@ -445,6 +447,10 @@ const IDS: Readonly<Record<string, string>> = {
   "SkewPartition@IntegerComposition": "Mp00180",
   "ComponentSizePartition@LabeledGraph": "Mp00037",
   "ComponentEdgePartition@LabeledGraph": "Mp00275",
+  "Catalanization@Permutation": "Mp00277",
+  "Gyration@AlternatingSignMatrix": "Mp00006",
+  "BlockEdgePartition@LabeledGraph": "Mp00276",
+  "TwoConjugate@IntegerPartition": "Mp00321",
 };
 
 test("every reading names the FindStat map it is", () => {

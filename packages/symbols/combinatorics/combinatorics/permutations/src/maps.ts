@@ -22,6 +22,7 @@ import {
   size,
   sortedRuns,
 } from "../../src/map-helpers.ts";
+import { fold } from "../../collections/src/families/tables.ts";
 import { bstParents } from "../../trees/src/bst.ts";
 import { fromPermutationTree } from "../../trees/src/increasing-binary-tree.ts";
 import {
@@ -161,6 +162,33 @@ const toricPromotionBody: MathJSON = [
     "list<integer>",
   ),
 ];
+
+/** Mp00277: the product, in lex order of the inversion positions (i, j), of the transpositions of values i and j: each
+ *  one exchanges the entries i and j of the permutation built so far. */
+const catalanizationBody: MathJSON = fold(
+  fold(
+    [
+      "If",
+      ["Greater", at("ca_i"), at("ca_j")],
+      forEach(
+        "ca_b",
+        ["If", ["Equal", "ca_v", "ca_i"], "ca_j", ["If", ["Equal", "ca_v", "ca_j"], "ca_i", "ca_v"]],
+        "ca_v",
+      ),
+      "ca_b",
+    ],
+    "ca_b",
+    "ca_j",
+    "ca_a",
+    ["Range", ["Add", "ca_i", 1], size, 1],
+    "list<integer>",
+  ),
+  "ca_a",
+  "ca_i",
+  positions,
+  positions,
+  "list<integer>",
+) as MathJSON;
 
 /** Mp00309: toggle (n 1), then (n-1 n), ..., (1 2). */
 const inverseToricPromotionBody: MathJSON = [
@@ -930,6 +958,15 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     summary: "The permutation read as a parking function: car i prefers the spot π(i).",
     note: "FindStat's Mp00305. Injective.",
     findstat: ["Mp00305"],
+  },
+  {
+    name: "Catalanization",
+    from: "permutation",
+    to: "permutation",
+    body: catalanizationBody,
+    summary:
+      "The product of the transpositions (i j), one for each inversion at positions i < j in lexicographic order, each exchanging the entries i and j.",
+    note: "FindStat's Mp00277. Fixes exactly the 231-avoiding permutations.",
   },
 ];
 

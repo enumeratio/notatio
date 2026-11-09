@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-partition-31			[TwoConjugate, [IntegerPartition, [List, 3, 1]]]	[IntegerPartition, [List, 2, 1, 1]]	the partition $31$

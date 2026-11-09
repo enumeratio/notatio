@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-identity-matrix-of-size-2			[Gyration, [AlternatingSignMatrix, [List, [List, 1, 0], [List, 0, 1]]]]	[AlternatingSignMatrix, [List, [List, 0, 1], [List, 1, 0]]]	the identity matrix of size $2$

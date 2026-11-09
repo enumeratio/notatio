@@ -2,6 +2,7 @@
 // `_raw` = Tuple(n, edges): the vertices 1 .. n, and the edges as pairs [u, v] with u < v.
 
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
+import { blockEdgePartitionBody } from "./block-edges.ts";
 import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
 
 const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
@@ -122,5 +123,13 @@ export const GRAPHS_MAPS: readonly CombinatorialMap[] = [
     body: perComponent((leader) => total("gm_edges", cell("gm_reach", leader, lower("e")), "e")),
     summary: "The numbers of edges of the connected components, largest first, a component with no edge left out.",
     note: "FindStat's Mp00275.",
+  },
+  {
+    name: "BlockEdgePartition",
+    from: "labeled_graph",
+    to: "integer_partition",
+    body: blockEdgePartitionBody,
+    summary: "The number of edges in each block (biconnected component) of the graph, largest first.",
+    note: "FindStat's Mp00276. An isolated vertex is a block with no edges and contributes no part.",
   },
 ];
