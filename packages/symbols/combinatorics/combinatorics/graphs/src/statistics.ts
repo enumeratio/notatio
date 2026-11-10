@@ -2727,6 +2727,8 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The ways to direct every edge so that no directed cycle results.",
     withMasks(lastEntry(acyclicOrientationTable), 1),
     `FindStat's St000269. The sinks of an acyclic orientation form a nonempty independent set, and what is left is acyclic; inclusion-exclusion over the sinks gives the count. The graph with no vertices has one orientation, the empty one, so 1.`,
+  ),
+  stat(
     "ComponentPreservingSpanningSubgraphCount",
     "The sets of edges that leave the graph with the same connected components.",
     tutteAt(1, 2),
