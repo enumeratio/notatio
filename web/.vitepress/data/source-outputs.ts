@@ -68,15 +68,6 @@ export const sourceLanguages: readonly SourceLanguageMeta[] = [
       "OpenGL Shading Language source, via compute-engine's GLSL target — the C-like syntax used in fragment/vertex shaders.",
     sample: "Sin(x) * Cos(y)",
   },
-  {
-    id: "wgsl",
-    title: "WGSL",
-    form: "wgsl",
-    system: "WGSL",
-    blurb:
-      "WebGPU Shading Language source, via compute-engine's WGSL target — WebGPU's shader language, close to GLSL for scalar math.",
-    sample: "x^2 - y^2",
-  },
 ];
 
 const arith: SourceRow = { expr: ["Add", ["Power", "x", 2], 1], label: "arithmetic and powers" };
@@ -180,5 +171,4 @@ export const sourceRows: Record<string, readonly SourceRow[]> = {
   numpy,
   javascript,
   glsl: shader,
-  wgsl: shader,
 };

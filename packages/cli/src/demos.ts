@@ -185,15 +185,7 @@ export const DEMOS: readonly Demo[] = [
     title: "Compile a function",
     description: "Numeric expressions compile to real source.",
     category: "Output forms",
-    lines: [
-      ":form numpy",
-      "Sqrt(x^2 + 1)",
-      ":form glsl",
-      "Sin(x) * Cos(x)",
-      ":form wgsl",
-      "Sin(x) * Cos(x)",
-      ":form inputform",
-    ],
+    lines: [":form numpy", "Sqrt(x^2 + 1)", ":form glsl", "Sin(x) * Cos(x)", ":form inputform"],
     tags: ["forms", "compile"],
   },
 

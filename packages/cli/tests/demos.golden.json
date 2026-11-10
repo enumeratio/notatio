@@ -275,14 +275,6 @@
       "out": "\u001b[2mOut[2]= \u001b[0m_gpu_sin(x) * _gpu_cos(x)"
     },
     {
-      "in": ":form wgsl",
-      "out": "\u001b[2m  form -> wgsl\u001b[0m"
-    },
-    {
-      "in": "Sin(x) * Cos(x)",
-      "out": "\u001b[2mOut[3]= \u001b[0m_gpu_sin(x) * _gpu_cos(x)"
-    },
-    {
       "in": ":form inputform",
       "out": "\u001b[2m  form -> inputform\u001b[0m"
     }
@@ -456,7 +448,7 @@
   "formats-registry": [
     {
       "in": ":formats",
-      "out": "  InputForm     .txt       text/plain  [export/import]\n  OutputForm    .          text/x-outputform  [export]\n  TeX           .tex       application/x-tex  [export/import]\n  MathML        .mml       application/mathml-presentation+xml  [export/import]\n  AsciiMath     .am        text/x-asciimath  [export/import]\n  MathJSON      .json      application/mathjson+json  [export/import]\n  WL            .wl .m     application/vnd.wolfram.wl  [export/import]\n  FullForm      .          text/x-epsil-fullform  [export/import]\n  Epsil         .epsil .ep text/x-epsil  [export/import]\n  Python        .py        text/x-python  [export]\n  GLSL          .glsl .frag x-shader/x-fragment  [export]\n  WGSL          .wgsl      text/wgsl  [export]\n  JavaScript    .js .mjs   text/javascript  [export]\n  SVG           .svg       image/svg+xml  [export/import]\n\n  export: InputForm, OutputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, Python, GLSL, WGSL, JavaScript, SVG\n  import: InputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, SVG\n  (display form: inputform)"
+      "out": "  InputForm     .txt       text/plain  [export/import]\n  OutputForm    .          text/x-outputform  [export]\n  TeX           .tex       application/x-tex  [export/import]\n  MathML        .mml       application/mathml-presentation+xml  [export/import]\n  AsciiMath     .am        text/x-asciimath  [export/import]\n  MathJSON      .json      application/mathjson+json  [export/import]\n  WL            .wl .m     application/vnd.wolfram.wl  [export/import]\n  FullForm      .          text/x-epsil-fullform  [export/import]\n  Epsil         .epsil .ep text/x-epsil  [export/import]\n  Python        .py        text/x-python  [export]\n  GLSL          .glsl .frag x-shader/x-fragment  [export]\n  JavaScript    .js .mjs   text/javascript  [export]\n  SVG           .svg       image/svg+xml  [export/import]\n\n  export: InputForm, OutputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, Python, GLSL, JavaScript, SVG\n  import: InputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, SVG\n  (display form: inputform)"
     },
     {
       "in": ":mime image/png",

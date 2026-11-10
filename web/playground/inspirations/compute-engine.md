@@ -95,7 +95,7 @@ possible, and it is worth naming the four seams we actually use:
   [domains](/reference/domains/).
 - **A pluggable compiler.** The engine compiles an expression to a target, and
   the target list is open — which is why `<notatio-out>` can show you the same
-  expression as Python, as JavaScript, as WGSL, and why the GPU phase portraits
+  expression as Python, as JavaScript, as GLSL, and why the GPU phase portraits
   compile an expression straight to a shader.
 
 <Story

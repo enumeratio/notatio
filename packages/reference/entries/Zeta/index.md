@@ -10,11 +10,11 @@ bindings:
     source: packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts
     note: Riemann ζ is the m = 1 case of the Hurwitz implementation.
   - origin: compiled
-    form: wgsl
+    form: glsl
     environment: gpu
-    source: packages/symbols/analysis/analytic/src/shader.ts:zetaWGSL
+    source: packages/symbols/analysis/analytic/src/shader.ts:zetaGLSL
     produces: a colour per pixel — complex ζ, domain-coloured
-    note: compute-engine's WGSLTarget has no lowering for Zeta; ours compiles Zeta(s) as zetaGen(s, 1) on the real-scalar path, and the complex-portrait fragment shader (complex-plot.ts) takes it as clogPolar(hurwitz(s, vec2f(1,0))).
+    note: compute-engine's GLSLTarget has no lowering for Zeta; ours compiles Zeta(s) as zetaGen(s, 1) on the real-scalar path, and the complex-portrait fragment shader (complex-plot.ts) takes it as clogPolar(hurwitz(s, vec2(1,0))).
   - origin: component
     form: <notatio-complex-plot>
     environment: browser

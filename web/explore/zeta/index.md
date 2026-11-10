@@ -45,10 +45,10 @@ functions genuinely disagree.
 
 ### On the GPU
 
-The same surface with `gpu` set evaluates its grid in a WebGPU compute shader instead of
-on the CPU — `HurwitzZeta` compiles to the [`zetaWGSL`](/explore/zeta/phase-portrait)
-kernel via compute-engine's WGSL target. It falls back to the CPU path automatically where
-WebGPU is unavailable, so the two look identical; the difference is a denser grid stays
+The same surface with `gpu` set evaluates its grid in a WebGL2 fragment shader instead of
+on the CPU — `HurwitzZeta` compiles to the [`zetaGLSL`](/explore/zeta/phase-portrait)
+kernel via compute-engine's GLSL target. It falls back to the CPU path automatically where
+WebGL2 is unavailable, so the two look identical; the difference is a denser grid stays
 interactive. (Look for the **GPU** badge under the figure.)
 
 ## The third argument, as a dial

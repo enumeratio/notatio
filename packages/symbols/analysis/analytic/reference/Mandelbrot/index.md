@@ -12,4 +12,4 @@ seeAlso:
 ---
 
 - Numeric only -- evaluates under N() or when an operand is inexact; otherwise stays unevaluated.
-- Lowers to a compiled real-scalar kernel and to the WGSL `mandelbrot` shader function for GPU rendering.
+- Lowers to a compiled real-scalar kernel and to the GLSL `mandelbrot` shader function for GPU rendering.

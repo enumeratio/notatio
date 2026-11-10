@@ -186,7 +186,7 @@ export interface ReferenceSignature {
  *
  * - `engine`   plain compute-engine evaluation; works anywhere the engine does
  * - `browser`  needs the DOM, and usually a custom element (`<graphics-box>` et al.)
- * - `gpu`      compiled to WGSL/GLSL and evaluated on the GPU (`gpu-eval.ts`)
+ * - `gpu`      compiled to GLSL and evaluated on the GPU (`gpu-eval.ts`)
  * - `node`     server-side only (filesystem, a spawned kernel)
  * - `external` another system's kernel entirely — Wolfram, SymPy, Sage
  */
@@ -201,7 +201,7 @@ export type Environment = "engine" | "browser" | "gpu" | "node" | "external";
  *   oracle for every other row (https://github.com/enumeratio/notatio/wiki/Namespaces §6)
  * - `native`    authored by us in TypeScript — what actually runs; stored as a POINTER,
  *   because the source lives in the repo and a copy here would rot
- * - `compiled`  produced by a compute-engine compile target (numpy, glsl, wgsl, js);
+ * - `compiled`  produced by a compute-engine compile target (numpy, glsl, js);
  *   derivable live from the expression, so normally not stored at all
  * - `component` bottoms out in a web component — the head's meaning IS the rendered element
  * - `mapped`    the equivalent call in an external system; the table lives in
@@ -212,7 +212,7 @@ export type BindingOrigin = "reference" | "native" | "compiled" | "component" | 
 /** One of the several things a head is "made of". */
 export interface ReferenceBinding {
   readonly origin: BindingOrigin;
-  /** Target or language: "notatio", "typescript", "wgsl", "numpy", "<graphics-box>", … */
+  /** Target or language: "notatio", "typescript", "glsl", "numpy", "<graphics-box>", … */
   readonly form: string;
   readonly environment?: Environment;
   /**

@@ -53,7 +53,7 @@
   },
   "enumeratio": {
     "reads": [
-      "../packages/ce-patches/src/compute-engine/compilation/wgsl-complex.ts"
+      "../packages/ce-patches/src/compute-engine/compilation/glsl-complex.ts"
     ]
   }
 }

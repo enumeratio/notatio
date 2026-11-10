@@ -4,7 +4,7 @@
 // engine is threaded in via opts only where a decoder needs to parse (TeX).
 
 import type { Expression } from "@cortex-js/compute-engine";
-import { compile, GLSLTarget, PythonTarget, WGSLTarget } from "@cortex-js/compute-engine/compile";
+import { compile, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine/compile";
 import { parseEpsil, serializeEpsil } from "@cortex-js/compute-engine/epsil";
 import { MATHJSON_MIME } from "@enumeratio/boxes/render";
 import { fromWolfram, toWolfram } from "@enumeratio/wolfram";
@@ -179,15 +179,6 @@ registerFileFormat({
   extensions: ["glsl", "frag"],
   binary: false,
   encode: (v) => new GLSLTarget().compileToSource(asExpr(v)),
-});
-
-registerFileFormat({
-  name: "WGSL",
-  aliases: ["wgsl"],
-  mimeTypes: ["text/wgsl"],
-  extensions: ["wgsl"],
-  binary: false,
-  encode: (v) => new WGSLTarget().compileToSource(asExpr(v)),
 });
 
 registerFileFormat({

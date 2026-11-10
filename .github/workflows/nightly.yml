@@ -246,10 +246,10 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # The WebGPU stories: headless Chromium destroys a device whose canvas is configured, so these run
-  # headed, on a virtual display and a software adapter. Red when a story fails, like the stories above.
+  # The WebGL2 stories: these run headed, on a virtual display and ANGLE's SwiftShader, as the
+  # portraits are heavy to shade in software. Red when a story fails, like the stories above.
   component-stories-gpu:
-    name: component stories (WebGPU) ${{ matrix.shard }}/3
+    name: component stories (WebGL2) ${{ matrix.shard }}/3
     if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'component-stories-gpu')
     runs-on: ubuntu-latest
     # A cold dist build (up to 11 minutes) and a cold dev server, then a third of the tests: all 68 take
@@ -264,17 +264,13 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
         continue-on-error: true
-      # Without Mesa's Vulkan and EGL, Chromium has no shared image to present a WebGPU canvas with, and drops
-      # the WebGPU instance at the first frame. Compute-only tests pass regardless.
-      - run: sudo apt-get install -y --no-install-recommends libegl-mesa0 libgles2 mesa-vulkan-drivers
-        continue-on-error: true
       - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts --shard=${{ matrix.shard }}/3
         working-directory: web
       - if: matrix.shard == 1
         run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU" --output=test-results/plots
         working-directory: web
         env:
-          WEBGPU: "1"
+          WEBGL: "1"
       # A failed test's trace and page snapshot: the log says what timed out, not what the page was doing.
       - if: always()
         uses: actions/upload-artifact@v4
