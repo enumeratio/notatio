@@ -206,16 +206,6 @@ const planePartitions = (n: number): number[][][] => {
   return grow([], n);
 };
 
-/** Decorated permutations of n as FindStat writes them: each fixed point is `+` or `-`. */
-const decoratedPermutations = (n: number): string[] =>
-  permutations(n).flatMap((word) => {
-    const fixed = word.flatMap((value, k) => (value === k + 1 ? [k] : []));
-    return range(0, 2 ** fixed.length - 1).map(
-      (mask) =>
-        `[${word.map((value, k) => (value === k + 1 ? (mask & (1 << fixed.indexOf(k)) ? "-" : "+") : value)).join(",")}]`,
-    );
-  });
-
 /** Skew shapes λ/μ of n cells with no empty row or column, as the part lists of λ and μ. */
 const skewPartitions = (n: number): number[][][] =>
   range(n, 2 * n).flatMap((size) =>
@@ -268,7 +258,6 @@ const OBJECTS: Readonly<Record<string, string[]>> = {
   SemistandardTableau: through(4, 1, semistandardTableaux).map((t) => JSON.stringify(t)),
   GelfandTsetlinPattern: through(3, 1, gelfandTsetlinPatterns).map((p) => JSON.stringify(p)),
   PlanePartition: through(4, 1, planePartitions).map((p) => JSON.stringify(p)),
-  DecoratedPermutation: through(4, 1, decoratedPermutations),
 };
 
 /** Our map for a reading's `Head@Carrier` key. */

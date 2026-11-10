@@ -90,10 +90,6 @@ const SAMPLES: Record<string, { contents: unknown; caption: string }> = {
     contents: ["List", ["List", 2, 1], ["List", 1]],
     caption: "the plane partition with rows $21$ and $1$",
   },
-  decorated_permutation: {
-    contents: ["List", -1, 3, 2, 4],
-    caption: "the decorated permutation $\\bar 1\\,3\\,2\\,4$",
-  },
 };
 
 const constructorFor = Object.fromEntries(CARRIERS.map((c) => [c.type, c.name]));

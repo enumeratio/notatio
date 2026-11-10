@@ -1,2 +1,0 @@
-id	section	role	expr	expected	caption
-the-decorated-permutation-bar-1-3-2-4			[LowerGrassmannPermutation, [DecoratedPermutation, [List, -1, 3, 2, 4]]]	[Permutation, [List, 2, 4, 1, 3]]	the decorated permutation $\bar 1\,3\,2\,4$

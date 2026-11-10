@@ -162,7 +162,16 @@ const MIN_PER_MAP = 12;
  *  subject may have. A family's sample reaches shapes of 36 cells at its largest sizes; RskRecording, which
  *  ReadingTableau applies to the reading word, takes about a second at 3 cells, 3 at 6 and 9 at 10, so past
  *  8 the composition outlasts `testTimeout`. */
-const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([["ReadingTableau@integer_partition", 8]]);
+const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([
+  ["ReadingTableau@integer_partition", 8],
+  // An alternating sign matrix's entries sum to its order; the monotone triangle and link pattern maps take seconds at order 5.
+  ["SemistandardTableau@alternating_sign_matrix", 3],
+  ["LeftKeyPermutation@alternating_sign_matrix", 3],
+  ["DyckPath@alternating_sign_matrix", 3],
+  ["DiagonalHeightDyckPath@alternating_sign_matrix", 3],
+  ["PerfectMatching@alternating_sign_matrix", 3],
+  ["LinkPatternDyckPath@alternating_sign_matrix", 3],
+]);
 
 const cellsOf = (contents: unknown): number =>
   typeof contents === "number"
@@ -230,12 +239,16 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
   // The pair carrier's families aren't sampled: its subjects are the images of small permutations (words of at most
   // three letters in the standard run: the interpreter's inverse RSK is slow).
   const small = (words: unknown[]): unknown[] => words.filter((word) => DEEP || (word as unknown[]).length <= 4);
+  const largest = SLOW_TO_INTERPRET.get(mapKey(map)) ?? Infinity;
   const subjects =
     map.argumentParts !== undefined
       ? partSubjects(ce, map, budgeted("Permutation", small(subjectsOf("Permutation"))))
       : map.imageParts !== undefined
         ? budgeted(from.name, small(subjectsOf(from.name)))
-        : budgeted(from.name, subjectsOf(from.name));
+        : budgeted(
+            from.name,
+            subjectsOf(from.name).filter((contents) => cellsOf(contents) <= largest),
+          );
   const title = `${map.name} from ${map.from}: compiled agrees with interpreted`;
   for (let start = 0; start < subjects.length; start += CHUNK) {
     test(subjects.length > CHUNK ? `${title} (${start / CHUNK + 1})` : title, () => {

@@ -1,5 +1,4 @@
-// Readings for maps batch 20, after the Sage code FindStat states for each: the underlying and the Grassmann interval
-// permutations of a decorated permutation (Mp00253, Mp00255, Mp00256), the Tanimoto operator (Mp00329), the Demazure
+// Readings for maps batch 20, after the Sage code FindStat states for each: the Tanimoto operator (Mp00329), the Demazure
 // product with the inverse (Mp00159), the Lewis-Lyu-Pylyavskyy-Sen shape (Mp00204) and weak order rowmotion
 // (Mp00326). Same contract as map-findstat-readings.ts: FindStat's text in, FindStat's text out.
 
@@ -9,44 +8,6 @@ const ints = (text: string): number[] => JSON.parse(text) as number[];
 const list = (items: readonly number[]): string => `[${items.join(",")}]`;
 const range = (from: number, to: number): number[] =>
   Array.from({ length: Math.max(0, to - from + 1) }, (_, k) => from + k);
-
-/** Sage's list of a decorated permutation: a fixed point decorated `-` is negated, one decorated `+` stays. */
-const decorated = (text: string): number[] =>
-  text
-    .slice(1, -1)
-    .split(",")
-    .filter((entry) => entry !== "")
-    .map((entry, k) => (entry === "+" ? k + 1 : entry === "-" ? -(k + 1) : Number(entry)));
-
-// --- Mp00253: the underlying permutation ---
-
-const underlying = (text: string): string => list(decorated(text).map(Math.abs));
-
-// --- Mp00255, Mp00256: the Grassmann interval [u, v] of the decorated permutation ---
-
-const grassmannInterval = (text: string): [number[], number[]] => {
-  const x = decorated(text);
-  const pi = x.map(Math.abs);
-  const n = pi.length;
-  const inverse = Array<number>(n + 1).fill(0);
-  pi.forEach((value, k) => (inverse[value] = k + 1));
-  const anti: number[] = [];
-  for (let i = 1; i <= n; i++) if (i < inverse[i]! || x[i - 1] === i) anti.push(inverse[i]!);
-  const u1: number[] = [];
-  const u2: number[] = [];
-  const v1: number[] = [];
-  const v2: number[] = [];
-  for (let i = 1; i <= n; i++) {
-    if (anti.includes(i)) {
-      v1.push(i);
-      u1.push(Math.abs(x[i - 1]!));
-    } else {
-      v2.push(i);
-      u2.push(Math.abs(x[i - 1]!));
-    }
-  }
-  return [u1.concat(u2), v1.concat(v2)];
-};
 
 // --- Mp00329: Tanimoto's operator ---
 
@@ -156,9 +117,6 @@ const weakOrderRowmotion = (text: string): string => {
 };
 
 export const BATCH_TWENTY_READINGS: Readonly<Record<string, Reading>> = {
-  "Permutation@DecoratedPermutation": underlying,
-  "LowerGrassmannPermutation@DecoratedPermutation": (text) => list(grassmannInterval(text)[0]),
-  "UpperGrassmannPermutation@DecoratedPermutation": (text) => list(grassmannInterval(text)[1]),
   "Tanimoto@Permutation": tanimoto,
   "DemazureProductWithInverse@Permutation": demazureWithInverse,
   "LewisLyuPylyavskyySenShape@Permutation": lewisLyuPylyavskyySenShape,
@@ -167,9 +125,6 @@ export const BATCH_TWENTY_READINGS: Readonly<Record<string, Reading>> = {
 
 /** Each reading's FindStat map. */
 export const BATCH_TWENTY_IDS: Readonly<Record<string, string>> = {
-  "Permutation@DecoratedPermutation": "Mp00253",
-  "LowerGrassmannPermutation@DecoratedPermutation": "Mp00255",
-  "UpperGrassmannPermutation@DecoratedPermutation": "Mp00256",
   "Tanimoto@Permutation": "Mp00329",
   "DemazureProductWithInverse@Permutation": "Mp00159",
   "LewisLyuPylyavskyySenShape@Permutation": "Mp00204",

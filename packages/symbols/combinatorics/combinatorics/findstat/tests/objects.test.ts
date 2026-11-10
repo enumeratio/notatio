@@ -28,7 +28,6 @@ test("a few objects per new carrier", () => {
     "AlternatingSignMatrix",
     L(L(0, 1, 0), L(1, -1, 1), L(0, 1, 0)),
   ]);
-  expect(readObject("DecoratedPermutation", "[-,+,4,3]")).toEqual(["DecoratedPermutation", L(-1, 2, 4, 3)]);
   expect(readObject("SkewPartition", "[[3,1],[1]]")).toEqual(["SkewPartition", L(L(3, 1), L(1))]);
   expect(readObject("SkewPartition", "[[2],[]]")).toEqual(["SkewPartition", L(L(2), L())]);
   expect(readObject("SemistandardTableau", "[[1,1,3],[2,3]]")).toEqual(["SemistandardTableau", L(L(1, 1, 3), L(2, 3))]);

@@ -1044,7 +1044,7 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00006", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
-    name: "TableauShape",
+    name: "SemistandardTableauShape",
     from: "SemistandardTableau",
     to: "IntegerPartition",
     findstat: [{ id: "Mp00077", rows: 1200, compared: 1181, skipped: 0 }],
@@ -1528,24 +1528,6 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     from: "DyckPath",
     to: "SkewPartition",
     findstat: [{ id: "Mp00233", rows: 1200, compared: 196, skipped: 0 }],
-  },
-  {
-    name: "Permutation",
-    from: "DecoratedPermutation",
-    to: "Permutation",
-    findstat: [{ id: "Mp00253", rows: 1200, compared: 1200, skipped: 0 }],
-  },
-  {
-    name: "LowerGrassmannPermutation",
-    from: "DecoratedPermutation",
-    to: "Permutation",
-    findstat: [{ id: "Mp00255", rows: 1200, compared: 1200, skipped: 0 }],
-  },
-  {
-    name: "UpperGrassmannPermutation",
-    from: "DecoratedPermutation",
-    to: "Permutation",
-    findstat: [{ id: "Mp00256", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
     name: "Tanimoto",

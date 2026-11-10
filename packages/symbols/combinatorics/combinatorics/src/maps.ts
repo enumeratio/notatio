@@ -49,7 +49,6 @@ import { STRAHLER_MAPS } from "../trees/src/strahler-maps.ts";
 import { INCREASING_TREE_MAPS } from "../permutations/src/increasing-tree-maps.ts";
 import { FRANCON_MAPS } from "../lattice-paths/src/francon-maps.ts";
 import { POLYOMINO_MAPS } from "../lattice-paths/src/polyomino-maps.ts";
-import { DECORATED_PERMUTATION_MAPS } from "../permutations/src/decorated-maps.ts";
 import { PERMUTATION_BATCH_TEN_MAPS } from "../permutations/src/tenth-batch-maps.ts";
 import { PLANE_PARTITION_MAPS } from "../tableaux/src/plane-partition-maps.ts";
 import { CLIQUE_MAPS } from "../graphs/src/clique-maps.ts";
@@ -93,7 +92,6 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...INCREASING_TREE_MAPS,
   ...FRANCON_MAPS,
   ...POLYOMINO_MAPS,
-  ...DECORATED_PERMUTATION_MAPS,
   ...PERMUTATION_BATCH_TEN_MAPS,
   ...PLANE_PARTITION_MAPS,
   ...CLIQUE_MAPS,
