@@ -86,7 +86,7 @@ const rank: MathJSON = at(
 
 /** Whether following parents from vertex i reaches a root (0) within n steps. */
 const reachesRoot = (i: MathJSON): MathJSON =>
-  // The accumulator type stays: untyped, `valid` declines to compile (compute-engine 0.181).
+  // The accumulator type stays: untyped, `valid` declines to compile (compute-engine 0.184).
   equal(fold(iff(equal("vp", 0), 0, at(parents, "vp")), "vp", "vk", i, upTo(1, n), "integer"), 0);
 
 const rootedForests: EpsilFamily = {

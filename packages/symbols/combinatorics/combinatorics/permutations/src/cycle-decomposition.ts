@@ -47,7 +47,7 @@ const successor = (cycles: MathJSON, i: MathJSON, otherwise: MathJSON = 0): Math
           "k",
           "found",
           ["Range", 1, ["Length", "c"], 1],
-          // Untyped, this fold declines to compile (compute-engine 0.181).
+          // Untyped, this fold declines to compile (compute-engine 0.184).
           "integer",
         ),
         ["Typed", "found", "'integer'"],
