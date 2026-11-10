@@ -31,10 +31,17 @@ const isPositiveInfinity = (e: Expr | undefined): boolean =>
   ((e.isInfinity === true && e.im === 0 && e.re > 0) ||
     (e.operator === "DirectedInfinity" && operandsOf(e).length === 1 && operandsOf(e)[0]!.is(1)));
 
+/** The most declined expansions kept per engine. */
+const MAX_DECLINED = 256;
+
 export function declareSeriesInfinite(ce: Engine): void {
   const native = ce.lookupDefinition("Series");
   if (native === undefined || !("operator" in native)) return;
   const before = native.operator.evaluate;
+  // A held Series is evaluated again by every simplify pass over it, and native's Taylor rule
+  // differentiates f to the order before it declines at an infinity (about 0.4 s for
+  // `Hypergeometric0F1Regularized`): the declines are remembered, so the work is done once.
+  const declined = new Set<string>();
   extendHead(ce, "Series", {
     evaluate: (ops: readonly Expr[], options: EvalOptions) => {
       const [f, variable, point, order] = ops;
@@ -47,7 +54,16 @@ export function declareSeriesInfinite(ce: Engine): void {
         const expansion = asymptoticSeries(ce, f, variable, order === undefined ? 5 : order.N().re);
         if (expansion !== undefined) return expansion;
       }
-      return point?.operator === "DirectedInfinity" || expandsAtSingularity(ops) ? undefined : before?.(ops, options);
+      if (point?.operator === "DirectedInfinity" || expandsAtSingularity(ops)) return undefined;
+      if (!isPositiveInfinity(point)) return before?.(ops, options);
+      const key = `${ce.precision}${JSON.stringify(ops.map((op) => op.json))}`;
+      if (declined.has(key)) return undefined;
+      const result = before?.(ops, options);
+      if (result === undefined) {
+        if (declined.size >= MAX_DECLINED) declined.clear();
+        declined.add(key);
+      }
+      return result;
     },
   });
 }
