@@ -2,6 +2,7 @@
 // `permutations/src/maps.ts`).
 
 import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON, positions } from "../../src/map-helpers.ts";
+import { gyrationBody } from "./gyration.ts";
 import { capacityState, evacuation, insertionRows, inversePromotion, inverseRsk, promotion } from "./flat.ts";
 
 /** Rows must be nonempty and weakly shrinking: the carrier also holds the odd tableaux other families draw. */
@@ -517,5 +518,13 @@ export const TABLEAUX_MAPS: readonly CombinatorialMap[] = [
     body: forEach(positions, forEach(positions, at("i", at("j")), "j")),
     summary: "The transpose: rows become columns.",
     note: "FindStat's Mp00005, an involution.",
+  },
+  {
+    name: "Gyration",
+    from: "alternating_sign_matrix",
+    to: "alternating_sign_matrix",
+    body: gyrationBody,
+    summary: "Wieland's gyration: the height function toggled at the vertices of even parity, then of odd parity.",
+    note: "FindStat's Mp00006, a bijection of the alternating sign matrices of a size.",
   },
 ];

@@ -258,6 +258,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00305", rows: 1200, compared: 873, skipped: 0 }],
   },
   {
+    name: "Catalanization",
+    from: "Permutation",
+    to: "Permutation",
+    findstat: [{ id: "Mp00277", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
     name: "Reverse",
     from: "SignedPermutation",
     to: "SignedPermutation",
@@ -768,6 +774,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00179", rows: 1200, compared: 29, skipped: 0 }],
   },
   {
+    name: "TwoConjugate",
+    from: "IntegerPartition",
+    to: "IntegerPartition",
+    findstat: [{ id: "Mp00321", rows: 1200, compared: 29, skipped: 0 }],
+  },
+  {
     name: "Complement",
     from: "SetPartition",
     to: "SetPartition",
@@ -1024,6 +1036,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     from: "AlternatingSignMatrix",
     to: "AlternatingSignMatrix",
     findstat: [{ id: "Mp00005", rows: 1200, compared: 1200, skipped: 0 }],
+  },
+  {
+    name: "Gyration",
+    from: "AlternatingSignMatrix",
+    to: "AlternatingSignMatrix",
+    findstat: [{ id: "Mp00006", rows: 1200, compared: 1200, skipped: 0 }],
   },
   {
     name: "Reverse",
@@ -1324,6 +1342,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     from: "LabeledGraph",
     to: "IntegerPartition",
     findstat: [{ id: "Mp00275", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "BlockEdgePartition",
+    from: "LabeledGraph",
+    to: "IntegerPartition",
+    findstat: [{ id: "Mp00276", rows: 1200, compared: 208, skipped: 0 }],
   },
   {
     name: "FoataHan",

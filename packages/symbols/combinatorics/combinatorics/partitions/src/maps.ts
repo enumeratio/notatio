@@ -11,6 +11,7 @@ import {
   type MathJSON,
   positions,
 } from "../../src/map-helpers.ts";
+import { twoConjugateBody } from "./two-conjugate.ts";
 
 const parts: MathJSON = ["Length", "_raw"];
 const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
@@ -401,5 +402,14 @@ export const PARTITIONS_MAPS: readonly CombinatorialMap[] = [
     summary: "The partition as the skew shape λ/∅.",
     note: "FindStat's Mp00179. Injective.",
     findstat: ["Mp00179"],
+  },
+  {
+    name: "TwoConjugate",
+    from: "integer_partition",
+    to: "integer_partition",
+    body: twoConjugateBody,
+    summary:
+      "The involution that keeps the odd parts' positions and swaps the number of even parts with the number of cells of zero leg length and odd arm length.",
+    note: "FindStat's Mp00321, a bijection and an involution: the remainder diagram of the partition mod 2, taken through the green and yellow construction, conjugated and taken back.",
   },
 ];

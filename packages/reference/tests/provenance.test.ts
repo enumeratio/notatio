@@ -2213,6 +2213,10 @@ const NOVEL = [
   "RotateSkewPartition",
   "ComponentSizePartition",
   "ComponentEdgePartition",
+  "Catalanization",
+  "Gyration",
+  "BlockEdgePartition",
+  "TwoConjugate",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because
