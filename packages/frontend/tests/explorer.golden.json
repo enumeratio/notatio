@@ -378,7 +378,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "LargestPart", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 168
+    "statistics": 172
   },
   "DoubleFactorialNumbers": {
     "expr": "Take(DoubleFactorialNumbers, 20)",
@@ -680,7 +680,7 @@
     "glyph": "partition",
     "columns": ["PartCount", "LargestPart", "DistinctParts", "DurfeeSquare"],
     "derived": false,
-    "statistics": 168
+    "statistics": 172
   },
   "Involutions": {
     "expr": "Involutions(4)",
@@ -874,7 +874,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "DurfeeSquare", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 168
+    "statistics": 172
   },
   "LehmerCodes": {
     "expr": "LehmerCodes(4)",
@@ -1134,7 +1134,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "LargestPart", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 168
+    "statistics": 172
   },
   "OdiousNumbers": {
     "expr": "Take(OdiousNumbers, 20)",
@@ -1464,7 +1464,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "DurfeeSquare", "LargestPart", "PartCount"],
     "derived": true,
-    "statistics": 168
+    "statistics": 172
   },
   "PrimePowerNumbers": {
     "expr": "Take(PrimePowerNumbers, 20)",
@@ -1787,7 +1787,7 @@
     "glyph": "partition",
     "columns": ["LargestPart", "PartCount", "AlladiWeight", "ArmOfFirstCell"],
     "derived": true,
-    "statistics": 168
+    "statistics": 172
   },
   "SquarePyramidalNumbers": {
     "expr": "Take(SquarePyramidalNumbers, 20)",
@@ -2033,7 +2033,7 @@
     "glyph": "partition",
     "columns": ["DistinctParts", "LargestPart", "PartCount", "AddableCells"],
     "derived": true,
-    "statistics": 168
+    "statistics": 172
   },
   "TribonacciNumbers": {
     "expr": "Take(TribonacciNumbers, 20)",

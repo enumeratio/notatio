@@ -2978,6 +2978,30 @@ export const findstat: readonly FindStatMatch[] = [
     values: 271,
   },
   {
+    head: "SquareRootCount",
+    on: "IntegerPartition",
+    findstat: ["St000811"],
+    values: 288,
+  },
+  {
+    head: "StandardTableauCountWithOddFirstDescent",
+    on: "IntegerPartition",
+    findstat: ["St000620"],
+    values: 270,
+  },
+  {
+    head: "StandardTableauCountWithEvenFirstDescent",
+    on: "IntegerPartition",
+    findstat: ["St000621"],
+    values: 270,
+  },
+  {
+    head: "DesarrangementTableauCount",
+    on: "IntegerPartition",
+    findstat: ["St000506"],
+    values: 271,
+  },
+  {
     head: "Height",
     on: "DyckPath",
     findstat: ["St000013"],
