@@ -6,6 +6,8 @@
 // an independent reading over every permutation of 1..6.
 
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
+import { fold as tableFold } from "../../collections/src/families/tables.ts";
+import { insertionShape } from "../../tableaux/src/flat.ts";
 import {
   FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
   FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3,
@@ -3605,6 +3607,245 @@ const FINDSTAT_PERMUTATION_STATISTICS_13: readonly Definition[] = [
   ),
 ].map((d) => (SUBSET_SWEEPS.has(d.head) ? { ...d, checkWeight: SUBSET_SWEEP_CHECK_WEIGHT } : d));
 
+// The fourteenth batch: stack sorting, swap classes, the a-function, parking function fibers, star factorizations.
+/** The position at which the entry at i leaves the stack in a stack-sorting pass over `l`: that of the next larger entry, or n + 1. */
+const stackExit = (l: MathJSON): MathJSON =>
+  min([
+    "Join",
+    ["List", add(length(), 1)],
+    where(positions, and(greater("j", "i"), greater(at("j", l), at("i", l))), "j"),
+  ]);
+/** One stack-sorting pass over the list `l`: the entries come out ordered by when they leave the stack, the smaller first among those leaving together. */
+const stackSortPass = (l: MathJSON): MathJSON =>
+  bind(
+    "g",
+    forEach(positions, stackExit(l)),
+    bind(
+      "r",
+      forEach(
+        positions,
+        add(
+          1,
+          count(
+            positions,
+            or(less(at("j", "g"), at("i", "g")), and(equals(at("j", "g"), at("i", "g")), less(at("j", l), at("i", l)))),
+            "j",
+          ),
+        ),
+      ),
+      forEach(positions, sumOver(positions, ["If", equals(at("i", "r"), "k"), at("i", l), 0]), "k"),
+      "list<integer>",
+    ),
+    "list<integer>",
+  );
+/** The stack-sorting passes before the word is sorted: n passes are run, enough since n - 1 sort any word, and a sorted word stays put without counting. */
+const stackSortPasses: MathJSON = [
+  "At",
+  fold(
+    positions,
+    ["Join", ["List", 0], x],
+    bind(
+      "l",
+      forEach(positions, at(add("m", 1), "a"), "m"),
+      [
+        "Join",
+        [
+          "List",
+          add(carried(1), ["If", equals(count(adjacent, greater(at("i", "l"), at(add("i", 1), "l"))), 0), 0, 1]),
+        ],
+        stackSortPass("l"),
+      ],
+      "list<integer>",
+    ),
+  ),
+  1,
+];
+
+/** The shared typed fold, its tables-side expression type read as ours. */
+const typedFold = (...args: Parameters<typeof tableFold>): MathJSON => tableFold(...args) as MathJSON;
+/** The inverse of p as a list: the position of each value. */
+const inverseList: MathJSON = forEach(positions, positionOf("v"), "v");
+/**
+ * The permutations reachable from p by swapping adjacent entries whose values differ by `gap`: the linear extensions of the
+ * order on values 1 .. n where v precedes w when they do not differ by `gap` and v is left of w. Counted over subsets as
+ * masks of the values placed so far; the mask m is built from m minus one of its values, all of whose predecessors it holds.
+ */
+const swapClassSize = (gap: number): MathJSON =>
+  nonEmpty(
+    bind(
+      "q",
+      inverseList,
+      [
+        "At",
+        typedFold(
+          [
+            "Join",
+            "a",
+            [
+              "List",
+              sumOver(
+                positions,
+                [
+                  "If",
+                  and(
+                    equals(inSubset("m", "v"), 1),
+                    equals(
+                      count(
+                        positions,
+                        and(
+                          and(["NotEqual", ["Abs", subtract("w", "v")], gap], less(at("w", "q"), at("v", "q"))),
+                          equals(inSubset("m", "w"), 0),
+                        ),
+                        "w",
+                      ),
+                      0,
+                    ),
+                  ),
+                  at(add(subtract("m", ["Power", 2, subtract("v", 1)]), 1), "a"),
+                  0,
+                ],
+                "v",
+              ),
+            ],
+          ],
+          "a",
+          "m",
+          ["List", 1],
+          ["Range", 1, subtract(["Power", 2, length()], 1)],
+          "list<integer>",
+        ),
+        ["Power", 2, length()],
+      ],
+      "list<integer>",
+    ),
+    1,
+  );
+
+/** Sum over rows of (row - 1) times the row length of the Robinson-Schensted shape: the sum of binomial(column length, 2). */
+const lusztigAFunction: MathJSON = nonEmpty(
+  bind(
+    "s",
+    insertionShape("rs", x),
+    floored(sumOver(upTo(length("s")), ["Multiply", subtract("i", 1), at("i", "s")])),
+    "list<integer>",
+  ),
+);
+
+/** Parking functions parking the cars as p says: each car's preference is any spot of the occupied stretch just left of its own. */
+const parkingPermutationFiber: MathJSON = nonEmpty(
+  bind(
+    "q",
+    inverseList,
+    [
+      "Product",
+      forEach(
+        positions,
+        subtract(
+          "j",
+          max(["Join", ["List", 0], where(positions, and(less("k", "j"), greater(at("k", "q"), at("j", "q"))), "k")]),
+        ),
+        "j",
+      ),
+    ],
+    "list<integer>",
+  ),
+  1,
+);
+
+/**
+ * Parking functions whose word standardizes to the inverse of p: weakly increasing preferences by rank, strictly so where the
+ * entry of rank k comes after that of rank k + 1, and at most k for the k-th. A fold over ranks carries the counts by last value.
+ */
+const labellingPermutationFiber: MathJSON = hasPair(
+  floored([
+    "Sum",
+    typedFold(
+      forEach(
+        positions,
+        [
+          "If",
+          atMostValue("v", "b"),
+          subtract(sumOver(upTo("v"), at("u", "a"), "u"), [
+            "If",
+            greater(at(subtract("b", 1)), at("b")),
+            at("v", "a"),
+            0,
+          ]),
+          0,
+        ],
+        "v",
+      ),
+      "a",
+      "b",
+      forEach(positions, ["If", equals("i", 1), 1, 0]),
+      ["Range", 2, length()],
+      "list<integer>",
+    ),
+  ]),
+  1,
+);
+
+/** Minimal factorizations of p into star transpositions (1 a): (n + m - 2(k + 1))! times the cycle lengths' product, over (n - k)!, with m cycles and k fixed points other than 1. */
+const starFactorizations: MathJSON = nonEmpty(
+  bind(
+    "k",
+    count(positions, and(equals(here, "i"), greater("i", 1))),
+    bind(
+      "m",
+      length(cycleLengths),
+      [
+        "Divide",
+        ["Multiply", factorial(subtract(add(length(), "m"), ["Multiply", 2, add("k", 1)])), ["Product", cycleLengths]],
+        factorial(subtract(length(), "k")),
+      ],
+      "integer",
+    ),
+    "integer",
+  ),
+  1,
+);
+
+const FINDSTAT_PERMUTATION_STATISTICS_14: readonly Definition[] = [
+  stat(
+    "StackSortingPasses",
+    "The passes of West's stack sorting needed to sort p.",
+    hasPair(stackSortPasses),
+    "At most n - 1 passes sort a permutation of n.",
+  ),
+  stat(
+    "ConsecutiveSwapClassSize",
+    "The permutations reached from p by swapping adjacent entries that differ by 1, p included.",
+    swapClassSize(1),
+  ),
+  stat(
+    "DistanceTwoSwapClassSize",
+    "The permutations reached from p by swapping adjacent entries that differ by 2, p included.",
+    swapClassSize(2),
+  ),
+  stat(
+    "LusztigAFunction",
+    "Lusztig's a-function: the sum of binomial(c, 2) over the column lengths c of the Robinson-Schensted shape.",
+    lusztigAFunction,
+  ),
+  stat(
+    "ParkingPermutationPreimageSize",
+    "The parking functions whose cars park in the order p.",
+    parkingPermutationFiber,
+    "Each car chooses among the occupied spots just before its own, and its own.",
+  ),
+  stat(
+    "LabellingPermutationPreimageSize",
+    "The parking functions sent to p by the map to the labelling permutation.",
+    labellingPermutationFiber,
+  ),
+  stat(
+    "MinimalStarTranspositionFactorizationCount",
+    "The minimal length factorizations of p into the transpositions (1 a).",
+    starFactorizations,
+    "FindStat's formula.",
+  ),
+];
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -3817,6 +4058,7 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_11,
   ...FINDSTAT_PERMUTATION_STATISTICS_12,
   ...FINDSTAT_PERMUTATION_STATISTICS_13,
+  ...FINDSTAT_PERMUTATION_STATISTICS_14,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3,

@@ -447,6 +447,106 @@ const stretchCycleImage = (p: number[]): Map<number, number> => {
   close();
   return image;
 };
+/** The permutations reachable from p by swapping adjacent entries that differ by `gap`, found by search. */
+const swapClassOf = (p: number[], gap: number): number => {
+  const seen = new Set([p.join(",")]);
+  const todo = [p];
+  while (todo.length > 0) {
+    const w = todo.pop()!;
+    for (const i of range(0, w.length - 2)) {
+      if (Math.abs(w[i]! - w[i + 1]!) !== gap) continue;
+      const swapped = w.with(i, w[i + 1]!).with(i + 1, w[i]!);
+      if (seen.has(swapped.join(","))) continue;
+      seen.add(swapped.join(","));
+      todo.push(swapped);
+    }
+  }
+  return seen.size;
+};
+/** One pass of West's stack sorting: pop while the next entry is larger. */
+const stackSort = (w: number[]): number[] => {
+  const out: number[] = [];
+  const stack: number[] = [];
+  for (const e of w) {
+    while (stack.length > 0 && stack.at(-1)! < e) out.push(stack.pop()!);
+    stack.push(e);
+  }
+  return [...out, ...stack.toReversed()];
+};
+/** The row lengths of the Robinson-Schensted tableau, by row insertion. */
+const insertionShapeOf = (p: number[]): number[] => {
+  const rows: number[][] = [];
+  for (const entry of p) {
+    let e = entry;
+    for (let r = 0; ; r++) {
+      if (r === rows.length) {
+        rows.push([e]);
+        break;
+      }
+      const row = rows[r]!;
+      const j = row.findIndex((v) => v > e);
+      if (j < 0) {
+        row.push(e);
+        break;
+      }
+      [row[j], e] = [e, row[j]!];
+    }
+  }
+  return rows.map((row) => row.length);
+};
+/** The parking functions of n cars, as the spot each car takes and its preference word, found by letting the cars park. */
+const parkingFunctionsCache = new Map<number, { spots: number[]; word: number[] }[]>();
+const parkingFunctionsOf = (n: number): { spots: number[]; word: number[] }[] => {
+  if (parkingFunctionsCache.has(n)) return parkingFunctionsCache.get(n)!;
+  const found: { spots: number[]; word: number[] }[] = [];
+  const walk = (word: number[], taken: boolean[], spots: number[]): void => {
+    if (word.length === n) {
+      found.push({ spots, word });
+      return;
+    }
+    for (const want of range(1, n)) {
+      const spot = range(want, n).find((s) => !taken[s]);
+      if (spot === undefined) continue;
+      walk([...word, want], taken.with(spot, true), [...spots, spot]);
+    }
+  };
+  walk([], new Array<boolean>(n + 1).fill(false), []);
+  parkingFunctionsCache.set(n, found);
+  return found;
+};
+/** The standardization of a word: positions ranked by value, equal values left to right. */
+const standardPermutation = (w: number[]): number[] => {
+  const order = range(0, w.length - 1).toSorted((i, j) => w[i]! - w[j]! || i - j);
+  const rank = new Array<number>(w.length);
+  order.forEach((i, r) => (rank[i] = r + 1));
+  return rank;
+};
+/** The shortest-path counts from the identity in the graph that swaps the first entry with another, by search outward. */
+const starFactorizationCache = new Map<number, Map<string, number>>();
+const starFactorizationsOf = (n: number): Map<string, number> => {
+  if (starFactorizationCache.has(n)) return starFactorizationCache.get(n)!;
+  const identity = range(1, n);
+  const distance = new Map<string, number>([[identity.join(","), 0]]);
+  const paths = new Map<string, number>([[identity.join(","), 1]]);
+  let frontier = [identity];
+  while (frontier.length > 0) {
+    const next = new Map<string, number[]>();
+    for (const w of frontier)
+      for (const a of range(1, n - 1)) {
+        const moved = w.with(0, w[a]!).with(a, w[0]!);
+        const key = moved.join(",");
+        const known = distance.get(key);
+        const level = distance.get(w.join(","))! + 1;
+        if (known !== undefined && known < level) continue;
+        distance.set(key, level);
+        paths.set(key, (known === undefined ? 0 : paths.get(key)!) + paths.get(w.join(","))!);
+        next.set(key, moved);
+      }
+    frontier = [...next.values()];
+  }
+  starFactorizationCache.set(n, paths);
+  return paths;
+};
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -1305,4 +1405,29 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
     return passes;
   },
   DistinctPatternCount: (p) => new Set(subwordsOf(p).map(standardized)).size,
+  StackSortingPasses: (p) => {
+    let w = p;
+    let passes = 0;
+    while (w.some((v, i) => v !== i + 1)) {
+      w = stackSort(w);
+      passes++;
+    }
+    return passes;
+  },
+  ConsecutiveSwapClassSize: (p) => swapClassOf(p, 1),
+  DistanceTwoSwapClassSize: (p) => swapClassOf(p, 2),
+  LusztigAFunction: (p) => {
+    const shape = insertionShapeOf(p);
+    return sum(
+      range(1, shape[0] ?? 0).map(
+        (j) => (shape.filter((l) => l >= j).length * (shape.filter((l) => l >= j).length - 1)) / 2,
+      ),
+    );
+  },
+  ParkingPermutationPreimageSize: (p) =>
+    parkingFunctionsOf(p.length).filter(({ spots }) => spots.every((s, c) => s === p[c])).length,
+  LabellingPermutationPreimageSize: (p) =>
+    parkingFunctionsOf(p.length).filter(({ word }) => inverse(standardPermutation(word)).every((v, i) => v === p[i]))
+      .length,
+  MinimalStarTranspositionFactorizationCount: (p) => starFactorizationsOf(p.length).get(p.join(",")) ?? 0,
 };

@@ -2036,6 +2036,48 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "StackSortingPasses",
+    on: "Permutation",
+    findstat: ["St000028"],
+    values: 2708,
+  },
+  {
+    head: "ConsecutiveSwapClassSize",
+    on: "Permutation",
+    findstat: ["St000458"],
+    values: 1201,
+  },
+  {
+    head: "DistanceTwoSwapClassSize",
+    on: "Permutation",
+    findstat: ["St000669"],
+    values: 3028,
+  },
+  {
+    head: "LusztigAFunction",
+    on: "Permutation",
+    findstat: ["St001874"],
+    values: 873,
+  },
+  {
+    head: "ParkingPermutationPreimageSize",
+    on: "Permutation",
+    findstat: ["St001346"],
+    values: 872,
+  },
+  {
+    head: "LabellingPermutationPreimageSize",
+    on: "Permutation",
+    findstat: ["St000280"],
+    values: 1200,
+  },
+  {
+    head: "MinimalStarTranspositionFactorizationCount",
+    on: "Permutation",
+    findstat: ["St001081"],
+    values: 1200,
+  },
+  {
     head: "LargestPart",
     on: "IntegerPartition",
     findstat: ["St000147"],

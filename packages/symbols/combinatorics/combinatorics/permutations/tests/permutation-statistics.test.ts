@@ -37,6 +37,9 @@ const HEAVY = new Set([
   "InsertionBumpsOfOne",
   "SimionSchmidtPreimageSize",
   "PrefixExchangeDistance",
+  "LusztigAFunction",
+  "ConsecutiveSwapClassSize",
+  "DistanceTwoSwapClassSize",
 ]);
 // Sweeps over every subset or pair of subsets cost a second or more per permutation of 5: 1..3 here, 4 and 5 nightly.
 const SWEEPS = new Set([
@@ -45,6 +48,7 @@ const SWEEPS = new Set([
   "AlternatingSubsetBreakCount",
   "PopStackSortingPasses",
   "DistinctPatternCount",
+  "StackSortingPasses",
 ]);
 const ALL = upTo(5);
 const SMALL = upTo(4);
