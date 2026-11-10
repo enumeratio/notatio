@@ -3,6 +3,18 @@ name: GeneralPositionNumber
 domain: Graph statistics
 signature: GeneralPositionNumber(graph)
 summary: The most vertices in a set with no three on one shortest path.
+signatures:
+  - call: GeneralPositionNumber(graph)
+    description: The most vertices in a set with no three on one shortest path.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001655
+    url: https://www.findstat.org/St001655
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -3,6 +3,18 @@ name: MaximumSimplePathCount
 domain: Graph statistics
 signature: MaximumSimplePathCount(graph)
 summary: The most simple paths between two different vertices.
+signatures:
+  - call: MaximumSimplePathCount(graph)
+    description: The most simple paths between two different vertices.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001592
+    url: https://www.findstat.org/St001592
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

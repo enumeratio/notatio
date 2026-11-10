@@ -3,6 +3,18 @@ name: TwoPackingDifferential
 domain: Graph statistics
 signature: TwoPackingDifferential(graph)
 summary: The most, over the sets of vertices with disjoint closed neighborhoods, of the vertices outside the set with a neighbor in it less the vertices in it.
+signatures:
+  - call: TwoPackingDifferential(graph)
+    description: The most, over the sets of vertices with disjoint closed neighborhoods, of the vertices outside the set with a neighbor in it less the vertices in it.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001724
+    url: https://www.findstat.org/St001724
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -3,6 +3,18 @@ name: AcyclicOrientationCount
 domain: Graph statistics
 signature: AcyclicOrientationCount(graph)
 summary: The ways to direct every edge so that no directed cycle results.
+signatures:
+  - call: AcyclicOrientationCount(graph)
+    description: The ways to direct every edge so that no directed cycle results.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000269
+    url: https://www.findstat.org/St000269
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

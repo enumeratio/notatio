@@ -3,6 +3,18 @@ name: TriangleFreeVertexDeletionNumber
 domain: Graph statistics
 signature: TriangleFreeVertexDeletionNumber(graph)
 summary: The fewest vertices whose deletion leaves a graph with no triangle.
+signatures:
+  - call: TriangleFreeVertexDeletionNumber(graph)
+    description: The fewest vertices whose deletion leaves a graph with no triangle.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001336
+    url: https://www.findstat.org/St001336
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

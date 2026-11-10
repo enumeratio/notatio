@@ -3,6 +3,18 @@ name: LargestInducedPathSize
 domain: Graph statistics
 signature: LargestInducedPathSize(graph)
 summary: The most vertices that induce a path.
+signatures:
+  - call: LargestInducedPathSize(graph)
+    description: The most vertices that induce a path.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001093
+    url: https://www.findstat.org/St001093
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

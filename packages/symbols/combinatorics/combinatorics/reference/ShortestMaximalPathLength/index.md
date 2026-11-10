@@ -3,6 +3,18 @@ name: ShortestMaximalPathLength
 domain: Graph statistics
 signature: ShortestMaximalPathLength(graph)
 summary: The edges of the shortest path that no vertex can be added to at either end.
+signatures:
+  - call: ShortestMaximalPathLength(graph)
+    description: The edges of the shortest path that no vertex can be added to at either end.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001119
+    url: https://www.findstat.org/St001119
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

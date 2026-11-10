@@ -3,6 +3,18 @@ name: PadmakarIvanIndex
 domain: Graph statistics
 signature: PadmakarIvanIndex(graph)
 summary: The sum over the edges of the edges inside the vertices nearer one end, and inside those nearer the other.
+signatures:
+  - call: PadmakarIvanIndex(graph)
+    description: The sum over the edges of the edges inside the vertices nearer one end, and inside those nearer the other.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001374
+    url: https://www.findstat.org/St001374
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

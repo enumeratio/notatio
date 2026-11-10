@@ -3,6 +3,18 @@ name: HamiltonianCycleCount
 domain: Graph statistics
 signature: HamiltonianCycleCount(graph)
 summary: The cycles through every vertex.
+signatures:
+  - call: HamiltonianCycleCount(graph)
+    description: The cycles through every vertex.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St000379
+    url: https://www.findstat.org/St000379
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

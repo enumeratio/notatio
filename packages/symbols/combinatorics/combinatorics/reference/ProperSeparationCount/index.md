@@ -3,6 +3,18 @@ name: ProperSeparationCount
 domain: Graph statistics
 signature: ProperSeparationCount(graph)
 summary: The pairs of sets covering the vertices, each with a vertex the other lacks, and no edge between those vertices.
+signatures:
+  - call: ProperSeparationCount(graph)
+    description: The pairs of sets covering the vertices, each with a vertex the other lacks, and no edge between those vertices.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001799
+    url: https://www.findstat.org/St001799
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

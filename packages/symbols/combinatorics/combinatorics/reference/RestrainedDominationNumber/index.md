@@ -3,6 +3,18 @@ name: RestrainedDominationNumber
 domain: Graph statistics
 signature: RestrainedDominationNumber(graph)
 summary: The fewest vertices in a set such that every vertex outside it has a neighbor inside it and a neighbor outside it.
+signatures:
+  - call: RestrainedDominationNumber(graph)
+    description: The fewest vertices in a set such that every vertex outside it has a neighbor inside it and a neighbor outside it.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+catalog:
+  - system: findstat
+    identity: St001672
+    url: https://www.findstat.org/St001672
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
