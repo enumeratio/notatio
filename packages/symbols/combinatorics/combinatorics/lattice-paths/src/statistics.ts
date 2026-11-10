@@ -578,6 +578,32 @@ const standardMonomialDegree: MathJSON = fold(
 );
 
 /**
+ * The standard monomial relative to the trivial lower boundary (St001509): walk the steps carrying (open, spent,
+ * found). A down step is blocked once it passes the half plus the blockers spent, and spends one then, else it opens a
+ * column; an up step with an open column closes it, spends a blocker and adds one to the monomial.
+ */
+const lowerStandardMonomialDegree: MathJSON = fold(
+  positions,
+  ["List", 0, 0, 0],
+  [
+    "If",
+    equals(at(visiting), 0),
+    [
+      "If",
+      atMostValue(visiting, add(semilength, carried(2))),
+      ["List", add(carried(1), 1), carried(2), carried(3)],
+      ["List", carried(1), add(carried(2), 1), carried(3)],
+    ],
+    [
+      "If",
+      greater(carried(1), 0),
+      ["List", subtract(carried(1), 1), add(carried(2), 1), add(carried(3), 1)],
+      ["List", carried(1), carried(2), carried(3)],
+    ],
+  ],
+);
+
+/**
  * Pairs of singleton blocks of Biane's noncrossing partition (the ups whose matching downs lie in
  * one run of downs) whose merger is still noncrossing: no other block has a member strictly
  * between the two and another outside them.
@@ -1235,6 +1261,117 @@ const squaredRadicalInjectiveDimensions = [
 const leftShiftedSeries = ["leftSeries", leftSeries] as const;
 /** The indecomposable projectives that are not injective: the one before is longer, so a longer module ends at their socle. */
 const projectiveNotInjective: MathJSON = greater(at("v", "leftSeries"), at("v", "series"));
+
+// ── the algebra eAe and the quotient A/AeA, for e the idempotent of the minimal faithful projective-injective module ──
+/** Whether the indecomposable projective at vertex `v` is injective: no longer projective ends at the same socle. */
+const projectiveInjectiveAt = (v: MathJSON): MathJSON => atMostValue(at(v, "leftSeries"), at(v, "series"));
+/** The vertices of the projective-injective modules, the ones e keeps; the first vertex is always one. */
+const keptVertices: MathJSON = where(vertexIndices, projectiveInjectiveAt("v"), "v");
+/**
+ * The Kupisch series of eAe: the projective at a kept vertex has the kept vertices among its composition factors
+ * as its length. Padded with one simple projective for each dropped vertex so the series keeps the path's
+ * length; an isolated simple has projective dimension 0 and takes no part in any other module.
+ */
+const cornerSeries: MathJSON = bindList(
+  "kept",
+  keptVertices,
+  forEach(
+    vertexIndices,
+    [
+      "If",
+      atMostValue("v", length("kept")),
+      bind(
+        "w",
+        at("v", "kept"),
+        count("kept", and(atLeastValue("y", "w"), less("y", add("w", at("w", "series")))), "y"),
+        "integer",
+      ),
+      1,
+    ],
+    "v",
+  ),
+);
+/**
+ * The Kupisch series of A/AfA, f the idempotent at the socles of the projective-injective modules: a projective cut
+ * at the first such socle at or after its top, and the projective at a socle itself dropped to an isolated simple.
+ */
+const quotientSeries: MathJSON = bindList(
+  "socles",
+  forEach(keptVertices, add("v", subtract(at("v", "series"), 1)), "v"),
+  forEach(
+    vertexIndices,
+    [
+      "If",
+      greater(count("socles", equals("y", "v"), "y"), 0),
+      1,
+      [
+        "Min",
+        at("v", "series"),
+        subtract(["Min", ["Join", where("socles", atLeastValue("y", "v"), "y"), ["List", add(vertexCount, 1)]]], "v"),
+      ],
+    ],
+    "v",
+  ),
+);
+/** `body` with the series and left shifted series of the path's algebra bound, then those of `derived`; `outer` values bind in between. */
+const overDerivedSeries = (
+  derived: MathJSON,
+  outer: readonly (readonly [string, MathJSON, string?])[],
+  body: MathJSON,
+): MathJSON =>
+  nonEmpty(
+    bindList(
+      "series",
+      kupischSeries,
+      bindList(
+        "leftSeries",
+        leftSeries,
+        outer.reduceRight(
+          (inner, [name, value, type]) => bindList(name, value, inner, type),
+          bindList("series", derived, bindList("leftSeries", leftSeries, body)),
+        ),
+      ),
+    ),
+  );
+const withSimpleDimensions = (body: MathJSON): MathJSON => bindList("dims", simpleDimensions, body);
+/** The count of simples of eAe whose projective dimension passes `test`, less the padding. */
+const cornerSimplesWhere = (test: (dimension: MathJSON) => MathJSON): MathJSON =>
+  overDerivedSeries(
+    cornerSeries,
+    [["padding", subtract(vertexCount, length(keptVertices)), "integer"]],
+    withSimpleDimensions(subtract(simplesWhere(test), "padding")),
+  );
+/**
+ * The sum of the entries of the Coxeter matrix -C^-T C for the Cartan matrix C (of the opposite reading of the
+ * path), up to sign. C v = 1 has the solution v = 1 on the jumps v -> v + series[v] from the first vertex and 0
+ * elsewhere, and C 1 counts at each vertex the projectives that cover it, so the sum is those counts along the jumps.
+ */
+const coxeterEntrySum: MathJSON = [
+  "At",
+  fold(
+    vertexIndices,
+    ["List", 1, 0],
+    bindList(
+      "entry",
+      ["If", atMostValue(carried(1), vertexCount), at(carried(1), "series"), 0],
+      [
+        "If",
+        atMostValue(carried(1), vertexCount),
+        [
+          "List",
+          add(carried(1), "entry"),
+          add(
+            carried(2),
+            count(vertexIndices, and(atMostValue("j", carried(1)), less(carried(1), add("j", at("j", "series")))), "j"),
+          ),
+        ],
+        ["List", carried(1), carried(2)],
+      ],
+      "integer",
+    ),
+  ),
+  2,
+];
 
 export const DYCK_STATISTICS: readonly Definition[] = [
   stat("Height", "The greatest height the path reaches.", nonEmpty(["Max", profile])),
@@ -1969,7 +2106,7 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     "DiagonalStandardMonomialDegree",
     "The degree of the standard monomial of the path relative to the diagonal boundary.",
     nonEmpty(["At", standardMonomialDegree, 3]),
-    "FindStat's St001508, as its Sage code walks the path. St001509, the same relative to the trivial lower boundary, is not adopted: its published code does not run.",
+    "FindStat's St001508, as its Sage code walks the path; `TrivialLowerBoundaryStandardMonomialDegree` is St001509, relative to the trivial lower boundary.",
   ),
   stat(
     "NoncrossingMergeableSingletonPairs",
@@ -2791,5 +2928,76 @@ export const DYCK_STATISTICS: readonly Definition[] = [
       ),
     ),
     "FindStat's St001492. A simple module is in the socle when some indecomposable projective ends at it.",
+  ),
+  stat(
+    "CornerAlgebraGlobalDimension",
+    "The global dimension of the corner algebra eAe of the path's linear Nakayama algebra, e the idempotent of its minimal faithful projective-injective module.",
+    overDerivedSeries(cornerSeries, [], withSimpleDimensions(["Max", "dims"])),
+    "FindStat's St001197.",
+  ),
+  stat(
+    "NakayamaGlobalMinusCornerGlobalDimension",
+    "The global dimension of the path's linear Nakayama algebra less that of its corner algebra eAe.",
+    overDerivedSeries(
+      cornerSeries,
+      [
+        ["dims", simpleDimensions],
+        ["fullGlobal", ["Max", "dims"], "integer"],
+      ],
+      withSimpleDimensions(subtract("fullGlobal", ["Max", "dims"])),
+    ),
+    "FindStat's St001196.",
+  ),
+  stat(
+    "CornerAlgebraSimplesOfProjectiveDimensionAtMostOne",
+    "The simple modules of the corner algebra eAe of projective dimension at most one.",
+    cornerSimplesWhere((d) => atMostValue(d, 1)),
+    "FindStat's St001198.",
+  ),
+  stat(
+    "CornerAlgebraSimplesOfProjectiveDimensionAtMostTwo",
+    "The simple modules of the corner algebra eAe of projective dimension at most two.",
+    cornerSimplesWhere((d) => atMostValue(d, 2)),
+    "FindStat's St001200.",
+  ),
+  stat(
+    "CornerAlgebraNonSimpleProjectiveInjectives",
+    "The indecomposable projective-injective modules of the corner algebra eAe that are not simple.",
+    overDerivedSeries(
+      cornerSeries,
+      [],
+      count(vertexIndices, and(projectiveInjectiveAt("v"), greater(at("v", "series"), 1)), "v"),
+    ),
+    "FindStat's St001205.",
+  ),
+  stat(
+    "CornerAlgebraLongestProjective",
+    "The greatest dimension of an indecomposable projective module of the corner algebra eAe, the height of its Dyck path.",
+    overDerivedSeries(cornerSeries, [], ["Max", "series"]),
+    "FindStat's St001206. The towers, whose corner algebra is the field, have 1.",
+  ),
+  stat(
+    "FaithfulQuotientGlobalDimension",
+    "The global dimension of the quotient A/AfA of the path's linear Nakayama algebra by the ideal of the idempotent f of its minimal faithful projective-injective left module.",
+    overDerivedSeries(quotientSeries, [], withSimpleDimensions(["Max", "dims"])),
+    "FindStat's St001195. A vertex f keeps is an isolated simple projective here, which has projective dimension 0. The left module Af is the one whose socles are the socles of the right projective-injective modules.",
+  ),
+  stat(
+    "NakayamaFrobeniusDimension",
+    "The dimension of the space of homomorphisms from the injective cogenerator D(A) to the regular module of the path's linear Nakayama algebra.",
+    overSeries(floored(["Sum", forInjectives(homWithRegular)])),
+    "FindStat's St001643, which counts over a field with three elements; the dimension does not depend on the field.",
+  ),
+  stat(
+    "NakayamaCoxeterMatrixEntrySum",
+    "The absolute value of the sum of the entries of the Coxeter matrix of the path's linear Nakayama algebra.",
+    overSeries(coxeterEntrySum),
+    "FindStat's St001473, the Coxeter matrix being -C^-1 C^T for the Cartan matrix C, which is lower unitriangular, so the matrix is integral.",
+  ),
+  stat(
+    "TrivialLowerBoundaryStandardMonomialDegree",
+    "The degree of the standard monomial of the path relative to the trivial lower boundary.",
+    nonEmpty(["At", lowerStandardMonomialDegree, 3]),
+    "FindStat's St001509, as its Sage code walks the path: the blockers are the positions after the first half, spent in order.",
   ),
 ];

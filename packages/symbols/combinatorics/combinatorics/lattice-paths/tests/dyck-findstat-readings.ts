@@ -516,6 +516,104 @@ const regularSimples = (a: ReturnType<typeof nakayama>, k: number): number =>
       a.extensionAt(m, k) === 1 &&
       a.range(0, k - 1).every((i) => a.extensionAt(m, i) === 0),
   ).length;
+// ── the corner algebra, quotient, Frobenius dimension and Coxeter matrix, read from FindStat's Sage code ──
+
+/** The Kupisch series as Sage builds it from the path itself: one entry per down step (one more than the height it starts from), then a final 1. */
+const sageSeries = (w: Word): number[] => {
+  const h = heights(w);
+  return [...w.flatMap((s, i) => (s === 0 ? [1 + h[i]!] : [])), 1];
+};
+/** Whether the projective at vertex x is injective: no longer projective ends at the same socle. */
+const isProjectiveInjective = (c: readonly number[], x: number): boolean => x === 0 || c[x - 1]! <= c[x]!;
+/** The projective dimension of the module with top x and length l, by syzygies: the syzygy has top x + l and length c[x] - l. */
+const projectiveDimensionOf = (c: readonly number[], top: number, length: number): number => {
+  let [x, l, steps] = [top, length, 0];
+  while (l !== c[x]) {
+    [x, l] = [x + l, c[x]! - l];
+    steps++;
+  }
+  return steps;
+};
+const globalDimensionOf = (c: readonly number[]): number =>
+  Math.max(...c.map((_, v) => projectiveDimensionOf(c, v, 1)));
+/** The series of eAe: the projective at a kept vertex has as length the kept vertices among its composition factors. */
+const cornerSeriesOf = (c: readonly number[]): number[] => {
+  const kept = c.flatMap((_, x) => (isProjectiveInjective(c, x) ? [x] : []));
+  return kept.map((x) => kept.filter((y) => y >= x && y < x + c[x]!).length);
+};
+/** The global dimension of A/AfA for f at the socles of the projective-injective modules; the series is read from the reversed path, as the rest of this file does. */
+const quotientGlobalDimension = (w: Word): number => {
+  const c = sageSeries(w.toReversed().map((s) => 1 - s));
+  const socles = new Set(c.flatMap((entry, x) => (isProjectiveInjective(c, x) ? [x + entry - 1] : [])));
+  const cut = c.map((entry, x) => {
+    if (socles.has(x)) return undefined;
+    let l = 0;
+    while (l < entry && !socles.has(x + l)) l++;
+    return l;
+  });
+  const dimension = (top: number, length: number): number => {
+    let [x, l, steps] = [top, length, 0];
+    while (l !== cut[x]) {
+      [x, l] = [x + l, cut[x]! - l];
+      steps++;
+    }
+    return steps;
+  };
+  return Math.max(0, ...cut.flatMap((entry, x) => (entry === undefined ? [] : [dimension(x, 1)])));
+};
+/** The dimension of Hom((x, y), (a, b)): a map's image is a quotient of the first and a submodule of the second. */
+const homOfIntervals = (x: number, y: number, a: number, b: number): number => {
+  const l = a + b - x;
+  return l >= 1 && l <= Math.min(y, b) ? 1 : 0;
+};
+/** Hom from the injective cogenerator to the regular module: the injective at each socle is the longest module ending there. */
+const frobeniusDimension = (c: readonly number[]): number =>
+  c.reduce((total, _, socle) => {
+    const top = c.findIndex((entry, x) => x + entry > socle);
+    return total + c.reduce((sub, entry, j) => sub + homOfIntervals(top, socle - top + 1, j, entry), 0);
+  }, 0);
+/** The sum of the entries of the Coxeter matrix -C^-1 C^T, for the Cartan matrix C of the series: C is lower unitriangular, inverted by forward substitution. */
+const coxeterEntrySum = (c: readonly number[]): number => {
+  const n = c.length;
+  const cartan = Array.from({ length: n }, (_, i) =>
+    Array.from({ length: n }, (_, j) => (j <= i && i < j + c[j]! ? 1 : 0)),
+  );
+  const inverse = Array.from({ length: n }, () => Array.from({ length: n }, () => 0));
+  for (let col = 0; col < n; col++)
+    for (let i = col; i < n; i++) {
+      let value = i === col ? 1 : 0;
+      for (let k = col; k < i; k++) value -= cartan[i]![k]! * inverse[k]![col]!;
+      inverse[i]![col] = value;
+    }
+  let total = 0;
+  for (let i = 0; i < n; i++)
+    for (let j = 0; j < n; j++) for (let k = 0; k < n; k++) total -= inverse[i]![k]! * cartan[j]![k]!;
+  return Math.abs(total);
+};
+/** FindStat's standard monomial for the trivial lower boundary, with the blockers a queue (St001509's Sage code, steps 1 up). */
+const lowerStandardMonomialSize = (w: Word): number => {
+  const half = w.length / 2;
+  const blockers = Array.from({ length: half }, (_, i) => half + 1 + i);
+  let open = 0;
+  let size = 0;
+  w.forEach((s, index) => {
+    const position = index + 1;
+    if (s === 0) {
+      if (blockers.length === 0 || position < blockers[0]!) open++;
+      else blockers.shift();
+    } else if (open > 0) {
+      open--;
+      size++;
+      blockers.shift();
+    }
+  });
+  return size;
+};
+const overSageSeries =
+  (body: (c: number[]) => number) =>
+  (w: Word): number =>
+    w.length === 0 ? 0 : body(sageSeries(w));
+
 const peaksOf = (w: Word): number => w.filter((s, i) => s === 1 && w[i + 1] === 0).length;
 
 export const DYCK_READINGS: Record<string, (w: Word) => number> = {
@@ -1010,6 +1108,27 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
   ParallelogramPolyominoInnerCorners: (w) =>
     w.length === 0 ? 0 : polyominoCorners(w, "bottom") + polyominoCorners(w, "top"),
   ParallelogramPolyominoUpperInnerCorners: (w) => (w.length === 0 ? 0 : polyominoCorners(w, "bottom")),
+  CornerAlgebraGlobalDimension: overSageSeries((c) => globalDimensionOf(cornerSeriesOf(c))),
+  NakayamaGlobalMinusCornerGlobalDimension: overSageSeries(
+    (c) => globalDimensionOf(c) - globalDimensionOf(cornerSeriesOf(c)),
+  ),
+  CornerAlgebraSimplesOfProjectiveDimensionAtMostOne: overSageSeries((c) => {
+    const e = cornerSeriesOf(c);
+    return e.filter((_, v) => projectiveDimensionOf(e, v, 1) <= 1).length;
+  }),
+  CornerAlgebraSimplesOfProjectiveDimensionAtMostTwo: overSageSeries((c) => {
+    const e = cornerSeriesOf(c);
+    return e.filter((_, v) => projectiveDimensionOf(e, v, 1) <= 2).length;
+  }),
+  CornerAlgebraNonSimpleProjectiveInjectives: overSageSeries((c) => {
+    const e = cornerSeriesOf(c);
+    return e.filter((entry, x) => isProjectiveInjective(e, x) && entry > 1).length;
+  }),
+  CornerAlgebraLongestProjective: overSageSeries((c) => Math.max(...cornerSeriesOf(c))),
+  FaithfulQuotientGlobalDimension: (w) => (w.length === 0 ? 0 : quotientGlobalDimension(w)),
+  NakayamaFrobeniusDimension: overSageSeries(frobeniusDimension),
+  NakayamaCoxeterMatrixEntrySum: overSageSeries(coxeterEntrySum),
+  TrivialLowerBoundaryStandardMonomialDegree: lowerStandardMonomialSize,
 };
 
 /** The FindStat statistic each reading is held to. */
@@ -1099,4 +1218,14 @@ export const DYCK_FINDSTAT: Record<string, string> = {
   InjectivesOfProjectiveDimensionAtMostOne: "St001180",
   InjectivesOfProjectiveDimensionAtMostTwo: "St001179",
   InjectivesOfMaximalProjectiveDimension: "St001009",
+  CornerAlgebraGlobalDimension: "St001197",
+  NakayamaGlobalMinusCornerGlobalDimension: "St001196",
+  CornerAlgebraSimplesOfProjectiveDimensionAtMostOne: "St001198",
+  CornerAlgebraSimplesOfProjectiveDimensionAtMostTwo: "St001200",
+  CornerAlgebraNonSimpleProjectiveInjectives: "St001205",
+  CornerAlgebraLongestProjective: "St001206",
+  FaithfulQuotientGlobalDimension: "St001195",
+  NakayamaFrobeniusDimension: "St001643",
+  NakayamaCoxeterMatrixEntrySum: "St001473",
+  TrivialLowerBoundaryStandardMonomialDegree: "St001509",
 };
