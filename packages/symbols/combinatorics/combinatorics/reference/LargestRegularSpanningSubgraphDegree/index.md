@@ -10,6 +10,11 @@ catalog:
     on: LabeledGraph
 statOn:
   - LabeledGraph
+signatures:
+  - call: LargestRegularSpanningSubgraphDegree(graph)
+    description: The greatest k such that some set of edges gives every vertex degree k.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

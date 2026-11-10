@@ -10,6 +10,11 @@ catalog:
     on: LabeledGraph
 statOn:
   - LabeledGraph
+signatures:
+  - call: TutteEvaluationAtOneAndZero(graph)
+    description: The Tutte polynomial at x = 1, y = 0.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

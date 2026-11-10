@@ -10,6 +10,11 @@ catalog:
     on: LabeledGraph
 statOn:
   - LabeledGraph
+signatures:
+  - call: ContainedForestCount(graph)
+    description: The sets of edges, the empty set included, that contain no cycle.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -1163,10 +1163,12 @@ const EDGE_SOURCE: SubsetSource = {
   emptySize: 0,
 };
 /** The pairs of vertices a < b, step k the pair at row (k - 1) div n and column (k - 1) mod n; the size is the number of pairs where the subset differs from the graph's edges. */
+/** The row of step k, (k - 1) less its remainder mod n, over n. */
+const rowOfStep: MathJSON = ["Divide", subtract(subtract("k", 1), ["Mod", subtract("k", 1), "n"]), "n"];
 const PAIR_SOURCE: SubsetSource = {
   steps: ["Range", 1, ["Multiply", "n", "n"]],
-  active: less(add(["Floor", ["Divide", subtract("k", 1), "n"]], 1), add(["Mod", subtract("k", 1), "n"], 1)),
-  from: add(["Floor", ["Divide", subtract("k", 1), "n"]], 1),
+  active: less(add(rowOfStep, 1), add(["Mod", subtract("k", 1), "n"], 1)),
+  from: add(rowOfStep, 1),
   to: add(["Mod", subtract("k", 1), "n"], 1),
   size: add(at(1, "row"), subtract(1, times(2, adjacent("from", "to")))),
   emptySize: length("edges"),
@@ -2759,13 +2761,13 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   ),
   stat(
     "BetaInvariant",
-    "Crapo's beta invariant: (-1)^rank times the sum over sets of edges of (-1)^size times their rank.",
+    "Crapo's beta invariant: the absolute value of the sum over sets of edges of (-1)^size times their rank.",
     overEdgeSubsets(
       (size, rank) => times(["Power", -1, size], rank),
       0,
-      (sum, full) => times(["Power", -1, full], sum),
+      (sum) => ["Abs", sum],
     ),
-    `FindStat's St001071. ${NO_VERTICES}`,
+    `FindStat's St001071, (-1)^rank times that sum, which is never negative. ${NO_VERTICES}`,
   ),
   stat(
     "TutteEvaluationAtThreeAndThree",
@@ -2799,15 +2801,15 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   ),
   stat(
     "NowhereZeroFiveFlowCount",
-    "The nowhere-zero flows with values in the integers modulo 5: the Tutte polynomial at x = 0, y = -4, with the sign (-1)^nullity.",
-    tutteAt(0, -4, (sum, full) => times(["Power", -1, subtract(length("edges"), full)], sum)),
-    `FindStat's St001477. The graph with no vertices has one flow, the empty one, so 1.`,
+    "The nowhere-zero flows with values in the integers modulo 5: the absolute value of the Tutte polynomial at x = 0, y = -4.",
+    tutteAt(0, -4, (sum) => ["Abs", sum]),
+    `FindStat's St001477, the flow polynomial at 5: (-1)^nullity times that evaluation, which is never negative. The graph with no vertices has one flow, the empty one, so 1.`,
   ),
   stat(
     "NowhereZeroFourFlowCount",
-    "The nowhere-zero flows with values in the integers modulo 4: the Tutte polynomial at x = 0, y = -3, with the sign (-1)^nullity.",
-    tutteAt(0, -3, (sum, full) => times(["Power", -1, subtract(length("edges"), full)], sum)),
-    `FindStat's St001478. The graph with no vertices has one flow, the empty one, so 1.`,
+    "The nowhere-zero flows with values in the integers modulo 4: the absolute value of the Tutte polynomial at x = 0, y = -3.",
+    tutteAt(0, -3, (sum) => ["Abs", sum]),
+    `FindStat's St001478, the flow polynomial at 4: (-1)^nullity times that evaluation, which is never negative. The graph with no vertices has one flow, the empty one, so 1.`,
   ),
   stat(
     "TwoComponentSpanningForestCount",

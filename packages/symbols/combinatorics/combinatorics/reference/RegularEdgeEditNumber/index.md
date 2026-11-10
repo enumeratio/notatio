@@ -10,6 +10,11 @@ catalog:
     on: LabeledGraph
 statOn:
   - LabeledGraph
+signatures:
+  - call: RegularEdgeEditNumber(graph)
+    description: The fewest edges to add or delete to make a graph regular.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
 ---
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
