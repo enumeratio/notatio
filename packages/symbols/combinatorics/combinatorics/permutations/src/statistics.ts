@@ -3846,6 +3846,238 @@ const FINDSTAT_PERMUTATION_STATISTICS_14: readonly Definition[] = [
   ),
 ];
 
+// The fifteenth batch: patterns every size k permutation has, chord diagram components, run set fibers and twins.
+/** The size of each subsequence's order pattern where its mask is the least with that pattern: 0 elsewhere and for the empty one. */
+const firstPatternSizes: MathJSON = forEach(
+  subsetMasks,
+  bind(
+    "va",
+    subsetEntries("m"),
+    [
+      "If",
+      equals(
+        count(
+          where(subsetMasks, less("r", "m"), "r"),
+          bind(
+            "vb",
+            subsetEntries("r"),
+            [
+              "If",
+              equals(length("va"), length("vb")),
+              equals(orderDisagreements("va", "vb", length("va")), 0),
+              "False",
+            ],
+            "list<integer>",
+          ),
+          "r",
+        ),
+        0,
+      ),
+      length("va"),
+      0,
+    ],
+    "list<integer>",
+  ),
+  "m",
+);
+/** The sizes k up to n at which all k! patterns occur, as first occurrences; these are the sizes up to the largest. */
+const universalPatternSizes: MathJSON = bind(
+  "firsts",
+  firstPatternSizes,
+  count(positions, equals(count("firsts", equals("s", "k"), "s"), factorial("k")), "k"),
+  "list<integer>",
+);
+
+/** 1 when i lies strictly between the ends of the chord from j to p(j), else 0. */
+const strictlyBetween = (i: MathJSON, j: MathJSON): MathJSON => [
+  "If",
+  and(less(["Min", j, at(j)], i), less(i, ["Max", j, at(j)])),
+  1,
+  0,
+];
+/** Whether the chords from i and from j to their images cross: exactly one end of the chord from j is strictly inside the chord from i. */
+const chordsCross: MathJSON = ["NotEqual", strictlyBetween("j", "i"), strictlyBetween(at("j"), "i")];
+/**
+ * Components of the chord diagram of p on the labels 1 .. n in a circle: labels linked along each cycle and across crossing chords
+ * (chords sharing a label already are linked along their cycle). Each of n rounds gives each label the least label linked to it.
+ */
+const chordDiagramComponents: MathJSON = nonEmpty(
+  bind(
+    "c",
+    typedFold(
+      forEach(
+        positions,
+        min(
+          forEach(
+            positions,
+            [
+              "If",
+              or(or(equals("j", "i"), equals("j", at("i"))), or(equals("i", at("j")), chordsCross)),
+              at("j", "a"),
+              add(length(), 1),
+            ],
+            "j",
+          ),
+        ),
+      ),
+      "a",
+      "b",
+      positions,
+      positions,
+      "list<integer>",
+    ),
+    count(positions, equals(at("i", "c"), "i")),
+    "list<integer>",
+  ),
+);
+
+/** Positions that open a run (an ascending maximal stretch). */
+const runStarts: MathJSON = where(positions, ["If", equals("i", 1), "True", greater(previous, here)]);
+/** Positions that close a run. */
+const runEnds: MathJSON = where(positions, ["If", equals("i", length()), "True", greater(here, next)]);
+/**
+ * Arrangements of p's runs whose concatenation has the same runs: every junction a descent. The runs are the bits of a mask;
+ * the fold lists, for each non-empty mask in turn, the count of orders of its runs by last run (n masks times m entries, flat).
+ */
+const runSetFiber: MathJSON = nonEmpty(
+  bind(
+    "f",
+    forEach(runStarts, at("i")),
+    bind(
+      "l",
+      forEach(runEnds, at("i")),
+      bind(
+        "m",
+        length("f"),
+        bind(
+          "t",
+          typedFold(
+            [
+              "Join",
+              "a",
+              forEach(
+                upTo("m"),
+                [
+                  "If",
+                  equals(inSubset("b", "j"), 0),
+                  0,
+                  [
+                    "If",
+                    equals("b", ["Power", 2, subtract("j", 1)]),
+                    1,
+                    sumOver(upTo("m"), [
+                      "If",
+                      greater(at("i", "l"), at("j", "f")),
+                      at(add(["Multiply", subtract(subtract("b", ["Power", 2, subtract("j", 1)]), 1), "m"], "i"), "a"),
+                      0,
+                    ]),
+                  ],
+                ],
+                "j",
+              ),
+            ],
+            "a",
+            "b",
+            ["List"],
+            ["Range", 1, subtract(["Power", 2, "m"], 1)],
+            "list<integer>",
+          ),
+          floored(sumOver(upTo("m"), at(add(["Multiply", subtract(["Power", 2, "m"], 2), "m"], "j"), "t"), "j")),
+          "list<integer>",
+        ),
+        "integer",
+      ),
+      "list<integer>",
+    ),
+    "list<integer>",
+  ),
+  1,
+);
+
+/** Whether the subsets with masks m and r share no position. */
+const disjointMasks: MathJSON = equals(
+  count(positions, and(equals(inSubset("m", "q"), 1), equals(inSubset("r", "q"), 1)), "q"),
+  0,
+);
+/** The size of the largest pair of disjoint subsequences of equal size that `alike` (given them and their size) calls alike; 0 with none. */
+const twinSize = (alike: (a: MathJSON, b: MathJSON, k: MathJSON) => MathJSON): MathJSON =>
+  nonEmpty(
+    max([
+      "Join",
+      ["List", 0],
+      forEach(
+        subsetMasks,
+        bind(
+          "va",
+          subsetEntries("m"),
+          max([
+            "Join",
+            ["List", 0],
+            forEach(
+              where(subsetMasks, greater("r", "m"), "r"),
+              bind(
+                "vb",
+                subsetEntries("r"),
+                [
+                  "If",
+                  and(disjointMasks, equals(length("va"), length("vb"))),
+                  ["If", alike("va", "vb", length("va")), length("va"), 0],
+                  0,
+                ],
+                "list<integer>",
+              ),
+              "r",
+            ),
+          ]),
+          "list<integer>",
+        ),
+        "m",
+      ),
+    ]),
+  );
+/** Adjacent pairs of the k entries of `a` and `b` that rise in one and not the other. */
+const descentPatternDisagreements = (a: MathJSON, b: MathJSON, k: MathJSON): MathJSON =>
+  sumOver(
+    where(positions, less("t", k), "t"),
+    ["If", ["NotEqual", lowerAt(a, "t", add("t", 1)), lowerAt(b, "t", add("t", 1))], 1, 0],
+    "t",
+  );
+
+const FINDSTAT_PERMUTATION_STATISTICS_15: readonly Definition[] = [
+  stat(
+    "LargestUniversalPatternSize",
+    "The largest k such that p contains every permutation of size k as a pattern.",
+    nonEmpty(floored(["Max", universalPatternSizes, 0])),
+    "Containing every pattern of size k implies containing those of every smaller size, so the sizes counted are exactly 1 up to the largest.",
+  ),
+  stat(
+    "ChordDiagramComponentCount",
+    "The connected components of the chord diagram of p: the labels in a circle with a chord from each i to p(i).",
+    chordDiagramComponents,
+    "Chords that cross are in one component, as are those joined at a label.",
+  ),
+  stat(
+    "RunSetFiberSize",
+    "The permutations of the same size with the same set of ascending runs as p.",
+    runSetFiber,
+    "The runs can be put in any order that makes each junction a descent.",
+  ),
+  stat(
+    "LongestTwinLength",
+    "The size of a largest pair of disjoint subsequences of p that are order isomorphic.",
+    twinSize((a, b, k) => equals(orderDisagreements(a, b, k), 0)),
+  ),
+  stat(
+    "LongestWeakTwinLength",
+    "The size of a largest pair of disjoint subsequences of p with the same pattern of rises and falls.",
+    twinSize((a, b, k) => equals(descentPatternDisagreements(a, b, k), 0)),
+  ),
+].map((d) =>
+  ["LargestUniversalPatternSize", "LongestTwinLength", "LongestWeakTwinLength"].includes(d.head)
+    ? { ...d, checkWeight: SUBSET_SWEEP_CHECK_WEIGHT }
+    : d,
+);
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -4059,6 +4291,7 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_12,
   ...FINDSTAT_PERMUTATION_STATISTICS_13,
   ...FINDSTAT_PERMUTATION_STATISTICS_14,
+  ...FINDSTAT_PERMUTATION_STATISTICS_15,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3,

@@ -40,6 +40,8 @@ const HEAVY = new Set([
   "LusztigAFunction",
   "ConsecutiveSwapClassSize",
   "DistanceTwoSwapClassSize",
+  "ChordDiagramComponentCount",
+  "RunSetFiberSize",
 ]);
 // Sweeps over every subset or pair of subsets cost a second or more per permutation of 5: 1..3 here, 4 and 5 nightly.
 const SWEEPS = new Set([
@@ -49,6 +51,9 @@ const SWEEPS = new Set([
   "PopStackSortingPasses",
   "DistinctPatternCount",
   "StackSortingPasses",
+  "LargestUniversalPatternSize",
+  "LongestTwinLength",
+  "LongestWeakTwinLength",
 ]);
 const ALL = upTo(5);
 const SMALL = upTo(4);

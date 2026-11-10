@@ -2078,6 +2078,36 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "LargestUniversalPatternSize",
+    on: "Permutation",
+    findstat: ["St001741"],
+    values: 1200,
+  },
+  {
+    head: "ChordDiagramComponentCount",
+    on: "Permutation",
+    findstat: ["St001461"],
+    values: 1200,
+  },
+  {
+    head: "RunSetFiberSize",
+    on: "Permutation",
+    findstat: ["St001735"],
+    values: 1200,
+  },
+  {
+    head: "LongestTwinLength",
+    on: "Permutation",
+    findstat: ["St001517"],
+    values: 873,
+  },
+  {
+    head: "LongestWeakTwinLength",
+    on: "Permutation",
+    findstat: ["St001667"],
+    values: 1200,
+  },
+  {
     head: "LargestPart",
     on: "IntegerPartition",
     findstat: ["St000147"],

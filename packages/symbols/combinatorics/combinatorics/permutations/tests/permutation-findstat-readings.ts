@@ -547,6 +547,49 @@ const starFactorizationsOf = (n: number): Map<string, number> => {
   starFactorizationCache.set(n, paths);
   return paths;
 };
+/** The ascending runs of p: maximal stretches of consecutive increases. */
+const ascendingRuns = (p: number[]): number[][] => {
+  const runs: number[][] = [];
+  for (const v of p) {
+    if (runs.length > 0 && runs.at(-1)!.at(-1)! < v) runs.at(-1)!.push(v);
+    else runs.push([v]);
+  }
+  return runs;
+};
+/** Every ordering of the items. */
+const orderings = <T>(items: T[]): T[][] =>
+  items.length === 0
+    ? [[]]
+    : items.flatMap((item, i) =>
+        orderings([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest]),
+      );
+/** The labels' components when each i is joined to p(i) and chords that cross (ends strictly interleaved) are joined. */
+const chordComponents = (p: number[]): number => {
+  const parent = range(0, p.length);
+  const find = (v: number): number => (parent[v] === v ? v : (parent[v] = find(parent[v]!)));
+  const join = (a: number, b: number): void => void (parent[find(a)] = find(b));
+  p.forEach((v, i) => join(i + 1, v));
+  const chords = p.map((v, i): [number, number] => [Math.min(i + 1, v), Math.max(i + 1, v)]);
+  for (const [a, b] of chords) for (const [c, d] of chords) if (a < c && c < b && b < d) join(a, c);
+  return new Set(range(1, p.length).map(find)).size;
+};
+/** The size of the largest pair of disjoint subsequences of equal size that `alike` calls alike. */
+const largestTwins = (p: number[], alike: (a: number[], b: number[]) => boolean): number => {
+  let best = 0;
+  const n = p.length;
+  for (let first = 0; first < 2 ** n; first++)
+    for (let second = first + 1; second < 2 ** n; second++) {
+      if ((first & second) !== 0) continue;
+      const a = range(0, n - 1)
+        .filter((i) => (first >> i) % 2 === 1)
+        .map((i) => p[i]!);
+      const b = range(0, n - 1)
+        .filter((i) => (second >> i) % 2 === 1)
+        .map((i) => p[i]!);
+      if (a.length === b.length && a.length > best && alike(a, b)) best = a.length;
+    }
+  return best;
+};
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -1430,4 +1473,23 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
     parkingFunctionsOf(p.length).filter(({ word }) => inverse(standardPermutation(word)).every((v, i) => v === p[i]))
       .length,
   MinimalStarTranspositionFactorizationCount: (p) => starFactorizationsOf(p.length).get(p.join(",")) ?? 0,
+  LargestUniversalPatternSize: (p) => {
+    const found = new Set(subwordsOf(p).map(standardized));
+    let k = 0;
+    while (allPermutations(k + 1).every((q) => found.has(standardized(q)))) k++;
+    return k;
+  },
+  ChordDiagramComponentCount: chordComponents,
+  RunSetFiberSize: (p) => {
+    const runs = ascendingRuns(p);
+    const key = (rs: number[][]): string =>
+      rs
+        .map((r) => r.join(","))
+        .toSorted()
+        .join("|");
+    return orderings(runs).filter((order) => key(ascendingRuns(order.flat())) === key(runs)).length;
+  },
+  LongestTwinLength: (p) => largestTwins(p, (a, b) => standardized(a) === standardized(b)),
+  LongestWeakTwinLength: (p) =>
+    largestTwins(p, (a, b) => range(1, a.length - 1).every((i) => a[i - 1]! < a[i]! === b[i - 1]! < b[i]!)),
 };
