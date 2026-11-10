@@ -3,6 +3,18 @@ name: WeylGroupInvolutionClassCount
 domain: Cartan type statistics
 signature: WeylGroupInvolutionClassCount(cartanType)
 summary: "The conjugacy classes of the Weyl group whose elements are involutions, the identity left out: a class is a set of cycle types with positive and negative one- and two-cycles."
+catalog:
+  - system: findstat
+    identity: St001952
+    url: https://www.findstat.org/St001952
+    on: CartanType
+statOn:
+  - CartanType
+signatures:
+  - call: WeylGroupInvolutionClassCount(cartanType)
+    description: "The conjugacy classes of the Weyl group whose elements are involutions, the identity left out: a class is a set of cycle types with positive and negative one- and two-cycles."
+    library: enumeratio-combinatorics
+    type: (cartan_type) -> number
 ---
 
 - Defined over `CartanType` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -331,11 +331,11 @@ const indecomposablePermutations = (last: MathJSON): MathJSON =>
       [
         "List",
         subtract(
-          ["Factorial", add(["Length", "dc"], 1)],
+          factorial(add(["Length", "dc"], 1)),
           total(
             1,
             ["Length", "dc"],
-            times(entry("dc", "dk"), ["Factorial", subtract(add(["Length", "dc"], 1), "dk")]),
+            times(entry("dc", "dk"), factorial(subtract(add(["Length", "dc"], 1), "dk"))),
             "dk",
           ),
         ),
@@ -347,6 +347,9 @@ const indecomposablePermutations = (last: MathJSON): MathJSON =>
     ["Range", 2, last, 1],
     "list<integer>",
   );
+
+/** m!, as a product (no `Factorial` head: the core stays as it is), with 0! = 1. */
+const factorial = (m: MathJSON): MathJSON => ["Product", ["Range", 1, ["Max", m, 1], 1]];
 
 /** The least common multiple of the degrees: the exponent of the group of a Weyl group is it. */
 const leastCommonDegree: MathJSON = typedFold(["LCM", "la", "ld"], "la", "ld", 1, degrees);
@@ -784,21 +787,21 @@ export const CARTAN_STATISTICS: readonly Definition[] = [
         "cp",
         indecomposablePermutations(add(rank, 1)),
         byLetter({
-          A: exactly(["Factorial", add(rank, 1)], entry("cp", add(rank, 1))),
+          A: exactly(factorial(add(rank, 1)), entry("cp", add(rank, 1))),
           BC: exactly(
-            times(power(2, rank), ["Factorial", rank]),
+            times(power(2, rank), factorial(rank)),
             subtract(
-              times(power(2, rank), ["Factorial", rank]),
+              times(power(2, rank), factorial(rank)),
               total(
                 0,
                 subtract(rank, 1),
-                times(power(2, "ck"), ["Factorial", "ck"], entry("cp", subtract(rank, "ck"))),
+                times(power(2, "ck"), factorial("ck"), entry("cp", subtract(rank, "ck"))),
                 "ck",
               ),
             ),
           ),
           D: exactly(
-            times(power(2, rank), ["Factorial", rank]),
+            times(power(2, rank), factorial(rank)),
             subtract(
               total(
                 0,
@@ -811,8 +814,8 @@ export const CARTAN_STATISTICS: readonly Definition[] = [
                     ["Negate", entry("cp", ["Max", 1, subtract(subtract(rank, 3), "ck")])],
                   ],
                   add(
-                    subtract(["Factorial", add("ck", 2)], times(2, ["Factorial", add("ck", 3)])),
-                    times(power(2, add("ck", 2)), ["Factorial", add("ck", 3)]),
+                    subtract(factorial(add("ck", 2)), times(2, factorial(add("ck", 3)))),
+                    times(power(2, add("ck", 2)), factorial(add("ck", 3))),
                   ),
                 ),
                 "ck",

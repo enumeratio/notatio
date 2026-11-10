@@ -3,6 +3,18 @@ name: WeylGroupParabolicSubgroupCount
 domain: Cartan type statistics
 signature: WeylGroupParabolicSubgroupCount(cartanType)
 summary: "The parabolic subgroups of the Weyl group, the fixers of subspaces: the Bell number B(n + 1) for A_n, and for B_n and C_n the sum of C(n, k) times the signed set partitions of k, D_n leaving out those with exactly one zero coordinate."
+catalog:
+  - system: findstat
+    identity: St001791
+    url: https://www.findstat.org/St001791
+    on: CartanType
+statOn:
+  - CartanType
+signatures:
+  - call: WeylGroupParabolicSubgroupCount(cartanType)
+    description: "The parabolic subgroups of the Weyl group, the fixers of subspaces: the Bell number B(n + 1) for A_n, and for B_n and C_n the sum of C(n, k) times the signed set partitions of k, D_n leaving out those with exactly one zero coordinate."
+    library: enumeratio-combinatorics
+    type: (cartan_type) -> number
 ---
 
 - Defined over `CartanType` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

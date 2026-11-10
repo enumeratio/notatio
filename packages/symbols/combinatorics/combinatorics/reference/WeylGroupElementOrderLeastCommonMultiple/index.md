@@ -3,6 +3,18 @@ name: WeylGroupElementOrderLeastCommonMultiple
 domain: Cartan type statistics
 signature: WeylGroupElementOrderLeastCommonMultiple(cartanType)
 summary: "The exponent of the Weyl group, the least common multiple of the orders of its elements: the least common multiple of its degrees."
+catalog:
+  - system: findstat
+    identity: St001157
+    url: https://www.findstat.org/St001157
+    on: CartanType
+statOn:
+  - CartanType
+signatures:
+  - call: WeylGroupElementOrderLeastCommonMultiple(cartanType)
+    description: "The exponent of the Weyl group, the least common multiple of the orders of its elements: the least common multiple of its degrees."
+    library: enumeratio-combinatorics
+    type: (cartan_type) -> number
 ---
 
 - Defined over `CartanType` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

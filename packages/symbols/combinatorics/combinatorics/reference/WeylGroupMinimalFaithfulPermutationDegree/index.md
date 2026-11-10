@@ -3,6 +3,18 @@ name: WeylGroupMinimalFaithfulPermutationDegree
 domain: Cartan type statistics
 signature: WeylGroupMinimalFaithfulPermutationDegree(cartanType)
 summary: "The least number of points a permutation action of the Weyl group can have and stay faithful: the orbit of a fundamental weight of least size, n + 1 for A_n, 2 n for B_n, C_n and D_n."
+catalog:
+  - system: findstat
+    identity: St001897
+    url: https://www.findstat.org/St001897
+    on: CartanType
+statOn:
+  - CartanType
+signatures:
+  - call: WeylGroupMinimalFaithfulPermutationDegree(cartanType)
+    description: "The least number of points a permutation action of the Weyl group can have and stay faithful: the orbit of a fundamental weight of least size, n + 1 for A_n, 2 n for B_n, C_n and D_n."
+    library: enumeratio-combinatorics
+    type: (cartan_type) -> number
 ---
 
 - Defined over `CartanType` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
