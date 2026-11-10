@@ -396,18 +396,6 @@ function selectSubjects(groups: readonly (readonly unknown[])[], cap: number): u
   return chosen;
 }
 
-/** Statistics whose interpretation grows about threefold per size of partition: the largest size
- *  (the sum of the parts) their subjects reach in the standard run, every size under DEEP_TESTS.
- *  Chains of single splits take about 15 s here at size 6, so past 5 a loaded runner is within
- *  reach of the file's timeout. */
-const SLOW_TO_INTERPRET: ReadonlyMap<string, number> = new Map([["SingletonRefinementCount@IntegerPartition", 5]]);
-
-/** The sum of the numbers in a subject's `List`. */
-const sizeOf = (contents: unknown): number =>
-  Array.isArray(contents)
-    ? contents.slice(1).reduce((n: number, part) => n + (typeof part === "number" ? part : 0), 0)
-    : 0;
-
 /** Pairs where compiled code may decline while the interpreter answers exactly: an intermediate
  *  product passes 2^53, so the compiled parity tripwire declines rather than risk a rounded digit.
  *  `answer` is the exact value from the product formula in BigInt (the numerator divides evenly).
@@ -430,9 +418,8 @@ for (const definition of compiledDefinitions) {
     const run = compiledStatistic(ce, definition);
     expect(run).toBeDefined();
     let compared = 0;
-    const largest = DEEP ? Infinity : (SLOW_TO_INTERPRET.get(signatureOf(definition)) ?? Infinity);
     const cap = Math.max(MIN_PER_HEAD, Math.floor((CARRIER_ALLOWANCE[definition.on] ?? 0) / headsOn(definition.on)));
-    const groups = (SUBJECTS[definition.on] ?? []).map((group) => group.filter((c) => sizeOf(c) <= largest));
+    const groups = SUBJECTS[definition.on] ?? [];
     for (const contents of selectSubjects(groups, cap)) {
       const interpreted = interpretDefinition(ce, definition, ce.box(contents as never)).json;
       const answer = run!(contents);

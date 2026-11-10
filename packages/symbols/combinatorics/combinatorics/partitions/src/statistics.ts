@@ -690,11 +690,11 @@ const mergeCell = (k: MathJSON): MathJSON =>
     isPlace(k, add(firstPart, secondPart)),
   );
 /**
- * One level on from the bound level `fl` (end to end), whose partitions have `ways` chains each (when `weighted`).
+ * One level on from the bound level `fl` (end to end).
  * The candidates `ap` are the moves that apply, `cm` their partitions end to end; `sg` is a quick key that tells most
  * unequal candidates apart, and equal candidates are then confirmed place by place. `kp` keeps the first of each.
  */
-const levelStep = (applies: MathJSON, cell: (k: MathJSON) => MathJSON, weighted: boolean): MathJSON => {
+const levelStep = (applies: MathJSON, cell: (k: MathJSON) => MathJSON): MathJSON => {
   const candidates = length("ap");
   const cellOf = (s: MathJSON, k: MathJSON): MathJSON => at(add(["Multiply", subtract(s, 1), total], k), "cm");
   const same = (s: MathJSON, u: MathJSON): MathJSON => [
@@ -745,17 +745,7 @@ const levelStep = (applies: MathJSON, cell: (k: MathJSON) => MathJSON, weighted:
               ),
               "g",
             ),
-            weighted
-              ? forEach(
-                  ["Range", 1, kept],
-                  sumOver(
-                    ["Range", 1, candidates],
-                    ["If", same(at("r", "kp"), "u"), candidate(at("u", "ap"), at("e", "ways")), 0],
-                    "u",
-                  ),
-                  "r",
-                )
-              : ["List", 1],
+            ["List", 1],
             ["List", add(at(1, at(3, "a")), kept)],
           ],
           listOfIntegers,
@@ -768,14 +758,13 @@ const levelStep = (applies: MathJSON, cell: (k: MathJSON) => MathJSON, weighted:
   );
 };
 const listOfIntegers = "list<integer>";
-/** The walk of `steps` levels from this partition with the moves `firsts`, `seconds`: [last level, its chain counts, [partitions so far]]. */
+/** The walk of `steps` levels from this partition with the moves `firsts`, `seconds`: [last level, [1], [partitions so far]]. */
 const levelWalk = (
   steps: MathJSON,
   firsts: MathJSON,
   seconds: MathJSON,
   applies: MathJSON,
   cell: (k: MathJSON) => MathJSON,
-  weighted: boolean,
 ): MathJSON =>
   bind(
     "mj",
@@ -786,12 +775,7 @@ const levelWalk = (
       fold(
         ["Range", 1, steps, 1],
         ["List", multiplicities, ["List", 1], ["List", 1]],
-        bind(
-          "fl",
-          at(1, "a"),
-          bind("ways", at(2, "a"), levelStep(applies, cell, weighted), listOfIntegers),
-          listOfIntegers,
-        ),
+        bind("fl", at(1, "a"), bind("ways", at(2, "a"), levelStep(applies, cell), listOfIntegers), listOfIntegers),
       ),
       listOfIntegers,
     ),
@@ -800,18 +784,150 @@ const levelWalk = (
 /** The partitions that refine this one (itself included): the splits of parts, one more part each level. */
 const refinementCount: MathJSON = at(
   1,
-  at(3, levelWalk(subtract(total, length()), splitBigs, splitSmalls, splitApplies, splitCell, false)),
+  at(3, levelWalk(subtract(total, length()), splitBigs, splitSmalls, splitApplies, splitCell)),
 );
 /** The partitions this one refines (itself included): the merges of two parts, one fewer part each level. */
 const coarseningCount: MathJSON = at(
   1,
-  at(3, levelWalk(subtract(length(), 1), mergeFirsts, mergeSeconds, mergeApplies, mergeCell, false)),
+  at(3, levelWalk(subtract(length(), 1), mergeFirsts, mergeSeconds, mergeApplies, mergeCell)),
 );
-/** The chains of single splits from this partition to all ones: size - length levels, the last holding only the all-ones partition. */
-const refinementChains: MathJSON = [
-  "Sum",
-  at(2, levelWalk(subtract(total, length()), splitBigs, splitSmalls, splitApplies, splitCell, true)),
+/**
+ * A partition of the size as one integer: place k (1 .. size) is a digit of radix size/k + 1, the most parts equal to k.
+ * `pw` holds the place values; the code is exact below 2^53, which holds to size 30 (the chain counts pass 2^53 first).
+ */
+const radixPowers: MathJSON = fold(
+  ["Range", 1, subtract(total, 1), 1],
+  ["List", 1],
+  ["Join", "a", ["List", ["Multiply", at(length("a"), "a"), add(quotientOf(total, "b"), 1)]]],
+);
+/** How many parts equal k in the partition with code c. */
+const digitOf = (c: MathJSON, k: MathJSON): MathJSON => [
+  "Mod",
+  quotientOf(c, at(k, "pw")),
+  add(quotientOf(total, k), 1),
 ];
+/**
+ * The chains of single splits from this partition to all ones, a level (one more part each) at a time. A level is its
+ * partitions' codes `fl` with their chain counts `ways`; a split of a part j into a and j - a (`mj`, `ma`) moves a
+ * code by a fixed amount `dl`, so no partition is ever spelled out. The new codes are sorted (`od`) to bring equal ones
+ * together: `st` marks where each distinct code starts, and its run's chain counts are summed. Code 0, which is no
+ * partition, stands for a split that does not apply and sorts first.
+ */
+const refinementChains: MathJSON = bind(
+  "pw",
+  radixPowers,
+  bind(
+    "mj",
+    splitBigs,
+    bind(
+      "ma",
+      splitSmalls,
+      bind(
+        "dl",
+        forEach(
+          ["Range", 1, length("mj")],
+          subtract(
+            add(at(at("i", "ma"), "pw"), at(subtract(at("i", "mj"), at("i", "ma")), "pw")),
+            at(at("i", "mj"), "pw"),
+          ),
+        ),
+        bind(
+          "levels",
+          fold(
+            ["Range", 1, subtract(total, length()), 1],
+            ["List", ["List", sumOver(positions, at(here, "pw"))], ["List", 1]],
+            bind(
+              "fl",
+              at(1, "a"),
+              bind(
+                "ways",
+                at(2, "a"),
+                bind(
+                  "moves",
+                  length("mj"),
+                  bind(
+                    "nc",
+                    forEach(
+                      ["Range", 1, ["Multiply", length("fl"), "moves"]],
+                      bind(
+                        "e",
+                        add(1, quotientOf(subtract("t", 1), "moves")),
+                        bind(
+                          "q",
+                          add(1, ["Mod", subtract("t", 1), "moves"]),
+                          [
+                            "If",
+                            atLeastValue(digitOf(at("e", "fl"), at("q", "mj")), 1),
+                            add(at("e", "fl"), at("q", "dl")),
+                            0,
+                          ],
+                          "integer",
+                        ),
+                        "integer",
+                      ),
+                      "t",
+                    ),
+                    bind(
+                      "od",
+                      ["Ordering", "nc"],
+                      bind(
+                        "sc",
+                        forEach(["Range", 1, length("nc")], at(at("o", "od"), "nc"), "o"),
+                        bind(
+                          "st",
+                          where(
+                            ["Range", 1, length("nc")],
+                            [
+                              "If",
+                              equals("o", 1),
+                              greater(at(1, "sc"), 0),
+                              and(greater(at("o", "sc"), 0), less(at(subtract("o", 1), "sc"), at("o", "sc"))),
+                            ],
+                            "o",
+                          ),
+                          [
+                            "List",
+                            forEach(["Range", 1, length("st")], at(at("r", "st"), "sc"), "r"),
+                            forEach(
+                              ["Range", 1, length("st")],
+                              sumOver(
+                                [
+                                  "Range",
+                                  at("r", "st"),
+                                  ["If", equals("r", length("st")), length("nc"), subtract(at(add("r", 1), "st"), 1)],
+                                ],
+                                at(add(1, quotientOf(subtract(at("o", "od"), 1), "moves")), "ways"),
+                                "o",
+                              ),
+                              "r",
+                            ),
+                          ],
+                          listOfIntegers,
+                        ),
+                        listOfIntegers,
+                      ),
+                      listOfIntegers,
+                    ),
+                    listOfIntegers,
+                  ),
+                  "integer",
+                ),
+                listOfIntegers,
+              ),
+              listOfIntegers,
+            ),
+          ),
+          ["Sum", at(2, "levels")],
+          "list<list<integer>>",
+        ),
+        listOfIntegers,
+      ),
+      listOfIntegers,
+    ),
+    listOfIntegers,
+  ),
+  listOfIntegers,
+);
 
 /**
  * The ordered refinements, by a table over the totals t = 0 .. size. Entry (t, m) counts the weakly decreasing sequences of
