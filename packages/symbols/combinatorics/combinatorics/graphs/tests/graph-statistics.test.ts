@@ -97,6 +97,10 @@ const BATCH_TWO = new Set([
   "NowhereZeroFiveFlowCount",
   "NowhereZeroFourFlowCount",
   "TwoComponentSpanningForestCount",
+  "OverfullSubgraphCount",
+  "LargestRegularSpanningSubgraphDegree",
+  "LargestRegularSubgraphDegree",
+  "LongestTrailLength",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 

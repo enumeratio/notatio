@@ -8012,6 +8012,30 @@ export const findstat: readonly FindStatMatch[] = [
     values: 208,
   },
   {
+    head: "OverfullSubgraphCount",
+    on: "LabeledGraph",
+    findstat: ["St001797"],
+    values: 1200,
+  },
+  {
+    head: "LargestRegularSpanningSubgraphDegree",
+    on: "LabeledGraph",
+    findstat: ["St001357"],
+    values: 1200,
+  },
+  {
+    head: "LargestRegularSubgraphDegree",
+    on: "LabeledGraph",
+    findstat: ["St001358"],
+    values: 1200,
+  },
+  {
+    head: "LongestTrailLength",
+    on: "LabeledGraph",
+    findstat: ["St001649"],
+    values: 209,
+  },
+  {
     head: "WeylGroupOrder",
     on: "CartanType",
     findstat: ["St000106"],

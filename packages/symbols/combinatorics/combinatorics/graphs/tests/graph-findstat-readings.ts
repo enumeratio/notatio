@@ -566,6 +566,19 @@ const componentTotal = (n: number, edges: readonly Edge[]): number =>
   range(1, n).filter((v) => !range(1, v - 1).some((w) => joinedBy(edges, w, v))).length;
 const isForest = (n: number, edges: readonly Edge[]): boolean => componentTotal(n, edges) === n - edges.length;
 
+/** The most edges in a trail from `at` that has used `used`: an edge may follow another that shares its end. */
+function longestTrailFrom(edges: readonly Edge[], at: number, used: ReadonlySet<number>): number {
+  let best = used.size;
+  edges.forEach(([u, v], index) => {
+    if (used.has(index) || (u !== at && v !== at)) return;
+    best = Math.max(best, longestTrailFrom(edges, u === at ? v : u, new Set([...used, index])));
+  });
+  return best;
+}
+/** The degree of each vertex 1 .. n among `edges`. */
+const degreesIn = (n: number, edges: readonly Edge[]): number[] =>
+  range(1, n).map((v) => edges.filter(([a, b]) => a === v || b === v).length);
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -1057,4 +1070,33 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   NowhereZeroFourFlowCount: (g) => flowCount(g.edges, 4),
   TwoComponentSpanningForestCount: (g) =>
     edgeSets(g.edges).filter((set) => set.length === g.n - 2 && isForest(g.n, set)).length,
+  // St001797 as FindStat's code reads it: the sets of edges longer than the greatest degree times half the vertices they meet.
+  OverfullSubgraphCount: (g) =>
+    edgeSets(g.edges).filter(
+      (set) => set.length > Math.max(0, ...degrees(g)) * Math.floor(new Set(set.flat()).size / 2),
+    ).length,
+  // The greatest k such that some set of edges gives every vertex degree k, searched k by k.
+  LargestRegularSpanningSubgraphDegree: (g) =>
+    g.n === 0
+      ? 0
+      : Math.max(
+          ...range(0, g.n - 1).filter((k) =>
+            edgeSets(g.edges).some((set) => degreesIn(g.n, set).every((d) => d === k)),
+          ),
+        ),
+  // The greatest k such that some set of vertices has a set of edges inside it giving each of them degree k.
+  LargestRegularSubgraphDegree: (g) =>
+    Math.max(
+      0,
+      ...subsets(g.n)
+        .filter((set) => set.length > 0)
+        .flatMap((set) => {
+          const inside = g.edges.filter(([u, v]) => set.includes(u - 1) && set.includes(v - 1));
+          return edgeSets(inside).flatMap((chosen) => {
+            const d = degreesIn(g.n, chosen).filter((_, v) => set.includes(v));
+            return d.every((x) => x === d[0]) ? [d[0]!] : [];
+          });
+        }),
+    ),
+  LongestTrailLength: (g) => Math.max(0, ...range(1, g.n).map((start) => longestTrailFrom(g.edges, start, new Set()))),
 };

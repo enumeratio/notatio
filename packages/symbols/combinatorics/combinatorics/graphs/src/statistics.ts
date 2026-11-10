@@ -1132,60 +1132,102 @@ const acyclicOrientationTable: MathJSON = typedFolding(
   ["List", 1],
   masksFromOne,
 );
+/** Which columns the rows of `edgeSubsetRows` carry after the subset's size: a component label for each vertex, a degree for each vertex. */
+interface SubsetColumns {
+  readonly labels: boolean;
+  readonly degrees: boolean;
+}
+const RANK_COLUMNS: SubsetColumns = { labels: true, degrees: false };
+const DEGREE_COLUMNS: SubsetColumns = { labels: false, degrees: true };
+const BOTH_COLUMNS: SubsetColumns = { labels: true, degrees: true };
+/** The position in a row of vertex v's component label, and of its degree. */
+const labelPosition = (vertex: MathJSON): MathJSON => add(vertex, 1);
+const degreePosition = (columns: SubsetColumns, vertex: MathJSON): MathJSON =>
+  add(vertex, columns.labels ? add("n", 1) : 1);
 /**
- * One row for each subset of the edges, the subset of mask j in row j + 1 (bit k - 1 of the mask is edge k): the
- * component label of each vertex in that subgraph, then the subset's size. Edge k doubles the table, joining the classes
- * of its ends in a copy of every row so far by giving one the other's label (a union-find by relabeling). Step 0 is a
- * no-op, so a graph with no edges has the one row of the empty subset (`Range(1, 0)` does not evaluate to the empty list).
+ * One row for each subset of the edges, the subset of mask j in row j + 1 (bit k - 1 of the mask is edge k): the subset's
+ * size, then the `columns` that follow it. Edge k doubles the table: a copy of every row so far with the edge added,
+ * joining the classes of its ends by giving one the other's label (a union-find by relabeling) and raising their degrees.
+ * Step 0 is a no-op, so a graph with no edges has the one row of the empty subset (`Range(1, 0)` does not evaluate to the
+ * empty list).
  */
-const edgeSubsetRows: MathJSON = typedFolding(
-  [
+const edgeSubsetRows = (columns: SubsetColumns): MathJSON => {
+  const [labelEnd, width] = [add("n", 1), add(1, add(columns.labels ? "n" : 0, columns.degrees ? "n" : 0))];
+  const keep = at("t", "row");
+  const label: MathJSON = [
     "If",
-    equals("k", 0),
-    "rows",
+    equals(at(labelPosition("from"), "row"), at(labelPosition("to"), "row")),
+    keep,
+    ["If", equals(keep, at(labelPosition("to"), "row")), at(labelPosition("from"), "row"), keep],
+  ];
+  const degree: MathJSON = add(
+    keep,
+    add(one(equals("t", degreePosition(columns, "from"))), one(equals("t", degreePosition(columns, "to")))),
+  );
+  const entry: MathJSON =
+    columns.labels && columns.degrees
+      ? ["If", less("t", add(labelEnd, 1)), label, degree]
+      : columns.labels
+        ? label
+        : degree;
+  const zeros = (count: boolean): MathJSON[] => (count ? [forEach(vertices, 0, "v")] : []);
+  return typedFolding(
     [
-      "Join",
+      "If",
+      equals("k", 0),
       "rows",
-      forEach(
+      [
+        "Join",
         "rows",
-        bind(
-          "from",
-          at(1, at("k", "edges")),
+        forEach(
+          "rows",
           bind(
-            "to",
-            at(2, at("k", "edges")),
-            forEach(
-              ["Range", 1, add("n", 1)],
-              [
-                "If",
-                equals("t", add("n", 1)),
-                add(at("t", "row"), 1),
-                [
-                  "If",
-                  equals(at("from", "row"), at("to", "row")),
-                  at("t", "row"),
-                  ["If", equals(at("t", "row"), at("to", "row")), at("from", "row"), at("t", "row")],
-                ],
-              ],
-              "t",
+            "from",
+            at(1, at("k", "edges")),
+            bind(
+              "to",
+              at(2, at("k", "edges")),
+              forEach(["Range", 1, width], ["If", equals("t", 1), add(at(1, "row"), 1), entry], "t"),
+              "integer",
             ),
             "integer",
           ),
-          "integer",
+          "row",
         ),
-        "row",
-      ),
+      ],
     ],
-  ],
-  "rows",
-  "k",
-  ["List", ["Join", vertices, ["List", 0]]],
-  ["Range", 0, length("edges")],
-  "list<list<integer>>",
-);
+    "rows",
+    "k",
+    ["List", ["Join", ["List", 0], ...(columns.labels ? [vertices] : []), ...zeros(columns.degrees)]],
+    ["Range", 0, length("edges")],
+    "list<list<integer>>",
+  );
+};
 /** The rank of the subgraph of this row: each class keeps one vertex whose label is its own, so the others are the rank. */
 const rankOfRow = (row: MathJSON): MathJSON =>
-  subtract("n", floored(sumOver(vertices, one(equals(at("v", row), "v")), "v")));
+  subtract("n", floored(sumOver(vertices, one(equals(at(labelPosition("v"), row), "v")), "v")));
+/** The degree of each vertex in the subgraph of this row, as a list. */
+const rowDegrees = (columns: SubsetColumns, row: MathJSON): MathJSON =>
+  forEach(vertices, at(degreePosition(columns, "v"), row), "v");
+/**
+ * `over` each subset of the edges, for a body that reads the subset's `row` of `edgeSubsetRows(columns)`; `last` is the
+ * row of all the edges. `summary` takes the list of the bodies and `last`.
+ */
+const overEdgeSubsetRows = (
+  columns: SubsetColumns,
+  body: (row: MathJSON) => MathJSON,
+  summary: (bodies: MathJSON, last: MathJSON) => MathJSON,
+  otherwise: MathJSON = 0,
+): MathJSON =>
+  withGraph(
+    bindList(
+      "table",
+      edgeSubsetRows(columns),
+      bindList("last", at(length("table"), "table"), summary(forEach("table", body("row"), "row"), "last")),
+      "list<list<integer>>",
+    ),
+    otherwise,
+  );
 /**
  * The sum over the subsets of the edges of `body` of the subset's size, rank and corank (the rank of the whole graph less
  * its rank): the sum that every Tutte evaluation and coefficient is. `wrap` takes the sum and the rank of the whole graph.
@@ -1195,30 +1237,15 @@ const overEdgeSubsets = (
   otherwise: MathJSON = 0,
   wrap: (sum: MathJSON, full: MathJSON) => MathJSON = (sum) => sum,
 ): MathJSON =>
-  withGraph(
-    bindList(
-      "table",
-      edgeSubsetRows,
-      bind(
-        "full",
-        rankOfRow(at(length("table"), "table")),
-        wrap(
-          [
-            "Sum",
-            forEach(
-              "table",
-              bind("rank", rankOfRow("row"), body(at(add("n", 1), "row"), "rank", subtract("full", "rank")), "integer"),
-              "row",
-            ),
-          ],
-          "full",
-        ),
-        "integer",
-      ),
-      "list<list<integer>>",
-    ),
+  overEdgeSubsetRows(
+    RANK_COLUMNS,
+    (row) => bind("rank", rankOfRow(row), body(at(1, row), "rank", subtract("full", "rank")), "integer"),
+    (bodies, last) => bind("full", rankOfRow(last), wrap(["Sum", bodies], "full"), "integer"),
     otherwise,
   );
+/** The vertices with an edge in the subgraph of this row. */
+const touchedBy = (columns: SubsetColumns, row: MathJSON): MathJSON =>
+  floored(sumOver(vertices, one(less(0, at(degreePosition(columns, "v"), row))), "v"));
 /** `base` to the power `exponent`, an exponent of at least 0; 0 to the power 0 is 1. */
 const power = (base: number, exponent: MathJSON): MathJSON =>
   base === 0 ? one(equals(exponent, 0)) : base === 1 ? 1 : ["Power", base, exponent];
@@ -2757,5 +2784,66 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The sets of edges that form a forest with two trees on all the vertices.",
     overEdgeSubsets((size, rank) => times(one(equals(size, rank)), one(equals(subtract("n", rank), 2)))),
     `FindStat's St001827: the sets of edges with no cycle (size = rank) and two components. ${NO_VERTICES}`,
+  ),
+  stat(
+    "OverfullSubgraphCount",
+    "The sets of edges with more edges than the greatest degree times half the vertices they meet, rounded down.",
+    overEdgeSubsetRows(
+      DEGREE_COLUMNS,
+      (row) => {
+        const touched = touchedBy(DEGREE_COLUMNS, row);
+        return one(greater(at(1, row), times("top", ["Divide", subtract(touched, ["Mod", touched, 2]), 2])));
+      },
+      (bodies, last) => bind("top", ["Max", rowDegrees(DEGREE_COLUMNS, last)], floored(["Sum", bodies]), "integer"),
+    ),
+    `FindStat's St001797: the empty set of edges is never overfull. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestRegularSpanningSubgraphDegree",
+    "The greatest k such that some set of edges gives every vertex degree k.",
+    overEdgeSubsetRows(
+      DEGREE_COLUMNS,
+      (row) => {
+        const degrees = rowDegrees(DEGREE_COLUMNS, row);
+        return ["If", equals(["Min", degrees], ["Max", degrees]), ["Max", degrees], 0];
+      },
+      (bodies) => ["Max", bodies],
+    ),
+    `FindStat's St001357, the largest k with a k-factor; the empty set of edges is the 0-factor. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestRegularSubgraphDegree",
+    "The greatest k such that some set of edges gives every vertex it meets degree k.",
+    overEdgeSubsetRows(
+      DEGREE_COLUMNS,
+      (row) => {
+        const degrees = rowDegrees(DEGREE_COLUMNS, row);
+        return [
+          "If",
+          equals(floored(["Sum", degrees]), times(["Max", degrees], touchedBy(DEGREE_COLUMNS, row))),
+          ["Max", degrees],
+          0,
+        ];
+      },
+      (bodies) => ["Max", bodies],
+    ),
+    `FindStat's St001358: the degrees add up to k times the vertices met exactly when the met ones all have degree k. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LongestTrailLength",
+    "The most edges in a trail: a set of edges that is connected and has at most two vertices of odd degree.",
+    overEdgeSubsetRows(
+      BOTH_COLUMNS,
+      (row) =>
+        times(
+          at(1, row),
+          times(
+            one(equals(subtract(touchedBy(BOTH_COLUMNS, row), rankOfRow(row)), 1)),
+            one(less(floored(sumOver(vertices, ["Mod", at(degreePosition(BOTH_COLUMNS, "v"), row), 2], "v")), 3)),
+          ),
+        ),
+      (bodies) => ["Max", bodies],
+    ),
+    `FindStat's St001649: a connected set of edges has an Euler trail when at most two vertices have odd degree. ${NO_VERTICES}`,
   ),
 ];
