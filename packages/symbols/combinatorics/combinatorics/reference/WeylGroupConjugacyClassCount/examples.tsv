@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[WeylGroupConjugacyClassCount, [CartanType, [Tuple, "'D'", 5]]]	18			the type $D_5$
+the-type-e-6			[WeylGroupConjugacyClassCount, [CartanType, [Tuple, "'E'", 6]]]	25			the type $E_6$
+findstat-st000856-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'WeylGroupConjugacyClassCount'"]	2	2	FindStat St000856	FindStat's value for ['A',1]
+findstat-st000856-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'WeylGroupConjugacyClassCount'"]	3	3	FindStat St000856	FindStat's value for ['A',2]
+findstat-st000856-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'WeylGroupConjugacyClassCount'"]	5	5	FindStat St000856	FindStat's value for ['A',3]

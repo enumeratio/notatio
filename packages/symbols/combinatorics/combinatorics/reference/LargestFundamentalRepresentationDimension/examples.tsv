@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[LargestFundamentalRepresentationDimension, [CartanType, [Tuple, "'D'", 5]]]	120			the type $D_5$
+the-type-e-6			[LargestFundamentalRepresentationDimension, [CartanType, [Tuple, "'E'", 6]]]	2925			the type $E_6$
+findstat-st001370-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'LargestFundamentalRepresentationDimension'"]	2	2	FindStat St001370	FindStat's value for ['A',1]
+findstat-st001370-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'LargestFundamentalRepresentationDimension'"]	3	3	FindStat St001370	FindStat's value for ['A',2]
+findstat-st001370-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'LargestFundamentalRepresentationDimension'"]	6	6	FindStat St001370	FindStat's value for ['A',3]

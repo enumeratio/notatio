@@ -514,3 +514,215 @@ export function permanent(a: Matrix): number {
         );
   return walk(0, 0);
 }
+
+// ─── the Weyl group's classes, involutions, orders and parabolic subgroups ───────────────────────
+
+/** The conjugacy classes of the generated group: the orbits of its elements under conjugation by the simple reflections. */
+export function conjugacyClassCount(a: Matrix): number {
+  const g = weylGroup(a);
+  const seen = new Set<string>();
+  let classes = 0;
+  for (const start of g.elements) {
+    if (seen.has(start.join())) continue;
+    classes++;
+    seen.add(start.join());
+    const queue = [start];
+    while (queue.length > 0) {
+      const c = queue.pop()!;
+      for (const s of g.generators) {
+        const conjugate = compose(compose(s, c), s);
+        if (!seen.has(conjugate.join())) {
+          seen.add(conjugate.join());
+          queue.push(conjugate);
+        }
+      }
+    }
+  }
+  return classes;
+}
+
+/** The elements with at most one descent: w sends at most one simple root to a negative root. */
+export function grassmannianCount(a: Matrix): number {
+  const g = weylGroup(a);
+  const all = roots(a);
+  const negative = all.map((r) => r.some((c) => c < 0));
+  return g.elements.filter((w) => a.filter((_, j) => negative[w[j]!]).length <= 1).length;
+}
+/** The same count from the parabolic subgroups: the identity and, per simple reflection s, the |W| / |W_(S - s)| - 1 coset representatives. */
+export function grassmannianFromIndices(a: Matrix): number {
+  const order = (m: Matrix): number => exponentsFromRoots(m).reduce((p, e) => p * (e + 1), 1);
+  const without = (s: number): Matrix => {
+    const keep = a.map((_, j) => j).filter((j) => j !== s);
+    return keep.map((i) => keep.map((j) => a[i]![j]!));
+  };
+  return 1 + a.reduce((sum, _, s) => sum + order(a) / (a.length === 1 ? 1 : order(without(s))) - 1, 0);
+}
+
+/** The elements that are their own inverse. */
+export const involutionCount = (a: Matrix): number =>
+  weylGroup(a).elements.filter((w) => w.every((image, i) => w[image] === i)).length;
+/**
+ * The involutions of a simply laced Weyl group from its roots: an involution negates the span of some mutually orthogonal
+ * roots and fixes the complement, and the span's orthogonal projection (a matrix) says which one. Counts the distinct projections
+ * over the sets of orthogonal positive roots, the empty set (the identity) included.
+ */
+export function involutionsFromOrthogonalRoots(a: Matrix): number {
+  const n = a.length;
+  const positive = positiveRoots(a);
+  const pair = (r: readonly number[], s: readonly number[]): number =>
+    r.reduce((sum, ri, i) => sum + ri * s.reduce((inner, sj, j) => inner + a[i]![j]! * sj, 0), 0);
+  // 2 * the projection onto a root r, as a matrix in the root coordinates: r (a r)^T.
+  const outer = positive.map((r) => {
+    const image = a.map((row) => row.reduce((sum, entry, j) => sum + entry * r[j]!, 0));
+    return r.flatMap((ri) => image.map((v) => ri * v));
+  });
+  const projections = new Set<string>();
+  const extend = (candidates: readonly number[], total: readonly number[]): void => {
+    projections.add(total.join());
+    candidates.forEach((i, position) =>
+      extend(
+        candidates.slice(position + 1).filter((j) => pair(positive[i]!, positive[j]!) === 0),
+        total.map((v, k) => v + outer[i]![k]!),
+      ),
+    );
+  };
+  extend(
+    positive.map((_, i) => i),
+    Array.from({ length: n * n }, () => 0),
+  );
+  return projections.size;
+}
+
+/** The exponent of the group: the least common multiple of the orders of its elements. */
+export function elementOrderLeastCommonMultiple(a: Matrix): number {
+  const divide = (x: number, y: number): number => (y === 0 ? x : divide(y, x % y));
+  return weylGroup(a).elements.reduce((lcm, w) => {
+    const order = orderOf(w);
+    return (lcm * order) / divide(lcm, order);
+  }, 1);
+}
+
+/** The largest dimension among the fundamental representations, by Weyl's formula. */
+export const largestFundamentalDimension = (a: Matrix): number =>
+  Math.max(...a.map((_, i) => dimension(a, fundamental(a.length, i))));
+
+/** The simple reflections as permutations of the roots (the group is not generated). */
+function simpleReflectionsOnRoots(a: Matrix): { all: number[][]; reflections: number[][] } {
+  const all = roots(a);
+  const index = new Map(all.map((r, i) => [r.join(","), i]));
+  const reflections = a.map((_, j) =>
+    all.map((beta) => {
+      const pairing = beta.reduce((sum, b, i) => sum + b * a[i]![j]!, 0);
+      return index.get(beta.map((b, i) => (i === j ? b - pairing : b)).join(","))!;
+    }),
+  );
+  return { all, reflections };
+}
+/**
+ * The parabolic subgroups: the conjugates of the standard ones, each as its set of roots. The roots of the standard parabolic
+ * subgroup of a set J of simple roots are those supported in J, and its conjugates are found by the orbit under the simple
+ * reflections.
+ */
+export function parabolicSubgroupCount(a: Matrix): number {
+  const { all, reflections } = simpleReflectionsOnRoots(a);
+  const n = a.length;
+  const found = new Set<string>();
+  for (let mask = 0; mask < 1 << n; mask++) {
+    const start = all.flatMap((r, i) => (r.every((c, k) => c === 0 || (mask >> k) & 1) ? [i] : []));
+    const key = (set: readonly number[]): string => set.toSorted((x, y) => x - y).join(",");
+    const queue = [start];
+    found.add(key(start));
+    while (queue.length > 0) {
+      const set = queue.pop()!;
+      for (const s of reflections) {
+        const image = set.map((i) => s[i]!);
+        if (!found.has(key(image))) {
+          found.add(key(image));
+          queue.push(image);
+        }
+      }
+    }
+  }
+  return found.size;
+}
+
+/**
+ * The fewest points of a faithful permutation action that is an orbit of a fundamental weight: such an action is faithful
+ * because the orbit spans the space the irreducible group acts on faithfully. Its size is the index of the maximal standard parabolic.
+ */
+export function smallestFundamentalOrbit(a: Matrix): number {
+  const n = a.length;
+  const simple = a.map((_, j) => weightOf(a, unit(n, j)));
+  let best = Infinity;
+  for (let i = 0; i < n; i++) {
+    const orbit = new Set<string>([fundamental(n, i).join()]);
+    const queue = [fundamental(n, i)];
+    while (queue.length > 0 && orbit.size <= best) {
+      const c = queue.pop()!;
+      for (let j = 0; j < n; j++) {
+        const image = c.map((v, k) => v - c[j]! * simple[j]![k]!);
+        if (!orbit.has(image.join())) {
+          orbit.add(image.join());
+          queue.push(image);
+        }
+      }
+    }
+    best = Math.min(best, orbit.size);
+  }
+  return best;
+}
+
+// ─── involution classes and connected elements ───────────────────────────────────────────────────
+
+/** The conjugacy classes of the generated group whose elements have order 2. */
+export function involutionClassCount(a: Matrix): number {
+  const g = weylGroup(a);
+  const seen = new Set<string>();
+  let classes = 0;
+  for (const start of g.elements) {
+    if (seen.has(start.join())) continue;
+    const involution = start.some((image, i) => image !== i) && start.every((image, i) => start[image] === i);
+    if (involution) classes++;
+    seen.add(start.join());
+    const queue = [start];
+    while (queue.length > 0) {
+      const c = queue.pop()!;
+      for (const s of g.generators) {
+        const conjugate = compose(compose(s, c), s);
+        if (!seen.has(conjugate.join())) {
+          seen.add(conjugate.join());
+          queue.push(conjugate);
+        }
+      }
+    }
+  }
+  return classes;
+}
+
+/** The elements whose reduced words use every simple reflection: an element has the support of any shorter neighbor it extends, plus the generator. */
+export function connectedElementCount(a: Matrix): number {
+  const g = weylGroup(a);
+  const index = new Map(g.elements.map((w, i) => [w.join(), i]));
+  const support = g.elements.map(() => 0);
+  g.elements.forEach((w, at) =>
+    g.generators.forEach((s, j) => {
+      const next = index.get(compose(w, s).join())!;
+      if (g.lengths[next] === g.lengths[at]! + 1) support[next] = support[next]! | support[at]! | (1 << j);
+    }),
+  );
+  return support.filter((bits) => bits === (1 << a.length) - 1).length;
+}
+/** The same count by inclusion and exclusion: the sum over the subsets J of the simple reflections of (-1)^(n - |J|) |W_J|. */
+export function connectedFromParabolicOrders(a: Matrix): number {
+  const n = a.length;
+  const order = (indices: readonly number[]): number =>
+    indices.length === 0
+      ? 1
+      : exponentsFromRoots(indices.map((i) => indices.map((j) => a[i]![j]!))).reduce((p, e) => p * (e + 1), 1);
+  let total = 0;
+  for (let mask = 0; mask < 1 << n; mask++) {
+    const indices = a.map((_, j) => j).filter((j) => (mask >> j) & 1);
+    total += (-1) ** (n - indices.length) * order(indices);
+  }
+  return total;
+}

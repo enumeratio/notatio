@@ -8293,4 +8293,58 @@ export const findstat: readonly FindStatMatch[] = [
     findstat: ["St000960"],
     values: 39,
   },
+  {
+    head: "WeylGroupConjugacyClassCount",
+    on: "CartanType",
+    findstat: ["St000856"],
+    values: 31,
+  },
+  {
+    head: "WeylGroupGrassmannianElementCount",
+    on: "CartanType",
+    findstat: ["St001146"],
+    values: 26,
+  },
+  {
+    head: "WeylGroupInvolutionCount",
+    on: "CartanType",
+    findstat: ["St001467"],
+    values: 20,
+  },
+  {
+    head: "WeylGroupElementOrderLeastCommonMultiple",
+    on: "CartanType",
+    findstat: ["St001157"],
+    values: 34,
+  },
+  {
+    head: "LargestFundamentalRepresentationDimension",
+    on: "CartanType",
+    findstat: ["St001370"],
+    values: 30,
+  },
+  {
+    head: "WeylGroupParabolicSubgroupCount",
+    on: "CartanType",
+    findstat: ["St001791"],
+    values: 32,
+  },
+  {
+    head: "WeylGroupMinimalFaithfulPermutationDegree",
+    on: "CartanType",
+    findstat: ["St001897"],
+    values: 31,
+  },
+  {
+    head: "WeylGroupInvolutionClassCount",
+    on: "CartanType",
+    findstat: ["St001952"],
+    values: 31,
+  },
+  {
+    head: "WeylGroupConnectedElementCount",
+    on: "CartanType",
+    findstat: ["St001888"],
+    values: 22,
+  },
 ];

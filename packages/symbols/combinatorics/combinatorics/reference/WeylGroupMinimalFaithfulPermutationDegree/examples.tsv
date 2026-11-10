@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[WeylGroupMinimalFaithfulPermutationDegree, [CartanType, [Tuple, "'D'", 5]]]	10			the type $D_5$
+the-type-e-6			[WeylGroupMinimalFaithfulPermutationDegree, [CartanType, [Tuple, "'E'", 6]]]	27			the type $E_6$
+findstat-st001897-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'WeylGroupMinimalFaithfulPermutationDegree'"]	2	2	FindStat St001897	FindStat's value for ['A',1]
+findstat-st001897-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'WeylGroupMinimalFaithfulPermutationDegree'"]	3	3	FindStat St001897	FindStat's value for ['A',2]
+findstat-st001897-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'WeylGroupMinimalFaithfulPermutationDegree'"]	4	4	FindStat St001897	FindStat's value for ['A',3]

@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[WeylGroupGrassmannianElementCount, [CartanType, [Tuple, "'D'", 5]]]	158			the type $D_5$
+the-type-e-6			[WeylGroupGrassmannianElementCount, [CartanType, [Tuple, "'E'", 6]]]	1273			the type $E_6$
+findstat-st001146-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'WeylGroupGrassmannianElementCount'"]	2	2	FindStat St001146	FindStat's value for ['A',1]
+findstat-st001146-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'WeylGroupGrassmannianElementCount'"]	5	5	FindStat St001146	FindStat's value for ['A',2]
+findstat-st001146-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'WeylGroupGrassmannianElementCount'"]	12	12	FindStat St001146	FindStat's value for ['A',3]

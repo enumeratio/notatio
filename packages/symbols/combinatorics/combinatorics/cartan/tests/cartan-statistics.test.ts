@@ -12,6 +12,9 @@ import {
   type CartanType,
   centerSize,
   classicalCatalan,
+  conjugacyClassCount,
+  connectedElementCount,
+  connectedFromParabolicOrders,
   classicalPositiveCatalan,
   commutativeRoots,
   coxeterClassSize,
@@ -20,6 +23,7 @@ import {
   determinant,
   dualCoxeterFromRoots,
   dynkinIndex,
+  elementOrderLeastCommonMultiple,
   exponentsFromRoots,
   factorizationCount,
   firstFundamentalDimension,
@@ -27,18 +31,26 @@ import {
   fullyCommutativeCount,
   fussFromRoots,
   gammaFromRoots,
+  grassmannianCount,
+  grassmannianFromIndices,
   groupOrder,
   heightSum,
   highestRoot,
   highestRootPairing,
+  involutionClassCount,
+  involutionCount,
+  involutionsFromOrthogonalRoots,
+  largestFundamentalDimension,
   minimalFaithfulDimension,
   minusculeCount,
+  parabolicSubgroupCount,
   permanent,
   poincareCoefficients,
   positiveRoots,
   quasiMinusculeDimension,
   reflectionOrbitsFromRoots,
   rowmotionOrder,
+  smallestFundamentalOrbit,
 } from "./cartan-findstat-readings.ts";
 
 // The whole library, as a page evaluates it.
@@ -139,6 +151,39 @@ const READINGS: Record<string, { read: (type: CartanType) => number; types: Cart
     read: (t) => fullyCommutativeCount(matrixOf(t)),
     types: typesUpTo(5).filter(smallGroup(DEEP ? 4000 : 400)),
   },
+  WeylGroupConjugacyClassCount: {
+    read: (t) => conjugacyClassCount(matrixOf(t)),
+    types: typesUpTo(DEEP ? 6 : 4).filter(smallGroup(DEEP ? 60000 : 400)),
+  },
+  WeylGroupGrassmannianElementCount: { read: (t) => grassmannianFromIndices(matrixOf(t)), types: typesUpTo(8) },
+  WeylGroupInvolutionCount: {
+    read: (t) =>
+      t[0] === "A" || t[0] === "D" || t[0] === "E"
+        ? involutionsFromOrthogonalRoots(matrixOf(t))
+        : involutionCount(matrixOf(t)),
+    types: typesUpTo(DEEP ? 8 : 6).filter((t) => "ADE".includes(t[0]) || smallGroup(DEEP ? 60000 : 2000)(t)),
+  },
+  WeylGroupElementOrderLeastCommonMultiple: {
+    read: (t) => elementOrderLeastCommonMultiple(matrixOf(t)),
+    types: typesUpTo(6).filter(smallGroup(DEEP ? 60000 : 2000)),
+  },
+  LargestFundamentalRepresentationDimension: {
+    read: (t) => largestFundamentalDimension(matrixOf(t)),
+    types: typesUpTo(8),
+  },
+  WeylGroupParabolicSubgroupCount: {
+    read: (t) => parabolicSubgroupCount(matrixOf(t)),
+    types: typesUpTo(DEEP ? 7 : 5).filter((t) => !(t[0] === "E" && t[1] === 8)),
+  },
+  WeylGroupInvolutionClassCount: {
+    read: (t) => involutionClassCount(matrixOf(t)),
+    types: typesUpTo(6).filter(smallGroup(DEEP ? 60000 : 400)),
+  },
+  WeylGroupConnectedElementCount: { read: (t) => connectedFromParabolicOrders(matrixOf(t)), types: typesUpTo(8) },
+  WeylGroupMinimalFaithfulPermutationDegree: {
+    read: (t) => smallestFundamentalOrbit(matrixOf(t)),
+    types: typesUpTo(8),
+  },
 };
 
 test("every Cartan type definition has an independent reading, or is the exponents", () => {
@@ -156,6 +201,23 @@ for (const [head, { read, types }] of Object.entries(READINGS))
     expect(types.length).toBeGreaterThan(8);
     for (const type of types) expect(evaluate(head, type), `${type[0]}${type[1]}`).toBe(read(type));
   });
+
+test("the two readings of the Grassmannian count, and of the involution count, agree where both are cheap", () => {
+  for (const type of typesUpTo(5).filter(smallGroup(2000))) {
+    expect(grassmannianCount(matrixOf(type)), `${type[0]}${type[1]}`).toBe(grassmannianFromIndices(matrixOf(type)));
+    if ("ADE".includes(type[0]))
+      expect(involutionsFromOrthogonalRoots(matrixOf(type)), `${type[0]}${type[1]}`).toBe(
+        involutionCount(matrixOf(type)),
+      );
+  }
+});
+
+test("the connected elements counted from the group are those the parabolic orders give", () => {
+  for (const type of typesUpTo(5).filter(smallGroup(400)))
+    expect(connectedElementCount(matrixOf(type)), `${type[0]}${type[1]}`).toBe(
+      connectedFromParabolicOrders(matrixOf(type)),
+    );
+});
 
 test("the exponents are the exponents of the generated root system, ascending", () => {
   for (const type of typesUpTo(8))
