@@ -1132,6 +1132,158 @@ const acyclicOrientationTable: MathJSON = typedFolding(
   ["List", 1],
   masksFromOne,
 );
+/** Which columns the rows of `edgeSubsetRows` carry after the subset's size: a component label for each vertex, a degree for each vertex. */
+interface SubsetColumns {
+  readonly labels: boolean;
+  readonly degrees: boolean;
+}
+const RANK_COLUMNS: SubsetColumns = { labels: true, degrees: false };
+const DEGREE_COLUMNS: SubsetColumns = { labels: false, degrees: true };
+const BOTH_COLUMNS: SubsetColumns = { labels: true, degrees: true };
+/** The position in a row of vertex v's component label, and of its degree. */
+const labelPosition = (vertex: MathJSON): MathJSON => add(vertex, 1);
+const degreePosition = (columns: SubsetColumns, vertex: MathJSON): MathJSON =>
+  add(vertex, columns.labels ? add("n", 1) : 1);
+/** What the doubling steps of `subsetRows` add: step k (a no-op unless `active`) joins `from` to `to`, and the size becomes `size`, over the `row` before. */
+interface SubsetSource {
+  readonly steps: MathJSON;
+  readonly active: MathJSON;
+  readonly from: MathJSON;
+  readonly to: MathJSON;
+  readonly size: MathJSON;
+  readonly emptySize: MathJSON;
+}
+/** The edges of the graph, step 0 a no-op so that a graph with no edges folds over 0 alone (`Range(1, 0)` does not evaluate to the empty list). */
+const EDGE_SOURCE: SubsetSource = {
+  steps: ["Range", 0, length("edges")],
+  active: less(0, "k"),
+  from: at(1, at("k", "edges")),
+  to: at(2, at("k", "edges")),
+  size: add(at(1, "row"), 1),
+  emptySize: 0,
+};
+/** The pairs of vertices a < b, step k the pair at row (k - 1) div n and column (k - 1) mod n; the size is the number of pairs where the subset differs from the graph's edges. */
+/** The row of step k, (k - 1) less its remainder mod n, over n. */
+const rowOfStep: MathJSON = ["Divide", subtract(subtract("k", 1), ["Mod", subtract("k", 1), "n"]), "n"];
+const PAIR_SOURCE: SubsetSource = {
+  steps: ["Range", 1, ["Multiply", "n", "n"]],
+  active: less(add(rowOfStep, 1), add(["Mod", subtract("k", 1), "n"], 1)),
+  from: add(rowOfStep, 1),
+  to: add(["Mod", subtract("k", 1), "n"], 1),
+  size: add(at(1, "row"), subtract(1, times(2, adjacent("from", "to")))),
+  emptySize: length("edges"),
+};
+/**
+ * One row for each subset of the source's steps, the subset of mask j in row j + 1 (bit k - 1 of the mask is step k): the
+ * subset's size, then the `columns` that follow it. Step k doubles the table: a copy of every row so far with the step
+ * added, joining the classes of its ends by giving one the other's label (a union-find by relabeling) and raising their
+ * degrees. A graph with no edges has the one row of the empty subset.
+ */
+const subsetRows = (columns: SubsetColumns, source: SubsetSource = EDGE_SOURCE): MathJSON => {
+  const [labelEnd, width] = [add("n", 1), add(1, add(columns.labels ? "n" : 0, columns.degrees ? "n" : 0))];
+  const keep = at("t", "row");
+  const label: MathJSON = [
+    "If",
+    equals(at(labelPosition("from"), "row"), at(labelPosition("to"), "row")),
+    keep,
+    ["If", equals(keep, at(labelPosition("to"), "row")), at(labelPosition("from"), "row"), keep],
+  ];
+  const degree: MathJSON = add(
+    keep,
+    add(one(equals("t", degreePosition(columns, "from"))), one(equals("t", degreePosition(columns, "to")))),
+  );
+  const entry: MathJSON =
+    columns.labels && columns.degrees
+      ? ["If", less("t", add(labelEnd, 1)), label, degree]
+      : columns.labels
+        ? label
+        : degree;
+  const zeros = (count: boolean): MathJSON[] => (count ? [forEach(vertices, 0, "v")] : []);
+  return typedFolding(
+    [
+      "If",
+      source.active,
+      [
+        "Join",
+        "rows",
+        forEach(
+          "rows",
+          bind(
+            "from",
+            source.from,
+            bind(
+              "to",
+              source.to,
+              forEach(["Range", 1, width], ["If", equals("t", 1), source.size, entry], "t"),
+              "integer",
+            ),
+            "integer",
+          ),
+          "row",
+        ),
+      ],
+      "rows",
+    ],
+    "rows",
+    "k",
+    ["List", ["Join", ["List", source.emptySize], ...(columns.labels ? [vertices] : []), ...zeros(columns.degrees)]],
+    source.steps,
+    "list<list<integer>>",
+  );
+};
+/** The rank of the subgraph of this row: each class keeps one vertex whose label is its own, so the others are the rank. */
+const rankOfRow = (row: MathJSON): MathJSON =>
+  subtract("n", floored(sumOver(vertices, one(equals(at(labelPosition("v"), row), "v")), "v")));
+/** The degree of each vertex in the subgraph of this row, as a list. */
+const rowDegrees = (columns: SubsetColumns, row: MathJSON): MathJSON =>
+  forEach(vertices, at(degreePosition(columns, "v"), row), "v");
+/**
+ * `summary` of the list of `body` over each row of `subsetRows(columns, source)`: the body reads its `row`, and the summary
+ * the list of the bodies and `last`, the row of every step taken.
+ */
+const summarizeSubsetRows = (
+  columns: SubsetColumns,
+  body: (row: MathJSON) => MathJSON,
+  summary: (bodies: MathJSON, last: MathJSON) => MathJSON,
+  source?: SubsetSource,
+): MathJSON =>
+  bindList(
+    "table",
+    subsetRows(columns, source),
+    bindList("last", at(length("table"), "table"), summary(forEach("table", body("row"), "row"), "last")),
+    "list<list<integer>>",
+  );
+/** `summarizeSubsetRows` over the subsets of the edges. */
+const overEdgeSubsetRows = (
+  columns: SubsetColumns,
+  body: (row: MathJSON) => MathJSON,
+  summary: (bodies: MathJSON, last: MathJSON) => MathJSON,
+  otherwise: MathJSON = 0,
+): MathJSON => withGraph(summarizeSubsetRows(columns, body, summary), otherwise);
+/**
+ * The sum over the subsets of the edges of `body` of the subset's size, rank and corank (the rank of the whole graph less
+ * its rank): the sum that every Tutte evaluation and coefficient is. `wrap` takes the sum and the rank of the whole graph.
+ */
+const overEdgeSubsets = (
+  body: (size: MathJSON, rank: MathJSON, corank: MathJSON) => MathJSON,
+  otherwise: MathJSON = 0,
+  wrap: (sum: MathJSON, full: MathJSON) => MathJSON = (sum) => sum,
+): MathJSON =>
+  overEdgeSubsetRows(
+    RANK_COLUMNS,
+    (row) => bind("rank", rankOfRow(row), body(at(1, row), "rank", subtract("full", "rank")), "integer"),
+    (bodies, last) => bind("full", rankOfRow(last), wrap(["Sum", bodies], "full"), "integer"),
+    otherwise,
+  );
+/** The vertices with an edge in the subgraph of this row. */
+const touchedBy = (columns: SubsetColumns, row: MathJSON): MathJSON =>
+  floored(sumOver(vertices, one(less(0, at(degreePosition(columns, "v"), row))), "v"));
+/** `base` to the power `exponent`, an exponent of at least 0; 0 to the power 0 is 1. */
+const power = (base: number, exponent: MathJSON): MathJSON =>
+  base === 0 ? one(equals(exponent, 0)) : base === 1 ? 1 : ["Power", base, exponent];
+/** The Tutte polynomial at (x, y): the sum over subsets A of (x - 1)^corank(A) (y - 1)^nullity(A). */
+const tutteAt = (x: number, y: number, wrap?: (sum: MathJSON, full: MathJSON) => MathJSON): MathJSON =>
+  overEdgeSubsets((size, rank, corank) => times(power(x - 1, corank), power(y - 1, subtract(size, rank))), 1, wrap);
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -2575,5 +2727,242 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The ways to direct every edge so that no directed cycle results.",
     withMasks(lastEntry(acyclicOrientationTable), 1),
     `FindStat's St000269. The sinks of an acyclic orientation form a nonempty independent set, and what is left is acyclic; inclusion-exclusion over the sinks gives the count. The graph with no vertices has one orientation, the empty one, so 1.`,
+  ),
+  stat(
+    "ComponentPreservingSpanningSubgraphCount",
+    "The sets of edges that leave the graph with the same connected components.",
+    tutteAt(1, 2),
+    `FindStat's St000266, the Tutte polynomial at x = 1, y = 2. The graph with no vertices has one, the empty graph, so 1.`,
+  ),
+  stat(
+    "ContainedForestCount",
+    "The sets of edges, the empty set included, that contain no cycle.",
+    tutteAt(2, 1),
+    `FindStat's St000270, the Tutte polynomial at x = 2, y = 1. The graph with no vertices has one, so 1.`,
+  ),
+  stat(
+    "TutteXYCoefficient",
+    "The coefficient of x y in the Tutte polynomial.",
+    overEdgeSubsets((size, rank, corank) =>
+      times(
+        times(corank, ["Power", -1, add(corank, 1)]),
+        times(subtract(size, rank), ["Power", -1, add(subtract(size, rank), 1)]),
+      ),
+    ),
+    `FindStat's St001069: the sum over the sets of edges A of the coefficient of x in (x - 1)^corank(A) times that of y in (y - 1)^nullity(A). ${NO_VERTICES}`,
+  ),
+  stat(
+    "ChromaticPolynomialDerivativeAtOne",
+    "The absolute value of the derivative of the chromatic polynomial at 1.",
+    overEdgeSubsets(
+      (size, rank) => times(["Power", -1, size], subtract("n", rank)),
+      0,
+      (sum) => ["Abs", sum],
+    ),
+    `FindStat's St001070: the chromatic polynomial is the sum over sets of edges A of (-1)^|A| k^components(A), and the components of A are n less its rank. ${NO_VERTICES}`,
+  ),
+  stat(
+    "BetaInvariant",
+    "Crapo's beta invariant: the absolute value of the sum over sets of edges of (-1)^size times their rank.",
+    overEdgeSubsets(
+      (size, rank) => times(["Power", -1, size], rank),
+      0,
+      (sum) => ["Abs", sum],
+    ),
+    `FindStat's St001071, (-1)^rank times that sum, which is never negative. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TutteEvaluationAtThreeAndThree",
+    "The Tutte polynomial at x = 3, y = 3.",
+    tutteAt(3, 3),
+    `FindStat's St001072. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "NowhereZeroThreeFlowCount",
+    "The nowhere-zero flows with values in the integers modulo 3: the absolute value of the Tutte polynomial at x = 0, y = -2.",
+    tutteAt(0, -2, (sum) => ["Abs", sum]),
+    `FindStat's St001073. The graph with no vertices has one flow, the empty one, so 1.`,
+  ),
+  stat(
+    "TutteEvaluationAtTwoAndMinusOne",
+    "The Tutte polynomial at x = 2, y = -1.",
+    tutteAt(2, -1),
+    `FindStat's St001474. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "TutteEvaluationAtOneAndZero",
+    "The Tutte polynomial at x = 1, y = 0.",
+    tutteAt(1, 0),
+    `FindStat's St001475. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "TutteEvaluationAtOneAndMinusOne",
+    "The Tutte polynomial at x = 1, y = -1.",
+    tutteAt(1, -1),
+    `FindStat's St001476. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "NowhereZeroFiveFlowCount",
+    "The nowhere-zero flows with values in the integers modulo 5: the absolute value of the Tutte polynomial at x = 0, y = -4.",
+    tutteAt(0, -4, (sum) => ["Abs", sum]),
+    `FindStat's St001477, the flow polynomial at 5: (-1)^nullity times that evaluation, which is never negative. The graph with no vertices has one flow, the empty one, so 1.`,
+  ),
+  stat(
+    "NowhereZeroFourFlowCount",
+    "The nowhere-zero flows with values in the integers modulo 4: the absolute value of the Tutte polynomial at x = 0, y = -3.",
+    tutteAt(0, -3, (sum) => ["Abs", sum]),
+    `FindStat's St001478, the flow polynomial at 4: (-1)^nullity times that evaluation, which is never negative. The graph with no vertices has one flow, the empty one, so 1.`,
+  ),
+  stat(
+    "TwoComponentSpanningForestCount",
+    "The sets of edges that form a forest with two trees on all the vertices.",
+    overEdgeSubsets((size, rank) => times(one(equals(size, rank)), one(equals(subtract("n", rank), 2)))),
+    `FindStat's St001827: the sets of edges with no cycle (size = rank) and two components. ${NO_VERTICES}`,
+  ),
+  stat(
+    "OverfullSubgraphCount",
+    "The sets of edges with more edges than the greatest degree times half the vertices they meet, rounded down.",
+    overEdgeSubsetRows(
+      DEGREE_COLUMNS,
+      (row) => {
+        const touched = touchedBy(DEGREE_COLUMNS, row);
+        return one(greater(at(1, row), times("top", ["Divide", subtract(touched, ["Mod", touched, 2]), 2])));
+      },
+      (bodies, last) => bind("top", ["Max", rowDegrees(DEGREE_COLUMNS, last)], floored(["Sum", bodies]), "integer"),
+    ),
+    `FindStat's St001797: the empty set of edges is never overfull. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestRegularSpanningSubgraphDegree",
+    "The greatest k such that some set of edges gives every vertex degree k.",
+    overEdgeSubsetRows(
+      DEGREE_COLUMNS,
+      (row) => {
+        const degrees = rowDegrees(DEGREE_COLUMNS, row);
+        return ["If", equals(["Min", degrees], ["Max", degrees]), ["Max", degrees], 0];
+      },
+      (bodies) => ["Max", bodies],
+    ),
+    `FindStat's St001357, the largest k with a k-factor; the empty set of edges is the 0-factor. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestRegularSubgraphDegree",
+    "The greatest k such that some set of edges gives every vertex it meets degree k.",
+    overEdgeSubsetRows(
+      DEGREE_COLUMNS,
+      (row) => {
+        const degrees = rowDegrees(DEGREE_COLUMNS, row);
+        return [
+          "If",
+          equals(floored(["Sum", degrees]), times(["Max", degrees], touchedBy(DEGREE_COLUMNS, row))),
+          ["Max", degrees],
+          0,
+        ];
+      },
+      (bodies) => ["Max", bodies],
+    ),
+    `FindStat's St001358: the degrees add up to k times the vertices met exactly when the met ones all have degree k. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LongestTrailLength",
+    "The most edges in a trail: a set of edges that is connected and has at most two vertices of odd degree.",
+    overEdgeSubsetRows(
+      BOTH_COLUMNS,
+      (row) =>
+        times(
+          at(1, row),
+          times(
+            one(equals(subtract(touchedBy(BOTH_COLUMNS, row), rankOfRow(row)), 1)),
+            one(less(floored(sumOver(vertices, ["Mod", at(degreePosition(BOTH_COLUMNS, "v"), row), 2], "v")), 3)),
+          ),
+        ),
+      (bodies) => ["Max", bodies],
+    ),
+    `FindStat's St001649: a connected set of edges has an Euler trail when at most two vertices have odd degree. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TriangleFreeEdgeDeletionNumber",
+    "The fewest edges whose deletion leaves a graph with no triangle.",
+    withGraph([
+      "If",
+      equals(length("edges"), 0),
+      0,
+      bindList(
+        "index",
+        forEach(
+          vertices,
+          forEach(
+            vertices,
+            floored(
+              sumOver(
+                ["Range", 1, length("edges")],
+                times("k", times(one(equals(lower(at("k", "edges")), "a")), one(equals(upper(at("k", "edges")), "b")))),
+                "k",
+              ),
+            ),
+            "b",
+          ),
+          "a",
+        ),
+        [
+          "Min",
+          forEach(
+            ["Range", 0, subtract(["Power", 2, length("edges")], 1)],
+            [
+              "If",
+              equals(
+                floored(
+                  sumOver(
+                    vertices,
+                    floored(
+                      sumOver(
+                        vertices,
+                        floored(
+                          sumOver(
+                            vertices,
+                            times(
+                              one(hasBit("m", entry("index", "a", "b"))),
+                              times(
+                                one(hasBit("m", entry("index", "a", "c"))),
+                                one(hasBit("m", entry("index", "b", "c"))),
+                              ),
+                            ),
+                            "c",
+                          ),
+                        ),
+                        "b",
+                      ),
+                    ),
+                    "a",
+                  ),
+                ),
+                0,
+              ),
+              subtract(length("edges"), floored(sumOver(["Range", 1, length("edges")], one(hasBit("m", "k")), "k"))),
+              length("edges"),
+            ],
+            "m",
+          ),
+        ],
+        "list<list<integer>>",
+      ),
+    ]),
+    `FindStat's St001573: the edges less the most edges of a set with no triangle. A triangle is three vertices a < b < c whose three edges are all in the set. ${NO_VERTICES}`,
+  ),
+  stat(
+    "RegularEdgeEditNumber",
+    "The fewest edges to add or delete to make a graph regular.",
+    withAdjacency(
+      summarizeSubsetRows(
+        DEGREE_COLUMNS,
+        (row) => {
+          const degrees = rowDegrees(DEGREE_COLUMNS, row);
+          return ["If", equals(["Min", degrees], ["Max", degrees]), at(1, row), length("edges")];
+        },
+        (bodies) => ["Min", bodies],
+        PAIR_SOURCE,
+      ),
+    ),
+    `FindStat's St001574: the fewest differences between the edges and those of a regular graph on the same vertices; the graph with no edges is regular. ${NO_VERTICES}`,
   ),
 ];

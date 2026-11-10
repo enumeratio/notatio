@@ -487,6 +487,97 @@ const distanceRows = (g: Graph): number[][] => {
 /** The edges inside the vertices of `set`. */
 const edgesWithin = (m: boolean[][], set: readonly number[]): number =>
   pairsOf(set).filter(([u, v]) => m[u]![v]).length;
+type Edge = readonly [number, number];
+/** Whether `u` and `v` are joined by a path of `edges`. */
+function joinedBy(edges: readonly Edge[], u: number, v: number): boolean {
+  const seen = new Set([u]);
+  const queue = [u];
+  for (const w of queue)
+    for (const [a, b] of edges) {
+      const next = a === w ? b : b === w ? a : undefined;
+      if (next !== undefined && !seen.has(next)) {
+        seen.add(next);
+        queue.push(next);
+      }
+    }
+  return seen.has(v);
+}
+const withoutEdge = (edges: readonly Edge[], index: number): Edge[] => edges.filter((_, i) => i !== index);
+/** The edges with the ends of the edge at `index` identified and that edge gone: loops and parallel edges may arise. */
+const contractedEdge = (edges: readonly Edge[], index: number): Edge[] => {
+  const [u, v] = edges[index]!;
+  return withoutEdge(edges, index).map(([a, b]) => [a === v ? u : a, b === v ? u : b]);
+};
+/** A bivariate polynomial as its coefficients, keyed "i,j" for x^i y^j. */
+type Bivariate = ReadonlyMap<string, number>;
+const shifted = (p: Bivariate, di: number, dj: number): Bivariate =>
+  new Map(
+    [...p].map(([key, c]) => [
+      key
+        .split(",")
+        .map((e, k) => Number(e) + (k === 0 ? di : dj))
+        .join(","),
+      c,
+    ]),
+  );
+const summed = (p: Bivariate, q: Bivariate): Bivariate => {
+  const total = new Map(p);
+  for (const [key, c] of q) total.set(key, (total.get(key) ?? 0) + c);
+  return total;
+};
+/** The Tutte polynomial by deletion and contraction: a loop gives a factor y, a bridge a factor x. */
+function tuttePolynomial(edges: readonly Edge[]): Bivariate {
+  if (edges.length === 0) return new Map([["0,0", 1]]);
+  const [u, v] = edges[0]!;
+  const rest = withoutEdge(edges, 0);
+  if (u === v) return shifted(tuttePolynomial(rest), 0, 1);
+  if (!joinedBy(rest, u, v)) return shifted(tuttePolynomial(contractedEdge(edges, 0)), 1, 0);
+  return summed(tuttePolynomial(rest), tuttePolynomial(contractedEdge(edges, 0)));
+}
+const tutteAt = (g: Graph, x: number, y: number): number =>
+  [...tuttePolynomial(g.edges)].reduce((total, [key, c]) => {
+    const [i, j] = key.split(",").map(Number);
+    return total + c * x ** i! * y ** j!;
+  }, 0);
+const tutteCoefficient = (g: Graph, i: number, j: number): number => tuttePolynomial(g.edges).get(`${i},${j}`) ?? 0;
+/** The chromatic polynomial's coefficients (the power of k at each index) by deletion and contraction. */
+function chromaticPolynomial(vertexCount: number, edges: readonly Edge[]): number[] {
+  if (edges.length === 0) return [...Array.from({ length: vertexCount }, () => 0), 1];
+  const [u, v] = edges[0]!;
+  if (u === v) return [0];
+  const deleted = chromaticPolynomial(vertexCount, withoutEdge(edges, 0));
+  const contracted = chromaticPolynomial(vertexCount - 1, contractedEdge(edges, 0));
+  return deleted.map((c, i) => c - (contracted[i] ?? 0));
+}
+/** The number of nowhere-zero flows with values modulo `k`, by deletion and contraction of the flow polynomial. */
+function flowCount(edges: readonly Edge[], k: number): number {
+  if (edges.length === 0) return 1;
+  const [u, v] = edges[0]!;
+  const rest = withoutEdge(edges, 0);
+  if (u === v) return (k - 1) * flowCount(rest, k);
+  if (!joinedBy(rest, u, v)) return 0;
+  return flowCount(contractedEdge(edges, 0), k) - flowCount(rest, k);
+}
+/** The subsets of the edges, as lists. */
+const edgeSets = (edges: readonly Edge[]): Edge[][] =>
+  Array.from({ length: 2 ** edges.length }, (_, mask) => edges.filter((_, k) => (mask >> k) & 1));
+/** The connected components of the graph on 1 .. n with these edges. */
+const componentTotal = (n: number, edges: readonly Edge[]): number =>
+  range(1, n).filter((v) => !range(1, v - 1).some((w) => joinedBy(edges, w, v))).length;
+const isForest = (n: number, edges: readonly Edge[]): boolean => componentTotal(n, edges) === n - edges.length;
+
+/** The most edges in a trail from `at` that has used `used`: an edge may follow another that shares its end. */
+function longestTrailFrom(edges: readonly Edge[], at: number, used: ReadonlySet<number>): number {
+  let best = used.size;
+  edges.forEach(([u, v], index) => {
+    if (used.has(index) || (u !== at && v !== at)) return;
+    best = Math.max(best, longestTrailFrom(edges, u === at ? v : u, new Set([...used, index])));
+  });
+  return best;
+}
+/** The degree of each vertex 1 .. n among `edges`. */
+const degreesIn = (n: number, edges: readonly Edge[]): number[] =>
+  range(1, n).map((v) => edges.filter(([a, b]) => a === v || b === v).length);
 
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
@@ -960,4 +1051,72 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
         .map((s) => s.length),
     ),
   AcyclicOrientationCount: acyclicOrientations,
+  // St000266 and St000270 count the edge sets of their titles; the Tutte statistics read the polynomial built by deletion and contraction.
+  ComponentPreservingSpanningSubgraphCount: (g) =>
+    edgeSets(g.edges).filter((set) => componentTotal(g.n, set) === componentTotal(g.n, g.edges)).length,
+  ContainedForestCount: (g) => edgeSets(g.edges).filter((set) => isForest(g.n, set)).length,
+  TutteXYCoefficient: (g) => tutteCoefficient(g, 1, 1),
+  // The chromatic polynomial's derivative at 1, from its coefficients.
+  ChromaticPolynomialDerivativeAtOne: (g) =>
+    Math.abs(chromaticPolynomial(g.n, g.edges).reduce((total, c, i) => total + i * c, 0)),
+  // Crapo's beta invariant is the coefficient of x in the Tutte polynomial.
+  BetaInvariant: (g) => tutteCoefficient(g, 1, 0),
+  TutteEvaluationAtThreeAndThree: (g) => tutteAt(g, 3, 3),
+  NowhereZeroThreeFlowCount: (g) => flowCount(g.edges, 3),
+  TutteEvaluationAtTwoAndMinusOne: (g) => tutteAt(g, 2, -1),
+  TutteEvaluationAtOneAndZero: (g) => tutteAt(g, 1, 0),
+  TutteEvaluationAtOneAndMinusOne: (g) => tutteAt(g, 1, -1),
+  NowhereZeroFiveFlowCount: (g) => flowCount(g.edges, 5),
+  NowhereZeroFourFlowCount: (g) => flowCount(g.edges, 4),
+  TwoComponentSpanningForestCount: (g) =>
+    edgeSets(g.edges).filter((set) => set.length === g.n - 2 && isForest(g.n, set)).length,
+  // St001797 as FindStat's code reads it: the sets of edges longer than the greatest degree times half the vertices they meet.
+  OverfullSubgraphCount: (g) =>
+    edgeSets(g.edges).filter(
+      (set) => set.length > Math.max(0, ...degrees(g)) * Math.floor(new Set(set.flat()).size / 2),
+    ).length,
+  // The greatest k such that some set of edges gives every vertex degree k, searched k by k.
+  LargestRegularSpanningSubgraphDegree: (g) =>
+    g.n === 0
+      ? 0
+      : Math.max(
+          ...range(0, g.n - 1).filter((k) =>
+            edgeSets(g.edges).some((set) => degreesIn(g.n, set).every((d) => d === k)),
+          ),
+        ),
+  // The greatest k such that some set of vertices has a set of edges inside it giving each of them degree k.
+  LargestRegularSubgraphDegree: (g) =>
+    Math.max(
+      0,
+      ...subsets(g.n)
+        .filter((set) => set.length > 0)
+        .flatMap((set) => {
+          const inside = g.edges.filter(([u, v]) => set.includes(u - 1) && set.includes(v - 1));
+          return edgeSets(inside).flatMap((chosen) => {
+            const d = degreesIn(g.n, chosen).filter((_, v) => set.includes(v));
+            return d.every((x) => x === d[0]) ? [d[0]!] : [];
+          });
+        }),
+    ),
+  LongestTrailLength: (g) => Math.max(0, ...range(1, g.n).map((start) => longestTrailFrom(g.edges, start, new Set()))), // The fewest edges to delete, tried by count: the smallest k for which some k edges meet every triangle.
+  TriangleFreeEdgeDeletionNumber: (g) =>
+    range(0, g.edges.length).find((k) =>
+      edgeSubsets(g, k).some((deleted) => {
+        const kept = g.edges.filter((edge) => !deleted.includes(edge));
+        return !subsets(g.n).some(
+          (set) =>
+            set.length === 3 && pairsOf(set).every(([u, v]) => kept.some(([a, b]) => a === u + 1 && b === v + 1)),
+        );
+      }),
+    )!,
+  // Every graph on the same vertices that is regular, by the number of pairs where it differs from this one.
+  RegularEdgeEditNumber: (g) => {
+    const pairs = pairsOf(range(1, g.n)).filter(([u, v]) => u < v);
+    const has = (set: readonly Edge[], [u, v]: Edge): boolean => set.some(([a, b]) => a === u && b === v);
+    return Math.min(
+      ...edgeSets(pairs)
+        .filter((other) => new Set(degreesIn(g.n, other)).size <= 1)
+        .map((other) => pairs.filter((pair) => has(other, pair) !== has(g.edges, pair)).length),
+    );
+  },
 };
