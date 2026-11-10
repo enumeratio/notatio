@@ -380,6 +380,114 @@ const distanceMatrixOf = (g: Graph): number[][] | null => {
 const distanceLaplacianOf = (distances: number[][]): number[][] =>
   distances.map((row, u) => row.map((d, v) => (u === v ? sum(row) : -d)));
 
+/** The vertices in the set or adjacent to one of it. */
+const closedNeighborhoodOfSet = (m: boolean[][], n: number, set: readonly number[]): number[] =>
+  range(0, n - 1).filter((v) => set.includes(v) || neighborsIn(m, v, set).length > 0);
+/** Whether each vertex of the set has a vertex in its closed neighborhood that the others' closed neighborhoods miss. */
+const isIrredundantSet = (m: boolean[][], n: number, set: readonly number[]): boolean =>
+  set.every((v) => {
+    const others = closedNeighborhoodOfSet(
+      m,
+      n,
+      set.filter((x) => x !== v),
+    );
+    return closedNeighborhood(m, v, n).some((w) => !others.includes(w));
+  });
+/** The sizes of the irredundant sets to which no vertex can be added. */
+const maximalIrredundantSizes = (g: Graph): number[] => {
+  const m = matrix(g);
+  return subsets(g.n)
+    .filter(
+      (s) =>
+        isIrredundantSet(m, g.n, s) &&
+        range(0, g.n - 1).every((v) => s.includes(v) || !isIrredundantSet(m, g.n, [...s, v])),
+    )
+    .map((s) => s.length);
+};
+/** The simple paths from `start` to `end`, by depth-first search. */
+function simplePathCount(m: boolean[][], start: number, end: number): number {
+  let found = 0;
+  const extend = (path: number[]): void => {
+    const last = path[path.length - 1]!;
+    if (last === end) found++;
+    else for (let w = 0; w < m.length; w++) if (m[last]![w] && !path.includes(w)) extend([...path, w]);
+  };
+  extend([start]);
+  return found;
+}
+/** The length of the shortest path that no vertex can be added to at either end. */
+function shortestMaximalPath(g: Graph): number {
+  const m = matrix(g);
+  let best = Infinity;
+  const extend = (path: number[]): void => {
+    const ends = [path[0]!, path[path.length - 1]!];
+    const outward = (e: number): number[] => allVertices(g).filter((w) => m[e]![w] && !path.includes(w));
+    if (outward(ends[0]!).length + outward(ends[1]!).length === 0) best = Math.min(best, path.length - 1);
+    for (const w of outward(ends[0]!)) extend([w, ...path]);
+    for (const w of outward(ends[1]!)) extend([...path, w]);
+  };
+  for (let s = 0; s < g.n; s++) extend([s]);
+  return best;
+}
+
+/** The ways to direct every edge with no directed cycle, trying every direction of each edge. */
+function acyclicOrientations(g: Graph): number {
+  let found = 0;
+  for (let choice = 0; choice < 2 ** g.edges.length; choice++) {
+    const out = range(0, g.n - 1).map(() => [] as number[]);
+    g.edges.forEach(([u, v], k) =>
+      ((choice >> k) & 1 ? out[u - 1]! : out[v - 1]!).push((choice >> k) & 1 ? v - 1 : u - 1),
+    );
+    // Repeatedly remove a vertex with no edge leaving: all go exactly when there is no cycle.
+    const left = new Set(range(0, g.n - 1));
+    let removed = true;
+    while (removed) {
+      removed = false;
+      for (const v of left)
+        if (out[v]!.every((w) => !left.has(w))) {
+          left.delete(v);
+          removed = true;
+        }
+    }
+    if (left.size === 0) found++;
+  }
+  return found;
+}
+/** The pairs {A, B} covering the vertices with A \ B and B \ A nonempty and no edge between them, by labeling each vertex A only, B only or both. */
+function properSeparations(g: Graph): number {
+  let found = 0;
+  const labels: number[] = [];
+  const assign = (v: number): void => {
+    if (v === g.n) {
+      if (
+        labels.includes(1) &&
+        labels.includes(2) &&
+        !g.edges.some(([a, b]) => labels[a - 1]! + labels[b - 1]! === 3 && labels[a - 1] !== 0 && labels[b - 1] !== 0)
+      )
+        found++;
+      return;
+    }
+    for (const label of [0, 1, 2]) {
+      labels[v] = label;
+      assign(v + 1);
+    }
+  };
+  assign(0);
+  return found / 2;
+}
+/** Each shortest path length from each vertex, row by row; Infinity where there is no path. */
+const distanceRows = (g: Graph): number[][] => {
+  const m = matrix(g);
+  const all = allVertices(g);
+  return all.map((u) => {
+    const from = distancesFrom(m, u, all);
+    return all.map((w) => from.get(w) ?? Infinity);
+  });
+};
+/** The edges inside the vertices of `set`. */
+const edgesWithin = (m: boolean[][], set: readonly number[]): number =>
+  pairsOf(set).filter(([u, v]) => m[u]![v]).length;
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -719,4 +827,137 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
       ? 0
       : Math.max(...eigenvalueGroups(eigenvaluesOf(distanceLaplacianOf(distances))).map((x) => x.length));
   },
+  ClosedVertexSetCount: (g) => {
+    const m = matrix(g);
+    return subsets(g.n).filter((s) =>
+      pairsOf(s).every(([a, b]) => range(0, g.n - 1).every((w) => !(m[a]![w] && m[b]![w]) || s.includes(w))),
+    ).length;
+  },
+  MaximumDissociationSetCount: (g) => {
+    if (g.n === 0) return 0;
+    const sets = subsets(g.n).filter((s) => s.every((v) => neighborsIn(matrix(g), v, s).length <= 1));
+    return sets.filter((s) => s.length === Math.max(...sets.map((t) => t.length))).length;
+  },
+  HalfDominatingNonblockingSetCount: (g) => {
+    const m = matrix(g);
+    const all = allVertices(g);
+    return g.n === 0
+      ? 0
+      : subsets(g.n).filter(
+          (s) =>
+            isDominating(m, g.n, s) &&
+            all.filter((v) => s.includes(v)).every((v) => all.some((w) => !s.includes(w) && m[v]![w])),
+        ).length / 2;
+  },
+  CommonIndependenceNumber: (g) => {
+    const independent = independentSets(g);
+    return g.n === 0
+      ? 0
+      : Math.min(
+          ...allVertices(g).map((v) => Math.max(...independent.filter((s) => s.includes(v)).map((s) => s.length))),
+        );
+  },
+  RestrainedDominationNumber: (g) => {
+    const m = matrix(g);
+    return Math.min(
+      ...subsets(g.n)
+        .filter((d) =>
+          allVertices(g).every(
+            (v) =>
+              d.includes(v) ||
+              (m[v]!.some((edge, w) => edge && d.includes(w)) && m[v]!.some((edge, w) => edge && !d.includes(w))),
+          ),
+        )
+        .map((d) => d.length),
+    );
+  },
+  UpperIrredundanceNumber: (g) => Math.max(...maximalIrredundantSizes(g)),
+  IrredundanceNumber: (g) => Math.min(...maximalIrredundantSizes(g)),
+  ProperSeparationCount: properSeparations,
+  GraphEulerCharacteristic: (g) => g.n - g.edges.length,
+  ConvexVertexSetCount: (g) => {
+    const d = distanceRows(g);
+    return subsets(g.n).filter((u) =>
+      u.every((x) =>
+        u.every((y) =>
+          allVertices(g).every((w) => u.includes(w) || !(d[x]![y]! < Infinity && d[x]![w]! + d[w]![y]! === d[x]![y]!)),
+        ),
+      ),
+    ).length;
+  },
+  NonconvexVertexSetCount: (g) => 2 ** g.n - GRAPH_READINGS.ConvexVertexSetCount!(g),
+  SzegedWienerGap: (g) => GRAPH_READINGS.SzegedIndex!(g) - GRAPH_READINGS.WienerIndex!(g),
+  PadmakarIvanIndex: (g) => {
+    const m = matrix(g);
+    const d = distanceRows(g);
+    const closerTo = (u: number, v: number): number[] => allVertices(g).filter((w) => d[w]![u]! < d[w]![v]!);
+    return sum(
+      g.edges.map(([a, b]) => edgesWithin(m, closerTo(a - 1, b - 1)) + edgesWithin(m, closerTo(b - 1, a - 1))),
+    );
+  },
+  TwoPackingDifferential: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      ...subsets(g.n)
+        .filter((s) =>
+          pairsOf(s).every(
+            ([a, b]) => !closedNeighborhood(m, a, g.n).some((w) => closedNeighborhood(m, b, g.n).includes(w)),
+          ),
+        )
+        .map(
+          (s) => new Set(s.flatMap((v) => range(0, g.n - 1).filter((w) => m[v]![w] && !s.includes(w)))).size - s.length,
+        ),
+    );
+  },
+  GeneralPositionNumber: (g) => {
+    const d = distanceRows(g);
+    return Math.max(
+      ...subsets(g.n)
+        .filter((s) =>
+          s.every((x) =>
+            s.every((y) =>
+              s.every(
+                (z) => x === y || y === z || x === z || d[x]![z]! === Infinity || d[x]![y]! + d[y]![z]! !== d[x]![z]!,
+              ),
+            ),
+          ),
+        )
+        .map((s) => s.length),
+    );
+  },
+  HamiltonianCycleCount: (g) => cycleLengths(g).filter((length) => length === g.n).length,
+  MaximumSimplePathCount: (g) => {
+    const m = matrix(g);
+    return Math.max(0, ...pairsOf(allVertices(g)).map(([u, v]) => simplePathCount(m, u, v)));
+  },
+  ShortestMaximalPathLength: (g) => (g.n === 0 ? 0 : shortestMaximalPath(g)),
+  LargestInducedPathSize: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      0,
+      ...subsets(g.n)
+        .filter(
+          (s) =>
+            s.length > 0 &&
+            componentsOn(m, s) === 1 &&
+            edgesWithin(m, s) === s.length - 1 &&
+            s.every((v) => neighborsIn(m, v, s).length <= 2),
+        )
+        .map((s) => s.length),
+    );
+  },
+  LargestComponentPreservingForestSize: (g) =>
+    Math.max(
+      ...inducedForests(g)
+        .filter((s) => componentsOn(matrix(g), s) === components(g))
+        .map((s) => s.length),
+    ),
+  TriangleFreeVertexDeletionNumber: (g) =>
+    g.n -
+    Math.max(
+      ...subsets(g.n)
+        .filter((s) => !cycleLengths(inducedOn(g, s)).includes(3))
+        .map((s) => s.length),
+    ),
+  AcyclicOrientationCount: acyclicOrientations,
 };

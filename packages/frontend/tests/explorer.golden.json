@@ -825,11 +825,11 @@
     "columns": [
       "AboveAverageDegreeVertexCount",
       "AbsoluteAdjacencyDeterminant",
-      "AdjacencyDeterminant",
-      "AdjacencyNegativeEigenvalueCount"
+      "AcyclicOrientationCount",
+      "AdjacencyDeterminant"
     ],
     "derived": true,
-    "statistics": 118
+    "statistics": 140
   },
   "LabeledGraphsByEdges": {
     "expr": "LabeledGraphsByEdges(4, 2)",
@@ -847,7 +847,7 @@
       "AdjacencyNegativeEigenvalueCount"
     ],
     "derived": true,
-    "statistics": 118
+    "statistics": 140
   },
   "LabeledTrees": {
     "expr": "LabeledTrees(4)",
