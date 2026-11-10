@@ -379,7 +379,36 @@ export const WORD_READINGS: Record<string, Reading> = {
         ),
     ).length,
   WeakMajorIndex: (w) => sum(indices(w.length - 1).map((i) => (w[i]! >= w[i + 1]! ? i + 1 : 0))),
+  // FindStat's St001885: the words of the same length whose proper borders, as strings, are the same list.
+  SameBorderSetWordCount: (w) => {
+    const borders = (letters: string): string =>
+      indices(letters.length - 1)
+        .map((i) => i + 1)
+        .filter((size) => letters.slice(0, size) === letters.slice(-size))
+        .map((size) => letters.slice(0, size))
+        .join(",");
+    const target = borders(text(w));
+    return indices(2 ** w.length).filter((m) => borders(m.toString(2).padStart(w.length, "0")) === target).length;
+  },
+  KaylesGrundyValue: (w) => kaylesValue(text(w)),
 };
+
+/** FindStat's St000753: the game tree of Kayles on the word, a move turning a 1 or two adjacent 1s into 0s, and the least value no child has. */
+const kaylesMemo = new Map<string, number>();
+function kaylesValue(letters: string): number {
+  const known = kaylesMemo.get(letters);
+  if (known !== undefined) return known;
+  const children = new Set<number>();
+  for (let i = 0; i < letters.length; i++) {
+    if (letters[i] === "1") children.add(kaylesValue(`${letters.slice(0, i)}0${letters.slice(i + 1)}`));
+    if (letters[i] === "1" && letters[i + 1] === "1")
+      children.add(kaylesValue(`${letters.slice(0, i)}00${letters.slice(i + 2)}`));
+  }
+  let value = 0;
+  while (children.has(value)) value++;
+  kaylesMemo.set(letters, value);
+  return value;
+}
 
 /** FindStat's St000291 for `Descents`, which is not a binary-word definition of its own: the occurrences of the factor 10. */
 export const descentsOfWord = (w: readonly number[]): number =>

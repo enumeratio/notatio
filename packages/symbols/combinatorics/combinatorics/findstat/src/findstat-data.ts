@@ -5282,6 +5282,12 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "ReorderEquivalentTreeCount",
+    on: "OrderedTree",
+    findstat: ["St000413"],
+    values: 1200,
+  },
+  {
     head: "HammingWeight",
     on: "BinaryWord",
     findstat: ["St000288"],
@@ -5669,6 +5675,18 @@ export const findstat: readonly FindStatMatch[] = [
     head: "RecursiveBitPairCount",
     on: "BinaryWord",
     findstat: ["St001984"],
+    values: 1200,
+  },
+  {
+    head: "SameBorderSetWordCount",
+    on: "BinaryWord",
+    findstat: ["St001885"],
+    values: 1022,
+  },
+  {
+    head: "KaylesGrundyValue",
+    on: "BinaryWord",
+    findstat: ["St000753"],
     values: 1200,
   },
   {
@@ -6102,6 +6120,12 @@ export const findstat: readonly FindStatMatch[] = [
     on: "StandardTableau",
     findstat: ["St001462"],
     values: 1115,
+  },
+  {
+    head: "TopToRandomEigenvalue",
+    on: "StandardTableau",
+    findstat: ["St001816"],
+    values: 352,
   },
   {
     head: "Successions",
@@ -6642,6 +6666,18 @@ export const findstat: readonly FindStatMatch[] = [
     on: "AlternatingSignMatrix",
     findstat: ["St000898"],
     values: 1200,
+  },
+  {
+    head: "HalfFullyPackedLoopHorizontalEdgeCount",
+    on: "AlternatingSignMatrix",
+    findstat: ["St001030"],
+    values: 1200,
+  },
+  {
+    head: "OsculatingPathMajorIndex",
+    on: "AlternatingSignMatrix",
+    findstat: ["St000227"],
+    values: 480,
   },
   {
     head: "LuckyCars",

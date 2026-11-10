@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-standard-tableau-1-2-4-3-6-5			[TopToRandomEigenvalue, [StandardTableau, [List, [List, 1, 2, 4], [List, 3, 6], [List, 5]]]]	1			the standard tableau $[[1,2,4],[3,6],[5]]$
+findstat-st001816-1	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1]]], "'TopToRandomEigenvalue'"]	1	1	FindStat St001816	FindStat's value for [[1]]
+findstat-st001816-2	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2]]], "'TopToRandomEigenvalue'"]	2	2	FindStat St001816	FindStat's value for [[1,2]]
+findstat-st001816-3	Properties		[CombinatorialStat, [StandardTableau, [List, [List, 1, 2, 3]]], "'TopToRandomEigenvalue'"]	3	3	FindStat St001816	FindStat's value for [[1,2,3]]

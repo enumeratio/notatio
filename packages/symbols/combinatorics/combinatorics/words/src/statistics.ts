@@ -1270,9 +1270,122 @@ const FINDSTAT_PARKING_FUNCTION_STATISTICS_2: readonly Definition[] = [
   ),
 ];
 
+/** ⌊a / b⌋ for nonnegative integers, exactly. */
+const quotient = (a: MathJSON, b: MathJSON): MathJSON => ["Divide", subtract(a, ["Mod", a, b]), b];
+/** The word as a number, its letter j counted at 2^(j - 1): the first i letters are its remainder by 2^i and the last i its quotient by 2^(k - i), both as numbers of i letters. */
+const numeral = (letters: MathJSON): MathJSON =>
+  floored(sumOver(positions, times(at("i", letters), power(2, subtract("i", 1)))));
+/** The word with numeral `m` has a border of length `i`: its first i letters are its last i. */
+const bordered = (m: MathJSON, i: MathJSON): MathJSON =>
+  equals(["Mod", m, power(2, i)], quotient(m, power(2, subtract(k, i))));
+
+/** Bit `e` of the nonnegative integer `v`. */
+const bitOf = (v: MathJSON, e: MathJSON): MathJSON => ["Mod", quotient(v, power(2, e)), 2];
+/** The exclusive or of two integers below 16, as u + v less twice their bitwise and. */
+const exclusiveOr = (u: MathJSON, v: MathJSON): MathJSON =>
+  subtract(
+    add(u, v),
+    times(2, floored(sumOver(span(0, 3), times(power(2, "e"), times(bitOf(u, "e"), bitOf(v, "e"))), "e"))),
+  );
+/** The exclusive or of the Grundy values of the two rows left by a move at a: rows a and `rest`, where `to` is the last a. */
+const kaylesOutcomes = (to: MathJSON, rest: MathJSON): MathJSON =>
+  forEach(span(0, to), exclusiveOr(at(add("a", 1), "g"), at(add(rest, 1), "g")), "a");
+/** The Grundy values of Kayles on a row of l ones, l = 0 .. k, built up: a move takes one pin, leaving rows a and l - 1 - a, or two adjacent pins, leaving rows a and l - 2 - a (for l = 1 the second reads the empty row twice, the one-pin outcome again). */
+const kaylesTable: MathJSON = listFold(
+  [
+    "Join",
+    "g",
+    list(
+      bindList(
+        "outcomes",
+        [
+          "Unique",
+          [
+            "Join",
+            kaylesOutcomes(subtract("l", 1), subtract(subtract("l", 1), "a")),
+            kaylesOutcomes(["Max", subtract("l", 2), 0], ["Max", subtract(subtract("l", 2), "a"), 0]),
+          ],
+        ],
+        min(forEach(span(0, 15), ["If", equals(count("outcomes", equals("u", "v"), "u"), 0), "v", 99], "v")),
+      ),
+    ),
+  ],
+  "g",
+  "l",
+  list(0),
+  span(1, k),
+  "list<integer>",
+);
+/** The number of consecutive ones ending at position i. */
+const runEndingAt: MathJSON = subtract("i", max(forEach(span(1, "i"), ["If", equals(at("j"), 0), "j", 0], "j")));
+/** A run of ones ends at position i: a 1 followed by a 0 or by the end. */
+const endsRun: MathJSON = and(equals(here, 1), or(equals("i", k), equals(at(["Min", add("i", 1), k]), 0)));
+
+const FINDSTAT_BINARY_WORD_STATISTICS_7: readonly Definition[] = [
+  stat(
+    "SameBorderSetWordCount",
+    "The binary words of the same length whose set of proper borders, the proper prefixes that are also suffixes, is this word's.",
+    [
+      "If",
+      less(k, 2),
+      power(2, k),
+      bindList(
+        "w",
+        numeral(x),
+        floored(
+          sumOver(
+            span(0, subtract(power(2, k), 1)),
+            [
+              "Product",
+              forEach(span(1, subtract(k, 1)), [
+                "If",
+                and(
+                  equals(["If", bordered("m", "i"), 1, 0], ["If", bordered("w", "i"), 1, 0]),
+                  or(
+                    equals(["If", bordered("w", "i"), 1, 0], 0),
+                    equals(["Mod", "m", power(2, "i")], ["Mod", "w", power(2, "i")]),
+                  ),
+                ),
+                1,
+                0,
+              ]),
+            ],
+            "m",
+          ),
+        ),
+        "integer",
+      ),
+    ],
+    "FindStat's St001885. The words of length k are the numbers 0 .. 2^k - 1 with the letter j at the place 2^(j - 1). The borders match when each length is a border of both or of neither, and the prefixes agree where it is one (the border set lists the prefixes themselves). The words of length 0 and 1 have no proper border, so all 2^k words share the set.",
+  ),
+  stat(
+    "KaylesGrundyValue",
+    "The exclusive or, over the maximal runs of ones, of the Grundy values of Kayles on a row of that many pins.",
+    nonEmpty(
+      bindList(
+        "g",
+        kaylesTable,
+        floored(
+          sumOver(
+            span(0, 3),
+            times(power(2, "e"), [
+              "Mod",
+              floored(sumOver(positions, times(["If", endsRun, 1, 0], bitOf(at(add(runEndingAt, 1), "g"), "e")))),
+              2,
+            ]),
+            "e",
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St000753. The 0s are pins already down, so each run of ones is a game of its own and the values add by exclusive or, bit by bit as the parity of the runs whose value has that bit. A row's value is the least value no move leaves; Kayles values stay below 16 (they are at most 9).",
+  ),
+];
+
 export const WORD_STATISTICS: readonly Definition[] = [
   ...BINARY_WORD_STATISTICS,
   ...FINDSTAT_BINARY_WORD_STATISTICS_6,
+  ...FINDSTAT_BINARY_WORD_STATISTICS_7,
   ...PARKING_FUNCTION_STATISTICS,
   ...FINDSTAT_PARKING_FUNCTION_STATISTICS_2,
 ];

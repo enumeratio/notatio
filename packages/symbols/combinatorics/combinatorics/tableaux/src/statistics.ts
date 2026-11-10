@@ -748,6 +748,13 @@ const brokenAfterCut: MathJSON = floored(
   ),
 );
 
+/** Entry `e` is an ascent: its successor is not in a lower row, the largest entry being its own successor. */
+const isAscent = (e: MathJSON): MathJSON =>
+  atMostValue(rowOf(["Min", ["List", add(e, 1), length("reading")]]), rowOf(e));
+/** The first ascent above `k`; the number of entries plus 1 for none. */
+const firstAscentAfter = (k: MathJSON): MathJSON =>
+  min(forEach(["Range", add(k, 1), length("reading"), 1], ["If", isAscent("a"), "a", add(length("reading"), 1)], "a"));
+
 const FINDSTAT_TABLEAU_STATISTICS_5: readonly Definition[] = [
   stat(
     "TableauFactorCount",
@@ -772,6 +779,24 @@ const FINDSTAT_TABLEAU_STATISTICS_5: readonly Definition[] = [
       ),
     ),
     "FindStat's St001462. Concatenation lays the second tableau's rows below the first's, with the first's largest entry added to them. The empty tableau has no factors.",
+  ),
+  stat(
+    "TopToRandomEigenvalue",
+    "The eigenvalue of the top-to-random operator on the simple module that the tableau indexes: the least k for which the first ascent above k, less k, is even, or the number of entries if there is none.",
+    nonEmpty(
+      withRows([
+        "Min",
+        length("reading"),
+        min(
+          forEach(
+            ["Range", 0, subtract(length("reading"), 1), 1],
+            ["If", equals(["Mod", subtract(firstAscentAfter("k"), "k"), 2], 0), "k", length("reading")],
+            "k",
+          ),
+        ),
+      ]),
+    ),
+    "FindStat's St001816, whose Sage code is empty. The eigenvalue is the number of times the entry 1 is deleted and the tableau rectified until its first ascent is even, a desarrangement tableau; read from the descents, that is the least k for which the first ascent above k, less k, is even, and it gives all 352 rows (tableaux of up to 5 entries). An entry is an ascent when its successor is not in a lower row, and the largest entry is one. When no smaller k works the value is the number of entries, so n - 1 never occurs. The empty tableau gives 0.",
   ),
 ];
 
@@ -860,6 +885,46 @@ const secondColumnAfter = (k: MathJSON): MathJSON =>
     ),
   );
 
+/** The entries above cell `u` in its column: the column sum of the first rows there, 0 or 1. */
+const entriesAbove = (u: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      cellNumbers,
+      ["If", and(equals(columnOfCell("v"), columnOfCell(u)), less(rowOfCell("v"), rowOfCell(u))), at("v", "cells"), 0],
+      "v",
+    ),
+  );
+/** The corner sums of all the positions, row by row, bound as `corners`. */
+const cornerSumList: MathJSON = forEach(cellNumbers, cornerSum(rowOfCell("u"), columnOfCell("u")), "u");
+const cornerAt = (row: MathJSON, column: MathJSON): MathJSON =>
+  at(add(["Multiply", subtract(row, 1), "side"], column), "corners");
+/** Entry `t` of row `k` of the monotone triangle, counted from the smallest: the row's columns holding a 1 are those where the corner sum rises, so the entry is one more than the columns whose corner sum is below `t`. */
+const triangleEntry = (k: MathJSON, t: MathJSON): MathJSON => add(1, count(positions, less(cornerAt(k, "c"), t), "c"));
+/** Column `m` of the osculating paths' parking function: the values 1 + side - m less entry k - m of each triangle row k longer than m. */
+const parkingColumn: MathJSON = forEach(
+  ["Range", add("m", 1), "side", 1],
+  subtract(subtract(add("side", 1), "m"), triangleEntry("k", subtract("k", "m"))),
+  "k",
+);
+/** The valleys of its Dyck word, read from the end, add 2 K - j - (the values up to j) where the value j + 1 occurs, over j < K = side - m. */
+const parkingColumnValleys: MathJSON = [
+  "If",
+  less(subtract("side", "m"), 2),
+  0,
+  floored(
+    sumOver(
+      ["Range", 1, subtract(subtract("side", "m"), 1), 1],
+      [
+        "If",
+        greater(count("P", equals("p", add("j", 1)), "p"), 0),
+        subtract(subtract(["Multiply", 2, subtract("side", "m")], "j"), count("P", atMostValue("p", "j"), "p")),
+        0,
+      ],
+      "j",
+    ),
+  ),
+];
+
 const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS_2: readonly Definition[] = [
   matrix(
     "MatrixDeterminant",
@@ -910,6 +975,31 @@ const FINDSTAT_ALTERNATING_SIGN_MATRIX_STATISTICS_2: readonly Definition[] = [
       ),
     ),
     "FindStat's St000898. Row k of the monotone triangle lists the columns holding a 1 in the column sums of the first k rows, the last diagonal being the smallest entry of each row; an entry is maximal when it equals the second smallest entry of the row below, or one less than the second smallest of its own row.",
+  ),
+  matrix(
+    "HalfFullyPackedLoopHorizontalEdgeCount",
+    "Half the cells whose vertical edge is occupied where row + column is even and empty where it is odd, less half the order rounded down.",
+    withCells([
+      "Divide",
+      subtract(
+        floored(sumOver(cellNumbers, ["Mod", add(add(entriesAbove("u"), rowOfCell("u")), columnOfCell("u")), 2], "u")),
+        ["Divide", subtract("side", ["Mod", "side", 2]), 2],
+      ),
+      2,
+    ]),
+    "FindStat's St001030, half the non-boundary horizontal edges of the fully packed loop, which Sage reads off a six-vertex model coded 0 to 5. The edge above a cell is occupied when the column sum above it is 1; this count, over the cells, of the occupied edges where row + column is even and the empty ones where it is odd gives all 1200 of its rows (matrices up to order 6). The empty matrix gives 0.",
+  ),
+  matrix(
+    "OsculatingPathMajorIndex",
+    "The sum, over the columns of the monotone triangle, of the major index of the Dyck word of the column's nondecreasing parking function.",
+    withCells(
+      bindList(
+        "corners",
+        cornerSumList,
+        floored(sumOver(["Range", 0, subtract("side", 1), 1], bindList("P", parkingColumn, parkingColumnValleys), "m")),
+      ),
+    ),
+    "FindStat's St000227, read from its Sage code: column m of the monotone triangle (rows longest first, entries decreasing) gives the nondecreasing parking function side + 1 - m - entry m of each row longer than m; its Dyck word has one up step per value j followed by a down step, for each j. Reversed, the word's peaks add their positions, which is the sum over the valleys of the unreversed word of their distance from the end; this gives all 480 of its rows (matrices of orders 2 to 5). The matrix of order 1 gives 0.",
   ),
 ];
 

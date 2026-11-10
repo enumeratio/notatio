@@ -54,9 +54,14 @@ for (const [head, expected] of Object.entries(BINARY_READINGS)) {
       expect(evaluate(head, "BinaryTree", binaryJson(t)), JSON.stringify(t)).toBe(expected(t));
   });
 }
+// The reordering count compares a tree with every ordered tree of its size, so its standard case stops at three edges.
+const BRUTE_FORCE = new Set(["ReorderEquivalentTreeCount"]);
+const ORDERED_SMALL = upTo(orderedTrees, 3);
 for (const [head, expected] of Object.entries(ORDERED_READINGS)) {
-  test(`${head} agrees over every ordered tree of 0..5 edges`, () => {
-    for (const t of ORDERED) expect(evaluate(head, "OrderedTree", orderedJson(t)), JSON.stringify(t)).toBe(expected(t));
+  const small = BRUTE_FORCE.has(head) && !process.env.DEEP_TESTS;
+  test(`${head} agrees over every ordered tree of 0..${small ? 3 : 5} edges`, () => {
+    for (const t of small ? ORDERED_SMALL : ORDERED)
+      expect(evaluate(head, "OrderedTree", orderedJson(t)), JSON.stringify(t)).toBe(expected(t));
   });
 }
 
@@ -96,7 +101,7 @@ test.skipIf(!process.env.DEEP_TESTS)(
         if (!(SWAP_HEADS.has(head) && JSON.stringify(t).split("[").length > 8))
           expect(evaluate(head, "BinaryTree", binaryJson(t)), `${head} ${JSON.stringify(t)}`).toBe(expected(t));
     // The automorphism heads compare every pair of children and cost the most; seven edges is theirs to skip.
-    const slow = new Set(["AutomorphismGroupSize", "InequivalentIncreasingTreeCount"]);
+    const slow = new Set(["AutomorphismGroupSize", "InequivalentIncreasingTreeCount", "ReorderEquivalentTreeCount"]);
     for (const t of sweep([6, 7], orderedTrees))
       for (const [head, expected] of Object.entries(ORDERED_READINGS))
         if (!(slow.has(head) && JSON.stringify(t).split("[").length > 8))

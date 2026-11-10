@@ -184,6 +184,19 @@ export const BINARY_READINGS: Record<string, (t: Binary) => number> = {
   ),
 };
 
+/** An ordered tree up to reordering its children: each vertex's children's keys, sorted. */
+const canonicalKey = (t: Ordered): string => `(${t.map(canonicalKey).toSorted().join("")})`;
+/** Every ordered tree with `edges` edges: a root over an ordered forest of the vertices left. */
+const orderedForests = (vertices: number): Ordered[][] =>
+  vertices === 0
+    ? [[]]
+    : Array.from({ length: vertices }, (_, i) => i + 1).flatMap((first) =>
+        orderedForests(first - 1).flatMap((children) =>
+          orderedForests(vertices - first).map((rest) => [children, ...rest]),
+        ),
+      );
+const orderedTreesWithEdges = (edges: number): Ordered[] => orderedForests(edges);
+
 export const ORDERED_READINGS: Record<string, (t: Ordered) => number> = {
   RootDegree: (t) => t.length,
   LinearExtensionCount: (t) => factorial(orderedSize(t)) / product(orderedSubtrees(t).map(orderedSize)),
@@ -223,6 +236,11 @@ export const ORDERED_READINGS: Record<string, (t: Ordered) => number> = {
     ),
   InequivalentIncreasingTreeCount: (t) =>
     ORDERED_READINGS.LinearExtensionCount!(t) / ORDERED_READINGS.AutomorphismGroupSize!(t),
+  // FindStat's St000413: the ordered trees of this many edges whose children, reordered at every vertex, give this tree.
+  ReorderEquivalentTreeCount: (t) => {
+    const same = canonicalKey(t);
+    return orderedTreesWithEdges(orderedSize(t) - 1).filter((other) => canonicalKey(other) === same).length;
+  },
   OneProtectedNodeCount: (t) => orderedSubtrees(t).filter((s) => nearestLeaf(s) === 1).length,
   TwoProtectedNodeCount: (t) => orderedSubtrees(t).filter((s) => nearestLeaf(s) === 2).length,
   PruningNumber: (t) => {
