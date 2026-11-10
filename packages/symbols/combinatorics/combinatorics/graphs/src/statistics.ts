@@ -921,7 +921,7 @@ const maximumMultiplicity: MathJSON = bindList(
 );
 
 /**
- * Moduli for the Laplacian spectra: primes between 2^25 and 2^26, so a product of two residues and a sum of two
+ * Moduli for the spectra: primes between 2^25 and 2^26, so a product of two residues and a sum of two
  * such products stay below 2^53.
  */
 const SPECTRUM_PRIMES: readonly number[] = [
@@ -1009,6 +1009,8 @@ const modularDerivative = (poly: MathJSON): MathJSON =>
  * (a prime above n keeps the multiplicity formula of a derivative). They agree unless the prime divides the
  * discriminant of the minimal polynomial, which is nonzero and below (2 rho)^(n (n - 1)) in size: its roots are
  * eigenvalues, real, inside the Gershgorin radius rho (the greatest absolute row sum), so two differ by at most 2 rho.
+ * For the adjacency matrix rho is the largest degree, so its eigenvalues lie in [-rho, rho]; for the Laplacian rho is
+ * twice that.
  * Primes whose product passes that bound can't all divide it: each exceeds 2^25, and `bits` is the ceiling of log2 of
  * 2 rho, so `primeCount` primes with 25 `primeCount` > n (n - 1) `bits` suffice. The integer route `otherwise` answers where
  * the list is too short.
@@ -1064,7 +1066,7 @@ const overPrimes = (name: string, perPrime: MathJSON, pick: "Max" | "Min", other
     ),
     "integer",
   );
-/** The distinct eigenvalues of the matrix called `name`, mod primes; the integer route beyond the primes. */
+/** The distinct eigenvalues of the symmetric integer matrix called `name` (its characteristic polynomial's coefficients bound as `coefficients`), mod primes; the integer route beyond the primes. */
 const distinctSpectrumValues = (name: string): MathJSON =>
   bindList(
     "integral",
@@ -2611,10 +2613,10 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     withLaplacianSpectrum(positiveEigenvalues),
     `FindStat's St000987: the vertices less the components. ${NO_VERTICES}`,
   ),
-  stat(
+  spectrumStat(
     "DistinctEigenvalueCount",
     "The distinct eigenvalues of the adjacency matrix.",
-    withAdjacencySpectrum(distinctEigenvalues),
+    withAdjacencySpectrum(distinctSpectrumValues("adjacency")),
     `FindStat's St000452. The characteristic polynomial has as many distinct roots as its degree less that of its greatest common divisor with its derivative. ${NO_VERTICES}`,
   ),
   spectrumStat(
@@ -2623,10 +2625,10 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     withLaplacianSpectrum(distinctSpectrumValues("laplacian")),
     `FindStat's St000453. ${NO_VERTICES}`,
   ),
-  stat(
+  spectrumStat(
     "MaximumEigenvalueMultiplicity",
     "The greatest multiplicity of an eigenvalue of the adjacency matrix.",
-    withAdjacencySpectrum(maximumMultiplicity),
+    withAdjacencySpectrum(maximumSpectrumMultiplicity("adjacency")),
     `FindStat's St000776. A root of multiplicity m is a root of the m - 1 greatest common divisors of the polynomial with its derivatives in turn. ${NO_VERTICES}`,
   ),
   spectrumStat(

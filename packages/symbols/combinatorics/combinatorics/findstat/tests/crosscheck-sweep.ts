@@ -63,13 +63,6 @@ export const OBJECT_WISE: Readonly<Record<string, { standard: number; deep: numb
   LabeledGraph: { standard: 5, deep: Number(process.env.DEEP_OBJECT_SIZE ?? 7) },
 };
 const objectCap = (carrier: string): number => OBJECT_WISE[carrier]![DEEP ? "deep" : "standard"];
-/**
- * The adjacency spectrum's statistics are read off a greatest common divisor of polynomials over the integers. Their compiled
- * code declines where a coefficient passes the doubles (most graphs on 7 vertices, and some on fewer), and the interpreter
- * takes about 10 s a graph, so they are read to 6. The Laplacian ones work modulo primes and compile at every size.
- */
-const INTERPRETED_PAST_SIX = new Set(["DistinctEigenvalueCount", "MaximumEigenvalueMultiplicity"]);
-
 type Kind = "unclassified" | "emit" | "convention" | "ours";
 interface Disagreement {
   readonly kind: Kind;
@@ -178,9 +171,7 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
       if (!entry || COLLECTION_CARRIER[entry.collection] !== match.on) continue;
       for (const [object, v] of pairsOf(id)) {
         const size = objectSize(match.on, object);
-        const cap = OBJECT_WISE[match.on]
-          ? Math.min(objectCap(match.on), INTERPRETED_PAST_SIX.has(match.head) ? 6 : Infinity)
-          : MAX_SIZE;
+        const cap = OBJECT_WISE[match.on] ? objectCap(match.on) : MAX_SIZE;
         if (size === undefined || size > cap || typeof v !== "number") continue;
         const level = objectLevel(match.on, object) ?? [size];
         const group = bySize.get(level.join(",")) ?? { level, objects: new Map<string, number>() };
