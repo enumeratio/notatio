@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-type-d-5			[WeylGroupInvolutionCount, [CartanType, [Tuple, "'D'", 5]]]	156			the type $D_5$
+the-type-e-6			[WeylGroupInvolutionCount, [CartanType, [Tuple, "'E'", 6]]]	892			the type $E_6$
+findstat-st001467-1	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 1]], "'WeylGroupInvolutionCount'"]	2	2	FindStat St001467	FindStat's value for ['A',1]
+findstat-st001467-2	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 2]], "'WeylGroupInvolutionCount'"]	4	4	FindStat St001467	FindStat's value for ['A',2]
+findstat-st001467-3	Properties		[CombinatorialStat, [CartanType, [Tuple, "'A'", 3]], "'WeylGroupInvolutionCount'"]	10	10	FindStat St001467	FindStat's value for ['A',3]

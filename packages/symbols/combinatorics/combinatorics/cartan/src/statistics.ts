@@ -10,6 +10,7 @@ import {
   add,
   at,
   atLeastValue,
+  bind,
   bindList,
   count,
   equals,
@@ -220,6 +221,109 @@ const permanentTable: MathJSON = (() => {
     columns,
   );
 })();
+
+/** `list[index]`, 1-based. */
+const entry = (list: MathJSON, index: MathJSON): MathJSON => ["At", list, index];
+/** The sum of `body` over `from .. to`, which stays real (compiled sums of a fold's entries type complex otherwise). */
+const total = (from: MathJSON, to: MathJSON, body: MathJSON, variable: string): MathJSON =>
+  floored(["Sum", forEach(["Range", from, to, 1], body, variable)]);
+/** `answer` once the integer `n` is known exact in doubles (the larger of the counts it is built from is `n`). */
+const exactAt = (name: string, n: MathJSON, answer: MathJSON): MathJSON =>
+  bind(name, n, exactly(name, answer), "integer");
+
+/**
+ * The partitions of 0 .. m, counted by the parity of their number of parts: one list of 2 (m + 1) entries, the
+ * even-length counts at 1 .. m + 1 and the odd-length ones after them. Each part size k multiplies the series by 1 / (1 - q^k);
+ * i copies of k flip the parity i times.
+ */
+const partitionParities = (m: MathJSON): MathJSON => {
+  const width = add(m, 1);
+  const place = (side: MathJSON, j: MathJSON): MathJSON => add(add(times(side, width), j), 1);
+  const side: MathJSON = ["If", atLeastValue("pu", add(width, 1)), 1, 0];
+  const j: MathJSON = subtract(subtract("pu", 1), times(side, width));
+  const copies: MathJSON = where(["Range", 0, j, 1], ["LessEqual", times("pi", "pk"), j], "pi");
+  return typedFold(
+    forEach(
+      upTo(times(2, width)),
+      floored([
+        "Sum",
+        forEach(
+          copies,
+          entry(
+            "pq",
+            place(["If", equals(["Mod", "pi", 2], 0), side, subtract(1, side)], subtract(j, times("pi", "pk"))),
+          ),
+          "pi",
+        ),
+      ]),
+      "pu",
+    ),
+    "pq",
+    "pk",
+    forEach(upTo(times(2, width)), ["If", equals("pz", 1), 1, 0], "pz"),
+    upTo(m),
+    "list<integer>",
+  );
+};
+/** The partitions of k, from the parities list of `partitionParities(m)` (k at most m). */
+const partitionsOf = (parities: MathJSON, m: MathJSON, k: MathJSON): MathJSON =>
+  add(entry(parities, add(k, 1)), entry(parities, add(add(m, 1), add(k, 1))));
+/** The partitions of k with an even number of parts. */
+const evenLengthPartitionsOf = (parities: MathJSON, k: MathJSON): MathJSON => entry(parities, add(k, 1));
+
+/**
+ * u(0) = 1 and u(m) = sum_s C(m - 1, s) b^s u(m - 1 - s) for m up to `last`, as a list: the Bell numbers for b = 1, and for
+ * b = 2 the weights of the set partitions whose blocks carry a sign (each block of size t has 2^(t - 1) of them).
+ */
+const blockSums = (base: MathJSON, last: MathJSON): MathJSON =>
+  typedFold(
+    [
+      "Join",
+      "bl",
+      [
+        "List",
+        total(
+          0,
+          subtract(["Length", "bl"], 1),
+          times(
+            ["Binomial", subtract(["Length", "bl"], 1), "bs"],
+            power(base, "bs"),
+            entry("bl", subtract(["Length", "bl"], "bs")),
+          ),
+          "bs",
+        ),
+      ],
+    ],
+    "bl",
+    "bm",
+    ["List", 1],
+    upTo(last),
+    "list<integer>",
+  );
+
+/** The involutions u(k) = s u(k - 1) + s (k - 1) u(k - 2) of a group of signed or plain permutations, as a list up to k = `last`. */
+const involutionSeries = (scale: MathJSON, last: MathJSON): MathJSON =>
+  typedFold(
+    [
+      "Join",
+      "iu",
+      [
+        "List",
+        add(
+          times(scale, entry("iu", ["Length", "iu"])),
+          times(scale, subtract(["Length", "iu"], 1), entry("iu", subtract(["Length", "iu"], 1))),
+        ),
+      ],
+    ],
+    "iu",
+    "ik",
+    ["List", 1, scale],
+    ["Range", 2, last, 1],
+    "list<integer>",
+  );
+
+/** The least common multiple of the degrees: the exponent of the group of a Weyl group is it. */
+const leastCommonDegree: MathJSON = typedFold(["LCM", "la", "ld"], "la", "ld", 1, degrees);
 
 export const CARTAN_STATISTICS: readonly Definition[] = [
   stat(
@@ -482,5 +586,132 @@ export const CARTAN_STATISTICS: readonly Definition[] = [
       F: 106,
       G: 11,
     }),
+  ),
+  stat(
+    "WeylGroupConjugacyClassCount",
+    "The conjugacy classes of the Weyl group: p(n + 1) for A_n, the bipartitions of n for B_n and C_n, and for D_n those with an even number of parts in the second partition, together with the classes that split.",
+    bindList(
+      "pp",
+      partitionParities(add(rank, 1)),
+      byLetter({
+        A: partitionsOf("pp", add(rank, 1), add(rank, 1)),
+        BC: exactly(
+          total(
+            0,
+            rank,
+            times(partitionsOf("pp", add(rank, 1), "ck"), partitionsOf("pp", add(rank, 1), subtract(rank, "ck"))),
+            "ck",
+          ),
+          total(
+            0,
+            rank,
+            times(partitionsOf("pp", add(rank, 1), "ck"), partitionsOf("pp", add(rank, 1), subtract(rank, "ck"))),
+            "ck",
+          ),
+        ),
+        D: add(
+          total(
+            0,
+            rank,
+            times(partitionsOf("pp", add(rank, 1), "ck"), evenLengthPartitionsOf("pp", subtract(rank, "ck"))),
+            "ck",
+          ),
+          ["If", equals(["Mod", rank, 2], 0), partitionsOf("pp", add(rank, 1), divide(rank, 2)), 0],
+        ),
+        E: byRank(25, 60, 112),
+        F: 25,
+        G: 6,
+      }),
+    ),
+    "The classes of B_n are the pairs of partitions of sizes adding to n (the positive and the negative cycles); those of D_n have an even number of negative cycles, and a class with only even positive cycles and no negative ones splits in two. The exceptional types are tabulated (Carter, Conjugacy classes in the Weyl group).",
+  ),
+  stat(
+    "WeylGroupGrassmannianElementCount",
+    "The elements of the Weyl group with at most one descent: the identity and, for each simple reflection s, the minimal coset representatives for the parabolic subgroup without s, less the identity.",
+    byLetter({
+      A: exactly(power(2, add(rank, 1)), subtract(subtract(power(2, add(rank, 1)), rank), 1)),
+      BC: exactly(power(3, rank), subtract(power(3, rank), rank)),
+      D: exactly(power(3, rank), subtract(subtract(power(3, rank), times(rank, power(2, subtract(rank, 1)))), rank)),
+      E: byRank(1273, 17636, 881753),
+      F: 237,
+      G: 11,
+    }),
+    "The count is 1 + the sum over s of |W| / |W_(S - s)| - 1; the indices are binomial for A_n (C(n + 1, k)) and 2^k C(n, k) for B_n, C_n and D_n.",
+  ),
+  stat(
+    "WeylGroupInvolutionCount",
+    "The elements of the Weyl group that are their own inverse, the identity included: the telephone numbers for A_n, and for B_n, C_n and D_n the coefficients of exp(x^2 + 2x) and exp(x^2) (exp(2x) + 1) / 2.",
+    bindList(
+      "ii",
+      involutionSeries(["If", isLetter("A"), 1, 2], ["If", isLetter("A"), add(rank, 1), rank]),
+      byLetter({
+        A: exactAt("ij", entry("ii", add(rank, 2)), "ij"),
+        BC: exactAt("ij", entry("ii", add(rank, 1)), "ij"),
+        D: exactAt(
+          "ij",
+          entry("ii", add(rank, 1)),
+          divide(
+            add("ij", ["If", equals(["Mod", rank, 2], 0), ["Product", ["Range", add(divide(rank, 2), 1), rank, 1]], 0]),
+            2,
+          ),
+        ),
+        E: byRank(892, 10208, 199952),
+        F: 140,
+        G: 8,
+      }),
+    ),
+    "The E_6, E_7 and E_8 counts are of the elements fixing every vector of a root-spanned subspace and negating its complement: 892 = 1 + 36 + 270 + 540 + 45.",
+  ),
+  stat(
+    "WeylGroupElementOrderLeastCommonMultiple",
+    "The exponent of the Weyl group, the least common multiple of the orders of its elements: the least common multiple of its degrees.",
+    withDegrees(leastCommonDegree),
+    "For A_n the orders are the cycle lengths, for B_n and C_n the cycle lengths and twice them (a negative cycle doubles its length), for D_n the same with an even number of negative cycles; each case is the least common multiple of the degrees, and the exceptional types are checked against their element orders.",
+  ),
+  stat(
+    "LargestFundamentalRepresentationDimension",
+    "The largest dimension among the fundamental representations of the Lie algebra, by Weyl's formula: an exterior power of the vector representation, or its traceless part, for the classical types.",
+    byLetter({
+      A: exactAt("lf", ["Binomial", add(rank, 1), divide(subtract(add(rank, 1), ["Mod", add(rank, 1), 2]), 2)], "lf"),
+      B: exactAt("lf", ["Binomial", add(times(2, rank), 1), subtract(rank, 1)], "lf"),
+      C: exactAt(
+        "lf",
+        ["Binomial", times(2, rank), subtract(rank, 1)],
+        subtract("lf", ["Binomial", times(2, rank), subtract(rank, 3)]),
+      ),
+      D: exactAt("lf", ["Binomial", times(2, rank), subtract(rank, 2)], "lf"),
+      E: byRank(2925, 365750, 6899079264),
+      F: 1274,
+      G: 14,
+    }),
+  ),
+  stat(
+    "WeylGroupParabolicSubgroupCount",
+    "The parabolic subgroups of the Weyl group, the fixers of subspaces: the Bell number B(n + 1) for A_n, and for B_n and C_n the sum of C(n, k) times the signed set partitions of k, D_n leaving out those with exactly one zero coordinate.",
+    bindList(
+      "pb",
+      blockSums(["If", isLetter("A"), 1, 2], ["If", isLetter("A"), add(rank, 1), rank]),
+      byLetter({
+        A: entry("pb", add(rank, 2)),
+        BC: exactly(
+          total(0, rank, times(["Binomial", rank, "bk"], entry("pb", add("bk", 1))), "bk"),
+          total(0, rank, times(["Binomial", rank, "bk"], entry("pb", add("bk", 1))), "bk"),
+        ),
+        D: subtract(
+          total(0, rank, times(["Binomial", rank, "bk"], entry("pb", add("bk", 1))), "bk"),
+          times(rank, entry("pb", rank)),
+        ),
+        E: byRank(4598, 90408, 5506504),
+        F: 268,
+        G: 8,
+      }),
+    ),
+    "A parabolic subgroup is the pointwise stabilizer of a subspace (Steinberg), so these are the flats of the reflection arrangement; Marin calls the counts the parabolic Bell numbers. The exceptional types are tabulated.",
+  ),
+  stat(
+    "WeylGroupMinimalFaithfulPermutationDegree",
+    "The least number of points a permutation action of the Weyl group can have and stay faithful: the orbit of a fundamental weight of least size, n + 1 for A_n, 2 n for B_n, C_n and D_n.",
+    byLetter({ A: add(rank, 1), BC: times(2, rank), D: times(2, rank), E: byRank(27, 56, 240), F: 24, G: 6 }),
+    "The degrees are tabulated by type (Stembridge, Computational aspects of root systems, Coxeter groups, and Weyl characters, Table 1).",
   ),
 ];
