@@ -90,6 +90,7 @@ type Atom =
       readonly kind: "root";
       readonly key: string;
       readonly source: Json;
+      readonly variable: Json;
       readonly polynomial: readonly bigint[];
       readonly k: number;
     };
@@ -190,7 +191,7 @@ function atomsOf(j: Json, ce: ComputeEngine, into: Atom[], scale = 1n): boolean 
   }
   const h = head(j);
   if (h === POLYNOMIAL_ROOT) {
-    const root = rootAtom(ce, args(j)[0], args(j)[1]);
+    const root = rootAtom(ce, args(j)[0], args(j)[1], args(j)[2]);
     if (root === undefined) return false;
     into.push(root);
     return true;
@@ -207,9 +208,9 @@ function atomsOf(j: Json, ce: ComputeEngine, into: Atom[], scale = 1n): boolean 
   return false;
 }
 
-/** `PolynomialRoot(p, k)` as an atom: `p` rational in one unknown, `k` an integer from 1 to its degree. */
-function rootAtom(ce: ComputeEngine, source: Json, kj: Json): Extract<Atom, { kind: "root" }> | undefined {
-  const cs = coefficientsOf(ce, source);
+/** `PolynomialRoot(p, x, k)` as an atom: `p` rational in `x`, `k` an integer from 1 to its degree. */
+function rootAtom(ce: ComputeEngine, source: Json, x: Json, kj: Json): Extract<Atom, { kind: "root" }> | undefined {
+  const cs = coefficientsOf(ce, source, x);
   const k = rationalOf(kj);
   if (cs === undefined || k === undefined || k.den !== 1n || k.num < 1n || k.num > BigInt(cs.length - 1)) {
     return undefined;
@@ -220,15 +221,13 @@ function rootAtom(ce: ComputeEngine, source: Json, kj: Json): Extract<Atom, { ki
   const g = cleared.reduce((x, c) => gcd(x, c), 0n);
   const sign = cleared[cleared.length - 1]! < 0n ? -1n : 1n;
   const polynomial = cleared.map((c) => (sign * c) / g);
-  return { kind: "root", key: `${polynomial.join(",")}#${k.num}`, source, polynomial, k: Number(k.num) };
+  return { kind: "root", key: `${polynomial.join(",")}#${k.num}`, source, variable: x, polynomial, k: Number(k.num) };
 }
 
-/** A polynomial's coefficients in its one unknown, constant first; `undefined` unless rational. */
-function coefficientsOf(ce: ComputeEngine, p: Json): Rational[] | undefined {
-  const boxed = ce.box(p as never);
-  const unknowns = boxed.unknowns;
-  if (unknowns.length !== 1) return undefined;
-  const list = ce.box(["CoefficientList", p, unknowns[0]] as never).evaluate().json;
+/** A polynomial's coefficients in the variable `x`, constant first; `undefined` unless rational and free of other unknowns. */
+function coefficientsOf(ce: ComputeEngine, p: Json, x: Json): Rational[] | undefined {
+  if (typeof x !== "string" || ce.box(p as never).unknowns.some((u) => u !== x)) return undefined;
+  const list = ce.box(["CoefficientList", p, x] as never).evaluate().json;
   if (head(list) !== "List") return undefined;
   // CoefficientList is highest first.
   const cs = args(list).map(rationalOf).toReversed();
@@ -300,7 +299,9 @@ function fieldOf(atoms: readonly Atom[]): GeneratedField | undefined {
         lead,
       ),
       power: (k) =>
-        k === 1 ? [POLYNOMIAL_ROOT, first.source, first.k] : ["Power", [POLYNOMIAL_ROOT, first.source, first.k], k],
+        k === 1
+          ? [POLYNOMIAL_ROOT, first.source, first.variable, first.k]
+          : ["Power", [POLYNOMIAL_ROOT, first.source, first.variable, first.k], k],
       theta,
     };
   }
@@ -590,12 +591,12 @@ function numericRoot(ce: ComputeEngine, a: readonly bigint[], k: number, digits:
 export const algebraicNumbersLibrary: LibraryRecord = {
   PolynomialRoot: {
     description:
-      "The k-th root of the polynomial p in its unknown: real roots first in increasing order, then complex roots by increasing real part and then imaginary part (Wolfram's Root).",
-    signature: "(any, integer) -> number",
-    operands: held(2),
+      "The k-th root of the polynomial p in the variable x (bound, as in Wolfram's Root[Function[x, p], k]): real roots first in increasing order, then complex roots by increasing real part and then imaginary part (Wolfram's Root).",
+    signature: "(any, any, integer) -> number",
+    operands: () => [{ kind: "held" }, { kind: "clause" }, { kind: "value" }],
     evaluate: (ops: readonly Expression[], { engine: ce, numericApproximation, precision }: Options) => {
-      const cs = coefficientsOf(ce, ops[0]!.json);
-      const kj = rationalOf(ops[1]!.evaluate().json);
+      const cs = coefficientsOf(ce, ops[0]!.json, ops[1]!.json);
+      const kj = rationalOf(ops[2]!.evaluate().json);
       const d = (cs?.length ?? 1) - 1;
       if (cs === undefined || kj === undefined || kj.den !== 1n || kj.num < 1n || kj.num > BigInt(d)) {
         return decline(ce, "PolynomialRoot", ops, numericApproximation);
@@ -620,7 +621,7 @@ export const algebraicNumbersLibrary: LibraryRecord = {
         return numericApproximation ? root.N() : root;
       }
       if (numericApproximation) {
-        const atom = rootAtom(ce, ops[0]!.json, k);
+        const atom = rootAtom(ce, ops[0]!.json, ops[1]!.json, k);
         const digits = Math.max(precision ?? (typeof ce.precision === "number" ? ce.precision : 15), 15);
         const n = atom && numericRoot(ce, atom.polynomial, k, digits);
         if (n !== undefined) return n;

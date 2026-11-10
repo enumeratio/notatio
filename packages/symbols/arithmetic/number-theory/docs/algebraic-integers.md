@@ -38,7 +38,7 @@ units shrink too: $\mathbb{Z}[\omega]$ has six, $\mathbb{Z}[\sqrt{-3}]$ only $\p
 
 A number field of degree $n$ is $\mathbb{Q}(\theta)$ for $\theta$ a root of an irreducible
 polynomial of degree $n$, the **minimal polynomial**. The number $\theta$ can be a radical,
-$i$, the golden ratio, or a root named by its polynomial, `PolynomialRoot(p, k)` (Wolfram's
+$i$, the golden ratio, or a root named by its polynomial, `PolynomialRoot(p, x, k)` (Wolfram's
 `Root`):
 
 <notatio-cell value="MinimalPolynomial(1 + Root(2, 3), x)" />
@@ -84,18 +84,18 @@ Some fields have no $\theta$ with $\mathbb{Z}[\theta] = \mathcal{O}_K$ at all. D
 example is the field of a root of $x^3 - x^2 - 2x - 8$. Its ring of integers is
 $\mathbb{Z} + \mathbb{Z}\theta + \mathbb{Z}\frac{\theta + \theta^2}{2}$:
 
-<notatio-cell value="NumberFieldIntegralBasis(PolynomialRoot(x^3 - x^2 - 2x - 8, 1))" />
+<notatio-cell value="NumberFieldIntegralBasis(PolynomialRoot(x^3 - x^2 - 2x - 8, x, 1))" />
 
 The reason is the prime 2. It splits into three distinct primes, each of norm 2, so
 $\mathcal{O}_K/2\mathcal{O}_K \cong \mathbb{F}_2^3$. In a ring $\mathbb{Z}[\alpha]$ that would
 need $\alpha$'s minimal polynomial to have three distinct roots mod 2, and $\mathbb{F}_2$ has
 only two elements. So 2 is far from prime:
 
-<notatio-cell value="IsPrime(2, Over -> AlgebraicIntegers(PolynomialRoot(x^3 - x^2 - 2x - 8, 1)))" />
+<notatio-cell value="IsPrime(2, Over -> AlgebraicIntegers(PolynomialRoot(x^3 - x^2 - 2x - 8, x, 1)))" />
 
 while 3, where $x^3 - x^2 - 2x - 8$ stays irreducible, is inert:
 
-<notatio-cell value="IsPrime(3, Over -> AlgebraicIntegers(PolynomialRoot(x^3 - x^2 - 2x - 8, 1)))" />
+<notatio-cell value="IsPrime(3, Over -> AlgebraicIntegers(PolynomialRoot(x^3 - x^2 - 2x - 8, x, 1)))" />
 
 Primality here is that of the ideal: $(\alpha)$ is prime when $\mathcal{O}/(\alpha)$ is a field.
 With $|N(\alpha)| = p^f$ that comes down to linear algebra over $\mathbb{F}_p$. $p$ must lie in

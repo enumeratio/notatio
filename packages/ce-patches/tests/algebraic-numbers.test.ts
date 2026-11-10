@@ -104,6 +104,7 @@ describe("the heads", () => {
   const dedekind = [
     "PolynomialRoot",
     ["Add", ["Power", "x", 3], ["Negate", ["Power", "x", 2]], ["Multiply", -2, "x"], -8],
+    "x",
     1,
   ];
 
@@ -209,7 +210,7 @@ describe("the heads on every route", () => {
   const ce = new ComputeEngine();
   algebraicNumbers.apply(ce);
   const cubic = ["Add", ["Power", "x", 3], -2];
-  const root = (k: unknown): unknown[] => ["PolynomialRoot", cubic, k];
+  const root = (k: unknown): unknown[] => ["PolynomialRoot", cubic, "x", k];
   const run = (json: unknown): unknown => ce.box(json as never).evaluate().json;
 
   test("different roots of one polynomial are different generators", () => {
@@ -244,7 +245,7 @@ describe("the heads on every route", () => {
     for (const j of [
       ["MinimalPolynomial", ["Root", ["Rational", 1, 2], 10 ** 12], "x"],
       ["NumberFieldDiscriminant", ["Root", 2, 13]],
-      ["NumberFieldDiscriminant", ["PolynomialRoot", ["Add", ["Power", "x", 13], -2], 1]],
+      ["NumberFieldDiscriminant", ["PolynomialRoot", ["Add", ["Power", "x", 13], -2], "x", 1]],
     ]) {
       expect((run(j) as unknown[])[0]).toBe((j as unknown[])[0]);
     }
@@ -252,7 +253,7 @@ describe("the heads on every route", () => {
   });
 
   test("a subfield's generator gives the subfield's invariants", () => {
-    const sqrt2 = ["Power", ["PolynomialRoot", ["Add", ["Power", "x", 4], -2], 1], 2];
+    const sqrt2 = ["Power", ["PolynomialRoot", ["Add", ["Power", "x", 4], -2], "x", 1], 2];
     expect(run(["NumberFieldDiscriminant", sqrt2])).toBe(8);
     expect(run(["NumberFieldSignature", sqrt2])).toEqual(["List", 2, 0]);
     expect(run(["NumberFieldIntegralBasis", 3])).toEqual(["List", 1]);
@@ -268,7 +269,10 @@ describe("the heads on every route", () => {
     ]);
     expect(n(3).im).toBeGreaterThan(0);
     // A quadratic's root is a number too, not √2.
-    expect(ce.box(["PolynomialRoot", ["Add", ["Power", "x", 2], -2], 2] as never).N().re).toBeCloseTo(Math.SQRT2, 14);
+    expect(ce.box(["PolynomialRoot", ["Add", ["Power", "x", 2], -2], "x", 2] as never).N().re).toBeCloseTo(
+      Math.SQRT2,
+      14,
+    );
   });
 
   test("N doesn't turn a head's argument into a float", () => {
@@ -276,10 +280,60 @@ describe("the heads on every route", () => {
     expect(n.json).toEqual(["Add", ["Power", "x", 3], 2]);
   });
 
-  test("compile declines, and the fallback agrees with N", () => {
-    const expr = ce.box(root(1) as never);
-    const compiled = compile(expr, { to: "javascript" });
-    expect(compiled.success).toBe(false);
-    expect(compiled.run?.()).toBeCloseTo(expr.N().re, 12);
+  test("compile agrees with N: a real root as a number, a complex one through the fallback", () => {
+    const real = compile(ce.box(root(1) as never), { to: "javascript" });
+    expect(real.run?.()).toBeCloseTo(ce.box(root(1) as never).N().re, 12);
+    const complex = compile(ce.box(root(2) as never), { to: "javascript" });
+    expect(complex.success).toBe(false);
+    const n = ce.box(root(2) as never).N();
+    expect(complex.run?.()).toMatchObject({ re: expect.closeTo(n.re, 12), im: expect.closeTo(n.im, 12) });
+  });
+});
+
+describe("PolynomialRoot's variable is bound", () => {
+  const ce = new ComputeEngine();
+  algebraicNumbers.apply(ce);
+  const call = ["PolynomialRoot", ["Add", ["Power", "x", 3], -2], "x", 1];
+
+  test("a substitution for x leaves the head alone", () => {
+    expect(ce.box(call as never).subs({ x: 3 }).json).toEqual(call);
+  });
+
+  test("a value assigned to x neither changes nor blocks it", () => {
+    ce.assign("x", 3);
+    try {
+      expect(ce.box(call as never).evaluate().json).toEqual(call);
+      expect(ce.box(["MinimalPolynomial", call, "y"] as never).evaluate().json).toEqual(["Add", ["Power", "y", 3], -2]);
+      expect(ce.box(call as never).N().re).toBeCloseTo(Math.cbrt(2), 14);
+    } finally {
+      ce.assign("x", ce.symbol("x"));
+    }
+  });
+
+  test("the old two-argument form no longer matches", () => {
+    const old = ce.box(["PolynomialRoot", ["Add", ["Power", "x", 3], -2], 1] as never).evaluate();
+    expect(old.operator).toBe("Error");
+  });
+
+  test("a basis is written on the root with its variable", () => {
+    const basis = ce.box([
+      "NumberFieldIntegralBasis",
+      ["PolynomialRoot", ["Add", ["Power", "x", 3], -2], "x", 2],
+    ] as never);
+    expect(basis.evaluate().json).toEqual([
+      "List",
+      1,
+      ["PolynomialRoot", ["Add", ["Power", "x", 3], -2], "x", 2],
+      ["Power", ["PolynomialRoot", ["Add", ["Power", "x", 3], -2], "x", 2], 2],
+    ]);
+  });
+
+  test("a variable other than a symbol, or another unknown in p, declines", () => {
+    for (const j of [
+      ["PolynomialRoot", ["Add", ["Power", "x", 3], "y"], "x", 1],
+      ["PolynomialRoot", ["Add", ["Power", "x", 3], -2], ["Add", "x", 1], 1],
+    ]) {
+      expect(ce.box(j as never).N().operator).not.toBe("Number");
+    }
   });
 });

@@ -1,16 +1,18 @@
 id	in	out	tex.in	tex.out	verdict
-root-of-x2-x-1-is-a-cube-root-of-unity	Root[Plus[Power[x, 2], x, 1], 1]	(-1 - I*Sqrt[3])/2	\text{Root}\left[x^2+x+1,1\right]	\frac{1}{2} \left(-1-i \sqrt{3}\right)	
-smaller-root-first	Root[Plus[Power[x, 2], -2], 1]	-Sqrt[2]	\text{Root}\left[x^2-2,1\right]	-\sqrt{2}	
-dedekind-cubic-stays-a-root	Root[Plus[Power[x, 3], Minus[Power[x, 2]], Times[-2, x], -8], 1]	Root[-8 - 2*#1 - #1^2 + #1^3 & , 1, 0]	\text{Root}\left[x^3-x^2-2 x-8,1\right]	""	disagree
-cube-root-of-2-as-a-number	N[Root[Plus[Power[x, 3], -2], 1]]				
-complex-roots-follow-the-real-one	N[Root[Plus[Power[x, 3], -2], 2]]				
-complex-roots-follow-the-real-one-conjugate	N[Root[Plus[Power[x, 3], -2], 3]]				
-three-real-roots-smallest-first	N[Root[Plus[Power[x, 3], Times[-3, x], 1], 1]]				
-three-real-roots-middle	N[Root[Plus[Power[x, 3], Times[-3, x], 1], 2]]				
-three-real-roots-largest	N[Root[Plus[Power[x, 3], Times[-3, x], 1], 3]]				
-quartic-roots-by-real-then-imaginary-part	N[Root[Plus[Power[x, 4], 1], 3]]				
-quartic-complex-roots-first	N[Root[Plus[Power[x, 4], 1], 1]]				
-reducible-cubic-root-as-a-number	N[Root[Plus[Power[x, 3], -1], 1]]				
-quadratic-root-as-a-number	N[Root[Plus[Power[x, 2], -2], 2]]				
-index-past-the-degree-stays-unevaluated	Root[Plus[Power[x, 3], -2], 7]				
-index-zero-stays-unevaluated	Root[Plus[Power[x, 3], -2], 0]				
+root-of-x2-x-1-is-a-cube-root-of-unity	Root[Function[x, Plus[Power[x, 2], x, 1]], 1]	(-1 - I*Sqrt[3])/2	\text{Root}\left[x^2+x+1,1\right]	\frac{1}{2} \left(-1-i \sqrt{3}\right)	
+smaller-root-first	Root[Function[x, Plus[Power[x, 2], -2]], 1]	-Sqrt[2]	\text{Root}\left[x^2-2,1\right]	-\sqrt{2}	
+dedekind-cubic-stays-a-root	Root[Function[x, Plus[Power[x, 3], Minus[Power[x, 2]], Times[-2, x], -8]], 1]	Root[-8 - 2*#1 - #1^2 + #1^3 & , 1, 0]	\text{Root}\left[x^3-x^2-2 x-8,1\right]	""	disagree
+cube-root-of-2-as-a-number	N[Root[Function[x, Plus[Power[x, 3], -2]], 1]]				
+complex-roots-follow-the-real-one	N[Root[Function[x, Plus[Power[x, 3], -2]], 2]]				
+complex-roots-follow-the-real-one-conjugate	N[Root[Function[x, Plus[Power[x, 3], -2]], 3]]				
+three-real-roots-smallest-first	N[Root[Function[x, Plus[Power[x, 3], Times[-3, x], 1]], 1]]				
+three-real-roots-middle	N[Root[Function[x, Plus[Power[x, 3], Times[-3, x], 1]], 2]]				
+three-real-roots-largest	N[Root[Function[x, Plus[Power[x, 3], Times[-3, x], 1]], 3]]				
+quartic-roots-by-real-then-imaginary-part	N[Root[Function[x, Plus[Power[x, 4], 1]], 3]]				
+quartic-complex-roots-first	N[Root[Function[x, Plus[Power[x, 4], 1]], 1]]				
+reducible-cubic-root-as-a-number	N[Root[Function[x, Plus[Power[x, 3], -1]], 1]]				
+quadratic-root-as-a-number	N[Root[Function[x, Plus[Power[x, 2], -2]], 2]]				
+index-past-the-degree-stays-unevaluated	Root[Function[x, Plus[Power[x, 3], -2]], 7]				
+index-zero-stays-unevaluated	Root[Function[x, Plus[Power[x, 3], -2]], 0]				
+variable-is-bound-under-replacement	ReplaceAll[Root[Function[x, Plus[Power[x, 3], -2]], 1], Rule[x, 3]]				
+variable-is-bound-under-assignment					

@@ -1,9 +1,9 @@
 id	section	role	expr	expected	caption
-dedekind-cubic			[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 3], [Negate, [Power, x, 2]], [Multiply, -2, x], -8], 1]]	-503	Dedekind's cubic: $x^3 - x^2 - 2x - 8$ has discriminant $-2012 = -4 \cdot 503$, and $\mathcal{O}_K$ is twice as fine as $\mathbb{Z}[\theta]$
+dedekind-cubic			[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 3], [Negate, [Power, x, 2]], [Multiply, -2, x], -8], x, 1]]	-503	Dedekind's cubic: $x^3 - x^2 - 2x - 8$ has discriminant $-2012 = -4 \cdot 503$, and $\mathcal{O}_K$ is twice as fine as $\mathbb{Z}[\theta]$
 cube-root-of-19			[NumberFieldDiscriminant, [Root, 19, 3]]	-1083	$\mathbb{Q}(\sqrt[3]{19})$: $-3 \cdot 19^2$, a third of $\mathbb{Z}[\sqrt[3]{19}]$'s
 rationals			[NumberFieldDiscriminant, 3]	1	$\mathbb{Q}$
-subfield-generated-by-a-square			[NumberFieldDiscriminant, [Power, [PolynomialRoot, [Add, [Power, x, 4], -2], 1], 2]]	8	$\sqrt[4]{2}^2 = \sqrt 2$: the field is $\mathbb{Q}(\sqrt 2)$, not the quartic one
+subfield-generated-by-a-square			[NumberFieldDiscriminant, [Power, [PolynomialRoot, [Add, [Power, x, 4], -2], x, 1], 2]]	8	$\sqrt[4]{2}^2 = \sqrt 2$: the field is $\mathbb{Q}(\sqrt 2)$, not the quartic one
 eighth-root-of-7		test	[NumberFieldDiscriminant, [Root, 7, 8]]	-13816758796288	$x^8 - 7$ is Eisenstein at 7 and $\mathbb{Z}[\theta]$ is 2-maximal: $-2^{24} \cdot 7^7$
 twelfth-root-of-3		test	[NumberFieldDiscriminant, [Root, 3, 12]]	{num: "-1579460446107205632"}	Eisenstein at 3; the prime 2 needs one round
-past-the-degree-cap-stays-unevaluated		test	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 13], -2], 1]]	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 13], -2], 1]]	a degree 13 field is past the cap
-index-past-the-degree-stays-unevaluated		test	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 3], -2], 7]]	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 3], -2], 7]]	
+past-the-degree-cap-stays-unevaluated		test	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 13], -2], x, 1]]	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 13], -2], x, 1]]	a degree 13 field is past the cap
+index-past-the-degree-stays-unevaluated		test	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 3], -2], x, 7]]	[NumberFieldDiscriminant, [PolynomialRoot, [Add, [Power, x, 3], -2], x, 7]]	
