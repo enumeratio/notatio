@@ -2,3 +2,15 @@ id	section	role	expr	expected	caption	wolfram.kind	wolfram.note
 root-of-x2-x-1-is-a-cube-root-of-unity			[PolynomialRoot, [Add, [Power, x, 2], x, 1], 1]	[Multiply, [Rational, 1, 2], [Add, -1, [Complex, 0, [Negate, [Sqrt, 3]]]]]	the first root of $x^2 + x + 1$ is the one with negative imaginary part, $(-1 - i\sqrt 3)/2$		
 smaller-root-first			[PolynomialRoot, [Add, [Power, x, 2], -2], 1]	[Negate, [Sqrt, 2]]	real roots come in increasing order: $-\sqrt 2$ first		
 dedekind-cubic-stays-a-root			[PolynomialRoot, [Add, [Power, x, 3], [Negate, [Power, x, 2]], [Multiply, -2, x], -8], 1]	[PolynomialRoot, [Add, [Power, x, 3], [Negate, [Power, x, 2]], [Multiply, -2, x], -8], 1]	a cubic's root is its own name	shape	Wolfram writes the same root as a pure function with a third argument, Root[-8 - 2#1 - #1^2 + #1^3 &, 1, 0]
+cube-root-of-2-as-a-number			[N, [PolynomialRoot, [Add, [Power, x, 3], -2], 1]]	{num: "1.2599210498948731648"}	under `N` a root is a number, here $\sqrt[3]{2}$		
+complex-roots-follow-the-real-one		test	[N, [PolynomialRoot, [Add, [Power, x, 3], -2], 2]]	[Complex, {num: "-0.62996052494743658238"}, {num: "-1.0911236359717214036"}]	the second root of $x^3 - 2$: real part $-1.26/2$, imaginary part negative first		
+complex-roots-follow-the-real-one-conjugate		test	[N, [PolynomialRoot, [Add, [Power, x, 3], -2], 3]]	[Complex, {num: "-0.62996052494743658238"}, {num: "1.0911236359717214036"}]			
+three-real-roots-smallest-first		test	[N, [PolynomialRoot, [Add, [Power, x, 3], [Multiply, -3, x], 1], 1]]	{num: "-1.8793852415718167"}	$x^3 - 3x + 1$ has three real roots, in increasing order		
+three-real-roots-middle		test	[N, [PolynomialRoot, [Add, [Power, x, 3], [Multiply, -3, x], 1], 2]]	{num: "0.34729635533386063"}			
+three-real-roots-largest		test	[N, [PolynomialRoot, [Add, [Power, x, 3], [Multiply, -3, x], 1], 3]]	{num: "1.5320888862379562"}			
+quartic-roots-by-real-then-imaginary-part		test	[N, [PolynomialRoot, [Add, [Power, x, 4], 1], 3]]	[Complex, {num: "0.70710678118654752440"}, {num: "-0.70710678118654752440"}]	the roots of $x^4 + 1$ have real parts $\mp 1/\sqrt 2$ twice: the third is the lower one at $+1/\sqrt 2$		
+quartic-complex-roots-first		test	[N, [PolynomialRoot, [Add, [Power, x, 4], 1], 1]]	[Complex, {num: "-0.70710678118654752440"}, {num: "-0.70710678118654752440"}]			
+reducible-cubic-root-as-a-number		test	[N, [PolynomialRoot, [Add, [Power, x, 3], -1], 1]]	{num: "1.0"}	$x^3 - 1$ is reducible: the root is still a number under `N`, and stays a name without it		
+quadratic-root-as-a-number		test	[N, [PolynomialRoot, [Add, [Power, x, 2], -2], 2]]	{num: "1.4142135623730950488"}	a radical root is a number too under `N`		
+index-past-the-degree-stays-unevaluated			[PolynomialRoot, [Add, [Power, x, 3], -2], 7]	[PolynomialRoot, [Add, [Power, x, 3], -2], 7]	$x^3 - 2$ has three roots, so there is no seventh		
+index-zero-stays-unevaluated		test	[PolynomialRoot, [Add, [Power, x, 3], -2], 0]	[PolynomialRoot, [Add, [Power, x, 3], -2], 0]			

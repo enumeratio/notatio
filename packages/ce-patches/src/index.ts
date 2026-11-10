@@ -209,4 +209,4 @@ export function applyNativeHeadPatches(ce: ComputeEngine): void {
   ])
     applyPatch(ce, patch);
 }
-export { algebraicNumbers, numberField, readAlgebraic } from "./patches/algebraic-numbers.ts";
+export { algebraicNumbers, deadlineTick, numberField, readAlgebraic } from "./patches/algebraic-numbers.ts";
