@@ -13,9 +13,9 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
-    "./wgsl-complex": {
-      "types": "./dist/wgsl-complex.d.mts",
-      "import": "./dist/wgsl-complex.mjs"
+    "./glsl-complex": {
+      "types": "./dist/glsl-complex.d.mts",
+      "import": "./dist/glsl-complex.mjs"
     },
     "./package.json": "./package.json"
   },

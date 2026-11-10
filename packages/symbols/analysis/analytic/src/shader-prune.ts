@@ -1,8 +1,8 @@
-import { zetaWGSL } from "./shader.ts";
+import { zetaGLSL } from "./shader.ts";
 
-// The library cut at its top-level declarations: a declaration starts on a line that begins with
-// a keyword in column 0, and the comment lines above it travel with it.
-const DECL = /^(?:fn|const|var<private>|struct)\s+(\w+)/;
+// The library cut at its top-level declarations: a declaration starts on a line that begins in column 0
+// with a type (or `const`), and the comment lines above it travel with it.
+const DECL = /^(?:const\s+)?(?:float|int|uint|bool|void|[ib]?vec[234]|mat[234])\s+(\w+)\s*[(=;[]/;
 const IDENT = /[A-Za-z_]\w*/g;
 
 type Decl = { readonly name: string; readonly text: string; readonly uses: ReadonlySet<string> };
@@ -42,30 +42,40 @@ const split = (library: string): Decl[] => {
 let library: Decl[] | undefined;
 
 /**
- * The library declarations `code` reaches, in library order: those it names and, transitively, those
- * those name. `code` is the whole host text, so a host that reads module state a kernel writes
+ * The library declarations `code` reaches: those it names and, transitively, those those name. Each
+ * comes after what it uses, since GLSL declares a name before its first use, and otherwise in library
+ * order. `code` is the whole host text, so a host that reads module state a kernel writes
  * (`uncertain`, for the portrait's hatching) names it and keeps it.
  */
-export function reachableWGSL(code: string): string {
-  const decls = (library ??= split(zetaWGSL));
-  const seen = new Set<string>();
+export function reachableGLSL(code: string): string {
+  const decls = (library ??= split(zetaGLSL));
   const byName = new Map(decls.map((d) => [d.name, d]));
-  const visit = (name: string) => {
-    if (seen.has(name)) return;
+  const wanted = new Set<string>();
+  const want = (name: string) => {
+    if (wanted.has(name)) return;
     const d = byName.get(name);
     if (!d) return;
-    seen.add(name);
-    for (const u of d.uses) visit(u);
+    wanted.add(name);
+    for (const u of d.uses) want(u);
   };
-  for (const id of new Set(code.replace(/\/\/.*$/gm, "").match(IDENT) ?? [])) visit(id);
-  return decls
-    .filter((d) => seen.has(d.name))
-    .map((d) => d.text)
-    .join("\n");
+  for (const id of new Set(code.replace(/\/\/.*$/gm, "").match(IDENT) ?? [])) want(id);
+  const placed = new Set<string>();
+  const out: string[] = [];
+  const place = (d: Decl) => {
+    if (placed.has(d.name)) return;
+    placed.add(d.name);
+    for (const u of d.uses) {
+      const dep = byName.get(u);
+      if (dep) place(dep);
+    }
+    out.push(d.text);
+  };
+  for (const d of decls) if (wanted.has(d.name)) place(d);
+  return out.join("\n");
 }
 
 /** `host` with the library declarations it reaches in front of it. */
-export const withWGSL = (host: string): string => {
-  const lib = reachableWGSL(host);
+export const withGLSL = (host: string): string => {
+  const lib = reachableGLSL(host);
   return lib === "" ? host : `${lib}\n${host}`;
 };

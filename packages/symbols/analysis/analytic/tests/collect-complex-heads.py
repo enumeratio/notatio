@@ -1,4 +1,4 @@
-# Collects mpmath's values for the heads the complex WGSL emitter lowers, at the points
+# Collects mpmath's values for the heads the complex GLSL emitter lowers, at the points
 # complex-heads.golden.json holds, for web's gpu.spec.ts to hold the GPU kernels to.
 #   python3 packages/symbols/analysis/analytic/tests/collect-complex-heads.py && vp fmt packages/symbols/analysis/analytic/tests/complex-heads.golden.json
 # Needs mpmath (1.3.0 wrote the committed file). Each case is the head as canonical MathJSON in `z`,

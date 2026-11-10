@@ -1,8 +1,8 @@
 import { expect, test } from "vite-plus/test";
 import { lerchPhiRealF32, makeJitter } from "../scripts/lerch-f32.ts";
-import { zetaWGSL } from "../src/shader.ts";
+import { zetaGLSL } from "../src/shader.ts";
 
-const tol = Number(/const LERCH_REAL_TOL: f32 = ([0-9.e-]+);/.exec(zetaWGSL)![1]);
+const tol = Number(/const float LERCH_REAL_TOL = ([0-9.e-]+);/.exec(zetaGLSL)![1]);
 
 test("the f32 emulation reads measured noise as real", () => {
   // Worst noise points of the measurement grid (scripts/lerch-real-tol.ts), at ±2 ulp.

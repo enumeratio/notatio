@@ -53,24 +53,24 @@ export const declined = (r: Expression | undefined, head: string): boolean => r 
 /**
  * A `compile` handler so `ce.compile(expr, {target})` emits a call to our kernel for
  * a head compute-engine's own compiler can't lower. Real-valued: assumes real args
- * and emits the real part, which composes in the real-scalar JS / WGSL pipelines the
+ * and emits the real part, which composes in the real-scalar JS / GLSL pipelines the
  * plotters use.
  *  - javascript: `_.<js>(…)`, a real wrapper injected on the scope object.
- *  - wgsl: `<wgsl>(vec2f(…, 0.0), …).x`, using the `zetaWGSL` kernel (which the shader
- *    host must prepend). `.x` takes the real part back to an f32.
+ *  - glsl: `<glsl>(vec2(…, 0.0), …).x`, using the `zetaGLSL` kernel (which the shader
+ *    host must prepend). `.x` takes the real part back to a float.
  * A target left unnamed returns undefined, which lets a native lowering (where the
- * target has one) take over instead. GLSL and other targets fall through the same way.
+ * target has one) take over instead. Other targets fall through the same way.
  */
 export const realCompile =
-  (arity: number, emit: { js?: string; wgsl?: string; wgslReal?: string }) =>
+  (arity: number, emit: { js?: string; glsl?: string; glslReal?: string }) =>
   (args: readonly Expression[], compile: (e: Expression) => string, ctx: { language?: string }): string | undefined => {
     const ops = args.slice(0, arity);
     if (ops.length < arity || ops.some((o) => o === undefined)) return undefined;
     const cs = ops.map(compile);
     if (ctx.language === "javascript" && emit.js) return `_.${emit.js}(${cs.join(", ")})`;
     // A kernel with a real-valued wrapper (NaN where the value is not real) is called as is.
-    if (ctx.language === "wgsl" && emit.wgslReal)
-      return `${emit.wgslReal}(${cs.map((c) => `vec2f(${c}, 0.0)`).join(", ")})`;
-    if (ctx.language === "wgsl" && emit.wgsl) return `${emit.wgsl}(${cs.map((c) => `vec2f(${c}, 0.0)`).join(", ")}).x`;
+    if (ctx.language === "glsl" && emit.glslReal)
+      return `${emit.glslReal}(${cs.map((c) => `vec2(${c}, 0.0)`).join(", ")})`;
+    if (ctx.language === "glsl" && emit.glsl) return `${emit.glsl}(${cs.map((c) => `vec2(${c}, 0.0)`).join(", ")}).x`;
     return undefined;
   };

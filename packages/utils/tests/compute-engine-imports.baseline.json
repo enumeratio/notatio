@@ -162,7 +162,6 @@
   "packages/symbols/analysis/analytic/tests/trig-factor.test.ts",
   "packages/symbols/analysis/analytic/tests/trig-infinity.test.ts",
   "packages/symbols/analysis/analytic/tests/trig-reduction.test.ts",
-  "packages/symbols/analysis/analytic/tests/wgsl-complex.test.ts",
   "packages/symbols/analysis/analytic/tests/widened.test.ts",
   "packages/symbols/combinatorics/combinatorics/collections/src/families/epsil.ts",
   "packages/symbols/evaluation/evaluation/src/about.ts",

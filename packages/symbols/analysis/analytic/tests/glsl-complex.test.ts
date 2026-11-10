@@ -1,27 +1,26 @@
-import { ComputeEngine } from "@cortex-js/compute-engine";
+import { createEngine } from "@enumeratio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
-import { emitComplexWGSL, type Json, MAX_SLOTS } from "@enumeratio/ce-patches";
-import { complexWGSL } from "../src/shader-complex.ts";
-import { zetaWGSL } from "../src/shader.ts";
+import { emitComplexGLSL, type Json, MAX_SLOTS } from "@enumeratio/ce-patches";
+import { complexGLSL } from "../src/shader-complex.ts";
+import { zetaGLSL } from "../src/shader.ts";
 
 test("the real Lerch wrapper in the shader returns NaN where Φ is complex", () => {
-  expect(zetaWGSL).toContain("fn lerchPhiReal(");
+  expect(zetaGLSL).toContain("float lerchPhiReal(");
 });
 
-test("the shader has no const-evaluable NaN (WGSL rejects 'value nan cannot be represented as f32')", () => {
-  const src = zetaWGSL.replace(/\/\/.*$/gm, "");
-  expect(src).not.toMatch(/bitcast<f32>\(\s*0x7f[89a-f][0-9a-f]{5}u\s*\)/i);
+test("the shader has no const-evaluable NaN (a constant NaN is undefined in GLSL ES 3.00 and some compilers reject it)", () => {
+  const src = zetaGLSL.replace(/\/\/.*$/gm, "");
+  expect(src).not.toMatch(/uintBitsToFloat\(\s*0x7f[89a-f][0-9a-f]{5}u\s*\)/i);
   expect(src).not.toMatch(/0\.0\s*\/\s*0\.0/);
 });
 
-const ce = new ComputeEngine();
-declareAnalytic(ce);
+const ce = createEngine(declareAnalytic);
 
 /** Canonical MathJSON for a boxed expression, the emitter's input shape. */
-const canon = (expr: unknown): Json => ce.box(expr as Parameters<ComputeEngine["box"]>[0]).json as unknown as Json;
+const canon = (expr: unknown): Json => ce.box(expr as Parameters<typeof ce.box>[0]).json as unknown as Json;
 
-const emit = (expr: unknown) => emitComplexWGSL(canon(expr));
+const emit = (expr: unknown) => emitComplexGLSL(canon(expr));
 
 test("the variable passes through and literals become uniform slots", () => {
   const r = emit(["PolyLog", 2.5, "z"]);
@@ -49,7 +48,7 @@ test("a small integer power becomes repeated multiplication, avoiding cpow's cut
 });
 
 test("Zeta takes the Riemann kernel at one argument and the generalized one at two", () => {
-  expect(emit(["Zeta", "z"])?.code).toBe("hurwitz(z, vec2f(1.0, 0.0))");
+  expect(emit(["Zeta", "z"])?.code).toBe("hurwitz(z, vec2(1.0, 0.0))");
   expect(emit(["Zeta", 2, "z"])?.code).toBe("zetaGen(prm.p[0].xy, z)");
 });
 
@@ -115,7 +114,7 @@ test("each widened head reaches a kernel the shader defines", () => {
     expect(code, JSON.stringify(expr)).toBeDefined();
     expect(code, JSON.stringify(expr)).toContain(call);
     const fn = call.slice(0, -1);
-    expect(zetaWGSL, `${fn} is defined`).toMatch(new RegExp(`fn ${fn}\\(`));
+    expect(zetaGLSL, `${fn} is defined`).toMatch(new RegExp(`^(?:vec[234]|float|void) ${fn}\\(`, "m"));
   }
 });
 
@@ -136,7 +135,7 @@ test("a head whose kernel cannot vouch for its digits stays declined", () => {
 });
 
 test("PolyGamma of order 0 and 1 takes the digamma and trigamma kernels, not the pole of ζ(1, z)", () => {
-  const polygamma = /fn polygamma\([\s\S]*?\n}\n/.exec(zetaWGSL)![0];
+  const polygamma = /vec2 polygamma\([\s\S]*?\n}\n/.exec(zetaGLSL)![0];
   expect(polygamma).toContain("cdigamma(z)");
   expect(polygamma).toContain("ctrigamma(z)");
 });
@@ -169,7 +168,7 @@ test("the baked-in integer exponent is part of the shape", () => {
 test("an unbound symbol or unsupported head is rejected, not mis-emitted", () => {
   expect(emit(["PolyLog", 2, "w"])).toBeUndefined(); // w is not the variable
   expect(emit(["AiryAi", "z"])).toBeUndefined();
-  expect(emitComplexWGSL(["Hypot", "z"] as Json)).toBeUndefined();
+  expect(emitComplexGLSL(["Hypot", "z"] as Json)).toBeUndefined();
 });
 
 test("more literals than slots is rejected rather than overflowing the uniform", () => {
@@ -198,36 +197,36 @@ test("the closed forms a slider actually lands on all lower", () => {
   // Sweeping s across the integers walks HurwitzZeta through these.
   for (const s of [0, -1, -2, -3, -6]) {
     const closed = ce.box(["HurwitzZeta", s, "z"]).evaluate().json;
-    expect(emitComplexWGSL(closed as Json)).toBeDefined();
+    expect(emitComplexGLSL(closed as Json)).toBeDefined();
   }
 });
 
 test("a lowercase head from the Epsil round trip still resolves", () => {
   // `PolyLog(1, z)` evaluates to -ln(1 - z), and the round trip through Epsil hands
   // back `ln`, not `Ln`.
-  expect(emitComplexWGSL(["Negate", ["ln", ["Subtract", 1, "z"]]] as Json)?.code).toBe("cneg(clog((prm.p[0].xy - z)))");
-  expect(emitComplexWGSL(["sin", "z"] as Json)?.code).toBe("csin(z)");
+  expect(emitComplexGLSL(["Negate", ["ln", ["Subtract", 1, "z"]]] as Json)?.code).toBe("cneg(clog((prm.p[0].xy - z)))");
+  expect(emitComplexGLSL(["sin", "z"] as Json)?.code).toBe("csin(z)");
 });
 
 test("digit separators in a number literal are read, not rejected", () => {
-  expect(emitComplexWGSL(["Multiply", { num: "1_000.5" }, "z"] as Json)?.literals).toEqual([[1000.5, 0]]);
+  expect(emitComplexGLSL(["Multiply", { num: "1_000.5" }, "z"] as Json)?.literals).toEqual([[1000.5, 0]]);
 });
 
 test("Gamma and Factorial lower to cgamma, Factorial as Γ(z + 1)", () => {
   expect(emit(["Gamma", "z"])?.code).toBe("cgamma(z)");
-  expect(emitComplexWGSL(["gamma", "z"] as Json)?.code).toBe("cgamma(z)");
-  expect(emit(["Factorial", "z"])?.code).toBe("cgamma((z + vec2f(1.0, 0.0)))");
+  expect(emitComplexGLSL(["gamma", "z"] as Json)?.code).toBe("cgamma(z)");
+  expect(emit(["Factorial", "z"])?.code).toBe("cgamma((z + vec2(1.0, 0.0)))");
 });
 
 // --- cgamma, numerically ------------------------------------------------------------
-// No WGSL runtime here, so this is a line-for-line f32 port of cgamma/clgamma/clogSin
+// No GLSL runtime here, so this is a line-for-line f32 port of cgamma/clgamma/clogSin
 // (Math.fround on every op), checked against our Gamma head. A string check ties the
 // port to the shader's constants.
 
 test("the shader's cgamma has the constants the port below uses", () => {
-  expect(zetaWGSL).toContain("fn cgamma(");
-  expect(zetaWGSL).toContain("1.1447299");
-  expect(zetaWGSL).toContain("min(lg.x, 80.0)");
+  expect(zetaGLSL).toContain("vec2 cgamma(");
+  expect(zetaGLSL).toContain("1.1447299");
+  expect(zetaGLSL).toContain("min(lg.x, 80.0)");
 });
 
 const f = Math.fround;
@@ -315,19 +314,19 @@ test("poles come out huge and finite, never NaN", () => {
 });
 
 test("the Hurwitz kernels flag a sum whose terms dwarf it, for a host to hatch (S#5)", () => {
-  expect(zetaWGSL).toContain("var<private> uncertain: f32");
+  expect(zetaGLSL).toContain("float uncertain = 0.0;");
   // The Taylor sum vouches for itself in f32; the Euler–Maclaurin sum, where f32 cancels it, is redone
   // in df64 and that vouches.
-  const hurwitz = zetaWGSL.replace(complexWGSL, "");
+  const hurwitz = zetaGLSL.replace(complexGLSL, "");
   expect(hurwitz.match(/vouch\(largest, /g)?.length).toBe(3);
   expect(hurwitz).toContain("if (DF64 && largest > SUM_COND_LIMIT * length(sum)) { return hurwitzEMDf(s, a, largest);");
   expect(hurwitz.match(/vouchDf\(largest, /g)?.length).toBe(1);
 });
 
 test("the df64 constants are pairs of f32 that sum to the double they stand for", () => {
-  // Euler–Maclaurin's B₂ₖ/(2k)!, written as vec2f(hi, lo): hi + lo is the double to well under df64's 2⁻⁴⁸.
-  const row = /var em = array<vec2f, 9>\((.*)\);/.exec(zetaWGSL)![1]!;
-  const pairs = [...row.matchAll(/vec2f\(([^,]+), ([^)]+)\)/g)].map(
+  // Euler–Maclaurin's B₂ₖ/(2k)!, written as vec2(hi, lo): hi + lo is the double to well under df64's 2⁻⁴⁸.
+  const row = /vec2 em\[9\] = vec2\[9\]\((.*)\);/.exec(zetaGLSL)![1]!;
+  const pairs = [...row.matchAll(/vec2\(([^,]+), ([^)]+)\)/g)].map(
     (m) => [Math.fround(Number(m[1])), Math.fround(Number(m[2]))] as const,
   );
   const exact = [0, 1 / 12, -1 / 720, 1 / 30240, -1 / 1209600, 1 / 47900160, -691 / 1307674368000];

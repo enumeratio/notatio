@@ -1,5 +1,5 @@
-// Emit WGSL that evaluates a MathJSON expression as a *complex* value (vec2f),
-// for per-pixel domain coloring. compute-engine's own WGSL target is real-scalar —
+// Emit GLSL that evaluates a MathJSON expression as a *complex* value (vec2f),
+// for per-pixel domain coloring. compute-engine's own GLSL target is real-scalar —
 // our `realCompile` handlers take `.x` off the kernels — which is right for plotting
 // a surface and useless for a portrait, where the phase is the whole picture.
 //
@@ -13,17 +13,17 @@
 //    just re-upload the slots. That is the difference between rebuilding a shader
 //    module per frame and writing 8 bytes per frame.
 //
-// The emitted body assumes `zetaWGSL` is in scope (for the special-function kernels
-// and the complex helpers), a `vec2f` named by `variable` holding the point being
-// coloured, and a uniform `prm.p : array<vec4f, MAX_SLOTS>` holding the literals —
-// vec4f because a uniform array's element stride is rounded up to 16 bytes, so a
-// packed `array<vec2f, N>` is not addressable. Only `.xy` of each slot is read.
+// The emitted body assumes `zetaGLSL` is in scope (for the special-function kernels
+// and the complex helpers), a `vec2` named by `variable` holding the point being
+// coloured, and a uniform block member `prm.p : vec4[MAX_SLOTS]` holding the literals —
+// vec4 because a std140 array's element stride is rounded up to 16 bytes, so a
+// packed `vec2[N]` is not addressable. Only `.xy` of each slot is read.
 
 /** MathJSON, in the canonical plain-array form `ce.box(expr).json` returns. */
 export type Json = number | string | boolean | { [k: string]: unknown } | Json[];
 
-export interface ComplexWGSL {
-  /** A WGSL expression of type `vec2f`. */
+export interface ComplexGLSL {
+  /** A GLSL expression of type `vec2`. */
   readonly code: string;
   /** Literal values, in slot order, to upload as `prm.p`. */
   readonly literals: readonly (readonly [number, number])[];
@@ -84,7 +84,7 @@ const CONSTANTS: Record<string, [number, number]> = {
 };
 
 /**
- * Special-function heads, by arity, naming the `zetaWGSL` kernel they call. The
+ * Special-function heads, by arity, naming the `zetaGLSL` kernel they call. The
  * argument order matches the head's own.
  */
 const KERNELS: Record<string, { fn: string; arity: number }> = {
@@ -99,7 +99,7 @@ const KERNELS: Record<string, { fn: string; arity: number }> = {
 /** `ln` -> `Ln`: a round trip through Epsil can hand back a lowercase head. */
 const capitalize = (name: string): string => name.charAt(0).toUpperCase() + name.slice(1);
 
-/** Unary functions with a complex WGSL counterpart in `zetaWGSL`. */
+/** Unary functions with a complex GLSL counterpart in `zetaGLSL`. */
 const UNARY: Record<string, string> = {
   Exp: "cexp",
   Ln: "clog",
@@ -151,7 +151,7 @@ const UNARY: Record<string, string> = {
   AGM: "cagm1",
 };
 
-/** Two-argument heads, by the `zetaWGSL` function they call, arguments in the head's order. */
+/** Two-argument heads, by the `zetaGLSL` function they call, arguments in the head's order. */
 const BINARY: Record<string, string> = {
   Log: "clogBase",
   Pochhammer: "cpochhammer",
@@ -163,7 +163,7 @@ const BINARY: Record<string, string> = {
   AGM: "cagm",
 };
 
-/** Three-argument heads, by the `zetaWGSL` function they call. */
+/** Three-argument heads, by the `zetaGLSL` function they call. */
 const TERNARY: Record<string, string> = {
   Hypergeometric1F1: "chyp1f1",
 };
@@ -179,7 +179,7 @@ class Emitter {
     this.variable = variable;
   }
 
-  /** Record a literal and return the WGSL that reads its slot. */
+  /** Record a literal and return the GLSL that reads its slot. */
   private slot(re: number, im: number): string {
     if (this.literals.length >= MAX_SLOTS) throw new Error("too many literals");
     const i = this.literals.length;
@@ -267,7 +267,7 @@ class Emitter {
       }
       case "Root": {
         if (args.length !== 2) break;
-        return `cpow(${sub(0)}, cdiv(vec2f(1.0, 0.0), ${sub(1)}))`;
+        return `cpow(${sub(0)}, cdiv(vec2(1.0, 0.0), ${sub(1)}))`;
       }
       case "Square": {
         if (args.length !== 1) break;
@@ -276,11 +276,11 @@ class Emitter {
       }
       case "Factorial":
         // n! = Γ(n + 1)
-        if (args.length === 1) return `cgamma((${sub(0)} + vec2f(1.0, 0.0)))`;
+        if (args.length === 1) return `cgamma((${sub(0)} + vec2(1.0, 0.0)))`;
         break;
       case "Zeta":
         // One-argument Riemann zeta is ζ(s, 1); two-argument is the generalized one.
-        if (args.length === 1) return `hurwitz(${sub(0)}, vec2f(1.0, 0.0))`;
+        if (args.length === 1) return `hurwitz(${sub(0)}, vec2(1.0, 0.0))`;
         if (args.length === 2) return `zetaGen(${sub(0)}, ${sub(1)})`;
         break;
       default: {
@@ -302,11 +302,11 @@ class Emitter {
 }
 
 /**
- * Compile `json` to a complex-valued WGSL expression over `variable`, or `undefined`
+ * Compile `json` to a complex-valued GLSL expression over `variable`, or `undefined`
  * if it uses anything the emitter has no complex lowering for (an unbound symbol, an
  * unsupported head, too many literals) — callers fall back to the CPU sampler.
  */
-export function emitComplexWGSL(json: Json, variable = "z"): ComplexWGSL | undefined {
+export function emitComplexGLSL(json: Json, variable = "z"): ComplexGLSL | undefined {
   const emitter = new Emitter(variable);
   try {
     const code = emitter.emit(json);
