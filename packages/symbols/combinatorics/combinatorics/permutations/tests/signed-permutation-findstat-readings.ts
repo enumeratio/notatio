@@ -14,6 +14,18 @@ const pairs = (n: number, inclusive: boolean): [number, number][] =>
 /** The number of adjacent pairs i < n with p(i) > p(i+1). */
 const wordDescents = (p: readonly number[]): number => indices(p.length - 1).filter((i) => p[i]! > p[i + 1]!).length;
 const negatives = (p: readonly number[]): number => p.filter((a) => a < 0).length;
+/** Every signed permutation of 1..n, as words. */
+const signedPermutationsOf = (n: number): number[][] => {
+  const permutations = (m: number): number[][] =>
+    m === 0
+      ? [[]]
+      : permutations(m - 1).flatMap((rest) =>
+          Array.from({ length: m }, (_, i) => [...rest.slice(0, i), m, ...rest.slice(i)]),
+        );
+  return permutations(n).flatMap((q) =>
+    Array.from({ length: 2 ** n }, (_, mask) => q.map((v, i) => (mask & (1 << i) ? -v : v))),
+  );
+};
 /** The inverse signed permutation, as the word of its entries: it sends |p(t)| to t, with p(t)'s sign. */
 const inverse = (p: readonly number[]): number[] => {
   const q = new Array<number>(p.length);
@@ -71,6 +83,75 @@ const generatorSupports = (n: number): Map<string, Set<number>> => {
   return used;
 };
 const generatorsUsed = (p: readonly number[]): Set<number> => generatorSupports(p.length).get(p.join(",")) ?? new Set();
+
+/** The products p t of the word with each reflection t of the group: one entry negated, or two entries swapped, with or without both negated. */
+const timesReflections = (p: readonly number[]): number[][] => {
+  const out: number[][] = [];
+  for (let i = 0; i < p.length; i++) {
+    out.push(p.map((a, k) => (k === i ? -a : a)));
+    for (let j = i + 1; j < p.length; j++) {
+      out.push(p.map((a, k) => (k === i ? p[j]! : k === j ? p[i]! : a)));
+      out.push(p.map((a, k) => (k === i ? -p[j]! : k === j ? -p[i]! : a)));
+    }
+  }
+  return out;
+};
+/** The distance of every signed permutation of 1..n from the identity along `neighbors`, by breadth first search. */
+const distancesFrom = (n: number, neighbors: (p: readonly number[]) => number[][]): Map<string, number> => {
+  const start = indices(n).map((i) => i + 1);
+  const distance = new Map<string, number>([[start.join(","), 0]]);
+  let layer = [start];
+  while (layer.length > 0) {
+    const next: number[][] = [];
+    for (const w of layer)
+      for (const v of neighbors(w))
+        if (!distance.has(v.join(","))) {
+          distance.set(v.join(","), distance.get(w.join(","))! + 1);
+          next.push(v);
+        }
+    layer = next;
+  }
+  return distance;
+};
+/** The Coxeter length, the distance along the generators s_i (swap entries i, i + 1) and s_n (negate the last entry). */
+const coxeterLengths = new Map<number, Map<string, number>>();
+const coxeterLength = (p: readonly number[]): number => {
+  const n = p.length;
+  if (!coxeterLengths.has(n))
+    coxeterLengths.set(
+      n,
+      distancesFrom(n, (w) => [
+        ...indices(n - 1).map((g) => w.map((a, k) => (k === g ? w[g + 1]! : k === g + 1 ? w[g]! : a))),
+        ...(n > 0 ? [w.map((a, k) => (k === n - 1 ? -a : a))] : []),
+      ]),
+    );
+  return coxeterLengths.get(n)!.get(p.join(","))!;
+};
+/** The reflection length, the distance along the reflections. */
+const reflectionLengths = new Map<number, Map<string, number>>();
+const reflectionLength = (p: readonly number[]): number => {
+  const n = p.length;
+  if (!reflectionLengths.has(n)) reflectionLengths.set(n, distancesFrom(n, timesReflections));
+  return reflectionLengths.get(n)!.get(p.join(","))!;
+};
+/** p composed with q: the entry of the composite at i is p(q(i)), signs multiplying. */
+const composeSigned = (p: readonly number[], q: readonly number[]): number[] =>
+  q.map((b) => Math.sign(b) * p[Math.abs(b) - 1]!);
+/** The roots e_i, e_i - e_j and e_i + e_j (i < j) with their heights for the simple roots e_i - e_{i+1} and e_n; a root is positive when its first nonzero coordinate is. */
+const positiveRoots = (n: number): { vector: number[]; height: number }[] => {
+  const roots: { vector: number[]; height: number }[] = [];
+  for (let i = 1; i <= n; i++) {
+    roots.push({ vector: indices(n).map((k) => (k === i - 1 ? 1 : 0)), height: n - i + 1 });
+    for (let j = i + 1; j <= n; j++) {
+      roots.push({ vector: indices(n).map((k) => (k === i - 1 ? 1 : k === j - 1 ? -1 : 0)), height: j - i });
+      roots.push({
+        vector: indices(n).map((k) => (k === i - 1 || k === j - 1 ? 1 : 0)),
+        height: j - i + 2 * (n - j + 1),
+      });
+    }
+  }
+  return roots;
+};
 
 export type Reading = (p: readonly number[]) => number;
 
@@ -274,6 +355,30 @@ export const SIGNED_PERMUTATION_READINGS: Record<string, Reading> = {
       for (let j = i + 1; j <= p.length; j++) if ((j - i) % 2 !== 0 && f(i) > f(j)) total++;
     return total / 2;
   },
+  // St001852: the conjugates q p q^-1 over every signed permutation q, counted.
+  SignedConjugacyClassSize: (p) => {
+    const n = p.length;
+    const conjugates = new Set<string>();
+    for (const q of signedPermutationsOf(n)) {
+      const inverseOfQ = inverse(q);
+      conjugates.add(composeSigned(q, composeSigned(p, inverseOfQ)).join(","));
+    }
+    return conjugates.size;
+  },
+  // St001848: the heights of the positive roots a with w^-1(a) negative, w^-1 sending the coordinate vector v to the vector u with u_k = sign(p(k)) v_|p(k)|.
+  AtomicLength: (p) =>
+    positiveRoots(p.length)
+      .filter(({ vector }) => {
+        const image = p.map((a) => Math.sign(a) * vector[Math.abs(a) - 1]!);
+        return image.find((c) => c !== 0)! < 0;
+      })
+      .reduce((total, { height }) => total + height, 0),
+  // St001861: the reflections t with p t one shorter, in the Coxeter length found by search.
+  BruhatLowerCoverCount: (p) =>
+    p.length === 0 ? 0 : timesReflections(p).filter((q) => coxeterLength(q) === coxeterLength(p) - 1).length,
+  // St001858: the reflections t with p t one longer in the reflection length found by search.
+  AbsoluteOrderCoverCount: (p) =>
+    p.length === 0 ? 0 : timesReflections(p).filter((q) => reflectionLength(q) === reflectionLength(p) + 1).length,
   // The two statistics of permutations that read a value against its position, on signed words.
   Excedances: (p) => p.filter((a, i) => a > i + 1).length,
   WeakExcedances: (p) => p.filter((a, i) => a >= i + 1).length,

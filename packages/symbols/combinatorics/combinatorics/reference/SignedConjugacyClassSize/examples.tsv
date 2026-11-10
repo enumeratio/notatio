@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-signed-word-2-bar-1-bar-3			[SignedConjugacyClassSize, [SignedPermutation, [List, 2, -1, -3]]]	6			the signed word $2\,\bar{1}\,\bar{3}$
+findstat-st001852-1	Properties		[CombinatorialStat, [SignedPermutation, [List, 1]], "'SignedConjugacyClassSize'"]	1	1	FindStat St001852	FindStat's value for [1]
+findstat-st001852-2	Properties		[CombinatorialStat, [SignedPermutation, [List, -1]], "'SignedConjugacyClassSize'"]	1	1	FindStat St001852	FindStat's value for [-1]
+findstat-st001852-3	Properties		[CombinatorialStat, [SignedPermutation, [List, 1, 2]], "'SignedConjugacyClassSize'"]	1	1	FindStat St001852	FindStat's value for [1,2]

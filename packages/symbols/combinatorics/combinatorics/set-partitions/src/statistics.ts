@@ -1069,6 +1069,35 @@ const FINDSTAT_PERFECT_MATCHING_STATISTICS_2: readonly Definition[] = [
   ),
 ];
 
+/** The pairs a cut after point k separates: opening at or before k and closing after it, over the matching's `openers` and `closers`. */
+const pairsAcrossCut = (k: MathJSON): MathJSON =>
+  count(positions, and(atMostValue(at("i", "openers"), k), less(k, at("i", "closers"))), "i");
+
+export const FINDSTAT_PERFECT_MATCHING_STATISTICS_3: readonly Definition[] = [
+  matched(
+    "OscillatingTableauLargestPartitionSize",
+    "The most pairs a cut between two points separates: the largest number of pairs with one point on each side.",
+    nonEmpty(
+      bindList(
+        "openers",
+        firsts,
+        bindList(
+          "closers",
+          lasts,
+          max(forEach(["Range", 1, subtract(times(2, length()), 1)], pairsAcrossCut("k"), "k")),
+        ),
+      ),
+    ),
+    "FindStat's St000720. The oscillating tableau of Sundaram's map has the pairs open after a point as its partition, so its largest partition is the most pairs open at a cut.",
+  ),
+  matched(
+    "OscillatingTableauWeight",
+    "The sum over the pairs of the larger point less the smaller: the pairs a cut separates, summed over the cuts.",
+    nonEmpty(["Sum", ["Map", ["Function", blockSpan("b"), "b"], "_x"]]),
+    "FindStat's St000721, the weight of the matching: the sizes of the oscillating tableau's partitions, the pairs open after each point, summed. A pair is open after each point from its smaller point up to the one before its larger.",
+  ),
+];
+
 export const SET_PARTITION_STATISTICS: readonly Definition[] = [
   stat("Blocks", "The number of blocks.", ["Length", "_x"]),
   stat("LargestBlock", "The size of the largest block.", nonEmpty(["Max", sizes])),
@@ -1583,4 +1612,5 @@ export const SET_PARTITION_STATISTICS: readonly Definition[] = [
   ),
   ...FINDSTAT_PERFECT_MATCHING_STATISTICS,
   ...FINDSTAT_PERFECT_MATCHING_STATISTICS_2,
+  ...FINDSTAT_PERFECT_MATCHING_STATISTICS_3,
 ];

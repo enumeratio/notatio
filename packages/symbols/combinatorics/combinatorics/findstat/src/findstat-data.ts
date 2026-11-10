@@ -6140,6 +6140,18 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1000,
   },
   {
+    head: "OscillatingTableauLargestPartitionSize",
+    on: "PerfectMatching",
+    findstat: ["St000720"],
+    values: 1480,
+  },
+  {
+    head: "OscillatingTableauWeight",
+    on: "PerfectMatching",
+    findstat: ["St000721"],
+    values: 1739,
+  },
+  {
     head: "CrossingFormHalfRank",
     on: "PerfectMatching",
     findstat: ["St001444"],
@@ -6342,6 +6354,30 @@ export const findstat: readonly FindStatMatch[] = [
     on: "SignedPermutation",
     findstat: ["St001889"],
     values: 1200,
+  },
+  {
+    head: "SignedConjugacyClassSize",
+    on: "SignedPermutation",
+    findstat: ["St001852"],
+    values: 1200,
+  },
+  {
+    head: "AtomicLength",
+    on: "SignedPermutation",
+    findstat: ["St001848"],
+    values: 1200,
+  },
+  {
+    head: "BruhatLowerCoverCount",
+    on: "SignedPermutation",
+    findstat: ["St001861"],
+    values: 1200,
+  },
+  {
+    head: "AbsoluteOrderCoverCount",
+    on: "SignedPermutation",
+    findstat: ["St001858"],
+    values: 440,
   },
   {
     head: "NegativeOneCount",

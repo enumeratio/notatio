@@ -40,8 +40,12 @@ test("every signed-permutation definition has an independent reading", () => {
 
 /** Heads that take a tenth of a second or more a signed permutation to interpret: lengths 0..3 here, 0..4 under DEEP_TESTS, never 5. */
 const COSTLY = new Set([
+  "AbsoluteOrderCoverCount",
+  "AtomicLength",
   "BastidasHohlwegSaliolaExcedanceCount",
+  "BruhatLowerCoverCount",
   "OddSignBlockCount",
+  "SignedConjugacyClassSize",
   "SignedConnectivitySetSize",
   "SignedCrossingCount",
   "SignedEastNorthAlignmentCount",
@@ -53,7 +57,10 @@ const COSTLY = new Set([
   "SparreAndersenPositiveCount",
   "TypeBPatternTwoThreeOneCount",
 ]);
-const largest = (head: string): number => (COSTLY.has(head) && !process.env.DEEP_TESTS ? 3 : 4);
+/** Heads that take a quarter of a second or more a signed permutation of length 3: lengths 0..2 here, 0..3 under DEEP_TESTS. */
+const CHEAPEST_ONLY = new Set(["AbsoluteOrderCoverCount", "BruhatLowerCoverCount"]);
+const largest = (head: string): number =>
+  CHEAPEST_ONLY.has(head) ? (process.env.DEEP_TESTS ? 3 : 2) : COSTLY.has(head) && !process.env.DEEP_TESTS ? 3 : 4;
 
 for (const head of defined)
   test(`${head} agrees over every signed permutation of length 0..${largest(head)}`, () => {
@@ -63,7 +70,8 @@ for (const head of defined)
 
 test("each head called through the carrier gives the reading, shared ones included", () => {
   for (const [head, expected] of Object.entries(SIGNED_PERMUTATION_READINGS))
-    for (const p of upTo(3)) expect(viaCarrier(head, p), `${head} ${p.join(",")}`).toBe(expected(p));
+    for (const p of upTo(CHEAPEST_ONLY.has(head) ? 2 : 3))
+      expect(viaCarrier(head, p), `${head} ${p.join(",")}`).toBe(expected(p));
 });
 
 // Length 5 runs nightly (DEEP_TESTS=1).
