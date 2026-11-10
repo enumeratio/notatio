@@ -84,6 +84,19 @@ const BATCH_TWO = new Set([
   "LargestComponentPreservingForestSize",
   "TriangleFreeVertexDeletionNumber",
   "AcyclicOrientationCount",
+  "ComponentPreservingSpanningSubgraphCount",
+  "ContainedForestCount",
+  "TutteXYCoefficient",
+  "ChromaticPolynomialDerivativeAtOne",
+  "BetaInvariant",
+  "TutteEvaluationAtThreeAndThree",
+  "NowhereZeroThreeFlowCount",
+  "TutteEvaluationAtTwoAndMinusOne",
+  "TutteEvaluationAtOneAndZero",
+  "TutteEvaluationAtOneAndMinusOne",
+  "NowhereZeroFiveFlowCount",
+  "NowhereZeroFourFlowCount",
+  "TwoComponentSpanningForestCount",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 

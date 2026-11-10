@@ -1132,6 +1132,99 @@ const acyclicOrientationTable: MathJSON = typedFolding(
   ["List", 1],
   masksFromOne,
 );
+/**
+ * One row for each subset of the edges, the subset of mask j in row j + 1 (bit k - 1 of the mask is edge k): the
+ * component label of each vertex in that subgraph, then the subset's size. Edge k doubles the table, joining the classes
+ * of its ends in a copy of every row so far by giving one the other's label (a union-find by relabeling). Step 0 is a
+ * no-op, so a graph with no edges has the one row of the empty subset (`Range(1, 0)` does not evaluate to the empty list).
+ */
+const edgeSubsetRows: MathJSON = typedFolding(
+  [
+    "If",
+    equals("k", 0),
+    "rows",
+    [
+      "Join",
+      "rows",
+      forEach(
+        "rows",
+        bind(
+          "from",
+          at(1, at("k", "edges")),
+          bind(
+            "to",
+            at(2, at("k", "edges")),
+            forEach(
+              ["Range", 1, add("n", 1)],
+              [
+                "If",
+                equals("t", add("n", 1)),
+                add(at("t", "row"), 1),
+                [
+                  "If",
+                  equals(at("from", "row"), at("to", "row")),
+                  at("t", "row"),
+                  ["If", equals(at("t", "row"), at("to", "row")), at("from", "row"), at("t", "row")],
+                ],
+              ],
+              "t",
+            ),
+            "integer",
+          ),
+          "integer",
+        ),
+        "row",
+      ),
+    ],
+  ],
+  "rows",
+  "k",
+  ["List", ["Join", vertices, ["List", 0]]],
+  ["Range", 0, length("edges")],
+  "list<list<integer>>",
+);
+/** The rank of the subgraph of this row: each class keeps one vertex whose label is its own, so the others are the rank. */
+const rankOfRow = (row: MathJSON): MathJSON =>
+  subtract("n", floored(sumOver(vertices, one(equals(at("v", row), "v")), "v")));
+/**
+ * The sum over the subsets of the edges of `body` of the subset's size, rank and corank (the rank of the whole graph less
+ * its rank): the sum that every Tutte evaluation and coefficient is. `wrap` takes the sum and the rank of the whole graph.
+ */
+const overEdgeSubsets = (
+  body: (size: MathJSON, rank: MathJSON, corank: MathJSON) => MathJSON,
+  otherwise: MathJSON = 0,
+  wrap: (sum: MathJSON, full: MathJSON) => MathJSON = (sum) => sum,
+): MathJSON =>
+  withGraph(
+    bindList(
+      "table",
+      edgeSubsetRows,
+      bind(
+        "full",
+        rankOfRow(at(length("table"), "table")),
+        wrap(
+          [
+            "Sum",
+            forEach(
+              "table",
+              bind("rank", rankOfRow("row"), body(at(add("n", 1), "row"), "rank", subtract("full", "rank")), "integer"),
+              "row",
+            ),
+          ],
+          "full",
+        ),
+        "integer",
+      ),
+      "list<list<integer>>",
+    ),
+    otherwise,
+  );
+/** `base` to the power `exponent`, an exponent of at least 0; 0 to the power 0 is 1. */
+const power = (base: number, exponent: MathJSON): MathJSON =>
+  base === 0 ? one(equals(exponent, 0)) : base === 1 ? 1 : ["Power", base, exponent];
+/** The Tutte polynomial at (x, y): the sum over subsets A of (x - 1)^corank(A) (y - 1)^nullity(A). */
+const tutteAt = (x: number, y: number, wrap?: (sum: MathJSON, full: MathJSON) => MathJSON): MathJSON =>
+  overEdgeSubsets((size, rank, corank) => times(power(x - 1, corank), power(y - 1, subtract(size, rank))), 1, wrap);
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -2575,5 +2668,94 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The ways to direct every edge so that no directed cycle results.",
     withMasks(lastEntry(acyclicOrientationTable), 1),
     `FindStat's St000269. The sinks of an acyclic orientation form a nonempty independent set, and what is left is acyclic; inclusion-exclusion over the sinks gives the count. The graph with no vertices has one orientation, the empty one, so 1.`,
+    "ComponentPreservingSpanningSubgraphCount",
+    "The sets of edges that leave the graph with the same connected components.",
+    tutteAt(1, 2),
+    `FindStat's St000266, the Tutte polynomial at x = 1, y = 2. The graph with no vertices has one, the empty graph, so 1.`,
+  ),
+  stat(
+    "ContainedForestCount",
+    "The sets of edges, the empty set included, that contain no cycle.",
+    tutteAt(2, 1),
+    `FindStat's St000270, the Tutte polynomial at x = 2, y = 1. The graph with no vertices has one, so 1.`,
+  ),
+  stat(
+    "TutteXYCoefficient",
+    "The coefficient of x y in the Tutte polynomial.",
+    overEdgeSubsets((size, rank, corank) =>
+      times(
+        times(corank, ["Power", -1, add(corank, 1)]),
+        times(subtract(size, rank), ["Power", -1, add(subtract(size, rank), 1)]),
+      ),
+    ),
+    `FindStat's St001069: the sum over the sets of edges A of the coefficient of x in (x - 1)^corank(A) times that of y in (y - 1)^nullity(A). ${NO_VERTICES}`,
+  ),
+  stat(
+    "ChromaticPolynomialDerivativeAtOne",
+    "The absolute value of the derivative of the chromatic polynomial at 1.",
+    overEdgeSubsets(
+      (size, rank) => times(["Power", -1, size], subtract("n", rank)),
+      0,
+      (sum) => ["Abs", sum],
+    ),
+    `FindStat's St001070: the chromatic polynomial is the sum over sets of edges A of (-1)^|A| k^components(A), and the components of A are n less its rank. ${NO_VERTICES}`,
+  ),
+  stat(
+    "BetaInvariant",
+    "Crapo's beta invariant: (-1)^rank times the sum over sets of edges of (-1)^size times their rank.",
+    overEdgeSubsets(
+      (size, rank) => times(["Power", -1, size], rank),
+      0,
+      (sum, full) => times(["Power", -1, full], sum),
+    ),
+    `FindStat's St001071. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TutteEvaluationAtThreeAndThree",
+    "The Tutte polynomial at x = 3, y = 3.",
+    tutteAt(3, 3),
+    `FindStat's St001072. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "NowhereZeroThreeFlowCount",
+    "The nowhere-zero flows with values in the integers modulo 3: the absolute value of the Tutte polynomial at x = 0, y = -2.",
+    tutteAt(0, -2, (sum) => ["Abs", sum]),
+    `FindStat's St001073. The graph with no vertices has one flow, the empty one, so 1.`,
+  ),
+  stat(
+    "TutteEvaluationAtTwoAndMinusOne",
+    "The Tutte polynomial at x = 2, y = -1.",
+    tutteAt(2, -1),
+    `FindStat's St001474. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "TutteEvaluationAtOneAndZero",
+    "The Tutte polynomial at x = 1, y = 0.",
+    tutteAt(1, 0),
+    `FindStat's St001475. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "TutteEvaluationAtOneAndMinusOne",
+    "The Tutte polynomial at x = 1, y = -1.",
+    tutteAt(1, -1),
+    `FindStat's St001476. The graph with no vertices gives 1.`,
+  ),
+  stat(
+    "NowhereZeroFiveFlowCount",
+    "The nowhere-zero flows with values in the integers modulo 5: the Tutte polynomial at x = 0, y = -4, with the sign (-1)^nullity.",
+    tutteAt(0, -4, (sum, full) => times(["Power", -1, subtract(length("edges"), full)], sum)),
+    `FindStat's St001477. The graph with no vertices has one flow, the empty one, so 1.`,
+  ),
+  stat(
+    "NowhereZeroFourFlowCount",
+    "The nowhere-zero flows with values in the integers modulo 4: the Tutte polynomial at x = 0, y = -3, with the sign (-1)^nullity.",
+    tutteAt(0, -3, (sum, full) => times(["Power", -1, subtract(length("edges"), full)], sum)),
+    `FindStat's St001478. The graph with no vertices has one flow, the empty one, so 1.`,
+  ),
+  stat(
+    "TwoComponentSpanningForestCount",
+    "The sets of edges that form a forest with two trees on all the vertices.",
+    overEdgeSubsets((size, rank) => times(one(equals(size, rank)), one(equals(subtract("n", rank), 2)))),
+    `FindStat's St001827: the sets of edges with no cycle (size = rank) and two components. ${NO_VERTICES}`,
   ),
 ];
