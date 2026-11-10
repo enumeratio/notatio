@@ -96,6 +96,9 @@ jobs:
       # Our statistic distributions against FindStat's, per size, for every adopted statistic the pairs cover.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/distribution-crosscheck.test.ts
+      # The graph statistics against FindStat's rows, object by object (split from the distributions; one test per slow head).
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/graph-crosscheck.test.ts
       # Cartan type statistics over the larger types and the group-generating readings.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @enumeratio/combinatorics exec vp test run cartan/tests/cartan-statistics
