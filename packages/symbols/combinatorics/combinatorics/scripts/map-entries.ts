@@ -78,6 +78,22 @@ const SAMPLES: Record<string, { contents: unknown; caption: string }> = {
     contents: ["List", ["List", 1, 3], ["List", 2]],
     caption: "the standard tableau with rows $13$ and $2$",
   },
+  semistandard_tableau: {
+    contents: ["List", ["List", 1, 1, 3], ["List", 2, 3]],
+    caption: "the semistandard tableau with rows $113$ and $23$",
+  },
+  gelfand_tsetlin_pattern: {
+    contents: ["List", ["List", 3, 1, 0], ["List", 2, 0], ["List", 1]],
+    caption: "the Gelfand-Tsetlin pattern with rows $310$, $20$ and $1$",
+  },
+  plane_partition: {
+    contents: ["List", ["List", 2, 1], ["List", 1]],
+    caption: "the plane partition with rows $21$ and $1$",
+  },
+  decorated_permutation: {
+    contents: ["List", -1, 3, 2, 4],
+    caption: "the decorated permutation $\\bar 1\\,3\\,2\\,4$",
+  },
 };
 
 const constructorFor = Object.fromEntries(CARRIERS.map((c) => [c.type, c.name]));

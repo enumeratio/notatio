@@ -62,6 +62,23 @@ function graph(text: string): MathJSON {
   return ["Tuple", Number(match[2]), list(edges.map((edge) => list(edge)))];
 }
 
+/**
+ * `[+,-,2,1]` as Sage's list: each fixed point decorated `+` stays its position and one decorated `-` is its position
+ * negated, the other entries are the permutation's.
+ */
+function decoratedPermutation(text: string): MathJSON {
+  const entries = text.slice(1, -1) === "" ? [] : text.slice(1, -1).split(",");
+  if (!text.startsWith("[") || !text.endsWith("]")) throw new SyntaxError(`decorated permutation: cannot read ${text}`);
+  return list(
+    entries.map((entry, k) => {
+      if (entry === "+") return k + 1;
+      if (entry === "-") return -(k + 1);
+      if (!/^\d+$/.test(entry)) throw new SyntaxError(`decorated permutation: cannot read ${entry}`);
+      return Number(entry);
+    }),
+  );
+}
+
 interface Reader {
   readonly read: (text: string) => MathJSON;
   /** The size FindStat's tables are cut at: the length, sum or node count the collection grows by. */
@@ -126,6 +143,11 @@ const READERS: Readonly<Record<string, Reader>> = {
   },
   // 1-based: entry i is the spot car i prefers, as ours.
   ParkingFunction: { read: (t) => ["ParkingFunction", intList(t)], size: (t) => ints(t).length },
+  // The decorated fixed points are signed in Sage's list: `[-,+]` is [-1, 2]. Size is the number of entries.
+  DecoratedPermutation: {
+    read: (t) => ["DecoratedPermutation", decoratedPermutation(t)],
+    size: (t) => (t === "[]" ? 0 : t.split(",").length),
+  },
   // A matching is its 2-element blocks; size the number of points.
   PerfectMatching: { read: (t) => ["PerfectMatching", pairs(t)], size: (t) => count(t, /\d+/g) },
   // Rows of -1, 0, 1; size the number of rows. Our AlternatingSignMatrices family yields the bare rows; this is the carrier's constructor on them.

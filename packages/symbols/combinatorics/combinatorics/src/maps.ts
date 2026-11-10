@@ -37,6 +37,23 @@ import { SET_PARTITIONS_MAPS } from "../set-partitions/src/maps.ts";
 import { TABLEAUX_MAPS } from "../tableaux/src/maps.ts";
 import { TREES_MAPS } from "../trees/src/maps.ts";
 import { WORDS_MAPS } from "../words/src/maps.ts";
+import { ALTERNATING_SIGN_MAPS } from "../tableaux/src/alternating-sign-maps.ts";
+import { DYCK_ALTERNATING_SIGN_MAPS } from "../lattice-paths/src/alternating-sign-conversion-maps.ts";
+import { GELFAND_TSETLIN_MAPS } from "../tableaux/src/gelfand-tsetlin-maps.ts";
+import { SEMISTANDARD_MAPS } from "../tableaux/src/semistandard-maps.ts";
+import { PARKING_TABLEAU_MAPS } from "../words/src/parking-tableau-maps.ts";
+import { MATCHING_CONVERSION_MAPS } from "../set-partitions/src/matching-conversion-maps.ts";
+import { TUNNEL_MATCHING_MAPS } from "../lattice-paths/src/tunnel-matching-maps.ts";
+import { BINARY_TREE_CONVERSION_MAPS } from "../trees/src/binary-tree-conversion-maps.ts";
+import { STRAHLER_MAPS } from "../trees/src/strahler-maps.ts";
+import { INCREASING_TREE_MAPS } from "../permutations/src/increasing-tree-maps.ts";
+import { FRANCON_MAPS } from "../lattice-paths/src/francon-maps.ts";
+import { POLYOMINO_MAPS } from "../lattice-paths/src/polyomino-maps.ts";
+import { DECORATED_PERMUTATION_MAPS } from "../permutations/src/decorated-maps.ts";
+import { PERMUTATION_BATCH_TEN_MAPS } from "../permutations/src/tenth-batch-maps.ts";
+import { PLANE_PARTITION_MAPS } from "../tableaux/src/plane-partition-maps.ts";
+import { CLIQUE_MAPS } from "../graphs/src/clique-maps.ts";
+import { HORIZONTAL_STRIP_MAPS } from "../tableaux/src/horizontal-strip-maps.ts";
 
 export type { CombinatorialMap } from "./map-helpers.ts";
 export type { Law };
@@ -64,6 +81,23 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...COMPOSITIONS_MAPS,
   ...WORDS_MAPS,
   ...GRAPHS_MAPS,
+  ...ALTERNATING_SIGN_MAPS,
+  ...DYCK_ALTERNATING_SIGN_MAPS,
+  ...GELFAND_TSETLIN_MAPS,
+  ...SEMISTANDARD_MAPS,
+  ...PARKING_TABLEAU_MAPS,
+  ...MATCHING_CONVERSION_MAPS,
+  ...TUNNEL_MATCHING_MAPS,
+  ...BINARY_TREE_CONVERSION_MAPS,
+  ...STRAHLER_MAPS,
+  ...INCREASING_TREE_MAPS,
+  ...FRANCON_MAPS,
+  ...POLYOMINO_MAPS,
+  ...DECORATED_PERMUTATION_MAPS,
+  ...PERMUTATION_BATCH_TEN_MAPS,
+  ...PLANE_PARTITION_MAPS,
+  ...CLIQUE_MAPS,
+  ...HORIZONTAL_STRIP_MAPS,
   // After the words: Rowmotion's primary carrier is BinaryWord.
   ...SIGNED_PERMUTATIONS_ALGORITHM_MAPS,
 ].map(withLaws);

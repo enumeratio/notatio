@@ -527,4 +527,12 @@ export const TABLEAUX_MAPS: readonly CombinatorialMap[] = [
     summary: "Wieland's gyration: the height function toggled at the vertices of even parity, then of odd parity.",
     note: "FindStat's Mp00006, a bijection of the alternating sign matrices of a size.",
   },
+  {
+    name: "TableauShape",
+    from: "semistandard_tableau",
+    to: "integer_partition",
+    body: forEach(["Range", 1, ["Length", "_raw"], 1], ["Length", at("i")]),
+    summary: "The shape of a semistandard tableau: its row lengths.",
+    note: "FindStat's Mp00077.",
+  },
 ];

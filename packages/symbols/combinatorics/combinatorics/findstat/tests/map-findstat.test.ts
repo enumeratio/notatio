@@ -4,6 +4,13 @@ import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps, MAPS } from "../../src/index.ts";
 import { objectSize, readObject } from "../src/objects.ts";
 import { MAP_READINGS } from "./map-findstat-readings.ts";
+import { BATCH_SIXTEEN_IDS } from "./map-findstat-readings-16.ts";
+import { BATCH_SEVENTEEN_IDS } from "./map-findstat-readings-17.ts";
+import { BATCH_EIGHTEEN_IDS } from "./map-findstat-readings-18.ts";
+import { BATCH_NINETEEN_IDS } from "./map-findstat-readings-19.ts";
+import { BATCH_TWENTY_IDS } from "./map-findstat-readings-20.ts";
+import { BATCH_TWENTYONE_IDS } from "./map-findstat-readings-21.ts";
+import { BATCH_FIFTEEN_IDS } from "./map-findstat-readings-15.ts";
 
 // Each FindStat map we declare is read twice independently (a JS reading of FindStat's description, and
 // our Epsil definition) and the two are held to each other over every small object of the source carrier,
@@ -148,6 +155,67 @@ const alternatingSignMatrices = (n: number): number[][][] => {
   );
 };
 
+/** Semistandard tableaux of n cells with entries 1 .. n + 1: rows weakly increasing, columns strictly increasing. */
+const semistandardTableaux = (n: number): number[][][] =>
+  integerPartitions(n).flatMap((shape) => {
+    const fill = (rows: number[][]): number[][][] => {
+      const r = rows.length;
+      if (r === shape.length) return [rows];
+      const row = (entries: number[]): number[][] =>
+        entries.length === shape[r]!
+          ? [entries]
+          : range(entries.at(-1) ?? 1, n + 1)
+              .filter((value) => r === 0 || value > rows[r - 1]![entries.length]!)
+              .flatMap((value) => row([...entries, value]));
+      return row([]).flatMap((entries) => fill([...rows, entries]));
+    };
+    return fill([]);
+  });
+
+/** Gelfand-Tsetlin patterns of m rows, the top row weakly decreasing with entries 0 .. 2, each lower row interlacing the one above. */
+const gelfandTsetlinPatterns = (m: number): number[][][] => {
+  const below = (row: number[]): number[][] =>
+    row.length === 1
+      ? [[]]
+      : row
+          .slice(1)
+          .reduce<number[][]>(
+            (partial, upper, k) =>
+              partial.flatMap((prefix) => range(upper, row[k]!).map((value) => [...prefix, value])),
+            [[]],
+          );
+  const extend = (rows: number[][]): number[][][] =>
+    rows.at(-1)!.length === 1 ? [rows] : below(rows.at(-1)!).flatMap((next) => extend([...rows, next]));
+  const tops = (length: number, most: number): number[][] =>
+    length === 0 ? [[]] : range(0, most).flatMap((first) => tops(length - 1, first).map((rest) => [first, ...rest]));
+  return tops(m, 2).flatMap((top) => extend([top]));
+};
+
+/** Plane partitions of n: rows of positive entries weakly decreasing along rows and down columns. */
+const planePartitions = (n: number): number[][][] => {
+  /** The nonempty rows of at most `left` cells, weakly decreasing and under `cap` entry by entry. */
+  const rowsWithin = (cap: number[] | undefined, left: number, prefix: number[] = []): number[][] => {
+    const done = prefix.length > 0 ? [prefix] : [];
+    const j = prefix.length;
+    if (cap !== undefined && j >= cap.length) return done;
+    const most = Math.min(prefix.at(-1) ?? left, left, cap?.[j] ?? left);
+    return [...done, ...range(1, most).flatMap((value) => rowsWithin(cap, left - value, [...prefix, value]))];
+  };
+  const grow = (rows: number[][], left: number): number[][][] =>
+    left === 0 ? [rows] : rowsWithin(rows.at(-1), left).flatMap((row) => grow([...rows, row], left - sum(row)));
+  return grow([], n);
+};
+
+/** Decorated permutations of n as FindStat writes them: each fixed point is `+` or `-`. */
+const decoratedPermutations = (n: number): string[] =>
+  permutations(n).flatMap((word) => {
+    const fixed = word.flatMap((value, k) => (value === k + 1 ? [k] : []));
+    return range(0, 2 ** fixed.length - 1).map(
+      (mask) =>
+        `[${word.map((value, k) => (value === k + 1 ? (mask & (1 << fixed.indexOf(k)) ? "-" : "+") : value)).join(",")}]`,
+    );
+  });
+
 /** Skew shapes λ/μ of n cells with no empty row or column, as the part lists of λ and μ. */
 const skewPartitions = (n: number): number[][][] =>
   range(n, 2 * n).flatMap((size) =>
@@ -197,6 +265,10 @@ const OBJECTS: Readonly<Record<string, string[]>> = {
   AlternatingSignMatrix: through(4, 1, alternatingSignMatrices).map((m) => JSON.stringify(m)),
   SkewPartition: through(5, 1, skewPartitions).map((s) => JSON.stringify(s)),
   LabeledGraph: through(4, 1, labeledGraphs),
+  SemistandardTableau: through(4, 1, semistandardTableaux).map((t) => JSON.stringify(t)),
+  GelfandTsetlinPattern: through(3, 1, gelfandTsetlinPatterns).map((p) => JSON.stringify(p)),
+  PlanePartition: through(4, 1, planePartitions).map((p) => JSON.stringify(p)),
+  DecoratedPermutation: through(4, 1, decoratedPermutations),
 };
 
 /** Our map for a reading's `Head@Carrier` key. */
@@ -451,6 +523,13 @@ const IDS: Readonly<Record<string, string>> = {
   "Gyration@AlternatingSignMatrix": "Mp00006",
   "BlockEdgePartition@LabeledGraph": "Mp00276",
   "TwoConjugate@IntegerPartition": "Mp00321",
+  ...BATCH_FIFTEEN_IDS,
+  ...BATCH_SIXTEEN_IDS,
+  ...BATCH_SEVENTEEN_IDS,
+  ...BATCH_EIGHTEEN_IDS,
+  ...BATCH_NINETEEN_IDS,
+  ...BATCH_TWENTY_IDS,
+  ...BATCH_TWENTYONE_IDS,
 };
 
 test("every reading names the FindStat map it is", () => {
