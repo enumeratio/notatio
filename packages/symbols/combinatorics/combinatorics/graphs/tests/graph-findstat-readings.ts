@@ -426,6 +426,19 @@ function properSeparations(g: Graph): number {
   assign(0);
   return found / 2;
 }
+/** Each shortest path length from each vertex, row by row; Infinity where there is no path. */
+const distanceRows = (g: Graph): number[][] => {
+  const m = matrix(g);
+  const all = allVertices(g);
+  return all.map((u) => {
+    const from = distancesFrom(m, u, all);
+    return all.map((w) => from.get(w) ?? Infinity);
+  });
+};
+/** The edges inside the vertices of `set`. */
+const edgesWithin = (m: boolean[][], set: readonly number[]): number =>
+  pairsOf(set).filter(([u, v]) => m[u]![v]).length;
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -813,4 +826,54 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   IrredundanceNumber: (g) => Math.min(...maximalIrredundantSizes(g)),
   ProperSeparationCount: properSeparations,
   GraphEulerCharacteristic: (g) => g.n - g.edges.length,
+  ConvexVertexSetCount: (g) => {
+    const d = distanceRows(g);
+    return subsets(g.n).filter((u) =>
+      u.every((x) =>
+        u.every((y) =>
+          allVertices(g).every((w) => u.includes(w) || !(d[x]![y]! < Infinity && d[x]![w]! + d[w]![y]! === d[x]![y]!)),
+        ),
+      ),
+    ).length;
+  },
+  NonconvexVertexSetCount: (g) => 2 ** g.n - GRAPH_READINGS.ConvexVertexSetCount!(g),
+  SzegedWienerGap: (g) => GRAPH_READINGS.SzegedIndex!(g) - GRAPH_READINGS.WienerIndex!(g),
+  PadmakarIvanIndex: (g) => {
+    const m = matrix(g);
+    const d = distanceRows(g);
+    const closerTo = (u: number, v: number): number[] => allVertices(g).filter((w) => d[w]![u]! < d[w]![v]!);
+    return sum(
+      g.edges.map(([a, b]) => edgesWithin(m, closerTo(a - 1, b - 1)) + edgesWithin(m, closerTo(b - 1, a - 1))),
+    );
+  },
+  TwoPackingDifferential: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      ...subsets(g.n)
+        .filter((s) =>
+          pairsOf(s).every(
+            ([a, b]) => !closedNeighborhood(m, a, g.n).some((w) => closedNeighborhood(m, b, g.n).includes(w)),
+          ),
+        )
+        .map(
+          (s) => new Set(s.flatMap((v) => range(0, g.n - 1).filter((w) => m[v]![w] && !s.includes(w)))).size - s.length,
+        ),
+    );
+  },
+  GeneralPositionNumber: (g) => {
+    const d = distanceRows(g);
+    return Math.max(
+      ...subsets(g.n)
+        .filter((s) =>
+          s.every((x) =>
+            s.every((y) =>
+              s.every(
+                (z) => x === y || y === z || x === z || d[x]![z]! === Infinity || d[x]![y]! + d[y]![z]! !== d[x]![z]!,
+              ),
+            ),
+          ),
+        )
+        .map((s) => s.length),
+    );
+  },
 };

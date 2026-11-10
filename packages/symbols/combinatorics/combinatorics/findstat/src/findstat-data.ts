@@ -7706,6 +7706,42 @@ export const findstat: readonly FindStatMatch[] = [
     values: 208,
   },
   {
+    head: "ConvexVertexSetCount",
+    on: "LabeledGraph",
+    findstat: ["St001762"],
+    values: 1200,
+  },
+  {
+    head: "NonconvexVertexSetCount",
+    on: "LabeledGraph",
+    findstat: ["St001764"],
+    values: 1200,
+  },
+  {
+    head: "SzegedWienerGap",
+    on: "LabeledGraph",
+    findstat: ["St000403"],
+    values: 1200,
+  },
+  {
+    head: "PadmakarIvanIndex",
+    on: "LabeledGraph",
+    findstat: ["St001374"],
+    values: 1200,
+  },
+  {
+    head: "TwoPackingDifferential",
+    on: "LabeledGraph",
+    findstat: ["St001724"],
+    values: 1200,
+  },
+  {
+    head: "GeneralPositionNumber",
+    on: "LabeledGraph",
+    findstat: ["St001655"],
+    values: 1200,
+  },
+  {
     head: "WeylGroupOrder",
     on: "CartanType",
     findstat: ["St000106"],

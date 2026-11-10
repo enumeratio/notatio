@@ -978,6 +978,68 @@ const unrestrained = (mask: MathJSON): MathJSON =>
     ),
   );
 
+/** The sum over the edges of the vertices nearer one end times those nearer the other; a vertex in another component is nearer neither. */
+const szegedSum: MathJSON = floored(
+  sumOver(
+    "edges",
+    times(
+      floored(sumOver(vertices, one(less(distance(lower("e"), "w"), distance(upper("e"), "w"))), "w")),
+      floored(sumOver(vertices, one(less(distance(upper("e"), "w"), distance(lower("e"), "w"))), "w")),
+    ),
+    "e",
+  ),
+);
+/** The sum of the distances over the pairs of vertices joined by a path. */
+const wienerSum: MathJSON = spread(overPairs(["If", less(distance("u", "w"), "n"), distance("u", "w"), 0]));
+/** The edges with both ends nearer vertex `a` than vertex `b`. */
+const edgesNearer = (a: MathJSON, b: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      "edges",
+      times(
+        one(less(distance(lower("f"), a), distance(lower("f"), b))),
+        one(less(distance(upper("f"), a), distance(upper("f"), b))),
+      ),
+      "f",
+    ),
+  );
+/** The vertices of the subset `mask`, counted straight from its bits. */
+const maskSize = (mask: MathJSON): MathJSON => floored(sumOver(vertices, one(hasBit(mask, "v")), "v"));
+/** Over the triples of vertices (u, v, w), `body` summed. */
+const overTriples = (body: MathJSON): MathJSON =>
+  floored(sumOver(vertices, floored(sumOver(vertices, floored(sumOver(vertices, body, "w")), "v")), "u"));
+const inMask = (mask: MathJSON, ...among: MathJSON[]): MathJSON =>
+  among.map((v) => one(hasBit(mask, v))).reduce((a, b) => times(a, b));
+/** Whether vertex v lies on a shortest path from u to w, the two a path apart. */
+const betweenIn = (u: MathJSON, v: MathJSON, w: MathJSON): MathJSON =>
+  times(one(less(distance(u, w), "n")), one(equals(add(distance(u, v), distance(v, w)), distance(u, w))));
+/** The vertices outside the subset `mask` on a shortest path between two vertices of it, counted once for each such pair. */
+const geodesicEscapes = (mask: MathJSON): MathJSON =>
+  overTriples(times(times(inMask(mask, "u", "w"), subtract(1, one(hasBit(mask, "v")))), betweenIn("u", "v", "w")));
+/** The pairs of vertices in the subset `mask` at distance at most 2: closed neighborhoods that meet. */
+const closePairs = (mask: MathJSON): MathJSON =>
+  overPairs(times(times(one(less("u", "w")), inMask(mask, "u", "w")), one(less(distance("u", "w"), 3))));
+/** The vertices outside the subset `mask` with a neighbor in it. */
+const boundarySize = (mask: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      vertices,
+      times(
+        subtract(1, one(hasBit(mask, "v"))),
+        one(greater(floored(sumOver(vertices, times(one(hasBit(mask, "u")), adjacent("u", "v")), "u")), 0)),
+      ),
+      "v",
+    ),
+  );
+/** The triples of distinct vertices in the subset `mask` with the middle one on a shortest path between the others. */
+const collinearTriples = (mask: MathJSON): MathJSON =>
+  overTriples(
+    times(
+      times(inMask(mask, "u", "v", "w"), times(one(less(0, distance("u", "v"))), one(less(0, distance("v", "w"))))),
+      times(one(less(0, distance("u", "w"))), betweenIn("u", "v", "w")),
+    ),
+  );
+
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
   stat(
@@ -1164,7 +1226,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "WienerIndex",
     "The sum of the distances over the pairs of vertices that are joined by a path.",
-    withDistances(spread(overPairs(["If", less(distance("u", "w"), "n"), distance("u", "w"), 0]))),
+    withDistances(wienerSum),
     `FindStat's St000265, the Wiener index; a pair with no path adds nothing. ${NO_VERTICES}`,
   ),
   stat(
@@ -1442,18 +1504,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "SzegedIndex",
     "The sum over the edges of the vertices nearer one end times those nearer the other.",
-    withDistances(
-      floored(
-        sumOver(
-          "edges",
-          times(
-            floored(sumOver(vertices, one(less(distance(lower("e"), "w"), distance(upper("e"), "w"))), "w")),
-            floored(sumOver(vertices, one(less(distance(upper("e"), "w"), distance(lower("e"), "w"))), "w")),
-          ),
-          "e",
-        ),
-      ),
-    ),
+    withDistances(szegedSum),
     `FindStat's St000263. A vertex in another component is as far from both ends, so is in neither count. ${NO_VERTICES}`,
   ),
   stat(
@@ -2257,5 +2308,46 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The vertices less the edges.",
     subtract(at(1), length(at(2))),
     `FindStat's St001828, of the graph as a simplicial complex of dimension at most 1. ${NO_VERTICES}`,
+  ),
+  stat(
+    "ConvexVertexSetCount",
+    "The sets of vertices that hold every vertex on a shortest path between two of their members.",
+    withDistances(overMasks(one(equals(geodesicEscapes("m"), 0))), 1),
+    `FindStat's St001762. Vertices with no path between them have no shortest path. The graph with no vertices has the empty set, so 1.`,
+  ),
+  stat(
+    "NonconvexVertexSetCount",
+    "The sets of vertices that miss a vertex on a shortest path between two of their members.",
+    withDistances(overMasks(one(greater(geodesicEscapes("m"), 0)))),
+    `FindStat's St001764. ${NO_VERTICES}`,
+  ),
+  stat(
+    "SzegedWienerGap",
+    "The Szeged index less the Wiener index.",
+    withDistances(subtract(szegedSum, wienerSum)),
+    `FindStat's St000403, the difference of St000263 and St000265, with their conventions for a disconnected graph. ${NO_VERTICES}`,
+  ),
+  stat(
+    "PadmakarIvanIndex",
+    "The sum over the edges of the edges inside the vertices nearer one end, and inside those nearer the other.",
+    withDistances(
+      floored(sumOver("edges", add(edgesNearer(lower("e"), upper("e")), edgesNearer(upper("e"), lower("e"))), "e")),
+    ),
+    `FindStat's St001374. An edge lies inside a set of vertices when both its ends do; a vertex in another component is nearer neither end. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TwoPackingDifferential",
+    "The most, over the sets of vertices with disjoint closed neighborhoods, of the vertices outside the set with a neighbor in it less the vertices in it.",
+    withDistances([
+      "Max",
+      forEach(masks, ["If", equals(closePairs("m"), 0), subtract(boundarySize("m"), maskSize("m")), 0], "m"),
+    ]),
+    `FindStat's St001724. Closed neighborhoods of two vertices meet when they are at most 2 apart. The empty set gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GeneralPositionNumber",
+    "The most vertices in a set with no three on one shortest path.",
+    withDistances(["Max", forEach(masks, times(one(equals(collinearTriples("m"), 0)), maskSize("m")), "m")]),
+    `FindStat's St001655. ${NO_VERTICES}`,
   ),
 ];

@@ -71,6 +71,12 @@ const BATCH_TWO = new Set([
   "UpperIrredundanceNumber",
   "IrredundanceNumber",
   "ProperSeparationCount",
+  "ConvexVertexSetCount",
+  "NonconvexVertexSetCount",
+  "SzegedWienerGap",
+  "PadmakarIvanIndex",
+  "TwoPackingDifferential",
+  "GeneralPositionNumber",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 
