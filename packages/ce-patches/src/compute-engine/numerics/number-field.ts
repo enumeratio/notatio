@@ -39,12 +39,16 @@ function powMod(b: bigint, e: bigint, m: bigint): bigint {
   return r;
 }
 
+/** ⌊√n⌋ for n ≥ 0, by Newton's method on bigints (never through a double). */
 export function isqrt(n: bigint): bigint {
   if (n < 2n) return n;
-  let x = BigInt(Math.floor(Math.sqrt(Number(n))));
-  while (x * x > n) x--;
-  while ((x + 1n) * (x + 1n) <= n) x++;
-  return x;
+  // Start above the root: 2^⌈bits/2⌉ ≥ √n, then the iterates decrease to ⌊√n⌋.
+  let x = 1n << BigInt((n.toString(2).length + 1) >> 1);
+  for (;;) {
+    const y = (x + n / x) >> 1n;
+    if (y >= x) return x;
+    x = y;
+  }
 }
 
 /** Miller–Rabin with the first 13 primes as bases, a proof below this bound (Sorenson–Webster). */
@@ -365,6 +369,9 @@ function polyDivExact(a: Poly, b: Poly): bigint[] {
 
 // --- discriminants --------------------------------------------------------------------------
 
+/** Whether `f` has no repeated root: gcd(f, f′) is constant. */
+export const isSquarefree = (f: Poly): boolean => degree(polyGcdQ(f, derivative(f))) <= 0;
+
 /** disc(f) = det(Tr θ^(i+j)), the traces Newton's power sums of f's roots. */
 export function polynomialDiscriminant(f: Poly): bigint {
   const n = f.length - 1;
@@ -423,70 +430,140 @@ export function orderDiscriminant(o: Order): bigint {
   return polynomialDiscriminant(o.f) / (index * index);
 }
 
-/** O[y] = O + yO + … + yⁿ⁻¹O, y integral. */
-function adjoin(o: Order, y: FieldElement): Order {
-  const n = o.f.length - 1;
-  const basis = o.rows.map((r) => element(r, o.den));
-  const all: FieldElement[] = [...basis];
-  let power: FieldElement = element([1n, ...Array.from({ length: n - 1 }, () => 0n)]);
-  for (let k = 1; k < n; k++) {
-    power = multiply(o.f, power, y);
-    for (const b of basis) all.push(multiply(o.f, power, b));
+/** Called inside a long loop, so that a caller's deadline can interrupt it (it throws to stop). */
+export type Tick = () => void;
+
+const noTick: Tick = () => {};
+
+/** The basis of `{v ∈ 𝔽ₚ^m : v·M = 0}` for the m×k matrix `M`, by row reduction of [M | I]. */
+function leftKernelModP(m: readonly (readonly bigint[])[], p: bigint, tick: Tick): bigint[][] {
+  const rows = m.length;
+  const cols = m[0]?.length ?? 0;
+  const a = m.map((r, i) => [
+    ...r.map((c) => mod(c, p)),
+    ...Array.from({ length: rows }, (_, j) => (i === j ? 1n : 0n)),
+  ]);
+  let pivot = 0;
+  for (let c = 0; c < cols && pivot < rows; c++) {
+    const r = a.findIndex((row, i) => i >= pivot && row[c] !== 0n);
+    if (r < 0) continue;
+    [a[pivot], a[r]] = [a[r]!, a[pivot]!];
+    const inverse = powMod(a[pivot]![c]!, p - 2n, p);
+    a[pivot] = a[pivot]!.map((x) => (x * inverse) % p);
+    for (let i = 0; i < rows; i++) {
+      tick();
+      const factor = a[i]![c]!;
+      if (i === pivot || factor === 0n) continue;
+      a[i] = a[i]!.map((x, k) => mod(x - factor * a[pivot]![k]!, p));
+    }
+    pivot++;
   }
-  const den = all.reduce((l, x) => (l * x.den) / gcd(l, x.den), 1n);
-  return orderSpanned(
-    o.f,
-    all.map((x) => x.num.map((c) => c * (den / x.den))),
-    den,
-  );
+  return a.slice(pivot).map((row) => row.slice(cols));
 }
 
-/** Candidates tried in all, across one maximal-order computation, before it declines. */
-const SEARCH_LIMIT = 200_000;
+/** Whether `f` is Eisenstein at `p`, which makes ℤ[θ] p-maximal. */
+const eisensteinAt = (f: Poly, p: bigint): boolean =>
+  f.slice(0, -1).every((c) => c % p === 0n) && f[0]! % (p * p) !== 0n;
 
 /**
- * O enlarged to be p-maximal, or `undefined` past the search cap. O isn't p-maximal exactly
- * when some y ∈ (1/p)O \ O is integral (an element of order p in the p-part of O_K/O), and the
- * integral y form a subspace there, so one per line through the origin of (ℤ/p)ⁿ is tried.
+ * One round of Pohst–Zassenhaus (Cohen, Algorithm 6.1.8): O enlarged by (1/p)·U, where
+ * U/pO is the kernel of the maps by which O's elements multiply the p-radical I_p into pI_p.
+ * `O` is p-maximal exactly when that kernel is zero, and then `undefined` is returned.
  */
-function pMaximal(o: Order, p: bigint, budget: { left: number }): Order | undefined {
+function roundTwoStep(o: Order, p: bigint, tick: Tick): Order | undefined {
   const n = o.rows.length;
-  for (;;) {
-    let found: FieldElement | undefined;
-    // Lines through the origin: the first nonzero coordinate is 1.
-    search: for (let lead = 0; lead < n; lead++) {
-      const free = n - lead - 1;
-      const count = p ** BigInt(free);
-      for (let t = 0n; t < count; t++) {
-        if (--budget.left < 0) return undefined;
-        const a: bigint[] = Array.from({ length: n }, () => 0n);
-        a[lead] = 1n;
-        for (let i = lead + 1, rest = t; i < n; i++, rest /= p) a[i] = rest % p;
-        const num = Array.from({ length: n }, (_, j) => a.reduce((s, ai, i) => s + ai * o.rows[i]![j]!, 0n));
-        const y = element(num, o.den * p);
-        if (isIntegral(o.f, y)) {
-          found = y;
-          break search;
-        }
+  const basis = o.rows.map((r) => element(r, o.den));
+  // ωᵢ·ωⱼ on the basis, exactly: the structure constants of O.
+  const T = basis.map((a) =>
+    basis.map((b) => {
+      tick();
+      return coordinates(o, multiply(o.f, a, b))!;
+    }),
+  );
+  // The product in O/pO, coordinates mod p.
+  const times = (a: readonly bigint[], b: readonly bigint[]): bigint[] => {
+    const out: bigint[] = Array.from({ length: n }, () => 0n);
+    for (let i = 0; i < n; i++) {
+      if (a[i] === 0n) continue;
+      for (let j = 0; j < n; j++) {
+        if (b[j] === 0n) continue;
+        tick();
+        const w = a[i]! * b[j]!;
+        for (let k = 0; k < n; k++) out[k] = (out[k]! + w * T[i]![j]![k]!) % p;
       }
     }
-    if (found === undefined) return o;
-    o = adjoin(o, found);
+    return out;
+  };
+  const one = (i: number): bigint[] => Array.from({ length: n }, (_, k) => (k === i ? 1n : 0n));
+  // The Frobenius x ↦ xᵖ is 𝔽ₚ-linear on O/pO: row i is ωᵢᵖ.
+  const frobenius = Array.from({ length: n }, (_, i) => {
+    let result: bigint[] | undefined;
+    let square = one(i).map((c) => c % p);
+    for (let e = p; e > 0n; e >>= 1n) {
+      if (e & 1n) result = result === undefined ? square : times(result, square);
+      if (e > 1n) square = times(square, square);
+    }
+    return result!;
+  });
+  const product = (a: readonly (readonly bigint[])[], b: readonly (readonly bigint[])[]): bigint[][] =>
+    a.map((row) => Array.from({ length: n }, (_, k) => row.reduce((s, x, j) => (s + x * b[j]![k]!) % p, 0n)));
+  // The p-radical is the kernel of xᵖʲ for the least j with pʲ ≥ n.
+  let power = frobenius;
+  for (let q = p; q < BigInt(n); q *= p) power = product(power, frobenius);
+  const radical = leftKernelModP(power, p, tick);
+  // I_p's ℤ-basis: pO and the lifted radical, in Hermite form (upper triangular).
+  const identity = Array.from({ length: n }, (_, i) => one(i).map((c) => c * p));
+  const ip = hermite([...identity, ...radical], n);
+  // x·αⱼ ∈ pI_p for x = Σ xᵢωᵢ: the coordinates of ωᵢ·αⱼ on (αₖ) must vanish mod p.
+  const onIp = (v: readonly bigint[]): bigint[] => {
+    const rest = [...v];
+    return ip.map((row, k) => {
+      const c = rest[k]! / row[k]!;
+      for (let t = k; t < n; t++) rest[t]! -= c * row[t]!;
+      return c;
+    });
+  };
+  const conditions = basis.map((_, i) =>
+    ip.flatMap((alpha) => {
+      tick();
+      const v = Array.from({ length: n }, (_, k) => alpha.reduce((s, ak, t) => s + ak * T[i]![t]![k]!, 0n));
+      return onIp(v);
+    }),
+  );
+  const kernel = leftKernelModP(conditions, p, tick);
+  if (kernel.length === 0) return undefined;
+  const vectors = [
+    ...o.rows.map((r) => r.map((c) => c * p)),
+    ...kernel.map((w) => Array.from({ length: n }, (_, k) => w.reduce((s, wi, i) => s + wi * o.rows[i]![k]!, 0n))),
+  ];
+  return orderSpanned(o.f, vectors, o.den * p);
+}
+
+/**
+ * O enlarged to be p-maximal: Round 2 until it stops. Where f is Eisenstein at p, ℤ[θ] is
+ * p-maximal, and so is O, whose index over it is prime to p.
+ */
+function pMaximal(o: Order, p: bigint, tick: Tick): Order {
+  if (eisensteinAt(o.f, p)) return o;
+  for (;;) {
+    const next = roundTwoStep(o, p, tick);
+    if (next === undefined) return o;
+    o = next;
   }
 }
 
-/** The maximal order O_K, or `undefined` when disc(f) can't be factored or a search runs past its cap. */
-export function maximalOrder(f: Poly): Order | undefined {
+/**
+ * The maximal order O_K, or `undefined` when disc(f) can't be factored. `tick` runs in the long
+ * loops, so a caller's deadline interrupts it.
+ */
+export function maximalOrder(f: Poly, tick: Tick = noTick): Order | undefined {
   const disc = polynomialDiscriminant(f);
   const primes = factorInteger(disc);
   if (primes === undefined) return undefined;
   let o = equationOrder(f);
-  const budget = { left: SEARCH_LIMIT };
   for (const [p, e] of primes) {
     if (e < 2) continue;
-    const next = pMaximal(o, p, budget);
-    if (next === undefined) return undefined;
-    o = next;
+    o = pMaximal(o, p, tick);
   }
   return o;
 }
