@@ -25,7 +25,7 @@ const { cached } = (await import(new URL("../../../../manifest/scripts/stamp.ts"
 const dir = fileURLToPath(new URL("..", import.meta.url));
 const at = (path: string): string => fileURLToPath(new URL(`../${path}`, import.meta.url));
 
-const quick = ["scripts/collect-statistics-naming.ts", "scripts/stub-generated.ts", "scripts/generate-map-laws.ts"];
+const quick = ["scripts/collect-statistics-naming.ts", "scripts/generate-map-laws.ts"];
 
 /** Each compile step and the one file it writes. */
 const compiles: ReadonlyArray<readonly [script: string, output: string]> = [
@@ -71,16 +71,14 @@ const compileInputs = {
 
 const seconds = (since: number): string => `${((Date.now() - since) / 1000).toFixed(1)}s`;
 
-// The compile steps import the stubs, so they count as outputs here.
+// The compile steps import the stubs, so they are written first, every run, and are not an output
+// of the cached step below: a restored or stamped step must never put stubs over the compiled files.
+execFileSync("node", ["scripts/stub-generated.ts"], { cwd: dir, stdio: "inherit" });
+
 const quickStarted = Date.now();
-await cached(
-  "quick",
-  inputs,
-  [at("src/statistics/naming-data.ts"), at("src/maps-laws.generated.ts"), ...compiles.map(([, output]) => at(output))],
-  () => {
-    for (const script of quick) execFileSync("node", [script], { cwd: dir, stdio: "inherit" });
-  },
-);
+await cached("quick-derived", inputs, [at("src/statistics/naming-data.ts"), at("src/maps-laws.generated.ts")], () => {
+  for (const script of quick) execFileSync("node", [script], { cwd: dir, stdio: "inherit" });
+});
 console.log(`quick: ${seconds(quickStarted)}`);
 
 const queue = [...compiles];
