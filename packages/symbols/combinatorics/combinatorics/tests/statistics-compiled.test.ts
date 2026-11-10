@@ -422,16 +422,6 @@ const DECLINES_PAST_2_53: readonly { signature: string; subject: unknown; answer
   { signature: "CoxeterElementFactorizationCount@CartanType", subject: ["Tuple", "'E'", 8], answer: 37968750 },
 ];
 
-/** Heads whose compiled code may decline a connected graph while the interpreter answers: Euclid's
- *  algorithm on the distance Laplacian's characteristic polynomial passes 2^53 on some 5-vertex graphs
- *  (the cancelled coefficients reach 1e19), GCD refuses the integer, and the interpreter's exact
- *  arithmetic goes on. Only the declines of these heads are accepted, and only for an answer between 1
- *  and the vertex count; the fixed examples pin the values (reference's `known.test.ts`). */
-const DECLINES_ON_LARGE_GCD: ReadonlySet<string> = new Set([
-  "DistinctDistanceLaplacianEigenvalueCount@LabeledGraph",
-  "MaximumDistanceLaplacianEigenvalueMultiplicity@LabeledGraph",
-]);
-
 const compiledDefinitions = ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(signatureOf(d)));
 const headsOn = (carrier: string): number => compiledDefinitions.filter((d) => d.on === carrier).length;
 
@@ -452,13 +442,6 @@ for (const definition of compiledDefinitions) {
         const allowed = DECLINES_PAST_2_53.find(
           (a) => a.signature === signatureOf(definition) && JSON.stringify(a.subject) === JSON.stringify(contents),
         );
-        if (DECLINES_ON_LARGE_GCD.has(signatureOf(definition))) {
-          const vertices = (contents as unknown[])[1] as number;
-          expect(interpreted, JSON.stringify(contents)).toSatisfy(
-            (v: unknown) => typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= vertices,
-          );
-          continue;
-        }
         expect(interpreted, JSON.stringify(contents)).toBe(allowed?.answer ?? "PositiveInfinity");
         continue;
       }
@@ -469,13 +452,20 @@ for (const definition of compiledDefinitions) {
   });
 }
 
-// The 5-vertex graphs whose distance Laplacian polynomial passes 2^53 in Euclid's algorithm: compiled code
-// declines (the interpreter's exact answer is held by the deep comparison above and the reference examples).
-test("a connected graph whose Euclid steps pass 2^53 is declined by compiled code, not answered", () => {
+// The 5-vertex graph whose Euclid steps on the distance Laplacian's characteristic polynomial pass 2^53 over the
+// integers: the spectrum heads work modulo primes, and their compiled code answers it (the interpreter takes
+// tens of seconds, so the values are pinned; reference's `known.test.ts` holds the examples).
+test("the spectrum heads' compiled code answers a graph whose gcd passes 2^53 over the integers", () => {
   const subject = ["Tuple", 5, list([list([1, 2]), list([1, 4]), list([2, 3]), list([2, 5]), list([3, 5])])];
-  for (const signature of DECLINES_ON_LARGE_GCD) {
+  const answers = {
+    "DistinctLaplacianEigenvalueCount@LabeledGraph": 5,
+    "MaximumLaplacianEigenvalueMultiplicity@LabeledGraph": 1,
+    "DistinctDistanceLaplacianEigenvalueCount@LabeledGraph": 5,
+    "MaximumDistanceLaplacianEigenvalueMultiplicity@LabeledGraph": 1,
+  };
+  for (const [signature, answer] of Object.entries(answers)) {
     const definition = compiledDefinitions.find((d) => signatureOf(d) === signature)!;
-    expect(compiledStatistic(ce, definition)!(subject), signature).toBeUndefined();
+    expect(compiledStatistic(ce, definition)!(subject), signature).toEqual(answer);
   }
 });
 

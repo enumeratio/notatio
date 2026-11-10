@@ -64,17 +64,11 @@ export const OBJECT_WISE: Readonly<Record<string, { standard: number; deep: numb
 };
 const objectCap = (carrier: string): number => OBJECT_WISE[carrier]![DEEP ? "deep" : "standard"];
 /**
- * Statistics read off a greatest common divisor of polynomials. Their compiled code declines where a coefficient passes the
- * doubles (most graphs on 7 vertices, and some on fewer), and the interpreter takes about 10 s a graph, so they are read to 6.
+ * The adjacency spectrum's statistics are read off a greatest common divisor of polynomials over the integers. Their compiled
+ * code declines where a coefficient passes the doubles (most graphs on 7 vertices, and some on fewer), and the interpreter
+ * takes about 10 s a graph, so they are read to 6. The Laplacian ones work modulo primes and compile at every size.
  */
-const INTERPRETED_PAST_SIX = new Set([
-  "DistinctEigenvalueCount",
-  "DistinctLaplacianEigenvalueCount",
-  "MaximumEigenvalueMultiplicity",
-  "MaximumLaplacianEigenvalueMultiplicity",
-  "DistinctDistanceLaplacianEigenvalueCount",
-  "MaximumDistanceLaplacianEigenvalueMultiplicity",
-]);
+const INTERPRETED_PAST_SIX = new Set(["DistinctEigenvalueCount", "MaximumEigenvalueMultiplicity"]);
 
 type Kind = "unclassified" | "emit" | "convention" | "ours";
 interface Disagreement {
