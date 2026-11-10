@@ -6,7 +6,9 @@ import type { Definition, MathJSON } from "../../src/statistics/types.ts";
 import {
   add,
   at,
+  atLeastValue,
   atMostValue,
+  bind,
   bindList,
   count,
   equals,
@@ -22,6 +24,8 @@ import {
   positions,
   subtract,
   sumOver,
+  where,
+  x,
 } from "../../src/statistics/vocabulary.ts";
 
 const signed = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
@@ -278,5 +282,184 @@ export const FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2: readonly Definition[] = [
       ),
     ),
     "FindStat's St001889: n less the number of generators in a reduced word, the sign change being the last generator. The generator s_i is absent when the first i entries are 1 .. i in order of no sign, and the sign change when no entry is negative.",
+  ),
+];
+
+// ── Coxeter reflections and the inverse ──────────────────────────────────────────────────
+
+/** The signed point p(w) for a point w of -n .. n, in the word bound to `word`. */
+const imageIn = (word: string, w: MathJSON): MathJSON => ["If", less(w, 0), negate(at(negate(w), word)), at(w, word)];
+/** Where the word `word` takes the point `from` after `steps` steps. */
+const walkIn = (word: string, from: MathJSON, steps: MathJSON): MathJSON => [
+  "Fold",
+  ["Function", imageIn(word, "s"), "s", "r"],
+  from,
+  ["Range", 1, steps, 1],
+];
+/** Whether i is the least point of its cycle, forgetting signs, in the word bound to `word`. */
+const leadsCycleIn = (word: string, i: MathJSON): MathJSON =>
+  equals(count(positions, less(["Abs", walkIn(word, i, "m")], i), "m"), 0);
+/** Whether the cycle of i never reaches -i: it is a positive cycle. */
+const staysPositiveIn = (word: string, i: MathJSON): MathJSON =>
+  equals(count(positions, equals(walkIn(word, i, "m"), negate(i)), "m"), 0);
+/** The positive cycles of the word bound to `word`. */
+const positiveCyclesIn = (word: string): MathJSON =>
+  count(positions, all(leadsCycleIn(word, "i"), staysPositiveIn(word, "i")));
+/** The least m >= 1 with p^m(i) = i as a signed point: the cycle of i, counted twice when it is negative. */
+const cycleLengthIn = (word: string, i: MathJSON): MathJSON => [
+  "Min",
+  where(["Range", 1, times(2, n), 1], equals(walkIn(word, i, "m"), i), "m"),
+];
+
+/** The Coxeter length of the word bound to `word`, when the last generator negates the last entry (Sage's): the type B length of the word read backward with each |entry| replaced by n + 1 less it. */
+const lengthIn = (word: string): MathJSON => {
+  const entry = at(subtract(add(n, 1), "k"), word);
+  return bindList(
+    "c",
+    forEach(positions, ["If", greater(entry, 0), subtract(add(n, 1), entry), subtract(negate(add(n, 1)), entry)], "k"),
+    floored(
+      sumOver(
+        positions,
+        add(
+          count(positions, all(greater("j", "i"), greater(at("i", "c"), at("j", "c"))), "j"),
+          count(positions, all(atLeastValue("j", "i"), greater(negate(at("i", "c")), at("j", "c"))), "j"),
+        ),
+      ),
+    ),
+  );
+};
+
+/** The word with entries u and v swapped. */
+const swapped = (u: MathJSON, v: MathJSON): MathJSON => ["ReplaceAt", ["ReplaceAt", x, u, at(v)], v, at(u)];
+/** The word with entries u and v swapped and negated. */
+const swappedNegated = (u: MathJSON, v: MathJSON): MathJSON => [
+  "ReplaceAt",
+  ["ReplaceAt", x, u, negate(at(v))],
+  v,
+  negate(at(u)),
+];
+/** The word with entry u negated. */
+const negatedAt = (u: MathJSON): MathJSON => ["ReplaceAt", x, u, negate(at(u))];
+
+/** The reflections t of the group, n of them for each sign change and n(n - 1) for the transpositions, with `holds` of the word of p t, `holds` reading it as the list `q`. */
+const reflectionsWhere = (holds: (word: string) => MathJSON): MathJSON => {
+  const meets = (word: MathJSON): MathJSON => ["If", bindList("q", word, holds("q")), 1, 0];
+  return add(
+    floored(sumOver(positions, meets(negatedAt("u")), "u")),
+    floored(
+      sumOver(
+        positions,
+        floored(
+          sumOver(
+            where(positions, greater("v", "u"), "v"),
+            add(meets(swapped("u", "v")), meets(swappedNegated("u", "v"))),
+            "v",
+          ),
+        ),
+        "u",
+      ),
+    ),
+  );
+};
+
+/** The inverse of the word at `k`: the position of the entry k or -k, negative when the entry is -k. The position is a floored sum over the entries equal to k in absolute value. */
+export const inverseAt = (k: MathJSON): MathJSON => [
+  "Multiply",
+  subtract(1, ["Multiply", 2, count(positions, equals(here, negate(k)), "i")]),
+  floored(sumOver(positions, ["If", equals(["Abs", here], k), "i", 0])),
+];
+
+/** Whether the point of `at(i, "s")` (a signed position) is the negative one. */
+const inverseNegative = (i: MathJSON): MathJSON => less(at(i, "s"), 0);
+/** The sum, over the positive roots sent negative by the inverse, of their heights in type B: e_i has n + 1 - i, e_i - e_j has j - i and e_i + e_j has j - i + 2(n + 1 - j), with i < j. */
+const atomicLength: MathJSON = bindList(
+  "s",
+  forEach(positions, inverseAt("k"), "k"),
+  floored(
+    add(
+      sumOver(positions, ["If", inverseNegative("i"), subtract(add(n, 1), "i"), 0]),
+      floored(
+        sumOver(
+          positions,
+          floored(
+            sumOver(
+              where(positions, greater("j", "i"), "j"),
+              [
+                "If",
+                less(["Abs", at("i", "s")], ["Abs", at("j", "s")]),
+                ["If", inverseNegative("i"), add(times(2, subtract("j", "i")), times(2, subtract(add(n, 1), "j"))), 0],
+                add(
+                  ["If", greater(at("j", "s"), 0), subtract("j", "i"), 0],
+                  ["If", inverseNegative("j"), add(subtract("j", "i"), times(2, subtract(add(n, 1), "j"))), 0],
+                ),
+              ],
+              "j",
+            ),
+          ),
+        ),
+      ),
+    ),
+  ),
+);
+
+/** The factor 2k a signed cycle of k points adds to the centralizer: its length as a signed point, doubled when it is positive. */
+const cycleFactor = (i: MathJSON): MathJSON => times(cycleLengthIn("_x", i), ["If", staysPositiveIn("_x", i), 2, 1]);
+/** The cycles led by a point up to i that look like the cycle of i: the same length, both positive or both negative. */
+const likeCycles = (i: MathJSON): MathJSON =>
+  count(
+    where(positions, atMostValue("e", i), "e"),
+    all(
+      leadsCycleIn("_x", "e"),
+      all(
+        equals(cycleLengthIn("_x", "e"), cycleLengthIn("_x", i)),
+        equals(staysPositiveIn("_x", "e"), staysPositiveIn("_x", i)),
+      ),
+    ),
+    "e",
+  );
+/** The size of the class: 2^n n! over the centralizer's order, the product over the cycles of 2k times the number of cycles of each kind and length before it. */
+const classSize: MathJSON = [
+  "Divide",
+  times(doubling(n), ["Product", ["Range", 1, n]]),
+  ["Product", forEach(positions, ["If", leadsCycleIn("_x", "i"), times(cycleFactor("i"), likeCycles("i")), 1])],
+];
+
+const reflectionLengthDrop: MathJSON = bind(
+  "target",
+  subtract(lengthIn("_x"), 1),
+  reflectionsWhere((word) => equals(lengthIn(word), "target")),
+  "integer",
+);
+const positiveCycleDrop: MathJSON = bind(
+  "target",
+  subtract(positiveCyclesIn("_x"), 1),
+  reflectionsWhere((word) => equals(positiveCyclesIn(word), "target")),
+  "integer",
+);
+
+export const FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3: readonly Definition[] = [
+  signed(
+    "SignedConjugacyClassSize",
+    "The signed permutations of the same signed cycle type: 2^n n! over the product of 2k for each cycle of k points and the factorials of the numbers of cycles of each length and sign.",
+    nonEmpty(classSize, 1),
+    "FindStat's St001852. A cycle and its negative are one signed cycle; it is positive when it never reaches its own negative. Not ConjugacyClassSize, which reads an unsigned permutation.",
+  ),
+  signed(
+    "AtomicLength",
+    "The sum of the heights, in type B, of the positive roots the inverse sends to negative ones.",
+    nonEmpty(atomicLength),
+    "FindStat's St001848, the atomic length of a Weyl group element.",
+  ),
+  signed(
+    "BruhatLowerCoverCount",
+    "The reflections t, a sign change of one entry or a swap of two, possibly with both negated, whose product p t is one shorter in the Coxeter length whose last generator negates the last entry.",
+    nonEmpty(reflectionLengthDrop),
+    "FindStat's St001861. The lower covers of p in Bruhat order are the p t shorter by exactly 1.",
+  ),
+  signed(
+    "AbsoluteOrderCoverCount",
+    "The reflections t, a sign change of one entry or a swap of two, possibly with both negated, whose product p t has one fewer positive cycle.",
+    nonEmpty(positiveCycleDrop),
+    "FindStat's St001858. The reflection length n less the positive cycles rises by 1 exactly when the positive cycles fall by 1: the elements covering p in absolute order are the p t of one more reflection length.",
   ),
 ];

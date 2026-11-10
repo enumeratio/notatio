@@ -44,6 +44,7 @@ test("every perfect-matching definition has an independent reading", () => {
 /** Heads that take more than a few tenths of a second a matching of 8 points to interpret: they run to 6 points here and to 8 under DEEP_TESTS. */
 const SLOW = new Set([
   "DihedralOrbitSize",
+  "OscillatingTableauLargestPartitionSize",
   "RestrictedGrowthThreeOneTwoCount",
   "RestrictedGrowthTwoOneThreeCount",
   "RestrictedGrowthTwoThreeOneCount",

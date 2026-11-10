@@ -199,7 +199,19 @@ export const PERFECT_MATCHING_READINGS: Record<string, Reading> = {
       a < c && c < b && b < d ? 1 : c < a && a < d && d < b ? -1 : 0;
     return Math.floor(rankOf(arcs.map((rowArc) => arcs.map((columnArc) => form(columnArc, rowArc)))) / 2);
   },
+  // St000720 and St000721: the largest, and the sum, of the oscillating tableau's partition sizes.
+  OscillatingTableauLargestPartitionSize: (m) => Math.max(0, ...partitionSizes(m)),
+  OscillatingTableauWeight: (m) => sum(partitionSizes(m)),
   Nestings: (m) => sum(m.map((p, i) => m.slice(i + 1).filter((q) => nests(p, q)).length)),
+};
+
+/** The sizes of the oscillating tableau's partitions after each point 1 .. 2n: a point opening a pair adds a cell, a point closing one removes a cell. */
+const partitionSizes = (m: Matching): number[] => {
+  let open = 0;
+  return Array.from({ length: points(m) }, (_, k) => {
+    open += m.some(([a]) => a === k + 1) ? 1 : -1;
+    return open;
+  });
 };
 
 /** The heads defined on the matching carrier; the rest are set-partition statistics the carrier shares. */
@@ -214,6 +226,8 @@ export const DEFINED_ON_MATCHINGS = [
   "IdentityMatchingEdgeCount",
   "MaximalNestingCount",
   "MaximalRightCrossingCount",
+  "OscillatingTableauLargestPartitionSize",
+  "OscillatingTableauWeight",
   "PropagatingNumber",
   "RestrictedGrowthThreeOneTwoCount",
   "RestrictedGrowthTwoOneThreeCount",

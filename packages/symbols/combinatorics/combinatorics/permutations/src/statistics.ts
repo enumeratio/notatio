@@ -6,7 +6,11 @@
 // an independent reading over every permutation of 1..6.
 
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
-import { FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2 } from "./signed-statistics.ts";
+import {
+  FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
+  FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3,
+  inverseAt,
+} from "./signed-statistics.ts";
 import {
   adjacent,
   and,
@@ -2885,13 +2889,6 @@ const entryPairs = (inclusive: boolean, relation: MathJSON): MathJSON =>
     sumOver(positions, count(positions, and(inclusive ? atLeastValue("j", "i") : greater("j", "i"), relation), "j")),
   );
 
-/** The inverse of the word at `k`: the position of the entry k or -k, negative when the entry is -k. The position is a floored sum over the entries equal to k in absolute value. */
-const inverseAt = (k: MathJSON): MathJSON => [
-  "Multiply",
-  subtract(1, ["Multiply", 2, count(positions, equals(here, ["Negate", k]), "i")]),
-  floored(sumOver(positions, ["If", equals(["Abs", here], k), "i", 0])),
-];
-
 /** The signed entry at the index k of -n..n, where p(-k) = -p(k) and p(0) = 0. */
 const signedEntryAt = (k: MathJSON): MathJSON => [
   "If",
@@ -3533,5 +3530,6 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_12,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
+  ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3,
   ...FINDSTAT_PERMUTATION_WINDOW_STATISTICS,
 ];
