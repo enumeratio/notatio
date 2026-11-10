@@ -38,12 +38,22 @@ const HEAVY = new Set([
   "SimionSchmidtPreimageSize",
   "PrefixExchangeDistance",
 ]);
+// Sweeps over every subset or pair of subsets cost a second or more per permutation of 5: 1..3 here, 4 and 5 nightly.
+const SWEEPS = new Set([
+  "SubsetHoleyness",
+  "CyclicSubsetHoleyness",
+  "AlternatingSubsetBreakCount",
+  "PopStackSortingPasses",
+  "DistinctPatternCount",
+]);
 const ALL = upTo(5);
 const SMALL = upTo(4);
+const TINY = upTo(3);
+const largest = (head: string): number => (SWEEPS.has(head) ? 3 : HEAVY.has(head) ? 4 : 5);
 for (const [head, expected] of Object.entries(EXPECTED)) {
-  const heavy = HEAVY.has(head);
-  test(`${head} agrees over every permutation of 1..${heavy ? 4 : 5}`, () => {
-    for (const p of heavy ? SMALL : ALL) expect(evaluate(head, p), `[${p.join(", ")}]`).toBe(expected(p));
+  test(`${head} agrees over every permutation of 1..${largest(head)}`, () => {
+    for (const p of SWEEPS.has(head) ? TINY : HEAVY.has(head) ? SMALL : ALL)
+      expect(evaluate(head, p), `[${p.join(", ")}]`).toBe(expected(p));
   });
 }
 
@@ -72,7 +82,7 @@ test.skipIf(!process.env.DEEP_TESTS)(
   "every new permutation definition agrees over every permutation of 6 and 7",
   () => {
     for (const [head, expected] of Object.entries(EXPECTED))
-      for (const p of (HEAVY.has(head) ? [5, 6] : [6, 7]).flatMap((n) => permutations(n)))
+      for (const p of (SWEEPS.has(head) ? [4, 5] : HEAVY.has(head) ? [5, 6] : [6, 7]).flatMap((n) => permutations(n)))
         expect(evaluate(head, p), `${head} [${p.join(", ")}]`).toBe(expected(p));
   },
   3_600_000,

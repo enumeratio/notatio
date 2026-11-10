@@ -381,6 +381,72 @@ const simionSchmidtOntoAvoiders = (q: number[]): number[] => {
   const rest = range(1, q.length).filter((v) => !records.includes(v));
   return q.map((v) => (records.includes(v) ? v : rest.shift()!));
 };
+/** Every subset of 1..n, as an ascending list. */
+const subsetsOf = (n: number): number[][] =>
+  range(0, 2 ** n - 1).map((mask) => range(1, n).filter((v) => (mask >> (v - 1)) % 2 === 1));
+/** FindStat's delta: the elements m of the set whose successor `next(m)` is not in it. */
+const edgesOf = (set: number[], next: (m: number) => number): number =>
+  set.filter((m) => !set.includes(next(m))).length;
+/** The largest gain in edges from a subset to its image under p, never below 0. */
+const holeynessOf = (p: number[], next: (m: number) => number): number =>
+  Math.max(
+    0,
+    ...subsetsOf(p.length).map(
+      (s) =>
+        edgesOf(
+          s.map((v) => p[v - 1]!),
+          next,
+        ) - edgesOf(s, next),
+    ),
+  );
+const isAlternatingSet = (s: number[]): boolean => s.every((v, i) => i === 0 || (v + s[i - 1]!) % 2 === 1);
+/** The subwords of p, as lists of entries. */
+const subwordsOf = (p: number[]): number[][] => subsetsOf(p.length).map((s) => s.map((i) => p[i - 1]!));
+/** Each entry's rank within the word. */
+const standardized = (w: number[]): string => w.map((v) => w.filter((u) => u < v).length).join(",");
+/** Number of monotone runs of w, as FindStat's St000483 counts them: increasing runs of two or more plus decreasing ones. */
+const monotoneRuns = (w: number[]): number => {
+  const increasingRuns = (u: number[]): number => {
+    let found = 0;
+    let longest = 1;
+    for (let i = 1; i <= u.length; i++)
+      if (i < u.length && u[i]! > u[i - 1]!) longest++;
+      else {
+        if (longest > 1) found++;
+        longest = 1;
+      }
+    return found;
+  };
+  return increasingRuns(w) + increasingRuns(w.toReversed());
+};
+/** One pass of the pop-stack operator: a stack that empties onto the output whenever the next entry exceeds its top. */
+const popStackSort = (w: number[]): number[] => {
+  const out: number[] = [];
+  let stack: number[] = [];
+  for (const e of w) {
+    if (stack.length > 0 && e > stack.at(-1)!) {
+      out.push(...stack.toReversed());
+      stack = [];
+    }
+    stack.push(e);
+  }
+  return [...out, ...stack.toReversed()];
+};
+/** The map Phi from the arrow patterns: p's cycles are the stretches opening at each left-to-right maximum. */
+const stretchCycleImage = (p: number[]): Map<number, number> => {
+  const image = new Map<number, number>();
+  let stretch: number[] = [];
+  const close = () => stretch.forEach((v, i) => image.set(v, stretch[(i + 1) % stretch.length]!));
+  for (const v of p) {
+    if (stretch.length > 0 && v > Math.max(...stretch)) {
+      close();
+      stretch = [];
+    }
+    stretch.push(v);
+  }
+  close();
+  return image;
+};
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -1205,4 +1271,38 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   SimionSchmidtPreimageSize: (p) => countAmongAll(p, (q) => sameWord(simionSchmidtOntoAvoiders(q), p)),
   PrefixExchangeDistance: (p) => (p.length === 0 ? 0 : starDistance(p)),
   ReducedReflectionLength: (p) => 2 * sum(p.map((v, i) => Math.max(0, v - i - 1))) - inversionPairs(p).length,
+  InverseFoataArrowAscents: (p) => {
+    const image = stretchCycleImage(p);
+    return range(1, p.length - 1).filter((i) => p[i - 1]! < p[i]! && image.get(p[i - 1]!) === p[i]!).length;
+  },
+  InverseFoataArrowPairs: (p) => {
+    const image = stretchCycleImage(p);
+    return pairs(p).filter(([i, j]) => p[i]! < image.get(p[i]!)! && image.get(p[i]!)! < p[j]!).length;
+  },
+  SubsetHoleyness: (p) => holeynessOf(p, (m) => m + 1),
+  CyclicSubsetHoleyness: (p) => holeynessOf(p, (m) => (m % p.length) + 1),
+  AlternatingSubsetBreakCount: (p) =>
+    subsetsOf(p.length).filter(
+      (s) => isAlternatingSet(s) && !isAlternatingSet(s.map((v) => p[v - 1]!).toSorted((a, b) => a - b)),
+    ).length,
+  SubsequenceMonotoneRunSum: (p) =>
+    sum(
+      subwordsOf(p)
+        .filter((w) => w.length >= 3)
+        .map(monotoneRuns),
+    ),
+  FixedPointAgreementCount: (p) =>
+    allPermutations(p.length).filter(
+      (s) => s.filter((v, i) => p[v - 1] === i + 1).length === p.filter((v, i) => v === i + 1).length,
+    ).length,
+  PopStackSortingPasses: (p) => {
+    let w = p;
+    let passes = 0;
+    while (w.some((v, i) => v !== i + 1) && passes < 2 * p.length) {
+      w = popStackSort(w);
+      passes++;
+    }
+    return passes;
+  },
+  DistinctPatternCount: (p) => new Set(subwordsOf(p).map(standardized)).size,
 };

@@ -3317,6 +3317,294 @@ const FINDSTAT_PERMUTATION_STATISTICS_12: readonly Definition[] = [
   ),
 ];
 
+/** Whether the list `l` rises from position k to k + 1. */
+const risesIn = (l: MathJSON, k: MathJSON): MathJSON => less(at(k, l), at(add(k, 1), l));
+/**
+ * One pop-stack pass over the list `l`: each maximal descending run is reversed, so the entry at i
+ * takes the one at (start + end - i) of its run.
+ */
+const popStackPass = (l: MathJSON): MathJSON =>
+  forEach(
+    positions,
+    at(
+      subtract(
+        add(
+          add(1, max(["Join", ["List", 0], where(adjacent, and(less("k", "i"), risesIn(l, "k")), "k")])),
+          min(["Join", ["List", length()], where(adjacent, and(atLeastValue("k", "i"), risesIn(l, "k")), "k")]),
+        ),
+        "i",
+      ),
+      l,
+    ),
+  );
+/**
+ * The passes before the word is sorted. The fold carries the passes so far in front of the current word; it is
+ * run n times, enough since n - 1 passes sort any word, and a sorted word stays put without counting.
+ */
+const popStackPasses: MathJSON = [
+  "At",
+  fold(
+    positions,
+    ["Join", ["List", 0], x],
+    bind(
+      "l",
+      forEach(positions, at(add("m", 1), "a"), "m"),
+      [
+        "Join",
+        [
+          "List",
+          add(carried(1), ["If", equals(count(adjacent, greater(at("i", "l"), at(add("i", 1), "l"))), 0), 0, 1]),
+        ],
+        popStackPass("l"),
+      ],
+      "list<integer>",
+    ),
+  ),
+  1,
+];
+
+/** The prefix maximum at position i. */
+const prefixMaximum: MathJSON = max(upToHere);
+/**
+ * Where inverse Foata sends p(i): cycles are the stretches of p opening at each left-to-right maximum, so
+ * an entry goes to the next entry of its stretch, or back to the stretch's maximum when the next entry opens a new one.
+ */
+const inverseFoataImage: MathJSON = [
+  "If",
+  less("i", length()),
+  ["If", less(next, prefixMaximum), next, prefixMaximum],
+  prefixMaximum,
+];
+
+/** The subsets of 1 .. n, as masks. */
+const subsetMasks: MathJSON = ["Range", 0, subtract(["Power", 2, length()], 1)];
+/** Whether position q is in the subset whose bits are set in `mask`. */
+const inSubset = (mask: MathJSON, q: MathJSON): MathJSON => [
+  "If",
+  ["GreaterEqual", ["Mod", mask, ["Power", 2, q]], ["Power", 2, subtract(q, 1)]],
+  1,
+  0,
+];
+/** The indicator list (length n + 1) of the subset of positions whose bits are set in `mask`. */
+const subsetIndicator = (mask: MathJSON): MathJSON => forEach(upTo(add(length(), 1)), inSubset(mask, "k"), "k");
+/** The entries of p at the positions of the subset `mask`, in order. */
+const subsetEntries = (mask: MathJSON): MathJSON =>
+  forEach(where(positions, equals(inSubset(mask, "q"), 1), "q"), at("q"), "q");
+/** 1 when the entry at position t of the list `l` is below the entry at u. */
+const lowerAt = (l: MathJSON, t: MathJSON, u: MathJSON): MathJSON => ["If", less(at(t, l), at(u, l)), 1, 0];
+/** Pairs t < u <= k that the lists `a` and `b` of k entries order differently; 0 when they are order isomorphic. */
+const orderDisagreements = (a: MathJSON, b: MathJSON, k: MathJSON): MathJSON =>
+  sumOver(
+    where(positions, atMostValue("t", k), "t"),
+    count(
+      where(positions, and(greater("u", "t"), atMostValue("u", k)), "u"),
+      ["NotEqual", lowerAt(a, "t", "u"), lowerAt(b, "t", "u")],
+      "u",
+    ),
+    "t",
+  );
+/** Distinct order patterns among the subsequences: those subsets with no numerically smaller subset of the same pattern. */
+const distinctPatterns: MathJSON = count(
+  subsetMasks,
+  bind(
+    "va",
+    subsetEntries("m"),
+    equals(
+      count(
+        where(subsetMasks, less("r", "m"), "r"),
+        bind(
+          "vb",
+          subsetEntries("r"),
+          ["If", equals(length("va"), length("vb")), equals(orderDisagreements("va", "vb", length("va")), 0), "False"],
+          "list<integer>",
+        ),
+        "r",
+      ),
+      0,
+    ),
+    "list<integer>",
+  ),
+  "m",
+);
+
+/** The indicator of the image p(S) of the subset with indicator `s`: position v is in it when p^-1(v) is in S. */
+const imageIndicator = (s: MathJSON): MathJSON => forEach(positions, at(positionOf("v"), s), "v");
+/** Elements i of the subset (indicator `s`, length at least n + 1) whose successor is outside it. */
+const subsetEdges = (s: MathJSON, successor: MathJSON): MathJSON =>
+  sumOver(positions, ["Multiply", at("i", s), subtract(1, at(successor, s))]);
+/** The largest gain in edges from a subset to its image, over all subsets; the empty subset gains 0. */
+const holeyness = (successor: MathJSON): MathJSON =>
+  max(
+    forEach(
+      subsetMasks,
+      bind(
+        "s",
+        subsetIndicator("m"),
+        bind(
+          "t",
+          ["Join", imageIndicator("s"), ["List", 0]],
+          subtract(subsetEdges("t", successor), subsetEdges("s", successor)),
+          "list<integer>",
+        ),
+        "list<integer>",
+      ),
+      "m",
+    ),
+  );
+
+/** Violations of alternation in the subset with indicator `s`: selected pairs of equal parity with nothing selected between. */
+const parityRepeats = (s: MathJSON): MathJSON =>
+  sumOver(
+    positions,
+    count(
+      positions,
+      and(
+        and(greater("j", "i"), equals(["Mod", subtract("j", "i"), 2], 0)),
+        and(
+          equals(["Multiply", at("i", s), at("j", s)], 1),
+          equals(count(positions, and(and(greater("k", "i"), less("k", "j")), equals(at("k", s), 1)), "k"), 0),
+        ),
+      ),
+      "j",
+    ),
+  );
+
+/** D(k), the derangements of k points, as the alternating sum of k! / j!. */
+const derangementCount = (k: MathJSON): MathJSON =>
+  sumOver(
+    ["Range", 0, k],
+    ["Multiply", ["Power", -1, "j"], ["If", less("j", k), ["Product", ["Range", add("j", 1), k]], 1]],
+    "j",
+  );
+
+/** Triples i < j < k whose middle entry is a peak or a valley, weighted by the subsequences having them consecutive: 2^(i - 1 + n - k). */
+const weightedExtremaTriples: MathJSON = sumOver(
+  positions,
+  sumOver(
+    where(positions, greater("j", "i"), "j"),
+    sumOver(
+      where(positions, greater("k", "j"), "k"),
+      [
+        "If",
+        or(
+          and(less(at("i"), at("j")), greater(at("j"), at("k"))),
+          and(greater(at("i"), at("j")), less(at("j"), at("k"))),
+        ),
+        ["Power", 2, add(subtract("i", 1), subtract(length(), "k"))],
+        0,
+      ],
+      "k",
+    ),
+    "j",
+  ),
+);
+
+// The thirteenth batch: arrows through inverse Foata, subsets and their images, subsequence sums, and fixed-point agreement.
+/** The compiled code of these is checked against the interpreter up to size 4; each subset sweep costs seconds interpreted at 5. */
+const SUBSET_SWEEP_CHECK_WEIGHT = 10;
+const SUBSET_SWEEPS = new Set([
+  "DistinctPatternCount",
+  "SubsetHoleyness",
+  "CyclicSubsetHoleyness",
+  "AlternatingSubsetBreakCount",
+]);
+
+const FINDSTAT_PERMUTATION_STATISTICS_13: readonly Definition[] = [
+  stat(
+    "InverseFoataArrowAscents",
+    "Adjacent ascents p(i) < p(i+1) where inverse Foata sends p(i) to p(i+1).",
+    hasPair(count(adjacent, and(risesAfter, less(next, prefixMaximum)))),
+    "Inverse Foata keeps p(i+1) in p(i)'s cycle exactly when p(i+1) is not a left-to-right maximum.",
+  ),
+  stat(
+    "InverseFoataArrowPairs",
+    "Pairs i < j with p(i) < inverse Foata of p(i) < p(j).",
+    nonEmpty(
+      sumOver(positions, [
+        "If",
+        greater(inverseFoataImage, here),
+        count(positions, and(greater("t", "i"), greater(at("t"), inverseFoataImage)), "t"),
+        0,
+      ]),
+    ),
+  ),
+  stat(
+    "SubsetHoleyness",
+    "The most any subset S of 1 .. n gains in elements m with m + 1 outside it on passing to its image p(S).",
+    nonEmpty(holeyness(add("i", 1))),
+    "FindStat's holeyness.",
+  ),
+  stat(
+    "CyclicSubsetHoleyness",
+    "The holeyness with successors taken cyclically: n is followed by 1.",
+    nonEmpty(holeyness(add(["Mod", "i", length()], 1))),
+  ),
+  stat(
+    "AlternatingSubsetBreakCount",
+    "The subsets of 1 .. n alternating in parity whose image under p is not.",
+    nonEmpty(
+      count(
+        subsetMasks,
+        bind(
+          "s",
+          subsetIndicator("m"),
+          bind(
+            "t",
+            imageIndicator("s"),
+            and(equals(parityRepeats("s"), 0), greater(parityRepeats("t"), 0)),
+            "list<integer>",
+          ),
+          "list<integer>",
+        ),
+        "m",
+      ),
+    ),
+  ),
+  word(
+    "SubsequenceMonotoneRunSum",
+    "The monotone runs of the subsequences of p with at least three entries, summed: one plus their interior peaks and valleys.",
+    nonEmpty(
+      floored(
+        add(
+          subtract(subtract(subtract(["Power", 2, length()], 1), length()), [
+            "Divide",
+            ["Multiply", length(), subtract(length(), 1)],
+            2,
+          ]),
+          weightedExtremaTriples,
+        ),
+      ),
+    ),
+    "Each triple is consecutive in as many subsequences as there are choices outside it.",
+  ),
+  stat(
+    "FixedPointAgreementCount",
+    "The permutations s of the same size such that p composed with s has as many fixed points as p.",
+    nonEmpty(
+      bind(
+        "f",
+        count(positions, equals(here, "i")),
+        ["Multiply", ["Binomial", length(), "f"], derangementCount(subtract(length(), "f"))],
+        "integer",
+      ),
+      1,
+    ),
+    "s agrees with the inverse of p in exactly the fixed points' number of places, which counts as the choices of those places times the derangements of the rest.",
+  ),
+  word(
+    "PopStackSortingPasses",
+    "The pop-stack sorting passes, each reversing every maximal descending run, needed to sort p.",
+    hasPair(popStackPasses),
+    "At most n - 1 passes sort a permutation of n.",
+  ),
+  word(
+    "DistinctPatternCount",
+    "The order patterns of the subsequences of p, the empty one included, counted once each.",
+    nonEmpty(floored(distinctPatterns), 1),
+    "A subsequence is counted when no subsequence at smaller positions, read as a bit mask, has its pattern.",
+  ),
+].map((d) => (SUBSET_SWEEPS.has(d.head) ? { ...d, checkWeight: SUBSET_SWEEP_CHECK_WEIGHT } : d));
+
 export const PERMUTATION_STATISTICS: readonly Definition[] = [
   word("Descents", "Positions i with p(i) > p(i+1).", hasPair(count(adjacent, fallsAfter))),
   word("Ascents", "Positions i with p(i) < p(i+1).", hasPair(count(adjacent, risesAfter))),
@@ -3528,6 +3816,7 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
   ...FINDSTAT_PERMUTATION_STATISTICS_10,
   ...FINDSTAT_PERMUTATION_STATISTICS_11,
   ...FINDSTAT_PERMUTATION_STATISTICS_12,
+  ...FINDSTAT_PERMUTATION_STATISTICS_13,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_2,
   ...FINDSTAT_SIGNED_PERMUTATION_STATISTICS_3,
