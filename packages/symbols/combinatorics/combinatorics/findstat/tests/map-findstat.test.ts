@@ -288,6 +288,23 @@ const SLOW: Readonly<Record<string, number>> = {
   "OrderedTree@ParkingFunction": 3,
   "Gyration@AlternatingSignMatrix": 3,
   "BlockEdgePartition@LabeledGraph": 3,
+  "SemistandardTableau@AlternatingSignMatrix": 3,
+  "LeftKeyPermutation@AlternatingSignMatrix": 3,
+  "DyckPath@AlternatingSignMatrix": 3,
+  "DiagonalHeightDyckPath@AlternatingSignMatrix": 3,
+  "PerfectMatching@AlternatingSignMatrix": 3,
+  "LinkPatternDyckPath@AlternatingSignMatrix": 3,
+  "GelfandTsetlinPromotion@GelfandTsetlinPattern": 2,
+  "InverseGelfandTsetlinPromotion@GelfandTsetlinPattern": 2,
+  "GelfandTsetlinCycle@GelfandTsetlinPattern": 2,
+  "InverseGelfandTsetlinCycle@GelfandTsetlinPattern": 2,
+  "Catabolism@SemistandardTableau": 3,
+  "RskInsertion@ParkingFunction": 3,
+  "NonNestingExceedencePermutation@PerfectMatching": 6,
+  "LewisLyuPylyavskyySenShape@Permutation": 3,
+  "WeakOrderRowmotion@Permutation": 3,
+  "CliqueSizePartition@LabeledGraph": 4,
+  "HorizontalStripSizes@StandardTableau": 4,
 };
 
 for (const [key, reading] of Object.entries(MAP_READINGS)) {
