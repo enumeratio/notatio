@@ -380,6 +380,52 @@ const distanceMatrixOf = (g: Graph): number[][] | null => {
 const distanceLaplacianOf = (distances: number[][]): number[][] =>
   distances.map((row, u) => row.map((d, v) => (u === v ? sum(row) : -d)));
 
+/** The vertices in the set or adjacent to one of it. */
+const closedNeighborhoodOfSet = (m: boolean[][], n: number, set: readonly number[]): number[] =>
+  range(0, n - 1).filter((v) => set.includes(v) || neighborsIn(m, v, set).length > 0);
+/** Whether each vertex of the set has a vertex in its closed neighborhood that the others' closed neighborhoods miss. */
+const isIrredundantSet = (m: boolean[][], n: number, set: readonly number[]): boolean =>
+  set.every((v) => {
+    const others = closedNeighborhoodOfSet(
+      m,
+      n,
+      set.filter((x) => x !== v),
+    );
+    return closedNeighborhood(m, v, n).some((w) => !others.includes(w));
+  });
+/** The sizes of the irredundant sets to which no vertex can be added. */
+const maximalIrredundantSizes = (g: Graph): number[] => {
+  const m = matrix(g);
+  return subsets(g.n)
+    .filter(
+      (s) =>
+        isIrredundantSet(m, g.n, s) &&
+        range(0, g.n - 1).every((v) => s.includes(v) || !isIrredundantSet(m, g.n, [...s, v])),
+    )
+    .map((s) => s.length);
+};
+/** The pairs {A, B} covering the vertices with A \ B and B \ A nonempty and no edge between them, by labeling each vertex A only, B only or both. */
+function properSeparations(g: Graph): number {
+  let found = 0;
+  const labels: number[] = [];
+  const assign = (v: number): void => {
+    if (v === g.n) {
+      if (
+        labels.includes(1) &&
+        labels.includes(2) &&
+        !g.edges.some(([a, b]) => labels[a - 1]! + labels[b - 1]! === 3 && labels[a - 1] !== 0 && labels[b - 1] !== 0)
+      )
+        found++;
+      return;
+    }
+    for (const label of [0, 1, 2]) {
+      labels[v] = label;
+      assign(v + 1);
+    }
+  };
+  assign(0);
+  return found / 2;
+}
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -719,4 +765,52 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
       ? 0
       : Math.max(...eigenvalueGroups(eigenvaluesOf(distanceLaplacianOf(distances))).map((x) => x.length));
   },
+  ClosedVertexSetCount: (g) => {
+    const m = matrix(g);
+    return subsets(g.n).filter((s) =>
+      pairsOf(s).every(([a, b]) => range(0, g.n - 1).every((w) => !(m[a]![w] && m[b]![w]) || s.includes(w))),
+    ).length;
+  },
+  MaximumDissociationSetCount: (g) => {
+    if (g.n === 0) return 0;
+    const sets = subsets(g.n).filter((s) => s.every((v) => neighborsIn(matrix(g), v, s).length <= 1));
+    return sets.filter((s) => s.length === Math.max(...sets.map((t) => t.length))).length;
+  },
+  HalfDominatingNonblockingSetCount: (g) => {
+    const m = matrix(g);
+    const all = allVertices(g);
+    return g.n === 0
+      ? 0
+      : subsets(g.n).filter(
+          (s) =>
+            isDominating(m, g.n, s) &&
+            all.filter((v) => s.includes(v)).every((v) => all.some((w) => !s.includes(w) && m[v]![w])),
+        ).length / 2;
+  },
+  CommonIndependenceNumber: (g) => {
+    const independent = independentSets(g);
+    return g.n === 0
+      ? 0
+      : Math.min(
+          ...allVertices(g).map((v) => Math.max(...independent.filter((s) => s.includes(v)).map((s) => s.length))),
+        );
+  },
+  RestrainedDominationNumber: (g) => {
+    const m = matrix(g);
+    return Math.min(
+      ...subsets(g.n)
+        .filter((d) =>
+          allVertices(g).every(
+            (v) =>
+              d.includes(v) ||
+              (m[v]!.some((edge, w) => edge && d.includes(w)) && m[v]!.some((edge, w) => edge && !d.includes(w))),
+          ),
+        )
+        .map((d) => d.length),
+    );
+  },
+  UpperIrredundanceNumber: (g) => Math.max(...maximalIrredundantSizes(g)),
+  IrredundanceNumber: (g) => Math.min(...maximalIrredundantSizes(g)),
+  ProperSeparationCount: properSeparations,
+  GraphEulerCharacteristic: (g) => g.n - g.edges.length,
 };

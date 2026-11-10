@@ -63,6 +63,14 @@ const BATCH_TWO = new Set([
   "MaximumDistanceLaplacianEigenvalueMultiplicity",
   "NullspaceZeroColumnCount",
   "NullspaceDistinctColumnCount",
+  "ClosedVertexSetCount",
+  "MaximumDissociationSetCount",
+  "HalfDominatingNonblockingSetCount",
+  "CommonIndependenceNumber",
+  "RestrainedDominationNumber",
+  "UpperIrredundanceNumber",
+  "IrredundanceNumber",
+  "ProperSeparationCount",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 

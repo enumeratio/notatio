@@ -922,6 +922,62 @@ const withConnectedSpectrum = (name: string, rows: MathJSON, body: MathJSON): Ma
     0,
   ]);
 
+/** The vertices outside the subset `mask` that have `bad` neighbors inside it. */
+const outsiders = (mask: MathJSON, bad: (inside: MathJSON) => MathJSON): MathJSON =>
+  floored(sumOver(vertices, times(subtract(1, one(hasBit(mask, "v"))), one(bad(neighborsIn(mask, "v")))), "v"));
+/** The subset of all the vertices, as a mask. */
+const fullMask: MathJSON = subtract(["Power", 2, "n"], 1);
+/** 1 when the vertices u and w are adjacent, read off the neighbors of the subset holding u alone. */
+const adjacentIn = (u: MathJSON, w: MathJSON): MathJSON => neighborsIn(bitValue(u), w);
+/** The vertices of the closed neighborhood of `vertex` that no other vertex of the subset `mask` (which holds `vertex`) has in its own. */
+const privateNeighbors = (mask: MathJSON, vertex: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      vertices,
+      times(
+        add(one(equals(vertex, "w")), adjacentIn(vertex, "w")),
+        times(
+          subtract(1, one(hasBit(subtract(mask, bitValue(vertex)), "w"))),
+          one(equals(neighborsIn(subtract(mask, bitValue(vertex)), "w"), 0)),
+        ),
+      ),
+      "w",
+    ),
+  );
+/** Whether the subset has no vertex whose closed neighborhood the others cover, by mask + 1. */
+const irredundantTable: MathJSON = forEach(
+  masks,
+  one(
+    equals(floored(sumOver(vertices, ["If", hasBit("m", "v"), one(equals(privateNeighbors("m", "v"), 0)), 0], "v")), 0),
+  ),
+  "m",
+);
+const isIrredundant = (mask: MathJSON): MathJSON => at(add(mask, 1), "irredundant");
+/** An irredundant subset no vertex can be added to. */
+const isMaximalIrredundant = (mask: MathJSON): MathJSON =>
+  times(
+    isIrredundant(mask),
+    one(
+      equals(floored(sumOver(vertices, ["If", hasBit(mask, "v"), 0, isIrredundant(add(mask, bitValue("v")))], "v")), 0),
+    ),
+  );
+const withIrredundant = (body: MathJSON): MathJSON => withNeighborsIn(bindList("irredundant", irredundantTable, body));
+/** Vertices outside the subset `mask` with no neighbor inside it, or all their neighbors inside it. */
+const unrestrained = (mask: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      vertices,
+      times(
+        subtract(1, one(hasBit(mask, "v"))),
+        subtract(
+          1,
+          times(one(greater(neighborsIn(mask, "v"), 0)), one(less(neighborsIn(mask, "v"), neighborsIn(fullMask, "v")))),
+        ),
+      ),
+      "v",
+    ),
+  );
+
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
   stat(
@@ -2111,5 +2167,95 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The greatest multiplicity of an eigenvalue of the distance Laplacian.",
     withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, maximumMultiplicity),
     `FindStat's St000771, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "ClosedVertexSetCount",
+    "The sets of vertices that hold every common neighbor of each two of their members.",
+    withNeighborsIn(
+      overMasks(
+        one(
+          equals(
+            outsiders("m", (d) => atLeastValue(d, 2)),
+            0,
+          ),
+        ),
+      ),
+      1,
+    ),
+    `FindStat's St001706. A vertex outside the set is a common neighbor of two members when two of its neighbors are in the set. The graph with no vertices has the empty set, so 1.`,
+  ),
+  stat(
+    "MaximumDissociationSetCount",
+    "The sets of the most vertices in which every vertex has at most one neighbor.",
+    withNeighborsIn(
+      bind(
+        "best",
+        ["Max", sizeUnlessAny((d) => greater(d, 1))],
+        overMasks(
+          times(
+            one(
+              equals(
+                misfits("m", (d) => greater(d, 1)),
+                0,
+              ),
+            ),
+            one(equals(total("m"), "best")),
+          ),
+        ),
+        "integer",
+      ),
+    ),
+    `FindStat's St001694. Its title says maximal sets; its code and rows count the sets of greatest size. ${NO_VERTICES}`,
+  ),
+  stat(
+    "HalfDominatingNonblockingSetCount",
+    "Half the sets of vertices that are dominating and whose complement is dominating.",
+    withDominating(spread(overMasks(times(isDominating("m"), isDominating(subtract(fullMask, "m")))))),
+    `FindStat's St001794. A set is non-blocking when its complement is dominating, and the complement of such a set is another. ${NO_VERTICES}`,
+  ),
+  stat(
+    "CommonIndependenceNumber",
+    "The most vertices r such that every vertex lies in an independent set of at least r vertices.",
+    withMasks([
+      "Min",
+      forEach(
+        vertices,
+        ["Max", forEach(masks, times(one(isIndependent("m")), times(one(hasBit("m", "v")), total("m"))), "m")],
+        "v",
+      ),
+    ]),
+    `FindStat's St001829: the fewest, over the vertices, of the largest independent set holding the vertex. ${NO_VERTICES}`,
+  ),
+  stat(
+    "RestrainedDominationNumber",
+    "The fewest vertices in a set such that every vertex outside it has a neighbor inside it and a neighbor outside it.",
+    withNeighborsIn(["Min", forEach(masks, ["If", equals(unrestrained("m"), 0), total("m"), "n"], "m")]),
+    `FindStat's St001672. ${NO_VERTICES}`,
+  ),
+  stat(
+    "UpperIrredundanceNumber",
+    "The most vertices in a maximal irredundant set.",
+    withIrredundant(["Max", forEach(masks, times(isMaximalIrredundant("m"), total("m")), "m")]),
+    `FindStat's St001338. A set is irredundant when each of its vertices has a vertex in its closed neighborhood that the closed neighborhoods of the others miss. ${NO_VERTICES}`,
+  ),
+  stat(
+    "IrredundanceNumber",
+    "The fewest vertices in a maximal irredundant set.",
+    withIrredundant(["Min", forEach(masks, ["If", equals(isMaximalIrredundant("m"), 1), total("m"), "n"], "m")]),
+    `FindStat's St001339. A subset of an irredundant set is irredundant, so a set is maximal when no one vertex can be added. ${NO_VERTICES}`,
+  ),
+  stat(
+    "ProperSeparationCount",
+    "The pairs of sets covering the vertices, each with a vertex the other lacks, and no edge between those vertices.",
+    withNeighborsIn(
+      spread(floored(sumOver(masksFromOne, subtract(["Power", 2, outsiders("m", (d) => equals(d, 0))], 1), "m"))),
+    ),
+    `FindStat's St001799. A separation is a nonempty set of vertices (one side only), a nonempty set of the vertices outside it and its neighbors (the other side only), and the rest in both; each is met from either side, hence the half. ${NO_VERTICES}`,
+  ),
+  stat(
+    "GraphEulerCharacteristic",
+    "The vertices less the edges.",
+    subtract(at(1), length(at(2))),
+    `FindStat's St001828, of the graph as a simplicial complex of dimension at most 1. ${NO_VERTICES}`,
   ),
 ];
