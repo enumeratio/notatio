@@ -54,6 +54,8 @@ const COSTLY = new Set([
   "PrimitiveFactorCount",
   "ReverseComplementFactorHalfLength",
   "ReverseComplementFactorHalfLengthStartingWithOne",
+  "SameBorderSetWordCount",
+  "KaylesGrundyValue",
 ]);
 const sizeFor = (head: string): number => (COSTLY.has(head) && !DEEP ? 4 : 8);
 

@@ -120,6 +120,32 @@ const tableauFactors = (t: Tableau): number => {
   return 1;
 };
 
+/** The tableau without its entry 1, rectified by jeu de taquin: the hole slides to the smaller of the entries to its right and below, and every entry drops by one. */
+function deleteSmallest(t: Tableau): number[][] {
+  const rows = t.map((row) => [...row]);
+  let [r, c] = [0, 0];
+  for (;;) {
+    const right = rows[r]![c + 1];
+    const below = rows[r + 1]?.[c];
+    if (right === undefined && below === undefined) break;
+    if (below === undefined || (right !== undefined && right < below)) {
+      rows[r]![c] = right!;
+      c++;
+    } else {
+      rows[r]![c] = below;
+      r++;
+    }
+  }
+  rows[r]!.pop();
+  return rows.filter((row) => row.length > 0).map((row) => row.map((entry) => entry - 1));
+}
+/** The first ascent: the least entry whose successor is not in a lower row, the largest entry being its own successor. */
+function firstAscent(t: Tableau): number {
+  const where = cells(t);
+  for (let e = 1; e < size(t); e++) if (where.get(e + 1)![0] <= where.get(e)![0]) return e;
+  return size(t);
+}
+
 export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   TableauFactorCount: tableauFactors,
   // The first row whose largest entry beats those above it is the one holding n.
@@ -201,4 +227,14 @@ export const TABLEAU_READINGS: Record<string, (t: Tableau) => number> = {
   MajorIndexMinusWeightedSize: (t) => sum(descents(t)) - weightedSize(t),
   ComajorIndexMinusWeightedSize: (t) => sum(descents(t).map((d) => size(t) - d)) - weightedSize(t),
   HaglundStevensInversionCount: haglundStevensInversions,
+  // FindStat's St001816: delete the entry 1 and rectify until the first ascent is even (a desarrangement tableau); the eigenvalue is the number of deletions.
+  TopToRandomEigenvalue: (t) => {
+    let current: Tableau = t;
+    let deletions = 0;
+    while (current.length > 0 && firstAscent(current) % 2 === 1) {
+      current = deleteSmallest(current);
+      deletions++;
+    }
+    return deletions;
+  },
 };

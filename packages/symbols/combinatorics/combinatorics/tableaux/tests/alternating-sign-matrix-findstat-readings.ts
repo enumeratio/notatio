@@ -165,6 +165,42 @@ const maximalLastDiagonal = (m: Matrix): number => {
 
 export type Reading = (m: Matrix) => number;
 
+/** FindStat's St001030: the vertices of the six-vertex model whose vertical edge is occupied on one parity of row + column and empty on the other, less half the order rounded down, halved. The edge above a cell is occupied when the column sum above it is 1. */
+const fullyPackedLoopHalfHorizontalEdges = (m: Matrix): number => {
+  const n = m.length;
+  const above = Array<number>(n).fill(0);
+  let counted = 0;
+  for (let i = 0; i < n; i++) {
+    for (let j = 0; j < n; j++) {
+      const occupied = above[j] === 1;
+      if ((i + j) % 2 === 0 ? occupied : !occupied) counted++;
+      above[j]! += m[i]![j]!;
+    }
+  }
+  return (counted - Math.floor(n / 2)) / 2;
+};
+
+/** FindStat's St000227: the monotone triangle's rows (longest first, entries decreasing) give a nondecreasing parking function per column, whose Dyck word, reversed, has its peaks' positions summed. */
+const osculatingPathMajorIndex = (m: Matrix): number => {
+  const n = m.length;
+  const triangle = indices(n).map((r) =>
+    indices(n)
+      .filter((j) => sum(m.slice(0, n - r).map((row) => row[j]!)) === 1)
+      .map((j) => j + 1)
+      .toReversed(),
+  );
+  let total = 0;
+  for (let column = 0; column < n; column++) {
+    const parking = triangle.filter((row) => row.length > column).map((row) => n + 1 - row[column]! - column);
+    // The Dyck word: for each j, one up step per parking value j and a down step.
+    const word: number[] = [];
+    for (let j = 1; j <= parking.length; j++) word.push(...parking.filter((v) => v === j).map(() => 1), 0);
+    const reversed = word.toReversed();
+    for (let p = 1; p < reversed.length; p++) if (reversed[p - 1] === 1 && reversed[p] === 0) total += p;
+  }
+  return total;
+};
+
 export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
   MatrixDeterminant: (m) => (m.length === 0 ? 1 : determinant(m)),
   AlternatingSignMatrixRank: rank,
@@ -192,4 +228,6 @@ export const ALTERNATING_SIGN_MATRIX_READINGS: Record<string, Reading> = {
   PositiveMatrixInversionNumber: (m) => inversionNumber(m) - entries(m).filter((a) => a === -1).length,
   MatrixPermanent: permanent,
   DecreasableCornerSumPositions: decreasableCornerSums,
+  HalfFullyPackedLoopHorizontalEdgeCount: fullyPackedLoopHalfHorizontalEdges,
+  OsculatingPathMajorIndex: osculatingPathMajorIndex,
 };

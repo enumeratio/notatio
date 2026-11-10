@@ -35,6 +35,7 @@ const INTERPRETED = [
   "Pitchforks",
   "ProtectionNumber",
   "PruningNumber",
+  "ReorderEquivalentTreeCount",
   "RightForkRightLeftPatternCount",
   "RightLeftLeftLeftPathCount",
   "RightLeftLeftPathCount",

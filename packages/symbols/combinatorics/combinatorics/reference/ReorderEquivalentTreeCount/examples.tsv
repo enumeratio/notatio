@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-ordered-tree			[ReorderEquivalentTreeCount, [OrderedTree, [List, [List], [List, [List]], [List]]]]	3			the ordered tree $[[],[[]],[]]$
+findstat-st000413-1	Properties		[CombinatorialStat, [OrderedTree, [List, [List]]], "'ReorderEquivalentTreeCount'"]	1	1	FindStat St000413	FindStat's value for [[]]
+findstat-st000413-2	Properties		[CombinatorialStat, [OrderedTree, [List, [List, [List]]]], "'ReorderEquivalentTreeCount'"]	1	1	FindStat St000413	FindStat's value for [[[]]]
+findstat-st000413-3	Properties		[CombinatorialStat, [OrderedTree, [List, [List], [List]]], "'ReorderEquivalentTreeCount'"]	1	1	FindStat St000413	FindStat's value for [[],[]]

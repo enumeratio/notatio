@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-word-110100111			[SameBorderSetWordCount, [BinaryWord, [List, 1, 1, 0, 1, 0, 0, 1, 1, 1]]]	23			the word $110100111$
+findstat-st001885-1	Properties		[CombinatorialStat, [BinaryWord, [List, 0]], "'SameBorderSetWordCount'"]	2	2	FindStat St001885	FindStat's value for 0
+findstat-st001885-2	Properties		[CombinatorialStat, [BinaryWord, [List, 1]], "'SameBorderSetWordCount'"]	2	2	FindStat St001885	FindStat's value for 1
+findstat-st001885-3	Properties		[CombinatorialStat, [BinaryWord, [List, 0, 0]], "'SameBorderSetWordCount'"]	1	1	FindStat St001885	FindStat's value for 00

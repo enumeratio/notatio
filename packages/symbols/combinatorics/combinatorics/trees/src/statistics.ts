@@ -593,6 +593,16 @@ const NESTED_STATISTICS: readonly Definition[] = [
     automorphisms,
   ),
   ordered(
+    "ReorderEquivalentTreeCount",
+    "The number of ordered trees with the same underlying rooted tree: the product, over the vertices, of the factorials of their numbers of children, over the automorphism group size.",
+    [
+      "Divide",
+      fold(forEach(orderedSubtrees, factorialOf(["Length", "s"]), "s"), 1, ["Multiply", "a", "b"]),
+      automorphisms,
+    ],
+    "FindStat's St000413. Reordering the children at every vertex reaches the tree's ordered forms, each as many times as there are automorphisms.",
+  ),
+  ordered(
     "InequivalentIncreasingTreeCount",
     "The number of increasing labelings of the tree up to its automorphisms: n! over the tree factorial and the automorphism group size.",
     [
