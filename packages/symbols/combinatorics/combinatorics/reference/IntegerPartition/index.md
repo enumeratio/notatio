@@ -15,5 +15,10 @@ signatures:
   - call: IntegerPartition(list)
     description: The singular-inhabitant constructor for an integer partition, as its parts.
     library: enumeratio-combinatorics
-    type: (list<integer>) -> integer_partition
+    type: ((list<integer>) -> integer_partition) & ((plane_partition) -> integer_partition)
+catalog:
+  - system: findstat
+    identity: Mp00311
+    url: https://www.findstat.org/Mp00311
+    on: PlanePartition
 ---

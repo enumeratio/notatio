@@ -1,2 +1,3 @@
 id	section	role	expr	expected	caption
 the-dyck-path-uuddud			[Avoiding132Permutation, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	[Permutation, [List, 3, 1, 2]]	the Dyck path $UUDDUD$
+a-four-node-tree			[Avoiding132Permutation, [BinaryTree, [List, [List, 0, 0], [List, 0, [List, 0, 0]]]]]	[Permutation, [List, 4, 3, 1, 2]]	a four-node tree
