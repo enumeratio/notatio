@@ -2,8 +2,8 @@
 # complex-heads.golden.json holds, for web's gpu.spec.ts to hold the GPU kernels to.
 #   python3 packages/symbols/analysis/analytic/tests/collect-complex-heads.py && vp fmt packages/symbols/analysis/analytic/tests/complex-heads.golden.json
 # Needs mpmath (1.3.0 wrote the committed file). Each case is the head as canonical MathJSON in `z`,
-# mpmath's value of it, and the relative error the f32 kernel was measured to stay within on the
-# SwiftShader adapter (WGSL gives sin and cos only 2^-11, which is most of the 2e-4 floor).
+# mpmath's value of it, and the relative error the f32 kernel stays within on SwiftShader's WebGL2.
+# The tolerances allow for a GPU whose sin and cos hold only 2^-11, which is most of the 2e-4 floor.
 import json
 import os
 

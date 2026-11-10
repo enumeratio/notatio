@@ -79,7 +79,7 @@ vec2 cexp(vec2 z) {
   return vec2(e*cos(z.y), e*sin(z.y));
 }
 // arg z in (−π, π], the cut's upper side on the negative real axis. A −0 imaginary part (a conjugate or a
-// product with 0, or sin of a multiple of π) reads as +0: SwiftShader's atan2(−0, x > 0) is π, a whole
+// product with 0, or sin of a multiple of π) reads as +0: SwiftShader's atan(−0, x > 0) is π, a whole
 // half turn off on the positive reals.
 float argOf(vec2 z) { return atan((z.y == 0.0 ? 0.0 : z.y), z.x); }
 vec2 clog(vec2 z) { return vec2(0.5*log(dot(z, z)), argOf(z)); }

@@ -8,15 +8,16 @@ import { display } from "../src/kernel-host.ts";
 
 const ce = new ComputeEngine();
 
-test("an expression of two reals is the plot grid's compute shader", () => {
+test("an expression of two reals is the plot grid's fragment shader", () => {
   const { gpushader } = codeForms(ce, ["Add", ["Sin", "x"], ["Power", "y", 2]]);
-  expect(gpushader).toContain("fn plotFn(");
-  expect(gpushader).toContain("@compute");
+  expect(gpushader).toContain("float plotFn(float x, float y)");
+  expect(gpushader).toContain("uniform Prm { vec4 grid; } prm;");
 });
 
 test("an expression of one complex variable is the phase portrait's fragment shader", () => {
   const { gpushader } = codeForms(ce, ["Gamma", "z"]);
-  expect(gpushader).toContain("@fragment");
+  expect(gpushader).toContain("#version 300 es");
+  expect(gpushader).toContain("void main()");
   expect(gpushader).toContain("cgamma(");
 });
 
@@ -25,11 +26,13 @@ test("an expression with no variable has no shader", () => {
 });
 
 test("a kernel's display carries the shader beside the other code forms", () => {
-  expect(display(ce, ["Add", ["Sin", "x"], ["Power", "y", 2]]).text.gpushader).toContain("fn plotFn(");
+  expect(display(ce, ["Add", ["Sin", "x"], ["Power", "y", 2]]).text.gpushader).toContain("float plotFn(");
 });
 
 const declares = (shader: string | undefined) =>
-  [...(shader ?? "").matchAll(/^(?:fn|const|var<private>|struct)\s+(\w+)/gm)].map((m) => m[1]);
+  [
+    ...(shader ?? "").matchAll(/^(?:const\s+)?(?:float|int|uint|bool|void|[ib]?vec[234]|mat[234])\s+(\w+)\s*[(=;[]/gm),
+  ].map((m) => m[1]);
 
 test("a plot that calls no kernel carries no library kernel", () => {
   const { gpushader } = codeForms(ce, ["Add", ["Power", "x", 2], ["Power", "y", 2]]);

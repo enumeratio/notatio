@@ -545,9 +545,6 @@ importers:
       '@enumeratio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@webgpu/types':
-        specifier: ^0.1.60
-        version: 0.1.72
       happy-dom:
         specifier: 'catalog:'
         version: 21.0.4
@@ -724,9 +721,6 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.13.4
-      '@webgpu/types':
-        specifier: ^0.1.60
-        version: 0.1.72
       typescript:
         specifier: ^7.0.2
         version: 7.0.2
@@ -3123,9 +3117,6 @@ packages:
     peerDependencies:
       vue: ^3.5.0
 
-  '@webgpu/types@0.1.72':
-    resolution: {integrity: sha512-0cF7RFM2edNoiIS1ODJp0/Gzv4/xSXhwoR0YCza+OWpJWtn4wmo9DvK91aLlH9+uUnwIriP7ZiC3WitmyhuzBw==}
-
   '@xterm/addon-fit@0.10.0':
     resolution: {integrity: sha512-UFYkDm4HUahf2lnEyHvio51TNGiLK66mqP2JoATy7hRZeXaGMRDr00JiSF7m63vR5WKATF605yEggJKsw0JpMQ==}
     peerDependencies:
@@ -5033,8 +5024,6 @@ snapshots:
   '@vueuse/shared@14.4.0(vue@3.5.42(typescript@7.0.2))':
     dependencies:
       vue: 3.5.42(typescript@7.0.2)
-
-  '@webgpu/types@0.1.72': {}
 
   '@xterm/addon-fit@0.10.0(@xterm/xterm@5.5.0)':
     dependencies:

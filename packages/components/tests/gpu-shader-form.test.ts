@@ -6,15 +6,16 @@ import { codeSources } from "../src/out-engine.ts";
 
 const engine = new ComputeEngine();
 
-test("an expression of two reals is the plot grid's compute shader", async () => {
+test("an expression of two reals is the plot grid's fragment shader", async () => {
   const { gpushader } = await codeSources(engine, ["Add", ["Sin", "x"], ["Power", "y", 2]]);
-  expect(gpushader).toContain("fn plotFn(");
-  expect(gpushader).toContain("@compute");
+  expect(gpushader).toContain("float plotFn(float x, float y)");
+  expect(gpushader).toContain("uniform Prm { vec4 grid; } prm;");
 });
 
 test("an expression of one complex variable is the phase portrait's fragment shader", async () => {
   const { gpushader } = await codeSources(engine, ["Gamma", "z"]);
-  expect(gpushader).toContain("@fragment");
+  expect(gpushader).toContain("#version 300 es");
+  expect(gpushader).toContain("void main()");
   expect(gpushader).toContain("cgamma(");
 });
 
