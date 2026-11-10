@@ -8036,6 +8036,18 @@ export const findstat: readonly FindStatMatch[] = [
     values: 209,
   },
   {
+    head: "TriangleFreeEdgeDeletionNumber",
+    on: "LabeledGraph",
+    findstat: ["St001573"],
+    values: 208,
+  },
+  {
+    head: "RegularEdgeEditNumber",
+    on: "LabeledGraph",
+    findstat: ["St001574"],
+    values: 230,
+  },
+  {
     head: "WeylGroupOrder",
     on: "CartanType",
     findstat: ["St000106"],

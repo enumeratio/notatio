@@ -1144,14 +1144,40 @@ const BOTH_COLUMNS: SubsetColumns = { labels: true, degrees: true };
 const labelPosition = (vertex: MathJSON): MathJSON => add(vertex, 1);
 const degreePosition = (columns: SubsetColumns, vertex: MathJSON): MathJSON =>
   add(vertex, columns.labels ? add("n", 1) : 1);
+/** What the doubling steps of `subsetRows` add: step k (a no-op unless `active`) joins `from` to `to`, and the size becomes `size`, over the `row` before. */
+interface SubsetSource {
+  readonly steps: MathJSON;
+  readonly active: MathJSON;
+  readonly from: MathJSON;
+  readonly to: MathJSON;
+  readonly size: MathJSON;
+  readonly emptySize: MathJSON;
+}
+/** The edges of the graph, step 0 a no-op so that a graph with no edges folds over 0 alone (`Range(1, 0)` does not evaluate to the empty list). */
+const EDGE_SOURCE: SubsetSource = {
+  steps: ["Range", 0, length("edges")],
+  active: less(0, "k"),
+  from: at(1, at("k", "edges")),
+  to: at(2, at("k", "edges")),
+  size: add(at(1, "row"), 1),
+  emptySize: 0,
+};
+/** The pairs of vertices a < b, step k the pair at row (k - 1) div n and column (k - 1) mod n; the size is the number of pairs where the subset differs from the graph's edges. */
+const PAIR_SOURCE: SubsetSource = {
+  steps: ["Range", 1, ["Multiply", "n", "n"]],
+  active: less(add(["Floor", ["Divide", subtract("k", 1), "n"]], 1), add(["Mod", subtract("k", 1), "n"], 1)),
+  from: add(["Floor", ["Divide", subtract("k", 1), "n"]], 1),
+  to: add(["Mod", subtract("k", 1), "n"], 1),
+  size: add(at(1, "row"), subtract(1, times(2, adjacent("from", "to")))),
+  emptySize: length("edges"),
+};
 /**
- * One row for each subset of the edges, the subset of mask j in row j + 1 (bit k - 1 of the mask is edge k): the subset's
- * size, then the `columns` that follow it. Edge k doubles the table: a copy of every row so far with the edge added,
- * joining the classes of its ends by giving one the other's label (a union-find by relabeling) and raising their degrees.
- * Step 0 is a no-op, so a graph with no edges has the one row of the empty subset (`Range(1, 0)` does not evaluate to the
- * empty list).
+ * One row for each subset of the source's steps, the subset of mask j in row j + 1 (bit k - 1 of the mask is step k): the
+ * subset's size, then the `columns` that follow it. Step k doubles the table: a copy of every row so far with the step
+ * added, joining the classes of its ends by giving one the other's label (a union-find by relabeling) and raising their
+ * degrees. A graph with no edges has the one row of the empty subset.
  */
-const edgeSubsetRows = (columns: SubsetColumns): MathJSON => {
+const subsetRows = (columns: SubsetColumns, source: SubsetSource = EDGE_SOURCE): MathJSON => {
   const [labelEnd, width] = [add("n", 1), add(1, add(columns.labels ? "n" : 0, columns.degrees ? "n" : 0))];
   const keep = at("t", "row");
   const label: MathJSON = [
@@ -1174,8 +1200,7 @@ const edgeSubsetRows = (columns: SubsetColumns): MathJSON => {
   return typedFolding(
     [
       "If",
-      equals("k", 0),
-      "rows",
+      source.active,
       [
         "Join",
         "rows",
@@ -1183,11 +1208,11 @@ const edgeSubsetRows = (columns: SubsetColumns): MathJSON => {
           "rows",
           bind(
             "from",
-            at(1, at("k", "edges")),
+            source.from,
             bind(
               "to",
-              at(2, at("k", "edges")),
-              forEach(["Range", 1, width], ["If", equals("t", 1), add(at(1, "row"), 1), entry], "t"),
+              source.to,
+              forEach(["Range", 1, width], ["If", equals("t", 1), source.size, entry], "t"),
               "integer",
             ),
             "integer",
@@ -1195,11 +1220,12 @@ const edgeSubsetRows = (columns: SubsetColumns): MathJSON => {
           "row",
         ),
       ],
+      "rows",
     ],
     "rows",
     "k",
-    ["List", ["Join", ["List", 0], ...(columns.labels ? [vertices] : []), ...zeros(columns.degrees)]],
-    ["Range", 0, length("edges")],
+    ["List", ["Join", ["List", source.emptySize], ...(columns.labels ? [vertices] : []), ...zeros(columns.degrees)]],
+    source.steps,
     "list<list<integer>>",
   );
 };
@@ -1210,24 +1236,28 @@ const rankOfRow = (row: MathJSON): MathJSON =>
 const rowDegrees = (columns: SubsetColumns, row: MathJSON): MathJSON =>
   forEach(vertices, at(degreePosition(columns, "v"), row), "v");
 /**
- * `over` each subset of the edges, for a body that reads the subset's `row` of `edgeSubsetRows(columns)`; `last` is the
- * row of all the edges. `summary` takes the list of the bodies and `last`.
+ * `summary` of the list of `body` over each row of `subsetRows(columns, source)`: the body reads its `row`, and the summary
+ * the list of the bodies and `last`, the row of every step taken.
  */
+const summarizeSubsetRows = (
+  columns: SubsetColumns,
+  body: (row: MathJSON) => MathJSON,
+  summary: (bodies: MathJSON, last: MathJSON) => MathJSON,
+  source?: SubsetSource,
+): MathJSON =>
+  bindList(
+    "table",
+    subsetRows(columns, source),
+    bindList("last", at(length("table"), "table"), summary(forEach("table", body("row"), "row"), "last")),
+    "list<list<integer>>",
+  );
+/** `summarizeSubsetRows` over the subsets of the edges. */
 const overEdgeSubsetRows = (
   columns: SubsetColumns,
   body: (row: MathJSON) => MathJSON,
   summary: (bodies: MathJSON, last: MathJSON) => MathJSON,
   otherwise: MathJSON = 0,
-): MathJSON =>
-  withGraph(
-    bindList(
-      "table",
-      edgeSubsetRows(columns),
-      bindList("last", at(length("table"), "table"), summary(forEach("table", body("row"), "row"), "last")),
-      "list<list<integer>>",
-    ),
-    otherwise,
-  );
+): MathJSON => withGraph(summarizeSubsetRows(columns, body, summary), otherwise);
 /**
  * The sum over the subsets of the edges of `body` of the subset's size, rank and corank (the rank of the whole graph less
  * its rank): the sum that every Tutte evaluation and coefficient is. `wrap` takes the sum and the rank of the whole graph.
@@ -2845,5 +2875,90 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
       (bodies) => ["Max", bodies],
     ),
     `FindStat's St001649: a connected set of edges has an Euler trail when at most two vertices have odd degree. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TriangleFreeEdgeDeletionNumber",
+    "The fewest edges whose deletion leaves a graph with no triangle.",
+    withGraph([
+      "If",
+      equals(length("edges"), 0),
+      0,
+      bindList(
+        "index",
+        forEach(
+          vertices,
+          forEach(
+            vertices,
+            floored(
+              sumOver(
+                ["Range", 1, length("edges")],
+                times("k", times(one(equals(lower(at("k", "edges")), "a")), one(equals(upper(at("k", "edges")), "b")))),
+                "k",
+              ),
+            ),
+            "b",
+          ),
+          "a",
+        ),
+        [
+          "Min",
+          forEach(
+            ["Range", 0, subtract(["Power", 2, length("edges")], 1)],
+            [
+              "If",
+              equals(
+                floored(
+                  sumOver(
+                    vertices,
+                    floored(
+                      sumOver(
+                        vertices,
+                        floored(
+                          sumOver(
+                            vertices,
+                            times(
+                              one(hasBit("m", entry("index", "a", "b"))),
+                              times(
+                                one(hasBit("m", entry("index", "a", "c"))),
+                                one(hasBit("m", entry("index", "b", "c"))),
+                              ),
+                            ),
+                            "c",
+                          ),
+                        ),
+                        "b",
+                      ),
+                    ),
+                    "a",
+                  ),
+                ),
+                0,
+              ),
+              subtract(length("edges"), floored(sumOver(["Range", 1, length("edges")], one(hasBit("m", "k")), "k"))),
+              length("edges"),
+            ],
+            "m",
+          ),
+        ],
+        "list<list<integer>>",
+      ),
+    ]),
+    `FindStat's St001573: the edges less the most edges of a set with no triangle. A triangle is three vertices a < b < c whose three edges are all in the set. ${NO_VERTICES}`,
+  ),
+  stat(
+    "RegularEdgeEditNumber",
+    "The fewest edges to add or delete to make a graph regular.",
+    withAdjacency(
+      summarizeSubsetRows(
+        DEGREE_COLUMNS,
+        (row) => {
+          const degrees = rowDegrees(DEGREE_COLUMNS, row);
+          return ["If", equals(["Min", degrees], ["Max", degrees]), at(1, row), length("edges")];
+        },
+        (bodies) => ["Min", bodies],
+        PAIR_SOURCE,
+      ),
+    ),
+    `FindStat's St001574: the fewest differences between the edges and those of a regular graph on the same vertices; the graph with no edges is regular. ${NO_VERTICES}`,
   ),
 ];

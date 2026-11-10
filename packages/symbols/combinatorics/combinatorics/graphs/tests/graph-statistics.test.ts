@@ -101,8 +101,14 @@ const BATCH_TWO = new Set([
   "LargestRegularSpanningSubgraphDegree",
   "LargestRegularSubgraphDegree",
   "LongestTrailLength",
+  "TriangleFreeEdgeDeletionNumber",
+  "RegularEdgeEditNumber",
 ]);
+// Heads that build the subsets of all the pairs of vertices take about a second a graph on 4 vertices and ten on 5, so the
+// standard run reads fewer of them still.
+const PAIR_SUBSETS = new Set(["RegularEdgeEditNumber"]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
+const thinnest = (head: string): boolean => PAIR_SUBSETS.has(head) && !DEEP;
 
 /** Every labeled graph on n vertices. */
 function graphs(n: number): Graph[] {
@@ -147,9 +153,9 @@ test("every graph definition has an independent reading", () => {
 
 for (const [head, expected] of Object.entries(GRAPH_READINGS))
   test(`${head} agrees over every graph on 0..4 vertices`, () => {
-    // Thinned: every graph to 3 vertices, every eighth on 4.
+    // Thinned: every graph to 3 vertices, every eighth on 4 (every 32nd for the thinnest).
     const all = thinned(head)
-      ? [0, 1, 2, 3, 4].flatMap((n) => graphs(n).filter((_, i) => n < 4 || i % 8 === 0))
+      ? [0, 1, 2, 3, 4].flatMap((n) => graphs(n).filter((_, i) => n < 4 || i % (thinnest(head) ? 32 : 8) === 0))
       : [0, 1, 2, 3, 4].flatMap(graphs);
     for (const g of all) expect(evaluate(head, g), JSON.stringify(g)).toBe(expected(g));
   });
@@ -159,8 +165,9 @@ for (const [head, expected] of Object.entries(GRAPH_READINGS))
   test(`${head} is the same after relabeling, and agrees, on graphs of 1..6 vertices`, () => {
     for (let n = 1; n <= 6; n++) {
       const all = graphs(n);
-      // Thinned: two graphs of each size to 4, one of 5, none of 6.
-      for (let k = 0; k < (thinned(head) ? (n <= 4 ? 2 : n === 5 ? 1 : 0) : 4); k++) {
+      // Thinned: two graphs of each size to 4, one of 5, none of 6 (one to 4 and none beyond for the thinnest).
+      const count = thinnest(head) ? (n <= 4 ? 1 : 0) : thinned(head) ? (n <= 4 ? 2 : n === 5 ? 1 : 0) : 4;
+      for (let k = 0; k < count; k++) {
         const g = all[Math.floor(((k * 7 + 3) * all.length) / 29) % all.length]!;
         const renamed = relabel(g, shuffled(n, 31 * n + k));
         expect(evaluate(head, g), JSON.stringify(g)).toBe(expected(g));

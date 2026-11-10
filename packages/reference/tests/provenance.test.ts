@@ -2014,6 +2014,8 @@ const NOVEL = [
   "LargestRegularSpanningSubgraphDegree",
   "LargestRegularSubgraphDegree",
   "LongestTrailLength",
+  "TriangleFreeEdgeDeletionNumber",
+  "RegularEdgeEditNumber",
   "CornerSumLatticeDegree",
   "MonotoneTriangleMaximalLastDiagonalCount",
   "DescentWordPreimageCount",

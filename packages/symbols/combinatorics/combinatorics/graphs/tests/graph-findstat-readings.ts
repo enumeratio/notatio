@@ -1098,5 +1098,25 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
           });
         }),
     ),
-  LongestTrailLength: (g) => Math.max(0, ...range(1, g.n).map((start) => longestTrailFrom(g.edges, start, new Set()))),
+  LongestTrailLength: (g) => Math.max(0, ...range(1, g.n).map((start) => longestTrailFrom(g.edges, start, new Set()))), // The fewest edges to delete, tried by count: the smallest k for which some k edges meet every triangle.
+  TriangleFreeEdgeDeletionNumber: (g) =>
+    range(0, g.edges.length).find((k) =>
+      edgeSubsets(g, k).some((deleted) => {
+        const kept = g.edges.filter((edge) => !deleted.includes(edge));
+        return !subsets(g.n).some(
+          (set) =>
+            set.length === 3 && pairsOf(set).every(([u, v]) => kept.some(([a, b]) => a === u + 1 && b === v + 1)),
+        );
+      }),
+    )!,
+  // Every graph on the same vertices that is regular, by the number of pairs where it differs from this one.
+  RegularEdgeEditNumber: (g) => {
+    const pairs = pairsOf(range(1, g.n)).filter(([u, v]) => u < v);
+    const has = (set: readonly Edge[], [u, v]: Edge): boolean => set.some(([a, b]) => a === u && b === v);
+    return Math.min(
+      ...edgeSets(pairs)
+        .filter((other) => new Set(degreesIn(g.n, other)).size <= 1)
+        .map((other) => pairs.filter((pair) => has(other, pair) !== has(g.edges, pair)).length),
+    );
+  },
 };
