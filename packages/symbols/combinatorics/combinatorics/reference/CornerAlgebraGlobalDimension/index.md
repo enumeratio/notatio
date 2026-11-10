@@ -8,6 +8,13 @@ signatures:
     description: The global dimension of the corner algebra eAe of the path's linear Nakayama algebra, e the idempotent of its minimal faithful projective-injective module.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001197
+    url: https://www.findstat.org/St001197
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -8,6 +8,13 @@ signatures:
     description: The global dimension of the quotient A/AfA of the path's linear Nakayama algebra by the ideal of the idempotent f of its minimal faithful projective-injective left module.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001195
+    url: https://www.findstat.org/St001195
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

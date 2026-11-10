@@ -8,6 +8,13 @@ signatures:
     description: The greatest dimension of an indecomposable projective module of the corner algebra eAe, the height of its Dyck path.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001206
+    url: https://www.findstat.org/St001206
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -8,6 +8,13 @@ signatures:
     description: The simple modules of the corner algebra eAe of projective dimension at most two.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001200
+    url: https://www.findstat.org/St001200
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

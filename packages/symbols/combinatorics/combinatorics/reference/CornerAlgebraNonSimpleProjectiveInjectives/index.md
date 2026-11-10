@@ -8,6 +8,13 @@ signatures:
     description: The indecomposable projective-injective modules of the corner algebra eAe that are not simple.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001205
+    url: https://www.findstat.org/St001205
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

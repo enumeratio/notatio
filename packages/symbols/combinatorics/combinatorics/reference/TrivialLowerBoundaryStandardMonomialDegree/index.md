@@ -8,6 +8,13 @@ signatures:
     description: The degree of the standard monomial of the path relative to the trivial lower boundary.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001509
+    url: https://www.findstat.org/St001509
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

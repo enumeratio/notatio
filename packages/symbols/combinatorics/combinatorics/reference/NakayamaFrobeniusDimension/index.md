@@ -8,6 +8,13 @@ signatures:
     description: The dimension of the space of homomorphisms from the injective cogenerator D(A) to the regular module of the path's linear Nakayama algebra.
     library: enumeratio-combinatorics
     type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001643
+    url: https://www.findstat.org/St001643
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
