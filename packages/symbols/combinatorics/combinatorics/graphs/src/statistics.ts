@@ -29,6 +29,12 @@ const stat = (head: string, summary: string, expr: MathJSON, note?: string): Def
 });
 
 const NO_VERTICES = "The graph with no vertices gives 0.";
+/** The largest subject (vertices plus edge ends) the build's compile cross-check interprets for a spectrum head: the interpreter takes seconds a graph at 4 vertices and tens at 5, so the larger graphs are held by the compiled tests. */
+const SPECTRUM_CHECK_WEIGHT = 16;
+const spectrumStat = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
+  ...stat(head, summary, expr, note),
+  checkWeight: SPECTRUM_CHECK_WEIGHT,
+});
 
 const vertices: MathJSON = ["Range", 1, "n"];
 const one = (test: MathJSON): MathJSON => ["If", test, 1, 0];
@@ -913,6 +919,201 @@ const maximumMultiplicity: MathJSON = bindList(
     ),
   ),
 );
+
+/**
+ * Moduli for the Laplacian spectra: primes between 2^25 and 2^26, so a product of two residues and a sum of two
+ * such products stay below 2^53.
+ */
+const SPECTRUM_PRIMES: readonly number[] = [
+  67108859, 67108837, 67108819, 67108777, 67108763, 67108757, 67108753, 67108747, 67108739, 67108729, 67108721,
+  67108709, 67108693, 67108669, 67108667, 67108661, 67108649, 67108633, 67108597, 67108579, 67108529, 67108511,
+  67108507, 67108493, 67108471, 67108463, 67108453, 67108439, 67108387, 67108373, 67108369, 67108351, 67108331,
+  67108313, 67108303, 67108289, 67108271, 67108219, 67108207, 67108201,
+];
+/** Bits every one of `SPECTRUM_PRIMES` exceeds. */
+const PRIME_BITS = 25;
+/** Euclid's round of `gcdRound` over the integers mod `prime`: no content to divide out, the cross-multiplied residues stay exact. */
+const modularGcdRound: MathJSON = bindList(
+  "front",
+  at(1, "pair"),
+  bindList(
+    "back",
+    at(2, "pair"),
+    [
+      "If",
+      isZero("back"),
+      "pair",
+      bind(
+        "frontDegree",
+        degreeOf("front"),
+        bind(
+          "backDegree",
+          degreeOf("back"),
+          [
+            "If",
+            ["Or", isZero("front"), less("frontDegree", "backDegree")],
+            ["List", "back", "front"],
+            [
+              "List",
+              forEach(
+                polynomialPositions,
+                [
+                  "Mod",
+                  subtract(
+                    times(at(add("backDegree", 1), "back"), at("j", "front")),
+                    times(at(add("frontDegree", 1), "front"), [
+                      "If",
+                      greater("j", subtract("frontDegree", "backDegree")),
+                      at(subtract("j", subtract("frontDegree", "backDegree")), "back"),
+                      0,
+                    ]),
+                  ),
+                  "prime",
+                ],
+                "j",
+              ),
+              "back",
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+    ],
+    "list<integer>",
+  ),
+  "list<integer>",
+);
+const modularGcd = (first: MathJSON, second: MathJSON): MathJSON =>
+  at(
+    1,
+    typedFolding(
+      modularGcdRound,
+      "pair",
+      "round",
+      ["List", first, second],
+      ["Range", 1, add(times(4, "n"), 2)],
+      "list<list<integer>>",
+    ),
+  );
+const modularDerivative = (poly: MathJSON): MathJSON =>
+  forEach(
+    polynomialPositions,
+    ["If", less("j", polynomialLength), ["Mod", times("j", at(add("j", 1), poly)), "prime"], 0],
+    "j",
+  );
+/**
+ * `perPrime`, a list of integers over the primes of `SPECTRUM_PRIMES` with `polynomial` the characteristic
+ * polynomial's coefficients reduced mod `prime`, lowest power first. The roots of the reduced polynomial are the images of
+ * the eigenvalues, so it has at most as many distinct roots, and none of a lower multiplicity, than the integer one
+ * (a prime above n keeps the multiplicity formula of a derivative). They agree unless the prime divides the
+ * discriminant of the minimal polynomial, which is nonzero and below (2 rho)^(n (n - 1)) in size: its roots are
+ * eigenvalues, real, inside the Gershgorin radius rho (the greatest absolute row sum), so two differ by at most 2 rho.
+ * Primes whose product passes that bound can't all divide it: each exceeds 2^25, and `bits` is the ceiling of log2 of
+ * 2 rho, so `primeCount` primes with 25 `primeCount` > n (n - 1) `bits` suffice. The integer route `otherwise` answers where
+ * the list is too short.
+ */
+const overPrimes = (name: string, perPrime: MathJSON, pick: "Max" | "Min", otherwise: MathJSON): MathJSON =>
+  bind(
+    "radius",
+    [
+      "Max",
+      2,
+      times(2, ["Max", forEach(vertices, floored(sumOver(vertices, ["Abs", entry(name, "i", "l")], "l")), "i")]),
+    ],
+    bind(
+      "bits",
+      floored(sumOver(["Range", 0, 30], one(less(["Power", 2, "t"], "radius")), "t")),
+      bind(
+        "primeCount",
+        add(
+          floored(
+            sumOver(
+              ["Range", 1, SPECTRUM_PRIMES.length + 1],
+              one(less(times(PRIME_BITS, "t"), add(times(times("n", subtract("n", 1)), "bits"), 1))),
+              "t",
+            ),
+          ),
+          1,
+        ),
+        [
+          "If",
+          greater("primeCount", SPECTRUM_PRIMES.length),
+          otherwise,
+          [
+            pick,
+            forEach(
+              ["Range", 1, "primeCount"],
+              bind(
+                "prime",
+                at("q", ["List", ...SPECTRUM_PRIMES]),
+                bindList(
+                  "polynomial",
+                  forEach(polynomialPositions, ["Mod", at("j", "integral"), "prime"], "j"),
+                  perPrime,
+                ),
+                "integer",
+              ),
+              "q",
+            ),
+          ],
+        ],
+        "integer",
+      ),
+      "integer",
+    ),
+    "integer",
+  );
+/** The distinct eigenvalues of the matrix called `name`, mod primes; the integer route beyond the primes. */
+const distinctSpectrumValues = (name: string): MathJSON =>
+  bindList(
+    "integral",
+    ascendingCoefficients,
+    overPrimes(
+      name,
+      subtract("n", degreeOf(modularGcd("polynomial", modularDerivative("polynomial")))),
+      "Max",
+      distinctEigenvalues,
+    ),
+  );
+const maximumSpectrumMultiplicity = (name: string): MathJSON =>
+  bindList(
+    "integral",
+    ascendingCoefficients,
+    overPrimes(
+      name,
+      at(
+        1,
+        at(
+          2,
+          typedFolding(
+            bindList(
+              "current",
+              at(1, "chain"),
+              [
+                "If",
+                equals(degreeOf("current"), 0),
+                "chain",
+                [
+                  "List",
+                  modularGcd("current", modularDerivative("current")),
+                  forEach(polynomialPositions, ["If", equals("j", 1), add(at(1, at(2, "chain")), 1), 0], "j"),
+                ],
+              ],
+              "list<integer>",
+            ),
+            "chain",
+            "turn",
+            ["List", "polynomial", forEach(polynomialPositions, 0, "j")],
+            ["Range", 1, "n"],
+            "list<list<integer>>",
+          ),
+        ),
+      ),
+      "Min",
+      maximumMultiplicity,
+    ),
+  );
 
 /** The Laplacian, degrees on the diagonal and minus the adjacency off it. */
 const laplacianRows: MathJSON = forEach(
@@ -2416,10 +2617,10 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     withAdjacencySpectrum(distinctEigenvalues),
     `FindStat's St000452. The characteristic polynomial has as many distinct roots as its degree less that of its greatest common divisor with its derivative. ${NO_VERTICES}`,
   ),
-  stat(
+  spectrumStat(
     "DistinctLaplacianEigenvalueCount",
     "The distinct eigenvalues of the Laplacian.",
-    withLaplacianSpectrum(distinctEigenvalues),
+    withLaplacianSpectrum(distinctSpectrumValues("laplacian")),
     `FindStat's St000453. ${NO_VERTICES}`,
   ),
   stat(
@@ -2428,10 +2629,10 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     withAdjacencySpectrum(maximumMultiplicity),
     `FindStat's St000776. A root of multiplicity m is a root of the m - 1 greatest common divisors of the polynomial with its derivatives in turn. ${NO_VERTICES}`,
   ),
-  stat(
+  spectrumStat(
     "MaximumLaplacianEigenvalueMultiplicity",
     "The greatest multiplicity of an eigenvalue of the Laplacian.",
-    withLaplacianSpectrum(maximumMultiplicity),
+    withLaplacianSpectrum(maximumSpectrumMultiplicity("laplacian")),
     `FindStat's St000774. ${NO_VERTICES}`,
   ),
   stat(
@@ -2452,16 +2653,16 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     withConnectedSpectrum("distances", "distances", determinantFromCoefficients(1)),
     `FindStat's St000302, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
   ),
-  stat(
+  spectrumStat(
     "DistinctDistanceLaplacianEigenvalueCount",
     "The distinct eigenvalues of the distance Laplacian.",
-    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, distinctEigenvalues),
+    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, distinctSpectrumValues("distanceLaplacian")),
     `FindStat's St000777, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
   ),
-  stat(
+  spectrumStat(
     "MaximumDistanceLaplacianEigenvalueMultiplicity",
     "The greatest multiplicity of an eigenvalue of the distance Laplacian.",
-    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, maximumMultiplicity),
+    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, maximumSpectrumMultiplicity("distanceLaplacian")),
     `FindStat's St000771, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
   ),
   stat(
