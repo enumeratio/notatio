@@ -45,9 +45,7 @@ import { PARKING_TABLEAU_MAPS } from "../words/src/parking-tableau-maps.ts";
 import { MATCHING_CONVERSION_MAPS } from "../set-partitions/src/matching-conversion-maps.ts";
 import { TUNNEL_MATCHING_MAPS } from "../lattice-paths/src/tunnel-matching-maps.ts";
 import { BINARY_TREE_CONVERSION_MAPS } from "../trees/src/binary-tree-conversion-maps.ts";
-import { STRAHLER_MAPS } from "../trees/src/strahler-maps.ts";
 import { INCREASING_TREE_MAPS } from "../permutations/src/increasing-tree-maps.ts";
-import { FRANCON_MAPS } from "../lattice-paths/src/francon-maps.ts";
 import { POLYOMINO_MAPS } from "../lattice-paths/src/polyomino-maps.ts";
 import { PERMUTATION_BATCH_TEN_MAPS } from "../permutations/src/tenth-batch-maps.ts";
 import { PLANE_PARTITION_MAPS } from "../tableaux/src/plane-partition-maps.ts";
@@ -88,9 +86,7 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...MATCHING_CONVERSION_MAPS,
   ...TUNNEL_MATCHING_MAPS,
   ...BINARY_TREE_CONVERSION_MAPS,
-  ...STRAHLER_MAPS,
   ...INCREASING_TREE_MAPS,
-  ...FRANCON_MAPS,
   ...POLYOMINO_MAPS,
   ...PERMUTATION_BATCH_TEN_MAPS,
   ...PLANE_PARTITION_MAPS,
