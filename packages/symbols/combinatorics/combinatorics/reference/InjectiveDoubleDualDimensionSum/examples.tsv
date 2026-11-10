@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[InjectiveDoubleDualDimensionSum, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	7			the step word $UUDDUD$
+the-step-word-uduudd			[InjectiveDoubleDualDimensionSum, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	5			the step word $UDUUDD$
+findstat-st001259-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'InjectiveDoubleDualDimensionSum'"]	2	2	FindStat St001259	FindStat's value for [1,0]
+findstat-st001259-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'InjectiveDoubleDualDimensionSum'"]	4	4	FindStat St001259	FindStat's value for [1,0,1,0]
+findstat-st001259-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'InjectiveDoubleDualDimensionSum'"]	3	3	FindStat St001259	FindStat's value for [1,1,0,0]

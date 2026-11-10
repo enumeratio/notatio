@@ -1175,7 +1175,7 @@ const regularSimples = (k: number): MathJSON =>
     ),
   );
 /** The `steps`-th cosyzygy of (x0, y0) as (top, length, steps taken); the zero module has length 0 and stays. */
-const cosyzygyAfter = (x0: MathJSON, y0: MathJSON, steps: number): MathJSON =>
+const cosyzygyAfter = (x0: MathJSON, y0: MathJSON, steps: MathJSON): MathJSON =>
   fold(
     upTo(vertexCount),
     ["List", x0, y0, 0],
@@ -1207,25 +1207,25 @@ const cosyzygyAfter = (x0: MathJSON, y0: MathJSON, steps: number): MathJSON =>
     ),
   );
 /** The greatest projective dimension of the `steps`-th term of the minimal injective coresolution of the indecomposable projectives (term 0 is the injective hull). */
-const coresolutionTermProjectiveDimension = (steps: number): MathJSON =>
-  overSeries([
-    "Max",
-    forEach(
-      vertexIndices,
-      bindList("cosyzygy", cosyzygyAfter(subtract("v", 1), at("v", "series"), steps), [
-        "If",
-        equals(at(2, "cosyzygy"), 0),
-        0,
-        bindList(
-          "socle",
-          subtract(add(at(1, "cosyzygy"), at(2, "cosyzygy")), 1),
-          bindList("hull", hullTop("socle"), projectiveDimension("hull", subtract(add("socle", 1), "hull")), "integer"),
-          "integer",
-        ),
-      ]),
-      "v",
-    ),
-  ]);
+const coresolutionTermDimension = (steps: MathJSON): MathJSON => [
+  "Max",
+  forEach(
+    vertexIndices,
+    bindList("cosyzygy", cosyzygyAfter(subtract("v", 1), at("v", "series"), steps), [
+      "If",
+      equals(at(2, "cosyzygy"), 0),
+      0,
+      bindList(
+        "socle",
+        subtract(add(at(1, "cosyzygy"), at(2, "cosyzygy")), 1),
+        bindList("hull", hullTop("socle"), projectiveDimension("hull", subtract(add("socle", 1), "hull")), "integer"),
+        "integer",
+      ),
+    ]),
+    "v",
+  ),
+];
+const coresolutionTermProjectiveDimension = (steps: number): MathJSON => overSeries(coresolutionTermDimension(steps));
 /** The dominant dimension of each indecomposable projective module, vertex by vertex. */
 const projectiveDominantDimensions = [
   "projectiveDominantDims",
@@ -1372,6 +1372,570 @@ const coxeterEntrySum: MathJSON = [
   ),
   2,
 ];
+
+// ── reflexive and torsionfree modules, Auslander-Reiten sequences, double duals ──────────────────────
+// A value read inside a `Filter` predicate or a nested module loop is bound to a name first: a predicate sees only its
+// own parameter and the names bound around it, never the parameters of an enclosing loop.
+/**
+ * The syzygies of the indecomposable injectives, one row per level: row `level` holds the (level - 1)-th syzygy of each
+ * injective, as its tops (`part` 1) or its lengths (`part` 2), stopping at the projective it reaches.
+ */
+const syzygyChains = (part: 1 | 2): MathJSON =>
+  forEach(
+    vertexIndices,
+    forInjectives((top, extent) => at(part, syzygyAfter(top, extent, subtract("level", 1)))),
+    "level",
+  );
+/** `body` over the series with the syzygies of the injectives bound as `chainTops` and `chainLengths`, read once for every Ext below. */
+const overChains = (body: MathJSON): MathJSON =>
+  nonEmpty(
+    bindList(
+      "series",
+      kupischSeries,
+      bindList(
+        "chainTops",
+        syzygyChains(1),
+        bindList("chainLengths", syzygyChains(2), body, "list<list<integer>>"),
+        "list<list<integer>>",
+      ),
+    ),
+  );
+/**
+ * The total dim Ext^degree from the indecomposable injectives to the module (a, b): Ext^1 of each injective's
+ * (degree - 1)-th syzygy, read off the maps from its syzygy, its projective cover and itself.
+ */
+const injectiveExtensionsInto = (a: MathJSON, b: MathJSON, degree: MathJSON): MathJSON =>
+  floored(
+    sumOver(
+      vertexIndices,
+      bindList(
+        "chainTop",
+        at("m", at(degree, "chainTops")),
+        bindList(
+          "chainLength",
+          at("m", at(degree, "chainLengths")),
+          bindList(
+            "chainEntry",
+            at(add("chainTop", 1), "series"),
+            add(
+              subtract(
+                homDimension(add("chainTop", "chainLength"), subtract("chainEntry", "chainLength"), a, b),
+                homDimension("chainTop", "chainEntry", a, b),
+              ),
+              homDimension("chainTop", "chainLength", a, b),
+            ),
+            "integer",
+          ),
+          "integer",
+        ),
+        "integer",
+      ),
+      "m",
+    ),
+  );
+/** 1 when the module (top, length) is `k`-torsionfree, else 0: Ext^i(D(A), tau M) vanishes for i up to k, tau M being (top + 1, length); a projective is. */
+const torsionfreeUpTo = (top: MathJSON, extent: MathJSON, k: number): MathJSON =>
+  bindList(
+    "moduleTop",
+    top,
+    bindList(
+      "moduleLength",
+      extent,
+      [
+        "If",
+        equals("moduleLength", at(add("moduleTop", 1), "series")),
+        1,
+        [
+          "If",
+          equals(
+            floored(sumOver(upTo(k), injectiveExtensionsInto(add("moduleTop", 1), "moduleLength", "degree"), "degree")),
+            0,
+          ),
+          1,
+          0,
+        ],
+      ],
+      "integer",
+    ),
+    "integer",
+  );
+/** 1 when the module is reflexive, which is 2-torsionfree, else 0; the zero module is. */
+const reflexiveModule = (top: MathJSON, extent: MathJSON): MathJSON =>
+  bindList(
+    "candidateLength",
+    extent,
+    ["If", equals("candidateLength", 0), 1, torsionfreeUpTo(top, "candidateLength", 2)],
+    "integer",
+  );
+/** `body(top, length)` at every indecomposable module, combined over the lengths at each top by `combine`; a list with one entry per top. */
+const eachModule = (combine: "Sum" | "Max", body: (top: MathJSON, extent: MathJSON) => MathJSON): MathJSON =>
+  forEach(
+    vertexIndices,
+    [
+      combine,
+      forEach(
+        moduleLengths,
+        bindList(
+          "moduleHead",
+          subtract("v", 1),
+          bindList("moduleExtent", "y", body("moduleHead", "moduleExtent"), "integer"),
+          "integer",
+        ),
+        "y",
+      ),
+    ],
+    "v",
+  );
+const isNonProjective = (top: MathJSON, extent: MathJSON): MathJSON => less(extent, at(add(top, 1), "series"));
+/** `value` at each non-projective module that passes `keep`, 0 at the rest. */
+const nonProjectiveWhere = (
+  combine: "Sum" | "Max",
+  keep: (top: MathJSON, extent: MathJSON) => MathJSON,
+  value: (top: MathJSON, extent: MathJSON) => MathJSON,
+): MathJSON =>
+  eachModule(combine, (top, extent) => [
+    "If",
+    isNonProjective(top, extent),
+    ["If", keep(top, extent), value(top, extent), 0],
+    0,
+  ]);
+/** `value` at each non-projective module, 0 at the projectives. */
+const nonProjective = (combine: "Sum" | "Max", value: (top: MathJSON, extent: MathJSON) => MathJSON): MathJSON =>
+  eachModule(combine, (top, extent) => ["If", isNonProjective(top, extent), value(top, extent), 0]);
+const isReflexive = (top: MathJSON, extent: MathJSON): MathJSON => equals(reflexiveModule(top, extent), 1);
+/** Whether the non-projective module embeds in an indecomposable projective: one with the same socle that starts at or before it. */
+const isTorsionless = (top: MathJSON, extent: MathJSON): MathJSON =>
+  greater(count(["Range", 0, top, 1], equals(add("a", at(add("a", 1), "series")), add(top, extent)), "a"), 0);
+/** The total dimension of the Auslander-Reiten sequence terms' reflexivity: 1 when every module in `terms` (top, length) is reflexive. */
+const allReflexive = (terms: readonly (readonly [MathJSON, MathJSON])[]): MathJSON => [
+  "If",
+  equals(["Multiply", ...terms.map(([top, extent]) => reflexiveModule(top, extent))], 1),
+  1,
+  0,
+];
+/** The indecomposable projectives that are not injective, vertex `v` counting from 1: one before it is longer. */
+const projectiveNotInjectiveAt = (v: MathJSON): MathJSON => greater(at(v, "leftSeries"), at(v, "series"));
+/**
+ * The non-injective projectives P = (top, length) whose Auslander-Reiten sequence 0 -> P -> (top - 1, length + 1) +
+ * (top, length - 1) -> (top - 1, length) -> 0 has terms that are all reflexive (`wanted` 1) or not all (`wanted` 0).
+ */
+const projectivesWithReflexiveSequence = (wanted: 0 | 1): MathJSON =>
+  overChains(
+    bindList(
+      "leftSeries",
+      leftSeries,
+      floored(
+        sumOver(
+          vertexIndices,
+          [
+            "If",
+            projectiveNotInjectiveAt("v"),
+            bindList(
+              "head",
+              subtract("v", 1),
+              bindList(
+                "extent",
+                at("v", "series"),
+                [
+                  "If",
+                  equals(
+                    allReflexive([
+                      [subtract("head", 1), add("extent", 1)],
+                      ["head", subtract("extent", 1)],
+                      [subtract("head", 1), "extent"],
+                    ]),
+                    wanted,
+                  ),
+                  1,
+                  0,
+                ],
+                "integer",
+              ),
+              "integer",
+            ),
+            0,
+          ],
+          "v",
+        ),
+      ),
+    ),
+  );
+/** The vertices (from 1) carrying the double dual of the module (top, length), the dual's support being those of the projectives it maps into. */
+const doubleDualVertices = (top: MathJSON, extent: MathJSON): MathJSON =>
+  bindList(
+    "dualTop",
+    top,
+    bindList(
+      "dualLength",
+      extent,
+      bindList(
+        "support",
+        where(
+          vertexIndices,
+          equals(homDimension("dualTop", "dualLength", subtract("w", 1), at("w", "series")), 1),
+          "w",
+        ),
+        bindList(
+          "lowest",
+          subtract(["Min", ["Join", "support", ["List", add(vertexCount, 1)]]], 1),
+          bindList(
+            "highest",
+            subtract(["Max", ["Join", "support", ["List", 0]]], 1),
+            where(
+              vertexIndices,
+              bindList(
+                "socle",
+                subtract("b", 1),
+                bindList(
+                  "hull",
+                  hullTop("socle"),
+                  and(
+                    atLeastValue("socle", "highest"),
+                    and(atLeastValue("hull", "lowest"), atMostValue("hull", "highest")),
+                  ),
+                  "integer",
+                ),
+                "integer",
+              ),
+              "b",
+            ),
+            "integer",
+          ),
+          "integer",
+        ),
+      ),
+      "integer",
+    ),
+    "integer",
+  );
+const doubleDualDimension = (top: MathJSON, extent: MathJSON): MathJSON => length(doubleDualVertices(top, extent));
+const simpleDoubleDualDimensions: MathJSON = forEach(vertexIndices, doubleDualDimension(subtract("v", 1), 1), "v");
+
+// ── the resolution quiver: each vertex goes to its own index plus its Kupisch entry, around the vertices ──
+/** The images of the vertices (from 1) under v -> v + series_v, taken around the vertex count; bound as `image`. */
+const resolutionImages: MathJSON = forEach(
+  vertexIndices,
+  add(["Mod", add(subtract("v", 1), at("v", "series")), vertexCount], 1),
+  "v",
+);
+/** `image` applied `steps` times to the vertex `start`; a `Range` with an explicit step is empty, not descending, when `steps` is 0. */
+const imagePower = (start: MathJSON, steps: MathJSON): MathJSON =>
+  fold(["Range", 1, steps, 1], start, at("a", "image"), "a", "b");
+/** The vertices on a cycle: the images of every vertex under as many steps as there are vertices. */
+const cycleVertices: MathJSON = forEach(vertexIndices, imagePower("v", vertexCount), "v");
+/** The steps from `start` until it reaches a cycle: the ticks at which it is still off every cycle. */
+const stepsToCycle = (start: MathJSON): MathJSON =>
+  bindList(
+    "origin",
+    start,
+    floored(
+      sumOver(
+        vertexIndices,
+        bindList(
+          "point",
+          imagePower("origin", subtract("k", 1)),
+          ["If", equals(count("cycleVertices", equals("u", "point"), "u"), 0), 1, 0],
+          "integer",
+        ),
+        "k",
+      ),
+    ),
+    "integer",
+  );
+const overResolutionQuiver = (body: MathJSON): MathJSON =>
+  overNakayama(
+    [
+      ["image", resolutionImages],
+      ["cycleVertices", cycleVertices],
+    ],
+    body,
+  );
+/** The steps from the vertex furthest from every cycle to its cycle: the number of steps the powers of the map take to become periodic. */
+const resolutionQuiverDepth: MathJSON = ["Max", forEach(vertexIndices, stepsToCycle("v"), "v")];
+
+// ── regular and syzygy modules, torsionfree indices, quotients, rigidity ───────────────────────────
+/** 1 when the module (top, length) is a `level`-syzygy: it embeds in a projective with the same socle, the cokernel being a (level - 1)-syzygy; the zero module is one. */
+const isSyzygyModule = (level: number, top: MathJSON, extent: MathJSON): MathJSON => {
+  if (level === 0) return 1;
+  const [topName, extentName, source] = [`syzygyTop${level}`, `syzygyLength${level}`, `source${level}`];
+  return bindList(
+    topName,
+    top,
+    bindList(
+      extentName,
+      extent,
+      [
+        "If",
+        greater(
+          floored([
+            "Sum",
+            forEach(
+              ["Range", 0, topName, 1],
+              [
+                "If",
+                equals(add(source, at(add(source, 1), "series")), add(topName, extentName)),
+                ["If", equals(source, topName), 1, isSyzygyModule(level - 1, source, subtract(topName, source))],
+                0,
+              ],
+              source,
+            ),
+          ]),
+          0,
+        ),
+        1,
+        0,
+      ],
+      "integer",
+    ),
+    "integer",
+  );
+};
+/** The least degree i up to the global dimension at which Ext^i(D(A), tau M) is nonzero, less one: how far M is torsionfree; the global dimension when none is. */
+const torsionfreeIndex = (top: MathJSON, extent: MathJSON): MathJSON =>
+  bindList(
+    "indexTop",
+    top,
+    bindList(
+      "indexLength",
+      extent,
+      bindList(
+        "limit",
+        ["Max", "dims"],
+        subtract(
+          [
+            "Min",
+            [
+              "Join",
+              where(
+                ["Range", 1, "limit", 1],
+                greater(injectiveExtensionsInto(add("indexTop", 1), "indexLength", "degree"), 0),
+                "degree",
+              ),
+              ["List", add("limit", 1)],
+            ],
+          ],
+          1,
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+    "integer",
+  );
+/** `body` over the series and the left shifted series. */
+const overSeriesAndLeft = (body: MathJSON): MathJSON =>
+  nonEmpty(bindList("series", kupischSeries, bindList("leftSeries", leftSeries, body)));
+/** `body` over the series, the syzygies of the injectives and the simple projective dimensions `dims`. */
+const overChainsAndSimples = (body: MathJSON): MathJSON => overChains(bindList("dims", simpleDimensions, body));
+/** The regular modules of degree `k`: projective dimension k, no maps into A and no extensions below k, and a one-dimensional Ext^k(M, A). */
+const regularModules = (k: 2): MathJSON =>
+  floored([
+    "Sum",
+    eachModule("Sum", (top, extent) => [
+      "If",
+      equals(projectiveDimension(top, extent), k),
+      [
+        "If",
+        equals(add(homWithRegular(top, extent), firstExtensionWithRegular(top, extent)), 0),
+        ["If", equals(extensionWithRegularAt(top, extent, k), 1), 1, 0],
+        0,
+      ],
+      0,
+    ]),
+  ]);
+/** The vertices (from 1) whose indecomposable projective is injective: the tops of the minimal faithful projective-injective module. */
+const keptVertexList: MathJSON = where(vertexIndices, projectiveInjectiveAt("v"), "v");
+/** The sum over the vertices not kept of Ext^1 with the regular module of the quotient A/AeA's projective at that vertex, e the idempotent of the kept vertices. */
+const topQuotientExtensions: MathJSON = bindList(
+  "kept",
+  keptVertexList,
+  floored(
+    sumOver(
+      vertexIndices,
+      [
+        "If",
+        projectiveNotInjectiveAt("v"),
+        bindList(
+          "vertex",
+          "v",
+          bindList(
+            "reach",
+            [
+              "Min",
+              ["Join", where("kept", greater("w", "vertex"), "w"), ["List", add(vertexCount, at("vertex", "series"))]],
+            ],
+            firstExtensionWithRegular(subtract("vertex", 1), [
+              "Min",
+              at("vertex", "series"),
+              subtract("reach", "vertex"),
+            ]),
+            "integer",
+          ),
+          "integer",
+        ),
+        0,
+      ],
+      "v",
+    ),
+  ),
+);
+/** The greatest injective dimension of the projectives of A/AfA that are not dropped, f the idempotent at the socles of the kept vertices. */
+const socleQuotientInjectiveDimension: MathJSON = bindList(
+  "kept",
+  keptVertexList,
+  bindList("socleVertices", forEach("kept", add("w", subtract(at("w", "series"), 1)), "w"), [
+    "Max",
+    [
+      "Join",
+      forEach(
+        vertexIndices,
+        bindList(
+          "vertex",
+          "v",
+          [
+            "If",
+            equals(count("socleVertices", equals("y", "vertex"), "y"), 0),
+            bindList(
+              "reach",
+              [
+                "Min",
+                ["Join", where("socleVertices", atLeastValue("y", "vertex"), "y"), ["List", add(vertexCount, 1)]],
+              ],
+              injectiveDimension(subtract("vertex", 1), ["Min", at("vertex", "series"), subtract("reach", "vertex")]),
+              "integer",
+            ),
+            0,
+          ],
+          "integer",
+        ),
+        "v",
+      ),
+      ["List", 0],
+    ],
+  ]),
+);
+/** The least i below the global dimension g where the i-th term of the injective coresolution of A has projective dimension above i, else g. */
+const gorensteinDegree: MathJSON = bindList(
+  "limit",
+  ["Max", "dims"],
+  [
+    "Min",
+    [
+      "Join",
+      where(
+        ["Range", 0, subtract("limit", 1), 1],
+        bindList("level", "degree", greater(coresolutionTermDimension("level"), "level"), "integer"),
+        "degree",
+      ),
+      ["List", "limit"],
+    ],
+  ],
+  "integer",
+);
+
+// ── the cyclic Nakayama algebra: the path's Kupisch series with its first entry added to its last ────
+/** The Kupisch series of the cyclic algebra, bound as `cyclicSeries`: its vertices go around, so a module past the last one continues at the first. */
+const cyclicKupischSeries: MathJSON = [
+  "Join",
+  forEach(upTo(semilength), at("i", "series")),
+  ["List", add(at(length("series"), "series"), at(1, "series"))],
+];
+/** The vertex `offset` along around the cyclic algebra (counting from 0), `offset` being no less than minus `widest`, the longest projective, turns of it. */
+const aroundVertices = (offset: MathJSON): MathJSON => [
+  "Mod",
+  add(offset, ["Multiply", vertexCount, "widest"]),
+  vertexCount,
+];
+/** The cap on every step count: the global and dominant dimensions of a cyclic Nakayama algebra with N simples, when finite, are below 2N. */
+const cyclicTicks: MathJSON = ["Range", 1, add(["Multiply", 2, vertexCount], 2), 1];
+/** The projective dimension of the cyclic module (x0, y0), or infinity when the syzygies have not reached a projective within the cap. */
+const cyclicProjectiveDimension = (x0: MathJSON, y0: MathJSON): MathJSON =>
+  bindList(
+    "reached",
+    fold(
+      cyclicTicks,
+      ["List", x0, y0, 0],
+      bindList(
+        "entry",
+        at(add(carried(1), 1), "cyclicSeries"),
+        [
+          "If",
+          equals(carried(2), "entry"),
+          ["List", carried(1), carried(2), carried(3)],
+          [
+            "List",
+            ["Mod", add(carried(1), carried(2)), vertexCount],
+            subtract("entry", carried(2)),
+            add(carried(3), 1),
+          ],
+        ],
+        "integer",
+      ),
+    ),
+    [
+      "If",
+      equals(at(2, "reached"), at(add(at(1, "reached"), 1), "cyclicSeries")),
+      at(3, "reached"),
+      "PositiveInfinity",
+    ],
+  );
+const overCyclicSeries = (body: MathJSON): MathJSON => overNakayama([["cyclicSeries", cyclicKupischSeries]], body);
+/** The codominant dimension of the cyclic module (x0, y0), counting each step of the projective resolution up to the cap while its terms are injective. */
+const cyclicCodominantDimension = (x0: MathJSON, y0: MathJSON): MathJSON => [
+  "At",
+  fold(
+    cyclicTicks,
+    ["List", x0, y0, 0, 1],
+    bindList(
+      "entry",
+      at(add(carried(1), 1), "cyclicSeries"),
+      bindList(
+        "before",
+        at(add(["Mod", add(carried(1), subtract(vertexCount, 1)), vertexCount], 1), "cyclicSeries"),
+        bindList(
+          "flag",
+          ["Multiply", carried(4), ["If", atMostValue("before", "entry"), 1, 0]],
+          [
+            "If",
+            equals(carried(2), "entry"),
+            ["List", carried(1), carried(2), add(carried(3), "flag"), "flag"],
+            [
+              "List",
+              ["Mod", add(carried(1), carried(2)), vertexCount],
+              subtract("entry", carried(2)),
+              add(carried(3), "flag"),
+              "flag",
+            ],
+          ],
+          "integer",
+        ),
+        "integer",
+      ),
+      "integer",
+    ),
+  ),
+  3,
+];
+/** The longest module ending at the vertex `socle` (counting from 0), as (top, length). */
+const cyclicInjective = (socle: MathJSON): MathJSON =>
+  bindList(
+    "ending",
+    socle,
+    bindList(
+      "longest",
+      [
+        "Max",
+        where(
+          ["Range", 1, "widest", 1],
+          atLeastValue(at(add(aroundVertices(subtract(add("ending", 1), "y")), 1), "cyclicSeries"), "y"),
+          "y",
+        ),
+      ],
+      ["List", aroundVertices(subtract(add("ending", 1), "longest")), "longest"],
+      "integer",
+    ),
+    "integer",
+  );
 
 export const DYCK_STATISTICS: readonly Definition[] = [
   stat("Height", "The greatest height the path reaches.", nonEmpty(["Max", profile])),
@@ -2999,5 +3563,283 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     "The degree of the standard monomial of the path relative to the trivial lower boundary.",
     nonEmpty(["At", lowerStandardMonomialDegree, 3]),
     "FindStat's St001509, as its Sage code walks the path: the blockers are the positions after the first half, spent in order.",
+  ),
+  stat(
+    "NonProjectiveReflexiveModules",
+    "The indecomposable non-projective modules that are reflexive, in the path's linear Nakayama algebra.",
+    overChains(floored(["Sum", nonProjectiveWhere("Sum", isReflexive, () => 1)])),
+    "FindStat's St001253. A module is reflexive when Ext^i(D(A), tau M) vanishes for i = 1, 2.",
+  ),
+  stat(
+    "SimpleReflexiveModules",
+    "The simple modules of the path's linear Nakayama algebra that are reflexive.",
+    overChains(count(vertexIndices, isReflexive(subtract("v", 1), 1), "v")),
+    "FindStat's St001066.",
+  ),
+  stat(
+    "ThreeTorsionfreeSimpleModules",
+    "The simple modules of the path's linear Nakayama algebra that are 3-torsionfree: Ext^i(D(A), tau S) vanishes for i = 1, 2, 3.",
+    overChains(count(vertexIndices, equals(torsionfreeUpTo(subtract("v", 1), 1, 3), 1), "v")),
+    "FindStat's St001063.",
+  ),
+  stat(
+    "LargestNonProjectiveReflexiveModule",
+    "The greatest dimension of an indecomposable non-projective reflexive module of the path's linear Nakayama algebra.",
+    overChains(["Max", nonProjectiveWhere("Max", isReflexive, (_top, extent) => extent)]),
+    "FindStat's St001266.",
+  ),
+  stat(
+    "NonProjectiveTorsionlessModules",
+    "The indecomposable non-projective modules that are torsionless: submodules of a projective module.",
+    overChains(floored(["Sum", nonProjectiveWhere("Sum", isTorsionless, () => 1)])),
+    "FindStat's St001278, which also reads it as the modules fixed by tau Omega^1 composed with its inverse.",
+  ),
+  stat(
+    "NonProjectiveReflexiveModuleTops",
+    "The simple modules that are the top of an indecomposable non-projective reflexive module.",
+    overChains(
+      count(
+        nonProjectiveWhere("Max", isReflexive, () => 1),
+        greater("d", 0),
+        "d",
+      ),
+    ),
+    "FindStat's St001167.",
+  ),
+  stat(
+    "NonInjectiveProjectivesWithReflexiveSequences",
+    "The indecomposable projective non-injective modules whose Auslander-Reiten sequence has only reflexive terms.",
+    projectivesWithReflexiveSequence(1),
+    "FindStat's St001113.",
+  ),
+  stat(
+    "NonInjectiveProjectivesWithNonReflexiveSequences",
+    "The indecomposable projective non-injective modules whose Auslander-Reiten sequence has a term that is not reflexive.",
+    projectivesWithReflexiveSequence(0),
+    "FindStat's St001297, which counts the non-injective projectives less those with reflexive sequences.",
+  ),
+  stat(
+    "SimplesWithReflexiveSequences",
+    "The non-projective simple modules whose Auslander-Reiten sequence ending at them has only reflexive terms.",
+    overChains(
+      floored(
+        sumOver(
+          vertexIndices,
+          [
+            "If",
+            greater(at("v", "series"), 1),
+            bindList(
+              "head",
+              subtract("v", 1),
+              allReflexive([
+                [add("head", 1), 1],
+                ["head", 2],
+                ["head", 1],
+              ]),
+              "integer",
+            ),
+            0,
+          ],
+          "v",
+        ),
+      ),
+    ),
+    "FindStat's St001219. The sequence 0 -> tau S -> E -> S -> 0 has the middle term the module of length two on S.",
+  ),
+  stat(
+    "LargestSimpleDoubleDualDimension",
+    "The greatest dimension of the double dual of a simple module of the path's linear Nakayama algebra.",
+    overSeries(["Max", simpleDoubleDualDimensions]),
+    "FindStat's St001239. The dual of a module is the maps into the regular module, and the double dual the maps from that into it.",
+  ),
+  stat(
+    "SimpleDoubleDualDimensionSum",
+    "The dimension of the double dual of the top A/J of the path's linear Nakayama algebra, J the Jacobson radical.",
+    overSeries(floored(["Sum", simpleDoubleDualDimensions])),
+    "FindStat's St001255.",
+  ),
+  stat(
+    "InjectiveDoubleDualDimensionSum",
+    "The dimension of the double dual of D(A), the direct sum of the indecomposable injectives of the path's linear Nakayama algebra.",
+    overSeries(floored(["Sum", forInjectives(doubleDualDimension)])),
+    "FindStat's St001259.",
+  ),
+  stat(
+    "SimpleDoubleDualDominantDimension",
+    "The dominant dimension of the double dual of A/J, the least among its nonzero summands, for the path's linear Nakayama algebra A with Jacobson radical J.",
+    overSeries([
+      "Min",
+      forEach(
+        vertexIndices,
+        bindList("dual", doubleDualVertices(subtract("v", 1), 1), [
+          "If",
+          greater(length("dual"), 0),
+          dominantDimensionOfModule(subtract(["Min", "dual"], 1), length("dual")),
+          1000,
+        ]),
+        "v",
+      ),
+    ]),
+    "FindStat's St001257. A projective-injective summand counts every step up to the vertex count.",
+  ),
+  stat(
+    "ResolutionQuiverDepth",
+    "The greatest number of steps from a vertex to a cycle in the resolution quiver of the path's linear Nakayama algebra, where each vertex goes to its own index plus its Kupisch entry, around the vertices.",
+    overResolutionQuiver(resolutionQuiverDepth),
+    "FindStat's St001503.",
+  ),
+  stat(
+    "ResolutionQuiverMergingIndegreeSum",
+    "The sum of the indegrees of the vertices of the resolution quiver of the path's linear Nakayama algebra that have indegree at least two.",
+    overResolutionQuiver(
+      floored(
+        sumOver(
+          vertexIndices,
+          bindList(
+            "target",
+            "v",
+            bindList(
+              "indegree",
+              count("image", equals("u", "target"), "u"),
+              ["If", atLeastValue("indegree", 2), "indegree", 0],
+              "integer",
+            ),
+            "integer",
+          ),
+          "v",
+        ),
+      ),
+    ),
+    "FindStat's St001504.",
+  ),
+  stat(
+    "ResolutionQuiverMonoidSize",
+    "The number of elements of the monoid generated by the map of the resolution quiver of the path's linear Nakayama algebra: the depth plus the least common multiple of its cycle lengths.",
+    overResolutionQuiver(
+      add(
+        resolutionQuiverDepth,
+        fold(
+          "cycleVertices",
+          1,
+          bindList(
+            "onCycle",
+            visiting,
+            ["LCM", "a", ["Min", where(vertexIndices, equals(imagePower("onCycle", "k"), "onCycle"), "k")]],
+            "integer",
+          ),
+        ),
+      ),
+    ),
+    "FindStat's St001505: the powers of the map are distinct until the depth and then repeat with the period.",
+  ),
+  stat(
+    "TwoRegularModules",
+    "The indecomposable modules of projective dimension 2 whose only nonvanishing Ext group with the regular module is Ext^2, one-dimensional.",
+    overSeries(regularModules(2)),
+    "FindStat's St001276.",
+  ),
+  stat(
+    "MaximalSimpleTorsionfreeIndex",
+    "The greatest r for which a non-projective simple module is r-torsionfree, up to the global dimension.",
+    overChainsAndSimples([
+      "Max",
+      forEach(vertexIndices, ["If", greater(at("v", "series"), 1), torsionfreeIndex(subtract("v", 1), 1), 0], "v"),
+    ]),
+    "FindStat's St001294. Ext^i(D(A), tau S) never vanishes for every i up to the global dimension on a path of semilength 6 or less, so the cap is not reached.",
+  ),
+  stat(
+    "MaximalTorsionfreeIndex",
+    "The greatest r for which an indecomposable non-projective module is r-torsionfree, up to the global dimension.",
+    overChainsAndSimples(["Max", nonProjective("Max", torsionfreeIndex)]),
+    "FindStat's St001296.",
+  ),
+  stat(
+    "ThreeSyzygySimpleModules",
+    "The simple modules that are 3-syzygy modules: kernels of a chain of three maps between projectives.",
+    overSeries(count(vertexIndices, equals(isSyzygyModule(3, subtract("v", 1), 1), 1), "v")),
+    "FindStat's St001064. A projective module is a syzygy of every order.",
+  ),
+  stat(
+    "TopQuotientRegularExtensionDimension",
+    "The dimension of Ext^1(A/AeA, A) for the path's linear Nakayama algebra A and e the idempotent at the tops of its projective-injective modules.",
+    overSeriesAndLeft(topQuotientExtensions),
+    "FindStat's St001193. The quotient's projective at a vertex is the one of A cut where the next kept vertex begins.",
+  ),
+  stat(
+    "SocleQuotientInjectiveDimension",
+    "The injective dimension of A/AfA for the path's linear Nakayama algebra A and f the idempotent at the socles of its projective-injective modules.",
+    overSeriesAndLeft(socleQuotientInjectiveDimension),
+    "FindStat's St001194, read as the greatest injective dimension over A of the projectives of the quotient that f does not remove.",
+  ),
+  stat(
+    "NakayamaGorensteinDegree",
+    "The greatest k for which the path's linear Nakayama algebra is k-Gorenstein, capped at the global dimension.",
+    overSimples(gorensteinDegree),
+    "FindStat's St000930: the first terms of the minimal injective coresolution of A have projective dimension at most their index.",
+  ),
+  stat(
+    "NakayamaDepth",
+    "The depth of the path's linear Nakayama algebra: the greatest grade of a simple module.",
+    overSeries(["Max", simpleGrades]),
+    "FindStat's St001530.",
+  ),
+  stat(
+    "CornerAlgebraDominantDimension",
+    "The dominant dimension of the corner algebra eAe of the path's linear Nakayama algebra, e the idempotent of its minimal faithful projective-injective module.",
+    overDerivedSeries(
+      cornerSeries,
+      [],
+      bindList(
+        "dims",
+        simpleDimensions,
+        bindList(
+          "injectiveDims",
+          injectiveDimensions,
+          bindList("codominantDims", injectiveCodominantDimensions, [
+            "If",
+            greater(length(nonProjectiveInjectives), 0),
+            dominantDimension,
+            "PositiveInfinity",
+          ]),
+        ),
+      ),
+    ),
+    "FindStat's St001199. A corner algebra with no non-projective injective module is self-injective, and has infinite dominant dimension: the towers, whose corner algebra is the field.",
+  ),
+  stat(
+    "CyclicNakayamaGlobalDimension",
+    "The global dimension of the cyclic Nakayama algebra got from the path's linear Nakayama algebra by adding the first Kupisch entry to the last.",
+    overCyclicSeries(["Max", forEach(vertexIndices, cyclicProjectiveDimension(subtract("v", 1), 1), "v")]),
+    "FindStat's St000969. A cyclic algebra of N simples has global dimension below 2N when it is finite, so a simple still unresolved after that many syzygies makes it infinite.",
+  ),
+  stat(
+    "CyclicNakayamaDominantDimension",
+    "The dominant dimension of the cyclic Nakayama algebra got from the path's linear Nakayama algebra by adding the first Kupisch entry to the last: the least codominant dimension of a non-projective injective module.",
+    overCyclicSeries(
+      bindList(
+        "widest",
+        ["Max", "cyclicSeries"],
+        bindList(
+          "least",
+          [
+            "Min",
+            forEach(
+              vertexIndices,
+              bindList("module", cyclicInjective(subtract("v", 1)), [
+                "If",
+                less(at(2, "module"), at(add(at(1, "module"), 1), "cyclicSeries")),
+                cyclicCodominantDimension(at(1, "module"), at(2, "module")),
+                1000,
+              ]),
+              "v",
+            ),
+          ],
+          ["If", less("least", 1000), "least", "PositiveInfinity"],
+          "integer",
+        ),
+        "integer",
+      ),
+    ),
+    "FindStat's St000968. The algebra is self-injective, with infinite dominant dimension, when no injective module is non-projective.",
   ),
 ];

@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[SocleQuotientInjectiveDimension, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	2			the step word $UUDDUD$
+the-step-word-uduudd			[SocleQuotientInjectiveDimension, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	1			the step word $UDUUDD$
+findstat-st001194-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'SocleQuotientInjectiveDimension'"]	0	0	FindStat St001194	FindStat's value for [1,0]
+findstat-st001194-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'SocleQuotientInjectiveDimension'"]	0	0	FindStat St001194	FindStat's value for [1,0,1,0]
+findstat-st001194-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'SocleQuotientInjectiveDimension'"]	1	1	FindStat St001194	FindStat's value for [1,1,0,0]
