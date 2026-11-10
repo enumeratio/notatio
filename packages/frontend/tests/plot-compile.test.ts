@@ -79,3 +79,16 @@ test("a plot's code reads its variables as reals, whatever type the engine infer
   // ζ(2, 3) = π²/6 − 1 − 1/4, from numbers in the scope.
   expect(run(item!.code, { x: 2, y: 3 })).toBeCloseTo(Math.PI ** 2 / 6 - 1.25, 12);
 });
+
+test("a form outside the GLSL fragment has no plotFn, so the plot takes its CPU path", () => {
+  const random = compilePlot(ce, ["Add", "x", ["Random"]], { target: "glsl", vars: ["x", "y"] });
+  expect(random.items[0]!.code).toBeUndefined();
+});
+
+test("a loop has no plotFn: the shader's 10,000-pass cap would give NaN where the CPU sums on", () => {
+  const sum = compilePlot(ce, ["Sum", ["Multiply", "k", "x"], ["Triple", "k", 1, 20000]], {
+    target: "glsl",
+    vars: ["x", "y"],
+  });
+  expect(sum.items[0]!.code).toBeUndefined();
+});

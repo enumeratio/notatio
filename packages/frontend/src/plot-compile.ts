@@ -3,7 +3,7 @@
 // runs it with no engine of its own (`@enumeratio/components`' `plot-kernel.ts`).
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { canCompile, GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { selfContainedCode } from "@enumeratio/engine/compiled";
 import { withGLSL } from "@enumeratio/analytic/shader";
 
@@ -60,9 +60,17 @@ const numeric = (e: Expression): number | undefined => {
  */
 export function toGlslFn(expr: Expression, vx: string, vy: string): string | undefined {
   try {
+    // A form outside the GLSL fragment (`Random`, a matrix, a symbol with no numeric type) has no shader:
+    // the plot takes its CPU path.
+    if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
     const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
     if (!r?.success || !r.code) return undefined;
-    return withGLSL(`${r.preamble ?? ""}\nfloat plotFn(float ${vx}, float ${vy}) { return ${r.code}; }`);
+    // A loop stops after 10,000 passes with NaN where the CPU path sums on: the plot declines to its
+    // CPU path rather than show NaN (an `iterationBudget` lift would let a large bound hang the GPU).
+    if (r.preamble?.includes("_gpu_passes") || r.code.includes("_gpu_passes")) return undefined;
+    // A block of locals compiles to statements ending in their own `return`.
+    const body = /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`;
+    return withGLSL(`${r.preamble ?? ""}\nfloat plotFn(float ${vx}, float ${vy}) { ${body} }`);
   } catch {
     return undefined;
   }
