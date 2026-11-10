@@ -322,6 +322,32 @@ const involutionSeries = (scale: MathJSON, last: MathJSON): MathJSON =>
     "list<integer>",
   );
 
+/** C(1 .. last), the permutations of 1 .. m that do not split into a prefix permuting its own values, as a list: C(m) = m! - sum_k C(k) (m - k)!. */
+const indecomposablePermutations = (last: MathJSON): MathJSON =>
+  typedFold(
+    [
+      "Join",
+      "dc",
+      [
+        "List",
+        subtract(
+          ["Factorial", add(["Length", "dc"], 1)],
+          total(
+            1,
+            ["Length", "dc"],
+            times(entry("dc", "dk"), ["Factorial", subtract(add(["Length", "dc"], 1), "dk")]),
+            "dk",
+          ),
+        ),
+      ],
+    ],
+    "dc",
+    "dm",
+    ["List", 1],
+    ["Range", 2, last, 1],
+    "list<integer>",
+  );
+
 /** The least common multiple of the degrees: the exponent of the group of a Weyl group is it. */
 const leastCommonDegree: MathJSON = typedFold(["LCM", "la", "ld"], "la", "ld", 1, degrees);
 
@@ -713,5 +739,93 @@ export const CARTAN_STATISTICS: readonly Definition[] = [
     "The least number of points a permutation action of the Weyl group can have and stay faithful: the orbit of a fundamental weight of least size, n + 1 for A_n, 2 n for B_n, C_n and D_n.",
     byLetter({ A: add(rank, 1), BC: times(2, rank), D: times(2, rank), E: byRank(27, 56, 240), F: 24, G: 6 }),
     "The degrees are tabulated by type (Stembridge, Computational aspects of root systems, Coxeter groups, and Weyl characters, Table 1).",
+  ),
+  stat(
+    "WeylGroupInvolutionClassCount",
+    "The conjugacy classes of the Weyl group whose elements are involutions, the identity left out: a class is a set of cycle types with positive and negative one- and two-cycles.",
+    byLetter({
+      A: divide(subtract(add(rank, 1), ["Mod", add(rank, 1), 2]), 2),
+      BC: subtract(
+        times(
+          add(divide(subtract(rank, ["Mod", rank, 2]), 2), 1),
+          subtract(add(rank, 1), divide(subtract(rank, ["Mod", rank, 2]), 2)),
+        ),
+        1,
+      ),
+      D: add(
+        subtract(
+          divide(
+            times(
+              add(divide(subtract(rank, ["Mod", rank, 2]), 2), 1),
+              add(divide(subtract(rank, ["Mod", rank, 2]), 2), 2),
+            ),
+            2,
+          ),
+          1,
+        ),
+        subtract(1, ["Mod", rank, 2]),
+      ),
+      E: byRank(4, 9, 9),
+      F: 7,
+      G: 3,
+    }),
+    "An involution of B_n has a positive one-cycles, b negative ones and c positive two-cycles with a + b + 2 c = n (a negative two-cycle has order 4), and one of D_n has b even; the class of the one with only two-cycles, none negative, splits in two. The exceptional types are tabulated.",
+  ),
+  stat(
+    "WeylGroupConnectedElementCount",
+    "The elements of the Coxeter group whose reduced words use every simple reflection, by inclusion and exclusion over the standard parabolic subgroups: the indecomposable permutations for A_n.",
+    byCases(
+      [
+        [isLetter("E"), byRank(47527, 2823981, 693437119)],
+        [isLetter("F"), 1057],
+        [isLetter("G"), 9],
+      ],
+      bindList(
+        "cp",
+        indecomposablePermutations(add(rank, 1)),
+        byLetter({
+          A: exactly(["Factorial", add(rank, 1)], entry("cp", add(rank, 1))),
+          BC: exactly(
+            times(power(2, rank), ["Factorial", rank]),
+            subtract(
+              times(power(2, rank), ["Factorial", rank]),
+              total(
+                0,
+                subtract(rank, 1),
+                times(power(2, "ck"), ["Factorial", "ck"], entry("cp", subtract(rank, "ck"))),
+                "ck",
+              ),
+            ),
+          ),
+          D: exactly(
+            times(power(2, rank), ["Factorial", rank]),
+            subtract(
+              total(
+                0,
+                subtract(rank, 3),
+                times(
+                  [
+                    "If",
+                    equals("ck", subtract(rank, 3)),
+                    1,
+                    ["Negate", entry("cp", ["Max", 1, subtract(subtract(rank, 3), "ck")])],
+                  ],
+                  add(
+                    subtract(["Factorial", add("ck", 2)], times(2, ["Factorial", add("ck", 3)])),
+                    times(power(2, add("ck", 2)), ["Factorial", add("ck", 3)]),
+                  ),
+                ),
+                "ck",
+              ),
+              entry("cp", subtract(rank, 2)),
+            ),
+          ),
+          E: 0,
+          F: 0,
+          G: 0,
+        }),
+      ),
+    ),
+    "For B_n the elements whose support misses the last node are 2^k k! C(n - k) with C the indecomposable permutations; D_n splits by the component through the node n - 2. The exceptional types are the alternating sums of the orders of their standard parabolic subgroups.",
   ),
 ];

@@ -671,3 +671,58 @@ export function smallestFundamentalOrbit(a: Matrix): number {
   }
   return best;
 }
+
+// ─── involution classes and connected elements ───────────────────────────────────────────────────
+
+/** The conjugacy classes of the generated group whose elements have order 2. */
+export function involutionClassCount(a: Matrix): number {
+  const g = weylGroup(a);
+  const seen = new Set<string>();
+  let classes = 0;
+  for (const start of g.elements) {
+    if (seen.has(start.join())) continue;
+    const involution = start.some((image, i) => image !== i) && start.every((image, i) => start[image] === i);
+    if (involution) classes++;
+    seen.add(start.join());
+    const queue = [start];
+    while (queue.length > 0) {
+      const c = queue.pop()!;
+      for (const s of g.generators) {
+        const conjugate = compose(compose(s, c), s);
+        if (!seen.has(conjugate.join())) {
+          seen.add(conjugate.join());
+          queue.push(conjugate);
+        }
+      }
+    }
+  }
+  return classes;
+}
+
+/** The elements whose reduced words use every simple reflection: an element has the support of any shorter neighbor it extends, plus the generator. */
+export function connectedElementCount(a: Matrix): number {
+  const g = weylGroup(a);
+  const index = new Map(g.elements.map((w, i) => [w.join(), i]));
+  const support = g.elements.map(() => 0);
+  g.elements.forEach((w, at) =>
+    g.generators.forEach((s, j) => {
+      const next = index.get(compose(w, s).join())!;
+      if (g.lengths[next] === g.lengths[at]! + 1) support[next] = support[next]! | support[at]! | (1 << j);
+    }),
+  );
+  return support.filter((bits) => bits === (1 << a.length) - 1).length;
+}
+/** The same count by inclusion and exclusion: the sum over the subsets J of the simple reflections of (-1)^(n - |J|) |W_J|. */
+export function connectedFromParabolicOrders(a: Matrix): number {
+  const n = a.length;
+  const order = (indices: readonly number[]): number =>
+    indices.length === 0
+      ? 1
+      : exponentsFromRoots(indices.map((i) => indices.map((j) => a[i]![j]!))).reduce((p, e) => p * (e + 1), 1);
+  let total = 0;
+  for (let mask = 0; mask < 1 << n; mask++) {
+    const indices = a.map((_, j) => j).filter((j) => (mask >> j) & 1);
+    total += (-1) ** (n - indices.length) * order(indices);
+  }
+  return total;
+}

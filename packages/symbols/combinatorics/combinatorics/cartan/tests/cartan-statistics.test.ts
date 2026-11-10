@@ -13,6 +13,8 @@ import {
   centerSize,
   classicalCatalan,
   conjugacyClassCount,
+  connectedElementCount,
+  connectedFromParabolicOrders,
   classicalPositiveCatalan,
   commutativeRoots,
   coxeterClassSize,
@@ -35,6 +37,7 @@ import {
   heightSum,
   highestRoot,
   highestRootPairing,
+  involutionClassCount,
   involutionCount,
   involutionsFromOrthogonalRoots,
   largestFundamentalDimension,
@@ -172,6 +175,11 @@ const READINGS: Record<string, { read: (type: CartanType) => number; types: Cart
     read: (t) => parabolicSubgroupCount(matrixOf(t)),
     types: typesUpTo(DEEP ? 7 : 5).filter((t) => !(t[0] === "E" && t[1] === 8)),
   },
+  WeylGroupInvolutionClassCount: {
+    read: (t) => involutionClassCount(matrixOf(t)),
+    types: typesUpTo(6).filter(smallGroup(DEEP ? 60000 : 400)),
+  },
+  WeylGroupConnectedElementCount: { read: (t) => connectedFromParabolicOrders(matrixOf(t)), types: typesUpTo(8) },
   WeylGroupMinimalFaithfulPermutationDegree: {
     read: (t) => smallestFundamentalOrbit(matrixOf(t)),
     types: typesUpTo(8),
@@ -202,6 +210,13 @@ test("the two readings of the Grassmannian count, and of the involution count, a
         involutionCount(matrixOf(type)),
       );
   }
+});
+
+test("the connected elements counted from the group are those the parabolic orders give", () => {
+  for (const type of typesUpTo(5).filter(smallGroup(400)))
+    expect(connectedElementCount(matrixOf(type)), `${type[0]}${type[1]}`).toBe(
+      connectedFromParabolicOrders(matrixOf(type)),
+    );
 });
 
 test("the exponents are the exponents of the generated root system, ascending", () => {

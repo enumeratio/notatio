@@ -8185,4 +8185,16 @@ export const findstat: readonly FindStatMatch[] = [
     findstat: ["St001897"],
     values: 31,
   },
+  {
+    head: "WeylGroupInvolutionClassCount",
+    on: "CartanType",
+    findstat: ["St001952"],
+    values: 31,
+  },
+  {
+    head: "WeylGroupConnectedElementCount",
+    on: "CartanType",
+    findstat: ["St001888"],
+    values: 22,
+  },
 ];
