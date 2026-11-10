@@ -38,4 +38,4 @@ allowBuilds:
   "@parcel/watcher": false
   esbuild: false
 minimumReleaseAgeExclude:
-  - "@cortex-js/compute-engine@0.185.1"
+  - "@cortex-js/compute-engine@0.186.0"
