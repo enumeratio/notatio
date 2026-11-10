@@ -5,7 +5,7 @@ signature: IncreasingTree(Permutation)
 summary: "The shape of the increasing binary tree of a permutation: the smallest entry is the root, the entries before it make its left subtree and the entries after it its right."
 seeAlso:
   - BinaryTree
-  - IncreasingTreeParentArray
+  - BinaryTreeParentArray
 catalog:
   - system: findstat
     identity: Mp00061
@@ -21,5 +21,5 @@ signatures:
 ---
 
 - Takes a `Permutation` and returns a `BinaryTree` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- Defined as a COMPOSITION, applied right to left: [[BinaryTree]] after [[IncreasingTreeParentArray]]. Each step goes through its own declared head, so every intermediate value is a properly constructed carrier.
+- Defined as a COMPOSITION, applied right to left: [[BinaryTree]] after [[BinaryTreeParentArray]]. Each step goes through its own declared head, so every intermediate value is a properly constructed carrier.
 - FindStat's Mp00061, Sage's increasing_tree_shape. A surjection: a tree is the shape of as many permutations as it has linear extensions.

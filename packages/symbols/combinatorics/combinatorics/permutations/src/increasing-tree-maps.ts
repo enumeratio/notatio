@@ -40,7 +40,8 @@ const increasingParents: MathJSON = forEach(
 
 export const INCREASING_TREE_MAPS: readonly CombinatorialMap[] = [
   {
-    name: "IncreasingTreeParentArray",
+    name: "BinaryTreeParentArray",
+    convert: true,
     from: "permutation",
     to: "binary_tree_parent_array",
     body: increasingParents,
@@ -52,7 +53,7 @@ export const INCREASING_TREE_MAPS: readonly CombinatorialMap[] = [
     name: "IncreasingTree",
     from: "permutation",
     to: "binary_tree",
-    composedOf: ["BinaryTree", "IncreasingTreeParentArray"],
+    composedOf: ["BinaryTree", "BinaryTreeParentArray"],
     summary:
       "The shape of the increasing binary tree of a permutation: the smallest entry is the root, the entries before it make its left subtree and the entries after it its right.",
     note: "FindStat's Mp00061, Sage's increasing_tree_shape. A surjection: a tree is the shape of as many permutations as it has linear extensions.",

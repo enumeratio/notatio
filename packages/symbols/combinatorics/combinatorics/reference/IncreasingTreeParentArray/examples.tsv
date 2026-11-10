@@ -1,2 +1,0 @@
-id	section	role	expr	expected	caption
-the-one-line-word-231			[IncreasingTreeParentArray, [Permutation, [List, 2, 3, 1]]]	[BinaryTreeParentArray, [List, 3, 1, 0]]	the one-line word $231$
