@@ -404,6 +404,55 @@ const maximalIrredundantSizes = (g: Graph): number[] => {
     )
     .map((s) => s.length);
 };
+/** The simple paths from `start` to `end`, by depth-first search. */
+function simplePathCount(m: boolean[][], start: number, end: number): number {
+  let found = 0;
+  const extend = (path: number[]): void => {
+    const last = path[path.length - 1]!;
+    if (last === end) found++;
+    else for (let w = 0; w < m.length; w++) if (m[last]![w] && !path.includes(w)) extend([...path, w]);
+  };
+  extend([start]);
+  return found;
+}
+/** The length of the shortest path that no vertex can be added to at either end. */
+function shortestMaximalPath(g: Graph): number {
+  const m = matrix(g);
+  let best = Infinity;
+  const extend = (path: number[]): void => {
+    const ends = [path[0]!, path[path.length - 1]!];
+    const outward = (e: number): number[] => allVertices(g).filter((w) => m[e]![w] && !path.includes(w));
+    if (outward(ends[0]!).length + outward(ends[1]!).length === 0) best = Math.min(best, path.length - 1);
+    for (const w of outward(ends[0]!)) extend([w, ...path]);
+    for (const w of outward(ends[1]!)) extend([...path, w]);
+  };
+  for (let s = 0; s < g.n; s++) extend([s]);
+  return best;
+}
+
+/** The ways to direct every edge with no directed cycle, trying every direction of each edge. */
+function acyclicOrientations(g: Graph): number {
+  let found = 0;
+  for (let choice = 0; choice < 2 ** g.edges.length; choice++) {
+    const out = range(0, g.n - 1).map(() => [] as number[]);
+    g.edges.forEach(([u, v], k) =>
+      ((choice >> k) & 1 ? out[u - 1]! : out[v - 1]!).push((choice >> k) & 1 ? v - 1 : u - 1),
+    );
+    // Repeatedly remove a vertex with no edge leaving: all go exactly when there is no cycle.
+    const left = new Set(range(0, g.n - 1));
+    let removed = true;
+    while (removed) {
+      removed = false;
+      for (const v of left)
+        if (out[v]!.every((w) => !left.has(w))) {
+          left.delete(v);
+          removed = true;
+        }
+    }
+    if (left.size === 0) found++;
+  }
+  return found;
+}
 /** The pairs {A, B} covering the vertices with A \ B and B \ A nonempty and no edge between them, by labeling each vertex A only, B only or both. */
 function properSeparations(g: Graph): number {
   let found = 0;
@@ -876,4 +925,39 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
         .map((s) => s.length),
     );
   },
+  HamiltonianCycleCount: (g) => cycleLengths(g).filter((length) => length === g.n).length,
+  MaximumSimplePathCount: (g) => {
+    const m = matrix(g);
+    return Math.max(0, ...pairsOf(allVertices(g)).map(([u, v]) => simplePathCount(m, u, v)));
+  },
+  ShortestMaximalPathLength: (g) => (g.n === 0 ? 0 : shortestMaximalPath(g)),
+  LargestInducedPathSize: (g) => {
+    const m = matrix(g);
+    return Math.max(
+      0,
+      ...subsets(g.n)
+        .filter(
+          (s) =>
+            s.length > 0 &&
+            componentsOn(m, s) === 1 &&
+            edgesWithin(m, s) === s.length - 1 &&
+            s.every((v) => neighborsIn(m, v, s).length <= 2),
+        )
+        .map((s) => s.length),
+    );
+  },
+  LargestComponentPreservingForestSize: (g) =>
+    Math.max(
+      ...inducedForests(g)
+        .filter((s) => componentsOn(matrix(g), s) === components(g))
+        .map((s) => s.length),
+    ),
+  TriangleFreeVertexDeletionNumber: (g) =>
+    g.n -
+    Math.max(
+      ...subsets(g.n)
+        .filter((s) => !cycleLengths(inducedOn(g, s)).includes(3))
+        .map((s) => s.length),
+    ),
+  AcyclicOrientationCount: acyclicOrientations,
 };

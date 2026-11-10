@@ -77,6 +77,13 @@ const BATCH_TWO = new Set([
   "PadmakarIvanIndex",
   "TwoPackingDifferential",
   "GeneralPositionNumber",
+  "HamiltonianCycleCount",
+  "MaximumSimplePathCount",
+  "ShortestMaximalPathLength",
+  "LargestInducedPathSize",
+  "LargestComponentPreservingForestSize",
+  "TriangleFreeVertexDeletionNumber",
+  "AcyclicOrientationCount",
 ]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 

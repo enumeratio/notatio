@@ -7742,6 +7742,48 @@ export const findstat: readonly FindStatMatch[] = [
     values: 1200,
   },
   {
+    head: "HamiltonianCycleCount",
+    on: "LabeledGraph",
+    findstat: ["St000379"],
+    values: 1199,
+  },
+  {
+    head: "MaximumSimplePathCount",
+    on: "LabeledGraph",
+    findstat: ["St001592"],
+    values: 1200,
+  },
+  {
+    head: "ShortestMaximalPathLength",
+    on: "LabeledGraph",
+    findstat: ["St001119"],
+    values: 1200,
+  },
+  {
+    head: "LargestInducedPathSize",
+    on: "LabeledGraph",
+    findstat: ["St001093"],
+    values: 1200,
+  },
+  {
+    head: "LargestComponentPreservingForestSize",
+    on: "LabeledGraph",
+    findstat: ["St001318"],
+    values: 1200,
+  },
+  {
+    head: "TriangleFreeVertexDeletionNumber",
+    on: "LabeledGraph",
+    findstat: ["St001336"],
+    values: 1200,
+  },
+  {
+    head: "AcyclicOrientationCount",
+    on: "LabeledGraph",
+    findstat: ["St000269"],
+    values: 1200,
+  },
+  {
     head: "WeylGroupOrder",
     on: "CartanType",
     findstat: ["St000106"],

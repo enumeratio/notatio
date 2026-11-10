@@ -399,22 +399,23 @@ const uncut = (mask: MathJSON): MathJSON => add(inside(mask), inside(subtract(su
 
 /** The index of the entry for `end` of the subset `mask` in a path table: a leading placeholder, then n entries per subset. */
 const pathAt = (mask: MathJSON, end: MathJSON): MathJSON => add(add(times(subtract(mask, 1), "n"), end), 1);
+/** The paths that visit the subset `b` and end at `e`, as the paths on `b` less `e` that end at a neighbor of `e`. */
+const extendPaths: MathJSON = floored(
+  sumOver(
+    vertices,
+    times(
+      one(hasBit(subtract("b", bitValue("e")), "w")),
+      times(adjacent("w", "e"), at(pathAt(subtract("b", bitValue("e")), "w"), "a")),
+    ),
+    "w",
+  ),
+);
 /**
  * The paths of the graph that visit exactly the vertices of a subset and end at a vertex, by subset and end: the entry
  * for subset b and end e counts them. With `fromLowest` a path starts at the lowest vertex of its subset, so a cycle on
  * the subset is counted once for each direction; else it starts anywhere.
  */
 const pathTable = (fromLowest: boolean): MathJSON => {
-  const extend = floored(
-    sumOver(
-      vertices,
-      times(
-        one(hasBit(subtract("b", bitValue("e")), "w")),
-        times(adjacent("w", "e"), at(pathAt(subtract("b", bitValue("e")), "w"), "a")),
-      ),
-      "w",
-    ),
-  );
   return typedFolding(
     [
       "Join",
@@ -424,7 +425,12 @@ const pathTable = (fromLowest: boolean): MathJSON => {
         [
           "If",
           hasBit("b", "e"),
-          ["If", equals("b", bitValue("e")), 1, fromLowest ? ["If", equals("e", lowest("b")), 0, extend] : extend],
+          [
+            "If",
+            equals("b", bitValue("e")),
+            1,
+            fromLowest ? ["If", equals("e", lowest("b")), 0, extendPaths] : extendPaths,
+          ],
           0,
         ],
         "e",
@@ -444,6 +450,44 @@ const withPaths = (fromLowest: boolean, body: MathJSON): MathJSON =>
       bindList("adjacency", adjacencyMatrix, bindList("paths", pathTable(fromLowest), body), "list<list<integer>>"),
     ),
   );
+/** The paths that start at `start`, by subset and end as in `pathTable`. */
+const pathTableFrom = (start: MathJSON): MathJSON =>
+  typedFolding(
+    [
+      "Join",
+      "a",
+      forEach(
+        vertices,
+        ["If", hasBit("b", "e"), ["If", equals("b", bitValue("e")), one(equals("e", start)), extendPaths], 0],
+        "e",
+      ),
+    ],
+    "a",
+    "b",
+    ["List", 0],
+    masksFromOne,
+  );
+/** `body` with the paths from each start vertex, a table by subset and end as in `pathTable`, bound as "paths", by start. */
+const withStartPaths = (body: MathJSON): MathJSON =>
+  withGraph(
+    bindList(
+      "totals",
+      vertexTotals,
+      bindList(
+        "adjacency",
+        adjacencyMatrix,
+        bindList("paths", forEach(vertices, pathTableFrom("s"), "s"), body, "list<list<integer>>"),
+        "list<list<integer>>",
+      ),
+    ),
+  );
+/** The neighbors of vertex `x` outside the subset `mask`. */
+const neighborsOutside = (x: MathJSON, mask: MathJSON): MathJSON =>
+  floored(sumOver(vertices, times(adjacent(x, "w"), subtract(1, one(hasBit(mask, "w")))), "w"));
+/** The paths from `start` to `end` through exactly the subset `mask`. */
+const pathsThrough = (start: MathJSON, mask: MathJSON, end: MathJSON): MathJSON =>
+  at(pathAt(mask, end), at(start, "paths"));
+
 /** Twice the cycles through exactly the vertices of the subset `mask`, which holds at least 3: each is closed from the lowest vertex by an edge, in either direction. */
 const cyclesTwice = (mask: MathJSON): MathJSON =>
   times(
@@ -1039,6 +1083,55 @@ const collinearTriples = (mask: MathJSON): MathJSON =>
       times(one(less(0, distance("u", "w"))), betweenIn("u", "v", "w")),
     ),
   );
+
+/** The triangles inside the subset `mask`. */
+const trianglesWithin = (mask: MathJSON): MathJSON =>
+  overTriples(
+    times(
+      inMask(mask, "u", "v", "w"),
+      times(
+        times(one(less("u", "v")), one(less("v", "w"))),
+        times(adjacent("u", "v"), times(adjacent("v", "w"), adjacent("u", "w"))),
+      ),
+    ),
+  );
+/** The vertices of the subset `b` not in `m`, counted straight from the bits: 0 when `m` lies inside `b`. */
+const outsideOf = (m: MathJSON, b: MathJSON): MathJSON =>
+  floored(sumOver(vertices, times(one(hasBit(m, "v")), subtract(1, one(hasBit(b, "v")))), "v"));
+/**
+ * The acyclic orientations of the subgraph each subset induces, by mask + 1: the first of the subset's independent
+ * sets, in inclusion-exclusion over the sinks, is taken from it, an odd one added and an even one subtracted.
+ */
+const acyclicOrientationTable: MathJSON = typedFolding(
+  [
+    "Join",
+    "a",
+    [
+      "List",
+      floored(
+        sumOver(
+          masksFromOne,
+          [
+            "If",
+            equals(outsideOf("m", "b"), 0),
+            [
+              "If",
+              isIndependent("m"),
+              times(["If", equals(["Mod", total("m"), 2], 1), 1, -1], at(add(subtract("b", "m"), 1), "a")),
+              0,
+            ],
+            0,
+          ],
+          "m",
+        ),
+      ),
+    ],
+  ],
+  "a",
+  "b",
+  ["List", 1],
+  masksFromOne,
+);
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -2349,5 +2442,138 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "The most vertices in a set with no three on one shortest path.",
     withDistances(["Max", forEach(masks, times(one(equals(collinearTriples("m"), 0)), maskSize("m")), "m")]),
     `FindStat's St001655. ${NO_VERTICES}`,
+  ),
+  stat(
+    "HamiltonianCycleCount",
+    "The cycles through every vertex.",
+    withPaths(true, spread(cyclesTwice(fullMask))),
+    `FindStat's St000379, each cycle counted once however it is started or turned. A graph on fewer than 3 vertices has none. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximumSimplePathCount",
+    "The most simple paths between two different vertices.",
+    withStartPaths([
+      "Max",
+      forEach(
+        vertices,
+        [
+          "Max",
+          forEach(
+            vertices,
+            ["If", equals("s", "t"), 0, floored(sumOver(masksFromOne, pathsThrough("s", "b", "t"), "b"))],
+            "t",
+          ),
+        ],
+        "s",
+      ),
+    ]),
+    `FindStat's St001592. A graph with fewer than 2 vertices gives 0. ${NO_VERTICES}`,
+  ),
+  stat(
+    "ShortestMaximalPathLength",
+    "The edges of the shortest path that no vertex can be added to at either end.",
+    withStartPaths([
+      "Min",
+      forEach(
+        vertices,
+        [
+          "Min",
+          forEach(
+            masksFromOne,
+            [
+              "Min",
+              forEach(
+                vertices,
+                [
+                  "If",
+                  equals(
+                    times(
+                      one(greater(pathsThrough("s", "b", "e"), 0)),
+                      times(one(equals(neighborsOutside("s", "b"), 0)), one(equals(neighborsOutside("e", "b"), 0))),
+                    ),
+                    1,
+                  ),
+                  subtract(total("b"), 1),
+                  "n",
+                ],
+                "e",
+              ),
+            ],
+            "b",
+          ),
+        ],
+        "s",
+      ),
+    ]),
+    `FindStat's St001119; a vertex alone is a path of length 0, maximal when it has no neighbor. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestInducedPathSize",
+    "The most vertices that induce a path.",
+    withNeighborsIn(
+      bindList("connected", connectedMasks, [
+        "Max",
+        forEach(
+          masks,
+          times(
+            times(at(add("m", 1), "connected"), total("m")),
+            times(
+              one(equals(inside("m"), subtract(total("m"), 1))),
+              one(
+                equals(
+                  misfits("m", (d) => greater(d, 2)),
+                  0,
+                ),
+              ),
+            ),
+          ),
+          "m",
+        ),
+      ]),
+    ),
+    `FindStat's St001093, the detour number: a connected set with one fewer edges than vertices is a tree, and a tree with no vertex of degree 3 is a path. ${NO_VERTICES}`,
+  ),
+  stat(
+    "LargestComponentPreservingForestSize",
+    "The most vertices that induce a forest with as many components as the graph.",
+    withAdjacency(
+      withNeighborsIn(
+        bindList(
+          "forests",
+          forestMasks,
+          bind(
+            "components",
+            componentCount,
+            [
+              "Max",
+              forEach(
+                masks,
+                times(
+                  at(add("m", 1), "forests"),
+                  times(one(equals(subtract(total("m"), inside("m")), "components")), total("m")),
+                ),
+                "m",
+              ),
+            ],
+            "integer",
+          ),
+        ),
+      ),
+    ),
+    `FindStat's St001318. A forest has as many components as its vertices less its edges. ${NO_VERTICES}`,
+  ),
+  stat(
+    "TriangleFreeVertexDeletionNumber",
+    "The fewest vertices whose deletion leaves a graph with no triangle.",
+    withAdjacency(
+      subtract("n", ["Max", forEach(masks, ["If", equals(trianglesWithin("m"), 0), maskSize("m"), 0], "m")]),
+    ),
+    `FindStat's St001336: the vertices less the largest set that holds no triangle. ${NO_VERTICES}`,
+  ),
+  stat(
+    "AcyclicOrientationCount",
+    "The ways to direct every edge so that no directed cycle results.",
+    withMasks(lastEntry(acyclicOrientationTable), 1),
+    `FindStat's St000269. The sinks of an acyclic orientation form a nonempty independent set, and what is left is acyclic; inclusion-exclusion over the sinks gives the count. The graph with no vertices has one orientation, the empty one, so 1.`,
   ),
 ];
