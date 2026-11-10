@@ -1,7 +1,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { parseExpression } from "@enumeratio/formats/expression";
 import { expect, test } from "vite-plus/test";
-import { emitComplexWGSL } from "@enumeratio/analytic";
+import { emitComplexGLSL } from "@enumeratio/analytic";
 import { complexComputeShader } from "../src/gpu-eval.ts";
 import { complexFunction } from "../src/complex-eval.ts";
 import {
@@ -133,11 +133,11 @@ test("a GPU value buffer colors the same way as the CPU sampler", () => {
 
 test("the complex compute shader binds the grid and the literal slots", () => {
   const { json } = parseExpression("1/(z^2 + 1)");
-  const emitted = emitComplexWGSL(ce.box(json).json as never, "z");
+  const emitted = emitComplexGLSL(ce.box(json).json as never, "z");
   expect(emitted).toBeDefined();
   const code = complexComputeShader("z", emitted!.code);
-  expect(code).toContain("let z = vec2f(");
-  expect(code).toContain("array<vec2f>");
+  expect(code).toContain("vec2 z = vec2(");
+  expect(code).toContain("vec4 p[16];");
   expect(code).toContain("prm.p[0].xy");
-  expect(code).toContain("fn cdiv");
+  expect(code).toContain("vec2 cdiv(");
 });

@@ -75,5 +75,6 @@ export * from "./environment.ts";
 export * from "./complex-plot.ts";
 export * from "./complex-plot-box.ts";
 export * from "./gpu-eval.ts";
+export * from "./gpu.ts";
 export * from "./complex-plot-3d.ts";
 export { markupOf, typesetLeaf } from "./box-leaf.ts";

@@ -1,4 +1,4 @@
-import { emitComplexWGSL } from "@enumeratio/ce-patches/wgsl-complex";
+import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
 import type { ComplexFunction } from "@enumeratio/frontend";
 import { html, LitElement, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
@@ -46,10 +46,10 @@ async function engineFunction(json: unknown, variable: string): Promise<ComplexF
  * turns it round). A pole is a spike that rises to `max-height`
  * with every hue winding round it; a zero is a dimple the hues wind round the other way.
  *
- * `value` is **Epsil**; LaTeX is accepted inside a `$…$` island. Sampled in a WebGPU
- * compute shader through the same complex lowering the portrait uses, falling back to
+ * `value` is **Epsil**; LaTeX is accepted inside a `$…$` island. Sampled in a WebGL2
+ * fragment shader through the same complex lowering the portrait uses, falling back to
  * the CPU -- the base package's complex evaluator, or the engine's own numeric evaluation
- * for a head it has no lowering for -- where WebGPU is missing or the expression doesn't
+ * for a head it has no lowering for -- where WebGL2 is missing or the expression doesn't
  * lower. `gpu="false"` forces the CPU; a number sets the GPU's `samples`. Drag rotates,
  * ctrl/⌘ + wheel zooms, double-click resets the view.
  *
@@ -74,7 +74,7 @@ export class NotatioComplexPlot3D extends LitElement {
     domain: { type: String },
     /** Samples per side, clamped to 2..400. */
     samples: { type: Number },
-    /** `"false"` samples on the CPU even where WebGPU is available. A number sets `samples` for the GPU. */
+    /** `"false"` samples on the CPU even where WebGL2 is available. A number sets `samples` for the GPU. */
     gpu: { type: String },
     /** Height ceiling for |f|, since a pole goes to infinity. */
     maxHeight: { type: Number, attribute: "max-height" },
@@ -191,13 +191,13 @@ export class NotatioComplexPlot3D extends LitElement {
       const variable = this.var || "z";
       const domain = parseComplexDomain(this.domain);
       const maxHeight = Number(this.maxHeight);
-      // The portrait's complex lowering, dispatched over the grid, unless `gpu="false"`.
-      // Where the expression doesn't lower or WebGPU doesn't answer, the CPU sampler below
+      // The portrait's complex lowering, drawn over the grid, unless `gpu="false"`.
+      // Where the expression doesn't lower or WebGL2 doesn't answer, the CPU sampler below
       // runs, at the CPU sample count.
       let surface: ComplexSurface | undefined;
       if (this.gpu !== "false") {
         try {
-          const emitted = emitComplexWGSL(json as never, variable);
+          const emitted = emitComplexGLSL(json as never, variable);
           if (emitted) {
             const { xs, ys } = complexGrid({ domain, samples: Number(this.gpu) || this.samples });
             const values = await evalComplexGridGPU(emitted, variable, xs, ys);

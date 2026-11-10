@@ -106,7 +106,7 @@
 - id: surface-evaluated-on-gpu
   caption: A surface evaluated on the GPU
   category: GPU evaluation
-  notes: The grid (here 100×100) is computed in a compute shader, then drawn through the same SVG surface. Needs a WebGPU browser; otherwise it renders on the CPU.
+  notes: The grid (here 100×100) is computed in a fragment shader, then drawn through the same SVG surface. Needs a WebGL2 browser; otherwise it renders on the CPU.
   expr: [Plot3D, [Multiply, [Sin, x], [Cos, y]], [Tuple, x, -3.14, 3.14], [Tuple, y, -3.14, 3.14], [Tuple, Gpu, 100]]
 - id: surface-on-the-magma-gradient
   caption: A surface on the magma gradient

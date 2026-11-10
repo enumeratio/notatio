@@ -1,7 +1,7 @@
 // Minimal, dependency-free syntax highlighting for the code boxes. A single-pass
 // tokenizer -- good enough for the small, uniform expressions we emit (function
 // calls, numbers, strings, brackets, operators) across wolfram / python / glsl /
-// wgsl / json / javascript -- not a real grammar. Input is HTML-escaped; the
+// json / javascript -- not a real grammar. Input is HTML-escaped; the
 // result is safe to inject. `lang` is accepted for future per-language tuning.
 
 const ESCAPE: Record<string, string> = { "&": "&amp;", "<": "&lt;", ">": "&gt;" };

@@ -1,7 +1,8 @@
-/// <reference types="@webgpu/types" />
-import { withWGSL } from "@enumeratio/analytic/shader";
-import { type Df64Mode, df64Mode, testDf64, withDf64 } from "./df64-selftest.ts";
-import { type ComplexWGSL, MAX_SLOTS } from "@enumeratio/ce-patches/wgsl-complex";
+import { withGLSL } from "@enumeratio/analytic/shader";
+import { type Df64Mode, withDf64 } from "./df64-selftest.ts";
+import { type ComplexGLSL, MAX_SLOTS } from "@enumeratio/ce-patches/glsl-complex";
+import type { Gpu } from "./gpu.ts";
+import { compileProgram, createContext, drawFullScreen, GLSL_HEADER, useParams } from "./webgl.ts";
 import {
   DEFAULT_PHASE_GRADIENT,
   type Gradient,
@@ -11,7 +12,7 @@ import {
   sampleGradient,
 } from "./palettes.ts";
 
-// WebGPU domain-coloring of a complex-valued expression: one fragment-shader
+// WebGL2 domain-coloring of a complex-valued expression: one fragment-shader
 // invocation per pixel, color = arg on a gradient, brightness = a compressed log-magnitude.
 //
 // Internal to the element -- deliberately not re-exported from the package index, since
@@ -20,92 +21,93 @@ import {
 //
 // The point of the split from `notatio-complex-plot.ts` is the pipeline cache. A
 // Manipulate slider changes a *literal* in the expression, not its shape, and
-// `emitComplexWGSL` hoists literals into uniform slots precisely so that case can
-// re-upload 256 bytes instead of rebuilding a shader module. `setExpression` returns
+// `emitComplexGLSL` hoists literals into uniform slots precisely so that case can
+// re-upload 256 bytes instead of relinking a program. `setExpression` returns
 // whether it had to rebuild, which is also what makes a frame-rate readout honest.
 
 /** Most stops a gradient carries into the shader; a longer one is resampled to this many. */
 export const MAX_STOPS = 16;
 
 /** Coloring from (direction, ln|value|) — see `clogPolar` / `polygammaLog`. */
-const HOST = /* wgsl */ `
-struct Prm {
-  center : vec2f,
-  res    : vec2f,
-  extent : f32,
-  mask   : f32,
-  one    : f32,  // 1.0, that the compiler cannot see: dfOne in the library
-  _pad   : f32,
-  p      : array<vec4f, ${MAX_SLOTS}>,
+const HOST = /* glsl */ `
+uniform Prm {
+  vec2 center;
+  vec2 res;
+  float extent;
+  float mask;
+  float one;  // 1.0, that the compiler cannot see: dfOne in the library
+  float pad;
+  vec4 p[${MAX_SLOTS}];
   // The gradient: each stop is its color (sRGB, or OKLab) and its position; ramp is
   // (stop count, 1 when the stops blend in OKLab, 1 when the gradient wraps, unused).
-  stops  : array<vec4f, ${MAX_STOPS}>,
-  ramp   : vec4f,
-};
-@group(0) @binding(0) var<uniform> prm : Prm;
+  vec4 stops[${MAX_STOPS}];
+  vec4 ramp;
+} prm;
+out vec4 fragColor;
 
-fn oklab2rgb(c: vec3f) -> vec3f {
-  let l = c.x + 0.3963377774 * c.y + 0.2158037573 * c.z;
-  let m = c.x - 0.1055613458 * c.y - 0.0638541728 * c.z;
-  let s = c.x - 0.0894841775 * c.y - 1.291485548 * c.z;
-  let lin = max(vec3f(
+vec3 oklab2rgb(vec3 c) {
+  float l = c.x + 0.3963377774 * c.y + 0.2158037573 * c.z;
+  float m = c.x - 0.1055613458 * c.y - 0.0638541728 * c.z;
+  float s = c.x - 0.0894841775 * c.y - 1.291485548 * c.z;
+  vec3 lin = max(vec3(
     4.0767416621 * l * l * l - 3.3077115913 * m * m * m + 0.2309699292 * s * s * s,
     -1.2684380046 * l * l * l + 2.6097574011 * m * m * m - 0.3413193965 * s * s * s,
-    -0.0041960863 * l * l * l - 0.7034186147 * m * m * m + 1.707614701 * s * s * s), vec3f(0.0));
-  let gamma = select(1.055 * pow(lin, vec3f(1.0 / 2.4)) - 0.055, 12.92 * lin, lin <= vec3f(0.0031308));
-  return clamp(gamma, vec3f(0.0), vec3f(1.0));
+    -0.0041960863 * l * l * l - 0.7034186147 * m * m * m + 1.707614701 * s * s * s), vec3(0.0));
+  vec3 gamma = mix(1.055 * pow(lin, vec3(1.0 / 2.4)) - 0.055, 12.92 * lin, lessThanEqual(lin, vec3(0.0031308)));
+  return clamp(gamma, vec3(0.0), vec3(1.0));
 }
 
 // The gradient at t, blended between its two neighboring stops as palettes.ts does.
-fn gradient(t0: f32) -> vec3f {
-  let n = u32(prm.ramp.x);
-  var t = clamp(t0, 0.0, 1.0);
+vec3 gradient(float t0) {
+  int n = int(prm.ramp.x);
+  float t = clamp(t0, 0.0, 1.0);
   if (prm.ramp.z > 0.5) { t = fract(t0); }
-  var k = 1u;
-  while (k < n - 1u && prm.stops[k].w < t) { k = k + 1u; }
-  let a = prm.stops[k - 1u];
-  let b = prm.stops[k];
-  let f = clamp((t - a.w) / max(b.w - a.w, 1e-6), 0.0, 1.0);
-  let c = mix(a.xyz, b.xyz, f);
+  int k = 1;
+  while (k < n - 1 && prm.stops[k].w < t) { k = k + 1; }
+  vec4 a = prm.stops[k - 1];
+  vec4 b = prm.stops[k];
+  float f = clamp((t - a.w) / max(b.w - a.w, 1e-6), 0.0, 1.0);
+  vec3 c = mix(a.xyz, b.xyz, f);
   if (prm.ramp.y > 0.5) { return oklab2rgb(c); }
-  return clamp(c, vec3f(0.0), vec3f(1.0));
+  return clamp(c, vec3(0.0), vec3(1.0));
 }
-@vertex fn vs(@builtin(vertex_index) i: u32) -> @builtin(position) vec4f {
-  var q = array<vec2f, 3>(vec2f(-1.0, -3.0), vec2f(-1.0, 1.0), vec2f(3.0, 1.0));
-  return vec4f(q[i], 0.0, 1.0);
-}
-@fragment fn fs(@builtin(position) frag: vec4f) -> @location(0) vec4f {
-  var uv = frag.xy / prm.res;
-  uv.y = 1.0 - uv.y;
-  let asp = prm.res.x / prm.res.y;
-  let z = prm.center + (uv - vec2f(0.5)) * vec2f(prm.extent * asp, prm.extent);
+
+void main() {
+  vec2 frag = gl_FragCoord.xy;
+  vec2 uv = frag / prm.res;
+  float asp = prm.res.x / prm.res.y;
+  vec2 z = prm.center + (uv - vec2(0.5)) * vec2(prm.extent * asp, prm.extent);
   // mask > 0 dims everything outside |z| < mask: the disk of convergence for a
   // series that has one, drawn as a faint grid so the boundary still reads.
   if (prm.mask > 0.0 && dot(z, z) >= prm.mask * prm.mask) {
-    let g = 0.05 + 0.03 * step(0.5, fract(z.x * 4.0)) * step(0.5, fract(z.y * 4.0));
-    return vec4f(vec3f(g), 1.0);
+    float g = 0.05 + 0.03 * step(0.5, fract(z.x * 4.0)) * step(0.5, fract(z.y * 4.0));
+    fragColor = vec4(vec3(g), 1.0);
+    return;
   }
   uncertain = 0.0;
   dfOne = prm.one;
-  let polar = VALUE;
+  vec3 polar = VALUE;
   // A value whose digits the kernel cannot vouch for is hatched, not colored: noise there reads as structure.
-  if (uncertain > 0.5) { return vec4f(vec3f(0.2 + 0.12 * step(0.5, fract((frag.x + frag.y) / 8.0))), 1.0); }
-  let logMag = polar.z;
-  if (!(logMag < 1e30)) { return vec4f(1.0, 1.0, 1.0, 1.0); } // a pole
-  if (!(logMag > -1e30)) { return vec4f(0.0, 0.0, 0.0, 1.0); } // a zero
+  if (uncertain > 0.5) {
+    fragColor = vec4(vec3(0.2 + 0.12 * step(0.5, fract((frag.x + frag.y) / 8.0))), 1.0);
+    return;
+  }
+  float logMag = polar.z;
+  if (!(logMag < 1e30)) { fragColor = vec4(1.0, 1.0, 1.0, 1.0); return; } // a pole
+  if (!(logMag > -1e30)) { fragColor = vec4(0.0, 0.0, 0.0, 1.0); return; } // a zero
   // arg/2π along the gradient: on the phase wheel, red on the positive reals, as ComplexPlot3D.
-  let hue = fract(argOf(polar.xy) * 0.15915494);
-  let bands = fract(logMag * 1.442695); // log2|v|
-  let base = 1.0 / (1.0 + exp(-logMag)); // = |v| / (1 + |v|)
-  let val = clamp(mix(base * 0.9, 1.0, 0.22 * bands), 0.0, 1.0);
-  let sat = mix(1.0, 0.82, 0.18 * bands);
-  return vec4f(pow(val * mix(vec3f(1.0), gradient(hue), sat), vec3f(0.9)), 1.0);
+  float hue = fract(argOf(polar.xy) * 0.15915494);
+  float bands = fract(logMag * 1.442695); // log2|v|
+  float base = 1.0 / (1.0 + exp(-logMag)); // = |v| / (1 + |v|)
+  float val = clamp(mix(base * 0.9, 1.0, 0.22 * bands), 0.0, 1.0);
+  float sat = mix(1.0, 0.82, 0.18 * bands);
+  fragColor = vec4(pow(val * mix(vec3(1.0), gradient(hue), sat), vec3(0.9)), 1.0);
 }
 `;
 
-/** The complete domain-coloring shader for a complex-valued WGSL expression `code`. */
+/** The complete domain-coloring fragment shader for a complex-valued GLSL expression `code`. */
 export const portraitShader = (code: string, df64: Df64Mode = "plain"): string =>
-  withDf64(withWGSL(HOST.replace("VALUE", `clogPolar(${code})`)), df64);
+  GLSL_HEADER + withDf64(withGLSL(HOST.replace("VALUE", `clogPolar(${code})`)), df64);
 
 /** Bytes before the literal slots: center, res, extent, mask, pad. */
 const SLOTS_OFFSET = 32;
@@ -169,74 +171,47 @@ export function zoomAbout(
   };
 }
 
-let devicePromise: Promise<GPUDevice | null> | undefined;
-
-/** The shared WebGPU device, or null where WebGPU is unavailable. */
-export function getComplexPlotDevice(): Promise<GPUDevice | null> {
-  devicePromise ??= (async () => {
-    const gpu = (navigator as unknown as { gpu?: GPU }).gpu;
-    if (!gpu) return null;
-    const adapter = await gpu.requestAdapter();
-    if (!adapter) return null;
-    const device = await adapter.requestDevice();
-    await testDf64(device);
-    return device;
-  })().catch(() => null);
-  return devicePromise;
-}
-
 export class ComplexPlotRenderer {
-  #device: GPUDevice;
-  #ctx: GPUCanvasContext;
-  #format: GPUTextureFormat;
-  #uniform: GPUBuffer;
-  #pipelines = new Map<string, GPURenderPipeline>();
-  #pipeline: GPURenderPipeline | undefined;
-  #bind: GPUBindGroup | undefined;
+  #gl: WebGL2RenderingContext;
+  #df64: Df64Mode;
+  #uniform: WebGLBuffer;
+  #programs = new Map<string, WebGLProgram>();
+  #program: WebGLProgram | undefined;
   #literals: readonly (readonly [number, number])[] = [];
-  #latest = 0;
   #buf = new ArrayBuffer(UNIFORM_SIZE);
   #gradient: Gradient | undefined;
 
-  constructor(device: GPUDevice, canvas: HTMLCanvasElement) {
-    this.#device = device;
-    this.#format = (navigator as unknown as { gpu: GPU }).gpu.getPreferredCanvasFormat();
-    this.#ctx = canvas.getContext("webgpu") as GPUCanvasContext;
-    this.#ctx.configure({ device, format: this.#format, alphaMode: "opaque" });
-    this.#uniform = device.createBuffer({
-      size: UNIFORM_SIZE,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+  /** A renderer on `canvas`, or null where it can't make a WebGL2 context with float targets. */
+  static create(gpu: Gpu, canvas: HTMLCanvasElement): ComplexPlotRenderer | null {
+    // preserveDrawingBuffer: the frame stays readable (a screenshot, a test) after it is composited.
+    const gl = createContext(canvas, { alpha: false, preserveDrawingBuffer: true });
+    return gl ? new ComplexPlotRenderer(gl, gpu.df64) : null;
+  }
+
+  private constructor(gl: WebGL2RenderingContext, df64: Df64Mode) {
+    this.#gl = gl;
+    this.#df64 = df64;
+    this.#uniform = gl.createBuffer();
     this.setGradient(gradientNamed(DEFAULT_PHASE_GRADIENT));
   }
 
   /**
    * Point the renderer at an emitted expression. Returns "rebuilt" when the shape
-   * changed and a pipeline had to be compiled, "slots" when only the literals moved
+   * changed and a program had to be compiled, "slots" when only the literals moved
    * (the cheap path a slider takes), or "failed" if the shader would not compile.
    */
-  async setExpression(e: ComplexWGSL): Promise<"rebuilt" | "slots" | "failed"> {
-    const ticket = ++this.#latest;
+  setExpression(e: ComplexGLSL): "rebuilt" | "slots" | "failed" {
     this.#literals = e.literals;
-    const cached = this.#pipelines.get(e.shape);
+    const cached = this.#programs.get(e.shape);
     if (cached) {
-      const rebuilt = cached !== this.#pipeline;
-      this.#use(cached);
+      const rebuilt = cached !== this.#program;
+      this.#program = cached;
       return rebuilt ? "rebuilt" : "slots";
     }
-    const code = portraitShader(e.code, df64Mode(this.#device));
-    this.#device.pushErrorScope("validation");
-    const module = this.#device.createShaderModule({ code });
-    const pipeline = this.#device.createRenderPipeline({
-      layout: "auto",
-      vertex: { module, entryPoint: "vs" },
-      fragment: { module, entryPoint: "fs", targets: [{ format: this.#format }] },
-      primitive: { topology: "triangle-list" },
-    });
-    if (await this.#device.popErrorScope()) return "failed";
-    this.#pipelines.set(e.shape, pipeline);
-    // A newer call owns the literals; its pipeline, not this one, is the one in use.
-    if (ticket === this.#latest) this.#use(pipeline);
+    const program = compileProgram(this.#gl, portraitShader(e.code, this.#df64));
+    if (!program) return "failed";
+    this.#programs.set(e.shape, program);
+    this.#program = program;
     return "rebuilt";
   }
 
@@ -248,19 +223,11 @@ export class ComplexPlotRenderer {
     new Float32Array(this.#buf, STOPS_OFFSET, u.length).set(u);
   }
 
-  #use(pipeline: GPURenderPipeline): void {
-    this.#pipeline = pipeline;
-    this.#bind = this.#device.createBindGroup({
-      layout: pipeline.getBindGroupLayout(0),
-      entries: [{ binding: 0, resource: { buffer: this.#uniform } }],
-    });
-  }
-
   /** Draw one frame. Returns the GPU-submit duration in ms (a coarse cost signal). */
   render(view: ComplexPlotView, width: number, height: number): number {
-    const pipeline = this.#pipeline;
-    const bind = this.#bind;
-    if (!pipeline || !bind) return 0;
+    const gl = this.#gl;
+    const program = this.#program;
+    if (!program) return 0;
     const t0 = performance.now();
 
     const f = new Float32Array(this.#buf);
@@ -275,24 +242,11 @@ export class ComplexPlotRenderer {
       f[SLOTS_OFFSET / 4 + i * 4] = re;
       f[SLOTS_OFFSET / 4 + i * 4 + 1] = im;
     }
-    this.#device.queue.writeBuffer(this.#uniform, 0, this.#buf);
-
-    const enc = this.#device.createCommandEncoder();
-    const pass = enc.beginRenderPass({
-      colorAttachments: [
-        {
-          view: this.#ctx.getCurrentTexture().createView(),
-          clearValue: { r: 0, g: 0, b: 0, a: 1 },
-          loadOp: "clear",
-          storeOp: "store",
-        },
-      ],
-    });
-    pass.setPipeline(pipeline);
-    pass.setBindGroup(0, bind);
-    pass.draw(3);
-    pass.end();
-    this.#device.queue.submit([enc.finish()]);
+    gl.viewport(0, 0, width, height);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    useParams(gl, program, this.#uniform, f);
+    drawFullScreen(gl);
     return performance.now() - t0;
   }
 }

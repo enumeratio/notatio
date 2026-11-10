@@ -23,7 +23,7 @@ Three ways in, and all of them read the same `reduce`:
 
 - **Print this page.** ⌘P (or the browser's print preview) and every card re-renders for
   `print`: the sliders become grids of small multiples, the readouts are evaluated once, a
-  WebGPU portrait rasterizes.
+  WebGL2 portrait rasterizes.
 - **Narrow the window** past 640px (or open the site on a phone). `Row` becomes
   `Column`; the controls stay live, because a phone can still drive them.
 - **Edit a card below.** The text box takes Epsil; the code block under it is the
