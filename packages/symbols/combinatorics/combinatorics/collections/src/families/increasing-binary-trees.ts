@@ -28,7 +28,7 @@ const cartesianTree = (perm: string): MathJSON => {
     "cx",
     "co",
     upTo(add("co", 1), hi),
-    // Untyped, this fold declines to compile (compute-engine 0.181).
+    // Untyped, this fold declines to compile (compute-engine 0.184).
     "integer",
   );
   const tree = fold(

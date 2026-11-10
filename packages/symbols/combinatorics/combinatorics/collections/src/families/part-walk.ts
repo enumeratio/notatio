@@ -254,7 +254,7 @@ export function partWalk(spec: PartWalk): EpsilFamily {
     "pw_j",
     "pw_r",
     upTo(1, membersUpTo("pw_m")),
-    // Untyped, this fold declines to compile (compute-engine 0.181).
+    // Untyped, this fold declines to compile (compute-engine 0.184).
     "integer",
   );
   // The state is [sum left, rank left, parts so far, those parts as digits in base total + 1].
