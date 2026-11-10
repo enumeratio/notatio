@@ -3,6 +3,18 @@ name: TopQuotientRegularExtensionDimension
 domain: Dyck path statistics
 signature: TopQuotientRegularExtensionDimension(path)
 summary: The dimension of Ext^1(A/AeA, A) for the path's linear Nakayama algebra A and e the idempotent at the tops of its projective-injective modules.
+signatures:
+  - call: TopQuotientRegularExtensionDimension(path)
+    description: The dimension of Ext^1(A/AeA, A) for the path's linear Nakayama algebra A and e the idempotent at the tops of its projective-injective modules.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001193
+    url: https://www.findstat.org/St001193
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

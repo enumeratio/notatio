@@ -3,6 +3,18 @@ name: NonInjectiveProjectivesWithNonReflexiveSequences
 domain: Dyck path statistics
 signature: NonInjectiveProjectivesWithNonReflexiveSequences(path)
 summary: The indecomposable projective non-injective modules whose Auslander-Reiten sequence has a term that is not reflexive.
+signatures:
+  - call: NonInjectiveProjectivesWithNonReflexiveSequences(path)
+    description: The indecomposable projective non-injective modules whose Auslander-Reiten sequence has a term that is not reflexive.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001297
+    url: https://www.findstat.org/St001297
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

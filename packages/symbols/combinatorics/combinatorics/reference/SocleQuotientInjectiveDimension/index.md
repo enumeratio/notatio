@@ -3,6 +3,18 @@ name: SocleQuotientInjectiveDimension
 domain: Dyck path statistics
 signature: SocleQuotientInjectiveDimension(path)
 summary: The injective dimension of A/AfA for the path's linear Nakayama algebra A and f the idempotent at the socles of its projective-injective modules.
+signatures:
+  - call: SocleQuotientInjectiveDimension(path)
+    description: The injective dimension of A/AfA for the path's linear Nakayama algebra A and f the idempotent at the socles of its projective-injective modules.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001194
+    url: https://www.findstat.org/St001194
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

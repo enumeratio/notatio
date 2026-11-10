@@ -3,6 +3,18 @@ name: SimplesWithReflexiveSequences
 domain: Dyck path statistics
 signature: SimplesWithReflexiveSequences(path)
 summary: The non-projective simple modules whose Auslander-Reiten sequence ending at them has only reflexive terms.
+signatures:
+  - call: SimplesWithReflexiveSequences(path)
+    description: The non-projective simple modules whose Auslander-Reiten sequence ending at them has only reflexive terms.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St001219
+    url: https://www.findstat.org/St001219
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

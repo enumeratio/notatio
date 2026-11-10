@@ -3,6 +3,18 @@ name: CyclicNakayamaGlobalDimension
 domain: Dyck path statistics
 signature: CyclicNakayamaGlobalDimension(path)
 summary: The global dimension of the cyclic Nakayama algebra got from the path's linear Nakayama algebra by adding the first Kupisch entry to the last.
+signatures:
+  - call: CyclicNakayamaGlobalDimension(path)
+    description: The global dimension of the cyclic Nakayama algebra got from the path's linear Nakayama algebra by adding the first Kupisch entry to the last.
+    library: enumeratio-combinatorics
+    type: (dyck_path) -> number
+catalog:
+  - system: findstat
+    identity: St000969
+    url: https://www.findstat.org/St000969
+    on: DyckPath
+statOn:
+  - DyckPath
 ---
 
 - Defined over `DyckPath` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
