@@ -10,6 +10,11 @@ catalog:
     on: SignedPermutation
 statOn:
   - SignedPermutation
+signatures:
+  - call: AbsoluteOrderCoverCount(signedPermutation)
+    description: The reflections t, a sign change of one entry or a swap of two, possibly with both negated, whose product p t has one fewer positive cycle.
+    library: enumeratio-combinatorics
+    type: (signed_permutation) -> number
 ---
 
 - Defined over `SignedPermutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

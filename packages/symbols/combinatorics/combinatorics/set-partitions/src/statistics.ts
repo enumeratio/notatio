@@ -1073,7 +1073,7 @@ const FINDSTAT_PERFECT_MATCHING_STATISTICS_2: readonly Definition[] = [
 const pairsAcrossCut = (k: MathJSON): MathJSON =>
   count(positions, and(atMostValue(at("i", "openers"), k), less(k, at("i", "closers"))), "i");
 
-export const FINDSTAT_PERFECT_MATCHING_STATISTICS_3: readonly Definition[] = [
+const FINDSTAT_PERFECT_MATCHING_STATISTICS_3: readonly Definition[] = [
   matched(
     "OscillatingTableauLargestPartitionSize",
     "The most pairs a cut between two points separates: the largest number of pairs with one point on each side.",

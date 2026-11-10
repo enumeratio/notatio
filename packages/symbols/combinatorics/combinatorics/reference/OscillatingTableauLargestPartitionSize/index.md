@@ -10,6 +10,11 @@ catalog:
     on: PerfectMatching
 statOn:
   - PerfectMatching
+signatures:
+  - call: OscillatingTableauLargestPartitionSize(matching)
+    description: "The most pairs a cut between two points separates: the largest number of pairs with one point on each side."
+    library: enumeratio-combinatorics
+    type: (perfect_matching) -> number
 ---
 
 - Defined over `PerfectMatching` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

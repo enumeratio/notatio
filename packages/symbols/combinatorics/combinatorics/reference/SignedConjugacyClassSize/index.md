@@ -10,6 +10,11 @@ catalog:
     on: SignedPermutation
 statOn:
   - SignedPermutation
+signatures:
+  - call: SignedConjugacyClassSize(signedPermutation)
+    description: "The signed permutations of the same signed cycle type: 2^n n! over the product of 2k for each cycle of k points and the factorials of the numbers of cycles of each length and sign."
+    library: enumeratio-combinatorics
+    type: (signed_permutation) -> number
 ---
 
 - Defined over `SignedPermutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

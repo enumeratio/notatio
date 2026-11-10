@@ -10,6 +10,11 @@ catalog:
     on: SignedPermutation
 statOn:
   - SignedPermutation
+signatures:
+  - call: BruhatLowerCoverCount(signedPermutation)
+    description: The reflections t, a sign change of one entry or a swap of two, possibly with both negated, whose product p t is one shorter in the Coxeter length whose last generator negates the last entry.
+    library: enumeratio-combinatorics
+    type: (signed_permutation) -> number
 ---
 
 - Defined over `SignedPermutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -10,6 +10,11 @@ catalog:
     on: PerfectMatching
 statOn:
   - PerfectMatching
+signatures:
+  - call: OscillatingTableauWeight(matching)
+    description: "The sum over the pairs of the larger point less the smaller: the pairs a cut separates, summed over the cuts."
+    library: enumeratio-combinatorics
+    type: (perfect_matching) -> number
 ---
 
 - Defined over `PerfectMatching` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

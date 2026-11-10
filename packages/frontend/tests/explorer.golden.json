@@ -1703,9 +1703,14 @@
       "start": 4
     },
     "glyph": "signed-permutation",
-    "columns": ["BastidasHohlwegSaliolaExcedanceCount", "Descents", "FlagDenertIndex", "FlagDescent"],
+    "columns": [
+      "AbsoluteOrderCoverCount",
+      "AtomicLength",
+      "BastidasHohlwegSaliolaExcedanceCount",
+      "BruhatLowerCoverCount"
+    ],
     "derived": true,
-    "statistics": 34
+    "statistics": 38
   },
   "SignedSetCompositions": null,
   "SignedSubsets": null,

@@ -420,7 +420,7 @@ const likeCycles = (i: MathJSON): MathJSON =>
 /** The size of the class: 2^n n! over the centralizer's order, the product over the cycles of 2k times the number of cycles of each kind and length before it. */
 const classSize: MathJSON = [
   "Divide",
-  times(doubling(n), ["Factorial", n]),
+  times(doubling(n), ["Product", ["Range", 1, n]]),
   ["Product", forEach(positions, ["If", leadsCycleIn("_x", "i"), times(cycleFactor("i"), likeCycles("i")), 1])],
 ];
 
