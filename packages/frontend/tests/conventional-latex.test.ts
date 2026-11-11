@@ -187,6 +187,9 @@ test("a derivative brackets an operand that binds looser than the prime", () => 
   expect(latex(["Derivative", ["Function", ["Block", ["Power", "x", 2]], "x"]])).toBe("(x\\mapsto x^2)^{\\prime}");
   expect(latex(["Derivative", ["Power", "x", 2]])).toBe("(x^2)^{\\prime}");
   expect(latex(["Derivative", "f", 2])).toBe("f^{\\doubleprime}");
+  expect(latex(["Apply", ["Derivative", "f", 2], "x"])).toBe("f^{\\doubleprime}(x)");
+  // A symbolic or partial order has no prime, so it is the call.
+  expect(latex(["Derivative", "f", "k"])).toBe("\\mathrm{Derivative}(f, k)");
 });
 
 test("an equation after a factorial reads back as an equation, not as `!=`", () => {
@@ -207,4 +210,22 @@ test("three sets minus one another read back as removing the second, then the th
   expect(head).toBe("SetMinus");
   expect(right).toBe("c");
   expect(JSON.stringify(left)).toContain('"SetMinus","a","b"');
+});
+
+test("the primes of a function symbol read as its derivative", () => {
+  const read = (latex: string) => ce.parse(latex, { form: "raw" }).json;
+  for (const [latex, order] of [
+    ["f'", 1],
+    ["f''", 2],
+    ["f'''", 3],
+    ["f^{\\prime}", 1],
+    ["f^{\\prime\\prime}", 2],
+    ["f^{\\doubleprime}", 2],
+    ["f^{\\tripleprime}", 3],
+  ] as const) {
+    expect(read(latex), latex).toEqual(["Derivative", "f", order]);
+  }
+  expect(read("f''(x)")).toEqual(["Apply", ["Derivative", "f", 2], "x"]);
+  // Not a symbol: the native read.
+  expect(read("(f+g)'")).toEqual(["Derivative", ["Delimiter", ["Add", "f", "g"]]]);
 });
