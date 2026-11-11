@@ -447,6 +447,149 @@ const stretchCycleImage = (p: number[]): Map<number, number> => {
   close();
   return image;
 };
+/** The permutations reachable from p by swapping adjacent entries that differ by `gap`, found by search. */
+const swapClassOf = (p: number[], gap: number): number => {
+  const seen = new Set([p.join(",")]);
+  const todo = [p];
+  while (todo.length > 0) {
+    const w = todo.pop()!;
+    for (const i of range(0, w.length - 2)) {
+      if (Math.abs(w[i]! - w[i + 1]!) !== gap) continue;
+      const swapped = w.with(i, w[i + 1]!).with(i + 1, w[i]!);
+      if (seen.has(swapped.join(","))) continue;
+      seen.add(swapped.join(","));
+      todo.push(swapped);
+    }
+  }
+  return seen.size;
+};
+/** One pass of West's stack sorting: pop while the next entry is larger. */
+const stackSort = (w: number[]): number[] => {
+  const out: number[] = [];
+  const stack: number[] = [];
+  for (const e of w) {
+    while (stack.length > 0 && stack.at(-1)! < e) out.push(stack.pop()!);
+    stack.push(e);
+  }
+  return [...out, ...stack.toReversed()];
+};
+/** The row lengths of the Robinson-Schensted tableau, by row insertion. */
+const insertionShapeOf = (p: number[]): number[] => {
+  const rows: number[][] = [];
+  for (const entry of p) {
+    let e = entry;
+    for (let r = 0; ; r++) {
+      if (r === rows.length) {
+        rows.push([e]);
+        break;
+      }
+      const row = rows[r]!;
+      const j = row.findIndex((v) => v > e);
+      if (j < 0) {
+        row.push(e);
+        break;
+      }
+      [row[j], e] = [e, row[j]!];
+    }
+  }
+  return rows.map((row) => row.length);
+};
+/** The parking functions of n cars, as the spot each car takes and its preference word, found by letting the cars park. */
+const parkingFunctionsCache = new Map<number, { spots: number[]; word: number[] }[]>();
+const parkingFunctionsOf = (n: number): { spots: number[]; word: number[] }[] => {
+  if (parkingFunctionsCache.has(n)) return parkingFunctionsCache.get(n)!;
+  const found: { spots: number[]; word: number[] }[] = [];
+  const walk = (word: number[], taken: boolean[], spots: number[]): void => {
+    if (word.length === n) {
+      found.push({ spots, word });
+      return;
+    }
+    for (const want of range(1, n)) {
+      const spot = range(want, n).find((s) => !taken[s]);
+      if (spot === undefined) continue;
+      walk([...word, want], taken.with(spot, true), [...spots, spot]);
+    }
+  };
+  walk([], new Array<boolean>(n + 1).fill(false), []);
+  parkingFunctionsCache.set(n, found);
+  return found;
+};
+/** The standardization of a word: positions ranked by value, equal values left to right. */
+const standardPermutation = (w: number[]): number[] => {
+  const order = range(0, w.length - 1).toSorted((i, j) => w[i]! - w[j]! || i - j);
+  const rank = new Array<number>(w.length);
+  order.forEach((i, r) => (rank[i] = r + 1));
+  return rank;
+};
+/** The shortest-path counts from the identity in the graph that swaps the first entry with another, by search outward. */
+const starFactorizationCache = new Map<number, Map<string, number>>();
+const starFactorizationsOf = (n: number): Map<string, number> => {
+  if (starFactorizationCache.has(n)) return starFactorizationCache.get(n)!;
+  const identity = range(1, n);
+  const distance = new Map<string, number>([[identity.join(","), 0]]);
+  const paths = new Map<string, number>([[identity.join(","), 1]]);
+  let frontier = [identity];
+  while (frontier.length > 0) {
+    const next = new Map<string, number[]>();
+    for (const w of frontier)
+      for (const a of range(1, n - 1)) {
+        const moved = w.with(0, w[a]!).with(a, w[0]!);
+        const key = moved.join(",");
+        const known = distance.get(key);
+        const level = distance.get(w.join(","))! + 1;
+        if (known !== undefined && known < level) continue;
+        distance.set(key, level);
+        paths.set(key, (known === undefined ? 0 : paths.get(key)!) + paths.get(w.join(","))!);
+        next.set(key, moved);
+      }
+    frontier = [...next.values()];
+  }
+  starFactorizationCache.set(n, paths);
+  return paths;
+};
+/** The ascending runs of p: maximal stretches of consecutive increases. */
+const ascendingRuns = (p: number[]): number[][] => {
+  const runs: number[][] = [];
+  for (const v of p) {
+    if (runs.length > 0 && runs.at(-1)!.at(-1)! < v) runs.at(-1)!.push(v);
+    else runs.push([v]);
+  }
+  return runs;
+};
+/** Every ordering of the items. */
+const orderings = <T>(items: T[]): T[][] =>
+  items.length === 0
+    ? [[]]
+    : items.flatMap((item, i) =>
+        orderings([...items.slice(0, i), ...items.slice(i + 1)]).map((rest) => [item, ...rest]),
+      );
+/** The labels' components when each i is joined to p(i) and chords that cross (ends strictly interleaved) are joined. */
+const chordComponents = (p: number[]): number => {
+  const parent = range(0, p.length);
+  const find = (v: number): number => (parent[v] === v ? v : (parent[v] = find(parent[v]!)));
+  const join = (a: number, b: number): void => void (parent[find(a)] = find(b));
+  p.forEach((v, i) => join(i + 1, v));
+  const chords = p.map((v, i): [number, number] => [Math.min(i + 1, v), Math.max(i + 1, v)]);
+  for (const [a, b] of chords) for (const [c, d] of chords) if (a < c && c < b && b < d) join(a, c);
+  return new Set(range(1, p.length).map(find)).size;
+};
+/** The size of the largest pair of disjoint subsequences of equal size that `alike` calls alike. */
+const largestTwins = (p: number[], alike: (a: number[], b: number[]) => boolean): number => {
+  let best = 0;
+  const n = p.length;
+  for (let first = 0; first < 2 ** n; first++)
+    for (let second = first + 1; second < 2 ** n; second++) {
+      if ((first & second) !== 0) continue;
+      const a = range(0, n - 1)
+        .filter((i) => (first >> i) % 2 === 1)
+        .map((i) => p[i]!);
+      const b = range(0, n - 1)
+        .filter((i) => (second >> i) % 2 === 1)
+        .map((i) => p[i]!);
+      if (a.length === b.length && a.length > best && alike(a, b)) best = a.length;
+    }
+  return best;
+};
 export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
   LeftOuterPeaks: (p) => peaksOf([0, ...p]),
   RightOuterPeaks: (p) => peaksOf([...p, 0]),
@@ -1305,4 +1448,48 @@ export const FINDSTAT_READINGS: Record<string, (p: number[]) => number> = {
     return passes;
   },
   DistinctPatternCount: (p) => new Set(subwordsOf(p).map(standardized)).size,
+  StackSortingPasses: (p) => {
+    let w = p;
+    let passes = 0;
+    while (w.some((v, i) => v !== i + 1)) {
+      w = stackSort(w);
+      passes++;
+    }
+    return passes;
+  },
+  ConsecutiveSwapClassSize: (p) => swapClassOf(p, 1),
+  DistanceTwoSwapClassSize: (p) => swapClassOf(p, 2),
+  LusztigAFunction: (p) => {
+    const shape = insertionShapeOf(p);
+    return sum(
+      range(1, shape[0] ?? 0).map(
+        (j) => (shape.filter((l) => l >= j).length * (shape.filter((l) => l >= j).length - 1)) / 2,
+      ),
+    );
+  },
+  ParkingPermutationPreimageSize: (p) =>
+    parkingFunctionsOf(p.length).filter(({ spots }) => spots.every((s, c) => s === p[c])).length,
+  LabellingPermutationPreimageSize: (p) =>
+    parkingFunctionsOf(p.length).filter(({ word }) => inverse(standardPermutation(word)).every((v, i) => v === p[i]))
+      .length,
+  MinimalStarTranspositionFactorizationCount: (p) => starFactorizationsOf(p.length).get(p.join(",")) ?? 0,
+  LargestUniversalPatternSize: (p) => {
+    const found = new Set(subwordsOf(p).map(standardized));
+    let k = 0;
+    while (allPermutations(k + 1).every((q) => found.has(standardized(q)))) k++;
+    return k;
+  },
+  ChordDiagramComponentCount: chordComponents,
+  RunSetFiberSize: (p) => {
+    const runs = ascendingRuns(p);
+    const key = (rs: number[][]): string =>
+      rs
+        .map((r) => r.join(","))
+        .toSorted()
+        .join("|");
+    return orderings(runs).filter((order) => key(ascendingRuns(order.flat())) === key(runs)).length;
+  },
+  LongestTwinLength: (p) => largestTwins(p, (a, b) => standardized(a) === standardized(b)),
+  LongestWeakTwinLength: (p) =>
+    largestTwins(p, (a, b) => range(1, a.length - 1).every((i) => a[i - 1]! < a[i]! === b[i - 1]! < b[i]!)),
 };
