@@ -1,0 +1,367 @@
+/* The frame around a page: header, sidebar, column, outline, pager, footer, mobile screen.
+   Selectors start at #app so they outrank the default theme's scoped rules. */
+
+/* Header: paper, one hairline, the wordmark in the serif. */
+#app .VPNav {
+  background: var(--paper);
+}
+#app .VPNavBar,
+#app .VPNavBar:not(.home) {
+  background: color-mix(in srgb, var(--paper) 92%, transparent);
+  backdrop-filter: saturate(1.2) blur(10px);
+  border-bottom: var(--hairline);
+}
+#app .VPNavBar .divider {
+  display: none;
+}
+#app .VPNavBar .content-body,
+#app .VPNavBar .title {
+  background: transparent;
+  border-bottom: 0;
+}
+#app .VPNavBarTitle .title {
+  font-family: var(--font-prose);
+  font-size: 1.4rem;
+  font-style: italic;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  gap: 0.55rem;
+}
+/* The mark: a rubric punctus before the name. */
+#app .VPNavBarTitle .title::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  background: var(--rubric);
+  transform: rotate(45deg);
+  flex: none;
+}
+#app .VPNavBarTitle .title:hover {
+  opacity: 1;
+  color: var(--blue);
+}
+#app .VPNavBarMenuLink,
+#app .VPNavBarMenuGroup .button,
+#app .VPNavBarMenuGroup .text {
+  font-size: var(--text-ui);
+  font-weight: 500;
+  color: var(--ink-2);
+  transition: color 0.15s;
+}
+#app .VPNavBarMenuLink {
+  position: relative;
+}
+#app .VPNavBarMenuLink:hover,
+#app .VPNavBarMenuGroup:hover .text,
+#app .VPNavBarMenuGroup .button:hover .text {
+  color: var(--ink);
+}
+#app .VPNavBarMenuLink.active,
+#app .VPNavBarMenuGroup.active .text,
+#app .VPNavBarMenuGroup .button.active .text {
+  color: var(--ink);
+}
+/* The section a reader is in is underlined on the header's own rule. */
+#app .VPNavBarMenuLink.active::after {
+  content: "";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 0;
+  height: 2px;
+  background: var(--rubric);
+}
+#app .VPFlyout .menu .VPMenu {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow);
+}
+#app .VPMenuLink a,
+#app .VPMenuLink .link {
+  font-size: var(--text-ui);
+  font-weight: 450;
+  color: var(--ink-2);
+  border-radius: var(--radius-1);
+}
+#app .VPMenuLink a:hover {
+  color: var(--ink);
+  background: var(--paper-sunken);
+}
+#app .VPMenuLink a.active {
+  color: var(--ink);
+}
+#app .VPSocialLink {
+  color: var(--ink-3);
+}
+#app .VPSocialLink:hover {
+  color: var(--ink);
+}
+#app .VPSwitch {
+  border-color: var(--rule-strong);
+  background: var(--paper-sunken);
+}
+#app .VPSwitch:hover {
+  border-color: var(--ink-3);
+}
+#app .VPSwitch .check {
+  background: var(--paper-raised);
+  box-shadow: 0 0 0 1px var(--rule-strong);
+}
+#app .VPNavBarHamburger .top,
+#app .VPNavBarHamburger .middle,
+#app .VPNavBarHamburger .bottom {
+  background: var(--ink);
+}
+
+/* Mobile: the full-screen menu and the local bar under the header. */
+#app .VPNavScreen {
+  background: var(--paper);
+  border-top: var(--hairline);
+}
+#app .VPNavScreenMenuLink,
+#app .VPNavScreenMenuGroup .button {
+  font-family: var(--font-prose);
+  font-size: 1.25rem;
+  font-weight: 500;
+  line-height: 1.3;
+  padding: 0.9rem 0;
+  color: var(--ink);
+  border-bottom: var(--hairline);
+}
+#app .VPNavScreenMenuGroup {
+  border-bottom: var(--hairline);
+}
+#app .VPNavScreenMenuGroup .button {
+  border-bottom: 0;
+}
+#app .VPNavScreenMenuGroupLink {
+  font-size: 1rem;
+  color: var(--ink-2);
+}
+#app .VPLocalNav {
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: var(--hairline);
+}
+#app .VPLocalNav .menu,
+#app .VPLocalNavOutlineDropdown button {
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+#app .VPLocalNavOutlineDropdown .items {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--paper-raised);
+  box-shadow: var(--shadow);
+}
+
+/* Sidebar: on the page's own paper, behind a hairline; groups under small-caps labels. */
+#app .VPSidebar {
+  background: var(--paper);
+  border-right: var(--hairline);
+  scrollbar-width: thin;
+  scrollbar-color: var(--rule-strong) transparent;
+}
+#app .VPSidebar .curtain {
+  background: var(--paper);
+}
+#app .VPSidebar .group + .group {
+  border-top: 0;
+  padding-top: 0.25rem;
+}
+#app .VPSidebar .group {
+  padding-bottom: 1.25rem;
+}
+#app .VPSidebarItem.level-0 {
+  padding-bottom: 0;
+}
+#app .VPSidebarItem.level-0 > .item > .text,
+#app .VPSidebarItem.level-0 > .item > .link > .text {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  line-height: 1.6;
+  padding: 0.6rem 0 0.35rem;
+}
+#app .VPSidebarItem .item {
+  position: relative;
+}
+#app .VPSidebarItem .text {
+  font-size: 0.86rem;
+  font-weight: 450;
+  line-height: 1.4;
+  padding: 0.28rem 0;
+  color: var(--ink-2);
+  transition: color 0.15s;
+}
+#app .VPSidebarItem .link:hover .text {
+  color: var(--ink);
+}
+#app .VPSidebarItem.is-active > .item .link > .text,
+#app .VPSidebarItem.level-0.is-active > .item > .link > .text {
+  color: var(--ink);
+  font-weight: 600;
+}
+/* The current page carries a rubric tick in the margin. */
+#app .VPSidebarItem .indicator {
+  left: -14px;
+  top: 0.45rem;
+  bottom: 0.45rem;
+  width: 2px;
+  border-radius: 0;
+}
+#app .VPSidebarItem.is-active > .item > .indicator {
+  background: var(--rubric);
+}
+#app .VPSidebarItem.level-1 .items,
+#app .VPSidebarItem.level-2 .items {
+  border-left: var(--hairline);
+  padding-left: 0.85rem;
+  margin: 0.1rem 0 0.2rem 0.1rem;
+}
+#app .VPSidebarItem .caret {
+  color: var(--ink-3);
+}
+
+/* The column. */
+#app .VPDoc {
+  padding-top: 2.5rem;
+}
+@media (min-width: 960px) {
+  #app .VPDoc {
+    padding-top: 3.5rem;
+  }
+  #app .VPDoc:not(.has-sidebar) .content {
+    max-width: calc(var(--column) + 64px);
+  }
+  #app .VPDoc:not(.has-sidebar) .container {
+    max-width: 1100px;
+  }
+}
+#app .VPDoc .content-container,
+#app .VPDoc.has-aside .content-container {
+  max-width: var(--column);
+}
+@media (min-width: 1280px) {
+  #app .VPDoc .aside {
+    max-width: 240px;
+  }
+}
+
+/* Outline: a quiet contents list; the heading in view is marked in rubric. */
+#app .VPDocAsideOutline .content {
+  border-left: var(--hairline);
+  padding-left: 1rem;
+}
+#app .VPDocAsideOutline .outline-title {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding-bottom: 0.35rem;
+}
+#app .VPDocAsideOutline .outline-marker {
+  background: var(--rubric);
+  width: 2px;
+  border-radius: 0;
+}
+#app .VPDocOutlineItem .outline-link {
+  font-size: var(--text-sm);
+  font-weight: 450;
+  line-height: 1.4;
+  padding: 0.25rem 0;
+  white-space: normal;
+  color: var(--ink-3);
+}
+#app .VPDocOutlineItem .outline-link:hover,
+#app .VPDocOutlineItem .outline-link.active {
+  color: var(--ink);
+}
+
+/* Pager: previous and next as two captions under a hairline, no boxes. */
+#app .VPDocFooter {
+  margin-top: 4rem;
+}
+#app .VPDocFooter .prev-next {
+  border-top: var(--hairline);
+  padding-top: 1.25rem;
+}
+#app .VPDocFooter .pager-link {
+  border: 0;
+  border-radius: 0;
+  padding: 0.25rem 0;
+}
+#app .VPDocFooter .pager-link .desc {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+#app .VPDocFooter .pager-link .title {
+  font-family: var(--font-prose);
+  font-size: 1.15rem;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--blue);
+}
+#app .VPDocFooter .pager-link:hover .title {
+  color: var(--blue-strong);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
+/* Colophon (components/SiteFooter.vue). */
+.site-footer {
+  margin-top: 4rem;
+  padding: 1.25rem 0 2.5rem;
+  border-top: var(--hairline);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  justify-content: space-between;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+.site-footer p {
+  margin: 0;
+  max-width: 30rem;
+}
+.site-footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.1rem;
+}
+.site-footer a,
+.vp-doc .site-footer a {
+  color: var(--ink-2);
+  text-decoration: none;
+}
+.site-footer a:hover,
+.vp-doc .site-footer a:hover {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+.site-footer em {
+  font-family: var(--font-prose);
+  font-size: 1.05em;
+}
+
+/* Skip link and the backdrop. */
+#app .VPSkipLink {
+  border-radius: var(--radius-2);
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-raised);
+  color: var(--blue);
+  font-size: var(--text-ui);
+}
