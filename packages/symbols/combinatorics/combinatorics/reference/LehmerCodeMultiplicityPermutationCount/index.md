@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: LehmerCodeMultiplicityPermutationCount(partition)
+    description: The permutations of the size whose Lehmer code takes its values with these multiplicities, the nonzero multiplicities of its values being the parts.
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

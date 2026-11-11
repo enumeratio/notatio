@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: ColoredRootedTreeCount(partition)
+    description: The rooted trees, unordered and unlabeled, on vertices colored with these multiplicities, vertices of one color being interchangeable.
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

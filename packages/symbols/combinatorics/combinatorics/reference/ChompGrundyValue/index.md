@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: ChompGrundyValue(partition)
+    description: "The Grundy value of Chomp on the diagram: a move cuts a cell and all cells below and right of it, any cell but the first, and the player left with the first cell alone loses."
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

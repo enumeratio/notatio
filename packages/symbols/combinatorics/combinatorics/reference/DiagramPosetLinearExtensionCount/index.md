@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: DiagramPosetLinearExtensionCount(partition)
+    description: The linear extensions of the poset on the diagram (Speyer's construction for the homogeneous Garnir relations), counted by the splitting of the diagram at its lowest cell on the longest antidiagonal into the rows below and the columns beyond.
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: ProperColoringSchemeCount(partition)
+    description: The partitions of the number of cells that are the class sizes of a proper coloring of the cells with the fewest colors, no two cells in a row or a column alike.
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

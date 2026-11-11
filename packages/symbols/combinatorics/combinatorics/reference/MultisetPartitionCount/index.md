@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: MultisetPartitionCount(partition)
+    description: "The multiset partitions of the multiset with these multiplicities: its vector of multiplicities written as an unordered sum of nonzero vectors."
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

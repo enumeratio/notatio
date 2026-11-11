@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: BinaryTreeCountWithNoTwinLeavesOfOneColor(partition)
+    description: The rooted binary trees whose leaves are the colored vertices, internal vertices unlabeled, in which no internal vertex has two leaves of one color as its children.
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

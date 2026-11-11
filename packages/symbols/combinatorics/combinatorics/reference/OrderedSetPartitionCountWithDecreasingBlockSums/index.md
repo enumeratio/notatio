@@ -10,6 +10,11 @@ catalog:
     on: IntegerPartition
 statOn:
   - IntegerPartition
+signatures:
+  - call: OrderedSetPartitionCountWithDecreasingBlockSums(partition)
+    description: The ways to put the parts, told apart by position, into an ordered list of blocks whose sums weakly decrease.
+    library: enumeratio-combinatorics
+    type: (integer_partition) -> number
 ---
 
 - Defined over `IntegerPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
