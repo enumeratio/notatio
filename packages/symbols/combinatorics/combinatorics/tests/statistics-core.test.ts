@@ -43,6 +43,8 @@ const CORE = [
   "Equal",
   "Filter",
   "Flatten",
+  // The row of a cell in the Robinson-Schensted state that LusztigAFunction (St001874) reads its shape from.
+  "Floor",
   "Fold",
   // The Euclidean algorithm of the distinct-eigenvalue statistics (St000452) cancels leading terms and removes content.
   "GCD",
