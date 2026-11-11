@@ -1378,11 +1378,12 @@ const coxeterEntrySum: MathJSON = [
 // own parameter and the names bound around it, never the parameters of an enclosing loop.
 /**
  * The syzygies of the indecomposable injectives, one row per level: row `level` holds the (level - 1)-th syzygy of each
- * injective, as its tops (`part` 1) or its lengths (`part` 2), stopping at the projective it reaches.
+ * injective, as its tops (`part` 1) or its lengths (`part` 2), stopping at the projective it reaches. Two rows past the
+ * vertex count, so that the third extension of a path with one vertex has a row to read.
  */
 const syzygyChains = (part: 1 | 2): MathJSON =>
   forEach(
-    vertexIndices,
+    upTo(add(vertexCount, 2)),
     forInjectives((top, extent) => at(part, syzygyAfter(top, extent, subtract("level", 1)))),
     "level",
   );
