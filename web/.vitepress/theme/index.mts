@@ -4,6 +4,7 @@ import DefaultTheme from "vitepress/theme";
 import "katex/dist/katex.min.css";
 import "./prerendered.css";
 import "./source-links.css";
+import "./styles/index.css";
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { PackageNotation } from "@enumeratio/boxes";
 import type { Resolver } from "@enumeratio/manifest";

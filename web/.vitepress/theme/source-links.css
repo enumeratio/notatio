@@ -4,7 +4,7 @@ a.source-link {
   text-decoration: none;
 }
 a.source-link code {
-  color: var(--vp-c-text-1);
+  color: var(--code-ink);
   border-bottom: 1px solid transparent;
   transition:
     color 0.2s,
@@ -16,6 +16,7 @@ a.source-link:hover code {
 }
 .source-link-try {
   margin: -0.75rem 0 1rem;
-  font-size: 0.8em;
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
   text-align: right;
 }
