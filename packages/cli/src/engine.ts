@@ -11,6 +11,7 @@ import { CARRIERS, declareCombinatorics, declareMaps } from "@enumeratio/combina
 import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
 import { declareGraphics, exportTo, importFrom } from "@enumeratio/formats";
 import { displayLatexSyntax } from "@enumeratio/frontend/display";
+import { readCardinalityByType } from "@enumeratio/frontend/conventional-latex";
 import { drawBoxes } from "./cell-layout.ts";
 import { NOTATION_ENTRIES } from "./notation.ts";
 import {
@@ -225,6 +226,7 @@ export class Session {
     this.ce = new ComputeEngine({
       latexSyntax: displayLatexSyntax(LATEX_DICTIONARY, NOTATION.latex),
     });
+    readCardinalityByType(this.ce);
     setEngineDefaults(this.ce);
     registerNotation(this.ce, NOTATION.traditional);
     // Carriers, the families typed by them, the plural type-spaces and Element, and the maps

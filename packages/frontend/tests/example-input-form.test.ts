@@ -10,12 +10,17 @@ import { toInputForm } from "@enumeratio/engine";
 import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { declaredEngine, packageNotations } from "../../reference/scripts/engines.ts";
+import { readCardinalityByType } from "../src/conventional-latex.ts";
 import { displayLatexSyntax } from "../src/display.ts";
 import { AS_TYPED, typedLatex } from "../src/latex.ts";
 
 const { heads } = loadReferenceData(PACKAGES);
 const notation = combineNotation(await packageNotations());
 const ce = declaredEngine({ latexSyntax: displayLatexSyntax(LATEX_DICTIONARY as never, notation.latex as never) });
+readCardinalityByType(ce);
+// Symbols for the cardinality cases: `|…|` is `Count` or `Abs` by the operand's declared type.
+ce.declare("cardSet", "set<integer>");
+ce.declare("cardList", "list<integer>");
 
 /** What the editor shows for `json`, read back the way a cell reads it, as InputForm. */
 const asTyped = (json: unknown): string | undefined => printed(ce.parse(typedLatex(ce, json), AS_TYPED).json);
@@ -226,6 +231,13 @@ test.each([
   ["a union of none", ["Union"]],
   ["the cardinality of a power set", ["Count", ["PowerSet", "s"]]],
   ["the cardinality of a quotient ring", ["Count", ["QuotientRing", "Integers", 12]]],
+  ["the cardinality of a declared set symbol", ["Count", "cardSet"]],
+  ["the cardinality of a set literal", ["Count", ["Set", 1, 2]]],
+  ["the cardinality of a union of declared sets", ["Count", ["Union", "cardSet", "cardSet"]]],
+  // compute-engine's canonical `Abs` of a list (a symbol typed `list`, or a `List` literal) stays `Abs`.
+  ["the absolute value of a declared list symbol", ["Abs", "cardList"]],
+  ["the absolute value of a list", ["Abs", ["List", 1, 2]]],
+  ["the absolute value of a number", ["Abs", -3]],
   ["the absolute value of a symbol", ["Abs", "x"]],
   ["a dictionary", ["Dictionary", ["KeyValuePair", { str: "k" }, "v"]]],
   ["a dictionary of two", ["Dictionary", ["KeyValuePair", { str: "k" }, 1], ["KeyValuePair", { str: "m" }, 2]]],
