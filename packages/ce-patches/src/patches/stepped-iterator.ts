@@ -1,4 +1,5 @@
 import { type Expression, type ComputeEngine, isFunction } from "@cortex-js/compute-engine";
+import { declareCompile } from "@enumeratio/engine";
 import type { Patch } from "../patch.ts";
 
 // Wolfram's `Sum[f, {i, lo, hi, step}]` and `Product[f, {i, lo, hi, step}]` run i over
@@ -39,6 +40,8 @@ export const steppedIterator: Patch = {
           ops.map((op, i) => (i === 0 ? op : asIndexingSet(ce, op))),
           context,
         );
+      // compile builtin: reads an iterator at canonicalization, before compile sees the expression
+      declareCompile(ce, head, "builtin");
     }
   },
 };
