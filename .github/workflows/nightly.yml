@@ -211,8 +211,8 @@ jobs:
 
   # A real browser against a real dev server, checking every component story renders (the
   # custom element upgrades, draws something, no console errors) -- see web/tests/stories.
-  # Slower and flakier than the PR gate's checks, so it lives here instead: advisory, never
-  # required, and a failure doesn't block anything.
+  # Slower and flakier than the PR gate's checks, so it lives here instead: never
+  # required, and a failure doesn't block anything, but the job goes red.
   component-stories:
     name: component stories (Playwright) ${{ matrix.shard }}/3
     if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'component-stories')
@@ -230,7 +230,6 @@ jobs:
       - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
         continue-on-error: true
       - run: pnpm --filter @enumeratio/web run test:stories --shard=${{ matrix.shard }}/3
-        continue-on-error: true
       # The hydration race needs the built site (the prerendered placeholders): one shard does it.
       # Not advisory like the stories: a regression goes red, for the fixup routine to file.
       - if: matrix.shard == 1
@@ -248,7 +247,7 @@ jobs:
           retention-days: 7
 
   # The WebGPU stories: headless Chromium destroys a device whose canvas is configured, so these run
-  # headed, on a virtual display and a software adapter. Advisory, like the stories above.
+  # headed, on a virtual display and a software adapter. Red when a story fails, like the stories above.
   component-stories-gpu:
     name: component stories (WebGPU) ${{ matrix.shard }}/3
     if: (github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'component-stories-gpu')
@@ -271,13 +270,11 @@ jobs:
         continue-on-error: true
       - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts --shard=${{ matrix.shard }}/3
         working-directory: web
-        continue-on-error: true
       - if: matrix.shard == 1
         run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.config.ts plots.spec.ts -g "on the GPU" --output=test-results/plots
         working-directory: web
         env:
           WEBGPU: "1"
-        continue-on-error: true
       # A failed test's trace and page snapshot: the log says what timed out, not what the page was doing.
       - if: always()
         uses: actions/upload-artifact@v4

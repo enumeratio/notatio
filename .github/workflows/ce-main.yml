@@ -128,11 +128,21 @@ jobs:
           node .github/scripts/compute-engine-tarball.ts apply "$tgz"
           pnpm install --no-frozen-lockfile
           node .github/scripts/compute-engine-tarball.ts verify "$tgz"
-      - run: node tools/ci/dist-cache.ts build
+      # Teed: the report reads the `<pkg> build failed` group from it when this stage is what failed.
+      - run: |
+          set -o pipefail
+          node tools/ci/dist-cache.ts build 2>&1 | tee "$RUNNER_TEMP/dist.log"
         env:
           DIST_CACHE_DIR: ${{ runner.temp }}/dist-cache
           BUILD_JOBS: 3
           DIST_CACHE_JOBS: 4
+          NO_COLOR: "1"
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-log
+          path: ${{ runner.temp }}/dist.log
+          retention-days: 3
       - uses: actions/upload-artifact@v4
         with:
           name: dist-cache
@@ -207,7 +217,7 @@ jobs:
       - uses: actions/download-artifact@v4
         continue-on-error: true # nothing to read when compute-engine itself failed to build
         with:
-          pattern: "{log-*,ce-range}"
+          pattern: "{log-*,ce-range,dist-log}"
           path: ${{ runner.temp }}/reports
       - uses: actions/github-script@v7
         env:
@@ -247,6 +257,19 @@ jobs:
                 if (/^\s*FAIL\s+\S/.test(line) && !failures.has(line.trim())) failures.set(line.trim(), lines.slice(i + 1, i + 6).join('\n').trimEnd())
               })
             }
+            // A dist failure has no test log: the failing package and the head of its build output instead.
+            let distFailure = ''
+            const distLog = path.join(dir, 'dist-log', 'dist.log')
+            if (fs.existsSync(distLog)) {
+              const lines = strip(fs.readFileSync(distLog, 'utf8')).split('\n')
+              const start = lines.findIndex((l) => /^::group::.* build failed$/.test(l))
+              if (start >= 0) {
+                const pkg = lines[start].slice('::group::'.length, -' build failed'.length)
+                const end = lines.findIndex((l, i) => i > start && l.startsWith('::endgroup::'))
+                const head = lines.slice(start + 1, end < 0 ? undefined : end).slice(0, 30).join('\n')
+                distFailure = `Dist build failed in \`${pkg}\`:\n\n\`\`\`\n${head.slice(0, 8000)}\n\`\`\``
+              }
+            }
             let range = 'No range recorded.'
             const rangeFile = path.join(dir, 'ce-range', 'range.md')
             if (fs.existsSync(rangeFile)) range = fs.readFileSync(rangeFile, 'utf8')
@@ -257,9 +280,10 @@ jobs:
               `Our suite against compute-engine ${ceRef} at [\`${sha ? sha.slice(0, 10) : 'unknown'}\`](${commitUrl}) failed: ${runUrl}`,
               `Stages: ${process.env.STAGES}`,
               range,
+              distFailure,
               `Failing tests (${failures.size}):`,
               list,
-            ].join('\n\n')
+            ].filter(Boolean).join('\n\n')
             if (existing) {
               if (existing.state === 'closed') await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'open' })
               await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body })
