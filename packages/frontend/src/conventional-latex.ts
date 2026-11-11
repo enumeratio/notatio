@@ -360,15 +360,57 @@ const primeOrder = (x: MathJsonExpression | undefined): boolean => {
   return n === 1 || n === 2 || n === 3;
 };
 
-/** `f^{\prime}` for a bare `Derivative(f)`; with orders it is the call: the prime reads back without
- *  them (`Derivative(f, 1)` as `Derivative(f)`), and `f^{(k)}` and `f^{(0, 1)}` as a power. */
+/** The primes of a symbol, each way compute-engine reads one: `f'`, `f''`, `f'''`, `f^{\prime}`,
+ *  `f^{\prime\prime}`, `f^{\doubleprime}`. It reads `Prime(f, k)`; the sign reads `Derivative(f, k)`,
+ *  which is what a first to third derivative of a function is everywhere else. */
+const PRIMES: readonly (readonly [trigger: string | string[], order: number, precedence?: number])[] = [
+  [["^", "\\prime"], 1],
+  ["^{\\prime\\prime}", 2],
+  ["^{\\prime\\prime\\prime}", 3],
+  [["^", "\\doubleprime"], 2],
+  [["^", "\\tripleprime"], 3],
+  ["'", 1, 810],
+  ["\\prime", 1, 810],
+  ["\\doubleprime", 2, 810],
+  ["\\tripleprime", 3, 810],
+];
+
+/** A prime on a symbol is `Derivative(f, k)`; on anything else (`(f+g)'`, `\sin'`) the native read. */
+const primeOf = ([trigger, order, precedence]: (typeof PRIMES)[number]): Entry => {
+  const nativePrime = LATEX_DICTIONARY.find(
+    (e: { latexTrigger?: unknown; kind?: string }) =>
+      JSON.stringify(e.latexTrigger) === JSON.stringify(trigger) && e.kind === "postfix",
+  ) as { parse?: (p: Parser, lhs: MathJsonExpression, until?: Until) => MathJsonExpression | null } | undefined;
+  return {
+    latexTrigger: trigger,
+    kind: "postfix",
+    ...(precedence === undefined ? {} : { precedence }),
+    parse: (parser: Parser, lhs: MathJsonExpression, until?: Until) => {
+      // `f''` reads as two primes: the second extends the derivative the first made.
+      const more = Array.isArray(lhs) && lhs[0] === "Derivative" && lhs.length === 3 && typeof lhs[1] === "string";
+      if (typeof lhs !== "string" && !more) return nativePrime?.parse?.(parser, lhs, until) ?? null;
+      const derivative = (more
+        ? ["Derivative", lhs[1], Number(lhs[2]) + order]
+        : ["Derivative", lhs, order]) as unknown as MathJsonExpression;
+      // `f''(x)` applies the derivative, as the native read does.
+      const args = parser.parseArguments("enclosure");
+      return args === null ? derivative : (["Apply", derivative, ...args] as unknown as MathJsonExpression);
+    },
+  } as Entry;
+};
+
+/** `f^{\prime}`, `f^{\doubleprime}` or `f^{\tripleprime}` for a first to third order, bare or applied;
+ *  any other order (`k`, a partial) is the call, since `f^{(k)}` and `f^{(0, 1)}` read as a power. */
 const derivative: Entry = {
   ...native("Derivative"),
   name: "Derivative",
-  serialize: (serializer, expr) =>
-    operands(expr).length === 1
+  serialize: (serializer, expr) => {
+    const args = operands(expr);
+    // Only a symbol's prime reads back with its order; the prime after anything else drops it.
+    return args.length === 1 || (args.length === 2 && primeOrder(args[1]) && typeof args[0] === "string")
       ? native("Derivative").serialize(serializer, expr)
-      : asCall(serializer, "Derivative", operands(expr)),
+      : asCall(serializer, "Derivative", args);
+  },
 };
 
 /** `f^{\prime}(x)` reads back as `Apply(Derivative(f, 1), x)`, so a first to third derivative keeps
@@ -470,6 +512,7 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   polyLog,
   derivative,
   apply,
+  ...PRIMES.map(primeOf),
   bracketed("Floor", "\\lfloor", "\\rfloor"),
   bracketed("Ceil", "\\lceil", "\\rceil"),
   zeta,

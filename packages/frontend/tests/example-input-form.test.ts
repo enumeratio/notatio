@@ -204,6 +204,9 @@ test("a dictionary stays a dictionary, not a set of arrows", () => {
 test.each([
   ["a third PolyLog argument", ["PolyLog", 1, 2, 1]],
   ["a first derivative, with its order", ["Derivative", "f", 1]],
+  ["a second derivative, as primes", ["Derivative", "f", 2]],
+  ["a third derivative of a function symbol", ["Derivative", "g", 3]],
+  ["a derivative of an expression, with its order", ["Derivative", ["Power", "x", 2], 1]],
   ["a partial derivative", ["Derivative", "Beta", 0, 1]],
   ["a derivative applied, of a symbolic order", ["Apply", ["Derivative", "f", "k"], "x"]],
   ["a second derivative applied", ["Apply", ["Derivative", "f", 2], "x"]],
