@@ -5,7 +5,7 @@
 // the natural one names its base.
 // (`Rank` is array depth, not matrix rank, so it keeps its default `\mathrm{Rank}`.)
 // A head whose sign would lose an argument or a grouping on the way back (`Union` of three, a
-// `Derivative` with its orders, `PolyLog` with a third argument, a second integral limit) writes
+// `Derivative` with its orders or none, `PolyLog` with a third argument, a second integral limit) writes
 // what reads back exactly: the editor shows this LaTeX and reads it again.
 // GCD, Determinant, Trace, Sign, Arg, Mod, Max, Min and Sinc were probed and are fine.
 // The shared engine carries these via its configureLatex list (engine.ts); engines built
@@ -294,6 +294,29 @@ const setOperation = (name: "Union" | "Intersection"): Entry => {
   } as Entry;
 };
 
+/** The heads whose value is a set, so `|…|` around one is its cardinality. compute-engine's canonical
+ *  `Abs` of a set-typed operand is `Count`, but the editor reads without canonicalizing, so it has no
+ *  types: `|𝒫(s)|` stays `Abs` unless the head is known to be a set. */
+const SET_HEADS = new Set(["Set", "PowerSet", "QuotientRing", "Union", "Intersection", "SetMinus"]);
+
+/** The native `|…|` entries (`|` and `\vert`), reading a set-valued body as `Count`. */
+const cardinality = (): Entry[] =>
+  LATEX_DICTIONARY.filter((e) => {
+    const { kind, openTrigger } = e as { kind?: string; openTrigger?: unknown };
+    return kind === "matchfix" && ['"|"', '["\\\\vert"]'].includes(JSON.stringify(openTrigger));
+  }).map((entry) => {
+    const { parse } = entry as unknown as { parse: (p: Parser, body: MathJsonExpression) => MathJsonExpression | null };
+    return {
+      ...entry,
+      parse: (parser: Parser, body: MathJsonExpression) => {
+        const read = parse(parser, body);
+        return Array.isArray(read) && read[0] === "Abs" && Array.isArray(read[1]) && SET_HEADS.has(read[1][0] as string)
+          ? (["Count", read[1]] as unknown as MathJsonExpression)
+          : read;
+      },
+    } as Entry;
+  });
+
 /** The integrand of an `Integrate`, which the boxed form carries as `Function(f, x, y)`. */
 const integrandOf = (integrand: MathJsonExpression | undefined): MathJsonExpression | undefined =>
   Array.isArray(integrand) && integrand[0] === "Function" ? (integrand[1] as MathJsonExpression) : integrand;
@@ -407,7 +430,9 @@ const derivative: Entry = {
   serialize: (serializer, expr) => {
     const args = operands(expr);
     // Only a symbol's prime reads back with its order; the prime after anything else drops it.
-    return args.length === 1 || (args.length === 2 && primeOrder(args[1]) && typeof args[0] === "string")
+    // A bare `Derivative(f)` has no order, and `f^{\prime}` reads as `Derivative(f, 1)`: the call.
+    const symbol = typeof args[0] === "string";
+    return (args.length === 1 && !symbol) || (args.length === 2 && primeOrder(args[1]) && symbol)
       ? native("Derivative").serialize(serializer, expr)
       : asCall(serializer, "Derivative", args);
   },
@@ -508,6 +533,7 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   setOperation("Union"),
   setOperation("Intersection"),
   integrate,
+  ...cardinality(),
   transpose,
   polyLog,
   derivative,
