@@ -4,7 +4,7 @@ import { declareCombinatorics } from "../../src/index.ts";
 import { applyDefinition } from "../../src/statistics/declare.ts";
 import { bySignature } from "../../src/statistics/types.ts";
 import { PARTITION_STATISTICS } from "../src/statistics.ts";
-import { PARTITION_READINGS, type Partition } from "./partition-findstat-readings.ts";
+import { DEEP_MAXIMUM_SIZE, PARTITION_READINGS, type Partition } from "./partition-findstat-readings.ts";
 
 // The whole library, as a page evaluates: a definition that works on a bare engine can still not on this one.
 const ce = bareEngine();
@@ -42,6 +42,7 @@ test.skipIf(!process.env.DEEP_TESTS)(
   () => {
     for (const l of [9, 10, 11, 12, 13, 14].flatMap((n) => partitions(n)))
       for (const [head, expected] of Object.entries(PARTITION_READINGS)) {
+        if (l.reduce((a, b) => a + b, 0) > (DEEP_MAXIMUM_SIZE[head] ?? 14)) continue;
         expect(evaluate(head, l), `${head} [${l.join(", ")}]`).toBe(expected(l));
       }
   },

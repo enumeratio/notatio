@@ -856,6 +856,698 @@ const firstDescentsByStrips = (l: Partition): number[] => {
 const tableauxByFirstDescentParity = (l: Partition, even: boolean): number =>
   sum((sum(l) <= 8 ? firstDescentsByTableaux(l) : firstDescentsByStrips(l)).filter((_, d) => (d % 2 === 0) === even));
 
+/**
+ * The distinct weights of the semistandard tableaux of the shape with entries up to its length, by building the tableaux one
+ * entry at a time: removing the horizontal strip of the entries equal to the largest leaves a tableau of an interlacing shape.
+ */
+const tableauWeights = (l: Partition): number[][] => {
+  const memo = new Map<string, number[][]>();
+  const go = (shape: number[], entries: number): number[][] => {
+    const key = `${shape.join()}|${entries}`;
+    const known = memo.get(key);
+    if (known) return known;
+    let weights: number[][] = [];
+    if (entries === 0) weights = shape.length === 0 ? [[]] : [];
+    else {
+      // Shapes inside `shape` with at most entries - 1 parts, each part between the next part of `shape` and its own.
+      const strip = (row: number, inner: number[]): void => {
+        if (row === shape.length) {
+          const rest = inner.filter((p) => p > 0);
+          if (rest.length < entries)
+            for (const w of go(rest, entries - 1)) weights.push([...w, sum(shape) - sum(inner)]);
+          return;
+        }
+        for (let kept = shape[row + 1] ?? 0; kept <= shape[row]!; kept++) strip(row + 1, [...inner, kept]);
+      };
+      strip(0, []);
+    }
+    memo.set(key, weights);
+    return weights;
+  };
+  return go([...l], l.length);
+};
+const distinctTableauWeights = (l: Partition): number => new Set(tableauWeights(l).map((w) => w.join())).size;
+/** The same count from the compositions of the size into that many parts: positive Kostka number exactly when dominated. */
+const dominatedWeightCount = (l: Partition): number => {
+  const compositions = (n: number, k: number): number[][] =>
+    k === 0
+      ? n === 0
+        ? [[]]
+        : []
+      : Array.from({ length: n + 1 }, (_, v) => v).flatMap((v) =>
+          compositions(n - v, k - 1).map((rest) => [v, ...rest]),
+        );
+  return compositions(sum(l), l.length).filter((w) =>
+    dominates(
+      l,
+      w.toSorted((a, b) => b - a),
+    ),
+  ).length;
+};
+
+/** The most cells of the diagram with at most j in every row and every column: a maximum flow from the rows to the columns, by shortest augmenting paths. */
+const cellsWithDegreesAtMost = (l: Partition, j: number): number => {
+  const rows = l.length;
+  const nodes = rows + (l[0] ?? 0) + 2;
+  const [source, sink] = [nodes - 2, nodes - 1];
+  const capacity = Array.from({ length: nodes }, () => Array.from({ length: nodes }, () => 0));
+  l.forEach((part, r) => {
+    capacity[source]![r] = j;
+    for (let c = 0; c < part; c++) capacity[r]![rows + c] = 1;
+  });
+  for (let c = 0; c < (l[0] ?? 0); c++) capacity[rows + c]![sink] = j;
+  let flow = 0;
+  for (;;) {
+    const parent = Array.from({ length: nodes }, () => -1);
+    parent[source] = source;
+    const queue = [source];
+    for (const u of queue)
+      for (let v = 0; v < nodes; v++)
+        if (parent[v] === -1 && capacity[u]![v]! > 0) {
+          parent[v] = u;
+          queue.push(v);
+        }
+    if (parent[sink] === -1) return flow;
+    for (let v = sink; v !== source; v = parent[v]!) {
+      capacity[parent[v]!]![v]!--;
+      capacity[v]![parent[v]!]!++;
+    }
+    flow++;
+  }
+};
+/** The class-size partitions of the proper colorings with the fewest colours, from the flow: those dominated by the gains in the cells j colours cover. */
+const coloringSchemesByFlow = (l: Partition): number => {
+  const sides = Math.max(l.length, l[0] ?? 0);
+  const covered = Array.from({ length: sides + 1 }, (_, j) => cellsWithDegreesAtMost(l, j));
+  const profile = Array.from({ length: sides }, (_, j) => covered[j + 1]! - covered[j]!);
+  return partitionsOf(sum(l)).filter((nu) => nu.length <= sides && dominates(profile, nu)).length;
+};
+/** The same by trying every coloring with at most that many colours: cells coloured in turn with a colour unused in their row and column, colours opened in order. */
+const coloringSchemesByColorings = (l: Partition): number => {
+  const sides = Math.max(l.length, l[0] ?? 0);
+  const cellsList = l.flatMap((part, r) => Array.from({ length: part }, (_, c) => [r, c] as const));
+  const schemes = new Set<string>();
+  const colour = (index: number, classes: (readonly [number, number][])[]): void => {
+    if (index === cellsList.length) {
+      schemes.add(
+        classes
+          .map((cl) => cl.length)
+          .toSorted((a, b) => b - a)
+          .join(),
+      );
+      return;
+    }
+    const [r, c] = cellsList[index]!;
+    for (let k = 0; k <= classes.length && k < sides; k++) {
+      if (k < classes.length && classes[k]!.some(([r2, c2]) => r2 === r || c2 === c)) continue;
+      colour(
+        index + 1,
+        k < classes.length ? classes.map((cl, i) => (i === k ? [...cl, [r, c] as const] : cl)) : [...classes, [[r, c]]],
+      );
+    }
+  };
+  colour(0, []);
+  return schemes.size;
+};
+
+/** The set partitions of 0..n-1 as lists of blocks, in restricted growth order. */
+const setPartitionsOf = (n: number): number[][][] => {
+  const out: number[][][] = [];
+  const go = (index: number, blocks: number[][]): void => {
+    if (index === n) {
+      out.push(blocks.map((block) => [...block]));
+      return;
+    }
+    for (const block of blocks) {
+      block.push(index);
+      go(index + 1, blocks);
+      block.pop();
+    }
+    blocks.push([index]);
+    go(index + 1, blocks);
+    blocks.pop();
+  };
+  go(0, []);
+  return out;
+};
+/** The letter of each of the n elements when the parts are the multiplicities of the letters 0, 1, 2, ... */
+const lettersOf = (l: Partition): number[] => l.flatMap((part, letter) => Array.from({ length: part }, () => letter));
+
+/** The multiset partitions of the multiset with these multiplicities, by the set partitions of its elements that are equal as multisets of blocks. */
+const multisetPartitionsByBlocks = (l: Partition): number => {
+  const letters = lettersOf(l);
+  const seen = new Set<string>();
+  for (const blocks of setPartitionsOf(letters.length))
+    seen.add(
+      blocks
+        .map((block) => block.map((i) => letters[i]).join(","))
+        .toSorted()
+        .join("|"),
+    );
+  return seen.size;
+};
+/**
+ * The multiset partitions by choosing the blocks one at a time in decreasing order, each a nonzero vector of letter counts at most the one
+ * before in the lexicographic order and within what is left.
+ */
+const multisetPartitionsByVectors = (l: Partition): number => {
+  const memo = new Map<string, number>();
+  const go = (rest: number[], limit: number[] | undefined): number => {
+    if (rest.every((r) => r === 0)) return 1;
+    const key = `${rest.join()}|${limit?.join() ?? ""}`;
+    const known = memo.get(key);
+    if (known !== undefined) return known;
+    let total = 0;
+    const choose = (index: number, block: number[]): void => {
+      if (index === rest.length) {
+        if (block.every((b) => b === 0)) return;
+        if (limit !== undefined) {
+          for (let i = 0; i < block.length; i++) {
+            if (block[i]! < limit[i]!) break;
+            if (block[i]! > limit[i]!) return;
+          }
+        }
+        total += go(
+          rest.map((r, i) => r - block[i]!),
+          block,
+        );
+        return;
+      }
+      for (let take = 0; take <= rest[index]!; take++) choose(index + 1, [...block, take]);
+    };
+    choose(0, []);
+    memo.set(key, total);
+    return total;
+  };
+  return go([...l], undefined);
+};
+
+/** The class sizes times the statistic, over every choice of a cycle type for each color of a Young subgroup: its Burnside average over the group. */
+const youngSubgroupAverage = (l: Partition, fixed: (cycleLengths: number[]) => number): number => {
+  const order = product(l.map((part) => bigFactorial(part)).map(Number));
+  let total = 0n;
+  const go = (index: number, lengths: number[], classSize: bigint): void => {
+    if (index === l.length) {
+      total += classSize * BigInt(fixed(lengths));
+      return;
+    }
+    for (const type of partitionsOf(l[index]!))
+      go(index + 1, [...lengths, ...type], classSize * (bigFactorial(l[index]!) / BigInt(centralizerOf(type))));
+  };
+  go(0, [], 1n);
+  return Number(total / BigInt(order));
+};
+/** The multisets of cycles on colored points, up to the points of one color changing places: the orbits of the Young subgroup on the permutations by conjugation, each fixed by its centralizer. */
+const cycleMultisetsByBurnside = (l: Partition): number => youngSubgroupAverage(l, centralizerOf);
+/** The same orbits found by conjugating every permutation by every element of the subgroup, for small sizes. */
+const cycleMultisetsByOrbits = (l: Partition): number => {
+  const n = sum(l);
+  const letters = lettersOf(l);
+  // The elements of the Young subgroup: the permutations that keep each point's letter.
+  const subgroup = allPermutations(n).filter((g) => g.every((image, i) => letters[image] === letters[i]));
+  const seen = new Set<string>();
+  for (const pi of allPermutations(n)) {
+    let canonical: string | undefined;
+    for (const g of subgroup) {
+      // g pi g^-1: the point g(i) goes to g(pi(i)).
+      const conjugated = Array.from({ length: n }, () => 0);
+      for (let i = 0; i < n; i++) conjugated[g[i]!] = g[pi[i]!]!;
+      const text = conjugated.join();
+      if (canonical === undefined || text < canonical) canonical = text;
+    }
+    seen.add(canonical!);
+  }
+  return seen.size;
+};
+/** The endofunctions on colored points up to the points of one color changing places, by Burnside: a map commuting with a permutation sends each cycle to a cycle whose length divides its own, in as many ways as it has points. */
+const endofunctionsByBurnside = (l: Partition): number =>
+  youngSubgroupAverage(l, (lengths) => {
+    const cycles = (e: number) => lengths.filter((d) => d === e).length;
+    return product(
+      lengths.map((d) =>
+        Array.from({ length: d }, (_, k) => k + 1)
+          .filter((e) => d % e === 0)
+          .reduce((total, e) => total + e * cycles(e), 0),
+      ),
+    );
+  });
+
+/** A colored rooted tree: the color of its root and its subtrees, written canonically as `color(child child ...)` with the children sorted. */
+interface ColoredTree {
+  readonly color: number;
+  readonly children: readonly ColoredTree[];
+  readonly text: string;
+}
+const coloredTree = (color: number, children: readonly ColoredTree[]): ColoredTree => {
+  const sorted = children.toSorted((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0));
+  return { color, children: sorted, text: `${color}(${sorted.map((child) => child.text).join(" ")})` };
+};
+/** Every colored rooted tree whose vertices have the given color counts, up to swapping vertices of one color: all of them, by the root's color and the forest left. */
+const coloredRootedTrees = (counts: readonly number[]): ColoredTree[] => {
+  const treesMemo = new Map<string, ColoredTree[]>();
+  const forestsMemo = new Map<string, ColoredTree[][]>();
+  const trees = (c: readonly number[]): ColoredTree[] => {
+    const key = c.join();
+    const known = treesMemo.get(key);
+    if (known) return known;
+    const out = new Map<string, ColoredTree>();
+    c.forEach((have, color) => {
+      if (have === 0) return;
+      const rest = c.map((v, i) => (i === color ? v - 1 : v));
+      for (const forest of forests(rest)) {
+        const tree = coloredTree(color, forest);
+        out.set(tree.text, tree);
+      }
+    });
+    const list = [...out.values()];
+    treesMemo.set(key, list);
+    return list;
+  };
+  /** The multisets of trees whose vertices make up exactly these counts: the tree holding the first remaining color, then a multiset of the rest. */
+  const forests = (c: readonly number[]): ColoredTree[][] => {
+    const key = c.join();
+    const known = forestsMemo.get(key);
+    if (known) return known;
+    const first = c.findIndex((v) => v > 0);
+    const out = new Map<string, ColoredTree[]>();
+    if (first === -1) out.set("", []);
+    else {
+      const sub = (index: number, take: number[]): void => {
+        if (index === c.length) {
+          if (take[first] === 0) return;
+          for (const tree of trees(take))
+            for (const rest of forests(c.map((v, i) => v - take[i]!))) {
+              const forest = [...rest, tree].toSorted((a, b) => (a.text < b.text ? -1 : a.text > b.text ? 1 : 0));
+              out.set(forest.map((t) => t.text).join(" "), forest);
+            }
+          return;
+        }
+        for (let t = 0; t <= c[index]!; t++) sub(index + 1, [...take, t]);
+      };
+      sub(0, []);
+    }
+    const list = [...out.values()];
+    forestsMemo.set(key, list);
+    return list;
+  };
+  return trees(counts);
+};
+/** The free trees among them: the rooted trees that are the same tree rooted elsewhere are one. */
+const coloredFreeTreeCount = (counts: readonly number[]): number => {
+  const seen = new Set<string>();
+  for (const tree of coloredRootedTrees(counts)) {
+    // Flatten to an adjacency structure, then write the tree canonically from every vertex and keep the least.
+    const colors: number[] = [];
+    const adjacent: number[][] = [];
+    const add = (node: ColoredTree, parent: number | undefined): number => {
+      const id = colors.length;
+      colors.push(node.color);
+      adjacent.push([]);
+      if (parent !== undefined) {
+        adjacent[id]!.push(parent);
+        adjacent[parent]!.push(id);
+      }
+      for (const child of node.children) add(child, id);
+      return id;
+    };
+    add(tree, undefined);
+    const written = (v: number, from: number): ColoredTree =>
+      coloredTree(
+        colors[v]!,
+        adjacent[v]!.filter((w) => w !== from).map((w) => written(w, v)),
+      );
+    seen.add(colors.map((_, root) => written(root, -1).text).toSorted()[0]!);
+  }
+  return seen.size;
+};
+/** The symmetric matrices of nonnegative integers with these row sums, found as the shapes of the tableaux of this content (Pieri: each letter adds a horizontal strip), summed. */
+const tableauxOfContent = (l: Partition): number => {
+  let shapes = new Map<string, number>([["", 1]]);
+  for (const multiplicity of l) {
+    const next = new Map<string, number>();
+    for (const [text, ways] of shapes) {
+      const shape = text === "" ? [] : text.split(",").map(Number);
+      // Add a horizontal strip of `multiplicity` cells: row r grows to at most the old row r - 1 (any length in the first row).
+      const grow = (row: number, left: number, built: number[]): void => {
+        if (row === shape.length + 1) {
+          if (left === 0) {
+            const key = built.filter((p) => p > 0).join();
+            next.set(key, (next.get(key) ?? 0) + ways);
+          }
+          return;
+        }
+        const old = shape[row] ?? 0;
+        const room = row === 0 ? left : Math.min(left, shape[row - 1]! - old);
+        for (let add = 0; add <= room; add++) grow(row + 1, left - add, [...built, old + add]);
+      };
+      grow(0, multiplicity, []);
+    }
+    shapes = next;
+  }
+  return [...shapes.values()].reduce((a, b) => a + b, 0);
+};
+/** The set partitions of 0..n-1 that the permutation maps to themselves, by trying each. */
+const invariantSetPartitionsByTrial = (l: Partition): number => {
+  const alpha = permutationOfCycleType(l);
+  return setPartitionsOf(sum(l)).filter((blocks) => {
+    const label = Array.from({ length: alpha.length }, () => 0);
+    blocks.forEach((block, b) => block.forEach((i) => (label[i] = b)));
+    // Each block must go into a single block.
+    return blocks.every((block) => new Set(block.map((i) => label[alpha[i]!])).size === 1);
+  }).length;
+};
+/** The words with these letter multiplicities, one letter at a time, that never read three increasing letters in a row. */
+const wordsAvoidingIncreasingTriple = (l: Partition): number => {
+  const memo = new Map<string, number>();
+  const go = (left: number[], last: number, second: number): number => {
+    if (left.every((v) => v === 0)) return 1;
+    const key = `${left.join()}|${last}|${second}`;
+    const known = memo.get(key);
+    if (known !== undefined) return known;
+    let total = 0;
+    left.forEach((have, letter) => {
+      if (have === 0) return;
+      if (second !== -1 && second < last && last < letter) return;
+      total += go(
+        left.map((v, i) => (i === letter ? v - 1 : v)),
+        letter,
+        last,
+      );
+    });
+    memo.set(key, total);
+    return total;
+  };
+  return go([...l], -1, -1);
+};
+/**
+ * The matrices with the parts as row sums and no empty column whose column sums weakly decrease, by choosing the columns one at a time:
+ * each is a vector of entries at most the row sums left (and at most 1 when `zeroOne`), nonzero, its sum at most the column before.
+ */
+const matricesWithDecreasingColumns = (l: Partition, zeroOne: boolean): number => {
+  const memo = new Map<string, number>();
+  const go = (left: number[], limit: number): number => {
+    if (left.every((v) => v === 0)) return 1;
+    const key = `${left.join()}|${limit}`;
+    const known = memo.get(key);
+    if (known !== undefined) return known;
+    let total = 0;
+    const column = (row: number, taken: number[], size: number): void => {
+      if (size > limit) return;
+      if (row === left.length) {
+        if (size > 0)
+          total += go(
+            left.map((v, i) => v - taken[i]!),
+            size,
+          );
+        return;
+      }
+      for (let entry = 0; entry <= (zeroOne ? Math.min(1, left[row]!) : left[row]!); entry++)
+        column(row + 1, [...taken, entry], size + entry);
+    };
+    column(0, [], 0);
+    memo.set(key, total);
+    return total;
+  };
+  return go([...l], sum(l));
+};
+/** The ordered lists of blocks of the parts, told apart by position, whose sums weakly decrease: a set partition has each order of blocks of equal sum. */
+const orderedSetPartitionsWithDecreasingSums = (l: Partition): number =>
+  setPartitionsOf(l.length).reduce((total, blocks) => {
+    const sums = blocks.map((block) => sum(block.map((i) => l[i]!)));
+    return total + product([...new Set(sums)].map((s) => factorial(sums.filter((t) => t === s).length)));
+  }, 0);
+
+/** Every rooted tree on the vertices 0..n-1, as the parent of each vertex (undefined for the root): each Prüfer sequence gives a tree, rooted at each vertex. */
+const rootedLabeledTrees = (n: number): (number | undefined)[][] => {
+  if (n === 0) return [];
+  if (n === 1) return [[undefined]];
+  const out: (number | undefined)[][] = [];
+  const sequences = (length: number): number[][] =>
+    length === 0 ? [[]] : sequences(length - 1).flatMap((rest) => Array.from({ length: n }, (_, v) => [...rest, v]));
+  for (const sequence of sequences(n - 2)) {
+    const degree = Array.from({ length: n }, () => 1);
+    for (const v of sequence) degree[v]!++;
+    const adjacent: number[][] = Array.from({ length: n }, () => []);
+    const link = (a: number, b: number): void => {
+      adjacent[a]!.push(b);
+      adjacent[b]!.push(a);
+    };
+    for (const v of sequence) {
+      const leaf = degree.findIndex((d) => d === 1);
+      link(leaf, v);
+      degree[leaf] = 0;
+      degree[v]!--;
+    }
+    const [a, b] = degree.flatMap((d, v) => (d === 1 ? [v] : []));
+    link(a!, b!);
+    for (let root = 0; root < n; root++) {
+      const parent: (number | undefined)[] = Array.from({ length: n }, () => undefined);
+      const seen = new Set([root]);
+      const stack = [root];
+      while (stack.length > 0) {
+        const u = stack.pop()!;
+        for (const v of adjacent[u]!)
+          if (!seen.has(v)) {
+            seen.add(v);
+            parent[v] = u;
+            stack.push(v);
+          }
+      }
+      out.push(parent);
+    }
+  }
+  return out;
+};
+/** The vertices of a rooted tree with no children. */
+const leavesOf = (parent: readonly (number | undefined)[]): boolean[] => {
+  const hasChild = parent.map(() => false);
+  for (const p of parent) if (p !== undefined) hasChild[p] = true;
+  return hasChild.map((c) => !c);
+};
+/** The rooted labeled trees on the colored vertices (colors in blocks, as many of each as the part) with no leaf of its parent's color. */
+const rootedTreesWithNoLeafOfParentsColor = (l: Partition): number => {
+  const color = lettersOf(l);
+  return rootedLabeledTrees(color.length).filter((parent) => {
+    const leaf = leavesOf(parent);
+    return parent.every((p, v) => p === undefined || !leaf[v] || color[p] !== color[v]);
+  }).length;
+};
+/** The increasing trees on 1..n (each vertex's parent is smaller), colored in blocks, with no leaf of its parent's color. */
+const increasingTreesWithNoLeafOfParentsColor = (l: Partition): number => {
+  const color = lettersOf(l);
+  const n = color.length;
+  if (n === 0) return 0;
+  let count = 0;
+  const parent: number[] = [];
+  const go = (v: number): void => {
+    if (v === n) {
+      const leaf = leavesOf([undefined, ...parent]);
+      if (parent.every((p, i) => !leaf[i + 1] || color[p] !== color[i + 1])) count++;
+      return;
+    }
+    for (let p = 0; p < v; p++) {
+      parent.push(p);
+      go(v + 1);
+      parent.pop();
+    }
+  };
+  go(1);
+  return count;
+};
+/**
+ * The trees whose leaves are the colored vertices and whose internal vertices have children without order, at least two (exactly two when
+ * `binary`), in which no internal vertex has only leaves of one color as its children (twin leaves). Over the subsets of leaves, a tree is a
+ * set partition of the leaves into at least two subtrees; the one into single leaves is a star, which is bad when the leaves are of one color.
+ */
+const leafLabeledTreesWithNoTwinLeavesOfOneColor = (l: Partition, binary: boolean): number => {
+  const color = lettersOf(l);
+  const n = color.length;
+  if (n === 0) return 0;
+  const trees = new Map<number, number>();
+  const single = (set: number): boolean => (set & (set - 1)) === 0;
+  const oneColor = (set: number): boolean =>
+    color.every((c, i) => !(set & (1 << i)) || c === color[Math.log2(set & -set)]);
+  const treesOn = (set: number): number => {
+    const known = trees.get(set);
+    if (known !== undefined) return known;
+    let total = 0;
+    if (single(set)) total = 1;
+    else {
+      const low = set & -set;
+      if (binary) {
+        // An unordered split holds the lowest leaf in its first part.
+        for (let first = (set - 1) & set; first > 0; first = (first - 1) & set) {
+          if ((first & low) === 0) continue;
+          const second = set & ~first;
+          if (single(first) && single(second) && color[Math.log2(first)] === color[Math.log2(second)]) continue;
+          total += treesOn(first) * treesOn(second);
+        }
+      } else {
+        // The ways to split the rest into any blocks, each a subtree.
+        const partitionsInto = (rest: number): number => {
+          if (rest === 0) return 1;
+          const lowest = rest & -rest;
+          let ways = 0;
+          for (let block = rest; block > 0; block = (block - 1) & rest)
+            if (block & lowest) ways += treesOn(block) * partitionsInto(rest & ~block);
+          return ways;
+        };
+        for (let block = (set - 1) & set; block > 0; block = (block - 1) & set)
+          if (block & low) total += treesOn(block) * partitionsInto(set & ~block);
+        // The star of single leaves is among them, bad when its leaves are all of one color.
+        if (oneColor(set)) total--;
+      }
+    }
+    trees.set(set, total);
+    return total;
+  };
+  return treesOn((1 << n) - 1);
+};
+
+/** The standard tableaux of the shape in which no row holds i and i + 1, by walking every tableau. */
+const tableauxWithoutRowRunsByWalking = (l: Partition): number =>
+  standardTableauxOf(l).filter((tableau) => !tableau.some((row) => row.some((entry, k) => row[k + 1] === entry + 1)))
+    .length;
+const lehmerDistributions = new Map<number, Map<string, number>>();
+/** The Lehmer codes of permutations (entry i at most n - i) whose values have the parts, sorted, as the multiplicities of the values taken: every code of the size tried once. */
+const lehmerCodesWithMultiplicities = (l: Partition): number => {
+  const n = sum(l);
+  let distribution = lehmerDistributions.get(n);
+  if (!distribution) {
+    distribution = new Map();
+    const code: number[] = [];
+    const go = (i: number): void => {
+      if (i === n) {
+        const multiplicities = new Map<number, number>();
+        for (const c of code) multiplicities.set(c, (multiplicities.get(c) ?? 0) + 1);
+        const key = [...multiplicities.values()].toSorted((a, b) => b - a).join();
+        distribution!.set(key, (distribution!.get(key) ?? 0) + 1);
+        return;
+      }
+      for (let c = 0; c <= n - 1 - i; c++) {
+        code.push(c);
+        go(i + 1);
+        code.pop();
+      }
+    };
+    go(0);
+    lehmerDistributions.set(n, distribution);
+  }
+  return distribution.get(l.join()) ?? 0;
+};
+/** FindStat's recursion for the linear extensions of Speyer's poset on a partition, verbatim: the last cell on the longest antidiagonal splits it. */
+const speyerPosetLinearExtensions = (l: Partition): number => {
+  if (l.length === 0) return 1;
+  const cellsInOrder = l.flatMap((part, i) => Array.from({ length: part }, (_, j) => [i, j] as const));
+  const longest = Math.max(...cellsInOrder.map(([i, j]) => i + j));
+  const [i, j] = cellsInOrder.filter(([a, b]) => a + b === longest).at(-1)!;
+  const below = l.slice(i + 1);
+  const right = conjugate(conjugate(l).slice(j + 1));
+  return binomial(i + j + 2, i + 1) * speyerPosetLinearExtensions(below) * speyerPosetLinearExtensions(right);
+};
+/** The Grundy value of a position of a game on partitions, the least value missing among those of the positions one move away. */
+const grundyValue = (l: Partition, moves: (position: Partition) => Partition[], memo: Map<string, number>): number => {
+  const key = l.join();
+  const known = memo.get(key);
+  if (known !== undefined) return known;
+  const options = new Set(moves(l).map((next) => grundyValue(next, moves, memo)));
+  let value = 0;
+  while (options.has(value)) value++;
+  memo.set(key, value);
+  return value;
+};
+/** Chomp: choose a cell other than the first and cut it and every cell below and to its right. */
+const chompMoves = (l: Partition): Partition[] =>
+  l.flatMap((part, row) =>
+    Array.from({ length: part }, (_, column) => column)
+      .filter((column) => row !== 0 || column !== 0)
+      .map((column) => [...l.slice(0, row), ...l.slice(row).map((p) => Math.min(p, column))].filter((p) => p > 0)),
+  );
+const chompMemo = new Map<string, number>();
+/** Remove one cell, or a 2 x 2 square of cells, so that the rest is still a partition. */
+const squareGameMoves = (l: Partition): Partition[] => {
+  const isPartition = (p: readonly number[]): boolean => p.every((part, i) => part >= (p[i + 1] ?? 0));
+  const out: Partition[] = [];
+  l.forEach((_, i) => {
+    const single = l.map((p, k) => (k === i ? p - 1 : p));
+    if (isPartition(single)) out.push(single.filter((p) => p > 0));
+    if (i + 1 < l.length && l[i] === l[i + 1] && l[i]! >= 2) {
+      const square = l.map((p, k) => (k === i || k === i + 1 ? p - 2 : p));
+      if (isPartition(square)) out.push(square.filter((p) => p > 0));
+    }
+  });
+  return out;
+};
+const squareGameMemo = new Map<string, number>();
+/** The fewest cells to remove so that what is left has an odd number of standard tableaux: the partitions inside, one removal at a time. */
+const oddRestrictionDepth = (l: Partition): number => {
+  let level = new Map<string, Partition>([[l.join(), l]]);
+  for (let depth = 0; depth <= sum(l); depth++) {
+    if ([...level.values()].some((p) => standardTableaux(p) % 2 === 1)) return depth;
+    const next = new Map<string, Partition>();
+    for (const p of level.values())
+      p.forEach((_, i) => {
+        const smaller = p.map((q, k) => (k === i ? q - 1 : q));
+        if (smaller.every((q, k) => q >= (smaller[k + 1] ?? 0))) {
+          const trimmed = smaller.filter((q) => q > 0);
+          next.set(trimmed.join(), trimmed);
+        }
+      });
+    level = next;
+  }
+  return sum(l);
+};
+/** The tilings of the diagram by single cells and dominoes, covering the first free cell in reading order each time. */
+const dominoTilings = (l: Partition): number => {
+  const memo = new Map<string, number>();
+  const covered = l.map((part) => Array.from({ length: part }, () => false));
+  const go = (): number => {
+    const key = covered.map((row) => row.map((c) => (c ? 1 : 0)).join("")).join("/");
+    const known = memo.get(key);
+    if (known !== undefined) return known;
+    const row = covered.findIndex((cells) => cells.some((c) => !c));
+    if (row === -1) return 1;
+    const column = covered[row]!.indexOf(false);
+    covered[row]![column] = true;
+    let total = go();
+    if (column + 1 < covered[row]!.length && !covered[row]![column + 1]) {
+      covered[row]![column + 1] = true;
+      total += go();
+      covered[row]![column + 1] = false;
+    }
+    if (row + 1 < covered.length && column < covered[row + 1]!.length && !covered[row + 1]![column]) {
+      covered[row + 1]![column] = true;
+      total += go();
+      covered[row + 1]![column] = false;
+    }
+    covered[row]![column] = false;
+    memo.set(key, total);
+    return total;
+  };
+  return go();
+};
+
+/** The endofunctions on colored points up to the points of one color changing places, by conjugating every function by every element of the subgroup. */
+const endofunctionsByOrbits = (l: Partition): number => {
+  const n = sum(l);
+  const letters = lettersOf(l);
+  const subgroup = allPermutations(n).filter((g) => g.every((image, i) => letters[image] === letters[i]));
+  const seen = new Set<string>();
+  const functions = (length: number): number[][] =>
+    length === 0 ? [[]] : functions(length - 1).flatMap((rest) => Array.from({ length: n }, (_, v) => [...rest, v]));
+  for (const f of functions(n)) {
+    let canonical: string | undefined;
+    for (const g of subgroup) {
+      const conjugated = Array.from({ length: n }, () => 0);
+      for (let i = 0; i < n; i++) conjugated[g[i]!] = g[f[i]!]!;
+      const text = conjugated.join();
+      if (canonical === undefined || text < canonical) canonical = text;
+    }
+    seen.add(canonical!);
+  }
+  return seen.size;
+};
+
 export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
   PartRange: (l) => (l.length === 0 ? 0 : l[0]! - l.at(-1)!),
   ContainingRectangleShortSide: (l) => (l.length === 0 ? 0 : Math.min(l[0]!, l.length)),
@@ -1146,4 +1838,64 @@ export const PARTITION_READINGS: Record<string, (l: Partition) => number> = {
     sum(l) <= 8
       ? standardTableauxOf(l).filter((tableau) => firstAscent(tableau) % 2 === 0).length
       : tableauxByFirstDescentParity(conjugate(l), true),
+
+  // The twelfth batch.
+  // The weights of the tableaux themselves for small shapes; beyond, the compositions the shape dominates.
+  SemistandardTableauWeightCountWithEntriesUpToLength: (l) =>
+    sum(l) <= 9 ? distinctTableauWeights(l) : dominatedWeightCount(l),
+  // Every coloring tried for small shapes; beyond, the flow.
+  ProperColoringSchemeCount: (l) => (sum(l) <= 9 ? coloringSchemesByColorings(l) : coloringSchemesByFlow(l)),
+
+  // The multiset partitions: every set partition of the elements, equal ones merged, for small sizes; beyond, by vectors.
+  MultisetPartitionCount: (l) => (sum(l) <= 8 ? multisetPartitionsByBlocks(l) : multisetPartitionsByVectors(l)),
+  // Every permutation conjugated by every element of the subgroup for small sizes; beyond, Burnside over the cycle types.
+  ColoredCycleMultisetCount: (l) => (sum(l) <= 5 ? cycleMultisetsByOrbits(l) : cycleMultisetsByBurnside(l)),
+  ColoredRootedTreeCount: (l) => coloredRootedTrees(l).length,
+  ColoredTreeCount: coloredFreeTreeCount,
+  SemistandardTableauCountWithContent: tableauxOfContent,
+  InvariantSetPartitionCount: invariantSetPartitionsByTrial,
+  ColoredEndofunctionCount: (l) => (sum(l) <= 4 ? endofunctionsByOrbits(l) : endofunctionsByBurnside(l)),
+  WordCountWithoutThreeConsecutiveIncreasingLetters: wordsAvoidingIncreasingTriple,
+  NonnegativeIntegerMatrixCountWithDecreasingColumnSums: (l) => matricesWithDecreasingColumns(l, false),
+  ZeroOneMatrixCountWithDecreasingColumnSums: (l) => matricesWithDecreasingColumns(l, true),
+  OrderedSetPartitionCountWithDecreasingBlockSums: orderedSetPartitionsWithDecreasingSums,
+  RootedTreeCountWithNoLeafOfItsParentsColor: rootedTreesWithNoLeafOfParentsColor,
+  IncreasingTreeCountWithNoLeafOfItsParentsColor: increasingTreesWithNoLeafOfParentsColor,
+  BinaryTreeCountWithNoTwinLeavesOfOneColor: (l) => leafLabeledTreesWithNoTwinLeavesOfOneColor(l, true),
+  LeafLabeledTreeCountWithNoTwinLeavesOfOneColor: (l) => leafLabeledTreesWithNoTwinLeavesOfOneColor(l, false),
+  StandardTableauCountWithNoConsecutiveEntriesInOneRow: tableauxWithoutRowRunsByWalking,
+  LehmerCodeMultiplicityPermutationCount: lehmerCodesWithMultiplicities,
+  DiagramPosetLinearExtensionCount: speyerPosetLinearExtensions,
+  ChompGrundyValue: (l) => grundyValue(l, chompMoves, chompMemo),
+  SquareRemovalGrundyValue: (l) => grundyValue(l, squareGameMoves, squareGameMemo),
+  SmallestOddRestrictionDepth: oddRestrictionDepth,
+  DominoTilingCount: dominoTilings,
+};
+
+/**
+ * The largest size the nightly sweep over every partition tries a head to: the readings that walk every object, and the tables over
+ * the vectors below the parts, stop where they take minutes.
+ */
+export const DEEP_MAXIMUM_SIZE: Record<string, number> = {
+  SemistandardTableauWeightCountWithEntriesUpToLength: 11,
+  MultisetPartitionCount: 11,
+  ColoredCycleMultisetCount: 12,
+  ColoredRootedTreeCount: 7,
+  ColoredTreeCount: 7,
+  InvariantSetPartitionCount: 10,
+  ColoredEndofunctionCount: 12,
+  WordCountWithoutThreeConsecutiveIncreasingLetters: 12,
+  NonnegativeIntegerMatrixCountWithDecreasingColumnSums: 10,
+  ZeroOneMatrixCountWithDecreasingColumnSums: 10,
+  OrderedSetPartitionCountWithDecreasingBlockSums: 10,
+  RootedTreeCountWithNoLeafOfItsParentsColor: 7,
+  IncreasingTreeCountWithNoLeafOfItsParentsColor: 9,
+  BinaryTreeCountWithNoTwinLeavesOfOneColor: 12,
+  LeafLabeledTreeCountWithNoTwinLeavesOfOneColor: 8,
+  LehmerCodeMultiplicityPermutationCount: 10,
+  SemistandardTableauCountWithContent: 12,
+  SmallestOddRestrictionDepth: 12,
+  ChompGrundyValue: 12,
+  SquareRemovalGrundyValue: 12,
+  DominoTilingCount: 12,
 };

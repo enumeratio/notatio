@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-partition-4-2-1-of-7			[DiagramPosetLinearExtensionCount, [IntegerPartition, [List, 4, 2, 1]]]	30			the partition $4 + 2 + 1$ of $7$
+the-partition-3-3-1-of-7			[DiagramPosetLinearExtensionCount, [IntegerPartition, [List, 3, 3, 1]]]	20			the partition $3 + 3 + 1$ of $7$
+findstat-st000063-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 1]], "'DiagramPosetLinearExtensionCount'"]	2	2	FindStat St000063	FindStat's value for [1]
+findstat-st000063-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'DiagramPosetLinearExtensionCount'"]	3	3	FindStat St000063	FindStat's value for [2]
+findstat-st000063-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'DiagramPosetLinearExtensionCount'"]	4	4	FindStat St000063	FindStat's value for [3]
