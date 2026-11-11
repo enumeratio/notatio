@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-step-word-uuddud			[LargestNonProjectiveReflexiveModule, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	0			the step word $UUDDUD$
+the-step-word-uduudd			[LargestNonProjectiveReflexiveModule, [DyckPath, [List, 1, 0, 1, 1, 0, 0]]]	0			the step word $UDUUDD$
+findstat-st001266-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'LargestNonProjectiveReflexiveModule'"]	0	0	FindStat St001266	FindStat's value for [1,0]
+findstat-st001266-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'LargestNonProjectiveReflexiveModule'"]	0	0	FindStat St001266	FindStat's value for [1,0,1,0]
+findstat-st001266-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'LargestNonProjectiveReflexiveModule'"]	0	0	FindStat St001266	FindStat's value for [1,1,0,0]

@@ -616,6 +616,257 @@ const overSageSeries =
 
 const peaksOf = (w: Word): number => w.filter((s, i) => s === 1 && w[i + 1] === 0).length;
 
+// ── reflexive and torsionless modules, Auslander-Reiten sequences, double duals, the resolution quiver, quotients, cyclic algebras ──
+
+/** A module of the linear Nakayama algebra: its top vertex and its length (the composition factors top .. top + length - 1). */
+type Module = readonly [top: number, length: number];
+/** The injective hull's top: the leftmost vertex whose projective reaches the socle. */
+const hullAt = (c: readonly number[], socle: number): number => c.findIndex((entry, x) => x + entry > socle);
+const zero = (m: Module): boolean => m[1] === 0;
+/** Maps between two modules: the image is a quotient of the first (same top) and a submodule of the second (same socle). */
+const homBetween = ([x, y]: Module, [a, b]: Module): number =>
+  y > 0 && b > 0 && a <= x && x <= a + b - 1 && x + y - 1 >= a + b - 1 ? 1 : 0;
+const projectiveCoverOf = (c: readonly number[], m: Module): Module => [m[0], c[m[0]]!];
+const isProjectiveModule = (c: readonly number[], m: Module): boolean => m[1] === c[m[0]];
+/** The syzygy: the kernel of the projective cover, zero when the module is projective. */
+const syzygyOfModule = (c: readonly number[], m: Module): Module =>
+  isProjectiveModule(c, m) ? [m[0] + m[1], 0] : [m[0] + m[1], c[m[0]]! - m[1]];
+/** Ext^1 from the sequence 0 -> Hom(M, N) -> Hom(P, N) -> Hom(syzygy, N) -> Ext^1(M, N) -> 0. */
+const extensionOf = (c: readonly number[], m: Module, n: Module): number =>
+  zero(m) || zero(n)
+    ? 0
+    : homBetween(syzygyOfModule(c, m), n) - homBetween(projectiveCoverOf(c, m), n) + homBetween(m, n);
+const higherExtensionOf = (c: readonly number[], m: Module, n: Module, degree: number): number => {
+  let current = m;
+  for (let i = 1; i < degree; i++) current = syzygyOfModule(c, current);
+  return extensionOf(c, current, n);
+};
+const injectiveModulesOf = (c: readonly number[]): Module[] =>
+  c.map((_, socle): Module => [hullAt(c, socle), socle - hullAt(c, socle) + 1]);
+const allModulesOf = (c: readonly number[]): Module[] =>
+  c.flatMap((entry, x) => Array.from({ length: entry }, (_, k): Module => [x, k + 1]));
+const simpleModulesOf = (c: readonly number[]): Module[] => c.map((_, x): Module => [x, 1]);
+const nonProjectiveModulesOf = (c: readonly number[]): Module[] =>
+  allModulesOf(c).filter((m) => !isProjectiveModule(c, m));
+const projectiveDimensionOfModule = (c: readonly number[], m: Module): number => {
+  let [current, steps] = [m, 0];
+  while (!isProjectiveModule(c, current)) {
+    current = syzygyOfModule(c, current);
+    steps++;
+  }
+  return steps;
+};
+/** Ext^i(D(A), tau M) vanishes for i up to r (a projective is r-torsionfree for every r). */
+const isTorsionfree = (c: readonly number[], m: Module, r: number): boolean =>
+  isProjectiveModule(c, m) ||
+  Array.from({ length: r }, (_, i) => i + 1).every((i) =>
+    injectiveModulesOf(c).every((inj) => higherExtensionOf(c, inj, [m[0] + 1, m[1]], i) === 0),
+  );
+const isReflexiveModule = (c: readonly number[], m: Module): boolean => zero(m) || isTorsionfree(c, m, 2);
+const regularExtension = (c: readonly number[], m: Module, degree: number): number =>
+  c.reduce(
+    (total, entry, a) =>
+      total + (degree === 0 ? homBetween(m, [a, entry]) : higherExtensionOf(c, m, [a, entry], degree)),
+    0,
+  );
+const globalOf = (c: readonly number[]): number =>
+  Math.max(...simpleModulesOf(c).map((m) => projectiveDimensionOfModule(c, m)));
+/** Whether the module embeds in a projective: one with the same socle that starts at or before it. */
+const isTorsionlessModule = (c: readonly number[], [x, y]: Module): boolean =>
+  c.some((entry, a) => a <= x && a + entry === x + y);
+/** The terms of the Auslander-Reiten sequence 0 -> P -> E -> tau^-1 P -> 0 starting at P. */
+const sequenceFrom = ([x, y]: Module): Module[] =>
+  (
+    [
+      [x, y],
+      [x - 1, y + 1],
+      [x, y - 1],
+      [x - 1, y],
+    ] as Module[]
+  ).filter(([, l]) => l > 0);
+const nonInjectiveProjectivesOf = (c: readonly number[]): Module[] =>
+  c.flatMap((entry, x): Module[] => (x > 0 && c[x - 1]! > entry ? [[x, entry]] : []));
+const reflexiveSequences = (c: readonly number[]): boolean[] =>
+  nonInjectiveProjectivesOf(c).map((p) => sequenceFrom(p).every((m) => isReflexiveModule(c, m)));
+/** The support of the dual Hom(M, A), and from it the double dual's: the projectives of the opposite algebra that the dual maps into. */
+const doubleDualVerticesOf = (c: readonly number[], m: Module): number[] => {
+  const support = c.flatMap((entry, a) => (homBetween(m, [a, entry]) === 1 ? [a] : []));
+  if (support.length === 0) return [];
+  const [low, high] = [Math.min(...support), Math.max(...support)];
+  return c.flatMap((_, b) => (high <= b && low <= hullAt(c, b) && hullAt(c, b) <= high ? [b] : []));
+};
+/** Leading terms of the minimal injective coresolution that are projective. */
+const dominantDimensionOfModule = (c: readonly number[], m: Module): number => {
+  let [[x, y], terms] = [m, 0];
+  for (let i = 0; i <= c.length; i++) {
+    const hull = hullAt(c, x + y - 1);
+    if (x + y - hull !== c[hull]) return terms;
+    terms++;
+    if (x === hull) return Infinity;
+    [x, y] = [hull, x - hull];
+  }
+  return Infinity;
+};
+const codominantOfModule = (c: readonly number[], m: Module): number => {
+  let [[x, y], terms] = [m, 0];
+  for (;;) {
+    if (!(x === 0 || c[x - 1]! <= c[x]!)) return terms;
+    terms++;
+    if (y === c[x]) return Infinity;
+    [x, y] = [x + y, c[x]! - y];
+  }
+};
+const injectiveDimensionOfModule = (c: readonly number[], m: Module): number => {
+  let [[x, y], steps] = [m, 0];
+  for (;;) {
+    const hull = hullAt(c, x + y - 1);
+    if (hull === x) return steps;
+    [x, y] = [hull, x - hull];
+    steps++;
+  }
+};
+/** The map v -> v + c_v around the vertices that the resolution quiver draws. */
+const resolutionMap = (c: readonly number[]): number[] => c.map((entry, v) => (v + entry) % c.length);
+/** The distinct powers of the map, found by composing until one repeats: the elements of the monoid it generates. */
+const resolutionPowers = (c: readonly number[]): number[][] => {
+  const f = resolutionMap(c);
+  const seen: string[] = [];
+  const powers: number[][] = [];
+  let current = c.map((_, v) => v);
+  while (!seen.includes(current.join())) {
+    seen.push(current.join());
+    powers.push(current);
+    current = current.map((v) => f[v]!);
+  }
+  return powers;
+};
+const resolutionCycle = (f: readonly number[]): Set<number> => {
+  const onCycle = new Set<number>();
+  f.forEach((_, start) => {
+    let v = start;
+    for (let i = 0; i < f.length; i++) v = f[v]!;
+    for (let i = 0; i < f.length; i++) {
+      onCycle.add(v);
+      v = f[v]!;
+    }
+  });
+  return onCycle;
+};
+const resolutionDistance = (c: readonly number[]): number => {
+  const f = resolutionMap(c);
+  const onCycle = resolutionCycle(f);
+  return Math.max(
+    ...f.map((_, start) => {
+      let [v, steps] = [start, 0];
+      while (!onCycle.has(v)) {
+        v = f[v]!;
+        steps++;
+      }
+      return steps;
+    }),
+  );
+};
+const isSyzygyOfOrder = (c: readonly number[], m: Module, order: number): boolean =>
+  order === 0 ||
+  zero(m) ||
+  c.some((entry, a) => a <= m[0] && a + entry === m[0] + m[1] && isSyzygyOfOrder(c, [a, m[0] - a], order - 1));
+const keptVerticesOf = (c: readonly number[]): number[] =>
+  c.flatMap((_, x) => (x === 0 || c[x - 1]! <= c[x]! ? [x] : []));
+/** The first degree up to the global dimension at which Ext^i(D(A), tau M) is nonzero, less one. */
+const torsionfreeIndexOf = (c: readonly number[], m: Module): number => {
+  const limit = globalOf(c);
+  let index = 0;
+  while (index < limit && isTorsionfree(c, m, index + 1)) index++;
+  return index;
+};
+const gradeOfModule = (c: readonly number[], m: Module): number => {
+  for (let i = 0; i <= c.length + 2; i++) if (regularExtension(c, m, i) > 0) return i;
+  return 0;
+};
+/** The projective dimension of the `steps`-th term of the minimal injective coresolution of the projective at each vertex, greatest. */
+const coresolutionTermDimensionOf = (c: readonly number[], steps: number): number =>
+  Math.max(
+    ...c.map((entry, x) => {
+      let [cx, cy] = [x, entry];
+      for (let i = 0; i < steps && cy > 0; i++) {
+        const hull = hullAt(c, cx + cy - 1);
+        [cx, cy] = cx === hull ? [cx, 0] : [hull, cx - hull];
+      }
+      if (cy <= 0) return 0;
+      const hull = hullAt(c, cx + cy - 1);
+      return projectiveDimensionOfModule(c, [hull, cx + cy - hull]);
+    }),
+  );
+const gorensteinDegreeOf = (c: readonly number[]): number => {
+  const limit = globalOf(c);
+  let k = 0;
+  while (k < limit && coresolutionTermDimensionOf(c, k) <= k) k++;
+  return k;
+};
+/** The projectives of A/AeA, e at the tops of the kept vertices: each vertex not kept, cut where the next kept vertex begins. */
+const topQuotientModules = (c: readonly number[]): Module[] => {
+  const kept = keptVerticesOf(c);
+  return c.flatMap((entry, x): Module[] =>
+    kept.includes(x) ? [] : [[x, Math.min(entry, Math.min(...kept.filter((k) => k > x), Infinity) - x)]],
+  );
+};
+const socleQuotientModules = (c: readonly number[]): Module[] => {
+  const socles = keptVerticesOf(c).map((x) => x + c[x]! - 1);
+  return c.flatMap((entry, x): Module[] =>
+    socles.includes(x) ? [] : [[x, Math.min(entry, Math.min(...socles.filter((s) => s >= x), Infinity) - x)]],
+  );
+};
+const cornerSeriesFrom = (c: readonly number[]): number[] => {
+  const kept = keptVerticesOf(c);
+  return kept.map((x) => kept.filter((y) => y >= x && y < x + c[x]!).length);
+};
+const dominantDimensionOfAlgebra = (c: readonly number[]): number => {
+  const nonProjectiveInjectives = injectiveModulesOf(c).filter((m) => !isProjectiveModule(c, m));
+  return nonProjectiveInjectives.length === 0
+    ? Infinity
+    : Math.min(...nonProjectiveInjectives.map((m) => codominantOfModule(c, m)));
+};
+/** The cyclic algebra's projective dimension of a module: syzygies (top + length around, entry - length), infinite past 2N of them. */
+const cyclicDimensionOf = (c: readonly number[], m: Module): number => {
+  let [[x, y], steps] = [m, 0];
+  while (y !== c[x]) {
+    [x, y] = [(x + y) % c.length, c[x]! - y];
+    if (++steps > 2 * c.length) return Infinity;
+  }
+  return steps;
+};
+const cyclicSeriesOf = (c: readonly number[]): number[] => [...c.slice(0, -1), c[c.length - 1]! + c[0]!];
+const cyclicDominantDimension = (c: readonly number[]): number => {
+  const n = c.length;
+  const injectiveAt = (socle: number): Module => {
+    let best: Module | undefined;
+    for (let y = 1; y <= Math.max(...c); y++) {
+      const x = (((socle - y + 1) % n) + n) % n;
+      if (y <= c[x]! && (best === undefined || y > best[1])) best = [x, y];
+    }
+    return best!;
+  };
+  const lowest = c.map((_, v) => injectiveAt(v)).filter(([x, y]) => y < c[x]!);
+  if (lowest.length === 0) return Infinity;
+  return Math.min(
+    ...lowest.map(([x0, y0]) => {
+      let [x, y, terms] = [x0, y0, 0];
+      for (let i = 0; i < 2 * n + 2; i++) {
+        if (!(c[(x + n - 1) % n]! <= c[x]!)) break;
+        terms++;
+        if (y !== c[x]) [x, y] = [(x + y) % n, c[x]! - y];
+      }
+      return terms;
+    }),
+  );
+};
+const overAlgebra =
+  (body: (c: readonly number[]) => number) =>
+  (w: Word): number =>
+    w.length === 0 ? 0 : body(nakayama(w).series);
+const sumOf = (xs: readonly number[]): number => xs.reduce((a, b) => a + b, 0);
+const maxOf = (xs: readonly number[]): number => xs.reduce((a, b) => Math.max(a, b), 0);
+
 export const DYCK_READINGS: Record<string, (w: Word) => number> = {
   SetValuedTableauNaturalDescents: (w) => (w.length === 0 ? 0 : naturalDescentsOf(w).length),
   SetValuedTableauComajorIndex: (w) =>
@@ -1129,6 +1380,100 @@ export const DYCK_READINGS: Record<string, (w: Word) => number> = {
   NakayamaFrobeniusDimension: overSageSeries(frobeniusDimension),
   NakayamaCoxeterMatrixEntrySum: overSageSeries(coxeterEntrySum),
   TrivialLowerBoundaryStandardMonomialDegree: lowerStandardMonomialSize,
+  NonProjectiveReflexiveModules: overAlgebra(
+    (c) => nonProjectiveModulesOf(c).filter((m) => isReflexiveModule(c, m)).length,
+  ),
+  SimpleReflexiveModules: overAlgebra((c) => simpleModulesOf(c).filter((m) => isReflexiveModule(c, m)).length),
+  ThreeTorsionfreeSimpleModules: overAlgebra((c) => simpleModulesOf(c).filter((m) => isTorsionfree(c, m, 3)).length),
+  LargestNonProjectiveReflexiveModule: overAlgebra((c) =>
+    maxOf(
+      nonProjectiveModulesOf(c)
+        .filter((m) => isReflexiveModule(c, m))
+        .map((m) => m[1]),
+    ),
+  ),
+  NonProjectiveTorsionlessModules: overAlgebra(
+    (c) => nonProjectiveModulesOf(c).filter((m) => isTorsionlessModule(c, m)).length,
+  ),
+  NonProjectiveReflexiveModuleTops: overAlgebra(
+    (c) =>
+      new Set(
+        nonProjectiveModulesOf(c)
+          .filter((m) => isReflexiveModule(c, m))
+          .map((m) => m[0]),
+      ).size,
+  ),
+  NonInjectiveProjectivesWithReflexiveSequences: overAlgebra((c) => reflexiveSequences(c).filter(Boolean).length),
+  NonInjectiveProjectivesWithNonReflexiveSequences: overAlgebra((c) => reflexiveSequences(c).filter((r) => !r).length),
+  SimplesWithReflexiveSequences: overAlgebra(
+    (c) =>
+      simpleModulesOf(c)
+        .filter((m) => !isProjectiveModule(c, m))
+        .filter(([x]) =>
+          (
+            [
+              [x + 1, 1],
+              [x, 2],
+              [x, 1],
+            ] as Module[]
+          ).every((m) => isReflexiveModule(c, m)),
+        ).length,
+  ),
+  LargestSimpleDoubleDualDimension: overAlgebra((c) =>
+    maxOf(simpleModulesOf(c).map((m) => doubleDualVerticesOf(c, m).length)),
+  ),
+  SimpleDoubleDualDimensionSum: overAlgebra((c) =>
+    sumOf(simpleModulesOf(c).map((m) => doubleDualVerticesOf(c, m).length)),
+  ),
+  InjectiveDoubleDualDimensionSum: overAlgebra((c) =>
+    sumOf(injectiveModulesOf(c).map((m) => doubleDualVerticesOf(c, m).length)),
+  ),
+  SimpleDoubleDualDominantDimension: overAlgebra((c) =>
+    Math.min(
+      ...simpleModulesOf(c).flatMap((m) => {
+        const dual = doubleDualVerticesOf(c, m);
+        return dual.length === 0 ? [] : [dominantDimensionOfModule(c, [Math.min(...dual), dual.length])];
+      }),
+    ),
+  ),
+  ResolutionQuiverDepth: overAlgebra(resolutionDistance),
+  ResolutionQuiverMergingIndegreeSum: overAlgebra((c) => {
+    const indegree = c.map((_, v) => resolutionMap(c).filter((image) => image === v).length);
+    return sumOf(indegree.filter((d) => d >= 2));
+  }),
+  ResolutionQuiverMonoidSize: overAlgebra((c) => resolutionPowers(c).length),
+  TwoRegularModules: overAlgebra(
+    (c) =>
+      allModulesOf(c).filter(
+        (m) =>
+          projectiveDimensionOfModule(c, m) === 2 &&
+          [0, 1].every((i) => regularExtension(c, m, i) === 0) &&
+          regularExtension(c, m, 2) === 1,
+      ).length,
+  ),
+  MaximalSimpleTorsionfreeIndex: overAlgebra((c) =>
+    maxOf(
+      simpleModulesOf(c)
+        .filter((m) => !isProjectiveModule(c, m))
+        .map((m) => torsionfreeIndexOf(c, m)),
+    ),
+  ),
+  MaximalTorsionfreeIndex: overAlgebra((c) => maxOf(nonProjectiveModulesOf(c).map((m) => torsionfreeIndexOf(c, m)))),
+  ThreeSyzygySimpleModules: overAlgebra((c) => simpleModulesOf(c).filter((m) => isSyzygyOfOrder(c, m, 3)).length),
+  TopQuotientRegularExtensionDimension: overAlgebra((c) =>
+    sumOf(topQuotientModules(c).map((m) => c.reduce((total, entry, a) => total + extensionOf(c, m, [a, entry]), 0))),
+  ),
+  SocleQuotientInjectiveDimension: overAlgebra((c) =>
+    maxOf(socleQuotientModules(c).map((m) => injectiveDimensionOfModule(c, m))),
+  ),
+  NakayamaGorensteinDegree: overAlgebra(gorensteinDegreeOf),
+  NakayamaDepth: overAlgebra((c) => maxOf(simpleModulesOf(c).map((m) => gradeOfModule(c, m)))),
+  CornerAlgebraDominantDimension: overAlgebra((c) => dominantDimensionOfAlgebra(cornerSeriesFrom(c))),
+  CyclicNakayamaGlobalDimension: overAlgebra((c) => {
+    const cyclic = cyclicSeriesOf(c);
+    return maxOf(cyclic.map((_, x) => cyclicDimensionOf(cyclic, [x, 1])));
+  }),
+  CyclicNakayamaDominantDimension: overAlgebra((c) => cyclicDominantDimension(cyclicSeriesOf(c))),
 };
 
 /** The FindStat statistic each reading is held to. */
@@ -1228,4 +1573,31 @@ export const DYCK_FINDSTAT: Record<string, string> = {
   NakayamaFrobeniusDimension: "St001643",
   NakayamaCoxeterMatrixEntrySum: "St001473",
   TrivialLowerBoundaryStandardMonomialDegree: "St001509",
+  NonProjectiveReflexiveModules: "St001253",
+  SimpleReflexiveModules: "St001066",
+  ThreeTorsionfreeSimpleModules: "St001063",
+  LargestNonProjectiveReflexiveModule: "St001266",
+  NonProjectiveTorsionlessModules: "St001278",
+  NonProjectiveReflexiveModuleTops: "St001167",
+  NonInjectiveProjectivesWithReflexiveSequences: "St001113",
+  NonInjectiveProjectivesWithNonReflexiveSequences: "St001297",
+  SimplesWithReflexiveSequences: "St001219",
+  LargestSimpleDoubleDualDimension: "St001239",
+  SimpleDoubleDualDimensionSum: "St001255",
+  InjectiveDoubleDualDimensionSum: "St001259",
+  SimpleDoubleDualDominantDimension: "St001257",
+  ResolutionQuiverDepth: "St001503",
+  ResolutionQuiverMergingIndegreeSum: "St001504",
+  ResolutionQuiverMonoidSize: "St001505",
+  TwoRegularModules: "St001276",
+  MaximalSimpleTorsionfreeIndex: "St001294",
+  MaximalTorsionfreeIndex: "St001296",
+  ThreeSyzygySimpleModules: "St001064",
+  TopQuotientRegularExtensionDimension: "St001193",
+  SocleQuotientInjectiveDimension: "St001194",
+  NakayamaGorensteinDegree: "St000930",
+  NakayamaDepth: "St001530",
+  CornerAlgebraDominantDimension: "St001199",
+  CyclicNakayamaGlobalDimension: "St000969",
+  CyclicNakayamaDominantDimension: "St000968",
 };
