@@ -288,22 +288,35 @@ interface Group {
   readonly value: Json;
   readonly order: number;
   readonly linear?: Linear;
+  /** The conditions on the axis, and on its mirror (left of 0), in cell order. */
   readonly conds: Json[];
+  readonly mirrored: Json[];
 }
 
-function staircase(axis: Axis, family: Family): Json | undefined {
-  const d = axis.domain;
-  if (!Number.isFinite(d.lo.v) || !Number.isFinite(d.hi.v) || d.hi.v - d.lo.v >= MAX_SPAN) return undefined;
+/**
+ * The cells laid over `axis`, and over its `mirror` when the unit coordinate is not monotone in the variable
+ * (`x^2` across 0): the mirror is the side left of 0, falling, and the axis the side from 0 up.
+ */
+function staircase(axis: Axis, family: Family, mirror?: Axis): Json | undefined {
+  const sides = mirror ? [mirror, axis] : [axis];
+  const [lo, hi] = [Math.min(...sides.map((a) => a.domain.lo.v)), Math.max(...sides.map((a) => a.domain.hi.v))];
+  if (!Number.isFinite(lo) || !Number.isFinite(hi) || hi - lo >= MAX_SPAN) return undefined;
   const groups = new Map<string, Group>();
-  for (let k = Math.floor(d.lo.v) - 1; k <= Math.ceil(d.hi.v) + 1; k++) {
+  for (let k = Math.floor(lo) - 1; k <= Math.ceil(hi) + 1; k++) {
     for (const r of family(k)) {
-      const edges = cut(r, d);
-      if (!edges) continue;
-      const cond = conditionOf(axis, r, edges);
+      const edges = cut(r, axis.domain);
+      const mirrorEdges = mirror && cut(r, mirror.domain);
+      if (!edges && !mirrorEdges) continue;
       const key = JSON.stringify(r.value);
-      const group = groups.get(key);
-      if (group) group.conds.push(cond);
-      else groups.set(key, { value: r.value, order: r.order, linear: r.linear, conds: [cond] });
+      let group = groups.get(key);
+      if (!group)
+        groups.set(key, (group = { value: r.value, order: r.order, linear: r.linear, conds: [], mirrored: [] }));
+      // The sides meet at 0, which the domain does not say: a cell starting there leaves it out (`x^2 > 0`).
+      // The cell around it is the default (0), which has no condition.
+      const apart = mirror !== undefined && qNum(r.lo) === 0;
+      if (edges) group.conds.push(conditionOf(axis, r, apart ? { ...edges, lower: true } : edges));
+      if (mirror && mirrorEdges)
+        group.mirrored.push(conditionOf(mirror, r, apart ? { ...mirrorEdges, lower: true } : mirrorEdges));
     }
   }
   const all = [...groups.values()];
@@ -321,7 +334,7 @@ function staircase(axis: Axis, family: Family): Json | undefined {
       .map((g) => {
         // Ascending in the variable, whichever way the unit coordinate runs.
         const conds = axis.falling ? g.conds.toReversed() : g.conds;
-        return [g.value, or(conds)] as const;
+        return [g.value, or([...g.mirrored.toReversed(), ...conds])] as const;
       }),
     ordered[fallback].value,
   );
@@ -634,6 +647,8 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
   const symbolJson: Json = arg.kind === "sum" ? arg.json : arg.symbol;
 
   let axis: Axis | undefined;
+  // The side of 0 left of it, for an even power over an interval that holds 0.
+  let mirror: Axis | undefined;
   let family: Family | undefined;
   if (arg.kind === "affine") {
     const bare = qNum(arg.a) === 1 && qIsZero(arg.b);
@@ -701,8 +716,13 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
     } else if (arg.kind === "exp") axis = i && increasingAxis(i, Math.exp, (e) => ["Ln", qJson(e)] as Json, symbolJson);
     else if (arg.kind === "log")
       axis = i && i.lo.v >= 0 ? increasingAxis(i, Math.log, (e) => ["Exp", qJson(e)] as Json, symbolJson) : undefined;
-    else if (arg.kind === "power") axis = i && powerAxis(i, arg.n, symbolJson);
-    else if (arg.kind === "cuberoot") axis = i && rootAxis(i, 3, ["Power", symbolJson, ["Rational", 1, 3]] as Json);
+    else if (arg.kind === "power") {
+      if (i && arg.n === 2 && i.lo.v < 0 && i.hi.v > 0) {
+        const zero = numQ(q(0));
+        mirror = powerAxis({ ...i, hi: zero, hiOpen: true }, 2, symbolJson);
+        axis = powerAxis({ ...i, lo: zero, loOpen: false }, 2, symbolJson);
+      } else axis = i && powerAxis(i, arg.n, symbolJson);
+    } else if (arg.kind === "cuberoot") axis = i && rootAxis(i, 3, ["Power", symbolJson, ["Rational", 1, 3]] as Json);
     else axis = i && rootAxis(i, 2, g.json);
     family =
       op === "Mod"
@@ -716,17 +736,18 @@ function bounded(ce: Engine, kn: Knowledge, op: string, args: readonly Expr[]): 
               : ceilCell;
     // `Floor(g, p)` is `p Floor(g / p)`: the cells are of `g / p`.
     if (axis && (toMultiple || moduloOp) && m.kind === "number") {
-      const inner = axis;
       const by = qDiv(q(1), m.p);
-      axis = {
+      const divided = (inner: Axis): Axis => ({
         ...inner,
         at: (e) => inner.at(qMul(e, m.p)),
         domain: { ...inner.domain, lo: numScale(inner.domain.lo, by), hi: numScale(inner.domain.hi, by) },
-      };
+      });
+      axis = divided(axis);
+      mirror = mirror && divided(mirror);
       if (toMultiple) family = multiples(family, constantLinear(m.p));
     }
   }
-  return axis && family ? staircase(axis, family) : undefined;
+  return axis && family ? staircase(axis, family, mirror) : undefined;
 }
 
 /** The step heads: Piecewise-expanded without a real-argument gate (Min .. UnitTriangle), or over a bounded argument. */
