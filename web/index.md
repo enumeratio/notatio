@@ -62,7 +62,7 @@ pageClass: home-page
 <li><a href="/reference/"><span class="home-contents-title">Reference</span><span class="home-contents-desc">Every symbol, format and element: signatures, live examples, and a crosswalk to the DLMF, the OEIS, Wolfram, Sage and more.</span></a></li>
 <li><a href="/explore/"><span class="home-contents-title">Explore</span><span class="home-contents-desc">One function per page with every constant on a dial: zeta, the Lerch transcendent, fractals, quadratic primes.</span></a></li>
 <li><a href="/worksheet/"><span class="home-contents-title">Worksheet</span><span class="home-contents-desc">Named expressions and a shared view of what they draw. Bind a number and it gets a slider.</span></a></li>
-<li><a href="/notebook/"><span class="home-contents-title">Notebook</span><span class="home-contents-desc">A transcript that keeps its answers: what you asked and what came back, in order, with prose between.</span></a></li>
+<li><a href="/notebook/"><span class="home-contents-title">Notebook</span><span class="home-contents-desc">A column of cells that refer to each other by name; change one and its readers follow. Kept in your browser.</span></a></li>
 <li><a href="/docs/cli/"><span class="home-contents-title">Command line</span><span class="home-contents-desc">The same evaluation in a terminal, with a REPL.</span></a></li>
 </ol>
 </nav>
