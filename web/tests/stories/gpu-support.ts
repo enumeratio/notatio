@@ -158,6 +158,8 @@ export function runShader(
       const n = input.length;
       const gl = document.createElement("canvas").getContext("webgl2")!;
       if (!gl.getExtension("EXT_color_buffer_float")) throw new Error("no float render targets");
+      let lost = false;
+      gl.canvas.addEventListener("webglcontextlost", () => (lost = true));
       const program = gl.createProgram()!;
       for (const [type, source] of [
         [
@@ -201,9 +203,22 @@ export function runShader(
       gl.bindFramebuffer(gl.FRAMEBUFFER, target);
       gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, output, 0);
       gl.viewport(0, 0, n, 1);
-      gl.drawArrays(gl.TRIANGLES, 0, 3);
+      // A few texels per draw, each finished before the next: a slow kernel (DirichletBeta) drawn in one
+      // command outlasts the GPU process's watchdog on a loaded software rasterizer, which loses the context.
+      gl.enable(gl.SCISSOR_TEST);
+      for (let x = 0; x < n; x += 8) {
+        gl.scissor(x, 0, Math.min(8, n - x), 1);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.finish();
+      }
       const values = new Float32Array(n * 4);
       gl.readPixels(0, 0, n, 1, gl.RGBA, gl.FLOAT, values);
+      // A lost context (the driver's watchdog on a slow shader) reads back zeros: report it, not a wrong value.
+      if (lost || gl.isContextLost()) throw new Error("the WebGL context was lost during the draw");
+      const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+      if (status !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`incomplete framebuffer 0x${status.toString(16)}`);
+      const error = gl.getError();
+      if (error !== gl.NO_ERROR) throw new Error(`GL error 0x${error.toString(16)}`);
       return Array.from(values);
     },
     { body, input: input.map((p) => [...p] as [number, number, number, number]), slots: [...slots] },
