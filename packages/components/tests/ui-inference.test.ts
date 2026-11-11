@@ -195,10 +195,11 @@ test("an inferred plot is chosen again from the engine's declarations of its axi
     el.innerHTML = `<graphics-box value="Plot(${body}, (${axis}, -5, 5))"></graphics-box>`;
     document.body.append(el);
     await until(() => el.querySelector("slider-box") !== null);
-    await new Promise((r) => setTimeout(r, 200));
     // The replot waits on the engine's scope, which a loaded runner may not have answered by now.
     const expected = (golden["replotted by declaration"] as Record<string, unknown> | undefined)?.[id];
-    if (!updating) await until(() => JSON.stringify(plotOf(el)) === JSON.stringify(expected));
+    // Regenerating has no expected state to wait for: settle for a moment instead.
+    if (updating) await new Promise((r) => setTimeout(r, 200));
+    else await until(() => JSON.stringify(plotOf(el)) === JSON.stringify(expected));
     drawnPlots[id] = plotOf(el);
     el.remove();
   }
