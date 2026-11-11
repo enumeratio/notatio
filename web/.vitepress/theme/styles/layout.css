@@ -332,7 +332,9 @@
   line-height: 1.6;
   color: var(--ink-3);
 }
-.site-footer p {
+.site-footer p,
+.vp-doc .site-footer p {
+  font: inherit;
   margin: 0;
   max-width: 30rem;
 }

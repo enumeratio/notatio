@@ -10,6 +10,7 @@ import type { PackageNotation } from "@enumeratio/boxes";
 import type { Resolver } from "@enumeratio/manifest";
 import Layout from "./Layout.vue";
 import NotatioPrerendered from "./components/NotatioPrerendered.vue";
+import SiteFooter from "./components/SiteFooter.vue";
 import { hydrated } from "./hydration.ts";
 import { createSessionSharedWorker, createSessionWorker } from "./worker-factories.ts";
 
@@ -60,6 +61,7 @@ export default {
     app.component("BenchViewer", BenchViewer);
     // Not async: it must render on the server, where the build fills it.
     app.component("NotatioPrerendered", NotatioPrerendered);
+    app.component("SiteFooter", SiteFooter);
     // Client only: register the custom elements (they call customElements.define)
     // and declare the extension libraries against the shared engine so their heads
     // evaluate in the playground and docs -- collections (Combinations/Subsets/…),
