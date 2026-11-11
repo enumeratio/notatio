@@ -13,3 +13,14 @@ test("ComplexPlot's extent is documented as the view's vertical span", () => {
   expect(extent.description).toMatch(/height|vertical/i);
   expect(extent.description).not.toMatch(/half-width/i);
 });
+
+test('ComplexPlot documents `gpu="false"` as the switch to the CPU, as ComplexPlot3D\'s does', () => {
+  const plots = collectComponents(srcDir).filter(
+    (c) => c.tag === "notatio-complex-plot" || c.tag === "notatio-complex-plot-3d",
+  );
+  expect(plots).toHaveLength(2);
+  for (const plot of plots) {
+    const gpu = plot.attributes.find((a) => a.attribute === "gpu")!;
+    expect(gpu.description, plot.tag).toMatch(/CPU/);
+  }
+});

@@ -2,12 +2,15 @@ import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
 import { html, LitElement, type PropertyValues } from "lit";
 import { bindWildcards, canonicalOf } from "./plot-kernel.ts";
 import { ensureStyles } from "./styles.ts";
+import type { ComplexFunction } from "@enumeratio/frontend";
 import {
   ComplexPlotRenderer,
   type ComplexPlotView,
   getGpu,
   gradientOf,
+  gradientRamp,
   parseNumeric,
+  renderPortrait,
   WHEEL_HINT,
   wheelZooms,
   zoomAbout,
@@ -41,6 +44,12 @@ import {
  * `ComplexPlot(f, {z, a + b I, c + d I})`, the corners set both: the view is centered on the
  * rectangle and as tall as its longer side, so it shows all of it (more, on a wide canvas).
  * Corners that are not a real rectangle (`a >= c` or `b >= d`, or not numbers) leave the default view.
+ *
+ * Where WebGL2 or float render targets are missing, or the expression has no GPU lowering, the portrait is
+ * drawn on the CPU instead, into a 2-D canvas through the base package's complex evaluator and the shader's
+ * own color mapping: coarse first, then refined, at one pixel per CSS pixel. A point the evaluator declines
+ * is hatched, as on the GPU. A render that runs past its time budget stops refining and says so.
+ * `gpu="false"` forces the CPU.
  */
 export class NotatioComplexPlot extends LitElement {
   static properties = {
@@ -63,7 +72,11 @@ export class NotatioComplexPlot extends LitElement {
     height: { type: Number },
     /** Show a frame-rate readout. */
     fps: { type: Boolean },
+    /** `"false"` draws on the CPU even where WebGL2 is available. */
+    gpu: { type: String },
     _status: { state: true },
+    _note: { state: true },
+    _cpu: { state: true },
     _fps: { state: true },
   };
 
@@ -79,9 +92,14 @@ export class NotatioComplexPlot extends LitElement {
   declare reverse: boolean;
   declare height: number;
   declare fps: boolean;
+  declare gpu: string;
   /** Drop the frame and caption, for a pane that already has its own context. */
   declare bare: boolean;
   declare _status: string;
+  /** What the CPU path says about its drawing, beside the portrait: not a failure. */
+  declare _note: string;
+  /** The portrait is drawn on the CPU (the GPU is missing, declined, or switched off). */
+  declare _cpu: boolean;
   declare _fps: number;
 
   #canvas: HTMLCanvasElement | undefined;
@@ -94,6 +112,11 @@ export class NotatioComplexPlot extends LitElement {
   #frames = 0;
   #last = 0;
   #queued = false;
+  #f: ComplexFunction | undefined;
+  #ramp = gradientRamp(gradientOf({}, "phase"));
+  /** A newer CPU render replaces the one running: it ends at its next yield. */
+  #cpuRender = 0;
+  #image: ImageData | undefined;
   #ro: ResizeObserver | undefined;
 
   constructor() {
@@ -107,8 +130,11 @@ export class NotatioComplexPlot extends LitElement {
     this.reverse = false;
     this.height = 460;
     this.fps = false;
+    this.gpu = "";
     this.bare = false;
     this._status = "";
+    this._note = "";
+    this._cpu = false;
     this._fps = 0;
     ensureStyles();
   }
@@ -123,16 +149,7 @@ export class NotatioComplexPlot extends LitElement {
   }
 
   async #init(): Promise<void> {
-    const canvas = this.#canvas;
-    if (!canvas) return;
-    const gpu = await getGpu();
-    const renderer = gpu ? ComplexPlotRenderer.create(gpu, canvas) : null;
-    if (!renderer) {
-      this._status = "This portrait needs WebGL2 with float render targets.";
-      return;
-    }
-    this.#renderer = renderer;
-    this.#renderer.setGradient(gradientOf(this, "phase"));
+    if (!this.#canvas) return;
     this.#readView();
     this.#home = {
       center: [...this.#view.center],
@@ -140,9 +157,27 @@ export class NotatioComplexPlot extends LitElement {
       mask: this.#view.mask,
     };
     this.#ro = new ResizeObserver(() => this.#resize());
-    this.#ro.observe(canvas);
+    if (this.gpu !== "false") {
+      const gpu = await getGpu();
+      this.#renderer = (gpu && ComplexPlotRenderer.create(gpu, this.#canvas)) || undefined;
+      this.#renderer?.setGradient(gradientOf(this, "phase"));
+    }
+    if (!this.#renderer) await this.#useCpu();
+    this.#ro.observe(this.#canvas);
     this.#resize();
     await this.#compile();
+  }
+
+  /** Switch to a 2-D canvas, the one a WebGL2 context was never taken from. */
+  async #useCpu(): Promise<void> {
+    if (this._cpu) return;
+    this.#renderer = undefined;
+    this._cpu = true;
+    await this.updateComplete;
+    this.#ro?.disconnect();
+    this.#canvas = this.querySelector("canvas") ?? undefined;
+    if (this.#canvas) this.#ro?.observe(this.#canvas);
+    this.#resize();
   }
 
   /**
@@ -160,11 +195,10 @@ export class NotatioComplexPlot extends LitElement {
     this.#view.mask = Number.isFinite(this.mask) && this.mask > 0 ? this.mask : 0;
   }
 
-  /** `value` in canonical form (from the page's kernel), emitted as complex GLSL for the renderer. */
+  /** `value` in canonical form (from the page's kernel): lowered to complex GLSL for the renderer, or evaluated on the CPU. */
   async #compile(): Promise<void> {
-    const renderer = this.#renderer;
     const value = this.value;
-    if (!renderer || !value.trim()) return;
+    if (!value.trim() || !this.#canvas) return;
     // Compiles overlap (the init's, then each `bindings` or `value` change, while the kernel is still
     // answering); only the newest goes on, so a stale one never rebuilds the program or paints a second frame.
     const mine = ++this.#compiling;
@@ -176,15 +210,25 @@ export class NotatioComplexPlot extends LitElement {
       return;
     }
     if (mine !== this.#compiling) return;
-    const emitted = emitComplexGLSL(canonical as never, this.var);
-    if (!emitted) {
-      this._status = `No complex GPU lowering for: ${value}`;
-      return;
+    if (this.#renderer) {
+      const emitted = emitComplexGLSL(canonical as never, this.var);
+      if (emitted && this.#renderer.setExpression(emitted) !== "failed") {
+        this._status = "";
+        this._note = "";
+        this.#draw();
+        return;
+      }
+      // No lowering, or the program did not compile: the CPU takes the portrait.
+      await this.#useCpu();
+      if (mine !== this.#compiling) return;
     }
-    const outcome = renderer.setExpression(emitted);
+    const { complexFunction } = await import("@enumeratio/frontend");
     if (mine !== this.#compiling) return;
-    if (outcome === "failed") {
-      this._status = `Shader did not compile for: ${this.value}`;
+    this.#f = complexFunction(canonical, this.var);
+    if (!this.#f) {
+      this._status = `No complex lowering for: ${value}`;
+      this._note = "";
+      this.#clearCpu();
       return;
     }
     this._status = "";
@@ -194,7 +238,8 @@ export class NotatioComplexPlot extends LitElement {
   #resize(): void {
     const canvas = this.#canvas;
     if (!canvas) return;
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    // The CPU draws one pixel per CSS pixel: a point costs microseconds to milliseconds there.
+    const dpr = this.#renderer ? Math.min(window.devicePixelRatio || 1, 2) : 1;
     this.#w = Math.max(2, Math.round(canvas.clientWidth * dpr));
     this.#h = Math.max(2, Math.round(canvas.clientHeight * dpr));
     canvas.width = this.#w;
@@ -207,7 +252,11 @@ export class NotatioComplexPlot extends LitElement {
    * the pointer, so there is nothing to coalesce. */
   #drawNow = (): void => {
     this.#queued = false;
-    this.#renderer?.render(this.#view, this.#w, this.#h);
+    if (!this.#renderer) {
+      void this.#renderCpu();
+      return;
+    }
+    this.#renderer.render(this.#view, this.#w, this.#h);
     if (!this.fps) return;
     this.#frames++;
     const now = performance.now();
@@ -229,10 +278,53 @@ export class NotatioComplexPlot extends LitElement {
     });
   };
 
+  #clearCpu(): void {
+    this.#cpuRender++;
+    const canvas = this.#canvas;
+    if (canvas && this.#cpu()) canvas.getContext("2d")?.clearRect(0, 0, canvas.width, canvas.height);
+  }
+
+  #cpu(): boolean {
+    return this._cpu || this.gpu === "false";
+  }
+
+  /** Draw the portrait on the CPU, coarse to fine; the next view (or a resize) ends this render at its next yield. */
+  async #renderCpu(): Promise<void> {
+    const canvas = this.#canvas;
+    const f = this.#f;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !f || !ctx) return;
+    const mine = ++this.#cpuRender;
+    const [width, height] = [this.#w, this.#h];
+    if (this.#image?.width !== width || this.#image.height !== height) this.#image = new ImageData(width, height);
+    const image = this.#image;
+    const { step, complete } = await renderPortrait(
+      {
+        f,
+        view: { center: [...this.#view.center], extent: this.#view.extent, mask: this.#view.mask },
+        width,
+        height,
+        ramp: this.#ramp,
+      },
+      image.data,
+      {
+        paint: () => ctx.putImageData(image, 0, 0),
+        yieldToEventLoop: () => new Promise((resolve) => setTimeout(resolve, 0)),
+        cancelled: () => mine !== this.#cpuRender,
+        now: () => performance.now(),
+      },
+    );
+    if (mine !== this.#cpuRender) return;
+    this._note = complete
+      ? "Drawn on the CPU."
+      : `Drawn on the CPU; stopped refining at ${step ? `${step}-pixel detail` : "a blank first pass"}: this expression is slow.`;
+  }
+
   protected override updated(changed: PropertyValues): void {
     if (changed.has("value") || changed.has("var") || changed.has("bindings")) void this.#compile();
     if (changed.has("gradient") || changed.has("reverse")) {
       this.#renderer?.setGradient(gradientOf(this, "phase"));
+      this.#ramp = gradientRamp(gradientOf(this, "phase"));
       this.#draw();
     }
     if (changed.has("center") || changed.has("extent") || changed.has("mask")) {
@@ -245,6 +337,7 @@ export class NotatioComplexPlot extends LitElement {
     super.disconnectedCallback();
     this.#ro?.disconnect();
     this.#ro = undefined;
+    this.#cpuRender++;
   }
 
   /** Public so a container (a worksheet's toolbar) can put the view back. */
@@ -306,8 +399,19 @@ export class NotatioComplexPlot extends LitElement {
     // under every pane it is just noise.
     return html`<div class="notatio-complex-plot ${this.bare ? "notatio-complex-plot-bare" : ""}">
       <div class="notatio-complex-plot-stage" style=${`height:${this.height}px`}>
-        <canvas tabindex="0" @pointerdown=${this.#onPointerDown} @wheel=${this.#onWheel}></canvas>
+        ${
+          // A canvas that has given out a WebGL2 context never gives a 2-D one, so the CPU path is its own element.
+          this.#cpu()
+            ? html`<canvas
+                data-drawn="cpu"
+                tabindex="0"
+                @pointerdown=${this.#onPointerDown}
+                @wheel=${this.#onWheel}
+              ></canvas>`
+            : html`<canvas tabindex="0" @pointerdown=${this.#onPointerDown} @wheel=${this.#onWheel}></canvas>`
+        }
         ${this._status ? html`<p class="notatio-complex-plot-status">${this._status}</p>` : null}
+        ${this._note && !this._status ? html`<p class="notatio-complex-plot-note">${this._note}</p>` : null}
       </div>
       ${
         // `bare` drops the whole footer, not just the legend: inside a worksheet's
