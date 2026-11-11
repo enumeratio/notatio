@@ -4,12 +4,15 @@
 // `LCM`/`MatrixRank`/`Erf`. A fraction's sign goes in front of it, and every logarithm but
 // the natural one names its base.
 // (`Rank` is array depth, not matrix rank, so it keeps its default `\mathrm{Rank}`.)
+// A head whose sign would lose an argument or a grouping on the way back (`Union` of three, a
+// `Derivative` with its orders, `PolyLog` with a third argument, a second integral limit) writes
+// what reads back exactly: the editor shows this LaTeX and reads it again.
 // GCD, Determinant, Trace, Sign, Arg, Mod, Max, Min and Sinc were probed and are fine.
 // The shared engine carries these via its configureLatex list (engine.ts); engines built
 // elsewhere pass `conventionalLatexDictionary()`.
 
 import { LATEX_DICTIONARY, LatexSyntax, type MathJsonExpression } from "@cortex-js/compute-engine";
-import type { LatexDictionaryEntry, Serializer } from "@cortex-js/compute-engine/latex-syntax";
+import type { LatexDictionaryEntry, Parser, Serializer } from "@cortex-js/compute-engine/latex-syntax";
 import { commandTeX, escapeTeXText, markLanded, UNICODE_TEX, unicodeTeX } from "@enumeratio/boxes/render";
 
 type Entry = Partial<LatexDictionaryEntry>;
@@ -42,7 +45,10 @@ const zeta: Entry = {
     `\\zeta(${operands(expr)
       .map((e) => serializer.serialize(e))
       .join(", ")})`,
-  parse: (parser) => ["Zeta", ...(parser.parseArguments() ?? [])],
+  parse: (parser) => {
+    const args = parser.parseArguments();
+    return args === null ? "Zeta" : ["Zeta", ...args];
+  },
 };
 
 /** The Euler beta, `\mathrm{B}(a, b)` -- a roman capital beta; `\Beta` is not a LaTeX
@@ -55,7 +61,10 @@ const beta: Entry = {
     `\\mathrm{B}(${operands(expr)
       .map((e) => serializer.serialize(e))
       .join(", ")})`,
-  parse: (parser) => ["Beta", ...(parser.parseArguments() ?? [])],
+  parse: (parser) => {
+    const args = parser.parseArguments();
+    return args === null ? "Beta" : ["Beta", ...args];
+  },
 };
 const betaRoman: Entry = {
   kind: "function",
@@ -256,6 +265,148 @@ const setMinus: Entry = {
   },
 };
 
+/** `\mathrm{name}(args)`: the call, which reads back as the head with exactly these arguments. */
+const asCall = (serializer: Serializer, name: string, args: readonly MathJsonExpression[]): string =>
+  `\\mathrm{${name}}${serializer.wrapArguments([name, ...args] as unknown as MathJsonExpression)}`;
+
+/** Precedence of the set operations in compute-engine's dictionary (`Union` and `Intersection`). */
+const SET_PRECEDENCE = 350;
+
+type Until = NonNullable<Parameters<Parser["parseExpression"]>[0]>;
+
+/** `a∪b∪c` with any number of operands: the sign reads a chain as one `Union`, not as
+ *  `Union(a, Union(b, c))`. A union of no or one operand has no sign to write, so it is the call. */
+const setOperation = (name: "Union" | "Intersection"): Entry => {
+  const entry = native(name);
+  return {
+    ...entry,
+    name,
+    parse: (parser: Parser, lhs: MathJsonExpression | null, until: Until) => {
+      if (lhs === null) return null;
+      const rhs = parser.parseExpression({ ...until, minPrec: SET_PRECEDENCE + 1 });
+      // Only a union this sign just read is extended, never a bracketed one: `(a∪b)∪c` stays two.
+      return Array.isArray(lhs) && lhs[0] === name
+        ? ([...(lhs as readonly unknown[]), rhs] as unknown as MathJsonExpression)
+        : [name, lhs, rhs];
+    },
+    serialize: (serializer, expr) =>
+      operands(expr).length >= 2 ? entry.serialize(serializer, expr) : asCall(serializer, name, operands(expr)),
+  } as Entry;
+};
+
+/** The integrand of an `Integrate`, which the boxed form carries as `Function(f, x, y)`. */
+const integrandOf = (integrand: MathJsonExpression | undefined): MathJsonExpression | undefined =>
+  Array.isArray(integrand) && integrand[0] === "Function" ? (integrand[1] as MathJsonExpression) : integrand;
+
+/** `\int_a^b\int_c^d f\, dy\, dx` is one `Integrate(f, (x, a, b), (y, c, d))`: the sign reads a run
+ *  of integrals as the one n-ary head. An integral of an integral, `Integrate(Integrate(f, y), x)`,
+ *  is bracketed to stay two. */
+const integrate: Entry = {
+  ...native("Integrate"),
+  name: "Integrate",
+  parse: (parser: Parser, until?: Until) => {
+    const read = (
+      native("Integrate") as unknown as { parse: (p: Parser, u?: Until) => MathJsonExpression | null }
+    ).parse(parser, until);
+    if (!Array.isArray(read) || read[0] !== "Integrate") return read;
+    const [, inner, ...limits] = read;
+    if (!Array.isArray(inner) || inner[0] !== "Integrate") return read;
+    const [, body, ...innerLimits] = inner;
+    return ["Integrate", body, ...limits, ...innerLimits] as unknown as MathJsonExpression;
+  },
+  serialize: (serializer, expr) => {
+    const [integrand, ...limits] = operands(expr);
+    const body = integrandOf(integrand);
+    if (!Array.isArray(body) || body[0] !== "Integrate") return native("Integrate").serialize(serializer, expr);
+    const grouped = ["Delimiter", body] as unknown as MathJsonExpression;
+    const held =
+      Array.isArray(integrand) && integrand[0] === "Function"
+        ? ["Function", grouped, ...operands(integrand).slice(1)]
+        : grouped;
+    return native("Integrate").serialize(serializer, ["Integrate", held, ...limits] as unknown as MathJsonExpression);
+  },
+};
+
+/** Precedence a postfix sign wraps its operand at, as compute-engine wraps a `^T` operand. */
+const POSTFIX_PRECEDENCE = 1000;
+
+/** `a^T` for one operand; `Transpose(a, perm)` has no sign, and `a^T` would drop the permutation. */
+const transpose: Entry = {
+  ...native("Transpose"),
+  name: "Transpose",
+  serialize: (serializer, expr) => {
+    const args = operands(expr);
+    return args.length === 1
+      ? `${serializer.wrap(args[0]!, POSTFIX_PRECEDENCE)}^T`
+      : asCall(serializer, "Transpose", args);
+  },
+};
+
+/** `\operatorname{Li}_{s}(z, k)`: native writes `Li_s(z)` and drops a third argument. */
+const polyLog: Entry = {
+  ...native("PolyLog"),
+  name: "PolyLog",
+  serialize: (serializer, expr) => {
+    const [order, ...rest] = operands(expr);
+    return order === undefined || rest.length === 0
+      ? asCall(serializer, "PolyLog", operands(expr))
+      : `\\operatorname{Li}_{${serializer.serialize(order)}}${serializer.wrapArguments(["PolyLog", ...rest] as unknown as MathJsonExpression)}`;
+  },
+};
+
+/** A first to third order, which `f^{\prime}`, `f^{\doubleprime}` and `f^{\tripleprime}` write. */
+const primeOrder = (x: MathJsonExpression | undefined): boolean => {
+  const n = typeof x === "number" ? x : typeof x === "object" && x !== null && "num" in x ? Number(x.num) : NaN;
+  return n === 1 || n === 2 || n === 3;
+};
+
+/** `f^{\prime}` for a bare `Derivative(f)`; with orders it is the call: the prime reads back without
+ *  them (`Derivative(f, 1)` as `Derivative(f)`), and `f^{(k)}` and `f^{(0, 1)}` as a power. */
+const derivative: Entry = {
+  ...native("Derivative"),
+  name: "Derivative",
+  serialize: (serializer, expr) =>
+    operands(expr).length === 1
+      ? native("Derivative").serialize(serializer, expr)
+      : asCall(serializer, "Derivative", operands(expr)),
+};
+
+/** `f^{\prime}(x)` reads back as `Apply(Derivative(f, 1), x)`, so a first to third derivative keeps
+ *  its prime; any other order (`k`, a partial) is `\mathrm{Apply}(\mathrm{Derivative}(f, k), x)`. */
+const apply: Entry = {
+  ...native("Apply"),
+  name: "Apply",
+  serialize: (serializer, expr) => {
+    const [head, ...args] = operands(expr);
+    if (!Array.isArray(head) || head[0] !== "Derivative") return native("Apply").serialize(serializer, expr);
+    const orders = head.slice(2);
+    return orders.length === 1 && primeOrder(orders[0] as MathJsonExpression)
+      ? native("Derivative").serialize(serializer, head as MathJsonExpression) +
+          serializer.wrapArguments(["Apply", ...args] as unknown as MathJsonExpression)
+      : asCall(serializer, "Apply", operands(expr));
+  },
+};
+
+/** `{k→v, …}` as a dictionary: the entries `Dictionary` writes, every one a `To`. A set of arrows is
+ *  not a thing, so the braces read as a `Dictionary` when each element is one. */
+const dictionaryOf = (body: MathJsonExpression): MathJsonExpression | null => {
+  const inner = Array.isArray(body) && body[0] === "Delimiter" ? (body[1] as MathJsonExpression) : body;
+  const items = Array.isArray(inner) && inner[0] === "Sequence" ? operands(inner) : [inner];
+  if (!items.every((item) => Array.isArray(item) && item[0] === "To" && item.length === 3)) return null;
+  return ["Dictionary", ...items.map((item) => ["KeyValuePair", ...operands(item)])] as unknown as MathJsonExpression;
+};
+
+const set: Entry = {
+  ...native("Set"),
+  name: "Set",
+  parse: (parser: Parser, body: MathJsonExpression) =>
+    dictionaryOf(body) ??
+    (native("Set") as unknown as { parse: (p: Parser, b: MathJsonExpression) => MathJsonExpression | null }).parse(
+      parser,
+      body,
+    ),
+} as Entry;
+
 /** A truth value written as the word, as InputForm spells it; ⊤ and ⊥ are TraditionalForm's
  *  and still read. */
 const truth = (name: "True" | "False", trigger: string): Entry => ({
@@ -311,6 +462,14 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   operatorname("Arccsc", "arccsc"),
   equal,
   setMinus,
+  set,
+  setOperation("Union"),
+  setOperation("Intersection"),
+  integrate,
+  transpose,
+  polyLog,
+  derivative,
+  apply,
   bracketed("Floor", "\\lfloor", "\\rfloor"),
   bracketed("Ceil", "\\lceil", "\\rceil"),
   zeta,

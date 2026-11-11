@@ -186,7 +186,9 @@ test("a derivative brackets an operand that binds looser than the prime", () => 
   const latex = (json: unknown): string => ce.box(json as never, { form: "raw" }).latex;
   expect(latex(["Derivative", ["Function", ["Block", ["Power", "x", 2]], "x"]])).toBe("(x\\mapsto x^2)^{\\prime}");
   expect(latex(["Derivative", ["Power", "x", 2]])).toBe("(x^2)^{\\prime}");
-  expect(latex(["Derivative", "f", 2])).toBe("f^{\\doubleprime}");
+  // With an order the prime would read back without it, so it is the call.
+  expect(latex(["Derivative", "f", 2])).toBe("\\mathrm{Derivative}(f, 2)");
+  expect(latex(["Apply", ["Derivative", "f", 2], "x"])).toBe("f^{\\doubleprime}(x)");
 });
 
 test("an equation after a factorial reads back as an equation, not as `!=`", () => {

@@ -2,7 +2,7 @@ import type { Expression, ComputeEngine, MathJsonExpression } from "@cortex-js/c
 import type { LatexDictionaryEntry } from "@cortex-js/compute-engine/latex-syntax";
 
 // LaTeX for compute-engine heads that have none of their own; the shared engine always
-// carries these (engine.ts). Display only -- nothing here needs to parse back.
+// carries these (engine.ts). A dictionary written here is read back by `Set` in conventional-latex.ts.
 
 /** compute-engine writes `Assign` as `\\coloneq` (`:-`); `:=` is `\\coloneqq`. */
 export const assignLatex = (latex: string): string => latex.replace(/\\coloneq(?!q)/g, "\\coloneqq");
@@ -86,4 +86,4 @@ export const AS_TYPED = { form: "InvisibleOperator" } as const;
  * back as a power, not a `Sqrt`.
  */
 export const typedLatex = (ce: ComputeEngine, json: unknown): string =>
-  ce.box(json as MathJsonExpression, { form: "raw" }).toLatex({ rootStyle: "radical" });
+  ce.box(json as MathJsonExpression, { form: "raw" }).toLatex({ rootStyle: "radical", digits: "max" });
