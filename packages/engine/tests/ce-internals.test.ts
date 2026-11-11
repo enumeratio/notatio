@@ -7,9 +7,13 @@ import { extendHead } from "../src/index.ts";
 // The compile stance reads two things from compute-engine's internals (ce-internals.ts). A bump of
 // compute-engine fails here until someone has checked both still hold and moved CHECKED_COMPUTE_ENGINE on.
 
-test("compute-engine is the version whose shadow rules ce-internals.ts was checked against", () => {
-  expect(version).toBe(CHECKED_COMPUTE_ENGINE);
-});
+// The nightly against compute-engine main (ce-main.yml) runs a newer version on purpose; the rule tests below still run.
+test.skipIf(process.env.COMPUTE_ENGINE_MAIN === "1")(
+  "compute-engine is the version whose shadow rules ce-internals.ts was checked against",
+  () => {
+    expect(version).toBe(CHECKED_COMPUTE_ENGINE);
+  },
+);
 
 test("the library operator is the one a fresh engine's lookup resolves to, and an extension is not", () => {
   const ce = new ComputeEngine();

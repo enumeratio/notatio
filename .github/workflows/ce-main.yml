@@ -1,0 +1,271 @@
+name: compute-engine main
+
+# Advisory, never a required check: our whole suite against compute-engine's `main` (or `ce_ref`), so the
+# maintainer hears what breaks before a release (cortex-js/compute-engine#515). compute-engine is built from
+# source and packed with `npm pack`; that tarball replaces the pinned version through a pnpm override written
+# in each job (.github/scripts/compute-engine-tarball.ts), so no committed file changes. The override rewrites
+# the lockfile, which changes every dist-cache key: nothing is restored, and the cache is never saved.
+# Shape as ci.yml's nightly: `dist` builds once, the shards restore its artifact and test. One rolling
+# issue labelled `ce-main`.
+
+on:
+  schedule:
+    - cron: "20 7 * * *" # 07:20 UTC, after ci.yml's 03:05 and nightly.yml's 04:05 (and its fixup read at 06:15)
+  workflow_dispatch:
+    inputs:
+      ce_ref:
+        description: compute-engine branch, tag or sha to test
+        type: string
+        default: main
+
+permissions:
+  contents: read
+  actions: read # the last green run's commit
+  issues: write
+
+concurrency:
+  group: ce-main
+  cancel-in-progress: false
+
+env:
+  CE_REF: ${{ inputs.ce_ref || 'main' }}
+  COMPUTE_ENGINE_MAIN: "1"
+
+jobs:
+  # Builds compute-engine, packs it, and says which commit and range that is.
+  compute-engine:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    outputs:
+      sha: ${{ steps.ce.outputs.sha }}
+      matrix: ${{ steps.select.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          repository: cortex-js/compute-engine
+          ref: ${{ env.CE_REF }}
+          path: ce
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.13.0
+      - id: select
+        run: node tools/ci/affected.ts --full --github-output
+      - id: ce
+        working-directory: ce
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      # The commit tested by the last green run (its `ce-commit` artifact), for the range in the report.
+      - name: range since the last green run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SHA: ${{ steps.ce.outputs.sha }}
+        run: |
+          mkdir -p out
+          echo "$SHA" > out/ce-commit
+          run=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ce-main.yml --status success --limit 1 --json databaseId --jq '.[0].databaseId // empty' || true)
+          last=""
+          if [ -n "$run" ]; then
+            mkdir -p prev
+            gh run download "$run" --repo "$GITHUB_REPOSITORY" -n ce-commit -D prev || true
+            if [ -f prev/ce-commit ]; then last=$(cat prev/ce-commit); fi
+          fi
+          if [ -n "$last" ] && git -C ce cat-file -e "$last^{commit}" 2>/dev/null; then
+            echo "Last green: \`${last:0:10}\`. Commits since:" > out/range.md
+            echo >> out/range.md
+            git -C ce log --format='- %h %s' "$last..$SHA" | head -100 >> out/range.md
+          else
+            echo "No earlier green run on record, so no range." > out/range.md
+          fi
+          cat out/range.md
+      - name: build and pack compute-engine
+        working-directory: ce
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          # --ignore-scripts: the build is done above, and `postpack` wants npm credentials
+          npm pack --ignore-scripts --pack-destination ../out
+      - uses: actions/upload-artifact@v4
+        with:
+          name: compute-engine
+          path: out/*.tgz
+          retention-days: 3
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ce-range
+          path: out/range.md
+          retention-days: 3
+      # What the next run's range starts from, if this run is the last green one.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ce-commit
+          path: out/ce-commit
+          retention-days: 90
+
+  # Our packages, built once against that tarball; the shards restore the result.
+  dist:
+    needs: compute-engine
+    runs-on: ubuntu-latest
+    timeout-minutes: 150 # cold: nothing restores, and combinatorics alone takes about 90 minutes
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.13.0
+          cache: pnpm
+      - uses: actions/download-artifact@v4
+        with:
+          name: compute-engine
+          path: ${{ runner.temp }}/compute-engine
+      - name: use the compute-engine build
+        run: |
+          tgz=$(ls "$RUNNER_TEMP"/compute-engine/*.tgz)
+          node .github/scripts/compute-engine-tarball.ts apply "$tgz"
+          pnpm install --no-frozen-lockfile
+          node .github/scripts/compute-engine-tarball.ts verify "$tgz"
+      - run: node tools/ci/dist-cache.ts build
+        env:
+          DIST_CACHE_DIR: ${{ runner.temp }}/dist-cache
+          BUILD_JOBS: 3
+          DIST_CACHE_JOBS: 4
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist-cache
+          path: ${{ runner.temp }}/dist-cache
+          compression-level: 1
+          retention-days: 3
+
+  # The nightly's shards (tools/ci/affected.ts, everything and combinatorics in full), each keeping its log.
+  test_shard:
+    name: tests (${{ matrix.shard }})
+    needs: [compute-engine, dist]
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.compute-engine.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.13.0
+          cache: pnpm
+      - uses: actions/download-artifact@v4
+        with:
+          name: compute-engine
+          path: ${{ runner.temp }}/compute-engine
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist-cache
+          path: ${{ runner.temp }}/dist-cache
+      - name: use the compute-engine build
+        run: |
+          tgz=$(ls "$RUNNER_TEMP"/compute-engine/*.tgz)
+          node .github/scripts/compute-engine-tarball.ts apply "$tgz"
+          pnpm install --no-frozen-lockfile
+          node .github/scripts/compute-engine-tarball.ts verify "$tgz"
+      # Every unit's key matches `dist`'s (same lockfile), so this restores all of it.
+      - run: node tools/ci/dist-cache.ts build $PACKAGES
+        env:
+          DIST_CACHE_DIR: ${{ runner.temp }}/dist-cache
+          PACKAGES: ${{ matrix.pkgs }}
+      - run: node tools/ci/clean-tree.ts
+      - env:
+          PKGS: ${{ matrix.pkgs }}
+          ARGS: ${{ matrix.args }}
+          NO_COLOR: "1"
+        run: |
+          set -o pipefail
+          filters=()
+          for p in $PKGS; do filters+=(--filter "$p"); done
+          # ARGS (a vitest --shard, when the shard is split) is intentionally word-split
+          pnpm -r "${filters[@]}" run test $ARGS 2>&1 | tee "$RUNNER_TEMP/test.log"
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: log-${{ strategy.job-index }}
+          path: ${{ runner.temp }}/test.log
+          retention-days: 3
+
+  # The red/green: one rolling issue labelled `ce-main` (as ci.yml's nightly-report does for nightly-fixup),
+  # opened or updated with the commit, the range and the failing tests; closed with a comment when green.
+  report:
+    if: ${{ !cancelled() }}
+    needs: [compute-engine, dist, test_shard]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/download-artifact@v4
+        continue-on-error: true # nothing to read when compute-engine itself failed to build
+        with:
+          pattern: "{log-*,ce-range}"
+          path: ${{ runner.temp }}/reports
+      - uses: actions/github-script@v7
+        env:
+          RESULTS: ${{ needs.compute-engine.result }} ${{ needs.dist.result }} ${{ needs.test_shard.result }}
+          STAGES: compute-engine=${{ needs.compute-engine.result }} dist=${{ needs.dist.result }} tests=${{ needs.test_shard.result }}
+          SHA: ${{ needs.compute-engine.outputs.sha }}
+          REPORTS: ${{ runner.temp }}/reports
+        with:
+          script: |
+            const fs = require('fs')
+            const path = require('path')
+            const TITLE = 'compute-engine main: our suite failing'
+            const ok = process.env.RESULTS.split(' ').every((r) => r === 'success')
+            const sha = process.env.SHA
+            const ceRef = process.env.CE_REF
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            const commitUrl = sha ? `https://github.com/cortex-js/compute-engine/commit/${sha}` : ''
+            const found = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${context.repo.owner}/${context.repo.repo} is:issue label:ce-main in:title "${TITLE}"`,
+            })
+            const existing = found.data.items.find((i) => i.title === TITLE)
+            if (ok) {
+              if (existing && existing.state === 'open') {
+                await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body: `Passed on compute-engine ${ceRef} at [\`${sha.slice(0, 10)}\`](${commitUrl}). ${runUrl}` })
+                await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'closed' })
+              }
+              return
+            }
+            // vitest's failure headers (" FAIL  file > name") with the lines that follow, once each.
+            const strip = (s) => s.replace(/\u001b\[[0-9;]*m/g, '')
+            const failures = new Map()
+            const dir = process.env.REPORTS
+            const logs = fs.existsSync(dir) ? fs.readdirSync(dir).filter((d) => d.startsWith('log-')) : []
+            for (const d of logs) {
+              const lines = strip(fs.readFileSync(path.join(dir, d, 'test.log'), 'utf8')).split('\n')
+              lines.forEach((line, i) => {
+                if (/^\s*FAIL\s+\S/.test(line) && !failures.has(line.trim())) failures.set(line.trim(), lines.slice(i + 1, i + 6).join('\n').trimEnd())
+              })
+            }
+            let range = 'No range recorded.'
+            const rangeFile = path.join(dir, 'ce-range', 'range.md')
+            if (fs.existsSync(rangeFile)) range = fs.readFileSync(rangeFile, 'utf8')
+            let list = [...failures].map(([head, rest]) => `<details><summary>${head.replace(/</g, '&lt;')}</summary>\n\n\`\`\`\n${rest}\n\`\`\`\n</details>`).join('\n')
+            if (list.length > 40000) list = list.slice(0, 40000) + '\n\n(truncated; the rest is in the run\'s logs)'
+            if (!list) list = 'No test failure was read from the logs: see the stages above.'
+            const body = [
+              `Our suite against compute-engine ${ceRef} at [\`${sha ? sha.slice(0, 10) : 'unknown'}\`](${commitUrl}) failed: ${runUrl}`,
+              `Stages: ${process.env.STAGES}`,
+              range,
+              `Failing tests (${failures.size}):`,
+              list,
+            ].join('\n\n')
+            if (existing) {
+              if (existing.state === 'closed') await github.rest.issues.update({ ...context.repo, issue_number: existing.number, state: 'open' })
+              await github.rest.issues.createComment({ ...context.repo, issue_number: existing.number, body })
+            } else {
+              try {
+                await github.rest.issues.createLabel({ ...context.repo, name: 'ce-main', color: '5319e7', description: 'our suite against compute-engine main' })
+              } catch (e) { /* exists */ }
+              await github.rest.issues.create({ ...context.repo, title: TITLE, body, labels: ['bug', 'ce-main'] })
+            }

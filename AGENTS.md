@@ -245,3 +245,9 @@ kernel, the network or hand curation stays committed.
   The tarball check (`tarball.yml`, nightly only; `tools/tarball-check`) packs every package, installs only the
   tarballs into a scratch app, and runs census's tests and the site build (`SITE_FROM_PACKAGES=1`,
   no `srcAliases`) from it; run it locally with `node tools/tarball-check/run.ts`.
+- **compute-engine main** (`ce-main.yml`, daily 07:20 UTC and `workflow_dispatch`, advisory): builds
+  compute-engine's `main` (or `ce_ref`) from source, packs it, and each job swaps it in for the pin with a
+  pnpm override written in the job (`.github/scripts/compute-engine-tarball.ts`; nothing committed changes),
+  then builds and runs every package's tests as the nightly does. It keeps one rolling issue labelled
+  `ce-main`: the commit, the range since the last green run, the failing tests; closed when green. The
+  engine's version-pin test (`tests/ce-internals.test.ts`) fails there whenever main's version differs from the pin.
