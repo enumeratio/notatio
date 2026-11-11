@@ -15,7 +15,12 @@ signatures:
   - call: Permutation(list)
     description: The singular-inhabitant constructor for a permutation, as a one-line word.
     library: enumeratio-combinatorics
-    type: ((list<integer>) -> permutation) & ((cycle_decomposition) -> permutation) & ((subexcedant_seq) -> permutation)
+    type: ((list<integer>) -> permutation) & ((cycle_decomposition) -> permutation) & ((subexcedant_seq) -> permutation) & ((perfect_matching) -> permutation)
+catalog:
+  - system: findstat
+    identity: Mp00058
+    url: https://www.findstat.org/Mp00058
+    on: PerfectMatching
 ---
 
 - Ordered by the right weak order, the convention of Sage's `permutohedron_lequal`: p is below q when p's inversion set, the pairs of values a < b with b first, lies inside q's. A lattice, so `Min` is the meet and `Max` the join; `Compare` gives NaN for incomparable permutations.

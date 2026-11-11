@@ -14,7 +14,7 @@ signatures:
   - call: DyckPath(list)
     description: The singular-inhabitant constructor for a Dyck path, as its up/down steps.
     library: enumeratio-combinatorics
-    type: ((list<integer>) -> dyck_path) & ((binary_tree) -> dyck_path) & ((ordered_tree) -> dyck_path)
+    type: ((list<integer>) -> dyck_path) & ((binary_tree) -> dyck_path) & ((ordered_tree) -> dyck_path) & ((alternating_sign_matrix) -> dyck_path) & ((perfect_matching) -> dyck_path)
 laws:
   - inverse: BinaryTree
     on: binary_tree
@@ -37,4 +37,12 @@ catalog:
     identity: Mp00051
     url: https://www.findstat.org/Mp00051
     on: OrderedTree
+  - system: findstat
+    identity: Mp00007
+    url: https://www.findstat.org/Mp00007
+    on: AlternatingSignMatrix
+  - system: findstat
+    identity: Mp00150
+    url: https://www.findstat.org/Mp00150
+    on: PerfectMatching
 ---

@@ -8,7 +8,7 @@ signatures:
   - call: BinaryTreeParentArray(list)
     description: "The singular-inhabitant constructor for a binary tree as its in-order parent array: entry k is the k-th node's parent, 0 at the root."
     library: enumeratio-combinatorics
-    type: ((list<integer>) -> binary_tree_parent_array) & ((binary_tree) -> binary_tree_parent_array)
+    type: ((list<integer>) -> binary_tree_parent_array) & ((binary_tree) -> binary_tree_parent_array) & ((permutation) -> binary_tree_parent_array)
 seeAlso:
   - BinaryTreeParentArrays
   - BinaryTree

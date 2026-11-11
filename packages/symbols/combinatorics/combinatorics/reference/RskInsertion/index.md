@@ -11,13 +11,18 @@ catalog:
     identity: Mp00059
     url: https://www.findstat.org/Mp00059
     on: Permutation
+  - system: findstat
+    identity: Mp00302
+    url: https://www.findstat.org/Mp00302
+    on: ParkingFunction
 mapOn:
+  - ParkingFunction
   - Permutation
 signatures:
   - call: RskInsertion(Permutation)
     description: The insertion tableau of the RSK correspondence.
     library: enumeratio-combinatorics
-    type: (permutation) -> standard_tableau
+    type: ((parking_function) -> semistandard_tableau) & ((permutation) -> standard_tableau)
 laws:
   - surjection
   - graded:
@@ -27,3 +32,5 @@ laws:
 
 - Takes a `Permutation` and returns a `StandardTableau` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - Row insertion with bumping, as a fold over the word whose accumulator is the growing tableau, emitted as its rows. See flat.ts for the indexing rule that makes it evaluate at all.
+- Also takes a `ParkingFunction`, returning a `SemistandardTableau`: The insertion tableau of the RSK correspondence on the word: row insertion, an entry bumping the leftmost larger one.
+- FindStat's Mp00302. The word repeats letters, so the tableau is semistandard; its content is the multiset of the entries.

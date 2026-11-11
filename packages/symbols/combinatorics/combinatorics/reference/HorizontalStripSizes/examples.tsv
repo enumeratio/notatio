@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-standard-tableau-with-rows-13-and-2			[HorizontalStripSizes, [StandardTableau, [List, [List, 1, 3], [List, 2]]]]	[IntegerComposition, [List, 1, 2]]	the standard tableau with rows $13$ and $2$

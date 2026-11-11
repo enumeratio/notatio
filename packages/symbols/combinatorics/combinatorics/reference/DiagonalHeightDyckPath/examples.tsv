@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-alternating-sign-matrix-with-rows-100-001			[DiagonalHeightDyckPath, [AlternatingSignMatrix, [List, [List, 1, 0, 0], [List, 0, 0, 1], [List, 0, 1, 0]]]]	[DyckPath, [List, 1, 0, 1, 1, 0, 0]]	the alternating sign matrix with rows $100$, $001$ and $010$

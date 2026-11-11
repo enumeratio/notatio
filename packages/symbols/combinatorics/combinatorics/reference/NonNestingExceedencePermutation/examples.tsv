@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-perfect-matching-1-3-mid-2-6-mid-4-5			[NonNestingExceedencePermutation, [PerfectMatching, [List, [List, 1, 3], [List, 2, 6], [List, 4, 5]]]]	[Permutation, [List, 3, 5, 1, 6, 4, 2]]	the perfect matching $\{1,3\} \mid \{2,6\} \mid \{4,5\}$

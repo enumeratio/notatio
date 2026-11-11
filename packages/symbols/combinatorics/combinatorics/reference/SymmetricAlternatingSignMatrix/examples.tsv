@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-dyck-path-uuddud			[SymmetricAlternatingSignMatrix, [DyckPath, [List, 1, 1, 0, 0, 1, 0]]]	[AlternatingSignMatrix, [List, [List, 0, 1, 0], [List, 1, 0, 0], [List, 0, 0, 1]]]	the Dyck path $UUDDUD$
