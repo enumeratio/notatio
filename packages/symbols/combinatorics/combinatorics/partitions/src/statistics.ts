@@ -2287,22 +2287,15 @@ const squareGameMoveCount = (w: MathJSON, k: MathJSON): MathJSON =>
       0,
     ]),
   );
-/** The exponent of 2 in m!, by Legendre's formula: the sum of floor(m / 2^k), for the k with 2^k at most the size. */
+/** The exponent of 2 in m!, by Legendre's formula: the sum of floor(m / 2^k) over k, m at most the size, the terms past the bits of m being 0. */
 const twoAdicFactorial = (m: MathJSON): MathJSON =>
   floored([
     "Sum",
-    forEach(
-      upTo(["Floor", ["Log", add(total, 1), 2]]),
-      ["Divide", subtract(m, ["Mod", m, ["Power", 2, "k"]]), ["Power", 2, "k"]],
-      "k",
-    ),
+    forEach(upTo(total), ["Divide", subtract(m, ["Mod", m, ["Power", 2, "k"]]), ["Power", 2, "k"]], "k"),
   ]);
-/** The exponent of 2 in the number h: the count of powers 2^k, k from 1 up to the size's bits, that divide it. */
+/** The exponent of 2 in the number h, at most the size: the count of the powers 2^k, k from 1, that divide it. */
 const twoAdicValuation = (h: MathJSON): MathJSON =>
-  floored([
-    "Sum",
-    forEach(upTo(["Floor", ["Log", add(total, 1), 2]]), ["If", equals(["Mod", h, ["Power", 2, "k"]], 0), 1, 0], "k"),
-  ]);
+  floored(["Sum", forEach(upTo(total), ["If", equals(["Mod", h, ["Power", 2, "k"]], 0), 1, 0], "k")]);
 /** The exponent of 2 in the product of the hook lengths of the diagram whose row lengths are the digits of vector w. */
 const hookProductTwoAdicValuation = (w: MathJSON): MathJSON =>
   floored([
