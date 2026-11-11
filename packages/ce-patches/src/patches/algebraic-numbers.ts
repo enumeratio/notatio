@@ -9,7 +9,11 @@ import { algebraicNumbersLibrary } from "../compute-engine/library/algebraic-num
 export const algebraicNumbers: Patch = {
   id: "algebraic-numbers",
   lands: "Algebraic numbers: minimal polynomials, and the ring of integers of the field one generates",
-  files: ["src/compute-engine/numerics/number-field.ts", "src/compute-engine/library/algebraic-numbers.ts"],
+  files: [
+    "src/compute-engine/numerics/number-field.ts",
+    "src/compute-engine/numerics/polynomial-roots.ts",
+    "src/compute-engine/library/algebraic-numbers.ts",
+  ],
   library: algebraicNumbersLibrary,
 
   fixed: () => {
@@ -21,5 +25,5 @@ export const algebraicNumbers: Patch = {
   apply: (ce) => declareLibrary(ce, algebraicNumbersLibrary),
 };
 
-export { readAlgebraic } from "../compute-engine/library/algebraic-numbers.ts";
+export { deadlineTick, readAlgebraic } from "../compute-engine/library/algebraic-numbers.ts";
 export * as numberField from "../compute-engine/numerics/number-field.ts";

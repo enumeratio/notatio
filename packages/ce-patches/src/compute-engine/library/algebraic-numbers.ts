@@ -2,9 +2,11 @@
 // AlgebraicIntegerQ, AlgebraicNumberNorm and AlgebraicNumberTrace, and the field an algebraic
 // number generates: NumberFieldDiscriminant, NumberFieldIntegralBasis, NumberFieldSignature.
 // An argument is read as a polynomial in one generator — a radical of a rational, i, the golden
-// ratio, or a PolynomialRoot — and anything else is left unevaluated.
+// ratio, or a PolynomialRoot — and anything else is left unevaluated. The reading is checked
+// against compute-engine's own numeric value of the argument, so a radical it takes on another
+// branch (the real cube root of a negative number) is declined, not read as the principal one.
 
-import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
+import { CancellationError, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
 import type { LibraryRecord } from "../../patch.ts";
 import {
   degree,
@@ -18,9 +20,12 @@ import {
   minimalPolynomial,
   multiply,
   orderDiscriminant,
+  type Order,
   type Poly,
   realRootCount,
+  type Tick,
 } from "../numerics/number-field.ts";
+import { type Complex, orderedRoots, refineRoot } from "../numerics/polynomial-roots.ts";
 
 type Json = unknown;
 
@@ -67,43 +72,48 @@ function rationalOf(j: Json): Rational | undefined {
 
 // --- the generator --------------------------------------------------------------------------
 
-/** What an argument is written in: one radical bᵐ/ᵏ of a rational, or one PolynomialRoot. */
-type Atom =
-  | { readonly kind: "radical"; readonly base: Rational; readonly index: number; readonly power: number }
-  | { readonly kind: "root"; readonly key: string; readonly polynomial: readonly Rational[] };
+/** Fields past this degree aren't attempted. */
+const MAX_DEGREE = 12;
+
+/** Powers past this, of the generator or of a sum in it, aren't expanded; nested powers multiply. */
+const MAX_POWER = 256n;
+
+const POLYNOMIAL_ROOT = "PolynomialRoot";
 
 /**
- * `j` with i, the golden ratio and `Complex(a, b)` written as square roots, and i·√c (c > 0)
- * as √−c, so a Gaussian or Eisenstein number is one radical.
+ * What an argument is written in: one radical bᵐ/ᵏ of a rational, or one PolynomialRoot (the
+ * `k`-th root of `polynomial`, a primitive integer polynomial with positive leading coefficient).
  */
-function normalize(j: Json): Json {
-  if (j === "ImaginaryUnit") return ["Sqrt", -1];
-  if (j === "GoldenRatio") return ["Multiply", ["Rational", 1, 2], ["Add", 1, ["Sqrt", 5]]];
-  const h = head(j);
-  if (h === undefined) return j;
-  if (h === "Complex") {
-    const [re, im] = args(j);
-    return normalize(["Add", re, ["Multiply", im, "ImaginaryUnit"]]);
-  }
-  const ops = args(j).map(normalize);
-  if (h === "Multiply") {
-    // i·√c = √−c for c > 0: then i and √c are one radical, not two.
-    const i = ops.findIndex((o) => radicalOf(o)?.base.num === -1n && radicalOf(o)?.index === 2);
-    const root = ops.findIndex((o, k) => {
-      const r = radicalOf(o);
-      return k !== i && r !== undefined && r.index === 2 && r.power === 1 && r.base.num > 0n;
-    });
-    if (i >= 0 && root >= 0) {
-      const r = radicalOf(ops[root])!;
-      const rest = ops.filter((_, k) => k !== i && k !== root);
-      return ["Multiply", ...rest, ["Sqrt", rationalJson(rational(-r.base.num, r.base.den))]];
+type Atom =
+  | { readonly kind: "radical"; readonly base: Rational; readonly index: number; readonly power: number }
+  | {
+      readonly kind: "root";
+      readonly key: string;
+      readonly source: Json;
+      readonly variable: Json;
+      readonly polynomial: readonly bigint[];
+      readonly k: number;
+    };
+
+/** The deadline of the engine's current time limit, checked every so many calls (it throws to stop). */
+export function deadlineTick(ce: ComputeEngine): Tick {
+  let calls = 0;
+  return () => {
+    if ((++calls & 63) !== 0) return;
+    const frame = ce._deadlineFrame;
+    if (frame !== undefined && Date.now() > frame.at) {
+      throw new CancellationError({
+        message: "timeout",
+        cause: "timeout",
+        attribution: frame.owner,
+        spans: frame.spans,
+      });
     }
-  }
-  return [h, ...ops];
+  };
 }
 
-/** `j` as bᵐ/ᵏ, b rational, 0 < m < k in lowest terms. */
-function radicalOf(j: Json): Extract<Atom, { kind: "radical" }> | undefined {
+/** The base and exponent of `j` when it is `Sqrt(b)`, `Root(b, k)` or `Power(b, m/k)` with b rational and 0 < m/k, k > 1. */
+function radicalParts(j: Json): { base: Rational; exponent: Rational } | undefined {
   const h = head(j);
   const [a, b] = args(j);
   let base: Rational | undefined;
@@ -114,14 +124,65 @@ function radicalOf(j: Json): Extract<Atom, { kind: "radical" }> | undefined {
     [base, exponent] = [rationalOf(a), k && k.den === 1n && k.num > 1n ? rational(1n, k.num) : undefined];
   } else if (h === "Power") [base, exponent] = [rationalOf(a), rationalOf(b)];
   if (base === undefined || exponent === undefined || exponent.den === 1n || exponent.num < 0n) return undefined;
-  if (base.num === 0n || exponent.num > MAX_POWER) return undefined;
+  return { base, exponent };
+}
+
+/**
+ * `j` with i, the golden ratio and `Complex(a, b)` written as square roots, i·√c (c > 0) as √−c,
+ * so a Gaussian or Eisenstein number is one radical, and the radical of a negative base with an
+ * odd index as compute-engine takes it: (−1)ᵐ times the radical of the positive base (the real root).
+ */
+function normalize(j: Json): Json {
+  if (j === "ImaginaryUnit") return ["Sqrt", -1];
+  if (j === "GoldenRatio") return ["Multiply", ["Rational", 1, 2], ["Add", 1, ["Sqrt", 5]]];
+  const h = head(j);
+  if (h === undefined || h === POLYNOMIAL_ROOT) return j;
+  if (h === "Complex") {
+    const [re, im] = args(j);
+    return normalize(["Add", re, ["Multiply", im, "ImaginaryUnit"]]);
+  }
+  const ops = args(j).map(normalize);
+  const node = [h, ...ops];
+  const parts = radicalParts(node);
+  if (parts !== undefined && parts.base.num < 0n && parts.exponent.den % 2n === 1n) {
+    const positive = ["Power", rationalJson(rational(-parts.base.num, parts.base.den)), rationalJson(parts.exponent)];
+    return parts.exponent.num % 2n === 1n ? ["Negate", positive] : positive;
+  }
+  if (h === "Multiply") {
+    // i·√c = √−c for c > 0: then i and √c are one radical, not two. Only i itself, not Power(−1, 3/2).
+    const i = ops.findIndex((o) => {
+      const r = radicalOf(o);
+      return r?.base.num === -1n && r.base.den === 1n && r.index === 2 && r.power === 1;
+    });
+    const root = ops.findIndex((o, k) => {
+      const r = radicalOf(o);
+      return k !== i && r !== undefined && r.index === 2 && r.power === 1 && r.base.num > 0n;
+    });
+    if (i >= 0 && root >= 0) {
+      const r = radicalOf(ops[root])!;
+      const rest = ops.filter((_, k) => k !== i && k !== root);
+      return ["Multiply", ...rest, ["Sqrt", rationalJson(rational(-r.base.num, r.base.den))]];
+    }
+  }
+  return node;
+}
+
+/**
+ * `j` as bᵐ/ᵏ, b rational, 0 < m < k in lowest terms, on the principal branch. A negative base
+ * with an odd index is the real root in compute-engine, which `normalize` rewrites, so it isn't
+ * read here; an index past `MAX_DEGREE` can never be one generator's, so it is declined at once.
+ */
+function radicalOf(j: Json): Extract<Atom, { kind: "radical" }> | undefined {
+  const parts = radicalParts(j);
+  if (parts === undefined) return undefined;
+  const { base, exponent } = parts;
+  if (base.num === 0n || exponent.num > MAX_POWER || exponent.den > BigInt(MAX_DEGREE)) return undefined;
+  if (base.num < 0n && exponent.den % 2n === 1n) return undefined;
   return { kind: "radical", base, index: Number(exponent.den), power: Number(exponent.num) };
 }
 
-const POLYNOMIAL_ROOT = "PolynomialRoot";
-
-/** The atoms of `j` and the radicals and roots in them, or `undefined` for what isn't read. */
-function atomsOf(j: Json, ce: ComputeEngine, into: Atom[]): boolean {
+/** The atoms of `j` and the radicals and roots in them; `false` for what isn't read. */
+function atomsOf(j: Json, ce: ComputeEngine, into: Atom[], scale = 1n): boolean {
   if (rationalOf(j) !== undefined) return true;
   const radical = radicalOf(j);
   if (radical !== undefined) {
@@ -130,27 +191,43 @@ function atomsOf(j: Json, ce: ComputeEngine, into: Atom[]): boolean {
   }
   const h = head(j);
   if (h === POLYNOMIAL_ROOT) {
-    const polynomial = coefficientsOf(ce, args(j)[0]);
-    if (polynomial === undefined) return false;
-    into.push({ kind: "root", key: JSON.stringify(args(j)[0]), polynomial });
+    const root = rootAtom(ce, args(j)[0], args(j)[1], args(j)[2]);
+    if (root === undefined) return false;
+    into.push(root);
     return true;
   }
   if (h === "Add" || h === "Multiply" || h === "Negate" || h === "Subtract")
-    return args(j).every((o) => atomsOf(o, ce, into));
-  if (h === "Divide") return atomsOf(args(j)[0], ce, into) && rationalOf(args(j)[1]) !== undefined;
+    return args(j).every((o) => atomsOf(o, ce, into, scale));
+  if (h === "Divide") return atomsOf(args(j)[0], ce, into, scale) && rationalOf(args(j)[1]) !== undefined;
   if (h === "Power" || h === "Square") {
     const e = h === "Square" ? rational(2n) : rationalOf(args(j)[1]);
-    return e !== undefined && e.den === 1n && e.num >= 0n && e.num <= MAX_POWER && atomsOf(args(j)[0], ce, into);
+    if (e === undefined || e.den !== 1n || e.num < 0n) return false;
+    const next = scale * (e.num < 1n ? 1n : e.num);
+    return next <= MAX_POWER && atomsOf(args(j)[0], ce, into, next);
   }
   return false;
 }
 
-/** A polynomial's coefficients in its one unknown, constant first; `undefined` unless rational. */
-function coefficientsOf(ce: ComputeEngine, p: Json): Rational[] | undefined {
-  const boxed = ce.box(p as never);
-  const unknowns = boxed.unknowns;
-  if (unknowns.length !== 1) return undefined;
-  const list = ce.box(["CoefficientList", p, unknowns[0]] as never).evaluate().json;
+/** `PolynomialRoot(p, x, k)` as an atom: `p` rational in `x`, `k` an integer from 1 to its degree. */
+function rootAtom(ce: ComputeEngine, source: Json, x: Json, kj: Json): Extract<Atom, { kind: "root" }> | undefined {
+  const cs = coefficientsOf(ce, source, x);
+  const k = rationalOf(kj);
+  if (cs === undefined || k === undefined || k.den !== 1n || k.num < 1n || k.num > BigInt(cs.length - 1)) {
+    return undefined;
+  }
+  // Cleared of denominators and content, leading coefficient positive: the same roots, in the same order.
+  const den = cs.reduce((l, c) => (l * c.den) / gcd(l, c.den), 1n);
+  const cleared = cs.map((c) => (c.num * den) / c.den);
+  const g = cleared.reduce((x, c) => gcd(x, c), 0n);
+  const sign = cleared[cleared.length - 1]! < 0n ? -1n : 1n;
+  const polynomial = cleared.map((c) => (sign * c) / g);
+  return { kind: "root", key: `${polynomial.join(",")}#${k.num}`, source, variable: x, polynomial, k: Number(k.num) };
+}
+
+/** A polynomial's coefficients in the variable `x`, constant first; `undefined` unless rational and free of other unknowns. */
+function coefficientsOf(ce: ComputeEngine, p: Json, x: Json): Rational[] | undefined {
+  if (typeof x !== "string" || ce.box(p as never).unknowns.some((u) => u !== x)) return undefined;
+  const list = ce.box(["CoefficientList", p, x] as never).evaluate().json;
   if (head(list) !== "List") return undefined;
   // CoefficientList is highest first.
   const cs = args(list).map(rationalOf).toReversed();
@@ -164,6 +241,8 @@ export interface GeneratedField {
   readonly generator: FieldElement;
   /** The generator as an expression, its power `k` given. */
   readonly power: (k: number) => Json;
+  /** The complex number θ stands for: the embedding the argument's numeric value is read in. */
+  readonly theta: () => Complex | undefined;
 }
 
 const lcm = (a: number, b: number): number => (a * b) / Number(gcd(BigInt(a), BigInt(b)));
@@ -197,27 +276,33 @@ function binomialIrreducible(k: number, c: bigint): boolean {
 /** The field `atoms` generate, when it is one generator's. */
 function fieldOf(atoms: readonly Atom[]): GeneratedField | undefined {
   if (atoms.length === 0) {
-    return { f: [0n, 1n], generator: element([0n]), power: () => 1 };
+    return { f: [0n, 1n], generator: element([0n]), power: () => 1, theta: () => ({ re: 0, im: 0 }) };
   }
   const first = atoms[0]!;
   if (first.kind === "root") {
     if (atoms.some((a) => a.kind !== "root" || a.key !== first.key)) return undefined;
-    // θ' = aₙ·θ (cleared of denominators) is a root of a monic integer polynomial.
-    const den = first.polynomial.reduce((l, c) => (l * c.den) / gcd(l, c.den), 1n);
-    const a = first.polynomial.map((c) => (c.num * den) / c.den);
+    // θ' = aₙ·θ is a root of the monic integer polynomial a₀aₙⁿ⁻¹ + … + x.
+    const a = first.polynomial;
     const n = a.length - 1;
+    if (n > MAX_DEGREE) return undefined;
     const lead = a[n]!;
-    if (lead === 0n) return undefined;
     const f = a.map((c, i) => (i === n ? 1n : c * lead ** BigInt(n - 1 - i)));
     if (isIrreducible(f) !== true) return undefined;
-    const key = JSON.parse(first.key) as Json;
+    const theta = (): Complex | undefined => {
+      const z = orderedRoots(a)?.[first.k - 1];
+      return z && { re: z.re * Number(lead), im: z.im * Number(lead) };
+    };
     return {
       f,
       generator: element(
         f.slice(0, n).map((_, i) => (i === 1 ? 1n : 0n)),
         lead,
       ),
-      power: (k) => (k === 1 ? [POLYNOMIAL_ROOT, key, 1] : ["Power", [POLYNOMIAL_ROOT, key, 1], k]),
+      power: (k) =>
+        k === 1
+          ? [POLYNOMIAL_ROOT, first.source, first.variable, first.k]
+          : ["Power", [POLYNOMIAL_ROOT, first.source, first.variable, first.k], k],
+      theta,
     };
   }
   // Radicals of one base b: the generator is b^(1/L), L the indices' lcm.
@@ -225,10 +310,11 @@ function fieldOf(atoms: readonly Atom[]): GeneratedField | undefined {
     return undefined;
   }
   const L = atoms.reduce((l, a) => lcm(l, (a as typeof first).index), 1);
+  if (L > MAX_DEGREE) return undefined;
   const { num: u, den: v } = first.base;
   // θ' = v·b^(1/L) is a root of x^L − u·v^(L−1).
   const c = u * v ** BigInt(L - 1);
-  if (L > MAX_DEGREE || !binomialIrreducible(L, c)) return undefined;
+  if (!binomialIrreducible(L, c)) return undefined;
   const f = [-c, ...Array.from({ length: L - 1 }, () => 0n), 1n];
   const b = rationalJson(first.base);
   return {
@@ -238,14 +324,14 @@ function fieldOf(atoms: readonly Atom[]): GeneratedField | undefined {
       v,
     ),
     power: (k) => (L === 2 && k === 1 ? ["Sqrt", b] : ["Power", b, ["Rational", k, L]]),
+    // The principal L-th root of c: a negative c has only even indices here.
+    theta: () => {
+      const modulus = Math.pow(Math.abs(Number(c)), 1 / L);
+      const angle = c < 0n ? Math.PI / L : 0;
+      return { re: modulus * Math.cos(angle), im: modulus * Math.sin(angle) };
+    },
   };
 }
-
-/** Fields past this degree aren't attempted. */
-const MAX_DEGREE = 12;
-
-/** Powers past this, of the generator or of a sum in it, aren't expanded. */
-const MAX_POWER = 256n;
 
 /** An argument read as an element of the field it generates. */
 export interface Read {
@@ -253,23 +339,59 @@ export interface Read {
   readonly x: FieldElement;
 }
 
-function read(ce: ComputeEngine, arg: Expression): Read | undefined {
-  const j = normalize(arg.json);
+/** `x` at θ, and the sum of its terms' sizes (what a cancellation in it can cost). */
+function approximate(x: FieldElement, theta: Complex): { value: Complex; size: number } | undefined {
+  let value: Complex = { re: 0, im: 0 };
+  let power: Complex = { re: 1, im: 0 };
+  let size = 0;
+  for (const c of x.num) {
+    const t = Number(c) / Number(x.den);
+    value = { re: value.re + t * power.re, im: value.im + t * power.im };
+    size += Math.abs(t) * Math.hypot(power.re, power.im);
+    power = { re: power.re * theta.re - power.im * theta.im, im: power.re * theta.im + power.im * theta.re };
+  }
+  return Number.isFinite(value.re) && Number.isFinite(value.im) && Number.isFinite(size) ? { value, size } : undefined;
+}
+
+/**
+ * Whether `x` in `field` is the number compute-engine has for `arg`: the reading assumes one
+ * branch for every radical, and a branch it didn't read (a root of a negative number, an index of
+ * a PolynomialRoot) shows up here as a different value.
+ */
+function agreesWith(arg: Expression, field: GeneratedField, x: FieldElement): boolean {
+  const theta = field.theta();
+  const mine = theta && approximate(x, theta);
+  const n = arg.N();
+  if (mine === undefined || !Number.isFinite(n.re) || !Number.isFinite(n.im)) return false;
+  const gap = Math.hypot(n.re - mine.value.re, n.im - mine.value.im);
+  return gap <= 1e-9 * (mine.size + Math.hypot(n.re, n.im));
+}
+
+function read(ce: ComputeEngine, arg: Expression, tick: Tick): Read | undefined {
+  // Exactly: a PolynomialRoot of degree 2 or less is written as the radicals it evaluates to.
+  const exact = arg.evaluate();
+  const j = normalize(exact.json);
   const atoms: Atom[] = [];
   if (!atomsOf(j, ce, atoms)) return undefined;
   const field = fieldOf(atoms);
   if (field === undefined) return undefined;
-  const x = elementOf(j, field);
-  return x === undefined ? undefined : { field, x };
+  const x = elementOf(j, field, tick);
+  return x !== undefined && agreesWith(exact, field, x) ? { field, x } : undefined;
 }
 
-function elementOf(j: Json, field: GeneratedField): FieldElement | undefined {
+function elementOf(j: Json, field: GeneratedField, tick: Tick): FieldElement | undefined {
   const n = field.f.length - 1;
   const constant = (r: Rational): FieldElement => element([r.num, ...Array.from({ length: n - 1 }, () => 0n)], r.den);
   const one = constant(rational(1n));
+  // Square and multiply: a power of a sum costs its exponent's bits, not the exponent.
   const pow = (x: FieldElement, k: number): FieldElement => {
     let out = one;
-    for (let i = 0; i < k; i++) out = multiply(field.f, out, x);
+    let square = x;
+    for (let e = k; e > 0; e >>= 1) {
+      tick();
+      if (e & 1) out = multiply(field.f, out, square);
+      if (e > 1) square = multiply(field.f, square, square);
+    }
     return out;
   };
   const go = (e: Json): FieldElement | undefined => {
@@ -347,24 +469,69 @@ const polynomialIn = (coefficients: readonly bigint[], x: Json): Json => [
 const minimalOf = ({ field, x }: Read): bigint[] => minimalPolynomial(field.f, x);
 
 /**
- * O_K's basis as Wolfram writes it: lower triangular on the generator's powers, the i-th led by
- * gⁱ/dᵢ, each lower coefficient in [0, 1/dₖ) by the k-th.
+ * The field ℚ(a) of the argument a read: the monic polynomial of y = lead·a (a's minimal
+ * polynomial scaled), and whether that is the whole field it was read in. a may generate a proper
+ * subfield of it (θ² for θ = ∜2).
  */
-function integralBasis(field: GeneratedField): Json[] | undefined {
-  const o = maximalOrder(field.f);
-  if (o === undefined) return undefined;
-  const n = field.f.length - 1;
-  // θ' = v·g, so on g's powers coordinate i scales by vⁱ; the Hermite form on reversed columns
-  // is lower triangular, each row reduced by the rows of lower degree.
-  const v = field.generator.den / field.generator.num[1]!;
+interface Subfield {
+  readonly f: Poly;
+  readonly lead: bigint;
+  readonly whole: boolean;
+}
+
+function subfieldOf(r: Read): Subfield {
+  const m = minimalOf(r);
+  const d = degree(m);
+  const lead = m[d]!;
+  return {
+    f: m.map((c, i) => (i === d ? 1n : c * lead ** BigInt(d - 1 - i))),
+    lead,
+    whole: d === r.field.f.length - 1,
+  };
+}
+
+/**
+ * O_K's basis as Wolfram writes it: lower triangular on the powers of g, where the order's
+ * coordinates are on those of θ' = v·g; the i-th is led by gⁱ/dᵢ, each lower coefficient in
+ * [0, 1/dₖ) by the k-th.
+ */
+function triangular(o: Order, v: bigint): bigint[][] {
+  const n = o.rows.length;
+  // On g's powers coordinate i scales by vⁱ; the Hermite form on reversed columns is lower
+  // triangular, each row reduced by the rows of lower degree.
   const scaled = o.rows.map((r) => r.map((c, i) => c * v ** BigInt(i)));
   return hermite(
     scaled.map((r) => r.toReversed()),
     n,
   )
     .map((r) => r.toReversed())
-    .toReversed()
-    .map((row) => expressionOnPowers(field, element(row, o.den)));
+    .toReversed();
+}
+
+/**
+ * A ℤ-basis of the ring of integers of ℚ(a), as expressions on the powers of the generator read:
+ * triangular on those when a generates the field it was read in, and on a's own powers when it
+ * generates a proper subfield. `undefined` when the ring of integers can't be computed.
+ */
+function integralBasis(r: Read, sub: Subfield, tick: Tick): Json[] | undefined {
+  const { field } = r;
+  if (sub.f.length === 2) return [1];
+  const o = maximalOrder(sub.f, tick);
+  if (o === undefined) return undefined;
+  if (sub.whole) {
+    const v = field.generator.den / field.generator.num[1]!;
+    return triangular(o, v).map((row) => expressionOnPowers(field, element(row, o.den)));
+  }
+  // Σ cᵢ·aⁱ in the field read, a's powers by multiplication.
+  const powers: FieldElement[] = [element([1n, ...Array.from({ length: field.f.length - 2 }, () => 0n)])];
+  for (let i = 1; i < sub.f.length - 1; i++) powers.push(multiply(field.f, powers[i - 1]!, r.x));
+  const common = powers.reduce((l, p) => (l * p.den) / gcd(l, p.den), 1n);
+  return triangular(o, sub.lead).map((row) => {
+    const num = powers[0]!.num.map((_, k) =>
+      row.reduce((s, c, i) => s + c * powers[i]!.num[k]! * (common / powers[i]!.den), 0n),
+    );
+    return expressionOnPowers(field, element(num, common * o.den));
+  });
 }
 
 /** Σ (cᵢ/den)·gⁱ for coordinates already on g's powers. */
@@ -381,30 +548,85 @@ function expressionOnPowers(field: GeneratedField, x: FieldElement): Json {
 /** Box an answer. */
 const boxed = (ce: ComputeEngine, j: Json): Expression => ce.box(j as never);
 
+/**
+ * A declined call: the head over its evaluated operands (numerically under `N`), not `undefined`,
+ * so what the caller gets back is the call as the operands left it.
+ */
+const decline = (ce: ComputeEngine, name: string, ops: readonly Expression[], numericApproximation = false) =>
+  ce.function(
+    name,
+    ops.map((op) => op.evaluate({ numericApproximation })),
+  );
+
+/** The operands a head reads as written: its arguments are held, so `N` doesn't turn them into floats. */
+const held = (count: number) => () => Array.from({ length: count }, () => ({ kind: "held" }));
+
+interface Options {
+  readonly engine: ComputeEngine;
+  readonly numericApproximation?: boolean;
+  readonly precision?: number;
+}
+
+/** An evaluate handler for a head of one number: `answer` gets it read, and `undefined` declines. */
+const ofNumber =
+  (name: string, answer: (r: Read, tick: Tick) => Json) =>
+  (ops: readonly Expression[], { engine: ce, numericApproximation }: Options) => {
+    const tick = deadlineTick(ce);
+    const r = read(ce, ops[0]!, tick);
+    const result = r && answer(r, tick);
+    return result === undefined ? decline(ce, name, ops, numericApproximation) : boxed(ce, result);
+  };
+
+const fractionJson = (num: bigint, den: bigint): Json => rationalJson(rational(num, den));
+
+/** The `k`-th root of the integer polynomial `a` to `digits` digits, as a number expression. */
+function numericRoot(ce: ComputeEngine, a: readonly bigint[], k: number, digits: number): Expression | undefined {
+  const z = orderedRoots(a)?.[k - 1];
+  const refined = z && refineRoot(a, z, digits);
+  if (refined === undefined) return undefined;
+  const re = { num: refined.re };
+  return z!.im === 0 ? boxed(ce, re) : boxed(ce, ["Complex", re, { num: refined.im }]);
+}
+
 export const algebraicNumbersLibrary: LibraryRecord = {
   PolynomialRoot: {
     description:
-      "The k-th root of the polynomial p in its unknown: real roots first in increasing order, then complex roots by increasing real part and then imaginary part (Wolfram's Root).",
-    signature: "(any, integer) -> number",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      // Degree 1 and 2 are rationals and radicals; past them the root is its own name.
-      const cs = coefficientsOf(ce, ops[0]!.json);
-      const k = ops[1]?.re;
-      if (cs === undefined || !Number.isInteger(k)) return undefined;
-      const d = cs.length - 1;
-      if (k! < 1 || k! > d) return undefined;
-      if (d === 1) return boxed(ce, rationalJson(rational(-cs[0]!.num * cs[1]!.den, cs[0]!.den * cs[1]!.num)));
-      if (d !== 2) return undefined;
-      // ax² + bx + c: (−b ∓ √(b² − 4ac)) / 2a, the smaller real root (or lower imaginary part) first.
-      const [c, b, a] = cs.map(rationalJson);
-      const disc = ["Subtract", ["Power", b, 2], ["Multiply", 4, a, c]];
-      const aPositive = cs[2]!.num > 0n;
-      const sign = (k === 1) === aPositive ? -1 : 1;
-      return boxed(ce, [
-        "Divide",
-        ["Add", ["Negate", b], ["Multiply", sign, ["Sqrt", disc]]],
-        ["Multiply", 2, a],
-      ]).evaluate();
+      "The k-th root of the polynomial p in the variable x (bound, as in Wolfram's Root[Function[x, p], k]): real roots first in increasing order, then complex roots by increasing real part and then imaginary part (Wolfram's Root).",
+    signature: "(any, any, integer) -> number",
+    operands: () => [{ kind: "held" }, { kind: "clause" }, { kind: "value" }],
+    evaluate: (ops: readonly Expression[], { engine: ce, numericApproximation, precision }: Options) => {
+      const cs = coefficientsOf(ce, ops[0]!.json, ops[1]!.json);
+      const kj = rationalOf(ops[2]!.evaluate().json);
+      const d = (cs?.length ?? 1) - 1;
+      if (cs === undefined || kj === undefined || kj.den !== 1n || kj.num < 1n || kj.num > BigInt(d)) {
+        return decline(ce, "PolynomialRoot", ops, numericApproximation);
+      }
+      const k = Number(kj.num);
+      // Degree 1 and 2 are rationals and radicals; past them the root is its own name, and a number under N.
+      if (d === 1) {
+        const root = boxed(ce, fractionJson(-cs[0]!.num * cs[1]!.den, cs[0]!.den * cs[1]!.num));
+        return numericApproximation ? root.N() : root;
+      }
+      if (d === 2) {
+        // ax² + bx + c: (−b ∓ √(b² − 4ac)) / 2a, the smaller real root (or lower imaginary part) first.
+        const [c, b, a] = cs.map(rationalJson);
+        const disc = ["Subtract", ["Power", b, 2], ["Multiply", 4, a, c]];
+        const aPositive = cs[2]!.num > 0n;
+        const sign = (k === 1) === aPositive ? -1 : 1;
+        const root = boxed(ce, [
+          "Divide",
+          ["Add", ["Negate", b], ["Multiply", sign, ["Sqrt", disc]]],
+          ["Multiply", 2, a],
+        ]).evaluate();
+        return numericApproximation ? root.N() : root;
+      }
+      if (numericApproximation) {
+        const atom = rootAtom(ce, ops[0]!.json, ops[1]!.json, k);
+        const digits = Math.max(precision ?? (typeof ce.precision === "number" ? ce.precision : 15), 15);
+        const n = atom && numericRoot(ce, atom.polynomial, k, digits);
+        if (n !== undefined) return n;
+      }
+      return decline(ce, "PolynomialRoot", ops, numericApproximation);
     },
   },
 
@@ -412,93 +634,81 @@ export const algebraicNumbersLibrary: LibraryRecord = {
     description:
       "The minimal polynomial of the algebraic number a in x: primitive over ℤ, positive leading coefficient.",
     signature: "(number, any) -> expression",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      return r && boxed(ce, polynomialIn(minimalOf(r), ops[1]!.json));
+    operands: held(2),
+    evaluate: (ops: readonly Expression[], { engine: ce, numericApproximation }: Options) => {
+      const r = read(ce, ops[0]!, deadlineTick(ce));
+      return r
+        ? boxed(ce, polynomialIn(minimalOf(r), ops[1]!.json))
+        : decline(ce, "MinimalPolynomial", ops, numericApproximation);
     },
   },
 
   AlgebraicIntegerQ: {
     description: "Whether a is an algebraic integer: a root of a monic polynomial over ℤ.",
     signature: "(number) -> boolean",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      return r && ce.symbol(isIntegral(r.field.f, r.x) ? "True" : "False");
-    },
+    operands: held(1),
+    evaluate: ofNumber("AlgebraicIntegerQ", (r) => (isIntegral(r.field.f, r.x) ? "True" : "False")),
   },
 
   AlgebraicNumberNorm: {
     description:
       "The norm of a over ℚ in the field ℚ(a): (−1)ᵈ times its minimal polynomial's constant term over its leading one.",
     signature: "(number) -> number",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      if (r === undefined) return undefined;
+    operands: held(1),
+    evaluate: ofNumber("AlgebraicNumberNorm", (r) => {
       const m = minimalOf(r);
       const d = degree(m);
-      const n = rational(d % 2 === 0 ? m[0]! : -m[0]!, m[d]!);
-      return boxed(ce, rationalJson(n));
-    },
+      return fractionJson(d % 2 === 0 ? m[0]! : -m[0]!, m[d]!);
+    }),
   },
 
   AlgebraicNumberTrace: {
     description:
       "The trace of a over ℚ in the field ℚ(a): minus its minimal polynomial's second coefficient over its leading one.",
     signature: "(number) -> number",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      if (r === undefined) return undefined;
+    operands: held(1),
+    evaluate: ofNumber("AlgebraicNumberTrace", (r) => {
       const m = minimalOf(r);
       const d = degree(m);
-      const t = rational(-m[d - 1]!, m[d]!);
-      return boxed(ce, rationalJson(t));
-    },
+      return fractionJson(-m[d - 1]!, m[d]!);
+    }),
   },
 
   NumberFieldDiscriminant: {
     description: "The discriminant of the field ℚ(a): of its ring of integers.",
     signature: "(number) -> integer",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      const generated = r && generatedBy(r);
-      const o = generated && maximalOrder(generated.f);
-      return o && boxed(ce, numberJson(orderDiscriminant(o)));
-    },
+    operands: held(1),
+    evaluate: ofNumber("NumberFieldDiscriminant", (r, tick) => {
+      const sub = subfieldOf(r);
+      if (sub.f.length === 2) return 1;
+      const o = maximalOrder(sub.f, tick);
+      return o && numberJson(orderDiscriminant(o));
+    }),
   },
 
   NumberFieldIntegralBasis: {
-    description: "A ℤ-basis of the ring of integers of ℚ(a), written on a's powers as Wolfram writes it.",
+    description:
+      "A ℤ-basis of the ring of integers of ℚ(a), written on the powers of the generator read (the radical or root a is written in), as Wolfram writes it.",
     signature: "(number) -> list",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      const generated = r && generatedBy(r);
-      const basis = generated && integralBasis(generated);
-      return basis && boxed(ce, ["List", ...basis]);
-    },
+    operands: held(1),
+    evaluate: ofNumber("NumberFieldIntegralBasis", (r, tick) => {
+      const basis = integralBasis(r, subfieldOf(r), tick);
+      return basis && ["List", ...basis];
+    }),
   },
 
   NumberFieldSignature: {
     description: "The signature (r₁, r₂) of ℚ(a): its real embeddings and its pairs of complex ones.",
     signature: "(number) -> list<integer>",
-    evaluate: (ops: readonly Expression[], { engine: ce }: { engine: ComputeEngine }) => {
-      const r = read(ce, ops[0]!);
-      const generated = r && generatedBy(r);
-      if (generated === undefined) return undefined;
-      const n = generated.f.length - 1;
-      const r1 = realRootCount(generated.f);
-      return boxed(ce, ["List", r1, (n - r1) / 2]);
-    },
+    operands: held(1),
+    evaluate: ofNumber("NumberFieldSignature", (r) => {
+      const { f } = subfieldOf(r);
+      const n = f.length - 1;
+      const r1 = n === 1 ? 1 : realRootCount(f);
+      return ["List", r1, (n - r1) / 2];
+    }),
   },
 };
-
-/**
- * The field a itself generates, with a as its generator, when that is the field it was read in
- * (ℚ(a) can be smaller than ℚ(θ): 1 + θ³ for θ = ∛2 is rational). Otherwise `undefined`.
- */
-function generatedBy(r: Read): GeneratedField | undefined {
-  const n = r.field.f.length - 1;
-  return degree(minimalOf(r)) === n ? r.field : undefined;
-}
 
 /**
  * `x` and `generator` read in the field `generator` generates, for the heads built on these
@@ -509,13 +719,16 @@ export function readAlgebraic(
   generator: Expression,
   x: Expression = generator,
 ): { field: GeneratedField; generator: FieldElement; x: FieldElement } | undefined {
-  const [g, j] = [normalize(generator.json), normalize(x.json)];
+  const tick = deadlineTick(ce);
+  const [ge, xe] = [generator.evaluate(), x.evaluate()];
+  const [g, j] = [normalize(ge.json), normalize(xe.json)];
   const atoms: Atom[] = [];
   if (!atomsOf(g, ce, atoms) || !atomsOf(j, ce, atoms)) return undefined;
   const field = fieldOf(atoms);
   if (field === undefined) return undefined;
-  const [y, z] = [elementOf(g, field), elementOf(j, field)];
+  const [y, z] = [elementOf(g, field, tick), elementOf(j, field, tick)];
   if (y === undefined || z === undefined) return undefined;
+  if (!agreesWith(ge, field, y) || !agreesWith(xe, field, z)) return undefined;
   // The generator must generate the whole field, x's atoms included.
   if (degree(minimalPolynomial(field.f, y)) !== field.f.length - 1) return undefined;
   return { field, generator: y, x: z };

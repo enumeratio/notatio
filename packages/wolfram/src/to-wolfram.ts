@@ -230,8 +230,11 @@ const SPECIAL: Record<string, (args: MathJson[]) => string> = {
   // Wolfram's `Reduce` (equations and inequalities to a condition) is ours as `ReduceConditions`;
   // `Reduce` itself is the fold above.
   ReduceConditions: (a) => call("Reduce", a),
-  // `Root[p, k]`, the k-th root object of a polynomial, is `PolynomialRoot(p, k)`; `Root` is the nth root.
-  PolynomialRoot: (a) => call("Root", a),
+  // `Root[Function[x, p], k]`, the k-th root object of a polynomial, is `PolynomialRoot(p, x, k)`; `Root` is the nth root.
+  PolynomialRoot: (a) =>
+    a.length === 3
+      ? `Root[Function[${toWolfram(a[1])}, ${toWolfram(a[0])}], ${toWolfram(a[2])}]`
+      : call(`${CONTEXT}PolynomialRoot`, a),
   // Series(f, x, x0, n) is Wolfram's `Series[f, {x, x0, n}]`; a shorter form leaves the order
   // to our default, which Wolfram has no spelling for.
   Series: (a) =>

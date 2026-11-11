@@ -3,3 +3,12 @@ one-plus-cube-root-of-2	MinimalPolynomial[Plus[1, Power[2, Divide[1, 3]]], x]	-3
 golden-ratio	MinimalPolynomial[GoldenRatio, x]	-1 - x + x^2	\text{MinimalPolynomial}[\phi ,x]	x^2-x-1
 half-of-cube-root-of-4-is-not-an-integer	MinimalPolynomial[Divide[Power[2, Rational[2, 3]], 2], x]	-1 + 2*x^3	\text{MinimalPolynomial}\left[\frac{2^{\frac{2}{3}}}{2},x\right]	2 x^3-1
 eisenstein-unit	MinimalPolynomial[Divide[Plus[1, Sqrt[-3]], 2], x]	1 - x + x^2	\text{MinimalPolynomial}\left[\frac{1+\sqrt{-3}}{2},x\right]	x^2-x+1
+real-cube-root-of-a-negative-number	MinimalPolynomial[Power[-2, Divide[1, 3]], x]			
+sixth-root-and-real-cube-root-stay-unevaluated	MinimalPolynomial[Plus[Power[-2, Divide[1, 6]], Power[-2, Divide[1, 3]]], x]			
+two-roots-of-one-cubic-stay-unevaluated	MinimalPolynomial[Subtract[Root[Function[x, Plus[Power[x, 3], -2]], 1], Root[Function[x, Plus[Power[x, 3], -2]], 2]], x]			
+sum-of-two-roots-of-one-cubic-stays-unevaluated	MinimalPolynomial[Plus[Root[Function[x, Plus[Power[x, 3], -2]], 1], Root[Function[x, Plus[Power[x, 3], -2]], 2]], x]			
+another-root-of-the-same-cubic	MinimalPolynomial[Root[Function[x, Plus[Power[x, 3], -2]], 2], x]			
+minus-i-is-not-i	MinimalPolynomial[Plus[Power[-1, Rational[3, 2]], I], x]			
+an-exact-answer-under-n	N[MinimalPolynomial[Power[-2, Divide[1, 3]], x]]			
+radical-index-past-the-cap-declines-at-once	MinimalPolynomial[Power[Rational[1, 2], Divide[1, 1000000000000]], x]			
+a-rational	MinimalPolynomial[3, x]			

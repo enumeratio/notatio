@@ -1,4 +1,4 @@
-import { algebraicNumbers, applyPatch, numberField, readAlgebraic } from "@enumeratio/ce-patches";
+import { algebraicNumbers, applyPatch, deadlineTick, numberField, readAlgebraic } from "@enumeratio/ce-patches";
 import { type Engine, type Expr, operandsOf, optionsOf, wrapOperator } from "@enumeratio/engine";
 import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
 
@@ -21,7 +21,7 @@ function orderOf(ce: Engine, ring: Expr): { order: Order; degree: number } | und
   const { field, generator } = read;
   const degree = field.f.length - 1;
   if (ring.operator === "AlgebraicIntegers") {
-    const order = maximalOrder(field.f);
+    const order = maximalOrder(field.f, deadlineTick(ce));
     return order && { order, degree };
   }
   // ℤ[θ] is an order only for θ integral.
@@ -39,7 +39,7 @@ function namedRing(ce: Engine, ring: Expr): Expr | undefined {
   if (named === undefined || named.degree > 2) return undefined;
   if (named.degree === 1) return ce.symbol("Integers");
   const D = orderDiscriminant(named.order);
-  if (orderIndex(maximalOrder(named.order.f)!) !== orderIndex(named.order)) {
+  if (orderIndex(maximalOrder(named.order.f, deadlineTick(ce))!) !== orderIndex(named.order)) {
     return ce.function("QuadraticOrder", [ce.number(Number(D))]);
   }
   // D_K = d or 4d, d squarefree.

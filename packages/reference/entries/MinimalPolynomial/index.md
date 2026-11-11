@@ -27,4 +27,5 @@ names:
 ---
 
 - $a$ is read as a polynomial in one generator: $1 + \sqrt[3]{2}$, $(1 + \sqrt{-3})/2$ or $\theta^2 - \theta$ for $\theta$ a [[PolynomialRoot]]; with two generators ($\sqrt 2 + \sqrt 3$) it stays unevaluated
+- Each radical is read as the number compute-engine means by it: `Root(-2, 3)` is the real cube root $-\sqrt[3]{2}$, and `Root(-2, 6)` the principal sixth root, a complex number; two radicals of one negative base on different branches are two generators, so unevaluated. The reading is checked against compute-engine's own numeric value of $a$, and declined when they differ
 - Its degree is $[\mathbb{Q}(a) : \mathbb{Q}]$; $a$ is an algebraic integer exactly when the polynomial is monic ([[AlgebraicIntegerQ]])

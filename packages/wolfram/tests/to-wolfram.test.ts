@@ -394,7 +394,9 @@ test("shapes Wolfram spells differently: Series, Residue, Insert, ReduceConditio
   expect(toWolfram(["Residue", "f", "z", 0])).toBe("Residue[f, List[z, 0]]");
   expect(toWolfram(["Insert", "xs", 2, "y"])).toBe("Insert[xs, y, 2]");
   expect(toWolfram(["ReduceConditions", ["Greater", "x", 0], "x"])).toBe("Reduce[Greater[x, 0], x]");
-  expect(toWolfram(["PolynomialRoot", "p", 1])).toBe("Root[p, 1]");
+  expect(toWolfram(["PolynomialRoot", ["Add", ["Power", "x", 3], -2], "x", 1])).toBe(
+    "Root[Function[x, Plus[Power[x, 3], -2]], 1]",
+  );
   // The fold keeps the fold; a call shaped for Wolfram's own Reduce no longer reaches it.
   expect(toWolfram(["Reduce", "xs", "f", 0])).toBe("Fold[f, 0, xs]");
 });

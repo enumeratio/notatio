@@ -4111,7 +4111,7 @@
   "PolynomialRoot": {
     "axis": {
       "name": "n",
-      "position": 1
+      "position": 2
     },
     "axisDomain": "integer",
     "window": [-10, 10],

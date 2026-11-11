@@ -328,7 +328,7 @@ test("Derivative[n][f][x] is the nth derivative of f applied to x", () => {
 
 test("names Wolfram spells for something ours spells differently", () => {
   expect(fromWolfram("Reduce[Greater[x, 0], x]")).toEqual(["ReduceConditions", ["Greater", "x", 0], "x"]);
-  expect(fromWolfram("Root[f, 1]")).toEqual(["PolynomialRoot", "f", 1]);
+  expect(fromWolfram("Root[Function[x, f], 1]")).toEqual(["PolynomialRoot", "f", "x", 1]);
   expect(fromWolfram("PartitionsP[10]")).toEqual(["Count", ["IntegerPartitions", 10]]);
   expect(fromWolfram("Signature[List[2, 1, 3]]")).toEqual(["Sign", ["Permutation", ["List", 2, 1, 3]]]);
   expect(fromWolfram("ProductLog[-1, z]")).toEqual(["LambertW", "z", -1]);

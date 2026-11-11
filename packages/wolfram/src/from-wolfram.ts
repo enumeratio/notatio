@@ -292,9 +292,13 @@ function applyNamed(name: string, args: MathJson[]): MathJson | undefined {
     // Wolfram's equation and inequality `Reduce`; ours is the fold.
     case "Reduce":
       return ["ReduceConditions", ...args];
-    // `Root[p, k]` is a polynomial's root object; ours is the nth root.
-    case "Root":
-      return ["PolynomialRoot", ...args];
+    // `Root[Function[x, p], k]` is a polynomial's root object; ours is the nth root.
+    case "Root": {
+      const f = args[0];
+      return args.length === 2 && Array.isArray(f) && f[0] === "Function" && f.length === 3
+        ? ["PolynomialRoot", f[1]!, f[2]!, args[1]!]
+        : undefined;
+    }
     // The partition number is a count.
     case "PartitionsP":
       return args.length === 1 ? ["Count", ["IntegerPartitions", args[0]!]] : undefined;
