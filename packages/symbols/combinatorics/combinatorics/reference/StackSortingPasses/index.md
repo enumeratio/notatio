@@ -10,6 +10,11 @@ catalog:
     on: Permutation
 statOn:
   - Permutation
+signatures:
+  - call: StackSortingPasses(p)
+    description: The passes of West's stack sorting needed to sort p.
+    library: enumeratio-combinatorics
+    type: (permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

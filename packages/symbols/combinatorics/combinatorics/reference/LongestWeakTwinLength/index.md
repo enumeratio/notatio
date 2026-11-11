@@ -10,6 +10,11 @@ catalog:
     on: Permutation
 statOn:
   - Permutation
+signatures:
+  - call: LongestWeakTwinLength(p)
+    description: The size of a largest pair of disjoint subsequences of p with the same pattern of rises and falls.
+    library: enumeratio-combinatorics
+    type: (permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -10,6 +10,11 @@ catalog:
     on: Permutation
 statOn:
   - Permutation
+signatures:
+  - call: LabellingPermutationPreimageSize(p)
+    description: The parking functions sent to p by the map to the labelling permutation.
+    library: enumeratio-combinatorics
+    type: (permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

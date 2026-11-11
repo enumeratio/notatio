@@ -10,6 +10,11 @@ catalog:
     on: Permutation
 statOn:
   - Permutation
+signatures:
+  - call: ParkingPermutationPreimageSize(p)
+    description: The parking functions whose cars park in the order p.
+    library: enumeratio-combinatorics
+    type: (permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

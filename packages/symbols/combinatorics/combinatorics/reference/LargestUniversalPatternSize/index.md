@@ -10,6 +10,11 @@ catalog:
     on: Permutation
 statOn:
   - Permutation
+signatures:
+  - call: LargestUniversalPatternSize(p)
+    description: The largest k such that p contains every permutation of size k as a pattern.
+    library: enumeratio-combinatorics
+    type: (permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

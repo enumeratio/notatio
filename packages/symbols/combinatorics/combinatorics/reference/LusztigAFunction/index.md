@@ -10,6 +10,11 @@ catalog:
     on: Permutation
 statOn:
   - Permutation
+signatures:
+  - call: LusztigAFunction(p)
+    description: "Lusztig's a-function: the sum of binomial(c, 2) over the column lengths c of the Robinson-Schensted shape."
+    library: enumeratio-combinatorics
+    type: (permutation) -> number
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
