@@ -52,7 +52,7 @@
     "d3-scale-chromatic": "catalog:"
   },
   "devDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0",
+    "@cortex-js/compute-engine": "^0.186.0",
     "@enumeratio/combinatorics": "workspace:*",
     "@enumeratio/config": "workspace:*",
     "@enumeratio/entry": "workspace:*",
@@ -61,13 +61,12 @@
     "@enumeratio/wolfram": "workspace:*",
     "@types/d3-scale-chromatic": "catalog:",
     "@types/node": "catalog:",
-    "@webgpu/types": "^0.1.60",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0"
+    "@cortex-js/compute-engine": "^0.186.0"
   },
   "enumeratio": {
     "layer": "presentation",

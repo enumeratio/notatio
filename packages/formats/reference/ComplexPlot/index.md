@@ -14,4 +14,4 @@ signatures:
 
 Lowers to a `GraphicsBox` holding a `RasterBox` with `Producer -> ComplexPlot`: color is the argument on a gradient (`phase`, the hue wheel, unless `ColorFunction` says otherwise), brightness a compressed log-magnitude, poles white and zeros black. `Extent` is the window's height, `Center` its middle, `Mask` a radius outside which the plane is dimmed.
 
-On the web a WebGPU shader fills the raster, one invocation per pixel, so a drag or a `Manipulate` slider redraws at frame rate. Everywhere else (Node, a build) the cells are evaluated on the CPU by the same coloring.
+On the web a WebGL2 shader fills the raster, one invocation per pixel, so a drag or a `Manipulate` slider redraws at frame rate. Everywhere else (Node, a build) the cells are evaluated on the CPU by the same coloring.

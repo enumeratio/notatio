@@ -144,7 +144,7 @@ const BRANCH_MARGIN = 1e-6;
  *  * Pi)`'s fractional part, read off a double, is rounding noise, not an answer, even though
  *  the raw gap from 0/1 can look comfortably wide. Declining here, not computing at higher
  *  precision, keeps every route through one arithmetic (no `ce.precision` bump to thread
- *  through `.N()`, compiled JS/WGSL, and back out again consistently). */
+ *  through `.N()`, compiled JS/GLSL, and back out again consistently). */
 const RESOLUTION_HEADROOM = 2 ** 10;
 const resolutionOf = (approx: number): number => Math.abs(approx) * 2 ** -52 * RESOLUTION_HEADROOM;
 
@@ -227,7 +227,7 @@ function decidedBox(ce: ComputeEngine, d: Decided): Expression {
  *  with the SAME rational arithmetic used everywhere else in this file, via `box`), a plain
  *  float otherwise. This is how every piecewise-linear branch below builds its result — the
  *  one shared construction every route (`evaluate`, `.N()`, and compute-engine's own constant
- *  folding ahead of JS/WGSL compilation, none of which this package gives these heads a
+ *  folding ahead of JS/GLSL compilation, none of which this package gives these heads a
  *  bespoke handler for) goes through. */
 function decidedScaleAdd(ce: ComputeEngine, d: Decided, scale: Frac, offset: Frac): Decided {
   if ("frac" in d) return { frac: fAdd(fMul(scale, d.frac), offset) };

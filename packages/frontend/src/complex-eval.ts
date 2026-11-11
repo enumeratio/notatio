@@ -13,7 +13,7 @@ import { Uncertain } from "./uncertain.ts";
 
 export { Uncertain };
 
-// A small complex evaluator over canonical MathJSON: the head set `emitComplexWGSL`
+// A small complex evaluator over canonical MathJSON: the head set `emitComplexGLSL`
 // lowers, plus Gamma, on `[re, im]` tuples. `notatio-complex-plot-3d`'s CPU sampler,
 // where the GPU doesn't answer. Pure: no DOM, no engine.
 

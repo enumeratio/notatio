@@ -1,7 +1,7 @@
 # @enumeratio/formats
 
 A Wolfram-style format registry — `Import`/`Export` over MathJSON, Wolfram Language, TeX,
-AsciiMath, MathML, code targets (Python/JS/GLSL/WGSL), and images. Reach for this when
+AsciiMath, MathML, code targets (Python/JS/GLSL), and images. Reach for this when
 you have a boxed expression and need it as text in some notation, or text in some
 notation and need it back as an expression.
 

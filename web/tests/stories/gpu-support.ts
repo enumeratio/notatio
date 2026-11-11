@@ -1,70 +1,39 @@
-// Reading WebGPU canvases back as pixels. A screenshot of a WebGPU canvas is blank, so an init
-// script copies each presented texture into a buffer and keeps the pixels per canvas; the helpers
-// below read them. Used by gpu.spec.ts, run under playwright.gpu.config.ts.
+// Reading WebGL2 canvases back as pixels. The portrait renderer keeps its drawing buffer
+// (`preserveDrawingBuffer`), so an init script counts each draw to a canvas's own framebuffer and the
+// helpers below read the pixels on demand. Used by gpu.spec.ts, run under playwright.gpu.config.ts.
 
 import type { Locator, Page } from "@playwright/test";
 import { expect } from "@playwright/test";
 
-/** Makes every configured WebGPU canvas readable: COPY_SRC on its usage and a copy of each frame. */
+/** Counts the frames each WebGL2 canvas draws, and gives `window.__grab(canvas)` its current pixels (top row first). */
 export function installCapture(): void {
-  if (!("GPUCanvasContext" in window)) return;
-  const proto = GPUCanvasContext.prototype as any;
-  const configure = proto.configure;
-  const getCurrentTexture = proto.getCurrentTexture;
-  const contexts = new Set<any>();
-  proto.configure = function (cfg: any) {
-    this.__device = cfg.device;
-    contexts.add(this);
-    return configure.call(this, { ...cfg, usage: (cfg.usage ?? 0x10) | 0x01 | 0x04 | 0x10 });
+  if (!("WebGL2RenderingContext" in window)) return;
+  const frames = new WeakMap<object, number>();
+  const drawArrays = Reflect.get(WebGL2RenderingContext.prototype, "drawArrays") as (
+    this: WebGL2RenderingContext,
+    mode: number,
+    first: number,
+    count: number,
+  ) => void;
+  WebGL2RenderingContext.prototype.drawArrays = function (mode, first, count) {
+    drawArrays.call(this, mode, first, count);
+    // Only a draw to the canvas itself is a frame; a draw into a framebuffer object is a computation.
+    if (this.getParameter(this.FRAMEBUFFER_BINDING) === null)
+      frames.set(this.canvas, (frames.get(this.canvas) ?? 0) + 1);
   };
-  proto.getCurrentTexture = function () {
-    const texture = getCurrentTexture.call(this);
-    this.__texture = texture;
-    this.__pending = true;
-    return texture;
-  };
-  const pixels = new WeakMap<HTMLCanvasElement, { w: number; h: number; rgba: Uint8ClampedArray; frame: number }>();
-  (window as any).__pixels = pixels;
-  let frames = 0;
-  const submit = Reflect.get(GPUQueue.prototype, "submit") as (
-    this: GPUQueue,
-    commands: Iterable<GPUCommandBuffer>,
-  ) => undefined;
-  GPUQueue.prototype.submit = function (commands) {
-    submit.call(this, commands);
-    for (const c of contexts) {
-      const device: GPUDevice = c.__device;
-      if (!c.__pending || !c.__texture || device.queue !== this) continue;
-      c.__pending = false;
-      const texture: GPUTexture = c.__texture;
-      const w = texture.width;
-      const h = texture.height;
-      const bytesPerRow = Math.ceil((w * 4) / 256) * 256;
-      const buffer = device.createBuffer({
-        size: bytesPerRow * h,
-        usage: GPUBufferUsage.MAP_READ | GPUBufferUsage.COPY_DST,
-      });
-      const encoder = device.createCommandEncoder();
-      encoder.copyTextureToBuffer({ texture }, { buffer, bytesPerRow }, [w, h]);
-      submit.call(this, [encoder.finish()]);
-      const bgra = texture.format.startsWith("bgra");
-      void buffer.mapAsync(GPUMapMode.READ).then(() => {
-        const src = new Uint8Array(buffer.getMappedRange().slice(0));
-        const rgba = new Uint8ClampedArray(w * h * 4);
-        for (let y = 0; y < h; y++)
-          for (let x = 0; x < w; x++) {
-            const s = y * bytesPerRow + x * 4;
-            const d = (y * w + x) * 4;
-            rgba[d] = src[s + (bgra ? 2 : 0)];
-            rgba[d + 1] = src[s + 1];
-            rgba[d + 2] = src[s + (bgra ? 0 : 2)];
-            rgba[d + 3] = 255;
-          }
-        pixels.set(c.canvas, { w, h, rgba, frame: ++frames });
-        buffer.unmap();
-        buffer.destroy();
-      });
-    }
+  (window as any).__grab = (canvas: HTMLCanvasElement) => {
+    const frame = frames.get(canvas);
+    const gl = canvas.getContext("webgl2") as WebGL2RenderingContext | null;
+    if (!frame || !gl) return null;
+    const w = gl.drawingBufferWidth;
+    const h = gl.drawingBufferHeight;
+    const flipped = new Uint8Array(w * h * 4);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+    gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, flipped);
+    // GL rows run bottom to top; the helpers read from the top.
+    const rgba = new Uint8ClampedArray(w * h * 4);
+    for (let y = 0; y < h; y++) rgba.set(flipped.subarray((h - 1 - y) * w * 4, (h - y) * w * 4), y * w * 4);
+    return { w, h, rgba, frame };
   };
 }
 
@@ -85,8 +54,9 @@ export interface PixelStats {
 /** What a canvas has drawn, from the captured frame; null until one has been presented. */
 export function readCanvas(canvas: Locator): Promise<PixelStats | null> {
   return canvas.evaluate((node) => {
-    const frame = (window as any).__pixels?.get(node) as
+    const frame = (window as any).__grab?.(node) as
       | { w: number; h: number; rgba: Uint8ClampedArray; frame: number }
+      | null
       | undefined;
     if (!frame) return null;
     const counts = new Array<number>(12).fill(0);
@@ -142,7 +112,7 @@ export async function repaintedStats(canvas: Locator, after: number): Promise<Pi
 export function colorAt(canvas: Locator, u: number, v: number): Promise<[number, number, number]> {
   return canvas.evaluate(
     (node, [fu, fv]) => {
-      const frame = (window as any).__pixels.get(node) as { w: number; h: number; rgba: Uint8ClampedArray };
+      const frame = (window as any).__grab(node) as { w: number; h: number; rgba: Uint8ClampedArray };
       const x = Math.min(frame.w - 1, Math.floor(fu * frame.w));
       const y = Math.min(frame.h - 1, Math.floor(fv * frame.h));
       const i = (y * frame.w + x) * 4;
@@ -155,7 +125,7 @@ export function colorAt(canvas: Locator, u: number, v: number): Promise<[number,
 /** The share of pixel rows that are the same, brightness for brightness, as their mirror image about the horizontal midline. */
 export function mirrorMatch(canvas: Locator, tolerance = 12): Promise<number> {
   return canvas.evaluate((node, tol) => {
-    const frame = (window as any).__pixels.get(node) as { w: number; h: number; rgba: Uint8ClampedArray };
+    const frame = (window as any).__grab(node) as { w: number; h: number; rgba: Uint8ClampedArray };
     const value = (x: number, y: number) => {
       const i = (y * frame.w + x) * 4;
       return Math.max(frame.rgba[i], frame.rgba[i + 1], frame.rgba[i + 2]);
@@ -172,64 +142,120 @@ export function mirrorMatch(canvas: Locator, tolerance = 12): Promise<number> {
 }
 
 /**
- * A complex WGSL expression in `z` evaluated at each of `points` on the GPU, with `literals` in the
+ * Run the fragment shader `body` (everything after the `#version` and precision lines) once per input
+ * texel: texel `i` of `input` (RGBA floats) is `texelFetch(inp, ivec2(i, 0), 0)` in the shader, `slots`
+ * fill the uniform block `Prm`, and the result is the RGBA the shader wrote for each, four floats a point.
+ * The shader declares `uniform sampler2D inp;`, `uniform Prm { vec4 p[16]; } prm;` and `out vec4 fragColor;`.
+ */
+export function runShader(
+  page: Page,
+  body: string,
+  input: readonly (readonly [number, number, number, number])[],
+  slots: readonly number[] = [],
+): Promise<number[]> {
+  return page.evaluate(
+    ({ body, input, slots }) => {
+      const n = input.length;
+      const gl = document.createElement("canvas").getContext("webgl2")!;
+      if (!gl.getExtension("EXT_color_buffer_float")) throw new Error("no float render targets");
+      let lost = false;
+      gl.canvas.addEventListener("webglcontextlost", () => (lost = true));
+      const program = gl.createProgram()!;
+      for (const [type, source] of [
+        [
+          gl.VERTEX_SHADER,
+          "#version 300 es\nvoid main() { vec2 q = vec2(float((gl_VertexID << 1) & 2), float(gl_VertexID & 2)); gl_Position = vec4(q * 2.0 - 1.0, 0.0, 1.0); }",
+        ],
+        [gl.FRAGMENT_SHADER, `#version 300 es\nprecision highp float;\nprecision highp int;\n${body}`],
+      ] as const) {
+        const stage = gl.createShader(type)!;
+        gl.shaderSource(stage, source);
+        gl.compileShader(stage);
+        if (!gl.getShaderParameter(stage, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(stage) ?? "shader");
+        gl.attachShader(program, stage);
+      }
+      gl.linkProgram(program);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(program) ?? "link");
+      gl.useProgram(program);
+      // The inputs go in as an n × 1 float texture on unit 0, the slots in the uniform block, and the result
+      // to its own texture on unit 1, so the input is not also the render target.
+      const inputTexture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0);
+      gl.bindTexture(gl.TEXTURE_2D, inputTexture);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA32F, n, 1);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+      gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, n, 1, gl.RGBA, gl.FLOAT, new Float32Array(input.flat()));
+      gl.uniform1i(gl.getUniformLocation(program, "inp"), 0);
+      const block = new Float32Array(64);
+      block.set(slots);
+      const uniform = gl.createBuffer();
+      gl.bindBuffer(gl.UNIFORM_BUFFER, uniform);
+      gl.bufferData(gl.UNIFORM_BUFFER, block, gl.STATIC_DRAW);
+      const index = gl.getUniformBlockIndex(program, "Prm");
+      if (index !== gl.INVALID_INDEX) gl.uniformBlockBinding(program, index, 0);
+      gl.bindBufferBase(gl.UNIFORM_BUFFER, 0, uniform);
+      gl.activeTexture(gl.TEXTURE1);
+      const output = gl.createTexture();
+      gl.bindTexture(gl.TEXTURE_2D, output);
+      gl.texStorage2D(gl.TEXTURE_2D, 1, gl.RGBA32F, n, 1);
+      const target = gl.createFramebuffer();
+      gl.bindFramebuffer(gl.FRAMEBUFFER, target);
+      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, output, 0);
+      gl.viewport(0, 0, n, 1);
+      // A few texels per draw, each finished before the next: a slow kernel (DirichletBeta) drawn in one
+      // command outlasts the GPU process's watchdog on a loaded software rasterizer, which loses the context.
+      gl.enable(gl.SCISSOR_TEST);
+      for (let x = 0; x < n; x += 8) {
+        gl.scissor(x, 0, Math.min(8, n - x), 1);
+        gl.drawArrays(gl.TRIANGLES, 0, 3);
+        gl.finish();
+      }
+      const values = new Float32Array(n * 4);
+      gl.readPixels(0, 0, n, 1, gl.RGBA, gl.FLOAT, values);
+      // A lost context (the driver's watchdog on a slow shader) reads back zeros: report it, not a wrong value.
+      if (lost || gl.isContextLost()) throw new Error("the WebGL context was lost during the draw");
+      const status = gl.checkFramebufferStatus(gl.FRAMEBUFFER);
+      if (status !== gl.FRAMEBUFFER_COMPLETE) throw new Error(`incomplete framebuffer 0x${status.toString(16)}`);
+      const error = gl.getError();
+      if (error !== gl.NO_ERROR) throw new Error(`GL error 0x${error.toString(16)}`);
+      return Array.from(values);
+    },
+    { body, input: input.map((p) => [...p] as [number, number, number, number]), slots: [...slots] },
+  );
+}
+
+/**
+ * A complex GLSL expression in `z` evaluated at each of `points` on the GPU, with `literals` in the
  * uniform slots `prm.p` the emitter reads. One `[re, im, declined]` per point: `declined` is the
  * kernel's `uncertain` flag, the hatching a portrait draws instead of a color.
  */
-export function evalComplexOnGpu(
+export async function evalComplexOnGpu(
   page: Page,
   preamble: string,
   code: string,
   literals: readonly (readonly [number, number])[],
   points: readonly (readonly [number, number])[],
 ): Promise<[number, number, boolean][]> {
-  return page.evaluate(
-    async ({ preamble, code, literals, points }) => {
-      const n = points.length;
-      const shader = `${preamble}
-struct Prm { p : array<vec4f, 16> };
-@group(0) @binding(2) var<uniform> prm : Prm;
-@group(0) @binding(0) var<storage, read> inp : array<vec2f>;
-@group(0) @binding(1) var<storage, read_write> outp : array<vec4f>;
-@compute @workgroup_size(1) fn main(@builtin(global_invocation_id) g : vec3u) {
-  let z = inp[g.x]; uncertain = 0.0; let v = ${code}; outp[g.x] = vec4f(v, uncertain, prm.p[15].x);
+  const body = `${preamble}
+uniform Prm { vec4 p[16]; } prm;
+uniform sampler2D inp;
+out vec4 fragColor;
+void main() {
+  vec2 z = texelFetch(inp, ivec2(gl_FragCoord.xy), 0).xy;
+  uncertain = 0.0;
+  vec2 v = ${code};
+  fragColor = vec4(v, uncertain, prm.p[15].x);
 }`;
-      const device = await (await navigator.gpu.requestAdapter())!.requestDevice();
-      const module = device.createShaderModule({ code: shader });
-      const errors = (await module.getCompilationInfo()).messages.filter((m) => m.type === "error");
-      if (errors.length) throw new Error(errors.map((m) => `${m.lineNum}: ${m.message}`).join("\n"));
-      const pipeline = device.createComputePipeline({ layout: "auto", compute: { module, entryPoint: "main" } });
-      const buffer = (size: number, usage: number) => device.createBuffer({ size, usage });
-      const input = buffer(n * 8, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST);
-      device.queue.writeBuffer(input, 0, new Float32Array(points.flat()));
-      const slots = new Float32Array(64);
-      literals.forEach(([re, im], i) => slots.set([re, im], 4 * i));
-      const uniform = buffer(256, GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST);
-      device.queue.writeBuffer(uniform, 0, slots);
-      const output = buffer(n * 16, GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC);
-      const read = buffer(n * 16, GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ);
-      const bind = device.createBindGroup({
-        layout: pipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: { buffer: input } },
-          { binding: 1, resource: { buffer: output } },
-          { binding: 2, resource: { buffer: uniform } },
-        ],
-      });
-      const encoder = device.createCommandEncoder();
-      const pass = encoder.beginComputePass();
-      pass.setPipeline(pipeline);
-      pass.setBindGroup(0, bind);
-      pass.dispatchWorkgroups(n);
-      pass.end();
-      encoder.copyBufferToBuffer(output, 0, read, 0, n * 16);
-      device.queue.submit([encoder.finish()]);
-      await read.mapAsync(GPUMapMode.READ);
-      const values = new Float32Array(read.getMappedRange().slice(0));
-      return points.map(
-        (_, i) => [values[4 * i]!, values[4 * i + 1]!, values[4 * i + 2]! > 0.5] as [number, number, boolean],
-      );
-    },
-    { preamble, code, literals: literals.map((l) => [...l]), points: points.map((p) => [...p]) },
+  const slots = new Array<number>(64).fill(0);
+  literals.forEach(([re, im], i) => ((slots[4 * i] = re), (slots[4 * i + 1] = im)));
+  const values = await runShader(
+    page,
+    body,
+    points.map(([re, im]) => [re, im, 0, 0] as const),
+    slots,
+  );
+  return points.map(
+    (_, i) => [values[4 * i]!, values[4 * i + 1]!, values[4 * i + 2]! > 0.5] as [number, number, boolean],
   );
 }

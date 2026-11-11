@@ -23,9 +23,9 @@ bindings:
     source: packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts
     note: "Euler–Maclaurin in double precision — the fast path, and all a double holds. Asked for more digits than that, N() leaves it: at an integer s ≥ 2 with real a > 0 it takes ζ(n, a) = (−1)ⁿψ⁽ⁿ⁻¹⁾(a)/(n−1)! through compute-engine's PolyGamma, and otherwise (real s ≠ 1, real a > 0) it evaluates the SAME Euler–Maclaurin written as an expression — a finite Sum over Power, Pochhammer and BernoulliB, which compute-engine carries to whatever precision was asked for (packages/symbols/analysis/analytic/src/precise.ts)."
   - origin: compiled
-    form: wgsl
+    form: glsl
     environment: gpu
-    source: packages/symbols/analysis/analytic/src/shader.ts:zetaWGSL
+    source: packages/symbols/analysis/analytic/src/shader.ts:zetaGLSL
     produces: a colour per pixel — complex ζ(s, a), domain-coloured
   - origin: mapped
     form: wolfram

@@ -12,7 +12,7 @@ import { highlightCode } from "@enumeratio/frontend/core";
  */
 export class NotatioCode extends LitElement {
   static properties = {
-    /** Syntax highlighting to apply, e.g. `wolfram`, `python`, `javascript`, `glsl`, `wgsl`. */
+    /** Syntax highlighting to apply, e.g. `wolfram`, `python`, `javascript`, `glsl`. */
     language: { type: String },
     // Reflected so the copy handler (selection.ts) can serialise a code box in a
     // selection without picking up the language tag or partial markup.

@@ -293,14 +293,14 @@ test.describe("a map's page", () => {
 });
 
 test.describe("formats", () => {
-  test("WGSLForm writes the shader expression", async ({ page }) => {
-    await page.goto("/reference/formats/output/wgsl/");
-    const wgsl = (source: string) => page.locator(`notatio-out[form=wgsl][value='${source}']`).first();
-    await expect(wgsl('["Add",["Power","x",2],1]')).toContainText("(x * x) + 1.0");
-    await expect(wgsl('["Sin","x"]')).toContainText("_gpu_sin(x)");
-    await expect(wgsl('["Divide",1,"x"]')).toContainText("1.0 / x");
-    await expect(wgsl('["Rational",1,2]')).toContainText("0.5");
-    await expect(wgsl('["Sqrt",["Add",["Power","x",2],["Power","y",2]]]')).toContainText("sqrt((x * x) + (y * y))");
-    await expect(wgsl('["Abs","x"]')).toContainText("abs(x)");
+  test("GLSLForm writes the shader expression", async ({ page }) => {
+    await page.goto("/reference/formats/output/glsl/");
+    const glsl = (source: string) => page.locator(`notatio-out[form=glsl][value='${source}']`).first();
+    await expect(glsl('["Add",["Power","x",2],1]')).toContainText("(x * x) + 1.0");
+    await expect(glsl('["Sin","x"]')).toContainText("_gpu_sin(x)");
+    await expect(glsl('["Divide",1,"x"]')).toContainText("1.0 / x");
+    await expect(glsl('["Rational",1,2]')).toContainText("0.5");
+    await expect(glsl('["Sqrt",["Add",["Power","x",2],["Power","y",2]]]')).toContainText("sqrt((x * x) + (y * y))");
+    await expect(glsl('["Abs","x"]')).toContainText("abs(x)");
   });
 });

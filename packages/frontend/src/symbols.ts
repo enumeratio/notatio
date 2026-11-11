@@ -792,7 +792,7 @@ export function graphics3dOfText(text: string): { json: Json; settings: Record<s
 }
 
 /**
- * `ComplexPlot(f, z)`: a portrait, drawn on the web by `<notatio-complex-plot>`, the WebGPU producer of
+ * `ComplexPlot(f, z)`: a portrait, drawn on the web by `<notatio-complex-plot>`, the WebGL2 producer of
  * the raster it lowers to (`complexPlotSettingsOf` reads the same attributes for the CPU one).
  */
 const COMPLEX_PLOT_SYMBOL: VisualSymbol = {

@@ -78,7 +78,7 @@ const sourceEntries: [specifier: string, source: string][] = fromPackages
       ["@enumeratio/combinatorics/collections", "symbols/combinatorics/combinatorics/collections/src/index.ts"],
       ["@enumeratio/combinatorics/findstat", "symbols/combinatorics/combinatorics/findstat/src/findstat-data.ts"],
       ["@enumeratio/catalog/records", "catalog/src/catalog-records-data.ts"],
-      ["@enumeratio/ce-patches/wgsl-complex", "ce-patches/src/compute-engine/compilation/wgsl-complex.ts"],
+      ["@enumeratio/ce-patches/glsl-complex", "ce-patches/src/compute-engine/compilation/glsl-complex.ts"],
     ];
 for (const [specifier, source] of sourceEntries) {
   const abs = resolve(pkgsDir, source);

@@ -185,7 +185,7 @@ kernel, the network or hand curation stays committed.
   imports any library); manifest's `tests/hierarchy.test.ts` holds that, and moving a package is
   one edit to its `enumeratio.layer` and `extends`.
 - **Every route in the same change.** A fix to what a head evaluates to also fixes `.N()`,
-  simplification and each compile target (JavaScript, WGSL). A fact that must hold on
+  simplification and each compile target (JavaScript, GLSL). A fact that must hold on
   several routes lives in one helper they all call, not a copy per route.
 - **Numerics: decline rather than answer wrong.** A kernel that can't vouch for its digits
   leaves the expression unevaluated: not `NaN` (a floating-point result with no value) and

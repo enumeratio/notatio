@@ -97,7 +97,6 @@ type Form =
   | "wolfram"
   | "python"
   | "glsl"
-  | "wgsl"
   | "gpushader"
   | "javascript";
 
@@ -192,8 +191,8 @@ function replaceAt(tree: unknown, path: string, replacement: unknown): unknown {
 
 // The code forms, each the source a compilation target writes (`out-engine.ts`'s
 // `codeSources`, or the kernel's display).
-const CODE_FORMS = new Set<Form>(["python", "glsl", "wgsl", "javascript", "gpushader"]);
-type CodeForm = "python" | "glsl" | "wgsl" | "javascript" | "gpushader";
+const CODE_FORMS = new Set<Form>(["python", "glsl", "javascript", "gpushader"]);
+type CodeForm = "python" | "glsl" | "javascript" | "gpushader";
 
 // The display forms offered by the In/Out menu.
 const FORMS: readonly Form[] = [
@@ -210,7 +209,6 @@ const FORMS: readonly Form[] = [
   "python",
   "javascript",
   "glsl",
-  "wgsl",
   "gpushader",
 ];
 const FORM_LABEL: Record<Form, string> = {
@@ -227,7 +225,6 @@ const FORM_LABEL: Record<Form, string> = {
   python: "PythonForm",
   javascript: "JavaScriptForm",
   glsl: "GLSLForm",
-  wgsl: "WGSLForm",
   gpushader: "GPUShaderForm",
 };
 // The language tag for the forms that render as source in a <notatio-code> box.
@@ -241,8 +238,7 @@ const FORM_LANG: Partial<Record<Form, string>> = {
   python: "python",
   javascript: "javascript",
   glsl: "glsl",
-  wgsl: "wgsl",
-  gpushader: "wgsl",
+  gpushader: "glsl",
 };
 
 /**

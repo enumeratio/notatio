@@ -150,7 +150,6 @@ export const oneLine = (json: MathJsonExpression): string =>
 const CODE_TARGETS = {
   python: "PythonTarget",
   glsl: "GLSLTarget",
-  wgsl: "WGSLTarget",
 } as const;
 export type CodeForm = keyof typeof CODE_TARGETS | "javascript" | "gpushader";
 

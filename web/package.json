@@ -45,7 +45,7 @@
     "katex": "catalog:"
   },
   "devDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0",
+    "@cortex-js/compute-engine": "^0.186.0",
     "@enumeratio/config": "workspace:*",
     "@playwright/test": "^1.55.0",
     "vitepress": "2.0.0-alpha.20",
@@ -53,7 +53,7 @@
   },
   "enumeratio": {
     "reads": [
-      "../packages/ce-patches/src/compute-engine/compilation/wgsl-complex.ts"
+      "../packages/ce-patches/src/compute-engine/compilation/glsl-complex.ts"
     ]
   }
 }

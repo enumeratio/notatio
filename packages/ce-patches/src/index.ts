@@ -183,7 +183,7 @@ export {
   ln as ballLn,
 } from "./compute-engine/numerics/ball.ts";
 export { hurwitzZetaBall } from "./compute-engine/numerics/hurwitz-zeta-ball.ts";
-export { type ComplexWGSL, emitComplexWGSL, MAX_SLOTS } from "./compute-engine/compilation/wgsl-complex.ts";
+export { type ComplexGLSL, emitComplexGLSL, MAX_SLOTS } from "./compute-engine/compilation/glsl-complex.ts";
 
 /** Apply every patch that has not landed upstream yet, to `ce`. Idempotent per engine. */
 export function applyAllPatches(ce: ComputeEngine): void {

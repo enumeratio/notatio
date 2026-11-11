@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { DF_OPAQUE_WGSL, DF_PLAIN_WGSL } from "@enumeratio/analytic/shader";
+import { DF_OPAQUE_GLSL, DF_PLAIN_GLSL } from "@enumeratio/analytic/shader";
 import { df64Exact } from "../src/df64-selftest.ts";
 import { portraitShader } from "../src/complex-plot.ts";
 import { complexComputeShader } from "../src/gpu-eval.ts";
@@ -27,21 +27,23 @@ test("the df64 self-test accepts exact error-free transforms and rejects any tha
   expect(df64Exact([1, 0, 1 + 2 ** -11, 0, 0, 1 + 2 ** -11, 0, 0])).toBe(false);
 });
 
-test("a host gets the shader for its device's verdict: plain, opaque two-sums, those with fma, or df64 off", () => {
-  const on = portraitShader("hurwitz(vec2f(1.5, 4.0), z)");
-  expect(on).toContain("const DF64: bool = true;");
-  expect(on).toContain(DF_PLAIN_WGSL);
-  expect(on).toContain("const DF_FMA: bool = false;");
+test("a host gets the shader for its device's verdict: plain, opaque two-sums, or df64 off", () => {
+  const on = portraitShader("hurwitz(vec2(1.5, 4.0), z)");
+  expect(on).toContain("const bool DF64 = true;");
+  expect(on).toContain(DF_PLAIN_GLSL);
   expect(on).toContain("dfOne = prm.one;");
-  const opaque = portraitShader("hurwitz(vec2f(1.5, 4.0), z)", "opaque");
-  expect(opaque).toContain(DF_OPAQUE_WGSL);
-  expect(opaque).toContain("const DF_FMA: bool = false;");
-  const fma = portraitShader("hurwitz(vec2f(1.5, 4.0), z)", "fma");
-  expect(fma).toContain("const DF64: bool = true;");
-  expect(fma).toContain(DF_OPAQUE_WGSL);
-  expect(fma).toContain("const DF_FMA: bool = true;");
-  const off = portraitShader("hurwitz(vec2f(1.5, 4.0), z)", "off");
-  expect(off).toContain("const DF64: bool = false;");
-  expect(off).not.toContain("const DF64: bool = true;");
-  expect(complexComputeShader("z", "hurwitz(vec2f(1.5, 4.0), z)", "off")).toContain("const DF64: bool = false;");
+  const opaque = portraitShader("hurwitz(vec2(1.5, 4.0), z)", "opaque");
+  expect(opaque).toContain(DF_OPAQUE_GLSL);
+  expect(opaque).not.toContain(DF_PLAIN_GLSL);
+  const off = portraitShader("hurwitz(vec2(1.5, 4.0), z)", "off");
+  expect(off).toContain("const bool DF64 = false;");
+  expect(off).not.toContain("const bool DF64 = true;");
+  expect(complexComputeShader("z", "hurwitz(vec2(1.5, 4.0), z)", "off")).toContain("const bool DF64 = false;");
+});
+
+test("a shader is GLSL ES 3.00 with the library declared before the host that calls it", () => {
+  const shader = portraitShader("hurwitz(vec2(1.5, 4.0), z)");
+  expect(shader.startsWith("#version 300 es\nprecision highp float;")).toBe(true);
+  expect(shader.indexOf("vec2 hurwitz(")).toBeGreaterThan(-1);
+  expect(shader.indexOf("vec2 hurwitz(")).toBeLessThan(shader.indexOf("void main()"));
 });

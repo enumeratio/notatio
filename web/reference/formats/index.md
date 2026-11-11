@@ -34,7 +34,7 @@ output cell), including code forms whose translations carry footguns.
   a page of its own because it is export-only: nothing parses it back.
 - Code forms (a language each, with an editable try-it cell + footguns):
   [Wolfram FullForm](/reference/formats/output/wolfram), [NumPy](/reference/formats/output/numpy),
-  [GLSL](/reference/formats/output/glsl), [WGSL](/reference/formats/output/wgsl),
+  [GLSL](/reference/formats/output/glsl),
   [JavaScript](/reference/formats/output/javascript).
 
 ## Not here

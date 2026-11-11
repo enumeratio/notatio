@@ -122,7 +122,7 @@ export const lerchPhiLibrary: LibraryRecord = {
     signature: "(number, number, number) -> number",
     evaluate: (ops: readonly Expression[], options: EvalOptions) =>
       evaluateLerch(options.engine, ops, wantsNumber(ops, options)),
-    compile: realCompile(3, { js: "__lp", wgsl: "lerchPhi", wgslReal: "lerchPhiReal" }),
+    compile: realCompile(3, { js: "__lp", glsl: "lerchPhi", glslReal: "lerchPhiReal" }),
   },
 };
 

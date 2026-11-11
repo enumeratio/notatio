@@ -47,8 +47,8 @@ export {
   polyLogReal,
   stieltjesGamma,
   stieltjesGammaReal,
-  type ComplexWGSL,
-  emitComplexWGSL,
+  type ComplexGLSL,
+  emitComplexGLSL,
   MAX_SLOTS,
 } from "@enumeratio/ce-patches";
 export { declareThreading113 } from "./threading-113.ts";
@@ -110,7 +110,7 @@ export { evaluateRisingFactorial } from "./rising-factorial.ts";
 export { declareQSeries } from "./q-series.ts";
 export { declareRiemannSiegel } from "./riemann-siegel.ts";
 export { landauFunction } from "./sloane-a.ts";
-export { zetaWGSL } from "./shader.ts";
+export { zetaGLSL } from "./shader.ts";
 export { declareIncompleteSymbolic } from "./incomplete-symbolic.ts";
 export { declareGeneralizedSpecial } from "./generalized-special.ts";
 export { declareConstantRounding } from "./constant-rounding.ts";

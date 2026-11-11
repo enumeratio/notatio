@@ -10,7 +10,7 @@ complex plane and colour each point by the value there — a _domain colouring_:
 - faint **bands** mark each doubling of magnitude.
 
 Every pixel below runs the same Euler–Maclaurin kernel as the CPU path —
-`@enumeratio/analytic`'s exported `zetaWGSL`, evaluated per pixel, per frame, on the GPU,
+`@enumeratio/analytic`'s exported `zetaGLSL`, evaluated per pixel, per frame, on the GPU,
 through the general [`<notatio-complex-plot>`](/reference/component/ComplexPlot) element. Both conventions
 are drawn at once from the same $s$, so the difference between them is a glance rather
 than a toggle. Drag to pan, ⌘/Ctrl + scroll to zoom; hit ▶ to sweep $\operatorname{Im}(s)$ up the
@@ -62,15 +62,15 @@ the mpmath/Wolfram oracles remain the source of truth for accuracy.)
 
 ## Why it's fast
 
-Two compilers are at work. `ce.compile(expr, { target: "wgsl" })` normally can't emit these
+Two compilers are at work. `ce.compile(expr, { to: "glsl" })` normally can't emit these
 heads — compute-engine doesn't know `HurwitzZeta` — so `@enumeratio/analytic` registers a
-`compile` handler that emits a call into `zetaWGSL`. That path is real-scalar, which suits
+`compile` handler that emits a call into `zetaGLSL`. That path is real-scalar, which suits
 a surface plot and not a portrait, where the phase _is_ the picture; so a second, complex
-lowering emits the same kernels as `vec2f`, and that is what colours the plane above.
+lowering emits the same kernels as `vec2`, and that is what colours the plane above.
 
 What keeps it interactive is that the sliders move a _literal_, not the expression's
-shape. Numeric literals compile to uniform slots, and the pipeline is cached on the shape,
-so dragging $\operatorname{Im}(s)$ re-uploads a few bytes rather than rebuilding a shader —
+shape. Numeric literals compile to uniform slots, and the program is cached on the shape,
+so dragging $\operatorname{Im}(s)$ re-uploads a few bytes rather than relinking a program —
 about 0.1 ms of work per frame outside the GPU. That headroom is why the value can be
 _interpolated_ between slider steps instead of jumping: the slider is quantised and fires
 below the refresh rate, and the frames in between are free.

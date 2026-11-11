@@ -1,4 +1,4 @@
-// WebGPU portraits, read back as pixels (gpu-support.ts). Run with playwright.gpu.config.ts under
+// WebGL2 portraits, read back as pixels (gpu-support.ts). Run with playwright.gpu.config.ts under
 // `xvfb-run -a`; SwiftShader draws the frames. Thresholds are set from what the portraits measure
 // there: the least colored portrait on these pages has 33% saturated pixels and 8 hue sectors.
 // The zeta surface and the Im a < 0 half of the zeta portrait belong to the plots spec.
@@ -7,10 +7,10 @@ import { readFileSync } from "node:fs";
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
 import {
-  emitComplexWGSL,
+  emitComplexGLSL,
   type Json,
-} from "../../../packages/ce-patches/src/compute-engine/compilation/wgsl-complex.ts";
-import { reachableWGSL, zetaWGSL } from "../../../packages/symbols/analysis/analytic/src/shader.ts";
+} from "../../../packages/ce-patches/src/compute-engine/compilation/glsl-complex.ts";
+import { reachableGLSL } from "../../../packages/symbols/analysis/analytic/src/shader.ts";
 import {
   colorAt,
   evalComplexOnGpu,
@@ -146,7 +146,7 @@ test.describe("the fractals", () => {
 });
 
 // The heads the complex emitter lowers beyond the first set (BL-335), and the elementary ones whose
-// shared helpers (arg, the square root) they changed, evaluated by their emitted WGSL on the GPU at the
+// shared helpers (arg, the square root) they changed, evaluated by their emitted GLSL on the GPU at the
 // points of complex-heads.golden.json and held to mpmath's values (collect-complex-heads.py). A point the kernel declines (its `uncertain` flag, drawn as hatching) is
 // not compared; the rest are, where the value is at least 0.1, to the case's measured tolerance.
 test.describe("the complex heads agree with mpmath", () => {
@@ -158,10 +158,10 @@ test.describe("the complex heads agree with mpmath", () => {
   for (const [name, c] of Object.entries(golden.cases)) {
     test(name, async ({ page }) => {
       await page.goto("/");
-      const emitted = emitComplexWGSL(c.json, "z");
+      const emitted = emitComplexGLSL(c.json, "z");
       expect(emitted, `${name} has a complex lowering`).toBeDefined();
       // Only the kernels the code reaches (the harness reads `uncertain`): a missing one fails the compile.
-      const library = reachableWGSL(`uncertain ${emitted!.code}`);
+      const library = reachableGLSL(`uncertain ${emitted!.code}`);
       const got = await evalComplexOnGpu(page, library, emitted!.code, emitted!.literals, golden.points);
       let drawn = 0;
       let worst = 0;
@@ -242,13 +242,25 @@ for (const head of [
 }
 
 // Two things a portrait read wrong before: a magnitude past 1e19 (length squares, so it overflowed and
-// read as a pole) and a −0 imaginary part (SwiftShader's atan2(−0, x > 0) is π, a half turn of hue).
+// read as a pole) and a −0 imaginary part (SwiftShader's atan(−0, x > 0) is π, a half turn of hue).
 test("a huge value keeps its magnitude, and a negative zero its argument", async ({ page }) => {
   await page.goto("/");
   // |G(-5.3 + 4i)| = e^64.83 (mpmath), 1e28.
-  const [[logMag]] = await evalComplexOnGpu(page, zetaWGSL, "vec2f(clogPolar(cbarnesG(z)).z, 0.0)", [], [[-5.3, 4]]);
+  const [[logMag]] = await evalComplexOnGpu(
+    page,
+    reachableGLSL("uncertain clogPolar(cbarnesG(z))"),
+    "vec2(clogPolar(cbarnesG(z)).z, 0.0)",
+    [],
+    [[-5.3, 4]],
+  );
   expect(logMag).toBeCloseTo(64.83, 0);
   // conj(2) = (2, -0): its argument is 0, not π.
-  const [[arg]] = await evalComplexOnGpu(page, zetaWGSL, "vec2f(argOf(cconj(z)), 0.0)", [], [[2, 0]]);
+  const [[arg]] = await evalComplexOnGpu(
+    page,
+    reachableGLSL("uncertain argOf(cconj(z))"),
+    "vec2(argOf(cconj(z)), 0.0)",
+    [],
+    [[2, 0]],
+  );
   expect(arg).toBe(0);
 });

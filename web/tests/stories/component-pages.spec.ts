@@ -31,8 +31,8 @@ const tagByName = new Map([
 // check is its own -- an actual DATA row (a row that is not `aria-busy`, which a placeholder
 // row is until its block arrives), and no `.nct-error` or `.tvb-error` (a count or parse the
 // table couldn't resolve). The table asks the kernel for its rows, so they may take a moment.
-// `notatio-complex-plot` is WebGPU-only, painting into a `<canvas>` rather than SVG, and
-// reports its own "needs WebGPU" status in light DOM when no adapter is available -- a real
+// `notatio-complex-plot` needs WebGL2, painting into a `<canvas>` rather than SVG, and
+// reports its own "needs WebGL2" status in light DOM when there is no context -- a real
 // condition in a headless/sandboxed runner, not a bug, so that case is *skipped* (with a
 // reason) rather than failed. A tag with no entry here falls back to "at least one <svg>".
 const RENDER_CHECKS: Readonly<Record<string, (el: Locator) => Promise<void>>> = {
@@ -55,13 +55,13 @@ const RENDER_CHECKS: Readonly<Record<string, (el: Locator) => Promise<void>>> = 
     const status = el.locator(".notatio-complex-plot-status");
     const canvas = el.locator("canvas");
     // `#init()` (notatio-complex-plot.ts) settles one way or the other -- a status
-    // paragraph (no WebGPU adapter) or an actually-painted frame -- give it time before
+    // paragraph (no WebGL2 context) or an actually-painted frame -- give it time before
     // deciding which.
     await expect(async () => {
       const drew = await canvasHasContent(canvas);
       expect(drew || (await status.count()) > 0).toBe(true);
     }).toPass();
-    test.skip((await status.count()) > 0, "WebGPU unavailable in this browser -- see notatio-complex-plot-status");
+    test.skip((await status.count()) > 0, "WebGL2 unavailable in this browser -- see notatio-complex-plot-status");
     await expect(canvas).toBeVisible();
     expect(await canvasHasContent(canvas)).toBe(true);
   },
@@ -173,11 +173,11 @@ for (const [name, stories] of Object.entries(STORIES_DATA)) {
         const slider = manipulate.locator(".notatio-manip-host input[type=range]").first();
         test.skip((await slider.count()) === 0, "no slider control on this Manipulate (a discrete choice, say)");
 
-        // Let the first render (and, for a ComplexPlot child, its WebGPU device request)
+        // Let the first render (and, for a ComplexPlot child, its WebGL2 context request)
         // settle before taking the "before" fingerprint.
         await expect(async () => expect((await fingerprintOf(driven)).length).toBeGreaterThan(0)).toPass();
-        const webGpuUnavailable = (await driven.locator(".notatio-complex-plot-status").count()) > 0;
-        test.skip(webGpuUnavailable, "WebGPU unavailable in this browser -- nothing to compare");
+        const webGlUnavailable = (await driven.locator(".notatio-complex-plot-status").count()) > 0;
+        test.skip(webGlUnavailable, "WebGL2 unavailable in this browser -- nothing to compare");
 
         const before = await fingerprintOf(driven);
 

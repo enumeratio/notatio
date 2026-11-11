@@ -68,13 +68,13 @@ export function declareFractals(ce: ComputeEngine): void {
     signature: "(number, number?) -> number",
     evaluate: ((ops: readonly Expression[], options: { numericApproximation?: boolean }) =>
       evaluateIterate(ce, ops, options.numericApproximation ?? false, "zero")) as NativeEval,
-    compile: realCompile(2, { js: "__mb", wgsl: "mandelbrot" }),
+    compile: realCompile(2, { js: "__mb", glsl: "mandelbrot" }),
   });
 
   ce.declare("Julia", {
     signature: "(number, number, number?) -> number",
     evaluate: ((ops: readonly Expression[], options: { numericApproximation?: boolean }) =>
       evaluateIterate(ce, ops, options.numericApproximation ?? false, "point")) as NativeEval,
-    compile: realCompile(3, { js: "__ju", wgsl: "julia" }),
+    compile: realCompile(3, { js: "__ju", glsl: "julia" }),
   });
 }

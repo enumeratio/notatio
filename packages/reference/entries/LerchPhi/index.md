@@ -22,9 +22,9 @@ bindings:
     source: packages/ce-patches/src/compute-engine/numerics/lerch-phi.ts
     note: The direct series, which covers |z| ≤ 1; z = 1 hands off to HurwitzZeta and inherits its closed forms.
   - origin: compiled
-    form: wgsl
+    form: glsl
     environment: gpu
-    source: packages/symbols/analysis/analytic/src/shader.ts:zetaWGSL
+    source: packages/symbols/analysis/analytic/src/shader.ts:zetaGLSL
     produces: a colour per pixel — complex Φ, domain-coloured
   - origin: mapped
     form: wolfram

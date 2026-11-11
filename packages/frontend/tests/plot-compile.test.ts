@@ -36,10 +36,10 @@ test("each element of a list compiles on its own, and a pair of numbers is a poi
   ]);
 });
 
-test("a surface compiles to a WGSL plotFn over its two variables, its wildcards compiled in", () => {
-  const plot = compilePlot(ce, ["Multiply", "_k", "x", "y"], { target: "wgsl", vars: ["x", "y"], bindings: { _k: 2 } });
+test("a surface compiles to a GLSL plotFn over its two variables, its wildcards compiled in", () => {
+  const plot = compilePlot(ce, ["Multiply", "_k", "x", "y"], { target: "glsl", vars: ["x", "y"], bindings: { _k: 2 } });
   expect(plot.unknowns).toEqual(["x", "y"]);
-  expect(plot.items[0]!.code).toMatch(/fn plotFn\(x: f32, y: f32\) -> f32 \{ return .*2.*; \}/);
+  expect(plot.items[0]!.code).toMatch(/float plotFn\(float x, float y\) \{ return .*2.*; \}/);
 });
 
 test("a plot of Sin(x) compiles to Math.sin on an engine with analytic declared", () => {
@@ -49,24 +49,24 @@ test("a plot of Sin(x) compiles to Math.sin on an engine with analytic declared"
   expect(plot.items[0]?.code).toBe("Math.sin(_.x)");
 });
 
-test("a WGSL plotFn defines every _gpu_ helper it calls", () => {
-  // Γ has no WGSL builtin: the target's own helper, from its preamble.
-  const plot = compilePlot(ce, ["Multiply", ["Gamma", "x"], ["Gamma", "y"]], { target: "wgsl", vars: ["x", "y"] });
+test("a GLSL plotFn defines every _gpu_ helper it calls", () => {
+  // Γ has no GLSL builtin: the target's own helper, from its preamble.
+  const plot = compilePlot(ce, ["Multiply", ["Gamma", "x"], ["Gamma", "y"]], { target: "glsl", vars: ["x", "y"] });
   const code = plot.items[0]!.code!;
   const called = new Set(code.match(/_gpu_\w+(?=\()/g));
   expect(called.size).toBeGreaterThan(0);
-  for (const name of called) expect(code).toMatch(new RegExp(`fn ${name}\\(`));
+  for (const name of called) expect(code).toMatch(new RegExp(`float ${name}\\(`));
 });
 
-test("a surface compiles to WGSL after it compiled to JavaScript, its variables real", () => {
+test("a surface compiles to GLSL after it compiled to JavaScript, its variables real", () => {
   const engine = new ComputeEngine();
   declareAnalytic(engine);
   const hurwitz = ["HurwitzZeta", "x", "y"];
   // A page compiles an expression for the CPU, and again for the GPU, on one engine.
-  compilePlot(engine, hurwitz, { target: "wgsl", vars: ["x", "y"], each: true });
+  compilePlot(engine, hurwitz, { target: "glsl", vars: ["x", "y"], each: true });
   compilePlot(engine, hurwitz, { target: "javascript", each: true });
-  const plot = compilePlot(engine, hurwitz, { target: "wgsl", vars: ["x", "y"], each: true });
-  expect(plot.items[0]!.code).toMatch(/fn plotFn\(x: f32, y: f32\) -> f32/);
+  const plot = compilePlot(engine, hurwitz, { target: "glsl", vars: ["x", "y"], each: true });
+  expect(plot.items[0]!.code).toMatch(/float plotFn\(float x, float y\)/);
 });
 
 test("a plot's code reads its variables as reals, whatever type the engine inferred for them before", () => {
@@ -78,4 +78,17 @@ test("a plot's code reads its variables as reals, whatever type the engine infer
   const [item] = compilePlot(engine, ["HurwitzZeta", "x", "y"], { target: "javascript", each: true }).items;
   // ζ(2, 3) = π²/6 − 1 − 1/4, from numbers in the scope.
   expect(run(item!.code, { x: 2, y: 3 })).toBeCloseTo(Math.PI ** 2 / 6 - 1.25, 12);
+});
+
+test("a form outside the GLSL fragment has no plotFn, so the plot takes its CPU path", () => {
+  const random = compilePlot(ce, ["Add", "x", ["Random"]], { target: "glsl", vars: ["x", "y"] });
+  expect(random.items[0]!.code).toBeUndefined();
+});
+
+test("a loop has no plotFn: the shader's 10,000-pass cap would give NaN where the CPU sums on", () => {
+  const sum = compilePlot(ce, ["Sum", ["Multiply", "k", "x"], ["Triple", "k", 1, 20000]], {
+    target: "glsl",
+    vars: ["x", "y"],
+  });
+  expect(sum.items[0]!.code).toBeUndefined();
 });

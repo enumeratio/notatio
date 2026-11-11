@@ -13,9 +13,9 @@
       "types": "./dist/index.d.mts",
       "import": "./dist/index.mjs"
     },
-    "./wgsl-complex": {
-      "types": "./dist/wgsl-complex.d.mts",
-      "import": "./dist/wgsl-complex.mjs"
+    "./glsl-complex": {
+      "types": "./dist/glsl-complex.d.mts",
+      "import": "./dist/glsl-complex.mjs"
     },
     "./package.json": "./package.json"
   },
@@ -29,7 +29,7 @@
     "@enumeratio/engine": "workspace:*"
   },
   "devDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0",
+    "@cortex-js/compute-engine": "^0.186.0",
     "@enumeratio/config": "workspace:*",
     "@enumeratio/engine": "workspace:*",
     "typescript": "^7.0.2",
@@ -37,7 +37,7 @@
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0"
+    "@cortex-js/compute-engine": "^0.186.0"
   },
   "enumeratio": {
     "layer": "infra",

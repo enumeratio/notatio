@@ -130,7 +130,7 @@ test("the argument of a complex surface is colored on the phase wheel by default
   expect(complexSurfaceSvg(surface, { axes: false, gradient: "sinebow" })).toContain('fill="#ff4040"');
 });
 
-// ── The WGSL domain coloring ──────────────────────────────────────────────────────────────
+// ── The GLSL domain coloring ──────────────────────────────────────────────────────────────
 
 test("the portrait and the complex surface agree: arg/2π along the gradient, red at arg 0", () => {
   expect(portraitShader("z")).toContain("fract(argOf(polar.xy) * 0.15915494);");
@@ -159,11 +159,11 @@ test("every gradient fits the shader's stop table, in the space it blends in", (
 test("a portrait resets the kernels' uncertainty flag per pixel and hatches a value they decline (S#5)", () => {
   const shader = portraitShader("hurwitz(prm.p[0].xy, z)");
   const reset = shader.indexOf("uncertain = 0.0;");
-  const value = shader.indexOf("let polar = ");
+  const value = shader.indexOf("vec3 polar = ");
   const hatch = shader.indexOf("if (uncertain > 0.5)");
   expect(reset).toBeGreaterThan(-1);
   expect(reset).toBeLessThan(value);
   expect(hatch).toBeGreaterThan(value);
   // A declined pixel returns before it is colored.
-  expect(hatch).toBeLessThan(shader.indexOf("let logMag = polar.z;"));
+  expect(hatch).toBeLessThan(shader.indexOf("float logMag = polar.z;"));
 });

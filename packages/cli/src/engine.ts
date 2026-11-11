@@ -73,7 +73,6 @@ export const FORMS = [
   "mathml",
   "numpy",
   "glsl",
-  "wgsl",
   "js",
 ] as const;
 export type Form = (typeof FORMS)[number];
@@ -90,7 +89,6 @@ export const FORM_LABEL: Record<Form, string> = {
   mathml: "MathML",
   numpy: "NumPy / Python",
   glsl: "GLSL",
-  wgsl: "WGSL",
   js: "JavaScript",
 };
 
@@ -106,7 +104,6 @@ const FORMAT_OF: Record<Exclude<Form, "standardform">, string> = {
   mathml: "MathML",
   numpy: "Python",
   glsl: "GLSL",
-  wgsl: "WGSL",
   js: "JavaScript",
 };
 

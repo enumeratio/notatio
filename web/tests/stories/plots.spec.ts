@@ -2,13 +2,15 @@
 // kernel, ranges that are honored, frames in proportion. Each test names the audit finding it holds
 // (S# = site audit, E# = elements audit, BL-319).
 //
-// WebGPU tests need a headed Chromium with a software adapter, so they skip where there is none:
+// WebGL2 tests need a headed Chromium on software GL, so they skip where there is none:
 //
 //   xvfb-run -a pnpm exec playwright test -c tests/stories/playwright.config.ts plots
 
 import { fileURLToPath } from "node:url";
 import type { Locator, Page } from "@playwright/test";
 import { expect, test } from "@playwright/test";
+import { withGLSL } from "../../../packages/symbols/analysis/analytic/src/shader.ts";
+import { runShader } from "./gpu-support.ts";
 
 /** This checkout's root, which the dev server serves under `/@fs/`. */
 const REPO = fileURLToPath(new URL("../../../", import.meta.url));
@@ -134,9 +136,9 @@ test("ContourPlot: concentric circles are drawn as circles (E#8)", async ({ page
 // --- GPUShaderForm (S#8, E#11) --------------------------------------------------------------------
 
 for (const [url, shader] of [
-  ["/docs/components/out#gpushaderform", /fn plotFn\(/],
-  ["/playground/inspirations/compute-engine", /fn plotFn\(/],
-  ["/reference/formats/output/wgsl", /@fragment/],
+  ["/docs/components/out#gpushaderform", /float plotFn\(/],
+  ["/playground/inspirations/compute-engine", /float plotFn\(/],
+  ["/reference/formats/output/glsl", /void main\(\)/],
 ] as const) {
   test(`GPUShaderForm on ${url} shows the shader, not a dash`, async ({ page }) => {
     await page.goto(url);
@@ -207,55 +209,26 @@ test("pressing 0 on a zoomed 2-D plot returns it to its whole range, as the Plot
   await expect.poll(labels).toEqual(whole);
 });
 
-// --- WebGPU ---------------------------------------------------------------------------------
-// Headless Chromium has no adapter, and destroys a device whose canvas is configured; these run
-// headed on a software adapter (WEBGPU=1, under xvfb-run) and skip otherwise.
-// Copies each presented WebGPU canvas texture to a buffer, so `window.__grab(canvas)` reads its pixels:
-// a screenshot of a WebGPU canvas is blank.
-const CAPTURE_CANVAS = `// init script: makes WebGPU canvases readable by copying each presented texture to a buffer
+// --- WebGL2 ---------------------------------------------------------------------------------
+// Headless Chromium draws WebGL2 on SwiftShader when it is told to (GPU_ARGS); these run headed under
+// xvfb-run (WEBGL=1) and skip otherwise, as the portraits are heavy to shade in software.
+// `window.__grab(canvas)` is the canvas's current frame as a PNG, null until it has drawn one: a portrait
+// keeps its drawing buffer, so the frame is there to read.
+const CAPTURE_CANVAS = `// init script: counts a canvas's own draws, and reads its frame back
 (()=>{
- if(!window.GPUCanvasContext) return;
- const P=GPUCanvasContext.prototype;
- const conf=P.configure, gct=P.getCurrentTexture;
- const ctxs=new Set();
- P.configure=function(cfg){this.__cfg=cfg;this.__dev=cfg.device;ctxs.add(this);return conf.call(this,{...cfg,usage:(cfg.usage||0x10)|0x01|0x04|0x10});};
- P.getCurrentTexture=function(){const t=gct.call(this);this.__tex=t;this.__pending=true;return t;};
- const sub=GPUQueue.prototype.submit;
- window.__pix=new WeakMap();
- GPUQueue.prototype.submit=function(cmds){
-  sub.call(this,cmds);
-  for(const c of ctxs){
-   if(!c.__pending||!c.__tex) continue;
-   const dev=c.__dev; if(dev.queue!==this) continue;
-   const t=c.__tex; c.__pending=false;
-   try{
-    const w=t.width,h=t.height,bpr=Math.ceil(w*4/256)*256;
-    const buf=dev.createBuffer({size:bpr*h,usage:GPUBufferUsage.MAP_READ|GPUBufferUsage.COPY_DST});
-    const enc=dev.createCommandEncoder();enc.copyTextureToBuffer({texture:t},{buffer:buf,bytesPerRow:bpr},[w,h]);
-    sub.call(this,[enc.finish()]);
-    const fmt=t.format;
-    buf.mapAsync(GPUMapMode.READ).then(()=>{const src=new Uint8Array(buf.getMappedRange().slice(0));const out=new Uint8ClampedArray(w*h*4);
-      for(let y=0;y<h;y++)for(let x=0;x<w;x++){const s=y*bpr+x*4,d=(y*w+x)*4;if(fmt.startsWith('bgra')){out[d]=src[s+2];out[d+1]=src[s+1];out[d+2]=src[s];}else{out[d]=src[s];out[d+1]=src[s+1];out[d+2]=src[s+2];}out[d+3]=255;}
-      window.__pix.set(c.canvas,{w,h,out,n:(window.__pix.get(c.canvas)?.n||0)+1});buf.unmap();buf.destroy()}).catch(e=>console.log('capture fail '+e));
-   }catch(e){console.log('capture err '+e)}
-  }
- };
- window.__grab=(canvas)=>{const r=window.__pix.get(canvas);if(!r)return null;const c=document.createElement('canvas');c.width=r.w;c.height=r.h;c.getContext('2d').putImageData(new ImageData(r.out,r.w,r.h),0,0);return c.toDataURL('image/png')};
+ if(!window.WebGL2RenderingContext) return;
+ const P=WebGL2RenderingContext.prototype, draw=P.drawArrays, drawn=new WeakSet();
+ P.drawArrays=function(...a){draw.apply(this,a);if(this.getParameter(this.FRAMEBUFFER_BINDING)===null)drawn.add(this.canvas)};
+ window.__grab=(canvas)=>{if(!drawn.has(canvas))return null;return canvas.toDataURL('image/png')};
 })();
 `;
 
-const GPU_ARGS = [
-  "--enable-unsafe-webgpu",
-  "--use-webgpu-adapter=swiftshader",
-  "--enable-features=Vulkan",
-  "--use-angle=swiftshader",
-  "--enable-unsafe-swiftshader",
-];
+const GPU_ARGS = ["--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist"];
 
-if (process.env["WEBGPU"]) test.use({ headless: false, launchOptions: { args: GPU_ARGS } });
+if (process.env["WEBGL"]) test.use({ headless: false, launchOptions: { args: GPU_ARGS } });
 
 test.describe("on the GPU", () => {
-  test.skip(!process.env["WEBGPU"], "needs a headed browser with a WebGPU adapter: WEBGPU=1 xvfb-run -a …");
+  test.skip(!process.env["WEBGL"], "needs a headed browser with software WebGL2: WEBGL=1 xvfb-run -a …");
 
   test("Plot3D with Gpu -> 100 compiles its shader and wears the GPU badge (E#7)", async ({ page }) => {
     await page.goto("/reference/component/Plot3D#surface-evaluated-on-gpu");
@@ -285,46 +258,24 @@ test.describe("on the GPU", () => {
   }
 
   async function hurwitzAt(page: Page, s: [number, number], a: [number, number][]) {
+    const host = `uniform sampler2D inp;
+out vec4 fragColor;
+void main() {
+  vec4 p = texelFetch(inp, ivec2(gl_FragCoord.xy), 0);
+  uncertain = 0.0;
+  vec2 v = hurwitz(p.xy, p.zw);
+  fragColor = vec4(v, uncertain, 0.0);
+}`;
+    const gpu = await runShader(
+      page,
+      withGLSL(host),
+      a.map(([ar, ai]) => [s[0], s[1], ar, ai] as const),
+    );
     return page.evaluate(
-      async ([sr, si, points, repo]) => {
-        const { zetaWGSL } = await import(`/@fs${repo}packages/symbols/analysis/analytic/src/shader.ts` as string);
+      async ([gpu, sr, si, points, repo]) => {
         const cpu = await import(
           `/@fs${repo}packages/ce-patches/src/compute-engine/numerics/hurwitz-zeta.ts` as string
         );
-        const n = points.length;
-        const code = `${zetaWGSL}
-@group(0) @binding(0) var<storage, read> inp : array<vec4f>;
-@group(0) @binding(1) var<storage, read_write> outp : array<vec4f>;
-@compute @workgroup_size(1) fn main(@builtin(global_invocation_id) g : vec3u) {
-  let p = inp[g.x]; uncertain = 0.0; let v = hurwitz(p.xy, p.zw); outp[g.x] = vec4f(v, uncertain, 0.0);
-}`;
-        const adapter = await navigator.gpu.requestAdapter();
-        const device = await adapter!.requestDevice();
-        const pipeline = device.createComputePipeline({
-          layout: "auto",
-          compute: { module: device.createShaderModule({ code }), entryPoint: "main" },
-        });
-        const input = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST });
-        device.queue.writeBuffer(input, 0, new Float32Array(points.flatMap(([ar, ai]) => [sr!, si!, ar!, ai!])));
-        const output = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_SRC });
-        const read = device.createBuffer({ size: n * 16, usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ });
-        const bind = device.createBindGroup({
-          layout: pipeline.getBindGroupLayout(0),
-          entries: [
-            { binding: 0, resource: { buffer: input } },
-            { binding: 1, resource: { buffer: output } },
-          ],
-        });
-        const encoder = device.createCommandEncoder();
-        const pass = encoder.beginComputePass();
-        pass.setPipeline(pipeline);
-        pass.setBindGroup(0, bind);
-        pass.dispatchWorkgroups(n);
-        pass.end();
-        encoder.copyBufferToBuffer(output, 0, read, 0, n * 16);
-        device.queue.submit([encoder.finish()]);
-        await read.mapAsync(GPUMapMode.READ);
-        const gpu = new Float32Array(read.getMappedRange().slice(0));
         return points.map(([ar, ai], i) => {
           const exact = cpu.hurwitzZeta({ re: sr, im: si }, { re: ar!, im: ai! }) as { re: number; im: number };
           const { value, largest } = cpu.hurwitzEMWithLargest({ re: sr, im: si }, { re: ar!, im: ai! }) as {
@@ -335,7 +286,7 @@ test.describe("on the GPU", () => {
           return { a: [ar, ai], err, declined: gpu[4 * i + 2]! > 0.5, cond: largest / Math.hypot(value.re, value.im) };
         });
       },
-      [s[0], s[1], a, REPO] as const,
+      [gpu, s[0], s[1], a, REPO] as const,
     );
   }
 

@@ -2,11 +2,11 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
 import { applyAllPatches, lerchPhiReal, realCompile } from "../src/index.ts";
 
-test("the WGSL lowering calls the real wrapper, which yields NaN rather than a real part", () => {
-  const lower = realCompile(3, { wgsl: "lerchPhi", wgslReal: "lerchPhiReal" });
+test("the GLSL lowering calls the real wrapper, which yields NaN rather than a real part", () => {
+  const lower = realCompile(3, { glsl: "lerchPhi", glslReal: "lerchPhiReal" });
   const args = ["z", "s", "a"] as never[];
-  expect(lower(args, (e) => String(e), { language: "wgsl" })).toMatchInlineSnapshot(
-    `"lerchPhiReal(vec2f(z, 0.0), vec2f(s, 0.0), vec2f(a, 0.0))"`,
+  expect(lower(args, (e) => String(e), { language: "glsl" })).toMatchInlineSnapshot(
+    `"lerchPhiReal(vec2(z, 0.0), vec2(s, 0.0), vec2(a, 0.0))"`,
   );
 });
 

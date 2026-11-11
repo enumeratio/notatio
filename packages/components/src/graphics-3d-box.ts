@@ -45,7 +45,7 @@ const on = (v: string | undefined): boolean => v !== undefined && v !== "" && v 
  * samples the compiled code again.
  *
  * - `Plot3D(f, (x, a, b), (y, c, d))`: a surface, `f` a list for several on one scale. Hover reads
- *   out a sample. `Gpu -> True` (or a grid size) evaluates the grid in a WebGPU shader, falling back
+ *   out a sample. `Gpu -> True` (or a grid size) evaluates the grid in a WebGL2 shader, falling back
  *   to the CPU; `Spin -> True` turns the view on its own; `N` is the grid per side (2 to 60).
  *   `PlotLegends -> True` draws a height key; `PlotLabel` titles it.
  * - `ListPlot3D(grid)` is a mesh of a height grid (or of `[x, y, z]` points, binned onto one),
@@ -234,7 +234,7 @@ export class Graphics3DBoxElement extends LitElement {
     let xs = gridAxis(xlo, xhi, size);
     let ys = gridAxis(ylo, yhi, size);
     let grids: number[][][] | undefined;
-    // The GPU path compiles every surface to WGSL and evaluates the grid in parallel; WGSL has no
+    // The GPU path compiles every surface to GLSL and evaluates the grid in parallel; a shader has no
     // scope, so the wildcards' values are compiled in. It takes a denser grid (`Gpu -> 120`).
     if (on(settings["gpu"])) {
       const dense = Math.max(2, Math.min(400, Number(settings["gpu"]) || size));
@@ -242,10 +242,10 @@ export class Graphics3DBoxElement extends LitElement {
       const gys = gridAxis(ylo, yhi, dense);
       const bound: Record<string, number> = {};
       for (const u of plot.unknowns) if (u.startsWith("_") && typeof scope[u] === "number") bound[u] = scope[u];
-      const wgsl = await compilePlotText(raw, { target: "wgsl", vars: [vx, vy], each: true, bindings: bound });
+      const glsl = await compilePlotText(raw, { target: "glsl", vars: [vx, vy], each: true, bindings: bound });
       if (generation !== this.#generation) return undefined;
       const results = await Promise.all(
-        wgsl.items.map((item) => (item.code ? evalGridGPU(item.code, gxs, gys) : Promise.resolve(undefined))),
+        glsl.items.map((item) => (item.code ? evalGridGPU(item.code, gxs, gys) : Promise.resolve(undefined))),
       );
       if (results.length > 0 && results.every((g): g is number[][] => g !== undefined)) {
         grids = results;

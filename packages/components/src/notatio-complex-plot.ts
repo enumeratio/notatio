@@ -1,12 +1,11 @@
-/// <reference types="@webgpu/types" />
-import { emitComplexWGSL } from "@enumeratio/ce-patches/wgsl-complex";
+import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
 import { html, LitElement, type PropertyValues } from "lit";
 import { bindWildcards, canonicalOf } from "./plot-kernel.ts";
 import { ensureStyles } from "./styles.ts";
 import {
   ComplexPlotRenderer,
   type ComplexPlotView,
-  getComplexPlotDevice,
+  getGpu,
   gradientOf,
   parseNumeric,
   WHEEL_HINT,
@@ -16,7 +15,7 @@ import {
 
 /**
  * `<ComplexPlot value="PolyLog(2, z)">` -- domain-coloring of a complex-valued
- * expression over the complex plane, one GPU invocation per pixel: color is the
+ * expression over the complex plane, one fragment-shader invocation per pixel: color is the
  * argument on a `gradient` (default `phase`, the hue wheel; any cyclic one such as
  * `sinebow` has no seam at the negative real axis; `reverse` turns it round), brightness a
  * compressed log-magnitude, poles white and zeros black.
@@ -30,7 +29,7 @@ import {
  * </Manipulate>
  * ```
  *
- * A slider moves a literal, not the expression's shape, so the compiled pipeline is
+ * A slider moves a literal, not the expression's shape, so the compiled program is
  * reused and the frame costs one small uniform upload -- which is what lets Manipulate
  * interpolate between slider steps and still hold frame.
  *
@@ -126,12 +125,13 @@ export class NotatioComplexPlot extends LitElement {
   async #init(): Promise<void> {
     const canvas = this.#canvas;
     if (!canvas) return;
-    const device = await getComplexPlotDevice();
-    if (!device) {
-      this._status = "This portrait needs WebGPU (Chrome/Edge 113+, Safari 18+).";
+    const gpu = await getGpu();
+    const renderer = gpu ? ComplexPlotRenderer.create(gpu, canvas) : null;
+    if (!renderer) {
+      this._status = "This portrait needs WebGL2 with float render targets.";
       return;
     }
-    this.#renderer = new ComplexPlotRenderer(device, canvas);
+    this.#renderer = renderer;
     this.#renderer.setGradient(gradientOf(this, "phase"));
     this.#readView();
     this.#home = {
@@ -160,13 +160,13 @@ export class NotatioComplexPlot extends LitElement {
     this.#view.mask = Number.isFinite(this.mask) && this.mask > 0 ? this.mask : 0;
   }
 
-  /** `value` in canonical form (from the page's kernel), emitted as complex WGSL for the renderer. */
+  /** `value` in canonical form (from the page's kernel), emitted as complex GLSL for the renderer. */
   async #compile(): Promise<void> {
     const renderer = this.#renderer;
     const value = this.value;
     if (!renderer || !value.trim()) return;
     // Compiles overlap (the init's, then each `bindings` or `value` change, while the kernel is still
-    // answering); only the newest goes on, so a stale one never rebuilds the shader or paints a second frame.
+    // answering); only the newest goes on, so a stale one never rebuilds the program or paints a second frame.
     const mine = ++this.#compiling;
     let canonical: unknown;
     try {
@@ -176,12 +176,12 @@ export class NotatioComplexPlot extends LitElement {
       return;
     }
     if (mine !== this.#compiling) return;
-    const emitted = emitComplexWGSL(canonical as never, this.var);
+    const emitted = emitComplexGLSL(canonical as never, this.var);
     if (!emitted) {
       this._status = `No complex GPU lowering for: ${value}`;
       return;
     }
-    const outcome = await renderer.setExpression(emitted);
+    const outcome = renderer.setExpression(emitted);
     if (mine !== this.#compiling) return;
     if (outcome === "failed") {
       this._status = `Shader did not compile for: ${this.value}`;

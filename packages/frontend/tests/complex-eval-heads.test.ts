@@ -1,10 +1,10 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { emitComplexWGSL } from "@enumeratio/ce-patches/wgsl-complex";
+import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
 import { parseExpression } from "@enumeratio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { type Complex, complexFunction } from "../src/complex-eval.ts";
 
-// The heads the complex emitter lowers to WGSL, held to the CPU evaluator on the same expression:
+// The heads the complex emitter lowers to GLSL, held to the CPU evaluator on the same expression:
 // both routes answer, and the CPU one agrees with mpmath 1.3.0 (30 digits) at three points, one in
 // each quadrant that matters (right half plane, upper-left, lower-right), cuts and branches included.
 
@@ -100,8 +100,8 @@ const json = (src: string) => {
 };
 
 for (const [src, want] of Object.entries(CASES)) {
-  test(`${src}: lowered to WGSL, and the CPU evaluator agrees with mpmath`, () => {
-    expect(emitComplexWGSL(json(src) as never, "z"), `${src} has a WGSL lowering`).toBeDefined();
+  test(`${src}: lowered to GLSL, and the CPU evaluator agrees with mpmath`, () => {
+    expect(emitComplexGLSL(json(src) as never, "z"), `${src} has a GLSL lowering`).toBeDefined();
     const f = complexFunction(json(src), "z");
     expect(f, `${src} has a CPU lowering`).toBeDefined();
     POINTS.forEach((p, i) => {

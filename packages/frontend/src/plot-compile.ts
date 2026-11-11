@@ -3,16 +3,16 @@
 // runs it with no engine of its own (`@enumeratio/components`' `plot-kernel.ts`).
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget, WGSLTarget } from "@cortex-js/compute-engine/compile";
+import { canCompile, GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { selfContainedCode } from "@enumeratio/engine/compiled";
-import { withWGSL } from "@enumeratio/analytic/shader";
+import { withGLSL } from "@enumeratio/analytic/shader";
 
 /** What to compile a plot's expression to. */
 export interface PlotCompileSpec {
   /** `javascript`: an expression over the scope `_` (and compute-engine's helpers `_SYS`).
-   *  `wgsl`: a `plotFn(vx, vy) -> f32` function, for the GPU grid. */
-  readonly target: "javascript" | "wgsl";
-  /** The plot's variables, in order, for `wgsl`; the free names stand in when absent. */
+   *  `glsl`: a `float plotFn(float vx, float vy)` function, for the GPU grid. */
+  readonly target: "javascript" | "glsl";
+  /** The plot's variables, in order, for `glsl`; the free names stand in when absent. */
   readonly vars?: readonly string[];
   /** Compile each element of a list on its own: one curve, or one component, per element. */
   readonly each?: boolean;
@@ -54,15 +54,23 @@ const numeric = (e: Expression): number | undefined => {
 };
 
 /**
- * A bivariate expression as a WGSL `plotFn`; the library kernels it reaches come first so its heads resolve,
+ * A bivariate expression as a GLSL `plotFn`; the library kernels it reaches come first so its heads resolve,
  * then the target's helper preamble, which defines the `_gpu_*` functions the body calls
  * (`_gpu_sin` for `Sin`).
  */
-export function toWgslFn(expr: Expression, vx: string, vy: string): string | undefined {
+export function toGlslFn(expr: Expression, vx: string, vy: string): string | undefined {
   try {
-    const r = new WGSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
+    // A form outside the GLSL fragment (`Random`, a matrix, a symbol with no numeric type) has no shader:
+    // the plot takes its CPU path.
+    if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
+    const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
     if (!r?.success || !r.code) return undefined;
-    return withWGSL(`${r.preamble ?? ""}\nfn plotFn(${vx}: f32, ${vy}: f32) -> f32 { return ${r.code}; }`);
+    // A loop stops after 10,000 passes with NaN where the CPU path sums on: the plot declines to its
+    // CPU path rather than show NaN (an `iterationBudget` lift would let a large bound hang the GPU).
+    if (r.preamble?.includes("_gpu_passes") || r.code.includes("_gpu_passes")) return undefined;
+    // A block of locals compiles to statements ending in their own `return`.
+    const body = /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`;
+    return withGLSL(`${r.preamble ?? ""}\nfloat plotFn(float ${vx}, float ${vy}) { ${body} }`);
   } catch {
     return undefined;
   }
@@ -77,10 +85,10 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
     const [a, b] = ops.map(numeric);
     if (a !== undefined && b !== undefined) item.point = [a, b];
   }
-  if (spec.target === "wgsl") {
+  if (spec.target === "glsl") {
     const free = unknowns.filter((u) => !u.startsWith("_"));
     const [vx = free[0] ?? "x", vy = free.find((u) => u !== vx) ?? "y"] = spec.vars ?? [];
-    const code = toWgslFn(e, vx, vy);
+    const code = toGlslFn(e, vx, vy);
     if (code !== undefined) item.code = code;
     return item;
   }

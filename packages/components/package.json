@@ -44,18 +44,17 @@
     "mathlive": "^0.110.0"
   },
   "devDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0",
+    "@cortex-js/compute-engine": "^0.186.0",
     "@enumeratio/combinatorics": "workspace:*",
     "@enumeratio/config": "workspace:*",
     "@enumeratio/entry": "workspace:*",
-    "@webgpu/types": "^0.1.60",
     "happy-dom": "catalog:",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "@cortex-js/compute-engine": "^0.184.0"
+    "@cortex-js/compute-engine": "^0.186.0"
   },
   "enumeratio": {
     "layer": "presentation",

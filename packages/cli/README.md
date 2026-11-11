@@ -55,7 +55,7 @@ Out[4]= (_.x * _.x) + 1
 ```
 
 Forms: `inputform` (the default), `standardform`, `tex`, `mathjson`, `wolfram`, `epsil`,
-`outputform`, `asciimath`, `mathml`, `numpy`, `glsl`, `wgsl`, `js`. Aliases: `text` is
+`outputform`, `asciimath`, `mathml`, `numpy`, `glsl`, `js`. Aliases: `text` is
 `outputform`, `wl`/`fullform` are `wolfram`, `texform`/`latex` are `tex`, `py`/`python` are `numpy`.
 
 `standardform` is the notation the web shows, laid out on character cells: stacked fractions,
@@ -66,7 +66,7 @@ colored, a `StyleBox`'s weight and color); piped, or with `NO_COLOR` set, it is 
 PascalCase heads and option names, and normalises the tree (`x - 2` for `x + -2`). `epsil` is
 the raw serialisation of the tree, with compute-engine's camelCase library names.
 
-The code forms (`numpy`/`glsl`/`wgsl`/`js`) are real compute-engine
+The code forms (`numpy`/`glsl`/`js`) are real compute-engine
 compilation targets — they only apply to numeric/function expressions.
 
 ## History and variables

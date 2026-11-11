@@ -11,7 +11,7 @@ made in prose, it links back.
   generalized cousin, by Euler–Maclaurin: a surface, the closed forms, and where the two
   conventions part ways.
   - [ζ on the GPU: a phase portrait](/explore/zeta/phase-portrait) — the whole kernel
-    compiled to a WebGPU shader, colouring the complex $a$-plane in real time.
+    compiled to a WebGL2 shader, colouring the complex $a$-plane in real time.
 - [**The Lerch transcendent**](/explore/lerchphi/) — $\Phi(z, s, a)$, the one function above
   the zeta/polylog/eta family, with a GPU domain-colouring of its disk of convergence.
 - [**The polylog and the polygamma**](/explore/polylog/) — $\operatorname{Li}_s(z)$ and

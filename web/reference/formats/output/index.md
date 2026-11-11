@@ -24,8 +24,7 @@ string).
 
   - [Wolfram FullForm](/reference/formats/output/wolfram) — Wolfram Language `Head[…]`.
   - [NumPy](/reference/formats/output/numpy) — Python/NumPy source.
-  - [GLSL](/reference/formats/output/glsl) — OpenGL shader source.
-  - [WGSL](/reference/formats/output/wgsl) — WebGPU shader source, and **GPUShaderForm**,
+  - [GLSL](/reference/formats/output/glsl) — GLSL ES 3.00 (WebGL2) shader source, and **GPUShaderForm**,
     the whole shader a GPU path here would run for the expression.
   - [JavaScript](/reference/formats/output/javascript) — JS source (the default eval target).
 
