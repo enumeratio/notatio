@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-partition-4-2-1-of-7			[ColoredEndofunctionCount, [IntegerPartition, [List, 4, 2, 1]]]	20955			the partition $4 + 2 + 1$ of $7$
+the-partition-3-3-1-of-7			[ColoredEndofunctionCount, [IntegerPartition, [List, 3, 3, 1]]]	27084			the partition $3 + 3 + 1$ of $7$
+findstat-st001610-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 1]], "'ColoredEndofunctionCount'"]	1	1	FindStat St001610	FindStat's value for [1]
+findstat-st001610-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'ColoredEndofunctionCount'"]	3	3	FindStat St001610	FindStat's value for [2]
+findstat-st001610-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'ColoredEndofunctionCount'"]	7	7	FindStat St001610	FindStat's value for [3]

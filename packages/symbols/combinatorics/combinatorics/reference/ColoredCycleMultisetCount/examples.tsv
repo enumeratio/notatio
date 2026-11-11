@@ -1,0 +1,6 @@
+id	section	role	expr	expected	known	source	caption
+the-partition-4-2-1-of-7			[ColoredCycleMultisetCount, [IntegerPartition, [List, 4, 2, 1]]]	170			the partition $4 + 2 + 1$ of $7$
+the-partition-3-3-1-of-7			[ColoredCycleMultisetCount, [IntegerPartition, [List, 3, 3, 1]]]	206			the partition $3 + 3 + 1$ of $7$
+findstat-st001612-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 1]], "'ColoredCycleMultisetCount'"]	1	1	FindStat St001612	FindStat's value for [1]
+findstat-st001612-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'ColoredCycleMultisetCount'"]	2	2	FindStat St001612	FindStat's value for [2]
+findstat-st001612-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'ColoredCycleMultisetCount'"]	3	3	FindStat St001612	FindStat's value for [3]

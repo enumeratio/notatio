@@ -5,6 +5,7 @@
 // columns" become statements about the conjugate rather than fresh definitions — which is
 // exactly the reduction-to-lesser-symbols the whole exercise is for.
 
+import { fold as foldWithType } from "../../collections/src/families/tables.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
 import {
   add,
@@ -32,6 +33,9 @@ import {
   where,
   x,
 } from "../../src/statistics/vocabulary.ts";
+
+/** The shared typed fold (a list accumulator the compiler can index), as this file's expressions. */
+const typedFold = (...args: Parameters<typeof foldWithType>): MathJSON => foldWithType(...args) as MathJSON;
 
 const on = "IntegerPartition";
 const stat = (
@@ -246,39 +250,41 @@ const solitairePreperiod: MathJSON = bind(
 const onSolitaireCycle = (body: MathJSON): MathJSON =>
   bind("c", solitaireAfter(solitaireSteps, solitaireStart), body, "list<integer>");
 /**
- * The partitions of the size dominated by this one, by a table over the rows of the candidate: entry (s, m) counts the
- * non-increasing rows so far (zeros allowed, so every partition is one sequence) summing to s and ending at m. Row k may
- * only bring the sum to at most the first k parts of this partition (padded with zeros). Entries are indexed from 1:
- * row s + 1, column m + 1.
+ * The partitions of the size dominated by `bound`, a partition of that size, by a table over the rows of the candidate: entry
+ * (s, m) counts the non-increasing rows so far (zeros allowed, so every partition is one sequence) summing to s and ending
+ * at m. Row k may only bring the sum to at most the first k parts of `bound` (padded with zeros). `rows` rows are laid, so
+ * the candidates have at most that many parts. Entries are indexed from 1: row s + 1, column m + 1.
  */
-const dominatedPartitionTable: MathJSON = fold(
-  upTo(total),
-  forEach(
-    upTo(add(total, 1)),
-    forEach(upTo(add(total, 1)), ["If", and(equals("r", 1), equals("c", add(total, 1))), 1, 0], "c"),
-    "r",
-  ),
-  forEach(
-    upTo(add(total, 1)),
+const dominatedPartitionTableOf = (bound: MathJSON, rows: MathJSON): MathJSON =>
+  fold(
+    upTo(rows),
     forEach(
       upTo(add(total, 1)),
-      [
-        "If",
-        and(
-          atMostValue("c", "r"),
-          atMostValue(
-            subtract("r", 1),
-            sumOver(["Range", 1, "b", 1], ["If", atMostValue("q", length()), at("q"), 0], "q"),
-          ),
-        ),
-        sumOver(["Range", "c", add(total, 1), 1], at("d", at(add(subtract("r", "c"), 1), "a")), "d"),
-        0,
-      ],
-      "c",
+      forEach(upTo(add(total, 1)), ["If", and(equals("r", 1), equals("c", add(total, 1))), 1, 0], "c"),
+      "r",
     ),
-    "r",
-  ),
-);
+    forEach(
+      upTo(add(total, 1)),
+      forEach(
+        upTo(add(total, 1)),
+        [
+          "If",
+          and(
+            atMostValue("c", "r"),
+            atMostValue(
+              subtract("r", 1),
+              sumOver(["Range", 1, "b", 1], ["If", atMostValue("q", length(bound)), at("q", bound), 0], "q"),
+            ),
+          ),
+          sumOver(["Range", "c", add(total, 1), 1], at("d", at(add(subtract("r", "c"), 1), "a")), "d"),
+          0,
+        ],
+        "c",
+      ),
+      "r",
+    ),
+  );
+const dominatedPartitionTable: MathJSON = dominatedPartitionTableOf(x, total);
 /**
  * Permutations whose cube is a fixed permutation with `a` cycles of length `d`: a cycle of d is the cube of a d-cycle
  * (unless 3 divides d), and three of them are the cube of a 3d-cycle in 2d^2 ways, over the unordered triples of cycles.
@@ -1130,6 +1136,1329 @@ const firstRowSkewSum = (shape: MathJSON, start: 0 | 1): MathJSON => {
 /** The standard tableaux of `shape` whose first descent (or n, when none) is even. */
 const evenFirstDescentTableaux = (shape: MathJSON): MathJSON => firstRowSkewSum(shape, 0);
 
+/** The value the fold over `upTo(largest)` is placing at its step b: the largest part, then each smaller. */
+const distinctWeightValue: MathJSON = subtract(add(largest, 1), "b");
+/**
+ * The distinct weights (contents) of the semistandard tableaux of the shape with entries up to its length: the compositions of the size
+ * into that many nonnegative parts whose sorted rearrangement the shape dominates, since the Kostka number is positive exactly then.
+ * A table over the values from the largest part down, entry (r, s) counting the ways to give r of the positions, summing to s, values
+ * so far: value v goes to k of the rest, in C(length - r, k) ways, and the sorted prefix sums stay within the shape's. They are
+ * concave in the row count and the prefix sums of equal values linear, so only the first and last of the k rows need checking.
+ * The rest of the positions take 0. Indexed from 1: row r + 1, column s + 1.
+ */
+const distinctWeightTable: MathJSON = bind(
+  "p",
+  forEach(positions, sumOver(upTo("i"), at("j"), "j")),
+  fold(
+    upTo(largest),
+    forEach(
+      ["Range", 0, length(), 1],
+      forEach(["Range", 0, total, 1], ["If", and(equals("r", 0), equals("s", 0)), 1, 0], "s"),
+      "r",
+    ),
+    forEach(
+      ["Range", 0, length(), 1],
+      forEach(
+        ["Range", 0, total, 1],
+        floored([
+          "Sum",
+          forEach(
+            ["Range", 0, "r", 1],
+            [
+              "If",
+              atMostValue(["Multiply", "k", distinctWeightValue], "s"),
+              [
+                "Multiply",
+                at(add(subtract("s", ["Multiply", "k", distinctWeightValue]), 1), at(add(subtract("r", "k"), 1), "a")),
+                binomialOf(subtract(length(), subtract("r", "k")), "k"),
+                [
+                  "If",
+                  equals("k", 0),
+                  1,
+                  [
+                    "If",
+                    atMostValue("s", at("r", "p")),
+                    [
+                      "If",
+                      atMostValue(
+                        add(subtract("s", ["Multiply", "k", distinctWeightValue]), distinctWeightValue),
+                        at(add(subtract("r", "k"), 1), "p"),
+                      ),
+                      1,
+                      0,
+                    ],
+                    0,
+                  ],
+                ],
+              ],
+              0,
+            ],
+            "k",
+          ),
+        ]),
+        "s",
+      ),
+      "r",
+    ),
+  ),
+  "list<integer>",
+);
+
+/** The longer side of the diagram: the fewest colors a proper coloring of its cells can use, and the most that are allowed. */
+const longerSide: MathJSON = ["Max", largest, length()];
+/**
+ * The most cells that j sets of cells, no two in a row or column, can cover: the list over j = 0 .. longer side (entry j + 1),
+ * the cells kept with at most j in a row and in a column. By the min-cut of that flow it is the least, over the first a rows
+ * and first b columns taken whole, of j (a + b) plus the cells outside them.
+ */
+const rookCoverage: MathJSON = forEach(
+  ["Range", 0, longerSide, 1],
+  [
+    "Min",
+    forEach(
+      ["Range", 0, length(), 1],
+      [
+        "Min",
+        forEach(
+          ["Range", 0, largest, 1],
+          add(
+            ["Multiply", "jj", add("aa", "bb")],
+            sumOver(positions, ["If", greater("i", "aa"), ["Max", subtract(here, "bb"), 0], 0]),
+          ),
+          "bb",
+        ),
+      ],
+      "aa",
+    ),
+  ],
+  "jj",
+);
+/**
+ * The class sizes of a proper coloring with the fewest colors, as a partition with that many parts: by Folkman and Fulkerson
+ * (the edges of a bipartite graph split into matchings of given sizes) they are those dominated by the gains of the coverage.
+ */
+const coloringProfile: MathJSON = forEach(upTo(longerSide), subtract(at(add("i", 1), "m"), at("i", "m")));
+
+/** The digit of `value` at part i in the mixed radix whose digit i runs 0 .. part i; reads the bound place values `pl` and radices `rd`. */
+const radixDigit = (value: MathJSON, i: MathJSON): MathJSON => [
+  "Mod",
+  ["Divide", subtract(value, ["Mod", value, at(i, "pl")]), at(i, "pl")],
+  at(i, "rd"),
+];
+/** The vectors below the multiplicities, each a number in that mixed radix. */
+const multisetVectors: MathJSON = ["Product", "rd"];
+/** The axes of the box: one per radix. */
+const axes: MathJSON = upTo(length("rd"));
+/** The radices of the box of a partition's own parts: one more than each part, so each digit runs 0 .. part. */
+const partRadices: MathJSON = forEach(positions, add(at("i"), 1));
+/** The digit of vector `value` at part i, from the bound table of digits `dg` (entry value + 1). */
+const vectorDigit = (value: MathJSON, i: MathJSON): MathJSON => at(i, at(add(value, 1), "dg"));
+/** The sum of the digits of vector `value`: the number of elements it holds. */
+const vectorSize = (value: MathJSON): MathJSON => ["Sum", at(add(value, 1), "dg")];
+/** 1 when the vector `value` has every digit divisible by `k`, else 0 (the zero vector is divisible by all). */
+const divisibleBy = (value: MathJSON, k: MathJSON): MathJSON => [
+  "If",
+  equals(floored(["Sum", forEach(axes, ["Mod", vectorDigit(value, "i"), k])]), 0),
+  1,
+  0,
+];
+/**
+ * `body` over the vectors below the multiplicities `radices` less one: each is a number in a mixed radix whose digit i runs
+ * 0 .. radix i - 1, so that adding or subtracting vectors is doing so to numbers while no digit leaves its range, and dividing a
+ * vector whose digits are all multiples of k is dividing the number by k. The bound lists are the radices `rd`, the place values
+ * `pl` and the digits `dg` of each vector (entry w + 1 for the vector numbered w).
+ */
+const overVectors = (radices: MathJSON, body: MathJSON): MathJSON =>
+  bind(
+    "rd",
+    radices,
+    bind(
+      "pl",
+      forEach(axes, ["Product", forEach(axes, ["If", less("j", "i"), at("j", "rd"), 1], "j")]),
+      bind(
+        "dg",
+        forEach(["Range", 0, subtract(multisetVectors, 1), 1], forEach(axes, radixDigit("w", "i")), "w"),
+        body,
+        "list<list<integer>>",
+      ),
+      "list<integer>",
+    ),
+    "list<integer>",
+  );
+/**
+ * The count p(w) of the unordered sums of nonzero vectors, each kind of vector v used as often as one of r(v) colors allows, that
+ * give the vector w, for the vector of multiplicities, by the Euler transform: |w| p(w) = sum over the vectors u in 1 .. w of
+ * c(u) p(w - u), where c(u) = sum over the k dividing every digit of u of |u / k| r(u / k), the log-derivative of the product
+ * of (1 - x^v)^(-r(v)). `weights` is the list of c(u) over the vectors u (entry u + 1).
+ */
+const eulerTransformCount = (weights: MathJSON): MathJSON =>
+  bind(
+    "cu",
+    weights,
+    bind(
+      "t",
+      typedFold(
+        [
+          "Join",
+          "a",
+          [
+            "List",
+            [
+              "Divide",
+              floored([
+                "Sum",
+                forEach(
+                  upTo("w"),
+                  [
+                    "If",
+                    equals(
+                      floored([
+                        "Sum",
+                        forEach(axes, ["If", greater(vectorDigit("u", "i"), vectorDigit("w", "i")), 1, 0]),
+                      ]),
+                      0,
+                    ),
+                    ["Multiply", at(add("u", 1), "cu"), at(add(subtract("w", "u"), 1), "a")],
+                    0,
+                  ],
+                  "u",
+                ),
+              ]),
+              vectorSize("w"),
+            ],
+          ],
+        ],
+        "a",
+        "w",
+        ["List", 1],
+        upTo(subtract(multisetVectors, 1)),
+        "list<integer>",
+      ),
+      at(multisetVectors, "t"),
+      "list<integer>",
+    ),
+    "list<integer>",
+  );
+/** The weights c(u) of the multisets of vectors: one color of each vector, so c(u) is the sum of |u| / k over the k dividing every digit. */
+const multisetWeights: MathJSON = forEach(
+  ["Range", 0, subtract(multisetVectors, 1), 1],
+  [
+    "If",
+    equals("u", 0),
+    0,
+    floored([
+      "Sum",
+      forEach(upTo(total), ["If", equals(divisibleBy("u", "k"), 1), ["Divide", vectorSize("u"), "k"], 0], "k"),
+    ]),
+  ],
+  "u",
+);
+/**
+ * The weights c(u) of the multisets of cycles: a vector v has |v|-fold-rotated words, so r(v) |v| is the sum over the k dividing every
+ * digit of k times the multinomial of v / k, and c(u) is that sum over the k dividing every digit of u of the multinomials of u / m,
+ * each m counted m times (the sum of phi(d) over d dividing m).
+ */
+const cycleMultisetWeights: MathJSON = forEach(
+  ["Range", 0, subtract(multisetVectors, 1), 1],
+  [
+    "If",
+    equals("u", 0),
+    0,
+    floored([
+      "Sum",
+      forEach(
+        upTo(total),
+        [
+          "If",
+          equals(divisibleBy("u", "k"), 1),
+          [
+            "Multiply",
+            "k",
+            [
+              "Divide",
+              factorialOf(["Divide", vectorSize("u"), "k"]),
+              ["Product", forEach(axes, factorialOf(["Divide", vectorDigit("u", "i"), "k"]))],
+            ],
+          ],
+          0,
+        ],
+        "k",
+      ),
+    ]),
+  ],
+  "u",
+);
+
+/**
+ * The weights c(u) of the symmetric matrices of nonnegative integers with these row sums, which are the multisets of the vectors e_i (a
+ * diagonal entry, counted once) and e_i + e_j (a pair of entries, i < j): c(u) is the sum of |u| / k over the k dividing every digit of u
+ * for which u / k is one of those vectors, a vector of 1 or 2 elements with no digit above 1.
+ */
+const symmetricMatrixWeights: MathJSON = forEach(
+  ["Range", 0, subtract(multisetVectors, 1), 1],
+  [
+    "If",
+    equals("u", 0),
+    0,
+    floored([
+      "Sum",
+      forEach(
+        upTo(total),
+        [
+          "If",
+          equals(divisibleBy("u", "k"), 1),
+          [
+            "If",
+            equals(vectorSize(["Divide", "u", "k"]), 1),
+            ["Divide", vectorSize("u"), "k"],
+            [
+              "If",
+              equals(vectorSize(["Divide", "u", "k"]), 2),
+              [
+                "If",
+                equals(
+                  floored(["Sum", forEach(axes, ["If", greater(vectorDigit(["Divide", "u", "k"], "i"), 1), 1, 0])]),
+                  0,
+                ),
+                ["Divide", vectorSize("u"), "k"],
+                0,
+              ],
+              0,
+            ],
+          ],
+          0,
+        ],
+        "k",
+      ),
+    ]),
+  ],
+  "u",
+);
+/** The distinct part sizes, largest first. */
+const distinctSizes: MathJSON = forEach(where(positions, startsOfRuns), at("i"));
+/** The radices of the box of the distinct sizes: one more than how many parts have each. */
+const sizeRadices: MathJSON = forEach("ds", add(sumOver(positions, ["If", equals(at("j"), "d"), 1, 0], "j"), 1), "d");
+/**
+ * The set partitions of the points that a permutation of this cycle type maps to themselves. They are the ways to group the
+ * cycles of the permutation into clusters, each cluster the cycles that meet one orbit of k blocks, with k dividing every cycle
+ * length in it, in k^(m - 1) ways for m cycles. The table is over the vectors of cycle counts by length, below those of this partition,
+ * numbered in a mixed radix: a(c) sums, over the cluster t that holds the first cycle of c, the choices of its cycles from each
+ * length, the weight of the cluster, and a(c - t). Entry c + 1 is a(c).
+ */
+const invariantSetPartitionCount: MathJSON = bind(
+  "ds",
+  distinctSizes,
+  overVectors(
+    sizeRadices,
+    bind(
+      "t",
+      typedFold(
+        bind(
+          "f",
+          ["Min", forEach(axes, ["If", greater(vectorDigit("c", "i"), 0), "i", add(length("rd"), 1)])],
+          [
+            "Join",
+            "a",
+            [
+              "List",
+              floored([
+                "Sum",
+                forEach(
+                  upTo("c"),
+                  [
+                    "If",
+                    equals(
+                      floored([
+                        "Sum",
+                        forEach(axes, ["If", greater(vectorDigit("u", "i"), vectorDigit("c", "i")), 1, 0]),
+                      ]),
+                      0,
+                    ),
+                    [
+                      "If",
+                      atLeastValue(vectorDigit("u", "f"), 1),
+                      [
+                        "Multiply",
+                        [
+                          "Product",
+                          forEach(axes, [
+                            "If",
+                            equals("i", "f"),
+                            binomialOf(subtract(vectorDigit("c", "i"), 1), subtract(vectorDigit("u", "i"), 1)),
+                            binomialOf(vectorDigit("c", "i"), vectorDigit("u", "i")),
+                          ]),
+                        ],
+                        floored([
+                          "Sum",
+                          forEach(
+                            upTo(total),
+                            [
+                              "If",
+                              equals(
+                                floored([
+                                  "Sum",
+                                  forEach(axes, [
+                                    "If",
+                                    greater(vectorDigit("u", "i"), 0),
+                                    ["Mod", at("i", "ds"), "k"],
+                                    0,
+                                  ]),
+                                ]),
+                                0,
+                              ),
+                              ["Power", "k", subtract(vectorSize("u"), 1)],
+                              0,
+                            ],
+                            "k",
+                          ),
+                        ]),
+                        at(add(subtract("c", "u"), 1), "a"),
+                      ],
+                      0,
+                    ],
+                    0,
+                  ],
+                  "u",
+                ),
+              ]),
+            ],
+          ],
+          "integer",
+        ),
+        "a",
+        "c",
+        ["List", 1],
+        upTo(subtract(multisetVectors, 1)),
+        "list<integer>",
+      ),
+      at(multisetVectors, "t"),
+      "list<integer>",
+    ),
+  ),
+  "list<integer>",
+);
+/**
+ * The colored rooted trees by their colors' multiplicities, over the vectors below those of this partition (three entries per vector
+ * w, from entry 3 w + 1: the trees r(w), the weight c(w) and the multisets of trees m(w)). A tree is a root of color i over a multiset of
+ * trees: r(w) is the sum of m(w - e_i) over the colors i in w; the multisets of trees are the Euler transform of the r, with c(w) the sum of
+ * |w / k| r(w / k) over the k dividing every digit of w, and |w| m(w) the sum of c(u) m(w - u) over the vectors u in 1 .. w.
+ */
+const rootedTreeTable: MathJSON = typedFold(
+  bind(
+    "rw",
+    floored([
+      "Sum",
+      forEach(axes, [
+        "If",
+        atLeastValue(vectorDigit("w", "i"), 1),
+        at(add(["Multiply", 3, subtract("w", at("i", "pl"))], 3), "a"),
+        0,
+      ]),
+    ]),
+    bind(
+      "cw",
+      floored([
+        "Sum",
+        forEach(
+          upTo(total),
+          [
+            "If",
+            equals(divisibleBy("w", "k"), 1),
+            [
+              "Multiply",
+              ["Divide", vectorSize("w"), "k"],
+              ["If", equals("k", 1), "rw", at(add(["Multiply", 3, ["Divide", "w", "k"]], 1), "a")],
+            ],
+            0,
+          ],
+          "k",
+        ),
+      ]),
+      [
+        "Join",
+        "a",
+        [
+          "List",
+          "rw",
+          "cw",
+          [
+            "Divide",
+            floored([
+              "Sum",
+              forEach(
+                upTo("w"),
+                [
+                  "If",
+                  equals(
+                    floored([
+                      "Sum",
+                      forEach(axes, ["If", greater(vectorDigit("u", "i"), vectorDigit("w", "i")), 1, 0]),
+                    ]),
+                    0,
+                  ),
+                  [
+                    "Multiply",
+                    ["If", equals("u", "w"), "cw", at(add(["Multiply", 3, "u"], 2), "a")],
+                    at(add(["Multiply", 3, subtract("w", "u")], 3), "a"),
+                  ],
+                  0,
+                ],
+                "u",
+              ),
+            ]),
+            vectorSize("w"),
+          ],
+        ],
+      ],
+      "integer",
+    ),
+    "integer",
+  ),
+  "a",
+  "w",
+  ["List", 0, 0, 1],
+  upTo(subtract(multisetVectors, 1)),
+  "list<integer>",
+);
+/** The colored rooted trees whose color multiplicities are the whole vector. */
+const rootedTreeCount: MathJSON = bind(
+  "t",
+  rootedTreeTable,
+  at(subtract(["Multiply", 3, multisetVectors], 2), "t"),
+  "list<integer>",
+);
+
+/** The colored rooted trees whose colors have the multiplicities of the vector `w`, from the bound table `t` of `rootedTreeTable`. */
+const rootedTreesOn = (w: MathJSON, table = "t"): MathJSON => at(add(["Multiply", 3, w], 1), table);
+/**
+ * The colored trees by the dissymmetry theorem: the trees rooted at a vertex, minus those rooted at an edge or at a vertex and an edge
+ * that are not rooted at an edge alone, the pairs of rooted trees (a root's tree beside the rest) counted twice unless equal:
+ * r - (r^2 - r(x^2)) / 2, where r^2 sums r(a) r(w - a) over the vectors a and r(x^2) is r(w / 2) when every digit of w is even.
+ */
+const treeCount: MathJSON = bind(
+  "t",
+  rootedTreeTable,
+  subtract(rootedTreesOn(subtract(multisetVectors, 1)), [
+    "Divide",
+    subtract(
+      floored([
+        "Sum",
+        forEach(
+          upTo(subtract(multisetVectors, 1)),
+          ["Multiply", rootedTreesOn("a"), rootedTreesOn(subtract(subtract(multisetVectors, 1), "a"))],
+          "a",
+        ),
+      ]),
+      [
+        "If",
+        equals(divisibleBy(subtract(multisetVectors, 1), 2), 1),
+        rootedTreesOn(["Divide", subtract(multisetVectors, 1), 2]),
+        0,
+      ],
+    ),
+    2,
+  ]),
+  "list<integer>",
+);
+
+/** 1 when vector `u` is at most vector `w` in every digit. */
+const belowVector = (u: MathJSON, w: MathJSON): MathJSON => [
+  "If",
+  equals(floored(["Sum", forEach(axes, ["If", greater(vectorDigit(u, "i"), vectorDigit(w, "i")), 1, 0])]), 0),
+  1,
+  0,
+];
+/**
+ * The sequences of nonzero vectors, each weighted `weightOf(u)`, that sum to each vector w, as the table over the vectors in the
+ * mixed radix (entry w + 1): s(0) = 1 and s(w) is the sum of the weight of u times s(w - u) over the vectors u in 1 .. w.
+ */
+const sequenceTable = (weightOf: (u: MathJSON) => MathJSON): MathJSON =>
+  typedFold(
+    [
+      "Join",
+      "a",
+      [
+        "List",
+        floored([
+          "Sum",
+          forEach(
+            upTo("w"),
+            [
+              "If",
+              equals(belowVector("u", "w"), 1),
+              ["Multiply", weightOf("u"), at(add(subtract("w", "u"), 1), "a")],
+              0,
+            ],
+            "u",
+          ),
+        ]),
+      ],
+    ],
+    "a",
+    "w",
+    ["List", 1],
+    upTo(subtract(multisetVectors, 1)),
+    "list<integer>",
+  );
+/**
+ * The colored endofunctions, unordered and unlabeled: a multiset of connected components, each a cycle of rooted trees, so by the
+ * Euler transform with weight c(u), the sum of m times L(u / m) over the m dividing every digit of u. L(v) is |v| times the count of
+ * cycles of rooted trees with colors v, summed over the rotations that fix them (phi), so L = |v| [x^v] log 1 / (1 - r): the sequences of
+ * rooted trees s(w), by s(w) the sum of r(a) s(w - a) over the vectors a in 1 .. w, give L(w) as the sum of |a| r(a) s(w - a).
+ */
+const endofunctionCount: MathJSON = bind(
+  "rt",
+  rootedTreeTable,
+  bind(
+    "sq",
+    sequenceTable((u) => rootedTreesOn(u, "rt")),
+    bind(
+      "lm",
+      forEach(
+        ["Range", 0, subtract(multisetVectors, 1), 1],
+        [
+          "If",
+          equals("w", 0),
+          0,
+          floored([
+            "Sum",
+            forEach(
+              upTo("w"),
+              [
+                "If",
+                equals(belowVector("u", "w"), 1),
+                ["Multiply", vectorSize("u"), rootedTreesOn("u", "rt"), at(add(subtract("w", "u"), 1), "sq")],
+                0,
+              ],
+              "u",
+            ),
+          ]),
+        ],
+        "w",
+      ),
+      eulerTransformCount(
+        forEach(
+          ["Range", 0, subtract(multisetVectors, 1), 1],
+          [
+            "If",
+            equals("u", 0),
+            0,
+            floored([
+              "Sum",
+              forEach(
+                upTo(total),
+                ["If", equals(divisibleBy("u", "k"), 1), ["Multiply", "k", at(add(["Divide", "u", "k"], 1), "lm")], 0],
+                "k",
+              ),
+            ]),
+          ],
+          "u",
+        ),
+      ),
+      "list<integer>",
+    ),
+    "list<integer>",
+  ),
+  "list<integer>",
+);
+
+/**
+ * The words with these multiplicities of letters that have no three consecutive increasing letters, by the cluster method of Goulden
+ * and Jackson: they are the sequences of the vectors b with weight B(b), 1/(1 - B), where B is the elementary symmetric
+ * functions e_1 + sum over m >= 3 of W(m) e_m, so only a vector of 0s and 1s counts, with weight 1 for one letter, and for m >= 3 letters
+ * the signed number of ways to cover a run of m by windows of 3 that overlap: -1, 1, 0 as m - 2 is 1, 2, 0 modulo 3.
+ */
+const clusterWeights: MathJSON = forEach(
+  ["Range", 0, subtract(multisetVectors, 1), 1],
+  [
+    "If",
+    equals("u", 0),
+    0,
+    [
+      "If",
+      equals(floored(["Sum", forEach(axes, ["If", greater(vectorDigit("u", "i"), 1), 1, 0])]), 0),
+      [
+        "If",
+        equals(vectorSize("u"), 1),
+        1,
+        [
+          "If",
+          equals(vectorSize("u"), 2),
+          0,
+          [
+            "If",
+            equals(["Mod", subtract(vectorSize("u"), 2), 3], 1),
+            -1,
+            ["If", equals(["Mod", subtract(vectorSize("u"), 2), 3], 2), 1, 0],
+          ],
+        ],
+      ],
+      0,
+    ],
+  ],
+  "u",
+);
+const avoidingWordCount: MathJSON = bind(
+  "bw",
+  clusterWeights,
+  bind(
+    "t",
+    sequenceTable((u) => at(add(u, 1), "bw")),
+    at(multisetVectors, "t"),
+    "list<integer>",
+  ),
+  "list<integer>",
+);
+/**
+ * The vectors of the box made into a sequence of layers by size, the sequences that fill the whole vector with the sizes of the
+ * vectors weakly decreasing, ties in any order: a product over the sizes s of the sequences of vectors of size s, 1 / (1 - B_s). With
+ * P_s the count using sizes up to s, P_s(w) = P_(s-1)(w) + the sum, over the allowed vectors u of size s in 1 .. w, of P_s(w - u).
+ * `allowed(u)` is 1 for a vector that is an item and `sizeOf(u)` its size, up to `layers`.
+ */
+const layeredSequenceCount = (
+  allowed: (u: MathJSON) => MathJSON,
+  sizeOf: (u: MathJSON) => MathJSON,
+  layers: MathJSON,
+): MathJSON =>
+  bind(
+    "t",
+    typedFold(
+      typedFold(
+        [
+          "Join",
+          "c",
+          [
+            "List",
+            add(
+              at(add("w", 1), "a"),
+              floored([
+                "Sum",
+                forEach(
+                  upTo("w"),
+                  [
+                    "If",
+                    equals(sizeOf("u"), "s"),
+                    [
+                      "If",
+                      equals(allowed("u"), 1),
+                      ["If", equals(belowVector("u", "w"), 1), at(add(subtract("w", "u"), 1), "c"), 0],
+                      0,
+                    ],
+                    0,
+                  ],
+                  "u",
+                ),
+              ]),
+            ),
+          ],
+        ],
+        "c",
+        "w",
+        ["List", at(1, "a")],
+        upTo(subtract(multisetVectors, 1)),
+        "list<integer>",
+      ),
+      "a",
+      "s",
+      forEach(upTo(multisetVectors), ["If", equals("i", 1), 1, 0]),
+      upTo(layers),
+      "list<integer>",
+    ),
+    at(multisetVectors, "t"),
+    "list<integer>",
+  );
+/** 1 when vector `u` has no digit above 1: a 0-1 vector. */
+const isZeroOneVector = (u: MathJSON): MathJSON => [
+  "If",
+  equals(floored(["Sum", forEach(axes, ["If", greater(vectorDigit(u, "i"), 1), 1, 0])]), 0),
+  1,
+  0,
+];
+/** The radices of a box of 0-1 vectors, one axis per part. */
+const binaryRadices: MathJSON = forEach(positions, 2);
+/** The parts a 0-1 vector `u` picks, added up. */
+const pickedPartSum = (u: MathJSON): MathJSON =>
+  floored(["Sum", forEach(positions, ["Multiply", at("i"), vectorDigit(u, "i")])]);
+/** The sum of `term` over `over`, which may be negative: its positive and negative parts are each floored, so the compiler types each real. */
+const signedSumOver = (over: MathJSON, term: MathJSON, variable: string): MathJSON =>
+  subtract(
+    floored(["Sum", forEach(over, ["Max", term, 0], variable)]),
+    floored(["Sum", forEach(over, ["Max", ["Negate", term], 0], variable)]),
+  );
+/**
+ * The trees counted by a formal group law, whose generating function f has the inverse phi: the sum over n of the coefficient of t^n in the
+ * product, over the parts k, of k! [x^k] exp(t phi(x)), times n! [x^n] f. Written a(m) = m! [x^m] phi and g(n) = n! [x^n] f, the first factors
+ * are the partial exponential Bell polynomials of a, whose coefficient of t^j in row k obeys B(k, j) = the sum over m in 1 .. k of
+ * C(k - 1, m - 1) a(m) B(k - m, j - 1); the table has one row per size 0 .. largest part, entry j + 1 for t^j. `gOf(d)` reads g(d), after
+ * `tables` binds what it needs; both come from the first line of FindStat's own code.
+ */
+const formalGroupLawCoefficient = (
+  a: (m: MathJSON) => MathJSON,
+  gOf: (d: MathJSON) => MathJSON,
+  tables: (body: MathJSON) => MathJSON = (body) => body,
+): MathJSON =>
+  tables(
+    bind(
+      "bt",
+      typedFold(
+        [
+          "Join",
+          "a",
+          [
+            "List",
+            forEach(
+              ["Range", 0, largest, 1],
+              [
+                "If",
+                equals("j", 0),
+                0,
+                signedSumOver(
+                  upTo("k"),
+                  [
+                    "Multiply",
+                    ["Binomial", subtract("k", 1), subtract("m", 1)],
+                    a("m"),
+                    at("j", at(add(subtract("k", "m"), 1), "a")),
+                  ],
+                  "m",
+                ),
+              ],
+              "j",
+            ),
+          ],
+        ],
+        "a",
+        "k",
+        ["List", forEach(["Range", 0, largest, 1], ["If", equals("j", 0), 1, 0], "j")],
+        upTo(largest),
+        "list<list<integer>>",
+      ),
+      bind(
+        "pl",
+        typedFold(
+          forEach(
+            ["Range", 0, total, 1],
+            signedSumOver(
+              ["Range", 0, "b", 1],
+              [
+                "If",
+                atMostValue("j", "d"),
+                ["Multiply", at(add(subtract("d", "j"), 1), "a"), at(add("j", 1), at(add("b", 1), "bt"))],
+                0,
+              ],
+              "j",
+            ),
+            "d",
+          ),
+          "a",
+          "b",
+          forEach(["Range", 0, total, 1], ["If", equals("d", 0), 1, 0], "d"),
+          x,
+          "list<integer>",
+        ),
+        floored(["Sum", forEach(["Range", 0, total, 1], ["Multiply", at(add("d", 1), "pl"), gOf("d")], "d")]),
+        "list<integer>",
+      ),
+      "list<list<integer>>",
+    ),
+  );
+/** 1 when the digits of vector `w` weakly decrease: the vector is a partition. */
+const isPartitionVector = (w: MathJSON): MathJSON => [
+  "If",
+  equals(
+    floored([
+      "Sum",
+      forEach(axes, [
+        "If",
+        less("i", length("rd")),
+        ["If", less(vectorDigit(w, "i"), vectorDigit(w, add("i", 1))), 1, 0],
+        0,
+      ]),
+    ]),
+    0,
+  ),
+  1,
+  0,
+];
+/**
+ * The standard tableaux with no two consecutive entries in one row, by inclusion and exclusion over the entries i that share a row
+ * with i + 1: a chain of the shapes inside this one, each step a run of m cells added to one row, signed (-1)^(m - 1). The table is
+ * over the vectors of row lengths, in a mixed radix with digit i running 0 .. part i (entry w + 1 for the vector numbered w), a vector that
+ * is not a partition counting 0.
+ */
+const tableauxWithoutRowRuns: MathJSON = typedFold(
+  [
+    "Join",
+    "a",
+    [
+      "List",
+      [
+        "If",
+        equals(isPartitionVector("w"), 1),
+        signedSumOver(
+          axes,
+          signedSumOver(
+            upTo(total),
+            [
+              "If",
+              atMostValue("m", vectorDigit("w", "i")),
+              [
+                "Multiply",
+                ["If", equals(["Mod", "m", 2], 1), 1, -1],
+                at(add(subtract("w", ["Multiply", "m", at("i", "pl")]), 1), "a"),
+              ],
+              0,
+            ],
+            "m",
+          ),
+          "i",
+        ),
+        0,
+      ],
+    ],
+  ],
+  "a",
+  "w",
+  ["List", 1],
+  upTo(subtract(multisetVectors, 1)),
+  "list<integer>",
+);
+/**
+ * The permutations whose Lehmer code, n entries with entry i at most n - i, takes its values with these multiplicities (the nonzero
+ * ones, as a multiset, are the parts). A table over the values from n - 1 down to 0, in the state the vector of how many parts of each
+ * size are used, in the mixed radix of the distinct sizes (entry w + 1 for the vector numbered w). The value with u = n - value
+ * entries allowed to take it has, less those taken by larger values (the sum of the sizes used), that many entries free, and
+ * takes a part of size k in C(free, k) ways.
+ */
+const lehmerCodeMultiplicityCount: MathJSON = bind(
+  "ds",
+  distinctSizes,
+  overVectors(
+    sizeRadices,
+    bind(
+      "t",
+      typedFold(
+        forEach(
+          ["Range", 0, subtract(multisetVectors, 1), 1],
+          [
+            "Sum",
+            [
+              "List",
+              at(add("w", 1), "a"),
+              floored([
+                "Sum",
+                forEach(axes, [
+                  "If",
+                  atLeastValue(vectorDigit("w", "i"), 1),
+                  [
+                    "Multiply",
+                    binomialOf(
+                      subtract(
+                        add("u", at("i", "ds")),
+                        floored(["Sum", forEach(axes, ["Multiply", vectorDigit("w", "j"), at("j", "ds")], "j")]),
+                      ),
+                      at("i", "ds"),
+                    ),
+                    at(add(subtract("w", at("i", "pl")), 1), "a"),
+                  ],
+                  0,
+                ]),
+              ]),
+            ],
+          ],
+          "w",
+        ),
+        "a",
+        "u",
+        forEach(upTo(multisetVectors), ["If", equals("i", 1), 1, 0]),
+        upTo(total),
+        "list<integer>",
+      ),
+      at(multisetVectors, "t"),
+      "list<integer>",
+    ),
+  ),
+  "list<integer>",
+);
+/**
+ * The linear extensions of the poset on a partition (Speyer's construction, from Fayers' question), over the regions of the diagram:
+ * those of rows a .. length past the first b columns, a partition again. A region has its cell (r, c) on the longest antidiagonal
+ * r + c, the lowest such, and splits there into the rows below r and the columns past c, with C(r + c - a - b + 1, r - a + 1) ways to
+ * interleave their orders: V(a, b) = C(r + c - a - b + 1, r - a + 1) V(r + 1, b) V(a, c), and 1 for an empty region. The table lists
+ * the regions from the last: region (a, b), numbered (a - 1)(largest part + 1) + b from 0, is entry (length + 1)(largest part + 1)
+ * minus that number.
+ */
+const regionWidth: MathJSON = add(largest, 1);
+const regionCount: MathJSON = ["Multiply", add(length(), 1), regionWidth];
+/** The region of the table's step q, numbered from 0. */
+const stepRegion: MathJSON = subtract(subtract(regionCount, 1), "q");
+const regionValue = (row: MathJSON, column: MathJSON): MathJSON =>
+  at(subtract(regionCount, add(["Multiply", subtract(row, 1), regionWidth], column)), "a");
+/** The cell r + c is largest in the region (rows from `ia`, columns past `ib`), the lowest of them: its row, as a key of the sum then the row. */
+const lowestLongestAntidiagonalKey: MathJSON = [
+  "Max",
+  forEach(positions, [
+    "If",
+    atLeastValue("i", "ia"),
+    ["If", greater(at("i"), "ib"), add(["Multiply", add("i", at("i")), add(length(), 1)], "i"), 0],
+    0,
+  ]),
+];
+const diagramLinearExtensionCount: MathJSON = bind(
+  "t",
+  typedFold(
+    bind(
+      "ia",
+      add(["Divide", subtract(stepRegion, ["Mod", stepRegion, regionWidth]), regionWidth], 1),
+      bind(
+        "ib",
+        ["Mod", stepRegion, regionWidth],
+        [
+          "Join",
+          "a",
+          [
+            "List",
+            [
+              "If",
+              greater("ia", length()),
+              1,
+              [
+                "If",
+                atMostValue(at("ia"), "ib"),
+                1,
+                bind(
+                  "rs",
+                  ["Mod", lowestLongestAntidiagonalKey, add(length(), 1)],
+                  [
+                    "Multiply",
+                    ["Binomial", add(subtract(add("rs", at("rs")), add("ia", "ib")), 1), add(subtract("rs", "ia"), 1)],
+                    regionValue(add("rs", 1), "ib"),
+                    regionValue("ia", at("rs")),
+                  ],
+                  "integer",
+                ),
+              ],
+            ],
+          ],
+        ],
+        "integer",
+      ),
+      "integer",
+    ),
+    "a",
+    "q",
+    ["List", 1],
+    upTo(subtract(regionCount, 1)),
+    "list<integer>",
+  ),
+  at(regionCount, "t"),
+  "list<integer>",
+);
+/** The least value from 0 that no option takes: `occurrences(k)` counts the options of value k, and the values stay below the size. */
+const leastMissingValue = (occurrences: (k: MathJSON) => MathJSON): MathJSON => [
+  "Min",
+  forEach(["Range", 0, total, 1], ["If", equals(floored(occurrences("k")), 0), "k", add(total, 1)], "k"),
+];
+/**
+ * The Grundy values of the positions inside this diagram, a position being a vector of row lengths (a partition) in the mixed radix with digit i
+ * running 0 .. part i: the table has entry w + 1 for the vector numbered w, the least value missing from those of the positions one move
+ * reaches (0 for a vector that is not a partition, which no move reaches). `occurrences(w, k)` counts the moves from w to a position
+ * whose value is k, reading the table so far as `a`.
+ */
+const grundyTable = (occurrences: (w: MathJSON, k: MathJSON) => MathJSON): MathJSON =>
+  typedFold(
+    [
+      "Join",
+      "a",
+      ["List", ["If", equals(isPartitionVector("w"), 1), leastMissingValue((k) => occurrences("w", k)), 0]],
+    ],
+    "a",
+    "w",
+    ["List", 0],
+    upTo(subtract(multisetVectors, 1)),
+    "list<integer>",
+  );
+/** The value, in the table so far, of the position numbered `index`. */
+const positionValue = (index: MathJSON): MathJSON => at(add(index, 1), "a");
+/**
+ * Chomp: a move picks a cell other than the first and cuts the cells below and right of it, so rows from i on shrink to at most c, where the
+ * cell is in column c (counting from 0) of row i.
+ */
+const chompMoveCount = (w: MathJSON, k: MathJSON): MathJSON =>
+  sumOver(
+    axes,
+    [
+      "Sum",
+      forEach(
+        ["Range", 0, total, 1],
+        [
+          "If",
+          less("c", vectorDigit(w, "i")),
+          [
+            "If",
+            and(equals("i", 1), equals("c", 0)),
+            0,
+            [
+              "If",
+              equals(
+                positionValue(
+                  floored([
+                    "Sum",
+                    forEach(
+                      axes,
+                      [
+                        "Multiply",
+                        ["If", atLeastValue("j", "i"), ["Min", vectorDigit(w, "j"), "c"], vectorDigit(w, "j")],
+                        at("j", "pl"),
+                      ],
+                      "j",
+                    ),
+                  ]),
+                ),
+                k,
+              ),
+              1,
+              0,
+            ],
+          ],
+          0,
+        ],
+        "c",
+      ),
+    ],
+    "i",
+  );
+/**
+ * The game that removes one cell or a 2 x 2 square of cells, the diagram staying a partition: a cell can go when it ends a row and the row
+ * below is shorter; a square can go when two rows of one length c >= 2 are followed by a row of at most c - 2.
+ */
+const squareGameMoveCount = (w: MathJSON, k: MathJSON): MathJSON =>
+  add(
+    sumOver(axes, [
+      "If",
+      atLeastValue(vectorDigit(w, "i"), 1),
+      [
+        "If",
+        less("i", length("rd")),
+        [
+          "If",
+          less(vectorDigit(w, add("i", 1)), vectorDigit(w, "i")),
+          ["If", equals(positionValue(subtract(w, at("i", "pl"))), k), 1, 0],
+          0,
+        ],
+        ["If", equals(positionValue(subtract(w, at("i", "pl"))), k), 1, 0],
+      ],
+      0,
+    ]),
+    sumOver(axes, [
+      "If",
+      less("i", length("rd")),
+      [
+        "If",
+        equals(vectorDigit(w, "i"), vectorDigit(w, add("i", 1))),
+        [
+          "If",
+          atLeastValue(vectorDigit(w, "i"), 2),
+          [
+            "If",
+            or(equals(add("i", 1), length("rd")), [
+              "If",
+              less(add("i", 1), length("rd")),
+              atMostValue(vectorDigit(w, add("i", 2)), subtract(vectorDigit(w, "i"), 2)),
+              "False",
+            ]),
+            [
+              "If",
+              equals(
+                positionValue(
+                  subtract(subtract(w, ["Multiply", 2, at("i", "pl")]), ["Multiply", 2, at(add("i", 1), "pl")]),
+                ),
+                k,
+              ),
+              1,
+              0,
+            ],
+            0,
+          ],
+          0,
+        ],
+        0,
+      ],
+      0,
+    ]),
+  );
+/** The exponent of 2 in m!, by Legendre's formula: the sum of floor(m / 2^k), for the k with 2^k at most the size. */
+const twoAdicFactorial = (m: MathJSON): MathJSON =>
+  floored([
+    "Sum",
+    forEach(
+      upTo(["Floor", ["Log", add(total, 1), 2]]),
+      ["Divide", subtract(m, ["Mod", m, ["Power", 2, "k"]]), ["Power", 2, "k"]],
+      "k",
+    ),
+  ]);
+/** The exponent of 2 in the number h: the count of powers 2^k, k from 1 up to the size's bits, that divide it. */
+const twoAdicValuation = (h: MathJSON): MathJSON =>
+  floored([
+    "Sum",
+    forEach(upTo(["Floor", ["Log", add(total, 1), 2]]), ["If", equals(["Mod", h, ["Power", 2, "k"]], 0), 1, 0], "k"),
+  ]);
+/** The exponent of 2 in the product of the hook lengths of the diagram whose row lengths are the digits of vector w. */
+const hookProductTwoAdicValuation = (w: MathJSON): MathJSON =>
+  floored([
+    "Sum",
+    forEach(
+      axes,
+      [
+        "Sum",
+        forEach(
+          upTo(total),
+          [
+            "If",
+            atMostValue("c", vectorDigit(w, "i")),
+            twoAdicValuation(
+              add(
+                subtract(
+                  add(
+                    subtract(vectorDigit(w, "i"), "c"),
+                    floored(["Sum", forEach(axes, ["If", atLeastValue(vectorDigit(w, "r"), "c"), 1, 0], "r")]),
+                  ),
+                  "i",
+                ),
+                1,
+              ),
+            ),
+            0,
+          ],
+          "c",
+        ),
+      ],
+      "i",
+    ),
+  ]);
+/**
+ * The fewest cells to remove for a partition inside this one to have an odd number of standard tableaux, which is when the hook lengths
+ * hold exactly the powers of 2 that its size factorial does. The restriction to the symmetric group on fewer points holds each partition
+ * inside, so this is the size less the largest size of such a partition.
+ */
+const smallestOddRestrictionDepth: MathJSON = [
+  "Min",
+  forEach(
+    ["Range", 0, subtract(multisetVectors, 1), 1],
+    [
+      "If",
+      equals(isPartitionVector("w"), 1),
+      [
+        "If",
+        equals(twoAdicFactorial(vectorSize("w")), hookProductTwoAdicValuation("w")),
+        subtract(total, vectorSize("w")),
+        total,
+      ],
+      total,
+    ],
+    "w",
+  ),
+];
+/** The bit k of the number `t`, 1 or 0. */
+const bitOf = (t: MathJSON, k: MathJSON): MathJSON => [
+  "Mod",
+  ["Divide", subtract(t, ["Mod", t, ["Power", 2, k]]), ["Power", 2, k]],
+  2,
+];
+/**
+ * The tilings of the diagram by single cells and dominoes, by the transfer table over the cells row by row, the diagram turned to have no more
+ * columns than rows. The state at a cell is a number whose bit k says that the cell k places on in reading order is already covered, by
+ * a vertical domino from above; the table has entry t + 1 for the state t, the states past the width of a row never set. At a cell
+ * already covered the state shifts; at a free one it takes a single cell (shift), a horizontal domino with the free cell to its right
+ * (shift, set bit 0), or a vertical domino with the cell below, which lies the row's length on in reading order (shift, set bit
+ * length - 1). A tiling is the state 0 after the last cell.
+ */
+const dominoTilingCount: MathJSON = bind(
+  "u",
+  ["If", greater(largest, length()), conjugate, x],
+  bind(
+    "t",
+    typedFold(
+      typedFold(
+        forEach(
+          ["Range", 0, subtract(["Power", 2, at(1, "u")], 1), 1],
+          add(
+            add(
+              [
+                "If",
+                atMostValue(add(["Multiply", 2, "m"], 1), subtract(["Power", 2, at(1, "u")], 1)),
+                at(add(["Multiply", 2, "m"], 2), "c"),
+                0,
+              ],
+              [
+                "If",
+                atMostValue(["Multiply", 2, "m"], subtract(["Power", 2, at(1, "u")], 1)),
+                at(add(["Multiply", 2, "m"], 1), "c"),
+                0,
+              ],
+            ),
+            add(
+              [
+                "If",
+                less("j", at("r", "u")),
+                [
+                  "If",
+                  equals(["Mod", "m", 2], 1),
+                  [
+                    "If",
+                    atMostValue(["Multiply", 2, subtract("m", 1)], subtract(["Power", 2, at(1, "u")], 1)),
+                    at(subtract(["Multiply", 2, "m"], 1), "c"),
+                    0,
+                  ],
+                  0,
+                ],
+                0,
+              ],
+              [
+                "If",
+                less("r", length("u")),
+                [
+                  "If",
+                  atMostValue("j", at(add("r", 1), "u")),
+                  [
+                    "If",
+                    equals(bitOf("m", subtract(at("r", "u"), 1)), 1),
+                    [
+                      "If",
+                      atMostValue(
+                        ["Multiply", 2, subtract("m", ["Power", 2, subtract(at("r", "u"), 1)])],
+                        subtract(["Power", 2, at(1, "u")], 1),
+                      ),
+                      at(add(["Multiply", 2, subtract("m", ["Power", 2, subtract(at("r", "u"), 1)])], 1), "c"),
+                      0,
+                    ],
+                    0,
+                  ],
+                  0,
+                ],
+                0,
+              ],
+            ),
+          ),
+          "m",
+        ),
+        "c",
+        "j",
+        "a",
+        upTo(at("r", "u")),
+        "list<integer>",
+      ),
+      "a",
+      "r",
+      forEach(["Range", 0, subtract(["Power", 2, at(1, "u")], 1), 1], ["If", equals("m", 0), 1, 0], "m"),
+      upTo(length("u")),
+      "list<integer>",
+    ),
+    at(1, "t"),
+    "list<integer>",
+  ),
+  "list<integer>",
+);
 export const PARTITION_STATISTICS: readonly Definition[] = [
   stat("LargestPart", "The largest part.", nonEmpty(largest)),
   stat(
@@ -2387,5 +3716,285 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "DesarrangementTableauCount",
     "The standard Young tableaux whose first ascent is even, which are the transposes of the tableaux of the conjugate shape with even first descent.",
     nonEmpty(evenFirstDescentTableaux(conjugate), 1),
+  ),
+
+  // ── FindStat's integer-partition statistics, batch 11 ───────────────────────────────────
+
+  stat(
+    "SemistandardTableauWeightCountWithEntriesUpToLength",
+    "The distinct weights of the semistandard tableaux of the shape with entries at most the number of parts: the arrangements of the partitions of the size, at most that many parts, that the shape dominates.",
+    nonEmpty(
+      bind(
+        "t",
+        distinctWeightTable,
+        floored(["Sum", forEach(["Range", 0, length(), 1], at(add(total, 1), at(add("r", 1), "t")), "r")]),
+        "list<list<integer>>",
+      ),
+      1,
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "ProperColoringSchemeCount",
+    "The partitions of the number of cells that are the class sizes of a proper coloring of the cells with the fewest colors, no two cells in a row or a column alike.",
+    nonEmpty(
+      bind(
+        "m",
+        rookCoverage,
+        bind(
+          "u",
+          coloringProfile,
+          bind(
+            "w",
+            at(add(total, 1), dominatedPartitionTableOf("u", longerSide)),
+            floored(["Sum", "w"]),
+            "list<integer>",
+          ),
+          "list<integer>",
+        ),
+        "list<integer>",
+      ),
+      1,
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "MultisetPartitionCount",
+    "The multiset partitions of the multiset with these multiplicities: its vector of multiplicities written as an unordered sum of nonzero vectors.",
+    nonEmpty(overVectors(partRadices, eulerTransformCount(multisetWeights)), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "ColoredRootedTreeCount",
+    "The rooted trees, unordered and unlabeled, on vertices colored with these multiplicities, vertices of one color being interchangeable.",
+    nonEmpty(overVectors(partRadices, rootedTreeCount)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "ColoredTreeCount",
+    "The trees, unrooted and unlabeled, on vertices colored with these multiplicities, vertices of one color being interchangeable.",
+    nonEmpty(overVectors(partRadices, treeCount)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "SemistandardTableauCountWithContent",
+    "The semistandard tableaux of any shape in which the entry i occurs as many times as part i: the symmetric matrices of nonnegative integers with these row sums.",
+    nonEmpty(overVectors(partRadices, eulerTransformCount(symmetricMatrixWeights)), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "InvariantSetPartitionCount",
+    "The set partitions of the points that a permutation of this cycle type maps to themselves.",
+    nonEmpty(invariantSetPartitionCount, 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "ColoredEndofunctionCount",
+    "The endofunctions, up to relabeling, on points colored with these multiplicities, points of one color being interchangeable.",
+    nonEmpty(overVectors(partRadices, endofunctionCount), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "WordCountWithoutThreeConsecutiveIncreasingLetters",
+    "The words in which letter i occurs as many times as part i that have no three consecutive letters in increasing order.",
+    nonEmpty(overVectors(partRadices, avoidingWordCount), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "NonnegativeIntegerMatrixCountWithDecreasingColumnSums",
+    "The matrices of nonnegative integers whose row sums are the parts and whose column sums weakly decrease, with no empty column.",
+    nonEmpty(
+      overVectors(
+        partRadices,
+        layeredSequenceCount(() => 1, vectorSize, total),
+      ),
+      1,
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "ZeroOneMatrixCountWithDecreasingColumnSums",
+    "The matrices of 0 and 1 whose row sums are the parts and whose column sums weakly decrease, with no empty column.",
+    nonEmpty(overVectors(partRadices, layeredSequenceCount(isZeroOneVector, vectorSize, length())), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "OrderedSetPartitionCountWithDecreasingBlockSums",
+    "The ways to put the parts, told apart by position, into an ordered list of blocks whose sums weakly decrease.",
+    nonEmpty(
+      overVectors(
+        binaryRadices,
+        layeredSequenceCount(() => 1, pickedPartSum, total),
+      ),
+      1,
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "RootedTreeCountWithNoLeafOfItsParentsColor",
+    "The rooted trees on these colored vertices, told apart by position within a color, in which no leaf has the color of its parent: n^(n-1) trees counted by the formal group law of x exp(-x).",
+    nonEmpty(
+      formalGroupLawCoefficient(
+        (m) => ["Multiply", m, ["If", equals(["Mod", m, 2], 1), 1, -1]],
+        (d) => ["If", equals(d, 0), 0, ["Power", d, subtract(d, 1)]],
+      ),
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "IncreasingTreeCountWithNoLeafOfItsParentsColor",
+    "The increasing trees on the vertices 1 .. n, colored in blocks with these multiplicities, in which no leaf has the color of its parent.",
+    nonEmpty(
+      formalGroupLawCoefficient(
+        (m) => ["If", equals(["Mod", m, 2], 1), 1, -1],
+        (d) => ["If", equals(d, 0), 0, factorialOf(subtract(d, 1))],
+      ),
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "BinaryTreeCountWithNoTwinLeavesOfOneColor",
+    "The rooted binary trees whose leaves are the colored vertices, internal vertices unlabeled, in which no internal vertex has two leaves of one color as its children.",
+    nonEmpty(
+      formalGroupLawCoefficient(
+        (m) => ["If", equals(m, 1), 1, ["If", equals(m, 2), -1, 0]],
+        (d) => [
+          "If",
+          equals(d, 0),
+          0,
+          [
+            "Divide",
+            factorialOf(subtract(["Multiply", 2, d], 2)),
+            ["Multiply", ["Power", 2, subtract(d, 1)], factorialOf(subtract(d, 1))],
+          ],
+        ],
+      ),
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "LeafLabeledTreeCountWithNoTwinLeavesOfOneColor",
+    "The rooted trees whose leaves are the colored vertices, internal vertices unlabeled and with at least two children, in which no internal vertex has only leaves of one color as its children.",
+    nonEmpty(
+      formalGroupLawCoefficient(
+        (m) => ["If", equals(m, 1), 1, -1],
+        (d) => at(add(d, 1), "gt"),
+        (body) =>
+          bind(
+            "gt",
+            typedFold(
+              [
+                "Join",
+                "a",
+                [
+                  "List",
+                  add(
+                    ["Multiply", -1, "n", at(add("n", 1), "a")],
+                    [
+                      "Multiply",
+                      2,
+                      floored([
+                        "Sum",
+                        forEach(
+                          upTo("n"),
+                          [
+                            "Multiply",
+                            ["Binomial", "n", "k"],
+                            at(add("k", 1), "a"),
+                            at(add(subtract("n", "k"), 2), "a"),
+                          ],
+                          "k",
+                        ),
+                      ]),
+                    ],
+                  ),
+                ],
+              ],
+              "a",
+              "n",
+              ["List", 0, 1],
+              upTo(total),
+              "list<integer>",
+            ),
+            body,
+            "list<integer>",
+          ),
+      ),
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "StandardTableauCountWithNoConsecutiveEntriesInOneRow",
+    "The standard Young tableaux of the shape in which no row holds i and i + 1 together.",
+    nonEmpty(overVectors(partRadices, bind("t", tableauxWithoutRowRuns, at(multisetVectors, "t"), "list<integer>")), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "LehmerCodeMultiplicityPermutationCount",
+    "The permutations of the size whose Lehmer code takes its values with these multiplicities, the nonzero multiplicities of its values being the parts.",
+    nonEmpty(lehmerCodeMultiplicityCount, 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "DiagramPosetLinearExtensionCount",
+    "The linear extensions of the poset on the diagram (Speyer's construction for the homogeneous Garnir relations), counted by the splitting of the diagram at its lowest cell on the longest antidiagonal into the rows below and the columns beyond.",
+    nonEmpty(diagramLinearExtensionCount, 1),
+  ),
+  stat(
+    "ChompGrundyValue",
+    "The Grundy value of Chomp on the diagram: a move cuts a cell and all cells below and right of it, any cell but the first, and the player left with the first cell alone loses.",
+    nonEmpty(
+      overVectors(partRadices, bind("t", grundyTable(chompMoveCount), at(multisetVectors, "t"), "list<integer>")),
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "SquareRemovalGrundyValue",
+    "The Grundy value of the game that removes a cell or a 2 x 2 square of cells from the diagram, which must stay a partition, the player who cannot move losing.",
+    nonEmpty(
+      overVectors(partRadices, bind("t", grundyTable(squareGameMoveCount), at(multisetVectors, "t"), "list<integer>")),
+    ),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "SmallestOddRestrictionDepth",
+    "The fewest cells to remove from the diagram so that the partition left has an odd number of standard tableaux: the least d such that the restriction of the irreducible representation to the symmetric group on n - d points has a constituent of odd dimension.",
+    nonEmpty(overVectors(partRadices, smallestOddRestrictionDepth)),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "DominoTilingCount",
+    "The tilings of the diagram by single cells and dominoes, the dominoes of two adjacent cells, whether in a row or a column.",
+    nonEmpty(dominoTilingCount, 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
+  ),
+  stat(
+    "ColoredCycleMultisetCount",
+    "The multisets of cycles on points colored with these multiplicities, points of one color being interchangeable.",
+    nonEmpty(overVectors(partRadices, eulerTransformCount(cycleMultisetWeights)), 1),
+    undefined,
+    TABLE_CHECK_WEIGHT,
   ),
 ];
