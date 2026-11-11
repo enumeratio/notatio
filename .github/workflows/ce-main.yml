@@ -29,6 +29,7 @@ concurrency:
 
 env:
   CE_REF: ${{ inputs.ce_ref || 'main' }}
+  COMPUTE_ENGINE_MAIN: "1"
 
 jobs:
   # Builds compute-engine, packs it, and says which commit and range that is.
