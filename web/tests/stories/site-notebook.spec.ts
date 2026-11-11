@@ -1,4 +1,4 @@
-// The notebook REPL (/notebook/) and the worksheet (/worksheet/): what a reader types and sees.
+// The notebook (/notebook/) and the worksheet (/worksheet/): what a reader types and sees.
 // Dragging a worksheet slider and the "+ cell" button belong to the figures-controls spec; here
 // a slider is set by value and a new cell is reached by focusing it.
 //
@@ -8,48 +8,47 @@ import { expect, test } from "@playwright/test";
 import { curveOf, peaks, sineMaxima } from "./support.ts";
 
 test.describe("/notebook/", () => {
-  test("the terminal numbers its lines, refers back by number and reports errors", async ({ page }) => {
+  const cell = (page: import("@playwright/test").Page, i: number) => page.locator("notatio-notebook .nb-cell").nth(i);
+  const answer = (page: import("@playwright/test").Page, i: number) => cell(page, i).locator("notatio-out");
+  // A cell shows typeset; a click opens its editor, and keys typed before the field has focus are lost.
+  const retype = async (page: import("@playwright/test").Page, i: number, text: string) => {
+    await cell(page, i).locator(".notatio-static.is-editable").first().click();
+    await expect(cell(page, i).locator("math-field")).toBeFocused();
+    await page.keyboard.press("Control+a");
+    await page.keyboard.type(text, { delay: 80 });
+    await page.keyboard.press("Enter");
+  };
+
+  test("opens on the starter: its cells answer and the plot draws", async ({ page }) => {
     await page.goto("/notebook/");
-    const screen = page.locator(".notatio-term__screen");
-    const input = page.getByLabel("Terminal input");
-    await expect(input).toBeAttached();
-    await expect(screen).toContainText("compute-engine REPL");
-    const run = async (line: string) => {
-      await input.focus();
-      await page.keyboard.type(line);
-      await page.keyboard.press("Enter");
-    };
-    // 10 choose 3 = 120; Out(1) + 1 = 121; In(1) is the first input's value.
-    await run("Binomial(10, 3)");
-    await expect(screen).toContainText("Out[1]= 120");
-    await run("Out(1) + 1");
-    await expect(screen).toContainText("Out[2]= 121");
-    await run("In(1)");
-    await expect(screen).toContainText("Out[3]= 120");
-    // sqrt(8) = 2 sqrt(2), kept exact.
-    await run("Sqrt(8)");
-    await expect(screen).toContainText("Out[4]= 2 * Sqrt(2)");
-    await run("1/0");
-    await expect(screen).toContainText("Out[5]= ComplexInfinity");
-    // A malformed line is reported and does not take a number.
-    await run("1/");
-    await expect(screen).toContainText("error: Epsil: expression-expected");
-    await expect(screen).toContainText("In[6]:=");
-    await expect(screen).not.toContainText("Out[6]");
+    // Four starter cells and the trailing blank one.
+    await expect(page.locator("notatio-notebook .nb-cell")).toHaveCount(5);
+    await expect(answer(page, 0)).toHaveAttribute("input-form", "120");
+    // r := Sqrt(8) is kept exact, and the cell after it reads r: 2 * 2 Sqrt(2) + 1.
+    await expect(answer(page, 1)).toHaveAttribute("input-form", "2 * Sqrt(2)");
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "1 + 4 * Sqrt(2)");
+    await expect(cell(page, 3).locator("graphics-box svg[aria-label=plot]")).toBeVisible();
   });
 
-  test("the page says nothing is saved: a reload starts a fresh transcript", async ({ page }) => {
+  test("editing the definition re-runs the cell that reads it", async ({ page }) => {
     await page.goto("/notebook/");
-    const screen = page.locator(".notatio-term__screen");
-    const input = page.getByLabel("Terminal input");
-    await expect(screen).toContainText("compute-engine REPL");
-    await input.focus();
-    await page.keyboard.type("2 + 3");
-    await page.keyboard.press("Enter");
-    await expect(screen).toContainText("Out[1]= 5");
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "1 + 4 * Sqrt(2)");
+    await retype(page, 1, "r:=9");
+    // 2 * 9 + 1.
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "19");
+  });
+
+  test("a reload keeps the reader's edit, and Reset returns to the starter", async ({ page }) => {
+    await page.goto("/notebook/");
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "1 + 4 * Sqrt(2)");
+    await retype(page, 1, "r:=9");
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "19");
+    // Saved once typing pauses.
+    await page.waitForTimeout(800);
     await page.reload();
-    await expect(page.locator(".notatio-term__screen")).toContainText("compute-engine REPL");
-    await expect(page.locator(".notatio-term__screen")).not.toContainText("Out[1]= 5");
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "19");
+    await page.getByRole("button", { name: "Reset" }).click();
+    await expect(answer(page, 2)).toHaveAttribute("input-form", "1 + 4 * Sqrt(2)");
   });
 });
 
