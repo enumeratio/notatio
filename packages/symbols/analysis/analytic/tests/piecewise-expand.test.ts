@@ -143,7 +143,7 @@ test("a staircase is left alone with no two-sided bound, from a span of 100, or 
   // An argument that is not monotone over the interval, a bound on another unknown's range only, a modulus unrelated to the bound.
   for (const [fn, assumptions] of [
     [
-      ["Floor", ["Power", "x", 2]],
+      ["Floor", ["Power", "x", 4]],
       ["Less", -2, "x", 2],
     ],
     [
@@ -505,6 +505,31 @@ test("a staircase over a constant multiple, Exp, Ln or a modulus of the square m
   expect(JSON.stringify(expand(["Floor", ["Multiply", "Pi", "x"]], ["Less", 0, "x", 2]))).toContain('"Pi"');
   expect(JSON.stringify(expand(["Floor", ["Exp", "x"]], ["Less", 0, "x", 3]))).toContain('["Ln",2]');
   expect(JSON.stringify(expand(["Floor", ["Ln", "x"]], ["Less", 1, "x", 10]))).toContain('"ExponentialE"');
+});
+
+test("a staircase over an even power across zero covers both signs of x", () => {
+  const sq = ["Power", "x", 2];
+  const cases: { fn: unknown; ref: (x: number) => number; lo: number; hi: number }[] = [
+    { fn: ["Floor", sq], ref: (x) => floor(x * x), lo: -1, hi: 2 },
+    { fn: ["Ceil", sq], ref: (x) => ceil(x * x), lo: -1, hi: 2 },
+    { fn: ["Round", sq], ref: (x) => roundEven(x * x), lo: -2, hi: 2 },
+    { fn: ["IntegerPart", sq], ref: (x) => trunc(x * x), lo: -2, hi: 3 },
+    { fn: ["Mod", sq, 3], ref: (x) => x * x - 3 * floor((x * x) / 3), lo: -3, hi: 2 },
+    { fn: ["Quotient", sq, 2], ref: (x) => floor((x * x) / 2), lo: -2, hi: 3 },
+    { fn: ["Floor", sq, 2], ref: (x) => 2 * floor((x * x) / 2), lo: -2, hi: 2 },
+  ];
+  for (const { fn, ref, lo, hi } of cases) {
+    const pw = expand(fn, ["Less", lo, "x", hi]);
+    expect(head(pw), JSON.stringify(fn)).toBe("Piecewise");
+    const points = [0, -1, 1, -2, 2, ...Array.from({ length: 199 }, (_, i) => lo + ((hi - lo) * (i + 1)) / 200 + 1e-4)];
+    for (const x of points.filter((p) => p > lo && p < hi)) {
+      expect(at(pw, { x }), `${JSON.stringify(fn)} at ${x}`).toBeCloseTo(ref(x), 9);
+    }
+  }
+  // A cell that starts at 0 leaves it out.
+  expect(JSON.stringify(expand(["Ceil", sq], ["Less", -2, "x", 2]))).toContain(
+    '["Or",["And",["LessEqual",-1,"x"],["Less","x",0]],["And",["Less",0,"x"],["LessEqual","x",1]]]',
+  );
 });
 
 test("bounds that are curved, scaled or linked to another unknown's range give the interval", () => {
