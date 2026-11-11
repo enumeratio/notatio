@@ -51,6 +51,6 @@ function onChange(e: Event) {
   min-height: 2rem;
   padding: 0.4rem 0.6rem;
   border: 1px dashed var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
 }
 </style>

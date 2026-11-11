@@ -416,7 +416,7 @@ onMounted(async () => {
   background: var(--vp-c-bg);
   color: var(--vp-c-text-1);
   border: 1px solid var(--vp-c-divider);
-  border-radius: 6px;
+  border-radius: var(--radius-2);
   padding: 0.25rem 0.5rem;
   font-size: 0.85rem;
 }
@@ -428,7 +428,7 @@ onMounted(async () => {
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
-  border-radius: 999px;
+  border-radius: var(--radius-1);
   padding: 0.25rem 0.75rem;
   font-size: 0.8rem;
   cursor: pointer;
@@ -440,7 +440,7 @@ onMounted(async () => {
 }
 .bench-fieldset {
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   padding: 0.4rem 0.8rem;
   margin: 0 0 0.6rem;
   display: flex;

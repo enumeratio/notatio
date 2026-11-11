@@ -105,11 +105,8 @@
   padding: 1.25rem;
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius-2);
-  background: var(--paper-raised);
+  background: var(--plate);
   overflow-x: auto;
-}
-.dark .plate > :not(figcaption) {
-  background: var(--paper-sunken);
 }
 .vp-doc .plate figcaption {
   margin-top: 0.75rem;

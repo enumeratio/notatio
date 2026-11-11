@@ -7,6 +7,8 @@
   --paper-sunken: #f4f2e9;
   --paper-deep: #ebe8dc;
   --paper-raised: #ffffff;
+  /* The ground a figure sits on. */
+  --plate: #ffffff;
   --ink: #1d1c19;
   --ink-2: #4d4a42;
   --ink-3: #6b675d;
@@ -78,6 +80,7 @@
   --paper-sunken: #1b1e25;
   --paper-deep: #232730;
   --paper-raised: #1f232b;
+  --plate: #1b1e25;
   --ink: #e9e5da;
   --ink-2: #b6b2a6;
   --ink-3: #928e84;

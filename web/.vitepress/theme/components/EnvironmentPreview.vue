@@ -145,7 +145,7 @@ onUnmounted(() => {
   font: 0.9rem/1.4 var(--vp-font-family-mono);
   padding: 0.4rem 0.6rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-bg-soft);
   color: inherit;
   resize: vertical;
@@ -153,7 +153,7 @@ onUnmounted(() => {
 .env-out {
   padding: 0.6rem;
   border: 1px dashed var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
 }
 @media print {
   .env-bar,

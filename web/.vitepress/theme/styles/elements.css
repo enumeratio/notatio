@@ -1,0 +1,121 @@
+/* How the elements sit on the page: cells, figures, controls and the box tags as one family.
+   The elements draw in light DOM and inject their own stylesheet after this one, so these
+   rules start at #app to outrank it; colors come from the tokens through --vp-* and --notatio-*. */
+
+/* A cell: In and Out as two labeled lines, the labels in the margin like equation numbers. */
+#app .notatio-row {
+  gap: 0.75rem;
+  margin: 0.3rem 0;
+}
+#app .style-box-label,
+#app .notatio-preview-label {
+  font-family: var(--font-code);
+  font-size: 0.7rem;
+  letter-spacing: 0.02em;
+  color: var(--ink-3);
+  min-width: 2rem;
+}
+#app .notatio-out-label {
+  color: var(--rubric);
+}
+#app .notatio-error {
+  color: var(--red);
+  font-size: 0.85rem;
+}
+#app .notatio-reset,
+#app .notatio-uncommitted-hint {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+}
+#app .notatio-reset:hover {
+  color: var(--blue);
+}
+
+/* Editors: the math field and the plain text forms share one frame. */
+#app notatio-in math-field,
+#app .notatio-cell-text {
+  border-radius: var(--radius-2);
+  color: var(--ink);
+}
+#app notatio-in math-field {
+  font-size: 1.08rem;
+}
+#app .notatio-cell notatio-in math-field:focus-within,
+#app notatio-in math-field:focus-within {
+  border-color: var(--blue);
+  background: var(--plate);
+  outline: none;
+  box-shadow: 0 0 0 3px var(--blue-wash);
+}
+#app .notatio-head-btn:last-child {
+  border-radius: 0 var(--radius-2) var(--radius-2) 0;
+}
+#app .notatio-cell-text:focus-visible {
+  outline: var(--focus);
+  outline-offset: 0;
+}
+
+/* Source boxes. */
+#app .notatio-code {
+  border-radius: var(--radius-2);
+  border-color: var(--rule);
+  background: var(--paper-sunken);
+}
+#app .notatio-code .tok-fn {
+  color: var(--code-function);
+}
+#app .notatio-code .tok-num {
+  color: var(--code-number);
+}
+#app .notatio-code .tok-str {
+  color: var(--code-string);
+}
+#app .notatio-form-src,
+#app .notatio-code pre,
+#app .notatio-code textarea {
+  font-size: 0.82rem;
+  font-variant-ligatures: none;
+}
+
+/* Figures: tick labels in the mono face; the 3D badge in rubric with paper text. */
+#app :is(graphics-box, graphics-3d-box, notatio-complex-plot-3d) svg text {
+  font-family: var(--font-code);
+}
+#app .graphics-3d-box-badge {
+  background: var(--rubric);
+  color: var(--paper);
+  border-radius: var(--radius-1);
+  font-family: var(--font-ui);
+}
+#app .graphics-box-unbound {
+  font-family: var(--font-ui);
+  color: var(--ink-3);
+}
+
+/* The notebook element: cells along a margin rule, the ordinal as a marginal number. */
+#app .notatio-notebook .nb-cell {
+  border-radius: 0;
+  padding: 0.45rem 0.5rem 0.45rem 0.75rem;
+  border-left: 2px solid var(--rule);
+}
+#app .notatio-notebook .nb-cell:hover {
+  background: none;
+  border-left-color: var(--rubric);
+}
+#app .nb-ordinal {
+  color: var(--ink-3);
+}
+#app .nb-cell.nb-drop-before {
+  box-shadow: inset 0 2px 0 0 var(--rubric);
+}
+#app .nb-reset,
+#app .nb-export {
+  border-radius: var(--radius-2);
+  border-color: var(--rule-strong);
+  font-family: var(--font-ui);
+}
+
+/* Native controls anywhere on the page take the ink blue. */
+#app :is(input[type="range"], input[type="checkbox"], input[type="radio"], progress) {
+  accent-color: var(--blue);
+}

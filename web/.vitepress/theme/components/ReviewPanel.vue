@@ -390,7 +390,7 @@ onBeforeUnmount(() => {
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
   color: var(--vp-c-text-1);
-  border-radius: 4px;
+  border-radius: var(--radius-1);
   padding: 0.25rem 0.4rem;
   font-size: 0.8rem;
 }
@@ -496,7 +496,7 @@ onBeforeUnmount(() => {
   margin: 0;
   padding: 0.6rem 0.7rem;
   border: 1px solid var(--vp-c-warning-1);
-  border-radius: 6px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-bg-soft);
 }
 .review-external-note {
@@ -530,7 +530,7 @@ onBeforeUnmount(() => {
   background: var(--vp-c-bg-soft);
   border: 1px solid var(--vp-c-divider);
   color: var(--vp-c-text-1);
-  border-radius: 4px;
+  border-radius: var(--radius-1);
   padding: 0.5rem;
   font-family: var(--vp-font-family-base);
   font-size: 0.82rem;
@@ -546,7 +546,7 @@ onBeforeUnmount(() => {
   border: 1px solid var(--vp-c-divider);
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-1);
-  border-radius: 4px;
+  border-radius: var(--radius-1);
   padding: 0.25rem 0.4rem;
   font-size: 0.72rem;
   cursor: pointer;

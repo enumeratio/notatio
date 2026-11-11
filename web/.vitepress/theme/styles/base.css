@@ -136,7 +136,7 @@ body {
   text-decoration-color: currentColor;
 }
 
-/* Inline code: the mono face in ink, no pill; a block sits on sunken paper between hairlines. */
+/* Inline code: the mono face in ink on sunken paper; a block sits in a hairline frame. */
 .vp-doc :not(pre) > code {
   font-family: var(--font-code);
   font-size: 0.84em;
@@ -145,7 +145,6 @@ body {
   background: var(--paper-sunken);
   padding: 0.08em 0.3em;
   border-radius: var(--radius-1);
-  box-shadow: inset 0 0 0 1px var(--rule);
 }
 .vp-doc a > code {
   color: var(--blue);

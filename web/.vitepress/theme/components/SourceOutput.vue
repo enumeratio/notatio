@@ -41,7 +41,7 @@ const toJson = (expr: unknown): string => JSON.stringify(expr);
   margin: 1rem 0 1.5rem;
   padding: 0.7rem 0.9rem;
   border: 1px solid var(--vp-c-brand-1);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-brand-soft, rgba(100, 108, 255, 0.06));
 }
 .so-try-label {
@@ -53,10 +53,10 @@ const toJson = (expr: unknown): string => JSON.stringify(expr);
   margin: 0.9rem 0;
   padding: 0.6rem 0.8rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
 }
 .so-row.is-divergent {
-  border-left: 3px solid #d9931a;
+  border-left: 3px solid var(--ochre);
 }
 .so-label {
   margin: 0 0 0.4rem;
@@ -80,9 +80,9 @@ const toJson = (expr: unknown): string => JSON.stringify(expr);
 }
 .so-chip {
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: rgba(217, 147, 26, 0.14);
-  color: #b7791f;
+  border-radius: var(--radius-1);
+  background: var(--ochre-wash);
+  color: var(--ochre);
   font-size: 0.72rem;
   white-space: nowrap;
 }

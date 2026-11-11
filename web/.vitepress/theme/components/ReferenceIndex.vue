@@ -150,7 +150,7 @@ const inline = (text: string): string =>
   display: inline-block;
   margin: 0 0.15rem;
   padding: 0 0.4rem;
-  border-radius: 999px;
+  border-radius: var(--radius-1);
   font-family: var(--vp-font-family-mono);
   font-size: 0.72rem;
   line-height: 1.5;
@@ -161,18 +161,18 @@ const inline = (text: string): string =>
   color: var(--vp-c-brand-1);
 }
 .ref-standing.is-primitive {
-  background: rgba(217, 147, 26, 0.14);
-  color: #b7791f;
+  background: var(--ochre-wash);
+  color: var(--ochre);
 }
 .ref-reach {
   white-space: nowrap;
 }
 .ref-reach-verified {
-  color: var(--vp-c-green-1, #3a9c5a);
+  color: var(--vp-c-green-1, var(--green));
   font-size: 0.85em;
 }
 .ref-reach-broken {
-  color: var(--vp-c-warning-1, #d9931a);
+  color: var(--vp-c-warning-1, var(--ochre));
   font-size: 0.85em;
   font-weight: 700;
 }
