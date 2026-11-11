@@ -81,6 +81,7 @@ export class Repl {
   constructor(opts: ReplOptions = {}) {
     this.session = new Session(opts.defaults);
     this.color = opts.color ?? true;
+    this.session.color = this.color;
     this.environment = opts.environment;
     this.extra = new Map(Object.entries(opts.commands ?? {}));
   }
@@ -154,7 +155,7 @@ export class Repl {
       case "forms":
         return {
           text: FORMS.map(
-            (f) => `  ${f === s.form ? cyan("*", this.color) : " "} ${f.padEnd(9)} ${FORM_LABEL[f]}`,
+            (f) => `  ${f === s.form ? cyan("*", this.color) : " "} ${f.padEnd(12)} ${FORM_LABEL[f]}`,
           ).join("\n"),
         };
       case "env": {

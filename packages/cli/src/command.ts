@@ -78,6 +78,8 @@ export interface EvalRequest {
    * controls, captions the declarations); omitted, the result is left as it is.
    */
   environment?: Environment;
+  /** Style StandardForm with ANSI, for a terminal that takes it. */
+  color?: boolean;
 }
 
 export interface EvalOk {
@@ -131,11 +133,11 @@ export function evaluateCommand(req: EvalRequest, defaults: SessionDefaults = {}
     }
     if (req.numeric) expr = expr.N();
     // The primary form must render; a secondary one that can't is just left out.
-    const result = render(expr, forms[0]);
+    const result = render(expr, forms[0], req.color);
     const rendered: Partial<Record<Form, string>> = { [forms[0]]: result };
     for (const f of forms.slice(1)) {
       try {
-        rendered[f] = render(expr, f);
+        rendered[f] = render(expr, f, req.color);
       } catch {
         // not every expression has every form (code targets need numeric input)
       }
@@ -146,8 +148,8 @@ export function evaluateCommand(req: EvalRequest, defaults: SessionDefaults = {}
   }
 }
 
-function render(expr: Expression, form: Form): string {
-  const out = renderForm(expr, form);
+function render(expr: Expression, form: Form, color?: boolean): string {
+  const out = renderForm(expr, form, { color });
   if (out === "") throw new Error(`no ${FORM_LABEL[form]} for this expression`);
   return out;
 }
@@ -384,6 +386,7 @@ function evaluate(
       // structured reply keeps the expression whole for whoever asked. `--env` names
       // another one to reduce for -- `print` samples a control into small multiples.
       environment: chosen ?? (p.json ? undefined : PIPE),
+      color: !p.json && host.color,
     },
     defaults,
   );
@@ -399,6 +402,6 @@ function evaluate(
 function listForms(json: boolean, current: Form): CommandResult {
   if (json)
     return ok(`${JSON.stringify(FORMS.map((f) => ({ name: f, label: FORM_LABEL[f], default: f === current })))}\n`);
-  const rows = FORMS.map((f) => `  ${f === current ? "*" : " "} ${f.padEnd(9)} ${FORM_LABEL[f]}`);
+  const rows = FORMS.map((f) => `  ${f === current ? "*" : " "} ${f.padEnd(12)} ${FORM_LABEL[f]}`);
   return ok(`${rows.join("\n")}\n`);
 }

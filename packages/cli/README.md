@@ -54,10 +54,13 @@ In[4]:= x^2 + 1
 Out[4]= (_.x * _.x) + 1
 ```
 
-Forms: `inputform` (the default), `tex`, `mathjson`, `wolfram`, `epsil`, `outputform`,
-`asciimath`, `mathml`, `numpy`, `glsl`, `wgsl`, `js`. Aliases: `standardform` is `inputform`,
-`text` is `outputform`, `wl`/`fullform` are `wolfram`, `texform`/`latex` are `tex`,
-`py`/`python` are `numpy`.
+Forms: `inputform` (the default), `standardform`, `tex`, `mathjson`, `wolfram`, `epsil`,
+`outputform`, `asciimath`, `mathml`, `numpy`, `glsl`, `wgsl`, `js`. Aliases: `text` is
+`outputform`, `wl`/`fullform` are `wolfram`, `texform`/`latex` are `tex`, `py`/`python` are `numpy`.
+
+`standardform` is the notation the web shows, laid out on character cells: stacked fractions,
+raised scripts, fenced matrices. On a terminal it is styled (variables slanted, numbers
+colored, a `StyleBox`'s weight and color); piped, or with `NO_COLOR` set, it is plain text.
 
 `inputform` and `epsil` both print Epsil, but `inputform` is what you would retype: it prints
 PascalCase heads and option names, and normalises the tree (`x - 2` for `x + -2`). `epsil` is
