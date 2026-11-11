@@ -1,4 +1,5 @@
 ---
+pageClass: wide-page
 head:
   - - meta
     - name: robots

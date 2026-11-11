@@ -119,3 +119,97 @@
 #app :is(input[type="range"], input[type="checkbox"], input[type="radio"], progress) {
   accent-color: var(--blue);
 }
+
+/* Controls: readouts in the mono face; pads and menus square their corners with the rest. */
+#app .control-readout {
+  font-family: var(--font-code);
+  font-size: 0.78em;
+  color: var(--ink-2);
+}
+#app .slider-2d-box-pad {
+  border-color: var(--rule-strong);
+  border-radius: var(--radius-1);
+  background:
+    linear-gradient(var(--rule) 1px, transparent 1px) 0 0 / 100% 25%,
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px) 0 0 / 25% 100%,
+    var(--plate);
+}
+#app .slider-2d-box-pad-dot,
+#app .locator-box-dot {
+  box-shadow: 0 0 0 2px var(--plate);
+}
+
+/* The worksheet: cells as ruled slips on the figure ground, beside one framed screen. */
+#app .ws-toolbar button {
+  border-color: var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: transparent;
+  font-family: var(--font-ui);
+  color: var(--ink-2);
+}
+#app .ws-toolbar button:hover {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+#app .ws-cell {
+  border-color: var(--rule);
+  border-radius: var(--radius-2);
+  background: var(--plate);
+  padding: 0.35rem 0.5rem;
+}
+#app .ws-cell:focus-within {
+  border-color: var(--rule-strong);
+}
+#app .ws-drop-before {
+  border-top-color: var(--rubric);
+}
+#app .ws-screen {
+  border-color: var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--plate);
+}
+
+/* The terminal: its bar's controls match the page's buttons; the screen is a dark plate in both themes. */
+#app .notatio-term__hint {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  opacity: 1;
+}
+#app .notatio-term__select,
+#app .notatio-term__btn {
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
+  border-radius: var(--radius-2);
+  border-color: var(--rule-strong);
+  background: transparent;
+}
+#app .notatio-term__btn:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+#app .notatio-term__screen {
+  border-radius: var(--radius-2);
+  border: 1px solid var(--rule-strong);
+}
+#app .notatio-term__figure {
+  border-color: var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--plate);
+}
+
+/* The collection table: a booktabs table in a hairline frame. */
+#app .nct-title {
+  color: var(--ink);
+}
+#app .nct-count {
+  font-family: var(--font-ui);
+  color: var(--ink-3);
+}
+#app .nct {
+  border-radius: var(--radius-2);
+  background: var(--plate);
+}

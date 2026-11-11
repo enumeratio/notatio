@@ -946,10 +946,19 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
   margin-right: auto;
   margin-left: 0.75rem;
 }
+/* The section's rule runs the column, so the head carries it rather than its h2. */
 .ref-examples-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: var(--hairline);
+}
+.ref-examples-head h2 {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
 }
 .ref-view {
   display: flex;

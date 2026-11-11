@@ -435,7 +435,7 @@ onMounted(async () => {
 }
 .bench-tabs button[aria-selected="true"] {
   background: var(--vp-c-brand-1);
-  color: var(--vp-c-white, #fff);
+  color: var(--paper);
   border-color: var(--vp-c-brand-1);
 }
 .bench-fieldset {

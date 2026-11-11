@@ -247,6 +247,12 @@
 #app .VPDoc.has-aside .content-container {
   max-width: var(--column);
 }
+/* A tool or a wide table, not a page of prose, takes the screen's width (`pageClass`). */
+@media (min-width: 960px) {
+  #app :is(.worksheet-page, .wide-page) .VPDoc:not(.has-sidebar) :is(.container, .content, .content-container) {
+    max-width: 1280px;
+  }
+}
 @media (min-width: 1280px) {
   #app .VPDoc .aside {
     max-width: 240px;
