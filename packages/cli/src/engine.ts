@@ -5,12 +5,13 @@
 // is returned as structured data and drawn by whichever adapter runs the core.
 
 import { type Expression, ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { combineNotation, registerNotation } from "@enumeratio/boxes";
+import { combineNotation, makeBoxes, registerNotation } from "@enumeratio/boxes";
 import { setEngineDefaults } from "@enumeratio/engine";
 import { CARRIERS, declareCombinatorics, declareMaps } from "@enumeratio/combinatorics";
 import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
 import { declareGraphics, exportTo, importFrom } from "@enumeratio/formats";
 import { displayLatexSyntax } from "@enumeratio/frontend/display";
+import { drawBoxes } from "./cell-layout.ts";
 import { NOTATION_ENTRIES } from "./notation.ts";
 import {
   declareDistributions,
@@ -62,6 +63,7 @@ export function classifyInput(src: string, fallback: Syntax = "epsil"): Classifi
 
 export const FORMS = [
   "inputform",
+  "standardform",
   "tex",
   "mathjson",
   "wolfram",
@@ -78,6 +80,7 @@ export type Form = (typeof FORMS)[number];
 
 export const FORM_LABEL: Record<Form, string> = {
   inputform: "InputForm",
+  standardform: "StandardForm",
   tex: "TeXForm",
   mathjson: "MathJSON",
   wolfram: "WolframFullForm",
@@ -92,7 +95,7 @@ export const FORM_LABEL: Record<Form, string> = {
 };
 
 // A display form is just a @enumeratio/formats export format under a short name.
-const FORMAT_OF: Record<Form, string> = {
+const FORMAT_OF: Record<Exclude<Form, "standardform">, string> = {
   inputform: "InputForm",
   tex: "TeX",
   mathjson: "MathJSON",
@@ -107,8 +110,15 @@ const FORMAT_OF: Record<Form, string> = {
   js: "JavaScript",
 };
 
+export interface RenderOptions {
+  /** StandardForm's weight, slant and color as ANSI; plain by default (a pipe, a wire reply). */
+  color?: boolean;
+}
+
 /** Render a boxed expression in the requested output form (via the format registry). */
-export function renderForm(expr: Expression, form: Form): string {
+export function renderForm(expr: Expression, form: Form, options: RenderOptions = {}): string {
+  // StandardForm is the web's boxes, laid out on character cells: stacked fractions, raised scripts.
+  if (form === "standardform") return drawBoxes(makeBoxes(expr.json), { color: options.color, styled: options.color });
   return String(exportTo(expr, FORMAT_OF[form]));
 }
 
@@ -127,7 +137,6 @@ const FORM_ALIASES: Record<string, Form> = {
   fullform: "wolfram",
   wolframfullform: "wolfram",
   wolframlanguage: "wolfram",
-  standardform: "inputform",
   text: "outputform",
 };
 const SYNTAX_ALIASES: Record<string, Syntax> = {
@@ -210,6 +219,8 @@ export class Session {
   readonly history: EvalResult[] = [];
   readonly vars = new Map<string, Expression>();
   form: Form = "inputform";
+  /** Whether a terminal takes ANSI: StandardForm is styled only then. */
+  color = false;
   defaultSyntax: Syntax = "epsil";
   private counter = 0;
 
@@ -323,7 +334,7 @@ export class Session {
 
   render(expr: Expression, form: Form = this.form): string {
     try {
-      const out = renderForm(expr, form);
+      const out = renderForm(expr, form, { color: this.color });
       return out === "" ? `(no ${FORM_LABEL[form]} for this expression)` : out;
     } catch (err) {
       return `(${FORM_LABEL[form]} unavailable: ${(err as Error).message})`;

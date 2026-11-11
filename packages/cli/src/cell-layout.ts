@@ -25,6 +25,8 @@ import { controlLine } from "./control-draw.ts";
 type Json = Parameters<typeof pin>[0];
 
 export interface LayoutOptions extends CellOptions {
+  /** Paint weight, slant and color as ANSI: a `StyleBox`'s own, and italic for a variable. */
+  readonly styled?: boolean;
   /** A `Dynamic`'s expression, pinned at its controls' values, as the session would show its value; absent, written as math. */
   readonly evaluate?: (json: Json) => string;
 }
@@ -48,7 +50,10 @@ function leafLines(box: Box, options: LayoutOptions, values: ReadonlyMap<string,
   return ["?"];
 }
 
-const visibleWidth = (line: string): number => Array.from(stripAnsi(line).replace(/\p{M}/gu, "")).length;
+// The invisible operators (function application, times) take no cell.
+const unwritten = (text: string): string => text.replace(/[\u2061\u2062]/g, "");
+
+const visibleWidth = (line: string): number => Array.from(unwritten(stripAnsi(line)).replace(/\p{M}/gu, "")).length;
 
 /** Integer character cells; a figure takes the room its drawing does. */
 function cellMetrics(
@@ -96,6 +101,50 @@ function cellsOf(line: string): string[] {
   return out;
 }
 
+type Inker = (item: Extract<Item, { kind: "text" }>) => string;
+
+const NAMED_COLORS: Readonly<Record<string, number>> = {
+  Black: 30,
+  Red: 31,
+  Green: 32,
+  Yellow: 33,
+  Blue: 34,
+  Magenta: 35,
+  Cyan: 36,
+  White: 37,
+  Gray: 90,
+};
+
+/** An SGR color: a `#rrggbb` in 24 bits, a basic name by its code; anything else is left unpainted. */
+function colorCode(color: string): string | undefined {
+  const hex = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(color);
+  if (hex) return `38;2;${parseInt(hex[1]!, 16)};${parseInt(hex[2]!, 16)};${parseInt(hex[3]!, 16)}`;
+  const named = NAMED_COLORS[color.charAt(0).toUpperCase() + color.slice(1).toLowerCase()];
+  return named === undefined ? undefined : String(named);
+}
+
+// A lone letter is a variable (the capture's odd parts); a run of digits, scripts included, a number.
+const VARIABLE_OR_NUMBER = /((?<![\p{L}0-9])\p{L}(?![\p{L}0-9])|\p{N}+(?:\.[0-9]+)?)/u;
+
+/** A run with its font's weight and slant and its color; a variable slanted, a number cyan unless colored. */
+function mathInk(item: Extract<Item, { kind: "text" }>): string {
+  const own = item.color === undefined ? undefined : colorCode(item.color);
+  const base = [
+    ...(item.font.weight === "Bold" ? ["1"] : []),
+    ...(item.font.slant === "Italic" ? ["3"] : []),
+    ...(own ? [own] : []),
+  ];
+  return unwritten(item.text)
+    .split(VARIABLE_OR_NUMBER)
+    .map((part, i) => {
+      if (part.trim() === "") return part;
+      const extra = i % 2 === 0 ? [] : /^\p{L}$/u.test(part) ? ["3"] : own ? [] : ["36"];
+      const codes = [...new Set([...base, ...extra])];
+      return codes.length === 0 ? part : `\x1b[${codes.join(";")}m${part}\x1b[0m`;
+    })
+    .join("");
+}
+
 class Canvas {
   readonly ink: (string | undefined)[];
   readonly masks: Uint8Array;
@@ -122,6 +171,7 @@ function paint(
   oy: number,
   clip: Clip,
   lines: (box: Box) => string[],
+  ink: Inker,
 ) {
   const inside = (x: number, y: number): boolean => x >= clip.x0 && x < clip.x1 && y >= clip.y0 && y < clip.y1;
   const mark = (x: number, y: number, mask: number): void => {
@@ -134,7 +184,7 @@ function paint(
     const [x, y] = [item.x + ox, item.y + oy];
     switch (item.kind) {
       case "text":
-        cellsOf(item.text).forEach((char, k) => put(x + k, y, char));
+        cellsOf(ink(item)).forEach((char, k) => put(x + k, y, char));
         break;
       case "rule":
         for (let k = 0; k < item.length; k++) {
@@ -174,6 +224,7 @@ function paint(
             y1: Math.min(clip.y1, y + item.height),
           },
           lines,
+          ink,
         );
         break;
     }
@@ -181,9 +232,9 @@ function paint(
 }
 
 /** A display list on cells, as rows of text with trailing blanks trimmed. */
-function render(list: DisplayList, lines: (box: Box) => string[]): string {
+function render(list: DisplayList, lines: (box: Box) => string[], ink: Inker): string {
   const canvas = new Canvas(list.width, list.height);
-  paint(canvas, list.items, 0, 0, { x0: 0, y0: 0, x1: list.width, y1: list.height }, lines);
+  paint(canvas, list.items, 0, 0, { x0: 0, y0: 0, x1: list.width, y1: list.height }, lines, ink);
   const rows: string[] = [];
   for (let y = 0; y < canvas.height; y++) {
     let row = "";
@@ -206,5 +257,5 @@ export function drawBoxes(box: Box, options: LayoutOptions = {}): string {
     if (value !== undefined) values.set(control.name, value);
   }
   const { metrics, lines } = cellMetrics(options, values);
-  return render(layout(box, DEFAULT_STYLE, metrics), lines);
+  return render(layout(box, DEFAULT_STYLE, metrics), lines, options.styled ? mathInk : (item) => unwritten(item.text));
 }

@@ -56,7 +56,7 @@ test("Wolfram *Form names resolve to forms", () => {
   expect(run(["-f", "TeXForm", "1/2 + 1/3"]).stdout).toBe("\\frac{5}{6}\n");
   expect(run(["-f", "FullForm", "x^2 + 1"]).stdout).toBe("Plus[Power[x, 2], 1]\n");
   expect(run(["-f", "InputForm", "x^2 + 1"]).stdout).toBe("x ^ 2 + 1\n");
-  expect(run(["--form=StandardForm", "x^2 + 1"]).stdout).toBe("x ^ 2 + 1\n");
+  expect(run(["--form=StandardForm", "x^2 + 1"]).stdout).toBe("x² + 1\n");
 });
 
 test("-f repeats: one line per form, in order", () => {
