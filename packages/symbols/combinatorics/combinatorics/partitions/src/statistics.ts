@@ -58,6 +58,10 @@ const stat = (
  *  stops at 10 cells: every partition up to that size is still compared, among them repeated
  *  parts, one row and one column. */
 const TABLE_CHECK_WEIGHT = 10;
+/** The tables over the vectors below the parts take seconds to interpret from a partition of 5 (a table of 2^5 vectors, for each of which the
+ *  vectors below it are tried), and the compiled code stays fast: the compile cross-check and the compiled-against-interpreted test stop at 4
+ *  cells, where every partition up to size 4 is still compared. */
+const VECTOR_TABLE_CHECK_WEIGHT = 4;
 
 const here = at("i");
 const largest: MathJSON = ["Max", x];
@@ -3726,7 +3730,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
       1,
     ),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "ProperColoringSchemeCount",
@@ -3751,56 +3755,56 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
       1,
     ),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "MultisetPartitionCount",
     "The multiset partitions of the multiset with these multiplicities: its vector of multiplicities written as an unordered sum of nonzero vectors.",
     nonEmpty(overVectors(partRadices, eulerTransformCount(multisetWeights)), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "ColoredRootedTreeCount",
     "The rooted trees, unordered and unlabeled, on vertices colored with these multiplicities, vertices of one color being interchangeable.",
     nonEmpty(overVectors(partRadices, rootedTreeCount)),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "ColoredTreeCount",
     "The trees, unrooted and unlabeled, on vertices colored with these multiplicities, vertices of one color being interchangeable.",
     nonEmpty(overVectors(partRadices, treeCount)),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "SemistandardTableauCountWithContent",
     "The semistandard tableaux of any shape in which the entry i occurs as many times as part i: the symmetric matrices of nonnegative integers with these row sums.",
     nonEmpty(overVectors(partRadices, eulerTransformCount(symmetricMatrixWeights)), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "InvariantSetPartitionCount",
     "The set partitions of the points that a permutation of this cycle type maps to themselves.",
     nonEmpty(invariantSetPartitionCount, 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "ColoredEndofunctionCount",
     "The endofunctions, up to relabeling, on points colored with these multiplicities, points of one color being interchangeable.",
     nonEmpty(overVectors(partRadices, endofunctionCount), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "WordCountWithoutThreeConsecutiveIncreasingLetters",
     "The words in which letter i occurs as many times as part i that have no three consecutive letters in increasing order.",
     nonEmpty(overVectors(partRadices, avoidingWordCount), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "NonnegativeIntegerMatrixCountWithDecreasingColumnSums",
@@ -3813,14 +3817,14 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
       1,
     ),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "ZeroOneMatrixCountWithDecreasingColumnSums",
     "The matrices of 0 and 1 whose row sums are the parts and whose column sums weakly decrease, with no empty column.",
     nonEmpty(overVectors(partRadices, layeredSequenceCount(isZeroOneVector, vectorSize, length())), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "OrderedSetPartitionCountWithDecreasingBlockSums",
@@ -3833,7 +3837,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
       1,
     ),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "RootedTreeCountWithNoLeafOfItsParentsColor",
@@ -3937,14 +3941,14 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "The standard Young tableaux of the shape in which no row holds i and i + 1 together.",
     nonEmpty(overVectors(partRadices, bind("t", tableauxWithoutRowRuns, at(multisetVectors, "t"), "list<integer>")), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "LehmerCodeMultiplicityPermutationCount",
     "The permutations of the size whose Lehmer code takes its values with these multiplicities, the nonzero multiplicities of its values being the parts.",
     nonEmpty(lehmerCodeMultiplicityCount, 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "DiagramPosetLinearExtensionCount",
@@ -3958,7 +3962,7 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
       overVectors(partRadices, bind("t", grundyTable(chompMoveCount), at(multisetVectors, "t"), "list<integer>")),
     ),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "SquareRemovalGrundyValue",
@@ -3967,14 +3971,14 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
       overVectors(partRadices, bind("t", grundyTable(squareGameMoveCount), at(multisetVectors, "t"), "list<integer>")),
     ),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "SmallestOddRestrictionDepth",
     "The fewest cells to remove from the diagram so that the partition left has an odd number of standard tableaux: the least d such that the restriction of the irreducible representation to the symmetric group on n - d points has a constituent of odd dimension.",
     nonEmpty(overVectors(partRadices, smallestOddRestrictionDepth)),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
   stat(
     "DominoTilingCount",
@@ -3988,6 +3992,6 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     "The multisets of cycles on points colored with these multiplicities, points of one color being interchangeable.",
     nonEmpty(overVectors(partRadices, eulerTransformCount(cycleMultisetWeights)), 1),
     undefined,
-    TABLE_CHECK_WEIGHT,
+    VECTOR_TABLE_CHECK_WEIGHT,
   ),
 ];

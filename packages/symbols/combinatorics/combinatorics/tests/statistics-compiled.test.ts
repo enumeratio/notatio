@@ -410,6 +410,10 @@ const DECLINES_PAST_2_53: readonly { signature: string; subject: unknown; answer
   { signature: "CoxeterElementFactorizationCount@CartanType", subject: ["Tuple", "'E'", 8], answer: 37968750 },
 ];
 
+/** The sum of the numbers in a subject. */
+const weightOf = (subject: unknown): number =>
+  typeof subject === "number" ? subject : Array.isArray(subject) ? subject.reduce((n, e) => n + weightOf(e), 0) : 0;
+
 const compiledDefinitions = ALL_STATISTICS.filter((d) => COMPILED_SIGNATURES.has(signatureOf(d)));
 const headsOn = (carrier: string): number => compiledDefinitions.filter((d) => d.on === carrier).length;
 
@@ -419,7 +423,10 @@ for (const definition of compiledDefinitions) {
     expect(run).toBeDefined();
     let compared = 0;
     const cap = Math.max(MIN_PER_HEAD, Math.floor((CARRIER_ALLOWANCE[definition.on] ?? 0) / headsOn(definition.on)));
-    const groups = SUBJECTS[definition.on] ?? [];
+    // A definition that is slow to interpret names the largest subject (the sum of its numbers) it is held to.
+    const groups = (SUBJECTS[definition.on] ?? []).map((group) =>
+      group.filter((contents) => weightOf(contents) <= (definition.checkWeight ?? Infinity)),
+    );
     for (const contents of selectSubjects(groups, cap)) {
       const interpreted = interpretDefinition(ce, definition, ce.box(contents as never)).json;
       const answer = run!(contents);
