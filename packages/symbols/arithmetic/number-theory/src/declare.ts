@@ -79,9 +79,8 @@ export function declareNumberTheory(ce: Engine): void {
   declareDivisorParts(ce);
 
   // Wolfram's Listable heads thread over a list: Multinomial([2, 3, 5], 3) is [10, 20, 56].
-  // compute-engine threads its other integer functions itself; it rejects Multinomial's list,
-  // and KroneckerSymbol is modular's, declared without the flag.
-  threadOverLists(ce, ["KroneckerSymbol", "Multinomial"]);
+  // compute-engine threads its other integer functions itself; it rejects Multinomial's list.
+  threadOverLists(ce, ["Multinomial"]);
 
   const list = (xs: readonly bigint[]): Expr =>
     ce.function(

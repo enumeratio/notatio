@@ -857,6 +857,7 @@ export function declareModular(ce: Engine): void {
   /** (a/n) for any integers a, n — the full extension of Jacobi/Legendre. Bignum-safe. */
   ce.declare("KroneckerSymbol", {
     signature: "(integer, integer) -> integer",
+    broadcastable: true, // Listable in Wolfram: KroneckerSymbol([1, 2, 3], 5) threads
     evaluate: (ops: readonly Expr[]) => {
       const [a, n] = [bigIntegerAt(ops[0]), bigIntegerAt(ops[1])];
       return a === undefined || n === undefined ? undefined : ce.number(kroneckerSymbol(a, n));

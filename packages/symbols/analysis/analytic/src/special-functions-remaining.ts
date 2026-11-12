@@ -4,9 +4,10 @@ import type { EvalOptions } from "@enumeratio/ce-patches";
 
 /** A concrete +oo operand -- `PositiveInfinity` boxes as an infinite NUMBER in
  * compute-engine 0.128 (its `.symbol` is undefined), not a symbol; matches q-series.ts's
- * own `n.isInfinity && n.re > 0` check for the same constant. */
+ * own `n.isInfinity && n.re > 0` check for the same constant. ComplexInfinity is infinite with
+ * re > 0 too, so the imaginary part must be 0. */
 const isPositiveInfinity = (x: Expression): boolean =>
-  (x as Partial<{ isInfinity: boolean }>).isInfinity === true && x.re > 0;
+  (x as Partial<{ isInfinity: boolean }>).isInfinity === true && x.re > 0 && x.im === 0;
 
 /** A concrete ImaginaryUnit operand -- also a numeric constant (Complex(0,1)), not a symbol. */
 const isImaginaryUnit = (x: Expression): boolean => x.re === 0 && x.im === 1;

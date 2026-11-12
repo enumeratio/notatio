@@ -223,3 +223,10 @@ test("plain evaluate() is untouched by the precise path", () => {
   const expr: Expr = ["HurwitzZeta", ["Rational", 5, 2], ["Rational", 1, 3]];
   expect(box40(engine, expr).evaluate().json).toEqual(box40(engine, expr).json);
 });
+
+test("HarmonicNumber of ComplexInfinity stays unevaluated; of PositiveInfinity it diverges", () => {
+  const ce = new ComputeEngine();
+  declareAnalytic(ce);
+  expect(ce.box(["HarmonicNumber", "ComplexInfinity"]).evaluate().json).toEqual(["HarmonicNumber", "ComplexInfinity"]);
+  expect(ce.box(["HarmonicNumber", "PositiveInfinity"]).evaluate().json).toEqual("PositiveInfinity");
+});
