@@ -124,9 +124,11 @@ export function hashInputs({
   return hash.digest("hex");
 }
 
-/** `hashInputs` in two: what the step's own code and config are (`code`, with the lockfile and
- *  Node), and what it runs on (`engine`: the dists it imports, compute-engine's version). A memo
- *  whose engine alone moved holds answers that are probably still right (see `verdictCache`). */
+/** `hashInputs` in two: what the step's own code and config are (`code`, with Node), and what it
+ *  runs on (`engine`: the dists it imports, the lockfile, compute-engine's version). A memo whose
+ *  engine alone moved holds answers that are probably still right (see `verdictCache`). The
+ *  lockfile is the engine's: a compute-engine bump rewrites it, and in `code` it would discard
+ *  every answer on each bump, so the step re-checks everything (hours, for combinatorics). */
 export function hashParts({ dir, roots: own = [dir], skip = () => false, omitDists = [], imports }: StepInputs): {
   code: string;
   engine: string;
@@ -141,7 +143,7 @@ export function hashParts({ dir, roots: own = [dir], skip = () => false, omitDis
   for (const root of workspaceDists(dir, omitDists, imports))
     for (const file of filesUnder(root, skip)) add(engine, relative(dir, file), readFileSync(file));
   const lock = lockfileOf(dir);
-  add(code, "lockfile", lock === "" ? "" : readFileSync(lock));
+  add(engine, "lockfile", lock === "" ? "" : readFileSync(lock));
   add(code, "node", process.version);
   add(engine, "compute-engine", engineVersion());
   return { code: code.digest("hex"), engine: engine.digest("hex") };
@@ -368,9 +370,9 @@ function readMemo(
 /**
  * A memo of checks that are slow and pure in `parts` (a generator comparing compiled code with
  * the interpreter, say) so an edit to one definition re-checks only that one. Answers are
- * trusted while the step's code, the lockfile and Node (`hashParts`' `code`) are as they were
+ * trusted while the step's code and Node (`hashParts`' `code`) are as they were
  * when the answers were made, and:
- *   - the engine (dists, compute-engine) is the same: reused;
+ *   - the engine (dists, lockfile, compute-engine) is the same: reused;
  *   - the engine moved: a deterministic sample of the step's items is re-checked and the other
  *     passes are carried, marked as not checked on this engine. A sampled answer that comes out
  *     differently is a divergence, and `settle` / the sharder re-check everything.
