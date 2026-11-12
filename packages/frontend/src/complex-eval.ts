@@ -2,6 +2,7 @@ import {
   digamma,
   hurwitzZetaChecked,
   hurwitzZetaWithError,
+  iterateQuadratic,
   lerchPhiChecked,
   logGamma,
   MAX_RELATIVE_ERROR,
@@ -34,6 +35,21 @@ function hurwitzQuarterDifference(s: Cx): Cx {
   if (lo.error + hi.error > MAX_RELATIVE_ERROR * Math.hypot(diff.re, diff.im)) throw new Uncertain();
   return diff;
 }
+
+/**
+ * The iteration count of `Mandelbrot` and `Julia` when none is written (`declareFractals`' default).
+ * `iterateQuadratic` is the loop the shader's mirrors: the same escape radius (|z|^2 > 1e12) and cap
+ * (512 steps), so both portraits stop each point at the same step.
+ */
+export const FRACTAL_DEFAULT_ITERATIONS = 64;
+
+/** An iterate needs finite inputs: a NaN or infinite one has no step count, so the sample is declined. */
+const finiteOrUncertain = (z: Complex): Cx => {
+  if (!Number.isFinite(z[0]) || !Number.isFinite(z[1])) throw new Uncertain();
+  return toCx(z);
+};
+
+const defaultSteps: ComplexFunction = () => [FRACTAL_DEFAULT_ITERATIONS, 0];
 
 /** MathJSON, in the canonical plain-array form `ce.box(expr).json` returns. */
 type Json = number | string | boolean | { [k: string]: unknown } | Json[];
@@ -214,6 +230,22 @@ function compile(j: Json, variable: string): ComplexFunction {
     }
     case "Root":
       if (fs.length === 2) return (z) => pow(f(0)(z), div([1, 0], f(1)(z)));
+      break;
+    case "Mandelbrot":
+      if (fs.length === 1 || fs.length === 2) {
+        const steps = fs[1] ?? defaultSteps;
+        return (z) =>
+          ofCx(iterateQuadratic({ re: 0, im: 0 }, finiteOrUncertain(f(0)(z)), finiteOrUncertain(steps(z)).re));
+      }
+      break;
+    case "Julia":
+      if (fs.length === 2 || fs.length === 3) {
+        const steps = fs[2] ?? defaultSteps;
+        return (z) =>
+          ofCx(
+            iterateQuadratic(finiteOrUncertain(f(0)(z)), finiteOrUncertain(f(1)(z)), finiteOrUncertain(steps(z)).re),
+          );
+      }
       break;
     case "Zeta":
       if (fs.length === 1) return (z) => ofCx(vouched(hurwitzZetaChecked(toCx(f(0)(z)), { re: 1, im: 0 })));

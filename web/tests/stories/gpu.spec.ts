@@ -276,6 +276,8 @@ test.describe("the CPU portrait agrees with the GPU portrait", () => {
     { name: "Exp", value: "Exp(z)", center: "0,0", extent: 8 },
     { name: "PolyLog(2, z)", value: "PolyLog(2, z)", center: "0,0", extent: 2.4, mask: 1 },
     { name: "Zeta", value: "Zeta(z)", center: "0.5,8", extent: 24 },
+    { name: "Mandelbrot", value: "Mandelbrot(z, 64)", center: "-0.5,0", extent: 3 },
+    { name: "Julia", value: "Julia(z, -0.4 + 0.6i, 64)", center: "0,0", extent: 3 },
   ];
   for (const head of heads) {
     test(head.name, async ({ page }) => {
