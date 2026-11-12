@@ -1,5 +1,5 @@
 // The verdict memo (scripts/stamp.ts `verdictCache`): reused while nothing moved, sampled and
-// carried when only the engine's dists moved, and fully re-checked on any other change.
+// carried when only the engine (its dists, the lockfile) moved, and fully re-checked on any other change.
 
 import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -77,6 +77,18 @@ test("a moved engine re-checks a sample and carries the rest", () => {
   // Another engine samples other items.
   put("node_modules/@enumeratio/dep/dist/a.js", "engine 3");
   expect(runOver(open())).not.toEqual(checked);
+});
+
+test("a moved lockfile re-checks a sample, as a moved engine does", () => {
+  const first = open();
+  runOver(first);
+  first.save();
+  put("pnpm-lock.yaml", "lockfileVersion: 9\n# compute-engine bumped\n");
+  const second = open();
+  const checked = runOver(second);
+  expect(checked.length).toBeGreaterThanOrEqual(SAMPLE_MIN);
+  expect(checked.length).toBeLessThan(labels.length / 2);
+  put("pnpm-lock.yaml", "lockfileVersion: 9\n");
 });
 
 test("a sampled answer that differs re-checks everything", () => {
