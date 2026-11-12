@@ -134,6 +134,18 @@ function bound(variable: Json, body: Json): { variable: Json; body: Json } {
   return { variable: letter, body: rename(body, variable, letter) };
 }
 
+/** A `Function`'s parameters are names: `i` there is the letter its body uses, not the imaginary unit. */
+function parameters(fn: Json[]): Json {
+  const [head, body, ...names] = fn as [string, Json, ...Json[]];
+  let renamed = body;
+  const letters = names.map((name) => {
+    const rebound = bound(name, renamed);
+    renamed = rebound.body;
+    return rebound.variable;
+  });
+  return [head, renamed, ...letters] as Json;
+}
+
 /** A notation rule's boxes for a head of `arity` operands, each one a `SLOTS` placeholder. */
 interface Pattern {
   readonly head: string;
@@ -416,6 +428,7 @@ class Reader {
         this.eat(APPLY_FUNCTION);
         const args = this.arguments();
         json = (name === undefined ? ["Apply", json, ...args] : [this.callee(name, args.length), ...args]) as Json;
+        if (Array.isArray(json) && json[0] === "Function") json = parameters(json);
         name = undefined;
       } else if (name !== undefined && FUNCTION_OF.has(name) && name !== "mod" && this.startsFactor(t)) {
         // `sin x`: a named function with its argument written bare.
