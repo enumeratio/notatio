@@ -168,10 +168,8 @@ export function declareResidues(ce: Engine): void {
     },
   });
 
-  // PrimitiveRootList threads over a list, and past the listing cap stays unevaluated but is
-  // still a collection: Length and At answer from φ(φ(n)) and an ascending scan, without the
-  // whole list.
-  threadOverLists(ce, ["PrimitiveRootList"]);
+  // PrimitiveRootList past the listing cap stays unevaluated but is still a collection: Length
+  // and At answer from φ(φ(n)) and an ascending scan, without the whole list.
   extend(ce, "PrimitiveRootList", (ops) => {
     const n = bigIntegerAt(ops[0]);
     const found = n === undefined ? undefined : primitiveRootList(n);
