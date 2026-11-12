@@ -78,36 +78,10 @@ export function declareNumberTheory(ce: Engine): void {
   declareBacklog(ce);
   declareDivisorParts(ce);
 
-  // compute-engine's integer functions reject a list argument with a type error (or leave
-  // the call unevaluated); Wolfram's thread over it: Totient([2, 4, 6]) is [1, 2, 2].
-  threadOverLists(ce, [
-    "Totient",
-    "NextPrime",
-    "NthPrime",
-    "PrimePi",
-    "FactorInteger",
-    "Divisors",
-    "PrimeNu",
-    "PrimeOmega",
-    "MoebiusMu",
-    "IsSquareFree",
-    "JacobiSymbol",
-    "KroneckerSymbol",
-    "LegendreSymbol",
-    "DivisorSigma",
-    "ExtendedGCD",
-    "ModularInverse",
-    "Multinomial",
-    "CatalanNumber",
-    "Subfactorial",
-    "StirlingS1",
-    "Stirling",
-    "BellNumber",
-    "Fibonacci",
-    "LucasL",
-    "CarmichaelLambda",
-    "IsPerfect",
-  ]);
+  // Wolfram's Listable heads thread over a list: Multinomial([2, 3, 5], 3) is [10, 20, 56].
+  // compute-engine threads its other integer functions itself; it rejects Multinomial's list,
+  // and KroneckerSymbol is modular's, declared without the flag.
+  threadOverLists(ce, ["KroneckerSymbol", "Multinomial"]);
 
   const list = (xs: readonly bigint[]): Expr =>
     ce.function(
@@ -160,10 +134,8 @@ export function declareNumberTheory(ce: Engine): void {
     3,
   );
 
-  // Native takes (a, m); the explicit numerator and denominator bounds are ours, and so is
-  // a list of residues.
+  // Native takes (a, m); the explicit numerator and denominator bounds are ours.
   widenSignature(ce, "RationalReconstruction", "(integer, integer, integer?, integer?) -> rational", mayBeInteger);
-  threadOverLists(ce, ["RationalReconstruction"]);
   wrapOperator(
     ce,
     ["RationalReconstruction"],
