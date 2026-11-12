@@ -60,7 +60,7 @@ const paren = (m: Made, min: number): Box => (m.prec < min ? fenced("(", [m.box]
 const operand = (m: Made, min: number): Box => (m.negative ? fenced("(", [m.box], ")") : paren(m, min));
 const list = (items: readonly Made[], sep = ","): Box[] => items.flatMap((m, i) => (i === 0 ? [m.box] : [sep, m.box]));
 
-const SYMBOLS: Record<string, string> = {
+export const SYMBOLS: Record<string, string> = {
   Pi: "π",
   ExponentialE: "e",
   ImaginaryUnit: "i",
@@ -137,7 +137,7 @@ const SYMBOLS: Record<string, string> = {
 };
 
 /** Heads that print as a named function with an upright name (`sin x`, `ln x`). */
-const FUNCTIONS: Record<string, string> = {
+export const FUNCTIONS: Record<string, string> = {
   Sin: "sin",
   Cos: "cos",
   Tan: "tan",
@@ -175,7 +175,7 @@ const FUNCTIONS: Record<string, string> = {
   Mod: "mod",
 };
 
-const RELATIONS: Record<string, string> = {
+export const RELATIONS: Record<string, string> = {
   Equal: "=",
   NotEqual: "≠",
   Less: "<",

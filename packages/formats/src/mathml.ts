@@ -1,12 +1,12 @@
 // MathMLForm -- an expression printed as presentation MathML: its traditional notation as
 // boxes (`makeBoxes`), and the boxes as MathML; a pure function of the MathJSON tree, so it
 // can be golden-tested. Read back, MathML is boxes (`parseMathML`), and boxes become an
-// expression through their LaTeX until MakeExpression reads them directly (see the Roadmap).
+// expression with `makeExpression`, through their LaTeX only for the boxes it declines.
 // See https://github.com/enumeratio/notatio/wiki/Boxes.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { type Box, makeBoxes } from "@enumeratio/boxes";
+import { type Box, makeBoxes, makeExpression, MakeExpressionError } from "@enumeratio/boxes";
 import {
   commandTeX,
   type MathMLOptions,
@@ -21,9 +21,16 @@ export type { MathMLOptions };
 export const toMathML = (json: MathJsonExpression, options: MathMLOptions = {}): string =>
   boxesToMathML(makeBoxes(json), options);
 
-/** Boxes read as an expression: through their LaTeX, for now, as commands (any engine reads them). */
-export const boxesToExpression = (boxes: Box, ce: ComputeEngine): MathJsonExpression =>
-  ce.parse(commandTeX(toLatex(boxes))).json as MathJsonExpression;
+/** Boxes read as an expression (canonical, as the engine boxes it): by makeExpression, and through
+ *  their LaTeX, as commands (any engine reads them), for the boxes it declines. */
+export const boxesToExpression = (boxes: Box, ce: ComputeEngine): MathJsonExpression => {
+  try {
+    return ce.box(makeExpression(boxes) as never).json as MathJsonExpression;
+  } catch (error) {
+    if (!(error instanceof MakeExpressionError)) throw error;
+    return ce.parse(commandTeX(toLatex(boxes))).json as MathJsonExpression;
+  }
+};
 
 /** Read presentation MathML as an expression. */
 export const fromMathML = (xml: string, ce: ComputeEngine): MathJsonExpression =>
