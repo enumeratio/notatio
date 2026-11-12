@@ -68,6 +68,6 @@ test("MakeExpression reads the reference examples back", () => {
   console.info(`mismatches:\n${mismatched.join("\n")}`);
   // What is left is heads whose notation shares a spelling with another (`ζ(s, a)`, an interval and a
   // list), or that print as layout or an interface: boxes that say nothing of the expression.
-  expect(rows.exact + rows.equivalent).toBeGreaterThan(0.85 * total);
+  expect(rows.exact + rows.equivalent).toBeGreaterThan(0.95 * total);
   expect(rows.declined).toBeLessThan(0.01 * total);
 }, 600_000);
