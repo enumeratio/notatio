@@ -31,25 +31,6 @@ const properRationals = (ops: Ops): (readonly [bigint, bigint])[] | undefined =>
 };
 
 export function declareWidened(ce: Engine): void {
-  // Wolfram's EulerPhi[0] is 0, and EulerPhi[-n] = EulerPhi[n]; compute-engine asks for a
-  // positive integer, so both a zero and a negative n need widening past it.
-  widenSignature(ce, "Totient", "(number) -> integer", mayBeInteger);
-  // compile builtin: an exact integer or rational operand native does not answer, or a list it threads over
-  wrapOperator(
-    ce,
-    ["Totient", 1],
-    (ops) => {
-      const n = bigIntegerAt(ops[0]);
-      return n !== undefined && n <= 0n;
-    },
-    () => (ops) => {
-      const n = bigIntegerAt(ops[0])!;
-      if (n === 0n) return ce.Zero;
-      return ce.function("Totient", [ce.number(-n)]).evaluate();
-    },
-    { arity: 1, compile: "builtin" },
-  );
-
   // σₖ(n) for k < 0 is σ₋ₖ(n) / n⁻ᵏ — the sum of 1/dᵏ over the divisors d of n.
   // compile builtin: an exact integer or rational operand native does not answer, or a list it threads over
   wrapOperator(
