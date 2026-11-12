@@ -231,8 +231,15 @@ function paint(
   }
 }
 
+/** Text drawn on cells, with the row its content sits on when that is known. */
+export interface Drawn {
+  readonly text: string;
+  /** Row (from 0, in `text`) the content sits on: the row an `Out[n]=` label goes beside. */
+  readonly baseline?: number;
+}
+
 /** A display list on cells, as rows of text with trailing blanks trimmed. */
-function render(list: DisplayList, lines: (box: Box) => string[], ink: Inker): string {
+function render(list: DisplayList, lines: (box: Box) => string[], ink: Inker): Drawn {
   const canvas = new Canvas(list.width, list.height);
   paint(canvas, list.items, 0, 0, { x0: 0, y0: 0, x1: list.width, y1: list.height }, lines, ink);
   const rows: string[] = [];
@@ -245,11 +252,20 @@ function render(list: DisplayList, lines: (box: Box) => string[], ink: Inker): s
     }
     rows.push(row.replace(/ +$/, ""));
   }
-  return rows.join("\n").replace(/^\n+|\n+$/g, "");
+  const lead = rows.findIndex((row) => row !== "");
+  const kept = rows.slice(Math.max(lead, 0)).join("\n").replace(/\n+$/, "");
+  // A baseline is the line under a row of text, so its row is one above.
+  const row = Math.max(0, Math.min(list.baseline - 1 - Math.max(lead, 0), kept.split("\n").length - 1));
+  return { text: kept, baseline: row };
 }
 
 /** Boxes laid out on character cells and drawn: a grid ruled, a panel framed, a fraction stacked. */
 export function drawBoxes(box: Box, options: LayoutOptions = {}): string {
+  return drawLaid(box, options).text;
+}
+
+/** `drawBoxes`, with the baseline row. */
+export function drawLaid(box: Box, options: LayoutOptions = {}): Drawn {
   // A static reading: each control stands where it starts, and the readouts are read there.
   const values = new Map<string, Json>();
   for (const control of boxControls(box)) {

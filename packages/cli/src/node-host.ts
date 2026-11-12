@@ -105,6 +105,6 @@ export class NodeHost {
       return { text: `  imported ${value.mimeType}, ${value.data.length} bytes${note}` };
     }
     const res = repl.session.evaluateJson(value, `:import ${arg}`);
-    return { text: repl.formatOut(res.n, repl.session.render(res.expr)) };
+    return { text: repl.formatOut(res.n, repl.session.renderDrawn(res.expr)) };
   }
 }
