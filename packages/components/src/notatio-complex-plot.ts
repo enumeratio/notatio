@@ -103,6 +103,9 @@ export class NotatioComplexPlot extends LitElement {
   declare _fps: number;
 
   #canvas: HTMLCanvasElement | undefined;
+  /** Settles once the renderer is taken or known to be missing. */
+  #backend: Promise<void> = Promise.resolve();
+  #cpuCanvas: Promise<void> | undefined;
   #renderer: ComplexPlotRenderer | undefined;
   #compiling = 0;
   #view: ComplexPlotView = { center: [0, 0], extent: 2.4, mask: 0 };
@@ -145,6 +148,7 @@ export class NotatioComplexPlot extends LitElement {
 
   protected override firstUpdated(): void {
     this.#canvas = this.querySelector("canvas") ?? undefined;
+    if (this.#canvas) this.#backend = this.#pickBackend(this.#canvas);
     void this.#init();
   }
 
@@ -157,20 +161,29 @@ export class NotatioComplexPlot extends LitElement {
       mask: this.#view.mask,
     };
     this.#ro = new ResizeObserver(() => this.#resize());
-    if (this.gpu !== "false") {
-      const gpu = await getGpu();
-      this.#renderer = (gpu && ComplexPlotRenderer.create(gpu, this.#canvas)) || undefined;
-      this.#renderer?.setGradient(gradientOf(this, "phase"));
-    }
+    await this.#backend;
     if (!this.#renderer) await this.#useCpu();
     this.#ro.observe(this.#canvas);
     this.#resize();
     await this.#compile();
   }
 
+  /** Take the WebGL2 renderer from the first canvas, unless `gpu="false"`; nothing draws or compiles before this settles,
+   * so a 2-D context is never taken from the canvas the GPU is about to use. */
+  async #pickBackend(canvas: HTMLCanvasElement): Promise<void> {
+    if (this.gpu === "false") return;
+    const gpu = await getGpu();
+    this.#renderer = (gpu && ComplexPlotRenderer.create(gpu, canvas)) || undefined;
+    this.#renderer?.setGradient(gradientOf(this, "phase"));
+  }
+
   /** Switch to a 2-D canvas, the one a WebGL2 context was never taken from. */
-  async #useCpu(): Promise<void> {
-    if (this._cpu) return;
+  #useCpu(): Promise<void> {
+    this.#cpuCanvas ??= this.#swapCanvas();
+    return this.#cpuCanvas;
+  }
+
+  async #swapCanvas(): Promise<void> {
     this.#renderer = undefined;
     this._cpu = true;
     await this.updateComplete;
@@ -209,6 +222,10 @@ export class NotatioComplexPlot extends LitElement {
       if (mine === this.#compiling) this._status = `Could not parse: ${value}`;
       return;
     }
+    if (mine !== this.#compiling) return;
+    await this.#backend;
+    if (mine !== this.#compiling) return;
+    if (!this.#renderer) await this.#useCpu();
     if (mine !== this.#compiling) return;
     if (this.#renderer) {
       const emitted = emitComplexGLSL(canonical as never, this.var);
