@@ -1,11 +1,12 @@
-// A fixed, fast slice of our tests against a compute-engine build, for compute-engine's own CI
-// (cortex-js/compute-engine#515): the packages that lean hardest on its heads, about 15 minutes on a hosted runner.
+// A fast slice of our tests against a compute-engine build, for compute-engine's own CI
+// (cortex-js/compute-engine#515): every library outside combinatorics' build closure, about 3 minutes
+// locally and an estimated 10-15 on a hosted runner.
 //
 //   node tools/ce-downstream/run.ts <tarball.tgz | compute-engine checkout> [--keep] [--summary FILE]
 //
 // A checkout is built and packed first (`npm ci`, `npm run build`, `npm pack`). The tarball then replaces
 // the pinned version through the same pnpm override ce-main.yml writes (.github/scripts/compute-engine-tarball.ts),
-// the slice's packages are built (`tools/ci/dist-cache.ts build`) and tested, and a summary of the failing tests
+// the slice's packages (derived from the workspace graph, printed first) are built (`tools/ci/dist-cache.ts build`) and tested, and a summary of the failing tests
 // with the first lines of each failure is printed (and appended to $GITHUB_STEP_SUMMARY, or --summary FILE).
 //
 // It rewrites pnpm-workspace.yaml and pnpm-lock.yaml in this checkout, so run it in a throwaway one (CI is);
@@ -14,43 +15,35 @@
 // compute-engine now ships natively (ce-patches' landed.test.ts), and the engine's version pin
 // (ce-internals.test.ts), which fails whenever the build is not the version we pinned.
 
-import { spawn, spawnSync } from "node:child_process";
+import { execFileSync, spawn, spawnSync } from "node:child_process";
 import { appendFileSync, existsSync, mkdirSync, mkdtempSync, readdirSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseArgs, stripVTControlCharacters } from "node:util";
+import { closure, loadWorkspace } from "../ci/workspace.ts";
 
 const repo = resolve(import.meta.dirname, "../..");
 
 /**
- * The slice: every library whose build does not read `combinatorics` (its cold build is about 90 minutes, and
- * reference, frontend and the rest read it), each a place compute-engine's behavior shows through. Their tests
- * are cheap (seconds to half a minute each), so the slice is all of them rather than a pick.
+ * The slice: every library package whose build does not read `combinatorics` (its cold build is about 90 minutes,
+ * and reference, frontend and the rest read it), each a place compute-engine's behavior shows through. Their tests
+ * are cheap (seconds to half a minute each), so the slice is all of them rather than a pick. A library is what
+ * tools/ci builds and tests: a workspace package other than web with a `build` and a `test` script. The edges
+ * are the declared and implicit dependencies a build follows (`deps`), not the files a test merely reads.
  */
-const SLICE = [
-  "engine", // our facade over compute-engine's internals: compiled routes, bigint, purity
-  "ce-patches", // each patch's claim, and which have landed
-  "analytic", // special functions: zeta, polylog, gamma, elliptic
-  "number-theory", // bignum, rationals, modular arithmetic
-  "residues",
-  "numerals",
-  "complex-numerals",
-  "adeles",
-  "structures",
-  "evaluation",
-  "hypercomplex",
-  "geometric",
-  "groupalgebra",
-  "hecke",
-  "hopf",
-  "incidence",
-  "quiver",
-  "diagram",
-  "modular",
-  "braid",
-  "polytope",
-  "boxes",
-].map((name) => `@enumeratio/${name}`);
+function deriveSlice(): string[] {
+  const pkgs = loadWorkspace();
+  const readers = (name: string) => [...pkgs.values()].filter((p) => p.deps.has(name)).map((p) => p.name);
+  const excluded = closure(["@enumeratio/combinatorics"], readers);
+  const hasTest = (dir: string) =>
+    "test" in (JSON.parse(readFileSync(join(repo, dir, "package.json"), "utf8")).scripts ?? {});
+  return [...pkgs.values()]
+    .filter(
+      (p) => p.name !== "@enumeratio/web" && p.buildScript !== undefined && hasTest(p.dir) && !excluded.has(p.name),
+    )
+    .map((p) => p.name)
+    .toSorted();
+}
 
 const { positionals, values: args } = parseArgs({
   allowPositionals: true,
@@ -60,6 +53,9 @@ if (positionals.length !== 1) {
   console.error("usage: ce-downstream/run.ts <tarball.tgz | compute-engine checkout> [--keep] [--summary FILE]");
   process.exit(2);
 }
+
+const SLICE = deriveSlice();
+console.log(`slice (${SLICE.length}): ${SLICE.join(" ")}`);
 
 const strip = stripVTControlCharacters;
 const scratch = mkdtempSync(join(tmpdir(), "ce-downstream-"));
@@ -87,6 +83,14 @@ function sh(
   return { ok: r.status === 0, text };
 }
 
+// Restores the files the override rewrites, on every exit (a failed setup included) unless --keep.
+process.on("exit", () => {
+  if (args.keep) return;
+  try {
+    execFileSync("git", ["checkout", "--", "pnpm-workspace.yaml", "pnpm-lock.yaml"], { cwd: repo, stdio: "ignore" });
+  } catch {}
+});
+
 function must(r: { ok: boolean }, what: string): void {
   if (r.ok) return;
   console.error(`setup failed: ${what}`);
@@ -96,8 +100,10 @@ function must(r: { ok: boolean }, what: string): void {
 function tarballOf(input: string): string {
   const path = resolve(input);
   if (path.endsWith(".tgz")) return path;
-  if (!existsSync(join(path, "package.json")))
-    throw new Error(`${path} is neither a .tgz nor a compute-engine checkout`);
+  if (!existsSync(join(path, "package.json"))) {
+    console.error(`setup failed: ${path} is neither a .tgz nor a compute-engine checkout`);
+    process.exit(2);
+  }
   must(
     sh("compute-engine: npm ci", "npm", ["ci", "--ignore-scripts", "--no-audit", "--no-fund"], {
       cwd: path,
@@ -144,7 +150,8 @@ interface Failure {
   lines: string;
 }
 const failures: Failure[] = [];
-/** Failures that say something changed upstream rather than that something broke. */
+/** Failures that say something changed upstream rather than that something broke. The second keys on the
+ *  version-pin test's title in packages/engine/tests/ce-internals.test.ts. */
 const NEWS = /landed\.test\.ts|ce-internals\.test\.ts > compute-engine is the version/;
 const news: string[] = [];
 const ran: { pkg: string; seconds: number; failed: number }[] = [];
@@ -245,5 +252,4 @@ console.log(`\n${report}`);
 const summaryFile = args.summary ?? process.env.GITHUB_STEP_SUMMARY;
 if (summaryFile) appendFileSync(summaryFile, `${report}\n`);
 
-if (!args.keep) spawnSync("git", ["checkout", "--", "pnpm-workspace.yaml", "pnpm-lock.yaml"], { cwd: repo });
 process.exit(failures.length === 0 ? 0 : 1);
