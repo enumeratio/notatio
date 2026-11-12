@@ -107,7 +107,6 @@
   "packages/symbols/analysis/analytic/src/trig-factor.ts",
   "packages/symbols/analysis/analytic/src/trig-normalisation.ts",
   "packages/symbols/analysis/analytic/src/trig-power-integrals.ts",
-  "packages/symbols/analysis/analytic/src/trig-reduction.ts",
   "packages/symbols/analysis/analytic/src/unit-step.ts",
   "packages/symbols/analysis/analytic/src/widened.ts",
   "packages/symbols/analysis/analytic/src/xgcd.ts",
