@@ -155,6 +155,9 @@ export function declareProducts(ce: Engine): void {
   // (possibly index-dependent) bound before that inner Product tries to reduce, so a
   // triangular product with a literal outer bound unrolls exactly the way compute-engine
   // already unrolls a single-clause literal-bound Product.
+  // Compute-engine 0.186 evaluates the multi-clause forms with no wrapper too, except an
+  // unbounded inner clause (Product(j k, {k}, {j})): it holds the flat form, where this
+  // wrapper holds the nested one. Neither evaluates (Wolfram gives Gamma[j]^(k-1) Gamma[k]^(j-1)).
   wrapOperator(
     ce,
     ["Product", "body", ["Tuple", "i", 1, "n"], ["Tuple", "j", 1, "i"]],
