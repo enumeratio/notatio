@@ -167,24 +167,6 @@ export function declareWidened(ce: ComputeEngine): void {
     { arity: 1, compile: "builtin" },
   );
 
-  // (−2k − 1)!! = (−1)ᵏ / (2k − 1)!!, running the recurrence n!! = n·(n − 2)!! downwards.
-  // compile builtin: exact folds and identities, and exact operands native rejects (half-integers, negative odd)
-  wrapOperator(
-    ce,
-    ["Factorial2", 1],
-    (ops) => {
-      const n = bigIntegerAt(ops[0]);
-      return n !== undefined && n < 0n && -n % 2n === 1n;
-    },
-    () => (ops) => {
-      const k = (-bigIntegerAt(ops[0])! - 1n) / 2n;
-      let den = 1n;
-      for (let j = 2n * k - 1n; j > 1n; j -= 2n) den *= j;
-      return ce.number([k % 2n === 0n ? 1n : -1n, den]);
-    },
-    { arity: 1, compile: "builtin" },
-  );
-
   // Wolfram's BernoulliB[n, x] is the Bernoulli polynomial, which is BernoulliPolynomial here.
   widenSignature(ce, "BernoulliB", "(integer, number?) -> number");
   // compile builtin: exact folds and identities, and exact operands native rejects (half-integers, negative odd)

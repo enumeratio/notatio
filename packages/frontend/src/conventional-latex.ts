@@ -1,13 +1,12 @@
-// Conventional LaTeX for native compute-engine heads that write or read it wrong
-//: `Zeta` and `Beta` serialise as `\Zeta`/`\Beta` (not LaTeX
-// commands), `LCM` as `\lcm`; `\operatorname{lcm|rank|erf}` don't parse back to
-// `LCM`/`MatrixRank`/`Erf`. A fraction's sign goes in front of it, and every logarithm but
+// Conventional LaTeX for native compute-engine heads that write or read it differently:
+// `Erf` and `Erfc` are written `\operatorname{erf}`, `Arccot` as `arccot`, and `\mathrm{arcsec}`
+// reads as the arcsecond. A fraction's sign goes in front of it, and every logarithm but
 // the natural one names its base.
 // (`Rank` is array depth, not matrix rank, so it keeps its default `\mathrm{Rank}`.)
 // A head whose sign would lose an argument or a grouping on the way back (`Union` of three, a
 // `Derivative` with its orders or none, `PolyLog` with a third argument, a second integral limit) writes
 // what reads back exactly: the editor shows this LaTeX and reads it again.
-// GCD, Determinant, Trace, Sign, Arg, Mod, Max, Min and Sinc were probed and are fine.
+// GCD, LCM, MatrixRank, Zeta, Determinant, Trace, Sign, Arg, Mod, Max, Min and Sinc were probed and are fine.
 // The shared engine carries these via its configureLatex list (engine.ts); engines built
 // elsewhere pass `conventionalLatexDictionary()`.
 
@@ -33,23 +32,6 @@ const operatorname = (name: string, word: string): Entry => ({
       .join(", ")})`,
   parse: (parser) => [name, ...(parser.parseArguments() ?? [])],
 });
-
-/** The Riemann zeta, `\zeta(s)` — not `\Zeta`, which is not a LaTeX command (capital
- *  zeta is a roman Z). Parsing already accepts both spellings; only the write side
- *  was wrong. */
-const zeta: Entry = {
-  kind: "function",
-  name: "Zeta",
-  latexTrigger: "\\zeta",
-  serialize: (serializer, expr) =>
-    `\\zeta(${operands(expr)
-      .map((e) => serializer.serialize(e))
-      .join(", ")})`,
-  parse: (parser) => {
-    const args = parser.parseArguments();
-    return args === null ? "Zeta" : ["Zeta", ...args];
-  },
-};
 
 /** The Euler beta, `\mathrm{B}(a, b)` -- a roman capital beta; `\Beta` is not a LaTeX
  *  command. `\Beta` still parses, and so does `\mathrm{B}` applied to arguments. */
@@ -127,22 +109,6 @@ const signOut = (name: string): Entry => {
       return na === nb ? written : `-${written}`;
     },
   };
-};
-
-/** Precedence of the prefix minus. */
-const NEGATE_PRECEDENCE = 701;
-const FRACTIONS = new Set(["Divide", "Rational"]);
-
-/** `-\frac{3}{4}`, not `-(\frac{3}{4})`: a fraction needs no brackets to be negated. */
-const negate: Entry = {
-  ...native("Negate"),
-  name: "Negate",
-  serialize: (serializer, expr) => {
-    const [x] = operands(expr);
-    return Array.isArray(x) && FRACTIONS.has(x[0] as string) && !isNegative(x[1])
-      ? `-${serializer.serialize(x)}`
-      : `-${serializer.wrap(x ?? null, NEGATE_PRECEDENCE)}`;
-  },
 };
 
 /** `Square(x)` is written as the power it is, so it brackets its base the same way. */
@@ -518,8 +484,6 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   memberCall,
   truth("True", "\\top"),
   truth("False", "\\bot"),
-  operatorname("LCM", "lcm"),
-  operatorname("MatrixRank", "rank"),
   operatorname("Erf", "erf"),
   operatorname("Erfc", "erfc"),
   // compute-engine writes the Russian `arcctg`.
@@ -541,7 +505,6 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   ...PRIMES.map(primeOf),
   bracketed("Floor", "\\lfloor", "\\rfloor"),
   bracketed("Ceil", "\\lceil", "\\rceil"),
-  zeta,
   beta,
   betaRoman,
   square,
@@ -549,8 +512,6 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   eulerGamma,
   exp,
   signOut("Divide"),
-  signOut("Rational"),
-  negate,
   multiply,
   add,
   logBase("Log", 10),

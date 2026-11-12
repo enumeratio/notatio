@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigIntegerAt, bigRationalAt, operandsOf, symbolNameOf, wrapOperator } from "@enumeratio/engine";
-import { declined, type EvalOptions, characterExponent } from "@enumeratio/ce-patches";
+import { declined, type EvalOptions } from "@enumeratio/ce-patches";
 import { gammaExactValue, type Rational } from "./widened.ts";
 
 /**
@@ -27,7 +27,6 @@ const POLYGAMMA_MAX_ORDER = 40n;
 const POLYGAMMA_MAX_SHIFT = 32n;
 
 const gcd = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gcd(b, a % b));
-const gcdNum = (a: number, b: number): number => (b === 0 ? a : gcdNum(b, a % b));
 
 /** n! for a small non-negative bigint n. */
 const factorial = (n: bigint): bigint => {
@@ -451,102 +450,5 @@ export function declareClosedForms113(ce: ComputeEngine): void {
       return finish(acc, options);
     },
     { arity: 1, compile: "builtin" },
-  );
-
-  // Mod(x, m) for an exact irrational x (an algebraic number like √28, not a float)
-  // against a numeric modulus: floor the double approximation to find which residue
-  // class x falls in, then build the EXACT symbolic remainder x − ⌊x/m⌋·m — the
-  // subtraction is exact even though the quotient was found numerically. Wolfram:
-  // Mod[Sqrt[28], 3] = 2√7 − 3, wolframscript-checked. Guarded to a wide margin from
-  // either boundary so a double-precision floor is never in doubt.
-  // compile builtin: exact closed forms at exact operands; an inexact one reaches the numeric kernel the lowering shares
-  wrapOperator(
-    ce,
-    ["Mod", 2],
-    (ops) => {
-      const x = ops[0];
-      const m = ops[1];
-      if (x === undefined || m === undefined) return false;
-      const xExact = (x as Partial<{ isExact: boolean }>).isExact === true;
-      const mExact = (m as Partial<{ isExact: boolean }>).isExact === true;
-      if (!xExact || !mExact || bigRationalAt(x) !== undefined) return false;
-      const mNum = m.re;
-      if (!(Number.isFinite(mNum) && mNum > 0)) return false;
-      const xNum = x.re;
-      if (!Number.isFinite(xNum)) return false;
-      const ratio = xNum / mNum;
-      return Math.abs(ratio - Math.round(ratio)) > 1e-6; // margin from a boundary case
-    },
-    () => (ops, options) => {
-      const [x, m] = ops;
-      const k = Math.floor(x.re / m.re);
-      const expr = ce.function("Subtract", [x, ce.function("Multiply", [intNode(ce, BigInt(k)), m])]);
-      return options.numericApproximation ? expr.N() : expr.evaluate();
-    },
-    { arity: 2, compile: "builtin" },
-  );
-
-  // L(1, χ) for a REAL (quadratic) odd primitive character mod k: derived from the
-  // Fourier expansion Σ χ(n)/n = (1/τ(χ)) Σₐ χ(a)·(−log(1 − e^{2πia/k})), whose real
-  // part cancels in odd-χ pairs and whose imaginary part collapses (real χ ⇒ τ(χ) =
-  // i√k) to L(1, χ) = −(π/k^{3/2}) Σₐ a·χ(a) — verified by hand at k = 3
-  // (χ(1)=1, χ(2)=−1 ⇒ −π/(3√3)·(1·1+2·(−1)) = π/(3√3), matching wolframscript's
-  // DirichletL[3,2,1]) and cross-checked numerically below against the existing
-  // Euler–Maclaurin kernel before ever returning the exact form, since an imprimitive
-  // character would silently break the τ(χ) = i√k step.
-  // compile builtin: exact closed forms at exact operands; an inexact one reaches the numeric kernel the lowering shares
-  wrapOperator(
-    ce,
-    ["DirichletL", 3],
-    (ops) => {
-      const k = bigIntegerAt(ops[0]);
-      const j = bigIntegerAt(ops[1]);
-      const s = bigIntegerAt(ops[2]);
-      if (k === undefined || j === undefined || s === undefined || s !== 1n) return false;
-      if (k < 1n || k > 1000n) return false;
-      const kn = Number(k);
-      const jn = Number(j);
-      if (characterExponent(kn, jn, kn - 1)?.join("/") !== "1/2") return false; // odd: χ(−1) = −1
-      // Real-valued: every value is a fourth turn at most (0 or 1/2).
-      for (let a = 1; a < kn; a++) {
-        if (gcdNum(a, kn) !== 1) continue;
-        const q = characterExponent(kn, jn, a);
-        if (q === undefined) return false;
-        const [num, den] = q;
-        if (!(num === 0 || 2 * num === den)) return false;
-      }
-      return true;
-    },
-    (native) => (ops, options) => {
-      const k = bigIntegerAt(ops[0])!;
-      const j = bigIntegerAt(ops[1])!;
-      const kn = Number(k);
-      const jn = Number(j);
-      let sum = 0n;
-      for (let a = 1; a < kn; a++) {
-        const q = characterExponent(kn, jn, a);
-        if (q === undefined) continue;
-        const sign = q[0] === 0 ? 1n : -1n;
-        sum += BigInt(a) * sign;
-      }
-      // L(1, χ) = π · (−Σ) / k^{3/2} = π · (−Σ/k) / √k — no reduction needed against k
-      // beyond what `evaluate()` itself does for the num/k rational.
-      const exact = ce
-        .function("Multiply", [
-          "Pi",
-          ce.function("Divide", [
-            intNode(ce, -sum),
-            ce.function("Multiply", [intNode(ce, k), ce.function("Sqrt", [intNode(ce, k)])]),
-          ]),
-        ])
-        .evaluate();
-      // Guard against a subtle primitivity error in the τ(χ) = i√k step: cross-check
-      // against the existing numeric kernel before trusting the exact form.
-      const numeric = native?.([...ops], { ...options, numericApproximation: true });
-      if (numeric === undefined || !Number.isFinite(numeric.re)) return undefined;
-      if (Math.abs(exact.N().re - numeric.re) > 1e-9) return undefined;
-      return options.numericApproximation ? exact.N() : exact;
-    },
-    { arity: 3, compile: "builtin" },
   );
 }

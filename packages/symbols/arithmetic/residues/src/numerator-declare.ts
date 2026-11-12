@@ -1,7 +1,6 @@
 import {
   bigIntegerAt,
   bigRationalAt,
-  extendHead,
   operandsOf,
   optionsOf,
   symbolNameOf,
@@ -277,7 +276,6 @@ export function declareNumerator(ce: Engine): void {
     // generic broadcast leaves it whole.
     widenSignature(ce, head, "(number, any*) -> number");
     takeOptionsAsRules(ce, head);
-    extendHead(ce, head, { broadcastExemptions: ["surplus-operands"] });
     wrapOperator(
       ce,
       [head],

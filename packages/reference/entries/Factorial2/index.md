@@ -15,7 +15,7 @@ signatures:
     description: The double factorial $n!!$, the product of every second integer from n down to 1 or 2.
     library: enumeratio-number-theory
     type: (any) -> any
-    overrides: enumeratio-analytic
+    overrides: compute-engine
 seeAlso:
   - Factorial
 references:

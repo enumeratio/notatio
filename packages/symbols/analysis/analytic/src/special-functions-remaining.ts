@@ -23,31 +23,17 @@ const finish = (expr: Expression, options: EvalOptions): Expression =>
   options.numericApproximation ? expr.N() : expr.evaluate();
 
 export function declareSpecialFunctionsRemaining(ce: ComputeEngine): void {
-  // --- Limits at +oo: every one of these heads is monotonically unbounded (or, for
-  // DirichletEta/DirichletBeta, tends to 1 as the Dirichlet series' leading n=0 term
-  // dominates) as its argument grows, so the limit is the same constant Wolfram's own
-  // page states. None of these have a `Limit` machinery behind them; each is a single
-  // pinned value at the single symbol PositiveInfinity, not a general limit-taking. ---
-  for (const head of ["BarnesG", "LogBarnesG", "LogGamma", "HarmonicNumber"] as const) {
-    // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
-    wrapOperator(
-      ce,
-      [head, 1],
-      (ops) => isPositiveInfinity(ops[0]),
-      () => (_ops, options) => finish(ce.symbol("PositiveInfinity"), options),
-      { arity: 1, compile: "builtin" },
-    );
-  }
-  for (const head of ["DirichletEta", "DirichletBeta"] as const) {
-    // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
-    wrapOperator(
-      ce,
-      [head, 1],
-      (ops) => isPositiveInfinity(ops[0]),
-      () => (_ops, options) => finish(ce.number(1), options),
-      { arity: 1, compile: "builtin" },
-    );
-  }
+  // --- The limit at +oo: HarmonicNumber grows without bound, so its value at the single
+  // symbol PositiveInfinity is PositiveInfinity, as Wolfram's page states. (compute-engine
+  // answers its own heads there: LogGamma, BarnesG, LogBarnesG, DirichletEta, DirichletBeta.) ---
+  // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
+  wrapOperator(
+    ce,
+    ["HarmonicNumber", 1],
+    (ops) => isPositiveInfinity(ops[0]),
+    () => (_ops, options) => finish(ce.symbol("PositiveInfinity"), options),
+    { arity: 1, compile: "builtin" },
+  );
   // H_oo^(r) = zeta(r) for r > 1 (the Basel-sum generalisation); r <= 1 diverges and is
   // left alone (H_oo^(1) is the plain harmonic series above, already oo).
   // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
@@ -127,28 +113,6 @@ export function declareSpecialFunctionsRemaining(ce: ComputeEngine): void {
         options,
       ),
     { arity: 3, compile: "builtin" },
-  );
-
-  // --- PolyLog(n, -1) = (2^(1-n) - 1) zeta(n) for a symbolic order n: Li_n(-1) =
-  // -DirichletEta(n) = -(1 - 2^(1-n)) zeta(n), the standard identity behind
-  // DirichletEta's own FunctionExpand — valid for any n, so no restriction beyond n
-  // being a free symbol (a concrete numeric n already has its own reductions). ---
-  // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
-  wrapOperator(
-    ce,
-    ["PolyLog", 2],
-    (ops) => symbolNameOf(ops[0]) !== undefined && bigIntegerAt(ops[1]) === -1n,
-    () => (ops, options) => {
-      const n = ops[0];
-      return finish(
-        ce.function("Multiply", [
-          ce.function("Add", [ce.function("Power", [2, ce.function("Add", [ce.function("Negate", [n]), 1])]), -1]),
-          ce.function("Zeta", [n]),
-        ]),
-        options,
-      );
-    },
-    { arity: 2, compile: "builtin" },
   );
 
   // --- PolyLog(-2, z) = z(1+z)/(1-z)^3: the standard negative-integer-order closed

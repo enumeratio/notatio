@@ -12,6 +12,10 @@ signatures:
     library: enumeratio-analytic
     type: (integer, integer, number) -> number
     overrides: compute-engine
+    on:
+      - Around
+      - CenteredInterval
+      - Interval
 bindings:
   - origin: reference
     form: notatio

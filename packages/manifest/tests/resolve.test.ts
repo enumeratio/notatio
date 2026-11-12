@@ -13,7 +13,7 @@ test("names: heads and symbols, not text or numbers", () => {
 
 test("packages: what the records and what declaring found say declares each name", () => {
   // A native head we override, a head of our own, and one only the engine has.
-  expect(packagesFor(["BarnesG", "x"])).toContain("analytic");
+  expect(packagesFor(["LogGamma", "x"])).toContain("analytic");
   expect(packagesFor(["HypergeometricPFQ", ["List", 1], ["List", 2], 0.5])).toContain("analytic");
   // A widening counts, but not rows on carriers the package declares: an Adele brings adeles.
   const sum = [...packagesFor(["Add", 1, 2])];
@@ -70,9 +70,9 @@ test("ensure: each library once per engine", async () => {
   const log: string[] = [];
   const resolver = createResolver([library("analytic", log)]);
   const ce = {};
-  expect((await resolver.ensure(ce, ["BarnesG", "x"])).declared).toEqual(["analytic"]);
-  expect((await resolver.ensure(ce, ["BarnesG", "y"])).declared).toEqual([]);
-  expect(await resolver.ensure({}, ["BarnesG", "y"])).toEqual({ declared: ["analytic"], missing: [] });
+  expect((await resolver.ensure(ce, ["LogGamma", "x"])).declared).toEqual(["analytic"]);
+  expect((await resolver.ensure(ce, ["LogGamma", "y"])).declared).toEqual([]);
+  expect(await resolver.ensure({}, ["LogGamma", "y"])).toEqual({ declared: ["analytic"], missing: [] });
   expect(log).toEqual(["analytic", "analytic"]);
 });
 
