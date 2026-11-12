@@ -665,6 +665,15 @@ notatio-out[busy] .notatio-render { opacity: 0.5; transition-delay: 0.15s; }
   border-radius: 8px;
   overflow: hidden;
 }
+.notatio-complex-plot-note {
+  position: absolute;
+  right: 0.5rem;
+  bottom: 0.4rem;
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  pointer-events: none;
+}
 .notatio-complex-plot-bare .notatio-complex-plot-foot {
   border-top: none;
   justify-content: flex-end;

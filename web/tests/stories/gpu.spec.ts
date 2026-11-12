@@ -264,3 +264,84 @@ test("a huge value keeps its magnitude, and a negative zero its argument", async
   );
   expect(arg).toBe(0);
 });
+
+// The CPU portrait (gpu="false") is the same mapping as the shader over the same view: for each head the two
+// canvases are compared pixel by pixel. Band edges and a sample the double evaluator and the float shader place
+// on different sides of a hue or brightness step differ by a lot at a few pixels, so the checks are the share
+// of pixels that agree to `TOLERANCE` (of 255) and the mean difference, not equality.
+test.describe("the CPU portrait agrees with the GPU portrait", () => {
+  const TOLERANCE = 24;
+  const heads: { name: string; value: string; center: string; extent: number; mask?: number }[] = [
+    { name: "Sin", value: "Sin(z)", center: "0,0", extent: 6 },
+    { name: "Exp", value: "Exp(z)", center: "0,0", extent: 8 },
+    { name: "PolyLog(2, z)", value: "PolyLog(2, z)", center: "0,0", extent: 2.4, mask: 1 },
+    { name: "Zeta", value: "Zeta(z)", center: "0.5,8", extent: 24 },
+  ];
+  for (const head of heads) {
+    test(head.name, async ({ page }) => {
+      await page.goto("/explore/polylog/");
+      await page.locator("notatio-complex-plot canvas").first().waitFor();
+      // Two portraits of one view at one size, one forced onto the CPU.
+      await page.evaluate(
+        async ({ head }) => {
+          // The page's own portraits keep drawing (software GL on CI) and starve the CPU render of the main thread.
+          for (const own of document.querySelectorAll("notatio-complex-plot")) own.remove();
+          const stage = document.createElement("div");
+          stage.id = "route-check";
+          for (const gpu of ["", "false"]) {
+            const plot = document.createElement("notatio-complex-plot");
+            plot.id = gpu ? "cpu" : "gpu";
+            plot.setAttribute("value", head.value);
+            plot.setAttribute("center", head.center);
+            plot.setAttribute("extent", String(head.extent));
+            if (head.mask) plot.setAttribute("mask", String(head.mask));
+            if (gpu) plot.setAttribute("gpu", gpu);
+            plot.setAttribute("height", "240");
+            plot.setAttribute("bare", "");
+            plot.style.cssText = "display:block;width:400px";
+            stage.append(plot);
+          }
+          document.body.prepend(stage);
+          await customElements.whenDefined("notatio-complex-plot");
+        },
+        { head },
+      );
+      const cpu = page.locator("#cpu canvas");
+      const gpu = page.locator("#gpu canvas");
+      await cpu.scrollIntoViewIfNeeded();
+      // The CPU says so when its last pass is down; the GPU has presented a frame.
+      await expect(page.locator("#cpu .notatio-complex-plot-note")).toHaveText("Drawn on the CPU.");
+      await expect(cpu).toHaveAttribute("data-drawn", "cpu");
+      await paintedStats(gpu);
+      const diff = await page.evaluate(
+        ([tolerance]) => {
+          const g = (window as any).__grab(document.querySelector("#gpu canvas")) as {
+            w: number;
+            h: number;
+            rgba: Uint8ClampedArray;
+          };
+          const c = document.querySelector("#cpu canvas") as HTMLCanvasElement;
+          const image = c.getContext("2d")!.getImageData(0, 0, c.width, c.height);
+          if (g.w !== c.width || g.h !== c.height) return { size: [g.w, g.h, c.width, c.height] };
+          let near = 0;
+          let sum = 0;
+          for (let i = 0; i < image.data.length; i += 4) {
+            const d = Math.max(
+              Math.abs(image.data[i] - g.rgba[i]),
+              Math.abs(image.data[i + 1] - g.rgba[i + 1]),
+              Math.abs(image.data[i + 2] - g.rgba[i + 2]),
+            );
+            sum += d;
+            if (d <= tolerance) near++;
+          }
+          const n = image.data.length / 4;
+          return { agree: near / n, mean: sum / n };
+        },
+        [TOLERANCE],
+      );
+      expect(diff).not.toHaveProperty("size");
+      expect((diff as { agree: number }).agree, "share of pixels within tolerance").toBeGreaterThan(0.95);
+      expect((diff as { mean: number }).mean, "mean difference").toBeLessThan(6);
+    });
+  }
+});
