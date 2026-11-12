@@ -1,6 +1,6 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { registerNotation } from "@enumeratio/boxes";
-import { threadOverLists, widenSignature, wrapOperator } from "@enumeratio/engine";
+import { widenSignature, wrapOperator } from "@enumeratio/engine";
 import { applyNativeHeadPatches, applyPatch, lerchPhiPatch, valuesAtZero } from "@enumeratio/ce-patches";
 import { evaluateIncompleteGamma } from "./incomplete-gamma.ts";
 import { ANALYTIC_NOTATION } from "./notation.ts";
@@ -151,15 +151,13 @@ export function declareAnalytic(ce: ComputeEngine): void {
   // whose z₀ = 0 case is the lower incomplete gamma. Native for one and two arguments.
   // The operand type follows each native definition — Gamma's second argument is optional,
   // GammaRegularized's is required — so that widening changes the arity and nothing else,
-  // type errors included. Both thread over a list, as Wolfram's Listable heads do (natively
-  // only Gamma does).
+  // type errors included.
   for (const [head, secondRequired] of [
     ["Gamma", false],
     ["GammaRegularized", true],
   ] as const) {
     const z = "complex | infinity";
     widenSignature(ce, head, `(${z}, (${z})${secondRequired ? "" : "?"}, (${z})?) -> number`);
-    threadOverLists(ce, [head]);
     // compile builtin up to two operands: a third operand, or a complex or exact one native declines: a real call of up to two is native's
     wrapOperator(
       ce,
@@ -170,9 +168,6 @@ export function declareAnalytic(ce: ComputeEngine): void {
     );
   }
 
-  // Native heads that reject a list argument with a type error, where Wolfram's thread
-  // over it: Erf([0, 1]) is [0, Erf(1)].
-  threadOverLists(ce, ["Binomial", "Pochhammer", "BernoulliB", "Erf", "Erfc", "ErfInv", "BetaRegularized"]);
   declareWidened(ce);
   declareInverseOutsideDomain(ce);
 
