@@ -46,6 +46,8 @@ const vocabulary = (json: unknown): unknown => {
   if (head === "Negate" && args.length === 1) return ["Multiply", -1, args[0]];
   if (head === "Power" && args.length === 2 && Number.isInteger(args[1]) && (args[1] as number) < 0)
     return reciprocal(["Power", args[0], -(args[1] as number)]);
+  // `(a^-1 mod n)` is how both a modular inverse and a power with exponent -1 are written.
+  if (head === "PowerMod" && args.length === 3 && args[1] === -1) return ["ModularInverse", args[0], args[2]];
   // A bound is written the same as a `Limits`, which is what compute-engine canonicalizes it to.
   if (BIG_OPERATORS.has(head))
     return [
@@ -102,6 +104,6 @@ test("MakeExpression reads the reference examples back", () => {
   // What is left is heads whose notation shares a spelling with another (`ζ(s, a)`, an interval and a
   // list), operands `makeBoxes` drops (a second integration variable, a step), or layout and
   // interfaces: boxes that say nothing of the expression.
-  expect(rows.exact + rows.equivalent).toBeGreaterThan(0.97 * total);
+  expect(rows.exact + rows.equivalent).toBeGreaterThan(0.975 * total);
   expect(rows.declined).toBeLessThan(0.01 * total);
 }, 600_000);
