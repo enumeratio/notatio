@@ -167,24 +167,6 @@ export function declareWidened(ce: Engine): void {
     );
   }
 
-  // compute-engine's native GCD/LCM round a big integer through a double past ~2⁵³, giving a
-  // wrong answer rather than an error: GCD(20!, 10¹⁰⁰+3) comes back 163840000 (right answer 7),
-  // and LCM the same pair as a float. Every plain-integer call goes through bigints instead —
-  // exact at every size, and unchanged from the native answer wherever that was already right.
-  for (const [head, fold] of [
-    ["GCD", gcd],
-    ["LCM", lcm],
-  ] as const) {
-    // compile builtin: an exact integer or rational operand native does not answer, or a list it threads over
-    wrapOperator(
-      ce,
-      [head, 1, 1],
-      (ops) => ops.every((op) => bigIntegerAt(op) !== undefined),
-      () => (ops) => ce.number(ops.map((op) => bigIntegerAt(op)!).reduce(fold)),
-      { arity: { min: 1 }, compile: "builtin" },
-    );
-  }
-
   // IsSquareFree of a rational: numerator and denominator both squarefree — compute-engine's
   // native handler asks for an integer.
   const isSquareFreeInteger = (n: bigint): boolean | undefined => {
