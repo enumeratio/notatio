@@ -7,6 +7,7 @@ import { operandsOf } from "@enumeratio/engine";
 // These stay unevaluated.
 export const solveDeclines: Patch = {
   id: "solve-declines",
+  issue: "https://github.com/cortex-js/compute-engine/issues/526",
   lands: "Solve stays unevaluated rather than answering a list that omits solutions",
   files: ["src/compute-engine/library/solve.ts"],
   heads: ["Solve"],

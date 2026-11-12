@@ -5,6 +5,8 @@ import { evaluateShapeOfUnknownElements } from "../compute-engine/library/linear
 // Wolfram's `Dimensions` reads the list's structure.
 export const shapeOfUnknownElements: Patch = {
   id: "shape-of-unknown-elements",
+  issue: "https://github.com/cortex-js/compute-engine/issues/525",
+  pr: "https://github.com/cortex-js/compute-engine/pull/530",
   lands: "Shape of a nested list falls back to its structure when the elements' type carries no dimensions",
   files: ["src/compute-engine/library/linear-algebra.ts"],
   heads: ["Shape"],
