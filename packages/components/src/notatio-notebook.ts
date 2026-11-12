@@ -117,7 +117,7 @@ export class NotatioNotebook extends LitElement {
     super.connectedCallback();
     this.#store = this.transient ? undefined : browserStore();
     if (this.#store === undefined) {
-      this._ready = true;
+      this.#apply(openingCells(undefined, this.#seeded), false);
       return;
     }
     const index = [...document.querySelectorAll("notatio-notebook")].indexOf(this);
@@ -168,8 +168,11 @@ export class NotatioNotebook extends LitElement {
   }
 
   protected override willUpdate(changed: PropertyValues): void {
-    // A seed set after the notebook opened (a framework binding it late) seeds an empty one.
-    if (changed.has("seed") && this._ready && this._cells.length === 0) this.#apply([], false);
+    // A seed set after the notebook opened (a framework binding it late) seeds a notebook that
+    // holds only blank cells; cells the reader has typed stay.
+    if (!changed.has("seed") || !this._ready || this._cells.some((c) => c.value.trim() !== "")) return;
+    const seeded = this.#seeded;
+    if (seeded.length > 0) this.#apply(openingCells(undefined, seeded), false);
   }
 
   protected override updated(changed: PropertyValues): void {
