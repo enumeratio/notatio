@@ -149,27 +149,6 @@ export function limitsOf(expr: Expr): Limits | undefined {
 }
 
 export function declareProducts(ce: Engine): void {
-  // Nested products -- more than one Limits clause -- fold right, innermost first:
-  // Product(body, L1, L2, …, Lk) becomes Product(Product(…Product(body, Lk)…, L2), L1).
-  // Evaluating that lets a concrete outer index substitute into the inner Product's own
-  // (possibly index-dependent) bound before that inner Product tries to reduce, so a
-  // triangular product with a literal outer bound unrolls exactly the way compute-engine
-  // already unrolls a single-clause literal-bound Product.
-  // Compute-engine 0.186 evaluates the multi-clause forms with no wrapper too, except an
-  // unbounded inner clause (Product(j k, {k}, {j})): it holds the flat form, where this
-  // wrapper holds the nested one. Neither evaluates (Wolfram gives Gamma[j]^(k-1) Gamma[k]^(j-1)).
-  wrapOperator(
-    ce,
-    ["Product", "body", ["Tuple", "i", 1, "n"], ["Tuple", "j", 1, "i"]],
-    (ops) => ops.length > 2,
-    () => (ops) => {
-      const [body, ...limits] = ops;
-      let nested = body!;
-      for (let k = limits.length - 1; k >= 0; k--) nested = ce.function("Product", [nested, limits[k]!]);
-      return nested.evaluate();
-    },
-  );
-
   wrapOperator(
     ce,
     ["Product", ["Power", "i", 2], ["Tuple", "i", 1, "n"]],
