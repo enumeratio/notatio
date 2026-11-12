@@ -19,6 +19,7 @@ import {
   vectorPlotBox,
 } from "@enumeratio/frontend";
 import { compilePlot } from "@enumeratio/frontend/plot-compile";
+import type { Drawn } from "./cell-layout.ts";
 import type { PlotPoint, Session } from "./engine.ts";
 import { figureText, plotText, type Sampled } from "./figure.ts";
 
@@ -115,20 +116,25 @@ export function sampledField(session: Session, json: Json): Box | undefined {
  * pipe pinned comes back `Labeled` with its caption, and keeps it under the cells.
  */
 export function textOf(session: Session, json: Json, width = 60, height = 12): string {
+  return drawnOf(session, json, width, height).text;
+}
+
+/** `textOf`, with the baseline row of a StandardForm result for `Out[n]=` to sit beside. */
+export function drawnOf(session: Session, json: Json, width = 60, height = 12): Drawn {
   if (headOf(json) === "Labeled") {
     const [body, label] = opsOf(json);
     const caption = strOf(label);
     if (body !== undefined && caption !== undefined && plotOf(body) !== undefined)
-      return `${textOf(session, body, width, height)}\n  ${caption}`;
+      return { text: `${textOf(session, body, width, height)}\n  ${caption}` };
   }
   const sampled = sampledPlot(session, json);
-  if (sampled !== undefined) return plotText(sampled, { width, height });
+  if (sampled !== undefined) return { text: plotText(sampled, { width, height }) };
   const figure = figureText(json, {
     width,
     field: (field) => sampledField(session, field),
     notation: notationOf(session.ce),
     evaluate: (pinned) => session.render(session.ce.box(pinned as never).evaluate()),
   });
-  if (figure !== undefined) return figure;
-  return session.render(session.ce.box(json as never).evaluate());
+  if (figure !== undefined) return { text: figure };
+  return session.renderDrawn(session.ce.box(json as never).evaluate());
 }
