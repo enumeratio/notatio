@@ -2,7 +2,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 
-// N(Sin(24^40)) et al. on a huge exact/bignum argument — trig-reduction.ts. Oracle
+// N(Sin(24^40)) et al. on a huge exact/bignum argument, which compute-engine reduces. Oracle
 // coverage (`wolframscript -code 'N[Sin[24^40], 30]'`, and the same for
 // Cos/Tan/Sec/Csc/Cot, at each of the huge arguments below, captured with
 // `$MaxExtraPrecision` raised so Wolfram doesn't decline the reduction itself) now lives

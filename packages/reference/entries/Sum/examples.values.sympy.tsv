@@ -5,3 +5,4 @@ sum-of-a-subset
 sum-of-a-lehmer-code		
 sum-of-a-subexcedant-sequence		
 sum-k-pow-neg-2-k-1-positiveinfinity	summation((S(Symbol("k"))**-2), (Symbol("k"), 1, oo))	pi**2/6
+sum-i-limits-i-1-4-2		

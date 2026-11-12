@@ -283,20 +283,11 @@ function declareTanhComplexInfinity(ce: ComputeEngine): void {
   );
 }
 
-/** Arsech(1) = 0 (an exact fold at the branch point, same shape as Arccosh(1) = 0) and
- * Arsech(x) for exact x > 1: past the real branch point, complex-valued. Arsech(x) =
+/** Arsech(x) for exact x > 1: past the real branch point, complex-valued. Arsech(x) =
  * Arccosh(1/x) by definition, and Arccosh(z) = i*Arccos(z) for |z| <= 1 -- here 1/x is a
  * real number already inside [0, 1), so Arccos(1/x) is the ordinary real-valued arccosine
  * (e.g. Arccos(1/2) = pi/3), not a further complex branch. */
 function declareArsech(ce: ComputeEngine): void {
-  // compile builtin: identities, exact folds and ComplexInfinity: the built-in lowering gives the same value
-  wrapOperator(
-    ce,
-    ["Arsech", 1],
-    (ops) => ops.length === 1 && ops[0]?.is(1) === true,
-    () => (_ops, options) => finish(ce.Zero, options),
-    { compile: "builtin" },
-  );
   // compile builtin: identities, exact folds and ComplexInfinity: the built-in lowering gives the same value
   wrapOperator(
     ce,
@@ -321,7 +312,7 @@ function declareArsech(ce: ComputeEngine): void {
  * has (`Ln(PositiveInfinity) = PositiveInfinity`) -- the magnitude alone diverges regardless
  * of an undefined direction. `Log2`/`Log10`/`Lb` canonicalize to `Log` at box time (`Log2(z)`
  * boxes straight to `Log(z, 2)`, `Log10(z)` to the default-base `Log(z)`), so their own
- * ComplexInfinity case is covered by `declareLogComplexInfinityAndReciprocalPower` below --
+ * ComplexInfinity case is covered by `declareLogComplexInfinity` below --
  * there is no separate `Log2`/`Log10`/`Lb` operator left by the time `evaluate` runs. */
 function declareLnComplexInfinity(ce: ComputeEngine): void {
   // compile builtin: identities, exact folds and ComplexInfinity: the built-in lowering gives the same value
@@ -353,64 +344,22 @@ function declareLnUnitFraction(ce: ComputeEngine): void {
   );
 }
 
-/** k with n = base^k exactly, for positive integers base > 1, n >= 1, k >= 0. */
-function exactLogInteger(base: bigint, n: bigint): bigint | undefined {
-  if (n === 1n) return 0n;
-  let k = 0n;
-  let power = 1n;
-  while (power < n) {
-    power *= base;
-    k += 1n;
-  }
-  return power === n ? k : undefined;
-}
-
 /**
  * `Log`, in both its call forms -- `Log2`, `Log10` and `Lb` all canonicalize to this
  * operator at box time (`Log2(z)` to `Log(z, 2)`, `Lb(z)` the same, `Log10(z)` to the
  * default-base one-argument `Log(z)`), so this is the only operator left to attach to for
  * any of them.
  *
- * Two folds:
- *   - `Log(ComplexInfinity[, base])` = +Infinity, the same "magnitude alone diverges"
- *     convention as `Ln`'s.
- *   - an exact rational argument `1/q` with `q` an exact power of the base: `Log(1/8, 2)`,
- *     `Log2(1/8)`, `Log10(1/100)` = the negative integer exponent. Compute-engine already
- *     folds a positive integer power of the base (`Log2(1024) = 10`); this is that fold's
- *     reciprocal side. Restricted to numerator 1 (rather than every rational whose num/den
- *     are both base powers) to keep the rule mechanical: a `bigRationalAt` read and one
- *     integer-power search, no general factorization.
+ * `Log(ComplexInfinity[, base])` = +Infinity, the same "magnitude alone diverges"
+ * convention as `Ln`'s.
  */
-function declareLogComplexInfinityAndReciprocalPower(ce: ComputeEngine): void {
-  /** The base Log(z, base) uses: 2 the explicit second operand, or 10 (compute-engine's own
-   * default, matching Log10(x) -> Log(x)) when there is none. */
-  const baseOf = (ops: readonly Expression[]): bigint | undefined => {
-    if (ops.length === 1) return 10n;
-    if (ops.length !== 2) return undefined;
-    const b = bigRationalAt(ops[1]);
-    return b !== undefined && b[1] === 1n && b[0] > 1n ? b[0] : undefined;
-  };
-  const reciprocalExponent = (ops: readonly Expression[]): bigint | undefined => {
-    const base = baseOf(ops);
-    if (base === undefined) return undefined;
-    const r = bigRationalAt(ops[0]);
-    if (r === undefined || r[0] !== 1n || r[1] <= 1n) return undefined;
-    return exactLogInteger(base, r[1]);
-  };
+function declareLogComplexInfinity(ce: ComputeEngine): void {
   // compile builtin: identities, exact folds and ComplexInfinity: the built-in lowering gives the same value
   wrapOperator(
     ce,
     ["Log", 1],
     (ops) => (ops.length === 1 || ops.length === 2) && ops[0] !== undefined && isComplexInfinity(ops[0]),
     () => () => ce.symbol("PositiveInfinity"),
-    { compile: "builtin" },
-  );
-  // compile builtin: identities, exact folds and ComplexInfinity: the built-in lowering gives the same value
-  wrapOperator(
-    ce,
-    ["Log", 1],
-    (ops) => (ops.length === 1 || ops.length === 2) && reciprocalExponent(ops) !== undefined,
-    () => (ops, options) => finish(ce.number(-reciprocalExponent(ops)!), options),
     { compile: "builtin" },
   );
 }
@@ -426,5 +375,5 @@ export function declareElementaryRemaining(ce: ComputeEngine): void {
   declareArsech(ce);
   declareLnComplexInfinity(ce);
   declareLnUnitFraction(ce);
-  declareLogComplexInfinityAndReciprocalPower(ce);
+  declareLogComplexInfinity(ce);
 }

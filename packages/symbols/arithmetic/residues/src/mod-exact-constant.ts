@@ -1,7 +1,9 @@
 import { bigRationalAt, symbolNameOf, wrapOperator, type Engine } from "@enumeratio/engine";
 
 export function declareModExactConstant(ce: Engine): void {
-  // compile builtin: a bare constant symbol (Pi) against a numeric modulus: the exact remainder equals the lowering's value
+  // A bare constant symbol (Pi) against a float modulus (Mod(Pi, 2.5)): evaluate returns the number, where
+  // compute-engine leaves Mod held. An exact modulus, `.N()` and the JavaScript compile already agree with
+  // compute-engine, so they are not this wrapper's business; `compile: "builtin"` keeps the lowering's value.
   wrapOperator(
     ce,
     ["Mod", 2],
@@ -10,6 +12,7 @@ export function declareModExactConstant(ce: Engine): void {
       const [x, m] = ops;
       if (symbolNameOf(x) === undefined) return false; // a bare constant symbol only
       if (bigRationalAt(x) !== undefined) return false; // already exact: native handles it
+      if (bigRationalAt(m) !== undefined) return false; // an exact modulus: compute-engine answers it
       const mNum = m.re;
       if (!(Number.isFinite(mNum) && mNum > 0)) return false;
       const xNum = x.N().re;

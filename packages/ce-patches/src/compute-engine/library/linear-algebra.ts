@@ -1,7 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { declareCompile, operandsOf } from "@enumeratio/engine";
-import { compileMatrixRank, exactRows } from "../compilation/matrix-rank.ts";
-import { matrixRank } from "../numerics/matrix-rank.ts";
+import { compileMatrixRank } from "../compilation/matrix-rank.ts";
 
 // cortex-js/compute-engine: `Shape` reads `xs.shape`, which is the `dimensions` of the operand's
 // TYPE, and a list's type only carries dimensions when its elements' type is known. A nested
@@ -46,18 +45,8 @@ export function evaluateShapeOfUnknownElements(ce: ComputeEngine): void {
   declareCompile(ce, "Shape", "builtin");
 }
 
-/** Give `MatrixRank` a JavaScript lowering (compute-engine's has none), and an exact answer for a
- *  matrix of integers and rationals: its own elimination runs on doubles, so the regular 12 by 12
- *  Hilbert matrix comes out rank 10. A matrix with a float, a symbol or no entries is left to it. `.N()` turns the entries into
- *  doubles before this runs, so it takes the float path. */
+/** Give `MatrixRank` a JavaScript lowering (compute-engine's has none). */
 export function compileMatrixRankToJavaScript(ce: ComputeEngine): void {
-  const definition = ce.lookupDefinition("MatrixRank");
-  const operator = definition !== undefined && "operator" in definition ? definition.operator : undefined;
-  const native = operator?.evaluate;
-  if (operator === undefined || native === undefined) return;
-  (operator as { evaluate: unknown }).evaluate = (ops: readonly Expression[], options: never) => {
-    const rows = ops.length === 1 ? exactRows(ops[0]!) : undefined;
-    return rows === undefined ? native(ops, options) : ce.number(matrixRank(rows));
-  };
+  if (ce.lookupDefinition("MatrixRank") === undefined) return;
   declareCompile(ce, "MatrixRank", compileMatrixRank);
 }

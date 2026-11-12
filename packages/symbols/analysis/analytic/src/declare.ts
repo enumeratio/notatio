@@ -1,6 +1,6 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { registerNotation } from "@enumeratio/boxes";
-import { threadOverLists, widenSignature, wrapOperator } from "@enumeratio/engine";
+import { widenSignature, wrapOperator } from "@enumeratio/engine";
 import { applyNativeHeadPatches, applyPatch, lerchPhiPatch, valuesAtZero } from "@enumeratio/ce-patches";
 import { evaluateIncompleteGamma } from "./incomplete-gamma.ts";
 import { ANALYTIC_NOTATION } from "./notation.ts";
@@ -61,7 +61,6 @@ import { declareIncompleteSymbolic } from "./incomplete-symbolic.ts";
 import { declareGeneralizedSpecial } from "./generalized-special.ts";
 import { declareConstantRounding } from "./constant-rounding.ts";
 import { declareTrigNormalisation } from "./trig-normalisation.ts";
-import { declareTrigReduction } from "./trig-reduction.ts";
 import { declareElementarySpecialValues } from "./elementary-special-values.ts";
 import { declareElementaryRemaining } from "./elementary-remaining.ts";
 import { declareThreading113 } from "./threading-113.ts";
@@ -139,9 +138,6 @@ import { declareNSum } from "./nsum.ts";
  * `Khinchin` constant (khinchin.ts); and `Hyperfactorial` (hyperfactorial.ts).
  * Also, in q-series.ts, the q-analogues `QPochhammer`, `QFactorial`, `QBinomial`;
  * and, in riemann-siegel.ts, `RiemannSiegelTheta`, `RiemannSiegelZ`, `RiemannZetaZero`.
- * Also, in trig-reduction.ts, an in-place fix for native `Sin`/`Cos`/`Tan`/`Sec`/`Csc`/`Cot`
- * on a huge exact or bignum argument, whose reduction mod 2*pi native loses to a premature
- * round to a machine double (or to `ce.precision`, under `N()`).
  */
 export function declareAnalytic(ce: ComputeEngine): void {
   registerNotation(ce, ANALYTIC_NOTATION);
@@ -151,15 +147,13 @@ export function declareAnalytic(ce: ComputeEngine): void {
   // whose z₀ = 0 case is the lower incomplete gamma. Native for one and two arguments.
   // The operand type follows each native definition — Gamma's second argument is optional,
   // GammaRegularized's is required — so that widening changes the arity and nothing else,
-  // type errors included. Both thread over a list, as Wolfram's Listable heads do (natively
-  // only Gamma does).
+  // type errors included.
   for (const [head, secondRequired] of [
     ["Gamma", false],
     ["GammaRegularized", true],
   ] as const) {
     const z = "complex | infinity";
     widenSignature(ce, head, `(${z}, (${z})${secondRequired ? "" : "?"}, (${z})?) -> number`);
-    threadOverLists(ce, [head]);
     // compile builtin up to two operands: a third operand, or a complex or exact one native declines: a real call of up to two is native's
     wrapOperator(
       ce,
@@ -170,9 +164,6 @@ export function declareAnalytic(ce: ComputeEngine): void {
     );
   }
 
-  // Native heads that reject a list argument with a type error, where Wolfram's thread
-  // over it: Erf([0, 1]) is [0, Erf(1)].
-  threadOverLists(ce, ["Binomial", "Pochhammer", "BernoulliB", "Erf", "Erfc", "ErfInv", "BetaRegularized"]);
   declareWidened(ce);
   declareInverseOutsideDomain(ce);
 
@@ -224,7 +215,6 @@ export function declareAnalytic(ce: ComputeEngine): void {
   declareGeneralizedSpecial(ce);
   declareConstantRounding(ce);
   declareTrigNormalisation(ce);
-  declareTrigReduction(ce);
   declareElementarySpecialValues(ce);
   declareElementaryRemaining(ce);
   declareThreading113(ce);

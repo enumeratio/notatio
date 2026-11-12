@@ -150,11 +150,8 @@ function declareConstructor(ce: ComputeEngine, carrier: Carrier): void {
     return;
   }
 
-  const existingEvaluate = operator.evaluate;
   const existingSignature = operator.signature;
   (operator as { signature: unknown }).signature = ce.type(`(${clause}) & ${String(existingSignature)}`);
-  operator.evaluate = (ops: readonly Expression[], options) => existingEvaluate?.(ops, options);
-  declareCompile(ce, carrier.name, "builtin"); // a pass-through
 }
 
 /** The value inside a constructed carrier — what a statistic reaches for. */

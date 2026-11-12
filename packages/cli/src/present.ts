@@ -5,11 +5,12 @@
 
 import { can, type Environment } from "@enumeratio/frontend";
 import { dim, red } from "./ansi.ts";
+import type { Drawn } from "./cell-layout.ts";
 import { Repl } from "./core.ts";
 import { type DriveScreen, type Driver, drivable, driver } from "./drive.ts";
 import { pager } from "./pager.ts";
 import { isTable, openTable } from "./table.ts";
-import { textOf } from "./textual.ts";
+import { drawnOf, textOf } from "./textual.ts";
 
 type Json = Parameters<typeof driver>[0];
 
@@ -40,9 +41,10 @@ export function present(
   const { session } = repl;
   const out = repl.eval(input);
   const text = (json: Json): string => textOf(session, json as never, 60, plotHeight);
+  const drawn = (json: Json): Drawn => drawnOf(session, json as never, 60, plotHeight);
   const last = session.history.at(-1);
   const settle = (pinned: Json): string =>
-    repl.formatOut(last?.n ?? 1, text(session.ce.box(pinned as never).evaluate().json as Json));
+    repl.formatOut(last?.n ?? 1, drawn(session.ce.box(pinned as never).evaluate().json as Json));
   if (last === undefined) return { echo, out: out.text || red("  no result", color), settle };
   const json = last.expr.json as Json;
   // A table pages over its row source; a pipe gets the pinned first page from `reduce` below.
@@ -59,7 +61,9 @@ export function present(
     if (d !== undefined) return { echo, out: "", driver: d, settle };
   }
   const reduced = repl.reduced(last.expr).json as Json;
-  return { echo, out: repl.formatOut(last.n, text(reduced)), settle };
+  // Someone at a terminal reads 2-D StandardForm; a pipe keeps the one-line form.
+  if (can.interact(env, "keys")) session.form = "standardform";
+  return { echo, out: repl.formatOut(last.n, drawn(reduced)), settle };
 }
 
 /** The line under a driven result that says how to pick the controls back up. */

@@ -9,7 +9,6 @@ import {
   operandsOf,
   stringAt,
   symbolNameOf,
-  threadOverLists,
   widenSignature,
   wrapOperator,
   type Engine,
@@ -328,10 +327,6 @@ export function declareNumerals(ce: Engine): void {
     }
     return ce.number(value);
   });
-
-  // Thread over a list of n, as Wolfram's do: IntegerDigits([6, 7], 2) is [[1, 1, 0], [1, 1, 1]].
-  // A system in the base slot is a head, never a bare list, so it is not threaded over.
-  threadOverLists(ce, ["IntegerDigits", "DigitCount", "DigitSum"]);
 
   // Wolfram's FromDigits["1923"] and FromDigits["ff", 16]: the digits as a string, 0-9 then
   // a-z. Natively the digits have to be a list. As for a list, a digit past the base carries

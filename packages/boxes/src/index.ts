@@ -22,6 +22,7 @@ export {
 export { BOXES_TYPE, declareBoxes } from "./declare.ts";
 export { BoxFormError, fromMathJson, toMathJson } from "./json.ts";
 export { APPLY_FUNCTION, INVISIBLE_TIMES, type MakeOptions, makeBoxes } from "./make.ts";
+export { MakeExpressionError, type MakeExpressionOptions, makeExpression } from "./read.ts";
 export {
   CONTROL_INTENT,
   CONTROL_NOTATION,

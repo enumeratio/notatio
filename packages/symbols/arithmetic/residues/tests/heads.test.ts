@@ -119,3 +119,9 @@ test("a class mod 1 meets any other class in the zero ring, as in Sage", () => {
     ["IntegerMod", 5, 7],
   ]);
 });
+
+test("Mod of a bare constant against a float modulus evaluates; an exact modulus stays exact", () => {
+  expect(ce.box(["Mod", "Pi", 2.5] as never).evaluate().re).toBeCloseTo(Math.PI - 2.5, 12);
+  expect(ce.box(["Mod", "Pi", 2.5] as never).N().re).toBeCloseTo(Math.PI - 2.5, 12);
+  expect(ce.box(["Mod", "Pi", 2] as never).evaluate().json).toEqual(["Add", -2, "Pi"]);
+});

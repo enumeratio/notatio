@@ -23,7 +23,7 @@ signatures:
     description: The remainder of a on division by b.
     library: enumeratio-residues
     type: (real, real) -> real
-    overrides: enumeratio-analytic
+    overrides: compute-engine
 seeAlso:
   - PowerMod
   - IntegerMod

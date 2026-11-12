@@ -2,15 +2,6 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigRationalAt, operandsOf, wrapOperator } from "@enumeratio/engine";
 import type { EvalOptions } from "@enumeratio/ce-patches";
 
-// Exact values compute-engine leaves symbolic for the hyperbolic functions, though it has
-// them for the circular ones: the values at 0 (and arcosh 1 = 0), as Wolfram gives them.
-//
-// The at-0 table for Sinh/Cosh/Tanh/Sech/Csch/Coth/Arsinh/Artanh (cortex-js/compute-engine
-// #341/#342) landed natively in compute-engine 0.139 -- the
-// @enumeratio/ce-patches hyperbolic-zero patch that used to apply it here was
-// retired. Arcosh(1) = 0 is a different point and NOT part of that issue, so it stays
-// here, in SPECIAL.
-//
 // The hyperbolic functions of ln q, q a positive rational, are rational in q:
 // sinh(ln q) = (q − 1/q)/2, cosh(ln q) = (q + 1/q)/2 and the rest by division. Wolfram
 // folds these (Sinh[Log[2]] is 3/4); compute-engine leaves them symbolic. Sinh(−ln q) is
@@ -41,27 +32,7 @@ function logArgument(op: Expression | undefined): readonly [bigint, bigint] | un
   return q !== undefined && q[0] > 0n && q[0] !== q[1] ? q : undefined;
 }
 
-/** f(x0) for the exact x0 (other than 0 -- hyperbolic-zero's) at which a head has a plain value. */
-const SPECIAL: Readonly<Record<string, readonly [number, (ce: ComputeEngine) => Expression]>> = {
-  Arcosh: [1, (ce) => ce.Zero],
-};
-
 export function declareHyperbolicExact(ce: ComputeEngine): void {
-  for (const [head, [at, value]] of Object.entries(SPECIAL)) {
-    // compile builtin: exact values and identities at exact arguments
-    wrapOperator(
-      ce,
-      [head, 1],
-      ([x]) => {
-        const q = bigRationalAt(x);
-        const exact = (x as { isExact?: boolean } | undefined)?.isExact !== false;
-        return exact && q !== undefined && q[1] === 1n && q[0] === BigInt(at);
-      },
-      () => () => value(ce),
-      { arity: 1, compile: "builtin" },
-    );
-  }
-
   for (const [head, rule] of Object.entries(RULES)) {
     const apply = rule(ce);
     // compile builtin: exact values and identities at exact arguments

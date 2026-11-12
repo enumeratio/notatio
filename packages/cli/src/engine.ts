@@ -12,7 +12,7 @@ import { declareCarrierElement, declareCarrierPlurals, declareStructures } from 
 import { declareGraphics, exportTo, importFrom } from "@enumeratio/formats";
 import { displayLatexSyntax } from "@enumeratio/frontend/display";
 import { readCardinalityByType } from "@enumeratio/frontend/conventional-latex";
-import { drawBoxes } from "./cell-layout.ts";
+import { type Drawn, drawLaid } from "./cell-layout.ts";
 import { NOTATION_ENTRIES } from "./notation.ts";
 import {
   declareDistributions,
@@ -115,9 +115,14 @@ export interface RenderOptions {
 
 /** Render a boxed expression in the requested output form (via the format registry). */
 export function renderForm(expr: Expression, form: Form, options: RenderOptions = {}): string {
+  return renderDrawn(expr, form, options).text;
+}
+
+/** `renderForm`, with StandardForm's baseline row (the other forms have none). */
+export function renderDrawn(expr: Expression, form: Form, options: RenderOptions = {}): Drawn {
   // StandardForm is the web's boxes, laid out on character cells: stacked fractions, raised scripts.
-  if (form === "standardform") return drawBoxes(makeBoxes(expr.json), { color: options.color, styled: options.color });
-  return String(exportTo(expr, FORMAT_OF[form]));
+  if (form === "standardform") return drawLaid(makeBoxes(expr.json), { color: options.color, styled: options.color });
+  return { text: String(exportTo(expr, FORMAT_OF[form])) };
 }
 
 export const SYNTAXES: readonly Syntax[] = ["latex", "mathjson", "wolfram", "epsil", "asciimath", "mathml"];
@@ -332,11 +337,16 @@ export class Session {
   }
 
   render(expr: Expression, form: Form = this.form): string {
+    return this.renderDrawn(expr, form).text;
+  }
+
+  /** `render`, with the baseline row when the form has one. */
+  renderDrawn(expr: Expression, form: Form = this.form): Drawn {
     try {
-      const out = renderForm(expr, form, { color: this.color });
-      return out === "" ? `(no ${FORM_LABEL[form]} for this expression)` : out;
+      const out = renderDrawn(expr, form, { color: this.color });
+      return out.text === "" ? { text: `(no ${FORM_LABEL[form]} for this expression)` } : out;
     } catch (err) {
-      return `(${FORM_LABEL[form]} unavailable: ${(err as Error).message})`;
+      return { text: `(${FORM_LABEL[form]} unavailable: ${(err as Error).message})` };
     }
   }
 

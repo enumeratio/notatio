@@ -78,36 +78,9 @@ export function declareNumberTheory(ce: Engine): void {
   declareBacklog(ce);
   declareDivisorParts(ce);
 
-  // compute-engine's integer functions reject a list argument with a type error (or leave
-  // the call unevaluated); Wolfram's thread over it: Totient([2, 4, 6]) is [1, 2, 2].
-  threadOverLists(ce, [
-    "Totient",
-    "NextPrime",
-    "NthPrime",
-    "PrimePi",
-    "FactorInteger",
-    "Divisors",
-    "PrimeNu",
-    "PrimeOmega",
-    "MoebiusMu",
-    "IsSquareFree",
-    "JacobiSymbol",
-    "KroneckerSymbol",
-    "LegendreSymbol",
-    "DivisorSigma",
-    "ExtendedGCD",
-    "ModularInverse",
-    "Multinomial",
-    "CatalanNumber",
-    "Subfactorial",
-    "StirlingS1",
-    "Stirling",
-    "BellNumber",
-    "Fibonacci",
-    "LucasL",
-    "CarmichaelLambda",
-    "IsPerfect",
-  ]);
+  // Wolfram's Listable heads thread over a list: Multinomial([2, 3, 5], 3) is [10, 20, 56].
+  // compute-engine threads its other integer functions itself; it rejects Multinomial's list.
+  threadOverLists(ce, ["Multinomial"]);
 
   const list = (xs: readonly bigint[]): Expr =>
     ce.function(
@@ -160,10 +133,8 @@ export function declareNumberTheory(ce: Engine): void {
     3,
   );
 
-  // Native takes (a, m); the explicit numerator and denominator bounds are ours, and so is
-  // a list of residues.
+  // Native takes (a, m); the explicit numerator and denominator bounds are ours.
   widenSignature(ce, "RationalReconstruction", "(integer, integer, integer?, integer?) -> rational", mayBeInteger);
-  threadOverLists(ce, ["RationalReconstruction"]);
   wrapOperator(
     ce,
     ["RationalReconstruction"],
@@ -462,22 +433,6 @@ function declareCombinatoricsGamma113(ce: Engine): void {
     },
     1,
   );
-
-  // StirlingS1(n, k) and Stirling(n, k) are 0 whenever k > n ≥ 0 -- both currently left
-  // unevaluated past the diagonal.
-  for (const head of ["StirlingS1", "Stirling"] as const) {
-    wrapOperator(
-      ce,
-      [head, 3, 5],
-      (ops) => {
-        const n = integerAt(ops[0]);
-        const k = integerAt(ops[1]);
-        return n !== undefined && k !== undefined && n >= 0 && k > n;
-      },
-      () => () => ce.Zero,
-      2,
-    );
-  }
 
   // Fibonacci and LucasL at a real index and with a second (polynomial) argument: rows in
   // their tables (defineOverload), beside adeles' profinite one, so which package declared

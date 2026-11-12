@@ -13,7 +13,7 @@ import type { SessionDefaults } from "./engine.ts";
 import { NodeHost } from "./node-host.ts";
 import { pager } from "./pager.ts";
 import { isTable, openTable } from "./table.ts";
-import { textOf } from "./textual.ts";
+import { drawnOf, textOf } from "./textual.ts";
 
 const HISTORY_FILE = join(homedir(), ".notatio_history");
 
@@ -66,7 +66,7 @@ export function runRepl(defaults: SessionDefaults = {}): void {
           // `Out[n]` is what the reader left on the screen, so a later line that
           // references it gets the state they stopped at, not the undriven controls.
           last.expr = session.ce.box(left).evaluate();
-          console.log(`${host.repl.formatOut(last.n, textOf(session, last.expr.json))}\n`);
+          console.log(`${host.repl.formatOut(last.n, drawnOf(session, last.expr.json))}\n`);
         } else if (out.text) console.log(`${out.text}\n`);
         else if (!out.clear) console.log("");
         if (out.exit) {

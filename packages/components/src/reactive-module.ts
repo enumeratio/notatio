@@ -153,7 +153,8 @@ export class ReactiveModule {
     this.#elements.set(id, el);
     let json: MathJsonExpression | undefined;
     try {
-      json = parseExpression(source, { allow: ["Assign"] }).json;
+      const read = parseExpression(source, { allow: ["Assign"] });
+      json = read.errors.length ? undefined : read.json;
     } catch {
       json = undefined;
     }

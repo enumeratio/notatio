@@ -104,6 +104,10 @@ export function evaluateHarmonicNumber(
   const box = (expr: Json) => ce.box(expr as unknown as BoxInput);
   const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
 
+  // An infinite operand reaches ψ(∞), which is NaN for ComplexInfinity; PositiveInfinity is reduced
+  // before this kernel, so what is left stays unevaluated.
+  if ((z as Partial<{ isInfinity: boolean }>).isInfinity === true) return undefined;
+
   if (isRealInt(z) && z.re < 0) return ce.symbol("ComplexInfinity"); // no sum below n = 0
 
   if (isRealInt(z) && z.re === 0) return finish(box(0)); // empty sum, any r
