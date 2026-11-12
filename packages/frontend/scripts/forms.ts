@@ -28,7 +28,12 @@ import { markupOf, readMarkupText, stripMetadata } from "@enumeratio/formats/mar
 import { parseExpression, withoutProgramBlock } from "@enumeratio/formats/expression";
 import { portableTeX, registerTeXMacros } from "@enumeratio/formats/tex";
 import { emit, SYSTEMS, type System } from "@enumeratio/oracle";
-import { conventionalLatexDictionary, DisplayLatexSyntax, withStringsWrapped } from "../src/conventional-latex.ts";
+import {
+  conventionalLatexDictionary,
+  DisplayLatexSyntax,
+  readCardinalityByType,
+  withStringsWrapped,
+} from "../src/conventional-latex.ts";
 import { mergeLatex } from "../src/engine.ts";
 import { combineNotation, makeBoxes, notationOf } from "@enumeratio/boxes";
 import { toLatex } from "@enumeratio/boxes/render";
@@ -43,6 +48,7 @@ const ce = new ComputeEngine({
     dictionary: mergeLatex(conventionalLatexDictionary(), PACKAGES.latex) as never[],
   }),
 });
+readCardinalityByType(ce);
 setEngineDefaults(ce);
 
 // TraditionalForm: every package's notation, as the engine that declares them all registers it.

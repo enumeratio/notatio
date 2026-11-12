@@ -20,6 +20,7 @@ import { combineNotation, type PackageNotation, registerNotation } from "@enumer
 import { declareAnalytic } from "@enumeratio/analytic";
 import { ENUMERATIO, declareCatalog } from "@enumeratio/catalog";
 import { displayLatexSyntax } from "@enumeratio/frontend/display";
+import { readCardinalityByType } from "@enumeratio/frontend/conventional-latex";
 import {
   buildEngine,
   dependedLibraries,
@@ -124,6 +125,7 @@ export const fullEngine = (): ComputeEngine =>
       const ce = new ComputeEngine({
         latexSyntax: displayLatexSyntax(LATEX_DICTIONARY, NOTATION.latex),
       });
+      readCardinalityByType(ce);
       registerNotation(ce, NOTATION.traditional);
       return ce;
     },

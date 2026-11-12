@@ -2,7 +2,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ComputeEngine, LatexSyntax } from "@cortex-js/compute-engine";
 import { afterAll, expect, test } from "vite-plus/test";
-import { conventionalLatexDictionary, withStringsWrapped } from "../src/conventional-latex.ts";
+import { AS_TYPED } from "../src/latex.ts";
+import { conventionalLatexDictionary, readCardinalityByType, withStringsWrapped } from "../src/conventional-latex.ts";
 
 // Conventional spellings for native compute-engine heads
 // (old-repo issue #376): `LCM`/`MatrixRank`/`Erf` under `\operatorname{...}`, `Zeta` under
@@ -228,4 +229,25 @@ test("the primes of a function symbol read as its derivative", () => {
   expect(read("f''(x)")).toEqual(["Apply", ["Derivative", "f", 2], "x"]);
   // Not a symbol: the native read.
   expect(read("(f+g)'")).toEqual(["Derivative", ["Delimiter", ["Add", "f", "g"]]]);
+});
+
+test("`|…|` and `\\vert…\\vert` read as Count by the operand's type, else Abs", () => {
+  const typed = new ComputeEngine({
+    latexSyntax: new LatexSyntax({ dictionary: conventionalLatexDictionary() as never[] }),
+  });
+  readCardinalityByType(typed);
+  typed.declare("s", "set<integer>");
+  typed.declare("v", "list<integer>");
+  typed.declare("n", "integer");
+  const read = (latex: string) => typed.parse(latex, AS_TYPED).json;
+  for (const bars of [(x: string) => `|${x}|`, (x: string) => `\\vert ${x}\\vert `]) {
+    expect(read(bars("s"))).toEqual(["Count", "s"]);
+    expect(read(bars("\\{1,2\\}"))).toEqual(["Count", ["Set", 1, 2]]);
+    expect(read(bars("n"))).toEqual(["Abs", "n"]);
+    // compute-engine's canonical `Abs` of a list stays `Abs`.
+    expect(read(bars("v"))).toEqual(["Abs", "v"]);
+    // An undeclared symbol has no type, and reading it does not declare it.
+    expect(read(bars("q"))).toEqual(["Abs", "q"]);
+  }
+  expect(typed.box("q", { form: "raw" }).type.toString()).toBe("unknown");
 });
