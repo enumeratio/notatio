@@ -10,7 +10,7 @@ signatures:
     description: "The rank of a matrix: the number of linearly independent rows (equivalently, columns)."
     library: enumeratio-analytic
     type: (value) -> integer
-    overrides: enumeratio-evaluation
+    overrides: compute-engine
   - call: MatrixRank(A)
     description: "The rank of a matrix: the number of linearly independent rows (equivalently, columns)."
     library: enumeratio-combinatorics
