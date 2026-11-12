@@ -6,16 +6,11 @@ import { declareCompile } from "@enumeratio/engine";
 // reads the tuple `(k, n)` that way but still leaves `Limits(k, Nothing, n)`, one bound, unevaluated
 // (the same rule as an integral with one bound). Reading that single bound as the upper one with a
 // lower bound of 1 is Wolfram's iterator; a lower bound written alone (`Limits(k, 1, Nothing)`)
-// stays as it is.
-//
-// A bare index (`Product(f, k)`, `Limits(k, Nothing, Nothing)`) is Wolfram's indefinite sum or
-// product, defined only up to a constant. compute-engine reads its two equal `Nothing` bounds as
-// the degenerate range `k = Nothing .. Nothing` and answers the body at `k := Nothing` (a
-// dropped factor: `3 q^(2k) + 5` answers `3 q^2 + 5`), so it holds instead.
+// stays as it is. A bare index (`Limits(k, Nothing, Nothing)`) is compute-engine's own: since 0.187 it
+// runs k = 1..infinity, so nothing here touches it.
 export const iteratorUpperBound: Patch = {
   id: "iterator-upper-bound",
-  lands:
-    "Sum and Product of Limits(k, Nothing, n) run from 1, as Wolfram's {k, n} iterator does; an unbounded index stays unevaluated",
+  lands: "Sum and Product of Limits(k, Nothing, n) run from 1, as Wolfram's {k, n} iterator does",
   files: ["src/patches/iterator-upper-bound.ts"],
   heads: ["Sum", "Product"],
 
@@ -23,7 +18,7 @@ export const iteratorUpperBound: Patch = {
     ce
       .box(["Sum", "k", ["Limits", "k", "Nothing", 3]])
       .evaluate()
-      .is(6) && ce.box(["Product", ["Power", 2, "k"], "k"]).evaluate().operator === "Product",
+      .is(6),
 
   apply: (ce) => {
     for (const head of ["Sum", "Product"]) {
@@ -38,27 +33,9 @@ export const iteratorUpperBound: Patch = {
         );
       // compile builtin: reads an iterator at canonicalization, before compile sees the expression
       declareCompile(ce, head, "builtin");
-      holdUnbounded(operator as Operator, "evaluate");
-      holdUnbounded(operator as Operator, "evaluateAsync");
     }
   },
 };
-
-type Operator = Record<
-  "evaluate" | "evaluateAsync",
-  ((ops: readonly Expression[], options: never) => unknown) | undefined
->;
-
-/** `operator[key]` declining (staying the call) when an index has no bounds at all. */
-function holdUnbounded(operator: Operator, key: "evaluate" | "evaluateAsync"): void {
-  const native = operator[key];
-  if (native === undefined) return;
-  operator[key] = (ops, options) => (ops.slice(1).some(isUnbounded) ? undefined : native(ops, options));
-}
-
-/** `Limits(k, Nothing, Nothing)`: an index with neither bound. */
-const isUnbounded = (op: Expression): boolean =>
-  isFunction(op) && op.operator === "Limits" && op.ops.length === 3 && isNothing(op.ops[1]) && isNothing(op.ops[2]);
 
 const isNothing = (op: Expression | undefined): boolean => op !== undefined && isSymbol(op) && op.symbol === "Nothing";
 
