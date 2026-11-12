@@ -406,7 +406,10 @@ export class NotatioWorksheet extends LitElement {
   #notifyReactive(id: number, source: string): void {
     let json: unknown;
     try {
-      json = parseExpression(source, { allow: ["Assign"] }).json;
+      const read = parseExpression(source, { allow: ["Assign"] });
+      // A source with errors reads only in part; a partial read is not announced.
+      if (read.errors.length) return;
+      json = read.json;
     } catch {
       return;
     }
