@@ -186,20 +186,6 @@ const eulerGamma: Entry = {
   serialize: () => "\\gamma",
 };
 
-/** `\lfloor x\rfloor` for one operand; with a step (`Floor(226, 10)`) the brackets would
- *  drop it, so it is written as the call. */
-const bracketed = (name: "Floor" | "Ceil", open: string, close: string): Entry => ({
-  ...native(name),
-  name,
-  serialize: (serializer, expr) => {
-    const args = operands(expr);
-    const inner = (x: MathJsonExpression) => serializer.serialize(x);
-    return args.length === 1
-      ? `${open}${/^[A-Za-z]/.test(inner(args[0]!)) ? " " : ""}${inner(args[0]!)}${close}`
-      : `\\mathrm{${name}}${serializer.wrapArguments(expr as MathJsonExpression)}`;
-  },
-});
-
 /** Precedence of `=` in compute-engine's dictionary. */
 const EQUAL_PRECEDENCE = 245;
 
@@ -490,7 +476,6 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   operatorname("Arccot", "arccot"),
   // `\mathrm{arcsec}` is the arcsecond to `Quantity`'s reader.
   operatorname("Arcsec", "arcsec"),
-  operatorname("Arccsc", "arccsc"),
   equal,
   setMinus,
   set,
@@ -503,8 +488,6 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   derivative,
   apply,
   ...PRIMES.map(primeOf),
-  bracketed("Floor", "\\lfloor", "\\rfloor"),
-  bracketed("Ceil", "\\lceil", "\\rceil"),
   beta,
   betaRoman,
   square,
