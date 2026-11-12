@@ -204,6 +204,7 @@ test("a dictionary stays a dictionary, not a set of arrows", () => {
 test.each([
   ["a third PolyLog argument", ["PolyLog", 1, 2, 1]],
   ["a first derivative, with its order", ["Derivative", "f", 1]],
+  ["a derivative with no order", ["Derivative", "f"]],
   ["a second derivative, as primes", ["Derivative", "f", 2]],
   ["a third derivative of a function symbol", ["Derivative", "g", 3]],
   ["a derivative of an expression, with its order", ["Derivative", ["Power", "x", 2], 1]],
@@ -223,6 +224,9 @@ test.each([
   ["an intersection of four", ["Intersection", "a", "b", "c", "d"]],
   ["a union of one", ["Union", "a"]],
   ["a union of none", ["Union"]],
+  ["the cardinality of a power set", ["Count", ["PowerSet", "s"]]],
+  ["the cardinality of a quotient ring", ["Count", ["QuotientRing", "Integers", 12]]],
+  ["the absolute value of a symbol", ["Abs", "x"]],
   ["a dictionary", ["Dictionary", ["KeyValuePair", { str: "k" }, "v"]]],
   ["a dictionary of two", ["Dictionary", ["KeyValuePair", { str: "k" }, 1], ["KeyValuePair", { str: "m" }, 2]]],
   ["a long decimal", ["Sin", { num: "3.141592653589793238462643383279" }]],
@@ -282,7 +286,7 @@ test.each(REMAINING.map((c) => [c.name, c] as const))("remaining: %s", (_, { men
 // Every example, the sweep's total, counted by the per-head test at the top (which reads each
 // example in a deep run): the spellings left alone are most of it. A count that moves is a loss
 // to look at, or a fix to lower it by.
-const TOTAL = 1043;
+const TOTAL = 1040;
 test.skipIf(!deep)("the sweep's total loss count holds", () => {
   expect(changed).toBe(TOTAL);
 });
