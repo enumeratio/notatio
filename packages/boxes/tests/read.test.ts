@@ -192,3 +192,14 @@ test("every operand of an iterated operator, a derivative or a limit reaches the
   exact(["Limit", ["Function", ["Block", ["Divide", 1, "_1"]], "_1"], 0, 1]);
   exact(["Limit", ["Function", ["Block", ["Divide", 1, "_1"]], "_1"], 0, -1]);
 });
+
+test("a function's parameters named i or e read as letters, not constants", () => {
+  expect(makeExpression(makeBoxes(["Function", ["Add", "i", "j"], "i", "j"]))).toEqual([
+    "Function",
+    ["Add", "i", "j"],
+    "i",
+    "j",
+  ]);
+  // A lone `i` outside a parameter list is still the imaginary unit.
+  expect(makeExpression(makeBoxes(["Add", "i", 1]))).toEqual(["Add", "ImaginaryUnit", 1]);
+});
