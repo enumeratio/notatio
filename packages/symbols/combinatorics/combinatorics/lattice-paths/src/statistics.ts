@@ -1780,11 +1780,13 @@ const topQuotientExtensions: MathJSON = bindList(
     ),
   ),
 );
+/** The socles of the kept vertices' projectives. Sorted to materialize: a lazy Map under the lambda below leaves its typed `Apply` unevaluated in compute-engine 0.187. */
+const keptSocleList: MathJSON = ["Sort", forEach("kept", add("w", subtract(at("w", "series"), 1)), "w")];
 /** The greatest injective dimension of the projectives of A/AfA that are not dropped, f the idempotent at the socles of the kept vertices. */
 const socleQuotientInjectiveDimension: MathJSON = bindList(
   "kept",
   keptVertexList,
-  bindList("socleVertices", forEach("kept", add("w", subtract(at("w", "series"), 1)), "w"), [
+  bindList("socleVertices", keptSocleList, [
     "Max",
     [
       "Join",
