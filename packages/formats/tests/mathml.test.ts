@@ -1,7 +1,10 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
+import { makeExpression, MakeExpressionError, row } from "@enumeratio/boxes";
+import { commandTeX, parseMathML, toLatex } from "@enumeratio/boxes/render";
 import { expect, test } from "vite-plus/test";
-import { exportFormats, exportTo, getFormat, importFormats } from "../src/index.ts";
-import { toMathML } from "../src/mathml.ts";
+import { exportFormats, exportTo, getFormat, importFormats, importFrom } from "../src/index.ts";
+import { boxesToExpression, toMathML } from "../src/mathml.ts";
+import { CORPUS } from "./corpus.ts";
 
 // The notation itself is `@enumeratio/boxes`' (its corpus and goldens); this is the format.
 test("MathML: root element and display option", () => {
@@ -24,4 +27,23 @@ test("MathML: registered as a format", () => {
   expect(exportTo(ce.parse("\\frac{x+1}{2}", { form: "raw" }), "MathML", { fragment: true })).toBe(
     "<mfrac><mrow><mi>x</mi><mo>+</mo><mn>1</mn></mrow><mn>2</mn></mfrac>",
   );
+});
+
+// MathML now reaches an expression through `makeExpression`; where the LaTeX seam it replaced
+// (boxes, to LaTeX, to compute-engine) read a corpus expression, it reads the same one.
+const seam = (mathml: string, ce: ComputeEngine) => ce.parse(commandTeX(toLatex(parseMathML(mathml)))).json;
+
+for (const latex of CORPUS) {
+  test(`MathML reads as the LaTeX seam did: ${latex}`, () => {
+    const ce = new ComputeEngine();
+    const mathml = exportTo(ce.parse(latex), "MathML") as string;
+    expect(importFrom(mathml, "MathML", { ce })).toEqual(seam(mathml, ce));
+  });
+}
+
+test("boxesToExpression falls back to the LaTeX seam for boxes the reader declines", () => {
+  const ce = new ComputeEngine();
+  const declined = row(["x", "+", ["ErrorBox", "y"]]) as never;
+  expect(() => makeExpression(declined)).toThrow(MakeExpressionError);
+  expect(boxesToExpression(declined, ce)).toEqual(ce.parse(commandTeX(toLatex(declined))).json);
 });
