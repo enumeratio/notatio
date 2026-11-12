@@ -6,8 +6,10 @@ import {
   graphics,
   interpretation,
   makeBoxes,
+  indexed,
   makeExpression,
   MakeExpressionError,
+  named,
   row,
   superscript,
 } from "../src/index.ts";
@@ -40,6 +42,8 @@ function roundTrip(json: MathJsonExpression): "exact" | "equivalent" | "declined
 const DECLINED = ["matrix no delimiters", "delimiter brackets", "error", "dictionary"];
 const MISMATCHED = [
   "product with a reciprocal",
+  // `(a + b)_n` is also how a Pochhammer symbol is written.
+  "subscript of sum",
   "superscript",
   "sum canonical",
   "derivative default order",
@@ -113,6 +117,39 @@ test("heads names a call's written name", () => {
   const boxes = row(["μ", "⁡", row(["(", "n", ")"])]);
   expect(makeExpression(boxes)).toEqual(["MoebiusMu", "n"]);
   expect(makeExpression(boxes, { heads: { μ: "Mobius" } })).toEqual(["Mobius", "n"]);
+});
+
+test("a registered notation reads back to its head", () => {
+  for (const json of [
+    ["Fibonacci", "n"],
+    ["Fibonacci", ["Add", "n", 1]],
+    ["CatalanNumber", "n"],
+    ["Pochhammer", "a", "n"],
+    ["Stirling", "n", "k"],
+    ["StirlingS1", "n", "k"],
+    ["MoebiusMu", "n"],
+    ["PolyGamma", "n", "z"],
+    ["Multinomial", "a", "b", "c"],
+  ] as MathJsonExpression[])
+    expect(makeExpression(makeBoxes(json)), JSON.stringify(json)).toEqual(json);
+});
+
+test("heads that share one notation are read by structure", () => {
+  // `B_n` is a Bell and a Bernoulli number, `ζ(s, a)` a Zeta and a Hurwitz zeta.
+  expect(makeExpression(makeBoxes(["BellNumber", "n"]))).toEqual("B_n");
+  expect(makeExpression(makeBoxes(["Zeta", "s", "a"]))).toEqual(["HurwitzZeta", "s", "a"]);
+});
+
+test("a notation passed in is read back too", () => {
+  const notation = { Pentagonal: named("P", 1), Triangular: indexed("T") };
+  for (const json of [
+    ["Pentagonal", "n"],
+    ["Triangular", "n"],
+  ] as MathJsonExpression[]) {
+    const boxes = makeBoxes(json, notation);
+    expect(makeExpression(boxes, { notation })).toEqual(json);
+    expect(makeExpression(boxes)).not.toEqual(json);
+  }
 });
 
 test("what is not an expression is declined, not guessed", () => {

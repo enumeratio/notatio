@@ -12,7 +12,9 @@
 
 import type { MathJsonExpression as Json } from "@cortex-js/compute-engine/epsil";
 import { type Box, type BoxNode, optionsOfBox, tokenClass } from "./box.ts";
-import { APPLY_FUNCTION, FUNCTIONS, INVISIBLE_TIMES, RELATIONS, SYMBOLS } from "./make.ts";
+import { APPLY_FUNCTION, FUNCTIONS, INVISIBLE_TIMES, makeBoxes, RELATIONS, SYMBOLS } from "./make.ts";
+import { ENGINE_NOTATION } from "./notation-engine.ts";
+import type { Notation } from "./notation.ts";
 
 /** A box tree that is not an expression, or that the reader does not cover. */
 export class MakeExpressionError extends Error {
@@ -22,6 +24,11 @@ export class MakeExpressionError extends Error {
 export interface MakeExpressionOptions {
   /** Heads a call's written name stands for (`{ μ: "MoebiusMu" }`), before the built-in function names. */
   readonly heads?: Readonly<Record<string, string>>;
+  /**
+   * The notation rules a head is read back from, as `makeBoxes` takes them: what a box that one
+   * of them writes (`F_n`, `(a)_n`, `μ(n)`) reads as. Compute-engine's own heads are always read.
+   */
+  readonly notation?: Notation;
 }
 
 const decline = (why: string, box?: unknown): never => {
@@ -49,19 +56,6 @@ for (const [name, head] of [
   ["erfc", "Erfc"],
 ] as const)
   FUNCTION_OF.set(name, head);
-
-/** Letters the engine's notation writes a head with (`μ(n)`): read as that head when written as a call. */
-const LETTER_HEAD: Readonly<Record<string, string>> = {
-  μ: "MoebiusMu",
-  φ: "Totient",
-  π: "PrimePi",
-  ω: "PrimeNu",
-  Ω: "PrimeOmega",
-  λ: "CarmichaelLambda",
-  ψ: "Digamma",
-  ζ: "Zeta",
-  Φ: "LerchPhi",
-};
 
 const RELATION_OF = new Map<string, string>(Object.entries(RELATIONS).map(([head, glyph]) => [glyph, head]));
 for (const [ascii, head] of [
@@ -140,11 +134,109 @@ function bound(variable: Json, body: Json): { variable: Json; body: Json } {
   return { variable: letter, body: rename(body, variable, letter) };
 }
 
+/** A notation rule's boxes for a head of `arity` operands, each one a `SLOTS` placeholder. */
+interface Pattern {
+  readonly head: string;
+  readonly arity: number;
+  readonly items: readonly Box[];
+  /** How many of its leaves are written out, not an operand's place. */
+  readonly literals: number;
+}
+
+/** The pattern that fits a box wins by what it spells out: more boxes, then more of them written
+ *  literally (`(a^{-1} mod n)` is a modular inverse, though `(a^b mod n)` fits it too). */
+const rank = (p: Pattern): [number, number] => [p.items.length, p.literals];
+const tied = (best: Pattern, next: Pattern): boolean => {
+  const [a, b] = [rank(best), rank(next)];
+  return a[0] === b[0] && a[1] === b[1];
+};
+const compare = (a: Pattern, b: Pattern): number => b.items.length - a.items.length || b.literals - a.literals;
+
+interface Notated {
+  /** Patterns by their first box, longest first. */
+  readonly byFirst: ReadonlyMap<string, readonly Pattern[]>;
+  /** Names a notation writes a call with (`μ`, `ζ`). */
+  readonly calls: ReadonlySet<string>;
+}
+
+/** Placeholder operands a rule is run on: each a symbol `makeBoxes` writes as itself. */
+const SLOTS = ["\uE000", "\uE001", "\uE002", "\uE003"];
+const slotOf = (box: Box): number => (typeof box === "string" ? SLOTS.indexOf(box) : -1);
+
+const firstKey = (box: Box | undefined): string =>
+  typeof box === "string" ? `t:${box}` : Array.isArray(box) ? `n:${box[0]}` : "";
+
+/** `box` against a pattern: equal, except that each placeholder stands for (and binds) one operand's boxes. */
+function matches(pattern: unknown, box: unknown, binds: Map<number, Box>): boolean {
+  const slot = slotOf(pattern as Box);
+  if (slot >= 0) {
+    const bound = binds.get(slot);
+    if (bound === undefined) binds.set(slot, box as Box);
+    return bound === undefined || JSON.stringify(bound) === JSON.stringify(box);
+  }
+  if (Array.isArray(pattern))
+    return Array.isArray(box) && box.length === pattern.length && pattern.every((p, i) => matches(p, box[i], binds));
+  if (typeof pattern === "object" && pattern !== null) return JSON.stringify(pattern) === JSON.stringify(box);
+  return pattern === box;
+}
+
+const literalsIn = (box: unknown): number =>
+  Array.isArray(box) ? box.reduce<number>((n, x) => n + literalsIn(x), 0) : slotOf(box as Box) >= 0 ? 0 : 1;
+
+const mentions = (box: unknown, slot: string): boolean =>
+  box === slot || (Array.isArray(box) && box.some((x) => mentions(x, slot)));
+
+/**
+ * What each rule writes, learned by running it: for every head and arity, the boxes of the head
+ * applied to placeholders. A head whose rule declines (it writes a call by name) or drops an
+ * operand has no pattern; heads whose patterns come out the same are not told apart.
+ */
+function notatedFrom(notation: Notation): Notated {
+  const byShape = new Map<string, Pattern[]>();
+  for (const head of Object.keys(notation)) {
+    for (let arity = 1; arity <= SLOTS.length; arity++) {
+      let box: Box;
+      try {
+        box = makeBoxes([head, ...SLOTS.slice(0, arity)] as never, notation);
+      } catch {
+        continue;
+      }
+      const items = isNodeOf(box, "RowBox") ? rowItems(box) : [box];
+      if (items[0] === head || !SLOTS.slice(0, arity).every((s) => mentions(box, s))) continue;
+      const shape = JSON.stringify(items);
+      byShape.set(shape, [...(byShape.get(shape) ?? []), { head, arity, items, literals: literalsIn(items) }]);
+    }
+  }
+  const byFirst = new Map<string, Pattern[]>();
+  const calls = new Set<string>();
+  for (const patterns of byShape.values()) {
+    const [pattern] = patterns;
+    const [first, second] = pattern!.items;
+    if (typeof first === "string" && second === APPLY_FUNCTION) calls.add(first);
+    const key = firstKey(first);
+    if (slotOf(first!) >= 0 || patterns.length > 1) continue;
+    byFirst.set(key, [...(byFirst.get(key) ?? []), pattern!].toSorted(compare));
+  }
+  return { byFirst, calls };
+}
+
+const DEFAULT = notatedFrom(ENGINE_NOTATION);
+const cache = new WeakMap<Notation, Notated>();
+
+/** The patterns of compute-engine's notation, and of `extra` over it. */
+function notatedBy(extra: Notation | undefined): Notated {
+  if (extra === undefined) return DEFAULT;
+  let found = cache.get(extra);
+  if (found === undefined) cache.set(extra, (found = notatedFrom({ ...ENGINE_NOTATION, ...extra })));
+  return found;
+}
+
 class Reader {
   pos = 0;
   constructor(
     readonly items: readonly Box[],
     readonly options: MakeExpressionOptions,
+    readonly notated: Notated,
   ) {}
 
   peek(offset = 0): Box | undefined {
@@ -159,7 +251,7 @@ class Reader {
 
   /** `items` read whole, as an expression of their own. */
   sub(items: readonly Box[]): Json {
-    return new Reader(items, this.options).whole();
+    return new Reader(items, this.options, this.notated).whole();
   }
 
   /** One box read as an expression of its own. */
@@ -168,7 +260,7 @@ class Reader {
   }
 
   atomOf(box: Box): Atom {
-    return new Reader([box], this.options).primary();
+    return new Reader([box], this.options, this.notated).primary();
   }
 
   /** Every item, as one expression (several comma-separated are a `Sequence`). */
@@ -336,11 +428,16 @@ class Reader {
   callee(name: string, argc = 1): string {
     // `ζ(s, a)` is the Hurwitz zeta.
     if (name === "ζ" && argc === 2) return "HurwitzZeta";
-    return this.options.heads?.[name] ?? FUNCTION_OF.get(name) ?? LETTER_HEAD[name] ?? name;
+    return this.options.heads?.[name] ?? FUNCTION_OF.get(name) ?? name;
   }
 
   callable(name: string): boolean {
-    return FUNCTION_OF.has(name) || CALLABLE.test(name) || this.options.heads?.[name] !== undefined;
+    return (
+      FUNCTION_OF.has(name) ||
+      CALLABLE.test(name) ||
+      this.options.heads?.[name] !== undefined ||
+      this.notated.calls.has(name)
+    );
   }
 
   /** A call's parenthesised arguments, as one fenced row or as flat tokens. */
@@ -365,7 +462,7 @@ class Reader {
   }
 
   listOf(items: readonly Box[]): Json[] {
-    const reader = new Reader(items, this.options);
+    const reader = new Reader(items, this.options, this.notated);
     const list = reader.list();
     if (reader.pos < items.length) decline("unexpected", reader.peek());
     return list;
@@ -382,8 +479,39 @@ class Reader {
   primary(): Atom {
     const item = this.items[this.pos];
     if (item === undefined) return decline("an expression ends early");
+    const head = this.notation();
+    if (head !== undefined) return head;
     this.pos++;
     return typeof item === "string" ? this.token(item) : this.node(item);
+  }
+
+  /** The head a registered notation writes the boxes at the cursor as, with its operands read. */
+  notation(): Atom | undefined {
+    const first = this.items[this.pos];
+    const candidates = this.notated.byFirst.get(firstKey(first));
+    if (candidates === undefined) return undefined;
+    let best: { pattern: Pattern; binds: Map<number, Box> } | undefined;
+    for (const pattern of candidates) {
+      if (best !== undefined && !tied(best.pattern, pattern)) break;
+      const binds = new Map<number, Box>();
+      const fits =
+        this.pos + pattern.items.length <= this.items.length &&
+        pattern.items.every((p, k) => matches(p, this.items[this.pos + k]!, binds)) &&
+        binds.size === pattern.arity;
+      if (!fits || this.written(pattern)) continue;
+      // Two heads that one notation writes alike are not told apart: read it by structure.
+      if (best !== undefined) return undefined;
+      best = { pattern, binds };
+    }
+    if (best === undefined) return undefined;
+    this.pos += best.pattern.items.length;
+    const operands = Array.from({ length: best.pattern.arity }, (_, i) => this.box(best.binds.get(i)!));
+    return atom([best.pattern.head, ...operands] as Json);
+  }
+
+  /** Whether the caller's `heads` already say what the call a pattern starts with stands for. */
+  written({ items }: Pattern): boolean {
+    return typeof items[0] === "string" && this.options.heads?.[items[0]] !== undefined;
   }
 
   token(t: string): Atom {
@@ -685,5 +813,5 @@ function piecewise(reader: Reader, grid: BoxNode): Json {
  * layouts, TeX as written, errors) or that the reader does not cover.
  */
 export function makeExpression(box: Box, options: MakeExpressionOptions = {}): Json {
-  return new Reader([box], options).whole();
+  return new Reader([box], options, notatedBy(options.notation)).whole();
 }
