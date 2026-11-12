@@ -118,15 +118,6 @@ export function declareListStats(ce: Engine): void {
     1,
   );
 
-  // Sort({}): the empty list sorts to itself — compute-engine leaves it unevaluated instead
-  // of answering trivially.
-  wrapOperator(
-    ce,
-    ["Sort", 1],
-    (ops) => ops.length === 1 && ops[0].operator === "List" && operandsOf(ops[0]).length === 0,
-    () => (ops) => ops[0],
-  );
-
   // Take(xs, UpTo(n)): compute-engine's Take has neither a `canonical` nor an `evaluate` of
   // its own — it's answered entirely through the operator's `collection` protocol (`.at`,
   // `.count`, `.iterator`, …), the same one the numeric-set domains rely on. Assigning
