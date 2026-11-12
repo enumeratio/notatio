@@ -59,6 +59,8 @@ export function present(
     if (d !== undefined) return { echo, out: "", driver: d, settle };
   }
   const reduced = repl.reduced(last.expr).json as Json;
+  // Someone at a terminal reads 2-D StandardForm; a pipe keeps the one-line form.
+  if (can.interact(env, "keys")) session.form = "standardform";
   return { echo, out: repl.formatOut(last.n, text(reduced)), settle };
 }
 
