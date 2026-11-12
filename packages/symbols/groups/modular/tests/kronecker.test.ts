@@ -71,3 +71,7 @@ test("bignum-safe past the double-precision range", () => {
   const n = 2n * (10n ** 25n + 3n) + 1n;
   expect(kroneckerSymbol(a, n)).toBe(kroneckerSymbol(a % n, n));
 });
+
+test("KroneckerSymbol is Listable, from its own declaration", () => {
+  expect(ce.box(["KroneckerSymbol", ["List", 1, 2, 3], 5]).evaluate().json).toEqual(["List", 1, -1, -1]);
+});
