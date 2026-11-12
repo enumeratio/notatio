@@ -284,6 +284,8 @@ test.describe("the CPU portrait agrees with the GPU portrait", () => {
       // Two portraits of one view at one size, one forced onto the CPU.
       await page.evaluate(
         async ({ head }) => {
+          // The page's own portraits keep drawing (software GL on CI) and starve the CPU render of the main thread.
+          for (const own of document.querySelectorAll("notatio-complex-plot")) own.remove();
           const stage = document.createElement("div");
           stage.id = "route-check";
           for (const gpu of ["", "false"]) {
