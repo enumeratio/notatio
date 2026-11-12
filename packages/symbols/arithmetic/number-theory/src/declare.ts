@@ -435,22 +435,6 @@ function declareCombinatoricsGamma113(ce: Engine): void {
     1,
   );
 
-  // StirlingS1(n, k) and Stirling(n, k) are 0 whenever k > n ≥ 0 -- both currently left
-  // unevaluated past the diagonal.
-  for (const head of ["StirlingS1", "Stirling"] as const) {
-    wrapOperator(
-      ce,
-      [head, 3, 5],
-      (ops) => {
-        const n = integerAt(ops[0]);
-        const k = integerAt(ops[1]);
-        return n !== undefined && k !== undefined && n >= 0 && k > n;
-      },
-      () => () => ce.Zero,
-      2,
-    );
-  }
-
   // Fibonacci and LucasL at a real index and with a second (polynomial) argument: rows in
   // their tables (defineOverload), beside adeles' profinite one, so which package declared
   // first doesn't matter. The native integer recurrence only ever sees the one integer it took.
