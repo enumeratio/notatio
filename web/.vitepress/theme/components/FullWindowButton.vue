@@ -33,13 +33,13 @@ defineEmits<{ toggle: [] }>();
 <style scoped>
 .full-window-toggle {
   position: absolute;
-  top: 0.45rem;
-  right: 0.6rem;
+  top: -0.2rem;
+  right: 0;
   z-index: 1;
   display: inline-flex;
   padding: 0.25rem;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--radius-2);
   background: none;
   color: var(--vp-c-text-3);
   cursor: pointer;

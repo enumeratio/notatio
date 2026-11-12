@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { HOLE_TAGS, isBoxTag } from "@enumeratio/frontend/box-tags";
 import { defineConfig } from "vitepress";
+import { codeThemes } from "./code-theme.ts";
 import { notatioMarkup, useLibraryParams } from "./notatio-markup.ts";
 import { libraryParams } from "./theme/libraries.ts";
 import { notatioMath } from "./notatio-math.ts";
@@ -386,6 +387,12 @@ const config = defineConfig({
   description:
     "Mathematics you can compute, draw and check — every object with a home, every claim with a test, all live in your browser.",
   lang: "en-US",
+  head: [
+    ["link", { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" }],
+    // The browser chrome takes the paper's color in each theme.
+    ["meta", { name: "theme-color", content: "#fbfaf5", media: "(prefers-color-scheme: light)" }],
+    ["meta", { name: "theme-color", content: "#15171c", media: "(prefers-color-scheme: dark)" }],
+  ],
   cleanUrls: true,
   // `/review` (review mode) is dev-only.
   srcExclude: dev ? [] : ["review/**"],
@@ -437,6 +444,7 @@ const config = defineConfig({
   // `$latex$` / `$$latex$$` typeset by KaTeX at build (notatio-math.ts), as cells are at runtime;
   // cells and plots marked for the build to render (prerender-markup.ts).
   markdown: {
+    theme: codeThemes as never,
     config: (md) => {
       notatioMath(md);
       notatioMarkup(md);

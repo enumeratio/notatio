@@ -662,18 +662,38 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 </template>
 
 <style scoped>
+/* The summary is the page's lede. */
+.reference-entry > p:first-of-type:not(.ref-stub),
+.reference-entry > .ref-stub + p {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: var(--ink);
+  margin-top: 0;
+}
 .ref-live {
-  margin: 1rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--vp-c-brand-1);
-  border-radius: 8px;
+  margin: 1.5rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--blue);
+  border-radius: var(--radius-2);
 }
 .ref-open {
   float: right;
   margin-left: 0.5rem;
-  font-size: 0.72rem;
-  color: var(--vp-c-text-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
   text-decoration: none;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.ref-example:hover .ref-open,
+.ref-open:focus-visible {
+  opacity: 1;
+}
+@media (hover: none) {
+  .ref-open {
+    opacity: 1;
+  }
 }
 .ref-open:hover {
   color: var(--vp-c-brand-1);
@@ -692,36 +712,55 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
   margin: 0.25rem 0;
 }
 .ref-io-label {
-  color: var(--vp-c-text-3);
-  font-size: 0.8em;
+  font-family: var(--font-code);
+  font-size: 0.75rem;
+  color: var(--ink-3);
+  min-width: 2.5rem;
 }
 .ref-cell-pending {
   display: none;
 }
+/* Signatures: each call form on its own ruled row, the call in mono and what it means beside it. */
 .ref-sig code {
   font-size: 1.05rem;
 }
 .ref-signatures {
-  margin: 0.75rem 0;
+  margin: 1.5rem 0;
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
 }
 .ref-signature {
-  margin: 0.4rem 0;
+  padding: 0.6rem 0;
+  line-height: 1.5;
 }
-.ref-signature code {
+.ref-signature + .ref-signature {
+  border-top: var(--hairline);
+}
+.ref-signature > code,
+.ref-sig > code {
   font-size: 0.95rem;
+  font-weight: 500;
+  background: none;
+  padding: 0;
 }
 .ref-sig-desc {
-  margin-left: 0.5rem;
-  color: var(--vp-c-text-2);
+  margin-left: 0.75rem;
+  font-family: var(--font-prose);
+  font-size: 1.05rem;
+  color: var(--ink-2);
 }
 .ref-typed {
   margin: 0.75rem 0;
 }
-.ref-typed summary {
+.ref-typed summary,
+.ref-details summary {
   cursor: pointer;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
   font-weight: 600;
-  color: var(--vp-c-text-2);
-  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
 }
 .ref-typed table {
   display: table;
@@ -734,12 +773,6 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 }
 .ref-details {
   margin: 1rem 0;
-}
-.ref-details summary {
-  cursor: pointer;
-  font-weight: 600;
-  color: var(--vp-c-text-2);
-  font-size: 0.9rem;
 }
 /* Collapsible example sections; no chrome, aligned with the examples. */
 .ref-section {
@@ -756,7 +789,7 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
   content: "▾";
   display: inline-block;
   margin-right: 0.35rem;
-  color: var(--vp-c-text-3);
+  color: var(--rubric);
   transition: transform 0.15s;
 }
 .ref-section:not([open]) > summary.ref-category::before {
@@ -796,10 +829,10 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 .ref-details li,
 .ref-body {
   margin: 0.3rem 0;
-  color: var(--vp-c-text-2);
+  color: var(--ink);
 }
 .ref-body :deep(p) {
-  margin: 0.5rem 0;
+  margin: 0.75rem 0;
 }
 .ref-body :deep(ul) {
   margin: 0.5rem 0 0;
@@ -808,102 +841,124 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 .ref-definition-note,
 .ref-definition-label {
   margin: 0.4rem 0 0;
-  color: var(--vp-c-text-2);
-  font-size: 0.85rem;
+  color: var(--ink-2);
+  font-size: 0.95rem;
 }
 .ref-definition pre {
   margin: 0.25rem 0 0.75rem;
-  padding: 0.6rem 0.8rem;
+  padding: 0.75rem 1rem;
   overflow-x: auto;
-  background: var(--vp-c-bg-soft);
-  border-radius: 6px;
+  background: var(--paper-sunken);
+  border: var(--hairline);
+  border-radius: var(--radius-2);
   font-size: 0.85rem;
+  line-height: 1.6;
 }
 .ref-stub {
-  color: var(--vp-c-text-2);
-  font-size: 0.85rem;
-  border-left: 3px solid var(--vp-c-divider);
-  padding-left: 0.75rem;
+  color: var(--ink-2);
+  font-size: 0.95rem;
+  border-left: 2px solid var(--rule-strong);
+  padding-left: 1rem;
 }
 .ref-meta {
-  color: var(--vp-c-text-2);
-  font-size: 0.9rem;
+  font-family: var(--font-ui);
+  color: var(--ink-3);
+  font-size: var(--text-sm);
 }
+/* An example is a ruled entry, not a card: caption, then In and Out, on the page's own paper.
+   Its state shows as a rule in the left margin. */
 .ref-example {
-  margin: 0.75rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  margin: 0;
+  padding: 1rem 0 1rem 1rem;
+  border-top: var(--hairline);
+  border-left: 2px solid transparent;
 }
 /* Snapshot assertion failed -- result diverged from the pinned expected value. */
 .ref-example.is-mismatch {
-  border-color: var(--vp-c-danger-1, #c0392b);
-  background: var(--vp-c-danger-soft, rgba(192, 57, 43, 0.08));
+  border-left-color: var(--red);
+  background: var(--red-wash);
 }
 /* compute-engine returned a diagnostic (an Error atom) rather than a value. */
 .ref-example.is-diagnostic {
-  border-color: #d9931a;
-  background: rgba(217, 147, 26, 0.08);
+  border-left-color: var(--ochre);
+  background: var(--ochre-wash);
 }
 /* A borrowed target compute-engine doesn't reproduce yet -- a capability gap. */
 .ref-example.is-planned {
-  border-style: dashed;
-  border-color: var(--vp-c-brand-1);
+  border-left: 2px dashed var(--blue);
 }
 .ref-known {
   margin: 0.25rem 0 0;
-  color: var(--vp-c-text-2);
-  font-size: 0.78rem;
+  font-family: var(--font-ui);
+  color: var(--ink-3);
+  font-size: var(--text-xs);
 }
 .ref-planned-badge {
   margin-left: 0.5rem;
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: var(--vp-c-brand-soft, rgba(100, 108, 255, 0.14));
-  color: var(--vp-c-brand-1);
-  font-size: 0.72rem;
+  border-radius: var(--radius-1);
+  background: var(--blue-wash);
+  color: var(--blue);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
-/* A deliberate, documented divergence from Wolfram behaviour (result is correct). */
+/* The reader has changed the input. */
 .ref-example.is-edited {
-  border-style: dashed;
+  border-left: 2px dashed var(--rule-strong);
 }
 /* The caption describes the original, not the edit. */
 .ref-example.is-edited .ref-caption {
   opacity: 0.45;
 }
+/* A deliberate, documented divergence from another system (the result is correct). */
 .ref-example.is-divergent {
-  border-left: 3px solid #d9931a;
+  border-left: 2px solid var(--ochre);
 }
 .ref-divergent-badge {
   margin-left: 0.5rem;
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
-  background: rgba(217, 147, 26, 0.14);
-  color: #b7791f;
-  font-size: 0.72rem;
+  border-radius: var(--radius-1);
+  background: var(--ochre-wash);
+  color: var(--ochre);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
   white-space: nowrap;
 }
 .ref-divergence-note {
   margin: 0.35rem 0 0;
-  color: var(--vp-c-text-2);
-  font-size: 0.8rem;
+  color: var(--ink-2);
+  font-size: 0.9rem;
 }
 .ref-category {
-  margin: 1.5rem 0 0.5rem;
-  font-size: 1rem;
-  color: var(--vp-c-text-1);
+  margin: 2rem 0 0.6rem;
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-2);
 }
 .ref-hidden-count {
-  font-size: 0.8rem;
-  color: var(--vp-c-text-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
   margin-right: auto;
   margin-left: 0.75rem;
 }
+/* The section's rule runs the column, so the head carries it rather than its h2. */
 .ref-examples-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  margin-top: 3.5rem;
+  padding-top: 1.5rem;
+  border-top: var(--hairline);
+}
+.ref-examples-head h2 {
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
 }
 .ref-view {
   display: flex;
@@ -929,21 +984,22 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 .ref-cases button {
   padding: 0 0.35rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 4px;
+  border-radius: var(--radius-1);
 }
 .ref-cases button:hover {
   color: var(--vp-c-brand-1);
 }
 .ref-caption {
-  margin: 0 0 0.4rem;
-  color: var(--vp-c-text-2);
-  font-size: 0.85rem;
+  margin: 0 0 0.5rem;
+  color: var(--ink-2);
+  font-size: 1rem;
+  line-height: 1.45;
 }
 /* Implementation rows: what the head is made of, one per implementation. */
 .ref-badge {
   display: inline-block;
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-1);
   font-family: var(--vp-font-family-mono);
   font-size: 0.72rem;
   line-height: 1.5;
@@ -956,8 +1012,8 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
   color: var(--vp-c-brand-1);
 }
 .ref-badge.is-primitive {
-  background: rgba(217, 147, 26, 0.14);
-  color: #b7791f;
+  background: var(--ochre-wash);
+  color: var(--ochre);
 }
 .ref-primitive {
   display: flex;
@@ -967,14 +1023,14 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
   font-size: 0.9rem;
 }
 .ref-impl {
-  margin: 0.75rem 0;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  margin: 0;
+  padding: 0.9rem 0 0.9rem 1rem;
+  border-top: var(--hairline);
+  border-left: 2px solid transparent;
 }
 /* The reference row is the specification -- set it apart from the rows checked against it. */
 .ref-impl[data-origin="reference"] {
-  border-color: var(--vp-c-brand-1);
+  border-left-color: var(--blue);
 }
 .ref-impl-head {
   display: flex;
@@ -999,7 +1055,7 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 }
 .ref-impl-note {
   margin: 0.35rem 0 0;
-  color: var(--vp-c-text-2);
-  font-size: 0.8rem;
+  color: var(--ink-2);
+  font-size: 0.9rem;
 }
 </style>

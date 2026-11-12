@@ -128,23 +128,30 @@ const tip = (reference: ResolvedReference): string =>
 </template>
 
 <style scoped>
+/* The apparatus: where else the head is known, set small and quiet under the summary. */
 .xw-legend {
   flex-basis: 100%;
-  font-size: 0.72rem;
-  color: var(--vp-c-text-3);
+  font-size: var(--text-xs);
+  color: var(--ink-3);
 }
 .crosswalk {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.9rem;
-  margin: 0.6rem 0 1rem;
-  font-size: 0.82rem;
+  gap: 0.15rem 1.1rem;
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.6rem 0;
+  border-top: var(--hairline);
+  border-bottom: var(--hairline);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
   line-height: 1.7;
 }
 .crosswalk.is-inline {
   display: inline-flex;
   margin: 0 0 0 0.6rem;
-  gap: 0.2rem 0.6rem;
+  padding: 0;
+  border: 0;
+  gap: 0.1rem 0.75rem;
   font-size: 0.76rem;
 }
 .xw-group {
@@ -154,26 +161,26 @@ const tip = (reference: ResolvedReference): string =>
   gap: 0.25rem;
 }
 .xw-system {
-  color: var(--vp-c-text-3);
-  font-size: 0.72rem;
+  color: var(--ink-3);
+  font-size: 0.68rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.07em;
   margin-right: 0.15rem;
 }
 .xw-chip {
   display: inline-flex;
   align-items: baseline;
   gap: 0.15rem;
-  padding: 0 0.45rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
-  background: var(--vp-c-bg-soft);
-  color: var(--vp-c-text-1);
+  padding: 0;
+  border-bottom: 1px solid var(--rule-strong);
+  color: var(--ink-2);
   text-decoration: none;
   white-space: nowrap;
+  line-height: 1.35;
   transition:
-    border-color 0.2s,
-    color 0.2s;
+    border-color 0.15s,
+    color 0.15s;
 }
 .xw-chip code {
   background: none;
@@ -185,19 +192,13 @@ const tip = (reference: ResolvedReference): string =>
   text-overflow: ellipsis;
 }
 a.xw-chip:hover {
-  border-color: var(--vp-c-brand-1);
-  color: var(--vp-c-brand-1);
+  border-color: var(--blue);
+  color: var(--blue);
 }
+/* A name with nowhere to link to carries no rule. */
 .xw-chip.is-plain {
-  color: var(--vp-c-text-2);
-  border-style: dashed;
-}
-.xw-chip.is-engine,
-.xw-chip.is-wolfram {
-  border-color: var(--vp-c-brand-soft);
-}
-.xw-chip.is-catalog {
-  border-color: var(--vp-c-green-soft, var(--vp-c-divider));
+  color: var(--ink-3);
+  border-bottom-color: transparent;
 }
 .xw-arity,
 .xw-via {
@@ -209,18 +210,18 @@ a.xw-chip:hover {
   font-style: italic;
 }
 .xw-verified {
-  color: var(--vp-c-green-1, #3a9c5a);
+  color: var(--green);
   font-size: 0.8em;
   margin-left: 0.1rem;
 }
 .xw-verified.is-broken {
-  color: var(--vp-c-warning-1, #d9931a);
+  color: var(--ochre);
   font-weight: 700;
 }
 .xw-chip.is-aggregate,
 .xw-chip.is-partial,
 .xw-chip.is-conceptual {
-  border-style: dotted;
+  border-bottom-style: dotted;
 }
 .xw-out {
   font-size: 0.75em;

@@ -85,7 +85,7 @@ const formId = (): string => selected.value ?? props.story.forms[0]?.id ?? "";
   position: relative;
   margin: 1.25rem 0;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 10px;
+  border-radius: var(--radius-2);
   overflow: hidden;
   background: var(--vp-c-bg);
 }
@@ -172,7 +172,7 @@ const formId = (): string => selected.value ?? props.story.forms[0]?.id ?? "";
 .story-tabs button {
   padding: 0.25rem 0.6rem;
   border: none;
-  border-radius: 6px 6px 0 0;
+  border-radius: var(--radius-2) var(--radius-2) 0 0;
   background: none;
   font: inherit;
   font-size: 0.75rem;

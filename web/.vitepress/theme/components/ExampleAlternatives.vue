@@ -98,22 +98,26 @@ const shown = computed(() => (active.value === undefined ? undefined : props.alt
 }
 .alt-tabs {
   display: flex;
-  gap: 0.25rem;
+  gap: 0.7rem;
   margin-left: auto;
 }
+/* The other systems' answers: quiet names in a row, underlined when open. */
 .alt-tab {
-  padding: 0 0.45rem;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
-  color: var(--vp-c-text-2);
-  font-size: 0.72rem;
+  padding: 0;
+  border-bottom: 1px solid transparent;
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
   line-height: 1.5;
   cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s;
 }
 .alt-tab:hover,
 .alt-tab.is-active {
-  border-color: var(--vp-c-text-3);
-  color: var(--vp-c-text-1);
+  border-bottom-color: var(--rubric);
+  color: var(--ink);
 }
 .alt-mark {
   margin-left: 0.15rem;
@@ -121,14 +125,15 @@ const shown = computed(() => (active.value === undefined ? undefined : props.alt
 .alt-tab.is-disagree .alt-mark,
 .alt-tab.is-inconclusive .alt-mark,
 .alt-tab.is-error .alt-mark {
-  color: #b7791f;
+  color: var(--ochre);
 }
 .alt-panel {
   flex-basis: 100%;
   margin-top: 0.3rem;
   padding: 0.35rem 0.6rem;
-  border-left: 2px solid var(--vp-c-divider);
-  font-size: 0.8rem;
+  border-left: 2px solid var(--rule-strong);
+  font-family: var(--font-ui);
+  font-size: var(--text-sm);
 }
 .alt-row {
   display: flex;

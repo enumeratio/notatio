@@ -1,0 +1,234 @@
+/* The design system: paper, ink, one rubric. Every color, face, size and rule on the site
+   is one of these; VitePress's own variables (--vp-*) and the elements' (--notatio-*) are
+   set from them below, so the theme, the page components and the elements agree. */
+:root {
+  /* Palette: light, a warm paper. */
+  --paper: #fbfaf5;
+  --paper-sunken: #f4f2e9;
+  --paper-deep: #ebe8dc;
+  --paper-raised: #ffffff;
+  /* The ground a figure sits on. */
+  --plate: #ffffff;
+  --ink: #1d1c19;
+  --ink-2: #4d4a42;
+  --ink-3: #6b675d;
+  --rule: #e3dfd2;
+  --rule-strong: #c9c4b3;
+  /* Ink blue: links, what can be pressed, a plot's first curve. */
+  --blue: #1f3f95;
+  --blue-strong: #162f73;
+  --blue-wash: rgba(31, 63, 149, 0.08);
+  /* Rubric: labels and marks, never body text. */
+  --rubric: #a63a22;
+  --rubric-wash: rgba(166, 58, 34, 0.08);
+  --ochre: #8a5a00;
+  --ochre-wash: rgba(170, 120, 20, 0.12);
+  --green: #2b6a3c;
+  --green-wash: rgba(43, 106, 60, 0.1);
+  --red: #b3261e;
+  --red-wash: rgba(179, 38, 30, 0.09);
+  --shadow: 0 1px 2px rgba(40, 34, 20, 0.06), 0 8px 24px rgba(40, 34, 20, 0.08);
+  /* Code tokens. */
+  --code-ink: #2a2924;
+  --code-comment: #6b675d;
+  --code-keyword: #8a3324;
+  --code-string: #2b6a3c;
+  --code-number: #7a5200;
+  --code-function: #1f3f95;
+
+  /* Faces. */
+  --font-prose: "Source Serif 4", "Source Serif Fallback", Georgia, "Times New Roman", serif;
+  --font-ui: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-code: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Type scale (1.2, on a 1.125rem prose size). */
+  --text-xs: 0.72rem;
+  --text-sm: 0.82rem;
+  --text-ui: 0.9rem;
+  --text-prose: 1.125rem;
+  --text-h4: 1.125rem;
+  --text-h3: 1.3rem;
+  --text-h2: 1.65rem;
+  --text-h1: 2.5rem;
+  --text-display: clamp(2.75rem, 2rem + 4vw, 4.5rem);
+  --leading-prose: 1.62;
+  --leading-tight: 1.15;
+  /* Prose runs about 65 characters; figures and tables may take the column. */
+  --measure: 34rem;
+  --column: 46rem;
+
+  /* Space (a 4px grid). */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+
+  /* Corners are nearly square; rules are hairlines. */
+  --radius-1: 2px;
+  --radius-2: 4px;
+  --hairline: 1px solid var(--rule);
+  --focus: 2px solid var(--blue);
+}
+
+/* Dark: a night slate with warm ink, drawn on its own. */
+.dark {
+  --paper: #15171c;
+  --paper-sunken: #1b1e25;
+  --paper-deep: #232730;
+  --paper-raised: #1f232b;
+  --plate: #1b1e25;
+  --ink: #e9e5da;
+  --ink-2: #b6b2a6;
+  --ink-3: #928e84;
+  --rule: #2b2f38;
+  --rule-strong: #414650;
+  --blue: #a9bcff;
+  --blue-strong: #c6d2ff;
+  --blue-wash: rgba(169, 188, 255, 0.12);
+  --rubric: #f08c6f;
+  --rubric-wash: rgba(240, 140, 111, 0.12);
+  --ochre: #e0b25a;
+  --ochre-wash: rgba(224, 178, 90, 0.13);
+  --green: #84c995;
+  --green-wash: rgba(132, 201, 149, 0.12);
+  --red: #ff8f85;
+  --red-wash: rgba(255, 143, 133, 0.12);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+  --code-ink: #dedacf;
+  --code-comment: #928e84;
+  --code-keyword: #f08c6f;
+  --code-string: #84c995;
+  --code-number: #e0b25a;
+  --code-function: #a9bcff;
+}
+
+/* VitePress's variables, from the tokens. */
+:root {
+  --vp-c-bg: var(--paper);
+  --vp-c-bg-alt: var(--paper-sunken);
+  --vp-c-bg-elv: var(--paper-raised);
+  --vp-c-bg-soft: var(--paper-sunken);
+  --vp-c-text-1: var(--ink);
+  --vp-c-text-2: var(--ink-2);
+  --vp-c-text-3: var(--ink-3);
+  --vp-c-border: var(--rule-strong);
+  --vp-c-divider: var(--rule);
+  --vp-c-gutter: var(--rule);
+
+  --vp-c-default-1: var(--rule-strong);
+  --vp-c-default-2: var(--rule);
+  --vp-c-default-3: var(--paper-deep);
+  --vp-c-default-soft: var(--paper-sunken);
+  --vp-c-brand-1: var(--blue);
+  --vp-c-brand-2: var(--blue-strong);
+  --vp-c-brand-3: #1f3f95;
+  --vp-c-brand-soft: var(--blue-wash);
+  --vp-c-tip-1: var(--green);
+  --vp-c-tip-2: var(--green);
+  --vp-c-tip-3: var(--green);
+  --vp-c-tip-soft: var(--green-wash);
+  --vp-c-warning-1: var(--ochre);
+  --vp-c-warning-2: var(--ochre);
+  --vp-c-warning-3: var(--ochre);
+  --vp-c-warning-soft: var(--ochre-wash);
+  --vp-c-danger-1: var(--red);
+  --vp-c-danger-2: var(--red);
+  --vp-c-danger-3: var(--red);
+  --vp-c-danger-soft: var(--red-wash);
+
+  --vp-font-family-base: var(--font-ui);
+  --vp-font-family-mono: var(--font-code);
+
+  --vp-nav-height: 56px;
+  --vp-nav-bg-color: var(--paper);
+  --vp-nav-screen-bg-color: var(--paper);
+  --vp-local-nav-bg-color: var(--paper);
+  --vp-sidebar-bg-color: var(--paper);
+  --vp-sidebar-width: 264px;
+  --vp-layout-max-width: 1380px;
+
+  --vp-code-font-size: 0.86em;
+  --vp-code-color: var(--code-ink);
+  --vp-code-bg: transparent;
+  --vp-code-link-color: var(--blue);
+  --vp-code-link-hover-color: var(--blue-strong);
+  --vp-code-block-color: var(--code-ink);
+  --vp-code-block-bg: var(--paper-sunken);
+  --vp-code-block-divider-color: var(--rule);
+  --vp-code-lang-color: var(--ink-3);
+  --vp-code-line-highlight-color: var(--blue-wash);
+  --vp-code-line-number-color: var(--ink-3);
+  --vp-code-copy-code-bg: var(--paper-raised);
+  --vp-code-copy-code-hover-bg: var(--paper-raised);
+  --vp-code-copy-code-border-color: var(--rule);
+  --vp-code-copy-code-hover-border-color: var(--rule-strong);
+  --vp-code-tab-bg: var(--paper-sunken);
+  --vp-code-tab-divider: var(--rule);
+  --vp-code-tab-text-color: var(--ink-3);
+  --vp-code-tab-hover-text-color: var(--ink);
+  --vp-code-tab-active-text-color: var(--ink);
+  --vp-code-tab-active-bar-color: var(--rubric);
+
+  --vp-button-brand-bg: var(--ink);
+  --vp-button-brand-text: var(--paper);
+  --vp-button-brand-border: var(--ink);
+  --vp-button-brand-hover-bg: var(--blue);
+  --vp-button-brand-hover-text: var(--paper);
+  --vp-button-brand-hover-border: var(--blue);
+  --vp-button-brand-active-bg: var(--blue-strong);
+  --vp-button-brand-active-text: var(--paper);
+  --vp-button-brand-active-border: var(--blue-strong);
+  --vp-button-alt-bg: transparent;
+  --vp-button-alt-text: var(--ink);
+  --vp-button-alt-border: var(--rule-strong);
+  --vp-button-alt-hover-bg: var(--paper-sunken);
+  --vp-button-alt-hover-text: var(--ink);
+  --vp-button-alt-hover-border: var(--ink-3);
+  --vp-button-alt-active-bg: var(--paper-deep);
+  --vp-button-alt-active-text: var(--ink);
+  --vp-button-alt-active-border: var(--ink-3);
+
+  --vp-custom-block-font-size: 0.95rem;
+  --vp-custom-block-code-font-size: 0.86em;
+  --vp-custom-block-info-border: transparent;
+  --vp-custom-block-info-text: var(--ink);
+  --vp-custom-block-info-bg: var(--paper-sunken);
+  --vp-custom-block-info-code-bg: transparent;
+  --vp-custom-block-tip-border: transparent;
+  --vp-custom-block-tip-text: var(--ink);
+  --vp-custom-block-tip-bg: transparent;
+  --vp-custom-block-tip-code-bg: transparent;
+  --vp-custom-block-warning-border: transparent;
+  --vp-custom-block-warning-text: var(--ink);
+  --vp-custom-block-warning-bg: transparent;
+  --vp-custom-block-warning-code-bg: transparent;
+  --vp-custom-block-danger-border: transparent;
+  --vp-custom-block-danger-text: var(--ink);
+  --vp-custom-block-danger-bg: transparent;
+  --vp-custom-block-danger-code-bg: transparent;
+  --vp-custom-block-details-border: transparent;
+  --vp-custom-block-details-text: var(--ink);
+  --vp-custom-block-details-bg: transparent;
+  --vp-custom-block-details-code-bg: transparent;
+
+  --vp-shadow-1: var(--shadow);
+  --vp-shadow-2: var(--shadow);
+  --vp-shadow-3: var(--shadow);
+
+  --vp-backdrop-bg-color: rgba(29, 28, 25, 0.4);
+
+  /* The elements' own variables (packages/components, packages/frontend); the rest fall back to --vp-*. */
+  --notatio-border: var(--rule-strong);
+  --notatio-mono: var(--font-code);
+  --notatio-diag: var(--ochre);
+  --notatio-diag-bg: var(--ochre-wash);
+  --notatio-fail-bg: var(--red-wash);
+}
+.dark {
+  --vp-c-brand-3: #3d57b8;
+  --vp-backdrop-bg-color: rgba(0, 0, 0, 0.6);
+}

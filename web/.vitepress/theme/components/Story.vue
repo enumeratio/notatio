@@ -248,29 +248,32 @@ const live = computed((): string => {
 .story-copy {
   margin-left: 0.4rem;
 }
+/* A story is a plate: its title and note above, the live figure in a hairline frame, the
+   source folded beneath. */
 .story {
   position: relative;
-  margin: 1.25rem 0;
-  border: 1px solid var(--vp-c-divider);
-  border-radius: 10px;
-  overflow: hidden;
-  background: var(--vp-c-bg);
+  margin: 2rem 0;
 }
 .story-head {
-  padding: 0.7rem 2.5rem 0 1rem;
+  padding: 0 2.5rem 0.6rem 0;
 }
 .story-title {
   margin: 0;
-  font-size: 0.95rem;
+  max-width: none;
+  font-family: var(--font-ui);
+  font-size: 0.9rem;
   font-weight: 600;
-  scroll-margin-top: var(--vp-nav-height, 64px);
+  font-style: normal;
+  letter-spacing: 0;
+  line-height: 1.4;
+  scroll-margin-top: calc(var(--vp-nav-height, 56px) + 1rem);
 }
 /* A VitePress-style hover anchor for deep-linking a single example. */
 .story-anchor {
   position: absolute;
   margin-left: -1.05em;
   padding-right: 0.35em;
-  color: var(--vp-c-brand-1);
+  color: var(--rubric);
   opacity: 0;
   text-decoration: none;
   transition: opacity 0.15s;
@@ -283,12 +286,14 @@ const live = computed((): string => {
   scroll-margin-top: var(--vp-nav-height, 64px);
 }
 .story:target .story-title {
-  color: var(--vp-c-brand-1);
+  color: var(--rubric);
 }
 .story-desc {
-  margin: 0.3rem 0 0;
-  font-size: 0.85rem;
-  color: var(--vp-c-text-2);
+  margin: 0.25rem 0 0;
+  max-width: var(--measure);
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--ink-2);
 }
 .story-canvas {
   display: flex;
@@ -297,33 +302,37 @@ const live = computed((): string => {
   align-items: flex-end;
   /* A wide child (a table) scrolls here rather than being clipped by .story. */
   overflow-x: auto;
-  padding: 1.25rem 1rem;
-  /* A faint dotted field so glyph bounds read against the page. */
-  background:
-    radial-gradient(var(--vp-c-divider) 1px, transparent 1px) 0 0 / 16px 16px,
-    var(--vp-c-bg-soft);
+  padding: 1.25rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2) var(--radius-2) 0 0;
+  background: var(--plate);
 }
 .story-canvas :deep(notatio-collection-table) {
   max-width: 100%;
   min-width: 0;
 }
 .story-code {
-  border-top: 1px solid var(--vp-c-divider);
-  background: var(--vp-c-bg-alt);
+  border: 1px solid var(--rule-strong);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-2) var(--radius-2);
+  background: var(--paper-sunken);
 }
 .story-code summary {
-  padding: 0.4rem 1rem;
+  margin: 0;
+  padding: 0.35rem 1.25rem;
   cursor: pointer;
-  font-size: 0.75rem;
-  color: var(--vp-c-text-3);
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+  color: var(--ink-3);
   user-select: none;
 }
 .story-live {
   display: contents;
 }
 .story-canvas.is-edited {
-  outline: 1px dashed var(--vp-c-brand-1);
-  outline-offset: -1px;
+  border-style: dashed;
+  border-color: var(--blue);
 }
 .story-reset {
   float: right;
