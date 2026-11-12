@@ -302,14 +302,16 @@ function makeCall(name: string, ops: unknown[]): Made {
 }
 
 /** `Sum`/`Product`/`Integrate` bounds: `Limits(n, 1, 10)`, `Tuple(n, 1, 10)`, or bare `n`. */
-function bounds(node: unknown): { variable?: Made; lower?: Made; upper?: Made } {
+function bounds(node: unknown): { variable?: Made; lower?: Made; upper?: Made; next?: Made } {
   const head = headOf(node);
   if (head === "Limits" || head === "Tuple" || head === "Triple" || head === "Pair") {
-    const [variable, lower, upper] = opsOf(node);
+    const [variable, lower, upper, step] = opsOf(node);
     return {
       variable: variable === undefined ? undefined : make(variable),
       lower: lower === undefined ? undefined : make(lower),
       upper: upper === undefined ? undefined : make(upper),
+      // A stepped range is written by its first two terms: `i = 1, 3, …`.
+      next: step === undefined || lower === undefined ? undefined : make(sumOf(lower, step)),
     };
   }
   return node === undefined ? {} : { variable: make(node) };
@@ -322,9 +324,18 @@ function body(node: unknown): unknown {
   return headOf(inner) === "Block" && opsOf(inner).length === 1 ? opsOf(inner)[0] : inner;
 }
 
+/** `a + b`, folded when both are literals. */
+function sumOf(a: unknown, b: unknown): unknown {
+  const [x, y] = [numberOf(a), numberOf(b)];
+  return x !== undefined && y !== undefined && Number.isFinite(Number(x) + Number(y))
+    ? Number(x) + Number(y)
+    : ["Add", a, b];
+}
+
 function bigOperator(symbol: string, over: unknown): Box {
-  const { variable, lower, upper } = bounds(over);
-  const under = variable && lower ? row([variable.box, "=", lower.box]) : (variable ?? lower)?.box;
+  const { variable, lower, upper, next } = bounds(over);
+  const range = (v: Made, l: Made) => (next ? [v.box, "=", l.box, ",", next.box, ",", "…"] : [v.box, "=", l.box]);
+  const under = variable && lower ? row(range(variable, lower)) : (variable ?? lower)?.box;
   if (under !== undefined && upper) return underoverscript(symbol, under, upper.box);
   if (under !== undefined) return underscript(symbol, under);
   return symbol;
@@ -508,41 +519,67 @@ function makeFunction(head: string, ops: unknown[]): Made {
 
     case "Sum":
     case "Product": {
-      const op = bigOperator(head === "Sum" ? "∑" : "∏", ops[1]);
-      return { box: row([op, paren(make(body(ops[0])), ADD + 1)]), prec: MULTIPLY };
+      // Each further `Limits` is an inner operator, the first outermost.
+      const operators = ops.slice(1).map((over) => bigOperator(head === "Sum" ? "∑" : "∏", over));
+      return {
+        box: row([
+          ...(operators.length === 0 ? [head === "Sum" ? "∑" : "∏"] : operators),
+          paren(make(body(ops[0])), ADD + 1),
+        ]),
+        prec: MULTIPLY,
+      };
     }
 
     case "Integrate": {
       const integrand = make(body(ops[0]));
-      const { variable, lower, upper } = bounds(ops[1]);
-      const op = lower && upper ? subsuperscript("∫", lower.box, upper.box) : lower ? subscript("∫", lower.box) : "∫";
-      const differential = variable ? [row(["d", variable.box])] : [];
-      return { box: row([op, paren(integrand, ADD + 1), ...differential]), prec: MULTIPLY };
+      // Each further `Limits` is an inner integral, the first outermost, its differential last.
+      const over = ops.length > 1 ? ops.slice(1).map(bounds) : [{}];
+      const operators = over.map(({ lower, upper }) =>
+        lower && upper ? subsuperscript("∫", lower.box, upper.box) : lower ? subscript("∫", lower.box) : "∫",
+      );
+      const differentials = over.flatMap(({ variable }) => (variable ? [row(["d", variable.box])] : [])).toReversed();
+      return { box: row([...operators, paren(integrand, ADD + 1), ...differentials]), prec: MULTIPLY };
     }
 
     case "Limit": {
-      const [fn, to] = ops;
+      const [fn, to, direction] = ops;
       const variable = headOf(fn) === "Function" ? opsOf(fn)[1] : undefined;
-      const approach = variable === undefined ? make(to).box : row([make(variable).box, "→", make(to).box]);
+      // The side a limit is taken from is a sign on the point: `x → a⁺`.
+      const side = { "1": "+", "-1": "−" }[numberOf(direction) ?? ""];
+      const point = side === undefined ? make(to).box : superscript(paren(make(to), ATOM), side);
+      const approach = variable === undefined ? point : row([make(variable).box, "→", point]);
       return { box: row([underscript("lim", approach), paren(make(body(fn)), ADD + 1)]), prec: MULTIPLY };
     }
 
     case "D": {
-      // `D(f, x)` -- Leibniz notation, `d/dx f`.
-      const [f, x] = ops;
-      const operator = fraction("d", row(["d", make(x).box]));
+      // `D(f, x)` -- Leibniz notation, `d/dx f`; `D(f, x, x)` is `d²/dx²` and `D(f, x, y)` is `d²/dx dy`.
+      const [f, ...x] = ops;
+      const order = String(x.length);
+      const same = x.length > 1 && x.every((v) => JSON.stringify(v) === JSON.stringify(x[0]));
+      const operator =
+        x.length < 2
+          ? fraction("d", row(["d", ...x.map((v) => make(v).box)]))
+          : fraction(
+              superscript("d", order),
+              same
+                ? row(["d", superscript(paren(make(x[0]), ATOM), order)])
+                : row(x.map((v) => row(["d", make(v).box]))),
+            );
       return { box: row([operator, paren(make(f), ADD + 1)]), prec: MULTIPLY };
     }
 
     // `Derivative(f, n)` -- the boxed function `f'` / `f''` / `f^(n)`, applied via
     // `Apply` below (`f'(x)` parses to `Apply(Derivative(f, 1), x)`).
     case "Derivative": {
-      const [fn, order] = ops;
+      const [fn, ...orders] = ops;
       const f = make(fn);
-      const n = order === undefined ? "1" : (numberOf(order) ?? "1");
-      const primes = { "1": "′", "2": "″", "3": "‴" }[n];
+      // One order is primes up to three; several (`f^(0,1)`, one per argument) or a symbolic one are parenthesized.
+      const n = orders.length === 0 ? "1" : orders.length === 1 ? numberOf(orders[0]) : undefined;
+      const primes = n === undefined ? undefined : { "1": "′", "2": "″", "3": "‴" }[n];
       return atom(
-        primes !== undefined ? row([paren(f, ATOM), primes]) : superscript(paren(f, ATOM), fenced("(", [n], ")")),
+        primes !== undefined
+          ? row([paren(f, ATOM), primes])
+          : superscript(paren(f, ATOM), fenced("(", list(orders.map(make)), ")")),
       );
     }
 

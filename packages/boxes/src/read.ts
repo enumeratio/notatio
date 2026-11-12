@@ -620,11 +620,8 @@ class Reader {
       case "FractionBox": {
         if (optionsOfBox(box).FractionLine === false) return decline("a fraction with no line", box);
         const [, top, bottom] = args as [unknown, Box, Box];
-        if (top === "d" && isNodeOf(bottom, "RowBox") && rowItems(bottom)[0] === "d" && rowItems(bottom).length > 1) {
-          // Leibniz: `d/dx f`.
-          const variable = this.sub(rowItems(bottom).slice(1));
-          return atom(["D", this.multiply(), variable] as Json);
-        }
+        const variables = this.leibniz(top, bottom);
+        if (variables !== undefined) return atom(["D", this.multiply(), ...variables] as Json);
         return atom(["Divide", this.box(top), this.box(bottom)] as Json);
       }
       case "SqrtBox":
@@ -674,14 +671,28 @@ class Reader {
     if (typeof sup === "string" && PRIMES[sup] !== undefined)
       return atom(["Derivative", this.box(base), PRIMES[sup]] as Json);
     // `f^(n)`: the n-th derivative, not a power with its exponent in parentheses.
-    const order = this.fencedRow(sup) && rowItems(sup).length === 3 ? rowItems(sup)[1] : undefined;
+    const orders = this.fencedRow(sup) ? this.orders(rowItems(sup).slice(1, -1)) : undefined;
     const derivable = typeof base === "string" ? tokenClass(base) === "identifier" : isNodeOf(base, "RowBox");
-    if (derivable && typeof order === "string" && /^\d+$/.test(order))
-      return atom(["Derivative", this.box(base), Number(order)] as Json);
+    if (derivable && orders !== undefined && (orders.every((n) => typeof n === "number") || typeof base === "string"))
+      return atom(["Derivative", this.box(base), ...orders] as Json);
     if (typeof base === "string" && FUNCTION_OF.has(base) && base !== "mod") {
       return atom(["Power", [this.callee(base), ...this.functionArguments()], this.box(sup)] as Json);
     }
     return atom(["Power", this.box(base), this.box(sup)] as Json);
+  }
+
+  /** The orders of `f^(n)`, `f^(0, 1)` or `f^(k)`: a count per argument, or a symbolic order. */
+  orders(items: readonly Box[]): Json[] | undefined {
+    if (items.length === 0) return undefined;
+    const parts: Box[][] = [[]];
+    for (const item of items) {
+      if (item === ",") parts.push([]);
+      else parts.at(-1)!.push(item);
+    }
+    if (parts.some((part) => part.length === 0)) return undefined;
+    return parts.map((part) =>
+      part.length === 1 && /^\d+$/.test(part[0] as string) ? Number(part[0]) : this.sub(part),
+    );
   }
 
   subscript(base: Box, sub: Box): Atom {
@@ -692,13 +703,51 @@ class Reader {
     return atom(["Subscript", this.box(base), this.box(sub)] as Json);
   }
 
+  /** The variables of a Leibniz fraction: `d/dx`, `d²/dx²` or `d²/dx dy`. */
+  leibniz(top: Box, bottom: Box): Json[] | undefined {
+    const order = top === "d" ? 1 : isNodeOf(top, "SuperscriptBox") && top[1] === "d" ? Number(top[2]) : NaN;
+    if (!(order >= 1) || !isNodeOf(bottom, "RowBox")) return undefined;
+    const items = rowItems(bottom);
+    if (items[0] === "d" && items.length > 1) {
+      const power = items[1];
+      if (order > 1 && items.length === 2 && isNodeOf(power, "SuperscriptBox") && power[2] === String(order))
+        return Array<Json>(order).fill(this.box(power[1] as Box));
+      return order === 1 ? [this.sub(items.slice(1))] : undefined;
+    }
+    const each = items.map((item) =>
+      isNodeOf(item, "RowBox") && rowItems(item)[0] === "d" ? this.sub(rowItems(item).slice(1)) : undefined,
+    );
+    return order > 1 && each.length === order && each.every((v) => v !== undefined) ? (each as Json[]) : undefined;
+  }
+
+  /** `i = 1, 3, …` under a big operator: the variable, first term and step. */
+  steppedRange(under: Box | undefined): { variable: Json; lower: Json; step: Json } | undefined {
+    if (!isNodeOf(under, "RowBox")) return undefined;
+    const items = rowItems(under);
+    if (items.at(-1) !== "…" || items.at(-2) !== ",") return undefined;
+    const head = items.slice(0, -2);
+    const equal = head.indexOf("=");
+    const comma = head.indexOf(",");
+    if (equal < 1 || comma < equal + 2) return undefined;
+    const lower = this.sub(head.slice(equal + 1, comma));
+    return {
+      variable: this.sub(head.slice(0, equal)),
+      lower,
+      step: ["Subtract", this.sub(head.slice(comma + 1)), lower] as Json,
+    };
+  }
+
   /** `∑`/`∏` with their bounds, over the product that follows. */
   bigOperator(symbol: string, under: Box | undefined, over: Box | undefined): Json {
-    const written = under === undefined ? undefined : this.box(under);
+    const stepped = this.steppedRange(under);
+    const written = under === undefined || stepped !== undefined ? undefined : this.box(under);
     const upper = over === undefined ? undefined : this.box(over);
     let variable: Json | undefined;
     let limits: Json | undefined = written;
-    if (Array.isArray(written) && written[0] === "Equal" && written.length === 3) {
+    if (stepped !== undefined) {
+      variable = stepped.variable;
+      limits = ["Limits", variable, stepped.lower, upper ?? "Nothing", stepped.step] as Json;
+    } else if (Array.isArray(written) && written[0] === "Equal" && written.length === 3) {
       variable = written[1] as Json;
       limits = ["Limits", variable, written[2], ...(upper === undefined ? [] : [upper])] as Json;
     } else if (written !== undefined && upper !== undefined) {
@@ -709,7 +758,11 @@ class Reader {
     if (limits === undefined) return [symbol === "∑" ? "Sum" : "Product", body] as Json;
     const bound_ = bound(variable ?? "", body);
     const fixed = variable === undefined ? limits : rename(limits, variable as string, bound_.variable as string);
-    return [symbol === "∑" ? "Sum" : "Product", bound_.body, fixed] as Json;
+    const head = symbol === "∑" ? "Sum" : "Product";
+    // An operator directly inside another is a further `Limits` of the one Sum, the outer first.
+    return Array.isArray(bound_.body) && bound_.body[0] === head
+      ? ([head, (bound_.body as readonly Json[])[1]!, fixed, ...(bound_.body as readonly Json[]).slice(2)] as Json)
+      : ([head, bound_.body, fixed] as Json);
   }
 
   /** `∫ f dx` and its bounds; the differential is the first `d x` after the integrand. */
@@ -717,18 +770,28 @@ class Reader {
     let end = this.pos;
     let variable: Json | undefined;
     let next = this.pos;
+    // An integral inside this one takes the first differential after its own integrand.
+    let inner = 0;
     for (; end < this.items.length; end++) {
       const item = this.items[end]!;
-      if (isNodeOf(item, "RowBox") && rowItems(item)[0] === "d" && rowItems(item).length > 1) {
-        variable = this.sub(rowItems(item).slice(1));
-        next = end + 1;
-        break;
+      if (isIntegralSign(item)) {
+        inner++;
+        continue;
       }
-      if (item === "d" && end + 1 < this.items.length) {
-        variable = this.atomOf(this.items[end + 1]!).json;
-        next = end + 2;
-        break;
+      const differential =
+        isNodeOf(item, "RowBox") && rowItems(item)[0] === "d" && rowItems(item).length > 1
+          ? { variable: () => this.sub(rowItems(item).slice(1)), width: 1 }
+          : item === "d" && end + 1 < this.items.length
+            ? { variable: () => this.atomOf(this.items[end + 1]!).json, width: 2 }
+            : undefined;
+      if (differential === undefined) continue;
+      if (inner-- > 0) {
+        end += differential.width - 1;
+        continue;
       }
+      variable = differential.variable();
+      next = end + differential.width;
+      break;
     }
     if (variable === undefined) return decline("an integral with no differential");
     const integrand = end === this.pos ? 1 : this.sub(this.items.slice(this.pos, end));
@@ -737,20 +800,31 @@ class Reader {
     const lo = lower === undefined ? undefined : this.box(lower);
     const hi = upper === undefined ? undefined : this.box(upper);
     const bounds: Json = lo === undefined ? v : (["Limits", v, lo, ...(hi === undefined ? [] : [hi])] as Json);
-    return ["Integrate", body, bounds] as Json;
+    // An integral directly inside another is a further `Limits` of the one Integrate, the outer first.
+    return Array.isArray(body) && body[0] === "Integrate"
+      ? (["Integrate", (body as readonly Json[])[1]!, bounds, ...(body as readonly Json[]).slice(2)] as Json)
+      : (["Integrate", body, bounds] as Json);
   }
 
   /** `lim` under `x → a`, over the product that follows. */
   limit(under: Box): Json {
     const items = isNodeOf(under, "RowBox") ? rowItems(under) : [under];
     const arrow = items.indexOf("→");
-    if (arrow < 0) return ["Limit", this.multiply(), this.sub(items)] as Json;
-    const variable = this.sub(items.slice(0, arrow));
-    const to = this.sub(items.slice(arrow + 1));
-    const { variable: v, body } = bound(variable, this.multiply());
-    return ["Limit", ["Function", ["Block", body], v], to] as Json;
+    // `a⁺` and `a⁻` are the side the limit is taken from.
+    const point = items.slice(arrow + 1);
+    const last = point.at(-1);
+    const side = isNodeOf(last, "SuperscriptBox") ? { "+": 1, "−": -1 }[last[2] as string] : undefined;
+    const to = this.sub(side === undefined ? point : [...point.slice(0, -1), (last as BoxNode)[1] as Box]);
+    const sides = side === undefined ? [] : [side];
+    if (arrow < 0) return ["Limit", this.multiply(), to, ...sides] as Json;
+    const { variable: v, body } = bound(this.sub(items.slice(0, arrow)), this.multiply());
+    return ["Limit", ["Function", ["Block", body], v], to, ...sides] as Json;
   }
 }
+
+/** `∫`, bare or with bounds. */
+const isIntegralSign = (item: Box): boolean =>
+  item === "∫" || ((isNodeOf(item, "SubscriptBox") || isNodeOf(item, "SubsuperscriptBox")) && item[1] === "∫");
 
 /** `10^k` after a mantissa, as `m × 10^k`: the number written in scientific notation. */
 function scientificNumber(mantissa: Json, power: Json): Json | undefined {
