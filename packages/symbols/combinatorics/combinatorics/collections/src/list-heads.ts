@@ -495,39 +495,6 @@ export function declareListHeads(ce: Engine): void {
     }
   }
 
-  // At(Primes, n): the set `Primes` has no order of its own, and compute-engine's `At` folds
-  // it to NaN while canonicalizing. Its n-th element is PrimeNumbers' (no change where
-  // PrimeNumbers isn't declared).
-  {
-    const definition = ce.lookupDefinition("At");
-    const operator =
-      definition !== undefined && "operator" in definition
-        ? (
-            definition as {
-              operator: { canonical?: (ops: readonly Expr[], options: unknown) => Expr | undefined | null };
-            }
-          ).operator
-        : undefined;
-    if (operator !== undefined) {
-      const nativeCanonical = operator.canonical;
-      const nativeOperator = Object.create(operator) as typeof operator;
-      nativeOperator.canonical = nativeCanonical;
-      operator.canonical = (ops, options) => {
-        const reroute =
-          symbolNameOf(ops[0]) === "Primes" &&
-          (integerAt(ops[1]) ?? 0) > 0 &&
-          ce.lookupDefinition("PrimeNumbers") !== undefined;
-        return nativeCanonical?.call(
-          nativeOperator,
-          reroute ? [ce.symbol("PrimeNumbers"), ...ops.slice(1)] : ops,
-          options,
-        );
-      };
-      // compile builtin: rewrites operands at canonicalization, before compile sees the expression
-      declareCompile(ce, "At", "builtin");
-    }
-  }
-
   // At(c, Span(start, end, step?)): a Wolfram `start;;end;;step` slice — compute-engine has
   // no `Span`. Resolved to an explicit 1-based index list (negative bounds count from the
   // end, like `Part`) and handed to the native list-of-indices form, so a single- or
