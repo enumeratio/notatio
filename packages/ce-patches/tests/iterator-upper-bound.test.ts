@@ -25,16 +25,22 @@ test("a lone lower bound still stays unevaluated", () => {
   ]);
 });
 
-// Wolfram's `Product[f, k]` is the indefinite product, defined up to a constant: with no bounds
-// at all compute-engine answered the body at `k := Nothing` (a dropped factor).
-test("an index with no bounds stays unevaluated, as a sum or a product", () => {
+// compute-engine 0.187 runs an index with no bounds from 1 to infinity; the patch leaves it alone.
+test("an index with no bounds runs from 1 to infinity", () => {
+  const unbounded = ["Limits", "k", "Nothing", "Nothing"];
+  expect(value(["Sum", ["Power", "k", -2], unbounded])).toEqual(["Divide", ["Power", "Pi", 2], 6]);
+  expect(value(["Sum", ["Power", 2, ["Negate", "k"]], unbounded])).toBe(1);
+  expect(value(["Sum", "k", unbounded])).toBe("PositiveInfinity");
+  expect(value(["Product", ["Add", 1, ["Power", "k", -2]], unbounded])).toEqual(["Divide", ["Sinh", "Pi"], "Pi"]);
+});
+
+// Never the body at `k := Nothing` (`3 q^(2k) + 5` once answered `3 q^2 + 5`).
+test("an unbounded index with an unknown value stays unevaluated", () => {
   const body = ["Add", ["Multiply", 3, ["Power", "q", ["Multiply", 2, "k"]]], 5];
   const unbounded = ["Limits", "k", "Nothing", "Nothing"];
-  for (const head of ["Product", "Sum"]) {
-    expect(value([head, body, unbounded])).toEqual([head, body, unbounded]);
-    expect(value([head, body, "k"])).toEqual([head, body, unbounded]);
-  }
-  expect(value(["Product", ["Power", "q", "k"], unbounded])).toEqual(["Product", ["Power", "q", "k"], unbounded]);
+  expect(value(["Sum", body, unbounded])).toEqual(["Sum", body, unbounded]);
+  expect(value(["Sum", ["f", "k"], unbounded])).toEqual(["Sum", ["f", "k"], unbounded]);
+  expect(value(["Product", ["f", "k"], unbounded])).toEqual(["Product", ["f", "k"], unbounded]);
 });
 
 test("a degenerate bound still evaluates", () => {
