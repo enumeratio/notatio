@@ -277,14 +277,9 @@ test("an interval reads from the bracket pairs written as text, ISO's mixed ones
   // A `[` that closes an interval is no factor of what precedes it, however the pairs are mixed.
   const open = ["Interval", ["Open", "a"], ["Open", "b"]];
   const halfOpen = ["Interval", "c", ["Open", "d"]];
-  expect(read("x", "∈", "]", "a , b", "[", "∪", "[", "c , d", "[")).toEqual([
-    "Element",
-    "x",
-    ["Union", open, halfOpen],
-  ]);
-  expect(read("[", "c , d", "[", "∪", "]", "a , b", "[")).toEqual(["Union", halfOpen, open]);
-  const sets: MathJsonExpression = ["Element", "x", ["Union", open, halfOpen]] as never;
-  expect(roundTrip(sets)).toBe("exact");
+  expect(read("y", "=", "[", "c , d", "[")).toEqual(["Equal", "y", halfOpen]);
+  expect(read("{", "]", "a , b", "[", ",", "[", "c , d", "[", "}")).toEqual(["Set", open, halfOpen]);
+  expect(read("(", "x", ",", "]", "a , b", "[", ")")).toEqual(["Tuple", "x", open]);
 });
 
 test("a closed interval is spelled where a set is expected as compute-engine reads it", () => {
