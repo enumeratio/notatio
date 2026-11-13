@@ -310,6 +310,128 @@ test("compute-engine reads the interval LaTeX written back", () => {
   expect(ce.parse(toLatex(makeBoxes(element)), { form: "raw" }).json).toEqual(element);
 });
 
+const SET_OPERATORS: Record<string, MathJsonExpression> = {
+  union: ["Union", "a", "b"],
+  intersection: ["Intersection", "a", "b"],
+  "set minus": ["SetMinus", "a", "b"],
+  "symmetric difference": ["SymmetricDifference", "a", "b"],
+  complement: ["Complement", "a"],
+  "complement of a union": ["Complement", ["Union", "a", "b"]],
+  "not a member": ["NotElement", "x", "a"],
+  subset: ["Subset", "a", "b"],
+  "subset or equal": ["SubsetEqual", "a", "b"],
+  superset: ["Superset", "a", "b"],
+  "superset or equal": ["SupersetEqual", "a", "b"],
+  "subset chain": ["Subset", "a", "b", "c"],
+  "union chain": ["Union", "a", "b", "c", "d"],
+  "intersection chain": ["Intersection", "a", "b", "c"],
+  "set minus chain": ["SetMinus", "a", "b", "c"],
+  "symmetric difference chain": ["SymmetricDifference", "a", "b", "c"],
+  "union of intersections": ["Union", ["Intersection", "a", "b"], ["Intersection", "c", "d"]],
+  "intersection of unions": ["Intersection", ["Union", "a", "b"], "c"],
+  "union nested on the right": ["Union", "a", ["Union", "b", "c"]],
+  "set minus nested": ["SetMinus", ["SetMinus", "a", "b"], "c"],
+  "set minus nested on the right": ["SetMinus", "a", ["SetMinus", "b", "c"]],
+  "element of a union": ["Element", "x", ["Union", "a", "b"]],
+  "union is a subset": ["Subset", ["Union", "a", "b"], "c"],
+  "union under a sum": ["Add", "a", ["Union", "b", "c"]],
+  "sum under a union": ["Union", ["Add", "a", "b"], "c"],
+  "union of products": ["Union", ["Multiply", "a", "b"], "c"],
+  "product with a union": ["Multiply", ["Union", "a", "b"], "c"],
+  "product with a set minus": ["Multiply", "a", ["SetMinus", "b", "c"]],
+  "set minus of a product": ["SetMinus", ["Multiply", "a", "b"], "c"],
+  "symmetric difference under a relation": ["Equal", ["SymmetricDifference", "a", "b"], "c"],
+  "symmetric difference of sums": ["SymmetricDifference", ["Add", "a", "b"], "c"],
+  "integers and naturals": ["Union", "Integers", "NonNegativeIntegers"],
+  "open and half-open intervals": ["Union", ["Interval", ["Open", 0], ["Open", 1]], ["Interval", 2, ["Open", 3]]],
+  "a member of a union of intervals": [
+    "Element",
+    "x",
+    ["Union", ["Interval", ["Open", 0], ["Open", 1]], ["Interval", 2, ["Open", 3]]],
+  ],
+  "closed intervals": ["Intersection", ["Interval", 0, 1], ["Interval", 1, 2]],
+  "a closed interval in a subset": ["Subset", ["Interval", 0, 1], ["Union", "a", "b"]],
+};
+
+test("set operators are written as operators and read back as their heads", () => {
+  for (const [name, json] of Object.entries(SET_OPERATORS)) expect(roundTrip(json), name).toBe("exact");
+  expect(toText(makeBoxes(["Union", "a", "b", "c"]))).toBe("a ∪ b ∪ c");
+  expect(toText(makeBoxes(["Intersection", "a", "b"]))).toBe("a ∩ b");
+  expect(toText(makeBoxes(["SetMinus", "a", "b"]))).toBe("a ∖ b");
+  expect(toText(makeBoxes(["SymmetricDifference", "a", "b"]))).toBe("a △ b");
+  expect(toLatex(makeBoxes(["Complement", "a"]))).toBe("a^{\\complement}");
+  expect(toLatex(makeBoxes(["SymmetricDifference", "a", "b"]))).toBe("a\\triangle b");
+});
+
+test("a set operator with no second operand stays a call", () => {
+  for (const head of ["Union", "Intersection", "SetMinus", "SymmetricDifference"])
+    expect(toText(makeBoxes([head, "a"])), head).toBe(`${head}(a)`);
+  // A relative complement has two operands.
+  expect(toText(makeBoxes(["Complement", "a", "b"]))).toBe("Complement(a, b)");
+});
+
+test("set operators read from the glyphs written as text, chained as compute-engine reads them", () => {
+  const read = (...items: string[]) => makeExpression(row(items.map((t) => (t.length > 1 ? row(t.split(" ")) : t))));
+  expect(read("a", "∪", "b", "∪", "c")).toEqual(["Union", "a", "b", "c"]);
+  expect(read("a", "∩", "b", "∩", "c")).toEqual(["Intersection", "a", "b", "c"]);
+  // `∪` and `∩` share a level and nest to the right.
+  expect(read("a", "∪", "b", "∩", "c")).toEqual(["Union", "a", ["Intersection", "b", "c"]]);
+  expect(read("a", "∩", "b", "∪", "c", "∪", "d")).toEqual(["Intersection", "a", ["Union", "b", "c", "d"]]);
+  expect(read("a", "∪", "(", "b", "∪", "c", ")")).toEqual(["Union", "a", ["Union", "b", "c"]]);
+  expect(read("a", "∖", "b", "∖", "c")).toEqual(["SetMinus", "a", "b", "c"]);
+  expect(read("a", "△", "b", "△", "c")).toEqual(["SymmetricDifference", "a", "b", "c"]);
+  expect(makeExpression(superscript("a", "∁"))).toEqual(["Complement", "a"]);
+  expect(makeExpression(row([superscript(row(["(", "a", "∪", "b", ")"]), "∁"), "∩", "c"]))).toEqual([
+    "Intersection",
+    ["Complement", ["Union", "a", "b"]],
+    "c",
+  ]);
+});
+
+test("set operators bind between a sum and a product, and tighter than a relation", () => {
+  const read = (...items: string[]) => makeExpression(row(items.map((t) => (t.length > 1 ? row(t.split(" ")) : t))));
+  expect(read("a", "+", "b", "∪", "c")).toEqual(["Add", "a", ["Union", "b", "c"]]);
+  expect(read("a", "∪", "b", "+", "c")).toEqual(["Add", ["Union", "a", "b"], "c"]);
+  expect(read("a", "∪", "b", "×", "c")).toEqual(["Union", "a", ["Multiply", "b", "c"]]);
+  expect(read("a", "×", "b", "∪", "c")).toEqual(["Union", ["Multiply", "a", "b"], "c"]);
+  // `∖` binds tighter than a product.
+  expect(read("a", "×", "b", "∖", "c")).toEqual(["Multiply", "a", ["SetMinus", "b", "c"]]);
+  expect(read("a", "∖", "b", "×", "c")).toEqual(["Multiply", ["SetMinus", "a", "b"], "c"]);
+  expect(read("a", "∪", "b", "∖", "c")).toEqual(["Union", "a", ["SetMinus", "b", "c"]]);
+  // A relation is looser than all of them.
+  expect(read("x", "∈", "a", "∪", "b")).toEqual(["Element", "x", ["Union", "a", "b"]]);
+  expect(read("x", "∉", "a", "∩", "b")).toEqual(["NotElement", "x", ["Intersection", "a", "b"]]);
+  expect(read("a", "∪", "b", "⊆", "c", "∩", "d")).toEqual([
+    "SubsetEqual",
+    ["Union", "a", "b"],
+    ["Intersection", "c", "d"],
+  ]);
+  expect(read("a", "△", "b", "=", "c")).toEqual(["Equal", ["SymmetricDifference", "a", "b"], "c"]);
+  expect(read("a", "+", "b", "△", "c", "+", "d")).toEqual([
+    "SymmetricDifference",
+    ["Add", "a", "b"],
+    ["Add", "c", "d"],
+  ]);
+  // A sign belongs to its own term.
+  expect(read("−", "a", "∪", "b")).toEqual(["Union", ["Negate", "a"], "b"]);
+});
+
+test("a union of intervals written as text reads, mixed brackets and all", () => {
+  const read = (...items: string[]) => makeExpression(row(items.map((t) => (t.length > 1 ? row(t.split(" ")) : t))));
+  const open = ["Interval", ["Open", 0], ["Open", 1]];
+  const halfOpen = ["Interval", 2, ["Open", 3]];
+  const union = ["Union", open, halfOpen];
+  expect(read("]", "0 , 1", "[", "∪", "[", "2 , 3", "[")).toEqual(union);
+  expect(read("x", "∈", "]", "0 , 1", "[", "∪", "[", "2 , 3", "[")).toEqual(["Element", "x", union]);
+  expect(read("]", "0 , 1", "[", "∪", "]", "2 , 3", "[", "∪", "[", "4 , 5", "[")).toEqual([
+    "Union",
+    open,
+    ["Interval", ["Open", 2], ["Open", 3]],
+    ["Interval", 4, ["Open", 5]],
+  ]);
+  expect(read("]", "0 , 1", "[", "∩", "]", "0 , 2", "]")).toEqual(["Intersection", open, ["Interval", ["Open", 0], 2]]);
+});
+
 test("an integer range is ⟦a, b⟧ when it counts up, and reads back", () => {
   for (const json of [
     ["Range", 1, 10],

@@ -377,12 +377,12 @@ class Reader {
   }
 
   relation(): Json {
-    const operands = [this.add()];
+    const operands = [this.symmetricDifference()];
     const heads: string[] = [];
     for (let head = this.relationHead(); head !== undefined; head = this.relationHead()) {
       this.pos++;
       heads.push(head);
-      operands.push(this.add());
+      operands.push(this.symmetricDifference());
     }
     if (heads.length === 0) return operands[0]!;
     if (heads.every((h) => h === heads[0])) return [heads[0]!, ...operands] as Json;
@@ -394,15 +394,22 @@ class Reader {
     return typeof t === "string" ? RELATION_OF.get(t) : undefined;
   }
 
+  /** `a △ b △ c`, one call: looser than a sum, tighter than a relation. */
+  symmetricDifference(): Json {
+    const operands = [this.add()];
+    while (this.eat("△")) operands.push(this.add());
+    return operands.length === 1 ? operands[0]! : (["SymmetricDifference", ...operands] as Json);
+  }
+
   add(): Json {
-    const terms: Json[] = [this.signed()];
+    const terms: Json[] = [this.setOperators(this.signed())];
     let last: Json | undefined;
     let subtracted = false;
     for (;;) {
       const t = this.peek();
       if (t !== "+" && !isMinus(t)) break;
       this.pos++;
-      const term = this.multiply();
+      const term = this.setOperators(this.multiply());
       subtracted = isMinus(t);
       last = term;
       terms.push(subtracted ? negate(term) : term);
@@ -410,6 +417,33 @@ class Reader {
     if (terms.length === 1) return terms[0]!;
     if (terms.length === 2 && subtracted && !isNumberLiteral(last!)) return ["Subtract", terms[0], last] as Json;
     return ["Add", ...terms] as Json;
+  }
+
+  /**
+   * `∪` and `∩` after `first`, between a sum and a product as in compute-engine. A run of one
+   * operator is one call (`a ∪ b ∪ c`); a different operator after it nests to the right, as
+   * compute-engine reads `a ∪ b ∩ c` as `Union(a, Intersection(b, c))`.
+   */
+  setOperators(first: Json): Json {
+    const glyph = this.peek();
+    if (glyph !== "∪" && glyph !== "∩") return first;
+    const operands = [first];
+    while (this.eat(glyph)) {
+      const next = this.multiply();
+      if (this.peek() === glyph) operands.push(next);
+      else {
+        operands.push(this.setOperators(next));
+        break;
+      }
+    }
+    return [glyph === "∪" ? "Union" : "Intersection", ...operands] as Json;
+  }
+
+  /** `a ∖ b ∖ c`, one call, binding tighter than a product. */
+  setMinus(): Json {
+    const operands = [this.factor()];
+    while (this.eat("∖")) operands.push(this.factor());
+    return operands.length === 1 ? operands[0]! : (["SetMinus", ...operands] as Json);
   }
 
   /** A term with its sign: `−a b` is the negation of the product. */
@@ -423,31 +457,31 @@ class Reader {
   }
 
   multiply(): Json {
-    let factors: Json[] = [this.factor()];
+    let factors: Json[] = [this.setMinus()];
     const fold = (): Json => (factors.length === 1 ? factors[0]! : (["Multiply", ...factors] as Json));
     for (;;) {
       const t = this.peek();
       if (typeof t === "string") {
         if (TIMES.has(t)) {
           this.pos++;
-          const next = this.factor();
+          const next = this.setMinus();
           const scientific = t === "×" && factors.length === 1 ? scientificNumber(factors[0]!, next) : undefined;
           factors = scientific === undefined ? [...factors, next] : [scientific];
           continue;
         }
         if (DIVIDES.has(t)) {
           this.pos++;
-          factors = [["Divide", fold(), this.factor()] as Json];
+          factors = [["Divide", fold(), this.setMinus()] as Json];
           continue;
         }
         if (t === "mod") {
           this.pos++;
-          factors = [["Mod", fold(), this.factor()] as Json];
+          factors = [["Mod", fold(), this.setMinus()] as Json];
           continue;
         }
       }
       if (!this.startsFactor(t)) break;
-      factors.push(this.factor());
+      factors.push(this.setMinus());
     }
     return fold();
   }
@@ -786,6 +820,7 @@ class Reader {
   power(base: Box, sup: Box): Atom {
     if (typeof sup === "string" && PRIMES[sup] !== undefined)
       return atom(["Derivative", this.box(base), PRIMES[sup]] as Json);
+    if (sup === "∁") return atom(["Complement", this.box(base)] as Json);
     // `f^(n)`: the n-th derivative, not a power with its exponent in parentheses.
     const orders = this.fencedRow(sup) ? this.orders(rowItems(sup).slice(1, -1)) : undefined;
     const derivable = typeof base === "string" ? tokenClass(base) === "identifier" : isNodeOf(base, "RowBox");

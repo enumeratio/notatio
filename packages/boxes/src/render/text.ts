@@ -11,7 +11,7 @@ import { endsOf, inSetPosition, insideOf, intervalEnds, isClosedInterval } from 
 import { texToAlphabet } from "./tex-text.ts";
 
 /** Operators that read better with a space either side. */
-const SPACED = new Set("+ − = ≠ < ≤ > ≥ ≈ ≡ ∈ ∉ ⊂ ⊆ ⊃ ⊇ → ∧ ∨ ⇒ ⇔ ×".split(" "));
+const SPACED = new Set("+ − = ≠ < ≤ > ≥ ≈ ≡ ∈ ∉ ⊂ ⊆ ⊃ ⊇ ∪ ∩ ∖ △ → ∧ ∨ ⇒ ⇔ ×".split(" "));
 
 const OPEN = new Set(["(", "[", "]", "{", "|", "‖", "⟨", "⟦", "⌊", "⌈"]);
 

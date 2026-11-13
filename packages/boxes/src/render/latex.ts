@@ -39,6 +39,8 @@ const COMMANDS: Record<string, string> = {
   "⇒": "\\Rightarrow",
   "⇔": "\\Leftrightarrow",
   "⊗": "\\otimes",
+  "△": "\\triangle",
+  "∁": "\\complement",
   mod: "\\bmod",
   "∑": "\\sum",
   "∏": "\\prod",
