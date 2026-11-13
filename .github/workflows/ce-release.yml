@@ -36,6 +36,7 @@ jobs:
       GH_TOKEN: ${{ secrets.CE_BUMP_TOKEN || github.token }}
       HAS_BUMP_TOKEN: ${{ secrets.CE_BUMP_TOKEN != '' }}
       INPUT_VERSION: ${{ inputs.version }}
+      MARKER: "<!-- ce-release.yml -->"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -59,8 +60,9 @@ jobs:
             exit 1
           fi
           { echo "pinned=$pinned"; echo "version=$target"; echo "go=$newer"; } >> "$GITHUB_OUTPUT"
-      # A bump PR still in flight holds this one back: a hand-made `chore/ce-*` PR, or a bot one someone
-      # has pushed fixes to. A bot PR with only its own bump commit is superseded by the new one.
+      # A bump PR still in flight holds this one back: a hand-made `chore/ce-*` PR, or one of ours someone
+      # has pushed fixes to. Ours carry the MARKER in their body (the token's account also opens PRs by
+      # hand, so the author can't tell them apart); one with only its bump commit is superseded.
       - name: skip when a bump is already in flight
         id: gate
         if: steps.pick.outputs.go == 'true'
@@ -73,15 +75,14 @@ jobs:
             echo "go=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          bot=$(gh api user --jq .login 2>/dev/null || echo app/github-actions)
           gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
-            --json number,headRefName,author,commits \
-            --jq '.[] | select(.headRefName | startswith("chore/ce-")) | "\(.number) \(.author.login) \(.commits | length)"' \
+            --json number,headRefName,body,commits \
+            --jq '.[] | select(.headRefName | startswith("chore/ce-")) | "\(.number) \(.body | contains(env.MARKER)) \(.commits | length)"' \
             > "$RUNNER_TEMP/open.txt"
           stale=""
-          while read -r number author commits; do
-            if [ "$author" != "$bot" ] || [ "$commits" != "1" ]; then
-              echo "#$number (by $author, $commits commits) is a bump in flight: nothing to do"
+          while read -r number ours commits; do
+            if [ "$ours" != "true" ] || [ "$commits" != "1" ]; then
+              echo "#$number (ours: $ours, $commits commits) is a bump in flight: nothing to do"
               echo "go=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
@@ -130,6 +131,8 @@ jobs:
             if [ -n "$issue_url" ]; then echo "- Its rolling issue: $issue_url"; fi
             echo
             echo "CI on this PR shows what the release breaks; a fix lane starts from there. Not auto-merging."
+            echo
+            echo "$MARKER"
             if [ "$HAS_BUMP_TOKEN" != "true" ]; then
               echo
               echo "Opened with GITHUB_TOKEN (no \`CE_BUMP_TOKEN\` secret), so CI did not start: push an empty commit or close and reopen this PR."
