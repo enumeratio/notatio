@@ -33,7 +33,6 @@ const RULES: Notation = {
   Fibonacci: indexed("F"),
   LucasL: indexed("L"),
   CatalanNumber: indexed("C"),
-  BellNumber: indexed("B"),
   BernoulliB: indexed("B"),
   NthPrime: indexed("p"),
   // Arithmetic functions.

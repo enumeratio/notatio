@@ -3,7 +3,7 @@
   "[\"Fibonacci\",\"n\",\"x\"]": "F_n(x)",
   "[\"LucasL\",10]": "L_{10}",
   "[\"CatalanNumber\",\"n\"]": "C_n",
-  "[\"BellNumber\",5]": "B_5",
+  "[\"BellNumber\",5]": "\\operatorname{BellNumber}(5)",
   "[\"BernoulliB\",\"n\",\"x\"]": "B_n(x)",
   "[\"NthPrime\",10]": "p_{10}",
   "[\"StieltjesGamma\",0]": "γ_0",
