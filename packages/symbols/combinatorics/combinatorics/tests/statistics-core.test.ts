@@ -28,6 +28,7 @@ import { core, cycles, headUsage, tower } from "../src/statistics/core.ts";
  * `Binomial` entered with the finite differences of the interpolating polynomial and the dual immaculate column sum.
  * `NotEqual` entered with the same polynomial's degree and the nonzero steps of an arithmetic progression.
  * `Ordering` entered with SingletonRefinementCount, which sorts partition codes to merge equal ones.
+ * `Sort` entered with SocleQuotientInjectiveDimension, which materializes its socle list (`Sort(Map(…))`) before indexing it.
  */
 const CORE = [
   "Abs",
@@ -77,6 +78,7 @@ const CORE = [
   "Range",
   "ReplaceAt",
   "Rest",
+  "Sort",
   "Subtract",
   "Sum",
   "Tuple",

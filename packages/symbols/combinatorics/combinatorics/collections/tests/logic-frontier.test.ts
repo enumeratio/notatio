@@ -276,3 +276,12 @@ test("IsIntervalMember: Open(...) excludes that endpoint", () => {
   expect(runJson(["IsIntervalMember", ["Interval", 1, ["Open", 5]], 5])).toEqual("False");
   expect(runJson(["IsIntervalMember", ["Interval", ["Open", 1], ["Open", 5]], 3])).toEqual("True");
 });
+
+test("LogicalExpand reads its operand before expanding it", () => {
+  expect(runJson(["LogicalExpand", ["Not", ["NoneTrue", L("x", "y", "z"), "f"]]])).toEqual([
+    "Or",
+    ["f", "x"],
+    ["f", "y"],
+    ["f", "z"],
+  ]);
+});

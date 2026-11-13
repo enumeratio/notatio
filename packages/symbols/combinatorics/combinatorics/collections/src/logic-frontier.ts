@@ -36,7 +36,11 @@ const passesTest = (ce: Engine, test: Expr | undefined, arg: Expr): boolean =>
  *  comparisons, predicate calls, …) are left alone as opaque literals. */
 export function eliminateConnectives(ce: Engine, expr: Expr): Expr {
   const op = expr.operator;
-  if (!CONNECTIVES.has(op)) return expr;
+  if (!CONNECTIVES.has(op)) {
+    // A call other than a connective is read: `NoneTrue(…)` is a connective (`Nor`) only once evaluated.
+    const read = operandsOf(expr).length > 0 ? expr.evaluate() : expr;
+    return CONNECTIVES.has(read.operator) ? eliminateConnectives(ce, read) : expr;
+  }
   const args = operandsOf(expr).map((a) => eliminateConnectives(ce, a));
   switch (op) {
     case "Not":
