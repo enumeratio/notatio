@@ -274,6 +274,17 @@ test("an interval reads from the bracket pairs written as text, ISO's mixed ones
   expect(read("[", "a , b", "]")).toEqual(["List", "a", "b"]);
   expect(read("(", "a , b", ")")).toEqual(["Tuple", "a", "b"]);
   expect(read("x", "∈", "]", "a , b", "[")).toEqual(["Element", "x", ["Interval", ["Open", "a"], ["Open", "b"]]]);
+  // A `[` that closes an interval is no factor of what precedes it, however the pairs are mixed.
+  const open = ["Interval", ["Open", "a"], ["Open", "b"]];
+  const halfOpen = ["Interval", "c", ["Open", "d"]];
+  expect(read("x", "∈", "]", "a , b", "[", "∪", "[", "c , d", "[")).toEqual([
+    "Element",
+    "x",
+    ["Union", open, halfOpen],
+  ]);
+  expect(read("[", "c , d", "[", "∪", "]", "a , b", "[")).toEqual(["Union", halfOpen, open]);
+  const sets: MathJsonExpression = ["Element", "x", ["Union", open, halfOpen]] as never;
+  expect(roundTrip(sets)).toBe("exact");
 });
 
 test("a closed interval is spelled where a set is expected as compute-engine reads it", () => {
@@ -320,6 +331,8 @@ test("an integer range is ⟦a, b⟧ when it counts up, and reads back", () => {
     ["Range", 1, 0],
     ["Range", "a", "b"],
     ["Range", 1, 10, 2],
+    ["Range", 5, 1, 1],
+    ["Range", 0.5, 3, 1],
   ] as MathJsonExpression[])
     expect(toText(makeBoxes(json)), JSON.stringify(json)).toMatch(/^Range\(/);
   expect(toLatex(makeBoxes(["Range", 1, 10]))).toBe("1..10");

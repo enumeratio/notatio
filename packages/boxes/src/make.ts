@@ -524,9 +524,14 @@ function makeFunction(head: string, ops: unknown[]): Made {
     case "Range": {
       const [lo, hi, step] = ops;
       const [a, b] = [numberOf(lo), numberOf(hi)];
-      const integers = a !== undefined && b !== undefined && /^-?\d+$/.test(a) && /^-?\d+$/.test(b);
+      const integer = (n: string | undefined) => n !== undefined && /^-?\d+$/.test(n);
       const ascending =
-        ops.length === 3 ? numberOf(step) === "1" : ops.length === 2 && integers && BigInt(a!) <= BigInt(b!);
+        ops.length === 3
+          ? numberOf(step) === "1" &&
+            // a stated step of 1 leaves a symbolic end alone, but a numeric one is an integer, in order
+            [a, b].every((n) => n === undefined || integer(n)) &&
+            (a === undefined || b === undefined || BigInt(a) <= BigInt(b))
+          : ops.length === 2 && integer(a) && integer(b) && BigInt(a!) <= BigInt(b!);
       if (!ascending) return makeCall(head, ops);
       return atom(fenced("⟦", [row([make(lo).box, ",", make(hi).box])], "⟧"));
     }
