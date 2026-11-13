@@ -10,8 +10,8 @@
 //
 // The rule for what goes here is the one naming.ts states: a Wolfram collision is not a
 // reason to rename; a name that misdescribes its result, or breaks the house spelling
-// (`…Count`, `…Numerals`), is. Web-component tags are queued in https://github.com/enumeratio/notatio/wiki/Names
-// §4 rather than here, since they are not engine heads.
+// (`…Count`, `…Numerals`), is. Web-component tags are not queued here: they are not engine
+// heads, and they follow the tag rule (https://github.com/enumeratio/notatio/wiki/Vdom, "Tags").
 
 export interface QueuedRename {
   readonly from: string;
