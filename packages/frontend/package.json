@@ -69,6 +69,7 @@
     "@cortex-js/compute-engine": "^0.187.1"
   },
   "enumeratio": {
+    "site": "notatio",
     "layer": "presentation",
     "extends": [
       "structures"

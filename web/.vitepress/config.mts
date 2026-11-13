@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { constants } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -12,6 +12,7 @@ import { notatioSymbols } from "./notatio-symbols.ts";
 import { notatioSourceLinks } from "./notatio-source-links.ts";
 import { notationEntriesPlugin } from "./notation-entries.ts";
 import { docRoute, docsSidebar, workspacePackages } from "./data/repo-docs.ts";
+import { writeRedirects } from "./redirects.ts";
 import { loaderWatchPlugin } from "./loader-watch.ts";
 import { BOX_LAYOUT_CSS } from "@enumeratio/frontend/core";
 import { fillPrerendered } from "./data/prerender.ts";
@@ -101,89 +102,6 @@ if (process.argv.includes("build")) {
       rmSync(temp, { recursive: true, force: true });
       process.exit(128 + constants.signals[signal]);
     });
-  }
-}
-
-// Pages that moved into package docs keep their old URLs as redirects: Pages hosting has no
-// server-side redirects, so each is a static page that forwards.
-const moved: [string, string][] = [
-  ["/guide/collections/", "/docs/combinatorics/ranking-and-unranking"],
-  ["/guide/numerals/adic", "/docs/numerals/adic"],
-  ["/guide/numerals/", "/docs/numerals/numeral-systems"],
-  ["/guide/adeles/", "/docs/adeles/adeles-and-ideles"],
-  ["/guide/hypercomplex/finite", "/docs/hypercomplex/finite"],
-  ["/guide/hypercomplex/", "/docs/hypercomplex/hypercomplex-algebras"],
-  ["/guide/diagram-algebras/", "/docs/diagram/diagram-algebras"],
-  ["/guide/hecke/", "/docs/hecke/hecke-algebras"],
-  ["/guide/incidence/", "/docs/incidence/incidence-algebras"],
-  ["/guide/quiver/", "/docs/quiver/path-algebras"],
-  ["/guide/hopf/", "/docs/hopf/hopf-algebras"],
-  ["/guide/groupalgebra/", "/docs/groupalgebra/group-algebras"],
-  ["/guide/modular/", "/docs/modular/modular-group"],
-  ["/guide/braid/torus-knots", "/docs/braid/torus-knots"],
-  ["/guide/braid/lorenz", "/docs/braid/lorenz"],
-  ["/guide/braid/", "/docs/braid/knots-and-braids"],
-  ["/cli/", "/docs/cli/"],
-  ["/reference/components/", "/reference/component/"],
-  ...[
-    "cell",
-    "in",
-    "out",
-    "notebook",
-    "worksheet",
-    "manipulate",
-    "controls",
-    "environments",
-    "terminal",
-    "verification",
-  ].map((page): [string, string] => [`/playground/${page}`, `/docs/components/${page}`]),
-  ["/playground/figure", "/docs/combinatorics/figure"],
-  ["/playground/polytope", "/docs/polytope/polytope"],
-  ["/playground/", "/docs/components/overview"],
-  ["/packages/", "/docs/"],
-  ...workspacePackages().map((p): [string, string] => [`/packages/${p.slug}`, docRoute(p.slug)]),
-];
-
-// Collection families renamed to their plural keep the old symbol page's URL, and the
-// moved-point statistics that became compositions of PermutationSupport lead to its page.
-const renamedSymbols: [string, string][] = [
-  ...["PrimePartition", "TriangularComposition", "ZigzagComposition"].map((old): [string, string] => [
-    `/reference/symbol/${old}`,
-    `/reference/symbol/${old}s`,
-  ]),
-  ...["PermutationLength", "PermutationMax", "PermutationMin"].map((old): [string, string] => [
-    `/reference/symbol/${old}`,
-    "/reference/symbol/PermutationSupport",
-  ]),
-];
-
-// Catalogue-only statistic and map names retired by BL-202 lead to the head that took the role.
-const retiredStubs: [string, string][] = Object.entries({
-  RealPart: "Re",
-  ImaginaryPart: "Imaginary",
-  MaxElement: "Max",
-  MinElement: "Min",
-  Cardinality: "Length",
-  ToRationalNumber: "FromContinuedFraction",
-  NumberOfEdges: "EdgeCount",
-  BigOmega: "PrimeOmega",
-  DivisorCount: "DivisorSigma",
-  LittleOmega: "PrimeNu",
-  ToCycleNotation: "CycleDecomposition",
-  BinaryWeight: "DigitCount",
-  SquareRoot: "SquarePartRoot",
-}).map(([old, head]) => [`/reference/symbol/${old}`, `/reference/symbol/${head}`]);
-
-function writeRedirects(outDir: string): void {
-  for (const [from, to] of [...moved, ...renamedSymbols, ...retiredStubs]) {
-    const file = resolve(outDir, from.endsWith("/") ? `.${from}index.html` : `.${from}.html`);
-    mkdirSync(dirname(file), { recursive: true });
-    writeFileSync(
-      file,
-      `<!doctype html><meta charset="utf-8"><title>Moved</title>` +
-        `<link rel="canonical" href="${to}"><meta http-equiv="refresh" content="0; url=${to}">` +
-        `<p>Moved to <a href="${to}">${to}</a>.</p>\n`,
-    );
   }
 }
 
@@ -400,6 +318,9 @@ const config = defineConfig({
   // (the raw markdown H1 is `{{ $params.name }}`, which VitePress can't read).
   buildEnd: (site: { outDir: string }) => {
     writeRedirects(site.outDir);
+    // The record schemas name `https://enumeratio.dev/schema/<file>` as their `$id`, so they are served there.
+    const schemas = resolve(pkgsDir, "entry/schema");
+    if (existsSync(schemas)) cpSync(schemas, resolve(site.outDir, "schema"), { recursive: true });
     // Before the service worker, which caches them.
     writeVendor(site.outDir);
     // The host: a service worker that caches the kernel's libraries on install (host/).
