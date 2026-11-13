@@ -35,7 +35,18 @@ export interface RegionOptions extends ColorOptions {
 
 /** A fill's opacity when `PlotStyle` gives none: translucent, so an overlap and the grid lines read through it. */
 export const REGION_OPACITY = 0.35;
-const BOUNDARY_WIDTH = 1.5;
+/** A boundary's width, in px. */
+export const BOUNDARY_WIDTH = 1.5;
+
+/** How each of `count` regions is painted: its fill, and its boundary's color (`null`: none drawn). */
+export function regionPaints(
+  count: number,
+  opts: RegionOptions = {},
+): { fills: RegionFill[]; edges: (string | null)[] } {
+  const colors = categoryColors(plotPalette(opts), count);
+  const fills = colors.map((color, k): RegionFill => opts.fills?.[k] ?? { color, opacity: REGION_OPACITY });
+  return { fills, edges: fills.map((fill) => (opts.boundary === null ? null : (opts.boundary ?? fill.color))) };
+}
 
 /** Subsamples per side a boundary cell's coverage is counted on. */
 const COVERAGE_SIDE = 4;
@@ -91,8 +102,7 @@ export function regionPlotBox(
   const options = fieldFrame(first, xs, ys, opts, ready);
   if (!ready) return graphics([], options);
 
-  const colors = categoryColors(plotPalette(opts), margins.length);
-  const fills = margins.map((_, k): RegionFill => opts.fills?.[k] ?? { color: colors[k]!, opacity: REGION_OPACITY });
+  const { fills, edges } = regionPaints(margins.length, opts);
   const mixing = opts.mixing === undefined || opts.mixing === "First" ? "Normal" : opts.mixing;
   // Rows run from the least y up, columns from the least x: a descending axis is turned round.
   let cells = Array.from({ length: ny - 1 }, (_, j) =>
@@ -120,26 +130,27 @@ export function regionPlotBox(
       "Region",
     ),
   ];
-  if (opts.boundary !== null)
-    margins.forEach((g, k) => {
-      const segments = marchingSquares(g, xs.slice(0, nx), ys.slice(0, ny), 0);
-      if (segments.length === 0) return;
-      marks.push(
-        style(
-          tag(
-            line({
-              Points: segments.flatMap(([a, b]) => [
-                [a.x, a.y],
-                [b.x, b.y],
-              ]),
-              Breaks: segments.map((_, s) => 2 * s).filter((s) => s > 0),
-            }),
-            "Boundary",
-          ),
-          { EdgeForm: [[opts.boundary ?? fills[k]!.color, BOUNDARY_WIDTH, 1, []]] },
+  margins.forEach((g, k) => {
+    const edge = edges[k];
+    if (edge === null || edge === undefined) return;
+    const segments = marchingSquares(g, xs.slice(0, nx), ys.slice(0, ny), 0);
+    if (segments.length === 0) return;
+    marks.push(
+      style(
+        tag(
+          line({
+            Points: segments.flatMap(([a, b]) => [
+              [a.x, a.y],
+              [b.x, b.y],
+            ]),
+            Breaks: segments.map((_, s) => 2 * s).filter((s) => s > 0),
+          }),
+          "Boundary",
         ),
-      );
-    });
+        { EdgeForm: [[edge, BOUNDARY_WIDTH, 1, []]] },
+      ),
+    );
+  });
   return graphics(marks, options);
 }
 

@@ -8,14 +8,24 @@
 
 import { type Box, graphics, graphicsOf, interpretation } from "@enumeratio/boxes";
 import { chartBox, type ChartBoxOptions, isChartKind, isNumber } from "./chart.ts";
-import { type ContourOptions, contourPlotBox, implicitPlotBox } from "./contour.ts";
+import { autoLevels, type ContourOptions, contourPlotBox, implicitPlotBox, LINE_WIDTH } from "./contour.ts";
 import { type DensityOptions, densityPlotBox } from "./densityplot.ts";
 import { DIAGRAM_HEADS } from "./diagram-lowering.ts";
+import type { FieldPaints } from "./field-shader.ts";
 import { colorMixingOf, colorOf, paintOf } from "./graphics-rules.ts";
 import { type PlotOptions, type PlotPoint, type PlotSeries, plotBox } from "./plot-box.ts";
+import { categoryColors, plotPalette } from "./plot-color.ts";
 import type { Primitive } from "./primitives.ts";
 import type { PolarPoint } from "./polarplot.ts";
-import { maskGrid, REGION_OPACITY, type RegionFill, type RegionOptions, regionPlotBox } from "./regionplot.ts";
+import {
+  BOUNDARY_WIDTH,
+  maskGrid,
+  REGION_OPACITY,
+  type RegionFill,
+  type RegionOptions,
+  regionPaints,
+  regionPlotBox,
+} from "./regionplot.ts";
 import type { VectorPlotOptions } from "./vectorplot.ts";
 
 /**
@@ -291,6 +301,28 @@ export function fieldOptionsOf(head: string, settings: PlotSettings): ContourOpt
   };
 }
 
+const HEX_COLOR = /^#[0-9a-f]{6}$/i;
+
+/**
+ * How a shader paints `count` regions or implicit curves (widths in the plot's own px), or undefined
+ * where only the box draws them: fills mixed other than `ColorMixing -> Normal`, or a color that is
+ * not `#rrggbb`.
+ */
+export function fieldPaintsOf(head: string, settings: PlotSettings, count: number): FieldPaints | undefined {
+  const options = fieldOptionsOf(head, settings);
+  const hex = (color: string | null): boolean => color === null || HEX_COLOR.test(color);
+  if (settings["field"] === "curves") {
+    const edges = categoryColors(plotPalette(options), count);
+    return edges.every(hex) ? { edges, width: LINE_WIDTH } : undefined;
+  }
+  if (settings["field"] !== "regions") return undefined;
+  if (options.mixing !== undefined && options.mixing !== "First" && options.mixing !== "Normal") return undefined;
+  const { fills, edges } = regionPaints(count, options);
+  return fills.every((fill) => hex(fill.color)) && edges.every(hex)
+    ? { fills, edges, width: BOUNDARY_WIDTH }
+    : undefined;
+}
+
 /** Samples per side when `PlotPoints` gives none, and the most it may ask for, by head. */
 const FIELD_GRID: Readonly<Record<string, readonly [fallback: number, cap: number]>> = {
   DensityPlot: [48, 160],
@@ -330,6 +362,21 @@ export function fieldBoxOfGrids(
   if (settings["field"] === "regions") return regionPlotBox(shown, xs, ys, options);
   if (settings["field"] === "curves") return implicitPlotBox(shown, xs, ys, options);
   return fieldBoxOfGrid(head, settings, shown[0] ?? [], xs, ys);
+}
+
+/**
+ * `settings` with a value plot's scale written out from `grid`, its samples over the whole plot: the
+ * contour levels, or the density's value range. A zoomed view resamples a window, and drawn with these
+ * it keeps the whole plot's levels and colors instead of refitting them to what the window holds.
+ */
+export function fieldScaleOf(head: string, settings: PlotSettings, grid: readonly (readonly number[])[]): PlotSettings {
+  if (settings["field"] !== undefined) return settings;
+  const flat = grid.flat().filter(Number.isFinite);
+  if (flat.length === 0) return settings;
+  const [min, max] = [Math.min(...flat), Math.max(...flat)];
+  if (isDensity(head)) return spanOf(settings["zrange"]) ? settings : { ...settings, zrange: `${min},${max}` };
+  const { levels, count } = levelsOf(settings["contours"]);
+  return levels ? settings : { ...settings, contours: JSON.stringify(autoLevels(min, max, count ?? 8)) };
 }
 
 /** The names a field plot's `RegionFunction` is written over, each with the plot variable it stands for. */

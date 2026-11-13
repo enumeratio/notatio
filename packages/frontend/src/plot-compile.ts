@@ -18,6 +18,13 @@ export interface PlotCompileSpec {
   readonly each?: boolean;
   /** Wildcard values (`_a` → 2) compiled in, for a target with no scope to read them from. */
   readonly bindings?: Readonly<Record<string, number>>;
+  /**
+   * `glsl`: the items together as one unit of `float field<k>(vx, vy, …params)` functions (`unit`), for a
+   * shader that draws them per pixel. `params` are the names left free, which the shader passes as
+   * trailing arguments: a wildcard moving costs an upload, not a compile.
+   */
+  readonly fields?: boolean;
+  readonly params?: readonly string[];
 }
 
 /** One compiled curve, surface or component. */
@@ -39,6 +46,8 @@ export interface CompiledPlot {
   /** Whether the expression was a list split into its elements (`each`). */
   readonly list: boolean;
   readonly items: readonly CompiledItem[];
+  /** `fields`: the items as one GLSL unit, when every one compiled. */
+  readonly unit?: string;
 }
 
 const LIST_HEADS = new Set(["List", "Set", "Tuple", "Sequence"]);
@@ -71,6 +80,44 @@ export function toGlslFn(expr: Expression, vx: string, vy: string): string | und
     // A block of locals compiles to statements ending in their own `return`.
     const body = /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`;
     return withGLSL(`${r.preamble ?? ""}\nfloat plotFn(float ${vx}, float ${vy}) { ${body} }`);
+  } catch {
+    return undefined;
+  }
+}
+
+/** A GLSL preamble's top-level definitions, each from its signature to its closing brace. */
+const definitionsOf = (preamble: string): string[] =>
+  preamble
+    .split(/\n(?=[A-Za-z_]\w*[ \t]+\w+[ \t]*\([^;{}]*\)[ \t]*\{)/)
+    .map((chunk) => chunk.trim())
+    .filter((chunk) => chunk !== "");
+
+/**
+ * Bivariate expressions as one GLSL unit: `float field<k>(vx, vy, …params)` for the k-th, after the
+ * helpers they call, each defined once however many of them call it. Undefined when any one has no
+ * shader (`toGlslFn`'s cases).
+ */
+export function toGlslFields(
+  exprs: readonly Expression[],
+  vx: string,
+  vy: string,
+  params: readonly string[] = [],
+): string | undefined {
+  try {
+    const helpers = new Set<string>();
+    const fields: string[] = [];
+    const signature = [vx, vy, ...params].map((name) => `float ${name}`).join(", ");
+    for (const [k, expr] of exprs.entries()) {
+      if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
+      const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
+      if (!r?.success || !r.code) return undefined;
+      // A capped loop yields NaN where the CPU path sums on (`toGlslFn`).
+      if (r.preamble?.includes("_gpu_passes") || r.code.includes("_gpu_passes")) return undefined;
+      for (const definition of definitionsOf(r.preamble ?? "")) helpers.add(definition);
+      const body = /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`;
+      fields.push(`float field${k}(${signature}) { ${body} }`);
+    }
+    return withGLSL([...helpers, ...fields].join("\n"));
   } catch {
     return undefined;
   }
@@ -133,5 +180,11 @@ function compileIn(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): Com
   const unknowns = [...expr.unknowns].toSorted();
   const list = spec.each === true && LIST_HEADS.has(expr.operator) && (opsOf(expr)?.length ?? 0) > 0;
   const items = list ? [...(opsOf(expr) ?? [])] : [expr];
-  return { unknowns, list, items: items.map((e) => compileItem(e, spec, unknowns)) };
+  const compiled = { unknowns, list, items: items.map((e) => compileItem(e, spec, unknowns)) };
+  if (spec.target !== "glsl" || spec.fields !== true) return compiled;
+  const params = spec.params ?? [];
+  const free = unknowns.filter((u) => !u.startsWith("_") && !params.includes(u));
+  const [vx = free[0] ?? "x", vy = free.find((u) => u !== vx) ?? "y"] = spec.vars ?? [];
+  const unit = toGlslFields(items, vx, vy, params);
+  return unit === undefined ? compiled : { ...compiled, unit };
 }
