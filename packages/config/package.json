@@ -19,7 +19,6 @@
     "access": "public"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "tooling",
     "extends": []
   }

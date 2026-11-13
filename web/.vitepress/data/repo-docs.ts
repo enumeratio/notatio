@@ -24,8 +24,6 @@ export interface DocPage {
   order: number;
 }
 
-export type Site = "enumeratio" | "notatio";
-
 export interface WorkspacePackage {
   /** `@notatio/…` */
   name: string;
@@ -36,8 +34,6 @@ export interface WorkspacePackage {
   dir: string;
   /** Where the package sits on /docs: see `groupOf`. */
   group: string;
-  /** The site its docs belong to (`enumeratio.site`); unset for a package that doesn't say. Not read by the routes yet. */
-  site?: Site;
   /** Sibling packages this one depends on at runtime / only in development. */
   deps: string[];
   devDeps: string[];
@@ -170,7 +166,7 @@ export function workspacePackages(): WorkspacePackage[] {
       description?: string;
       dependencies?: Record<string, string>;
       devDependencies?: Record<string, string>;
-      enumeratio?: { group?: string; site?: Site };
+      enumeratio?: { group?: string };
     };
     if (!pkg.name?.startsWith("@notatio/")) continue;
     const siblings = (deps = {}) => Object.keys(deps).filter((d) => d.startsWith("@notatio/"));
@@ -183,7 +179,6 @@ export function workspacePackages(): WorkspacePackage[] {
       description: pkg.description,
       dir,
       group: groupOf(slug, pkg.enumeratio?.group),
-      site: pkg.enumeratio?.site,
       deps,
       devDeps: siblings(pkg.devDependencies).filter((d) => !deps.includes(d)),
       readme: existsSync(readme) ? readme : undefined,
