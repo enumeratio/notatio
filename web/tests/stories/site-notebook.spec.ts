@@ -87,9 +87,7 @@ test.describe("/worksheet/", () => {
   });
 
   test("the curve and the surface are asked for the same x range", async ({ page }) => {
-    // BL-319 S#13: the sheet asks Plot for (x, -pi, pi) and Plot3D for (x, -1.5, 1.5), so at a = 4 the
-    // curve has 8 humps over its range and the surface about 2 ridges over its: the two do not share an x scale.
-    test.fail();
+    // With different ranges, at a = 4 the curve would show 8 humps and the surface about 2 ridges: no shared x scale.
     await page.goto("/worksheet/");
     await expect(page.locator('.ws-cell[data-cell="1"] input[type=range]')).toBeVisible();
     const requested = async (tag: string) => {
