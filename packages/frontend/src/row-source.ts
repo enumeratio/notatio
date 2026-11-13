@@ -20,11 +20,11 @@ import {
   type RowSource,
   tag,
   text,
-} from "@enumeratio/boxes";
-import { optionsOf } from "@enumeratio/formats";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { normalizeInputForm } from "@enumeratio/formats/inputform";
-import { allCarrierParams, carrierTypeForName } from "@enumeratio/structures";
+} from "@notatio/boxes";
+import { optionsOf } from "@notatio/formats";
+import { parseExpression } from "@notatio/formats/expression";
+import { normalizeInputForm } from "@notatio/formats/inputform";
+import { allCarrierParams, carrierTypeForName } from "@notatio/structures";
 import {
   carrierBody,
   type CellValue,
@@ -714,7 +714,7 @@ export async function staticTable(source: CollectionRows, options: PinnedOptions
 
 // --- the wire ------------------------------------------------------------------------------
 
-/** A kernel's rows requests (`@enumeratio/evaluation`'s `rows` hook): register, ask, abort by id. */
+/** A kernel's rows requests (`@notatio/evaluation`'s `rows` hook): register, ask, abort by id. */
 export type RowsRequest =
   | { readonly op: "register"; readonly handle: string; readonly source: Json }
   | {

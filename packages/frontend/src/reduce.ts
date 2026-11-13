@@ -9,9 +9,9 @@
 // See https://github.com/enumeratio/notatio/wiki/Rendering-Environments.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { type ControlBoxHead, LAYOUT_HEADS, makeBoxes, PROSE_HEADS } from "@enumeratio/boxes";
-import { optionsOf, withOptions } from "@enumeratio/formats";
-import { serializeExpression } from "@enumeratio/formats/expression";
+import { type ControlBoxHead, LAYOUT_HEADS, makeBoxes, PROSE_HEADS } from "@notatio/boxes";
+import { optionsOf, withOptions } from "@notatio/formats";
+import { serializeExpression } from "@notatio/formats/expression";
 import { type BoxControl, boxControls } from "./control-box.ts";
 import { plainJson } from "./graphics-rules.ts";
 import { can, ENVIRONMENTS, type Environment, type Reading } from "./environment.ts";

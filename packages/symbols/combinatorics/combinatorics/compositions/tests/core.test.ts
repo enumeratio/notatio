@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { kernelOn } from "../../collections/src/families/epsil.ts";
 import { epsilEntries } from "../src/families/core.ts";
 

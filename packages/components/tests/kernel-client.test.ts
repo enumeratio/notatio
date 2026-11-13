@@ -1,7 +1,7 @@
 // The page kernel without a SharedWorker (Chrome for Android) or with a throwing factory:
 // fake workers stand in, and fake timers show nothing waits on a spawn timeout.
 import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
-import type { WorkerLike } from "@enumeratio/evaluation/browser";
+import type { WorkerLike } from "@notatio/evaluation/browser";
 
 interface FakeWorker {
   onmessage: ((event: { data: unknown }) => void) | null;

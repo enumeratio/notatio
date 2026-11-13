@@ -1,4 +1,4 @@
-# @enumeratio/hypercomplex
+# @notatio/hypercomplex
 
 Hypercomplex-number extensions for compute-engine: multicomplex, split/perplex, dual and
 Clifford unit families as ordinary subscripted symbols, wired into `+ - × ÷`, integer
@@ -10,13 +10,13 @@ in [the guide](docs/hypercomplex-algebras.md); finite-quotient arithmetic (units
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareHypercomplex } from "@enumeratio/hypercomplex";
+import { declareHypercomplex } from "@notatio/hypercomplex";
 
 const ce = new ComputeEngine();
 declareHypercomplex(ce);
 ```
 
-`./src` is also exported directly, for packages (like [`@enumeratio/geometric`](../geometric/README.md))
+`./src` is also exported directly, for packages (like [`@notatio/geometric`](../geometric/README.md))
 that build on the multivector internals rather than just the declared heads.
 
 ## A generator is two dials
@@ -43,5 +43,5 @@ plus `BicomplexNumbers`, `TricomplexNumbers`, `SplitComplexNumbers` and `DualNum
 ## Next
 
 Read the guide for the multiplication-table construction and how canonicalisation
-interacts with anticommuting generators; [`@enumeratio/geometric`](../geometric/README.md) is the
+interacts with anticommuting generators; [`@notatio/geometric`](../geometric/README.md) is the
 grade-aware layer built on top.

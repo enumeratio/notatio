@@ -21,12 +21,12 @@
 // distinct, so there is never a tie). `i` is L's RIGHT child (i lies to L's right) or R's LEFT
 // child (i lies to R's left). That still holds — it is what makes `childPositionOnSide` below a
 // plain fold rather than a search — but the tree ITSELF is now assembled with real recursion
-// (`recurse`/`self`, @enumeratio/structures — "a fold can't build a nested value; this can"),
+// (`recurse`/`self`, @notatio/structures — "a fold can't build a nested value; this can"),
 // walking down from the root position rather than building flat left/right arrays by value.
 
 import { recurse, self } from "../../src/recursion.ts";
 
-// `unknown`, not a strict recursive union: `recurse`/`self` (@enumeratio/structures) are typed
+// `unknown`, not a strict recursive union: `recurse`/`self` (@notatio/structures) are typed
 // over `unknown` themselves, same as binary-tree.ts's own use of them.
 type MathJSON = unknown;
 

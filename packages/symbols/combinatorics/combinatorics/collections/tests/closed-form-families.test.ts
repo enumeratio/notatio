@@ -3,8 +3,8 @@
 // membership over every word near the family. Compiled and interpreted, and the interpreter checked
 // directly against the definitions too.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { ternaryGrayList } from "../../words/src/families/binary-word-families.ts";
 import { allFamilies, type EpsilFamily, epsilKernelOn, evaluateTables, isEpsilFamily } from "../src/families/index.ts";

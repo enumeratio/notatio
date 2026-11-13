@@ -2,9 +2,9 @@
 // Automatic output presentation through the elements: a cell with it on shows a collection value
 // as a collection table; with it off (the default) the output is the typeset form it always was.
 
-import { CARRIERS, declareCombinatorics } from "@enumeratio/combinatorics";
-import { configureEngine } from "@enumeratio/frontend/core";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
+import { CARRIERS, declareCombinatorics } from "@notatio/combinatorics";
+import { configureEngine } from "@notatio/frontend/core";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
 import { beforeAll, expect, test } from "vite-plus/test";
 
 // Cold import of the element graph can outlast the 10 s hook default on a loaded CI runner.

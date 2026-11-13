@@ -4,11 +4,11 @@
 // its own `statistics.compiled.generated.js` — see `../../src/statistics/compiled.ts`, which
 // merges every area's table back into one lookup for `compiledStatistic`.
 
-import { applyPatch, matrixRankCompiles } from "@enumeratio/ce-patches";
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { compileTyped, definitionHash, fromJs } from "@enumeratio/engine/compiled";
-import { evaluateEpsil, evaluateEpsilRepeatedly, type FlatCodec } from "@enumeratio/structures";
+import { applyPatch, matrixRankCompiles } from "@notatio/ce-patches";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { compileTyped, definitionHash, fromJs } from "@notatio/engine/compiled";
+import { evaluateEpsil, evaluateEpsilRepeatedly, type FlatCodec } from "@notatio/structures";
 import { FLAT_BY_NAME, subjectToJs } from "../flat.ts";
 import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 

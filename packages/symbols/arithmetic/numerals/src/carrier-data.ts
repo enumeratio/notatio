@@ -1,7 +1,7 @@
 // numerals' own carriers (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step
 // 4): moved from combinatorics' domains/LEFTOVER_DOMAINS.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const NUMERALS_CARRIERS: readonly Carrier[] = [
   {

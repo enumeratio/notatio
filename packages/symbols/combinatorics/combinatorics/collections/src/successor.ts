@@ -5,8 +5,8 @@
 // (`familySuccessor`), which `tests/successor.test.ts` holds to the definition. Anything else
 // finite is answered by the definition itself.
 
-import { type Engine, type Expr } from "@enumeratio/engine";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { type Engine, type Expr } from "@notatio/engine";
+import { evaluateEpsil } from "@notatio/structures";
 
 import { familySuccessor } from "./families/declare.ts";
 import { add, at, iff, lets, less, and } from "./families/tables.ts";

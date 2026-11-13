@@ -1,4 +1,4 @@
-import type { Json } from "@enumeratio/ce-patches";
+import type { Json } from "@notatio/ce-patches";
 import { jacobiPartialBody } from "./jacobi-derivatives.ts";
 
 // Derivatives of every order for heads whose first derivative closes on a small set of

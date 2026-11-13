@@ -1,6 +1,6 @@
-import { bigIntegerAt, type Engine, type Expr } from "@enumeratio/engine";
-import { factorInteger } from "@enumeratio/residues";
-import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
+import { bigIntegerAt, type Engine, type Expr } from "@notatio/engine";
+import { factorInteger } from "@notatio/residues";
+import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 
 // Abundance and AliquotSum are compositions over DivisorSigma, and SquareFreePart and
 // SquarePartRoot split n = ±s²·q by FactorInteger. All four take a nonzero integer and read

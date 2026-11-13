@@ -7,7 +7,7 @@
 //
 // Fungrim ENTRIES are the one system that runs long (a head like `Exp` is in a hundred
 // identities), so they collapse behind a count.
-import { groupBySystem, type ResolvedReference } from "@enumeratio/reference";
+import { groupBySystem, type ResolvedReference } from "@notatio/reference";
 import { computed, ref } from "vue";
 
 const props = defineProps<{

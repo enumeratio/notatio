@@ -2,11 +2,11 @@
 name: ExpToTrig
 domain: Transformations
 signature: ExpToTrig(expr)
-summary: Rewrite every exponential in `expr` as circular or hyperbolic functions -- the inverse of TrigToExp. Provided by `@enumeratio/analytic`.
+summary: Rewrite every exponential in `expr` as circular or hyperbolic functions -- the inverse of TrigToExp. Provided by `@notatio/analytic`.
 signatures:
   - call: ExpToTrig(expr)
     description: "`expr` with each `Exp` rewritten via Euler's formula or its hyperbolic analogue."
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression) -> expression
 bindings:
   - origin: mapped

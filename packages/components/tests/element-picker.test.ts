@@ -18,7 +18,7 @@ const fresh: Record<string, unknown> = {};
 // let the scope settle after each test, so no import is still in flight when the environment goes.
 beforeAll(async () => {
   await import("../src/notatio-element-picker.ts");
-  await import("@enumeratio/formats/expression");
+  await import("@notatio/formats/expression");
 }, 60_000);
 
 afterEach(async () => {

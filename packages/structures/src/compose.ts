@@ -16,7 +16,7 @@
 // left as we do, which is a transpiler mapping rather than a reason to rename.
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
 
 /** Apply `steps` to `subject` right to left — `compose(f, g)(x)` is `f(g(x))`.
  *

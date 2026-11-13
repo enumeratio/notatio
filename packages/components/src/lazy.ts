@@ -6,7 +6,7 @@
 // `tests/lazy.test.ts` holds this table to every tag the package defines, and the modules a page
 // of cells or plots loads to no engine.
 
-import { BAR_TAGS, HOLE_TAGS } from "@enumeratio/frontend/box-tags";
+import { BAR_TAGS, HOLE_TAGS } from "@notatio/frontend/box-tags";
 import { defineBoxElements, INTERACTIVE_BOX_TAGS } from "./box-elements.ts";
 
 export { configureMacros } from "./mathlive.ts";

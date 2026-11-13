@@ -2,7 +2,7 @@
 // read it back as the one control it is.
 
 import { expect, test } from "vite-plus/test";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { driver, keysOf } from "../src/drive.ts";
 import { figureText } from "../src/figure.ts";
 

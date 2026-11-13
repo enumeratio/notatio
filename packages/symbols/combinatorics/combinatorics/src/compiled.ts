@@ -9,7 +9,7 @@
 // `body` when that declines; the arguments are encoded and the images decoded around it, and the
 // nested `body` stays the meaning.
 
-import type { Engine } from "@enumeratio/engine";
+import type { Engine } from "@notatio/engine";
 import {
   compileTyped,
   definitionHash,
@@ -21,11 +21,11 @@ import {
   pureResult,
   runtimeHelpers,
   toJs,
-} from "@enumeratio/engine/compiled";
-import { type FlatCodec, operationEpsil } from "@enumeratio/structures";
+} from "@notatio/engine/compiled";
+import { type FlatCodec, operationEpsil } from "@notatio/structures";
 import { FLAT } from "./flat.ts";
 
-export { compileTyped, freshen, fromJs, toJs } from "@enumeratio/engine/compiled";
+export { compileTyped, freshen, fromJs, toJs } from "@notatio/engine/compiled";
 
 type Compiled = Pick<NonNullable<ReturnType<typeof compileTyped>>, "run">;
 

@@ -13,8 +13,8 @@ import {
   takeOptionsAsRules,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
-import { factorInteger, gcd as bigGcd } from "@enumeratio/residues";
+} from "@notatio/engine";
+import { factorInteger, gcd as bigGcd } from "@notatio/residues";
 import { gaussianAt, gaussianExpression, isComplexGaussian } from "./boxed-gaussian.ts";
 import {
   divideExact,
@@ -36,7 +36,7 @@ import {
   primeOmegaGaussian,
   quotient,
 } from "./gaussian.ts";
-import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
+import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 import { quadraticAt, quadraticCarrierAt, quadraticExpression } from "./boxed-quadratic.ts";
 import {
   classify,
@@ -63,7 +63,7 @@ import {
 // as an option key, which is why minting the plural type-space name used to have to wait,
 // #417). `RINGS` is the one place that maps a ring's symbol to how these heads answer over it;
 // adding a ring later (a `EuclideanDomain`/`UniqueFactorizationMonoid` dispatch through
-// @enumeratio/structures) means widening this table, not this file's call sites.
+// @notatio/structures) means widening this table, not this file's call sites.
 
 type Ops = readonly Expr[];
 

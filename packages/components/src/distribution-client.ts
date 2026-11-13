@@ -13,7 +13,7 @@ import {
   triangleOf,
   type Triangle,
   type TriangleRow,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { pageKernel, WorkerUnavailableError } from "./kernel-client.ts";
 
 export { equidistributed, type Triangle };
@@ -33,7 +33,7 @@ export async function evaluateText(text: string): Promise<unknown> {
       if (!(err instanceof WorkerUnavailableError)) throw err;
     }
   }
-  const { parseExpression } = await import("@enumeratio/formats/expression");
+  const { parseExpression } = await import("@notatio/formats/expression");
   const { engine, parsed } = await parseFor((ce) =>
     parseExpression(text, { ce, parseLatex: (tex) => ce.parse(tex).json }),
   );

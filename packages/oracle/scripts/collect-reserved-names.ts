@@ -5,7 +5,7 @@
 //
 //   node packages/oracle/scripts/collect-reserved-names.ts
 
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 import { LANES, laneNamespace, pythonNamespace } from "./reserved-names.ts";
 
 const python = pythonNamespace();

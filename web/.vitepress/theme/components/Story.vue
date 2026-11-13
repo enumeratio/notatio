@@ -7,7 +7,7 @@
 // The snippet is printed from the body itself -- the default slot's vnodes, written
 // back out as markup -- so the components are authored once and the source cannot
 // drift from what is rendered. Bound props print as their values.
-import { prettyEpsil, sourceMarkupOf } from "@enumeratio/formats/markup";
+import { prettyEpsil, sourceMarkupOf } from "@notatio/formats/markup";
 import { Comment, computed, Fragment, getCurrentInstance, ref, Text, type VNode, useSlots } from "vue";
 import { useFullWindow } from "../composables/useFullWindow.ts";
 import FullWindowButton from "./FullWindowButton.vue";

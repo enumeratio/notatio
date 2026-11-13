@@ -1,4 +1,4 @@
-import { registerNotation } from "@enumeratio/boxes";
+import { registerNotation } from "@notatio/boxes";
 import {
   declareCompile,
   defineOverload,
@@ -10,8 +10,8 @@ import {
   nativeEvaluate,
   refusing,
   wrapOperator,
-} from "@enumeratio/engine";
-import { declareCarriers } from "@enumeratio/structures";
+} from "@notatio/engine";
+import { declareCarriers } from "@notatio/structures";
 import { HYPERCOMPLEX_CARRIERS } from "./carrier-data.ts";
 import {
   addMultivectors,
@@ -36,7 +36,7 @@ import { GENERATOR_SYMBOLS } from "./units.ts";
 //
 // There is no extension point for a new number TYPE — Add and Multiply do not
 // dispatch on one — but an operator's definition can be replaced while keeping a
-// reference to the native handler, which is how @enumeratio/analytic extends the
+// reference to the native handler, which is how @notatio/analytic extends the
 // two-argument Zeta. The same move works here: each arithmetic head gets a wrapper
 // that dispatches to the blade algebra only when a generator actually occurs in its
 // operands, and otherwise calls straight through. Numeric literals never reach the

@@ -4,13 +4,13 @@
 // maps use lives next to those maps instead — see e.g. `permutations/src/maps.ts`'s
 // `byIndex`/`orbitLeast`/…, `set-partitions/src/maps.ts`'s `growthStringOf`/`blocksOf`.
 
-import type { MapDeclaration } from "@enumeratio/structures";
+import type { MapDeclaration } from "@notatio/structures";
 
 /** A MathJSON expression, structurally — declared locally so this package stays packable
  *  (a bundled package cannot import types from the src-only reference package). */
 export type MathJSON = string | number | boolean | readonly MathJSON[] | { readonly [key: string]: unknown };
 
-/** A combinatorics map: `MapDeclaration` (@enumeratio/structures) plus FindStat ids, the one
+/** A combinatorics map: `MapDeclaration` (@notatio/structures) plus FindStat ids, the one
  *  field a generic map has no business knowing about. */
 export interface CombinatorialMap extends MapDeclaration {
   /** FindStat map ids, for a map whose record doesn't state them (a conversion has none). */

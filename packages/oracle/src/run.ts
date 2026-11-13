@@ -12,7 +12,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type Bounds, memoryCapMb, runBounded, withFile, wolframFileArgs } from "@enumeratio/utils/bounded";
+import { type Bounds, memoryCapMb, runBounded, withFile, wolframFileArgs } from "@notatio/utils/bounded";
 import { SAGE_GROUPS } from "./sage-groups.ts";
 import { sageStatsPython } from "./sage-stats.ts";
 import type { System } from "./systems.ts";
@@ -1821,7 +1821,7 @@ export interface Prelude {
  * What a program for `system` has to start with so emitted sources mean what they mean in a
  * scan: imports, helpers and value printers. `evaluate` wraps a source string for the Python
  * family (Sage's preparser only runs through `sage_eval`); `printer` names the printer the scan
- * compares with. For the benchmark harnesses (`@enumeratio/bench`), which must run the same
+ * compares with. For the benchmark harnesses (`@notatio/bench`), which must run the same
  * sources the same way.
  */
 export function preludeFor(system: System): Prelude {

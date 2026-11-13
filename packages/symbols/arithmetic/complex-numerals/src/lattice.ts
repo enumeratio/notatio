@@ -1,4 +1,4 @@
-// `@enumeratio/complex-numerals/lattice`: radix expansions as a layer for `Show`'s `LatticeTiles`.
+// `@notatio/complex-numerals/lattice`: radix expansions as a layer for `Show`'s `LatticeTiles`.
 // Plain TypeScript, no engine.
 
 export { EXAMPLES, exampleNamed, FAVORITES, NOTABLE, type RadixExample } from "./examples.ts";

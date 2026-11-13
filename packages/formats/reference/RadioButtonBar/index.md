@@ -2,12 +2,12 @@
 name: RadioButtonBar
 domain: Graphics
 signature: RadioButtonBar(...)
-summary: Wolfram's own RadioButtonBar, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+summary: Wolfram's own RadioButtonBar, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
 signatures:
   - call: RadioButtonBar(...)
-    description: Wolfram's own RadioButtonBar, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+    description: Wolfram's own RadioButtonBar, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
     library: enumeratio-formats
     type: (any*) -> any
 ---

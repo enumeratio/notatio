@@ -10,7 +10,7 @@
 // `details`/`examples`.
 
 import { fileURLToPath } from "node:url";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
 import { areaStatisticsEntries, type Sample } from "../../src/statistics/generate-entries.ts";
 import { TREES_FRONTIER } from "../src/statistics.frontier.ts";
 import { TREE_STATISTICS } from "../src/statistics.ts";

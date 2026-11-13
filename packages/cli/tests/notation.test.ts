@@ -1,4 +1,4 @@
-import { NOTATIONS } from "@enumeratio/manifest";
+import { NOTATIONS } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { Session } from "../src/engine.ts";
 import { NOTATION_ENTRIES } from "../src/notation.ts";

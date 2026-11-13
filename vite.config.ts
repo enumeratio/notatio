@@ -12,7 +12,7 @@ export default defineConfig({
   },
   fmt: {
     ...fmt,
-    // A record's index.md is written by its own writer (@enumeratio/entry's record.ts), and its
+    // A record's index.md is written by its own writer (@notatio/entry's record.ts), and its
     // body holds a head's details as written: markdown formatting would rewrite `*x*` as `_x_`,
     // which the page shows as text. yaml.test holds the files to the writer instead.
     ignorePatterns: ["packages/**/reference/*/index.md", "packages/reference/entries/*/index.md"],
@@ -20,8 +20,8 @@ export default defineConfig({
   lint: {
     ...lint,
     overrides: [
-      // The nucleus facade (@enumeratio/engine) is the one place a library reaches
-      // compute-engine; the full API is `@enumeratio/engine/unstable`. Files that still import it
+      // The nucleus facade (@notatio/engine) is the one place a library reaches
+      // compute-engine; the full API is `@notatio/engine/unstable`. Files that still import it
       // directly are listed in the baseline and exempted below: it may only shrink, and
       // packages/utils/tests/compute-engine-imports.test.ts holds it to that.
       {
@@ -33,7 +33,7 @@ export default defineConfig({
               patterns: [
                 {
                   group: ["@cortex-js/compute-engine", "@cortex-js/compute-engine/*"],
-                  message: "Import from @enumeratio/engine; the full API is @enumeratio/engine/unstable.",
+                  message: "Import from @notatio/engine; the full API is @notatio/engine/unstable.",
                 },
               ],
             },

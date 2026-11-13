@@ -4,7 +4,7 @@ aside: false
 
 # Combinatorial statistics
 
-Every combinatorial statistic in `@enumeratio/statistics` — a head applied to a
+Every combinatorial statistic in `@notatio/statistics` — a head applied to a
 carrier (`Descents` on a `Permutation`, `LargestPart` on an `IntegerPartition`).
 Each is a definition over the object, evaluable on any row of the matching
 [collection](/reference/collections/). One head can be a different statistic on a

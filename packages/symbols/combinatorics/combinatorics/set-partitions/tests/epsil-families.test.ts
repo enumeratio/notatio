@@ -3,8 +3,8 @@
 // membership over every near miss. Compiled and interpreted, and the interpreter checked
 // directly against the definitions too.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, elementJson, epsilKernelOn } from "../../collections/src/families/epsil.ts";
 import {

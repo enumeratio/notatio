@@ -6,7 +6,7 @@ summary: The Jacobi theta function $\vartheta_a(u,q)$, $a=1,2,3,4$ (DLMF 20.2), 
 signatures:
   - call: EllipticTheta(a, u, q)
     description: the a-th Jacobi theta function (a = 1, 2, 3, or 4), argument u, nome q.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 seeAlso:
   - EllipticThetaPrime

@@ -1,4 +1,4 @@
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics } from "../src/index.ts";
 import {
@@ -9,7 +9,7 @@ import {
   RESTRICTIONS,
   RestrictionCollisionError,
   type Restriction,
-} from "@enumeratio/structures";
+} from "@notatio/structures";
 
 const ce = bareEngine();
 // A-94: declareCombinatorics (each area's own carriers + families) replaces the old bare

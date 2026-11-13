@@ -6,7 +6,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
 import { headForms, ownForms } from "./forms.ts";
 
 const FORMS_TABLE = fileURLToPath(new URL("../generated/forms.json", import.meta.url));

@@ -3,8 +3,8 @@
 // the build produced a table for each.
 
 import { readdirSync } from "node:fs";
-import { COMPONENT_STORIES_SCHEMA, validateSchema } from "@enumeratio/entry/schema";
-import { readStories, STORIES_SUFFIX } from "@enumeratio/entry/node";
+import { COMPONENT_STORIES_SCHEMA, validateSchema } from "@notatio/entry/schema";
+import { readStories, STORIES_SUFFIX } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { STORIES_DATA } from "../src/stories-data.ts";
 

@@ -65,7 +65,7 @@ type EngineGate = {
 
 /**
  * What declares libraries into the engine, once each: those an expression names
- * (`@enumeratio/manifest`'s `createResolver`), or all of them.
+ * (`@notatio/manifest`'s `createResolver`), or all of them.
  */
 export interface EngineResolver {
   ensure(ce: ComputeEngine, json: unknown): Promise<unknown>;
@@ -97,7 +97,7 @@ function createEngine(): Promise<ComputeEngine> {
       import("@cortex-js/compute-engine"),
       import("./display.ts"),
       import("./conventional-latex.ts"),
-      import("@enumeratio/engine"),
+      import("@notatio/engine"),
     ]);
     // The kernel's dictionary, so the page writes and reads LaTeX as a kernel does.
     engine = new ComputeEngine({

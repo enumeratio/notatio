@@ -3,7 +3,7 @@
 // is killed when it overruns. Calls must not overlap.
 
 import { Worker } from "node:worker_threads";
-import type { Verdict } from "@enumeratio/oracle";
+import type { Verdict } from "@notatio/oracle";
 import type { verdictOf } from "./oracle-verdict.ts";
 
 /** Seconds one comparison may take, including a fresh thread's engine start-up. */

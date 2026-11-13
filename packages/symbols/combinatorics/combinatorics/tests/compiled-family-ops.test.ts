@@ -3,7 +3,7 @@
 // drives every Epsil family's compiled operations over small fibers and fails on any throw that
 // isn't a RangeError decline.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { COMPILED_FAMILIES } from "../collections/src/families/compiled-families.generated.js";
 import {

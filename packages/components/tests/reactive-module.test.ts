@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { Transcript, type TrackedSymbols } from "@enumeratio/frontend";
+import { parseExpression } from "@notatio/formats/expression";
+import { Transcript, type TrackedSymbols } from "@notatio/frontend";
 import { expect, test } from "vite-plus/test";
 import { ReactiveModule } from "../src/reactive-module.ts";
 

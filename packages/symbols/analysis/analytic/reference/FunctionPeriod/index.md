@@ -6,7 +6,7 @@ summary: The fundamental period of f in x, or 0 if f is provably not periodic.
 signatures:
   - call: FunctionPeriod(f, x)
     description: the smallest positive p with f(x+p) = f(x) for every x, or 0 when f is not periodic.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

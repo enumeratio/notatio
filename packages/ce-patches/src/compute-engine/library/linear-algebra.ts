@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { declareCompile, operandsOf } from "@enumeratio/engine";
+import { declareCompile, operandsOf } from "@notatio/engine";
 import { compileMatrixRank } from "../compilation/matrix-rank.ts";
 
 // cortex-js/compute-engine: `Shape` reads `xs.shape`, which is the `dimensions` of the operand's

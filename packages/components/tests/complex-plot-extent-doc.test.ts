@@ -2,7 +2,7 @@
 // `center + (uv - 0.5) * (extent * aspect, extent)` (E#16), so the page must say that.
 
 import { fileURLToPath } from "node:url";
-import { collectComponents } from "@enumeratio/frontend/reflect";
+import { collectComponents } from "@notatio/frontend/reflect";
 import { expect, test } from "vite-plus/test";
 
 const srcDir = fileURLToPath(new URL("../src/", import.meta.url));

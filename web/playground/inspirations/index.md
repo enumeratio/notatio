@@ -30,4 +30,4 @@ a survey until the design is clear, and some is a debt we are simply naming.
   as `<dynamic-module-box>` and its inline controls.
 - [ganja.js](/playground/inspirations/ganja) — Steven De Keninck's geometric
   algebra generator. **Half built**: the operator layer shipped as
-  `@enumeratio/geometric`; the renderer has not.
+  `@notatio/geometric`; the renderer has not.

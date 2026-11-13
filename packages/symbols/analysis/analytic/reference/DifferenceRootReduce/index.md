@@ -2,11 +2,11 @@
 name: DifferenceRootReduce
 domain: Special functions
 signature: DifferenceRootReduce(f(n), n)
-summary: Reduces a hypergeometric-type sequence $f(n)$ to its holonomic (P-recursive) representation — $\mathrm{DifferenceRoot}$, a linear recurrence with polynomial(n) coefficients plus enough initial values to pin the sequence down, applied straight back to $n$. Covers Factorial, $a^n$, CatalanNumber, Binomial(n, k) for concrete k, polynomials in n, Fibonacci, LucasL, HarmonicNumber, and a sum of two hypergeometric terms; declines everything else, leaving the call symbolic. Provided by `@enumeratio/analytic`.
+summary: Reduces a hypergeometric-type sequence $f(n)$ to its holonomic (P-recursive) representation — $\mathrm{DifferenceRoot}$, a linear recurrence with polynomial(n) coefficients plus enough initial values to pin the sequence down, applied straight back to $n$. Covers Factorial, $a^n$, CatalanNumber, Binomial(n, k) for concrete k, polynomials in n, Fibonacci, LucasL, HarmonicNumber, and a sum of two hypergeometric terms; declines everything else, leaving the call symbolic. Provided by `@notatio/analytic`.
 signatures:
   - call: DifferenceRootReduce(f(n), n)
     description: the P-recursive reduction of $f(n)$, as $\mathrm{DifferenceRoot}(\ldots)(n)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 seeAlso:
   - DifferenceRoot

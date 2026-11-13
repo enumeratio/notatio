@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import type { Json } from "@enumeratio/ce-patches";
+import type { Json } from "@notatio/ce-patches";
 import { DEFINITIONS } from "../src/definitions.ts";
 import { declareAnalytic } from "../src/declare.ts";
 

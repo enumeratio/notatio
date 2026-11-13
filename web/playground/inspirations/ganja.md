@@ -15,7 +15,7 @@ could show too, and what would it cost to draw them ourselves?_
 
 ## What we already have
 
-`@enumeratio/hypercomplex` is not a geometric algebra library, but it is closer
+`@notatio/hypercomplex` is not a geometric algebra library, but it is closer
 to one than it looks. An algebra there is nothing but an ordered list of
 generators, and a generator is fixed by two facts — what it squares to, and
 whether it anticommutes. That is a 3 × 2 grid and all six cells are occupied:
@@ -81,7 +81,7 @@ beyond a Clifford algebra. Against ours, now that most of it is built:
 | `a**-1`      | inverse                     | **still missing** — ganja does it matrix-free to 5D                 |
 | `describe()` | basis, metric, Cayley table | `Basis`, `AlgebraDimension`; the table is a picture we could _draw_ |
 
-Those live in `@enumeratio/geometric`, a thin layer over the hypercomplex
+Those live in `@notatio/geometric`, a thin layer over the hypercomplex
 representation: every one of them is the geometric product with a **grade selected
 out of it**, or a sign per grade, so none of it needs a second representation of a
 multivector. The `Grade`/`GradePart` pair is the primitive and the rest are one

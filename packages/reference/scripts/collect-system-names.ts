@@ -11,7 +11,7 @@
 //   node packages/reference/scripts/collect-system-names.ts
 
 import { writeFileSync } from "node:fs";
-import { runWolframKernel } from "@enumeratio/utils/bounded";
+import { runWolframKernel } from "@notatio/utils/bounded";
 
 const code = 'Print[StringRiffle[Names["System`*"], "\\n"]]; Print["$Version=", $Version]';
 const out = await runWolframKernel(code, { timeoutMs: 600_000 });

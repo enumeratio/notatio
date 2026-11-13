@@ -4,7 +4,7 @@ import { fileURLToPath } from "node:url";
 import { expect, test } from "vite-plus/test";
 
 // Ratchet on libraries (packages/symbols) importing @cortex-js/compute-engine directly: they
-// go through @enumeratio/engine, and the full API through @enumeratio/engine/unstable (or its
+// go through @notatio/engine, and the full API through @notatio/engine/unstable (or its
 // unstable/latex-syntax subpath).
 // The lint rule (no-restricted-imports, root vite.config.ts) enforces it for every file not in
 // the baseline; this test keeps the baseline honest. It can only shrink: a file that no longer
@@ -13,7 +13,7 @@ import { expect, test } from "vite-plus/test";
 
 const BASELINE = join(dirname(fileURLToPath(import.meta.url)), "compute-engine-imports.baseline.json");
 const IMPORT = /(?:\bfrom|\bimport\s*\(?|\brequire\s*\()\s*["']@cortex-js\/compute-engine[^"']*["']/;
-const UNSTABLE_IMPORT = /["']@enumeratio\/engine\/unstable(?:\/[\w-]+)?["']/;
+const UNSTABLE_IMPORT = /["']@notatio\/engine\/unstable(?:\/[\w-]+)?["']/;
 const UNSTABLE_REASON = /\/\/ unstable: \S/;
 
 function repoRoot(start: string): string {

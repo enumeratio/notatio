@@ -1,4 +1,4 @@
-// @enumeratio/manifest/libraries: libraries from package hosts (npm, GitHub) as a catalog
+// @notatio/manifest/libraries: libraries from package hosts (npm, GitHub) as a catalog
 // (a registry of libraries), their format, and ranges locked to versions. A subpath, so the resolver
 // alone doesn't bring `semver`.
 

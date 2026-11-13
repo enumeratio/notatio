@@ -1,7 +1,7 @@
 // Divisor and multiplicative-structure numeric sets: paramCount:0 scalar FamilyKernels
 // (see numeric-sets.ts for the pattern this follows) plus the one-parameter selector
-// KFreeIntegers(k). collections has no dependency on @enumeratio/residues or
-// @enumeratio/number-theory (see its package.json), so the divisor-sum/factoring helpers
+// KFreeIntegers(k). collections has no dependency on @notatio/residues or
+// @notatio/number-theory (see its package.json), so the divisor-sum/factoring helpers
 // below are a fresh, plain-number implementation local to this file, not an import --
 // same reason numeric-sets.ts carries its own isPrime/sumProperDivisors rather than
 // importing them. isAbundant/sumProperDivisors below are literally copied from

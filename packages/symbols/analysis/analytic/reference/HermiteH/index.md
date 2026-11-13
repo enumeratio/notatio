@@ -2,11 +2,11 @@
 name: HermiteH
 domain: Special functions
 signature: HermiteH(n, x)
-summary: The physicists' Hermite polynomial $H_n(x)$, orthogonal on the real line with weight $e^{-x^2}$. Provided by `@enumeratio/analytic`.
+summary: The physicists' Hermite polynomial $H_n(x)$, orthogonal on the real line with weight $e^{-x^2}$. Provided by `@notatio/analytic`.
 signatures:
   - call: HermiteH(n, x)
     description: the degree-$n$ Hermite polynomial at $x$, for an integer $n \ge 0$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 bindings:
   - origin: reference

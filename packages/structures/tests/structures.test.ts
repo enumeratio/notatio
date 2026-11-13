@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { executeEpsil } from "@cortex-js/compute-engine/epsil";
-import { defineOverload, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { defineOverload, operandsOf, symbolNameOf } from "@notatio/engine";
 import { describe, expect, it } from "vite-plus/test";
 import { ancestry, conform, declareAlgebra, declareStructures, readsOwnExtremum } from "../src/index.ts";
 

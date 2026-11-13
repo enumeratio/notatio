@@ -1,4 +1,4 @@
-// Rebuild `@enumeratio/catalog`'s `catalog-records-data.ts` from every head's catalog-role
+// Rebuild `@notatio/catalog`'s `catalog-records-data.ts` from every head's catalog-role
 // fields -- `grades`/`carrier`/`unbounded` (a collection), `catalogCarrier` (a bare carrier),
 // `statOn`/`mapOn` (a statistic or map's overload set). `declareCatalog` needs these as plain,
 // synchronous data; it runs wherever compute-engine does, so it cannot parse YAML at runtime.
@@ -12,7 +12,7 @@
 //
 //   vp node packages/reference/scripts/collect-catalog-records.ts
 
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 import { referenceData } from "../src/node.ts";
 
 const { entries } = referenceData();

@@ -7,7 +7,7 @@ import {
   operandsOf,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { finish } from "./distributions.ts";
 
 // `Median(dist)`, as Wolfram defines it: the exact quantile at 1/2 for a continuous law, and the

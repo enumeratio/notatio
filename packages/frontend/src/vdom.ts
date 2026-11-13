@@ -2,15 +2,15 @@
 // `{ tag, props, children }` are the same tree under a renaming, and this module is the
 // renaming both ways. `structuralOf` writes the expression out verbatim -- every head a
 // tag, every argument a child, a run of atoms as its tokens, as the markup reader reads
-// them (`@enumeratio/formats/markup`) -- and `vdomOf`
+// them (`@notatio/formats/markup`) -- and `vdomOf`
 // gives the tree that draws, which is `renderingOf` with a typeset fallback. `toVNode`
 // hands either to any framework's `h`.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { optionsOf } from "@enumeratio/formats";
-import { serializeExpression } from "@enumeratio/formats/expression";
-import { stripMetadata, tokenOf } from "@enumeratio/formats/markup";
-import { LAYOUT_HEADS, PROSE_HEADS } from "@enumeratio/boxes";
+import { optionsOf } from "@notatio/formats";
+import { serializeExpression } from "@notatio/formats/expression";
+import { stripMetadata, tokenOf } from "@notatio/formats/markup";
+import { LAYOUT_HEADS, PROSE_HEADS } from "@notatio/boxes";
 import { isBoxTag } from "./box-tags.ts";
 import { CHART_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";

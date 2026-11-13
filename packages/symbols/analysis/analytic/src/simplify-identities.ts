@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { hyperbolicPythagoras } from "./full-simplify.ts";
-import { declareCompile } from "@enumeratio/engine";
+import { declareCompile } from "@notatio/engine";
 
 // Simplify's missing identities, where Wolfram's Simplify has them: a quotient of the
 // sine and cosine of the same argument is its tangent (cotangent, and the hyperbolic

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { crosswalkFor, SOURCES } from "@enumeratio/reference";
+import { crosswalkFor, SOURCES } from "@notatio/reference";
 import { entriesByDomain, getEntry } from "../../data/reference.ts";
 import { renderInline } from "../../prose.ts";
 

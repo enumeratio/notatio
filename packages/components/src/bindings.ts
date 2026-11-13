@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
+import { parseExpression, serializeExpression } from "@notatio/formats/expression";
 
 // Wildcard binding: the substitution machinery shared by `<notatio-manipulate>` and
 // `<dynamic-module-box>`. Both work the same way -- a descendant attribute (or custom-element

@@ -7,7 +7,7 @@ import { densitySvg } from "../src/densityplot.ts";
 import { plotArea } from "../src/plot-box.ts";
 import { vectorPlotBox } from "../src/vectorplot.ts";
 import { renderPlot } from "../src/plot-box.ts";
-import type { BoxNode } from "@enumeratio/boxes";
+import type { BoxNode } from "@notatio/boxes";
 
 const radial = (n: number) => {
   const axis = Array.from({ length: n }, (_, k) => -3 + (6 * k) / (n - 1));

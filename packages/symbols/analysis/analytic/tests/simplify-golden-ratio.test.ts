@@ -1,5 +1,5 @@
 // unstable: ComputeEngine, the engine class itself; the stable entry has no constructor
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 import { goldenRatioCollapse } from "../src/simplify-identities.ts";

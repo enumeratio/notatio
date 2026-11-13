@@ -2,7 +2,7 @@
 name: HurwitzZeta
 domain: Special functions
 signature: HurwitzZeta(s, a)
-summary: The Hurwitz zeta function $\zeta(s, a) = \sum_{n=0}^{\infty} (n+a)^{-s}$ for $\operatorname{Re}(s) > 1$, continued analytically elsewhere. Provided by `@enumeratio/analytic`.
+summary: The Hurwitz zeta function $\zeta(s, a) = \sum_{n=0}^{\infty} (n+a)^{-s}$ for $\operatorname{Re}(s) > 1$, continued analytically elsewhere. Provided by `@notatio/analytic`.
 signatures:
   - call: HurwitzZeta(s, a)
     description: the Hurwitz zeta function $\zeta(s, a)$.

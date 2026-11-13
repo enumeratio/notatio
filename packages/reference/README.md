@@ -1,4 +1,4 @@
-# @enumeratio/reference
+# @notatio/reference
 
 Structured, verified example data for compute-engine functions — the single source for
 reference pages and their tests. This is the loader and the crosswalk; the record format and
@@ -15,9 +15,9 @@ depending on `reference`.
 - **`.` (`src/index.ts`)** — `engineEntries`/`ENGINE_DOMAIN` (stub entries for
   compute-engine's own undocumented symbols), `backlog`/`BacklogHead` (heads Wolfram has that
   we don't yet, from `backlog.json`), `checkImplementations` (re-exported from
-  `@enumeratio/entry`), and the crosswalk (below).
+  `@notatio/entry`), and the crosswalk (below).
 - **`./node` (`src/node.ts`)** — the fs-based loader (AGENTS.md "Reference entries"): reads
-  every `<package>/reference/<Head>/` folder through `@enumeratio/entry`'s reader, validates
+  every `<package>/reference/<Head>/` folder through `@notatio/entry`'s reader, validates
   against its JSON Schema, and checks `id` collisions on a head shared between two packages.
   Node-only — the browser-facing `.` export never touches `node:fs`, since
   `ExampleAlternatives.vue` imports it directly.
@@ -38,14 +38,14 @@ vp test                                              # incl. tests/known.test.ts
 # after adding or changing an example, a printer, or a transpiler:
 UPDATE_FORMS=1 node packages/frontend/scripts/collect-forms.ts
 
-node packages/reference/scripts/format-records.ts     # rewrite every record through @enumeratio/entry's writer
+node packages/reference/scripts/format-records.ts     # rewrite every record through @notatio/entry's writer
 node packages/reference/scripts/oracle-scan.ts --accept       # every example, every wired system
 node packages/reference/scripts/oracle-scan.ts wolfram sage   # some systems only
 node packages/reference/scripts/oracle-scan.ts --head Foo,Bar # one or a few heads, fast iteration
 
-pnpm --filter @enumeratio/reference run crosswalk:fetch    # fungrim, inventories, wikidata, dlmf
-pnpm --filter @enumeratio/reference run crosswalk:find     # oeis, findstat
-pnpm --filter @enumeratio/reference run crosswalk:collect  # crosswalk-data.ts, engine-symbols-data.ts (`build` runs it); :check / :verify / :audit also exist
+pnpm --filter @notatio/reference run crosswalk:fetch    # fungrim, inventories, wikidata, dlmf
+pnpm --filter @notatio/reference run crosswalk:find     # oeis, findstat
+pnpm --filter @notatio/reference run crosswalk:collect  # crosswalk-data.ts, engine-symbols-data.ts (`build` runs it); :check / :verify / :audit also exist
 node packages/reference/scripts/collect-coverage.ts    # kernel snapshot, committed as src/coverage-data.ts (wolframscript, python3)
 ```
 

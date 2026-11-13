@@ -1,7 +1,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
-import { emitComplexGLSL } from "@enumeratio/analytic";
+import { emitComplexGLSL } from "@notatio/analytic";
 import { complexComputeShader } from "../src/gpu-eval.ts";
 import { complexFunction } from "../src/complex-eval.ts";
 import {

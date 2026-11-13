@@ -2,11 +2,11 @@
 name: Hypergeometric0F1Regularized
 domain: Special functions
 signature: Hypergeometric0F1Regularized(b, z)
-summary: The regularized confluent hypergeometric limit function ${}_0F_1(b; z) / \Gamma(b)$ — entire in both $b$ and $z$, unlike [[Hypergeometric0F1]] itself. Provided by `@enumeratio/analytic`.
+summary: The regularized confluent hypergeometric limit function ${}_0F_1(b; z) / \Gamma(b)$ — entire in both $b$ and $z$, unlike [[Hypergeometric0F1]] itself. Provided by `@notatio/analytic`.
 signatures:
   - call: Hypergeometric0F1Regularized(b, z)
     description: ${}_0F_1(b; z) / \Gamma(b)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 primitive: numeric
 bindings:

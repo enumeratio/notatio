@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{nc}(u,m) = 1/\operatorname{
 signatures:
   - call: JacobiNC(u, m)
     description: the Jacobi elliptic function nc, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiCN

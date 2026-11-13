@@ -2,8 +2,8 @@
 // a statistic answers on its first row. A build or a test passes these as the catalog's probes.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { toText } from "@enumeratio/boxes/render";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { toText } from "@notatio/boxes/render";
+import { parseExpression } from "@notatio/formats/expression";
 import type { ExplorerCatalog } from "./explorer.ts";
 import { openRowSource } from "./row-source.ts";
 

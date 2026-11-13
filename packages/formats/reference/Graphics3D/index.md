@@ -2,12 +2,12 @@
 name: Graphics3D
 domain: Graphics
 signature: Graphics3D(primitives..., options...)
-summary: Wolfram's own Graphics3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+summary: Wolfram's own Graphics3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
 signatures:
   - call: Graphics3D(primitives..., options...)
-    description: Wolfram's own Graphics3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+    description: Wolfram's own Graphics3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
     library: enumeratio-formats
     type: (any*) -> any
 seeAlso:

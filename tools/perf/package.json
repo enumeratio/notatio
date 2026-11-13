@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/perf-tools",
+  "name": "@notatio/perf-tools",
   "version": "0.0.0",
   "private": true,
   "description": "Advisory perf-drift tooling for CI: runs each package's suite with the vitest JSON reporter, keeps a rolling history, and flags tests that drift past their trailing median. See tools/perf/README.md.",
@@ -12,7 +12,7 @@
     "cpu-prof": "node src/cpu-prof.ts"
   },
   "devDependencies": {
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "@types/node": "catalog:",
     "typescript": "^7.0.2",
     "vite": "catalog:",

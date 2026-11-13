@@ -2,11 +2,11 @@
 name: DifferenceRoot
 domain: Special functions
 signature: DifferenceRoot(Function([recurrence == 0, ic, ...], y, n))(n0)
-summary: A holonomic (P-recursive) sequence object — a linear recurrence with polynomial(n) coefficients plus enough initial values, exactly as [[DifferenceRootReduce]] emits it. Applied to a concrete non-negative integer $n_0$, it runs the recurrence forward in exact rational arithmetic; applied to a symbolic $n$ (or anything else it can't run), it stays inert. Provided by `@enumeratio/analytic`.
+summary: A holonomic (P-recursive) sequence object — a linear recurrence with polynomial(n) coefficients plus enough initial values, exactly as [[DifferenceRootReduce]] emits it. Applied to a concrete non-negative integer $n_0$, it runs the recurrence forward in exact rational arithmetic; applied to a symbolic $n$ (or anything else it can't run), it stays inert. Provided by `@notatio/analytic`.
 signatures:
   - call: DifferenceRoot(fn)(n0)
     description: the sequence's value at $n_0$, running the recurrence stored in `fn` forward from whichever initial condition is closest below $n_0$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (any) -> any
 seeAlso:
   - DifferenceRootReduce

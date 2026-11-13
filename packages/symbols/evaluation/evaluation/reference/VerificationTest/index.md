@@ -23,4 +23,4 @@ attributes:
 - Held: input does not evaluate until the constraints (TimeConstraint, MemoryConstraint) are in place around it.
 - Outcome is one of "Success", "Failure", "Error" (input raised, or a constraint was requested this process cannot honor) or "Aborted" (TimeConstraint fired).
 - MemoryConstraint in-process reports Error rather than silently skipping the check — real enforcement needs the isolated evaluator, where it comes from the worker's own resourceLimits.
-- TestResultObject's operands are rules — Outcome, Input, ExpectedOutput, ActualOutput, AbsoluteTimeUsed (seconds, rounded to the millisecond), and TestID when given — the same rule spelling @enumeratio/engine's optionsOf/ruleOf read elsewhere in this codebase.
+- TestResultObject's operands are rules — Outcome, Input, ExpectedOutput, ActualOutput, AbsoluteTimeUsed (seconds, rounded to the millisecond), and TestID when given — the same rule spelling @notatio/engine's optionsOf/ruleOf read elsewhere in this codebase.

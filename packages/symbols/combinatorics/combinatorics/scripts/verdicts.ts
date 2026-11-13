@@ -79,7 +79,7 @@ export const checkers = {
 /** The workspace packages the checks load (and so the dists, with what those import, that a
  *  verdict depends on); a dependency of this package outside them, such as plausible, cannot
  *  change one. tests/verdict-inputs.test.ts holds the checks' module graph to it. */
-export const CHECKED_ON = ["@enumeratio/engine", "@enumeratio/structures", "@enumeratio/residues"];
+export const CHECKED_ON = ["@notatio/engine", "@notatio/structures", "@notatio/residues"];
 
 // Manifest's dist is built from every package's records, so any record edit would void every
 // verdict. The checks run on a bare engine and structures' interpreter, which read none of that
@@ -90,7 +90,7 @@ export const verdictsFor = (step: string, roots: readonly string[]) =>
     roots: [...roots.map(at), at("../../../manifest/src")],
     // Generated outputs are what the steps write, not what the checks read.
     skip: (path) => path.endsWith("/manifest/src/generated") || /\.generated\.(js|ts)$/.test(path),
-    omitDists: ["@enumeratio/manifest"],
+    omitDists: ["@notatio/manifest"],
     imports: CHECKED_ON,
   });
 

@@ -6,11 +6,11 @@ summary: "The unit box function: 1 on the closed [-1/2, 1/2], 0 outside."
 signatures:
   - call: UnitBox(x)
     description: 1 for -1/2 <= x <= 1/2, 0 otherwise.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real, real*) -> number
   - call: UnitBox(x1, x2, …)
     description: the product of the unit boxes -- 0 as soon as any argument is outside its own [-1/2, 1/2].
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

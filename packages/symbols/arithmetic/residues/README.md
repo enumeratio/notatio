@@ -1,4 +1,4 @@
-# @enumeratio/residues
+# @notatio/residues
 
 Modular arithmetic for `@cortex-js/compute-engine`, over bigints: residues, CRT, factoring,
 every r-th root of a residue, discrete logarithms and primitive roots, plus `ResidueClass` — an
@@ -15,7 +15,7 @@ exactly at an inverse-π estimate and sieves the short gap to p_n, up to `PRIME_
 ## Usage
 
 ```ts
-import { declareResidues } from "@enumeratio/residues";
+import { declareResidues } from "@notatio/residues";
 
 declareResidues(ce);
 ```
@@ -48,6 +48,6 @@ cyclic group).
 
 ## See also
 
-`@enumeratio/numerals` ([`numerals`](../numerals/README.md)) sits on top of this package for numeral
-systems, including a residue-numeral system built from `ChineseRemainder`. `@enumeratio/number-theory`
+`@notatio/numerals` ([`numerals`](../numerals/README.md)) sits on top of this package for numeral
+systems, including a residue-numeral system built from `ChineseRemainder`. `@notatio/number-theory`
 ([`number-theory`](../number-theory/README.md)) extends `PowerMod`/`PowerModList` to the Gaussian integers.

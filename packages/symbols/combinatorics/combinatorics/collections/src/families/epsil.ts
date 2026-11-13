@@ -7,15 +7,9 @@
 // for the fibers past 2^53, tried before the interpreter.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { compileTyped, definitionHash, type GeneratedRun, runtimeHelpers } from "@enumeratio/engine/compiled";
-import {
-  bigintRuntime,
-  compileBigint,
-  fromBigint,
-  isBigintDecline,
-  toBigint,
-} from "@enumeratio/engine/compiled-bigint";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { compileTyped, definitionHash, type GeneratedRun, runtimeHelpers } from "@notatio/engine/compiled";
+import { bigintRuntime, compileBigint, fromBigint, isBigintDecline, toBigint } from "@notatio/engine/compiled-bigint";
+import { evaluateEpsil } from "@notatio/structures";
 import { COMPILED_FAMILIES } from "./compiled-families.generated.js";
 import { isWorkDecline } from "./work.ts";
 import {

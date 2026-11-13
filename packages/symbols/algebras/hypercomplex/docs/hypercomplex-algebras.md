@@ -16,7 +16,7 @@ multicomplex tower ℂ₁ ⊂ ℂ₂ ⊂ ℂ₃ …; let them anticommute and yo
 algebras, among them the quaternions.
 
 They are all the same construction with different dials, which is why one implementation
-covers them: `@enumeratio/hypercomplex` adds them to the shared engine so that ordinary
+covers them: `@notatio/hypercomplex` adds them to the shared engine so that ordinary
 arithmetic — `+ - × ÷`, integer powers, `Norm`, `Conjugate`, division — just works on
 them, with exact coefficients.
 

@@ -1,4 +1,4 @@
-import { gcd } from "@enumeratio/residues";
+import { gcd } from "@notatio/residues";
 
 // Exact rationals over bigints: [numerator, denominator], denominator positive, reduced.
 

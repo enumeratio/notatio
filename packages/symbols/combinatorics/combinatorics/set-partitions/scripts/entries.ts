@@ -5,7 +5,7 @@
 // `omitHeads` keeps this generator out of that folder.
 
 import { fileURLToPath } from "node:url";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
 import { areaStatisticsEntries, type Sample } from "../../src/statistics/generate-entries.ts";
 import { SET_PARTITIONS_FRONTIER } from "../src/statistics.frontier.ts";
 import { SET_PARTITION_STATISTICS } from "../src/statistics.ts";

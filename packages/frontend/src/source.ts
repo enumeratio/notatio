@@ -1,5 +1,5 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { assignLatex, typedLatex } from "./latex.ts";
 
 // The seam between what an author writes and what MathLive edits. Every editable

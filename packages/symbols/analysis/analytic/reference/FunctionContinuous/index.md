@@ -6,11 +6,11 @@ summary: Whether f is continuous for every real x (or, given a domain restrictio
 signatures:
   - call: FunctionContinuous(f, x)
     description: True iff `f` has no singularity anywhere on the reals.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol, expression?) -> expression
   - call: FunctionContinuous(f, x, domain)
     description: True iff `f`, restricted to `domain` (a one-sided or bounded inequality in `x`), is continuous throughout it.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: kernel
 bindings:
   - origin: native

@@ -2,11 +2,11 @@
 name: Hypergeometric0F1
 domain: Special functions
 signature: Hypergeometric0F1(b, z)
-summary: The confluent hypergeometric limit function ${}_0F_1(b; z) = \sum_{k\ge0} z^k / ((b)_k\,k!)$ — entire in $z$, related to the Bessel functions. Provided by `@enumeratio/analytic`.
+summary: The confluent hypergeometric limit function ${}_0F_1(b; z) = \sum_{k\ge0} z^k / ((b)_k\,k!)$ — entire in $z$, related to the Bessel functions. Provided by `@notatio/analytic`.
 signatures:
   - call: Hypergeometric0F1(b, z)
     description: ${}_0F_1(b; z)$, by its defining series.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 primitive: numeric
 bindings:

@@ -5,8 +5,8 @@
 // rather than a bare list.
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
-import { ALL_REPRESENTATIONS, canonicalFor, type Medium, type Representation } from "@enumeratio/structures";
+import { operandsOf } from "@notatio/engine";
+import { ALL_REPRESENTATIONS, canonicalFor, type Medium, type Representation } from "@notatio/structures";
 
 const intsOf = (expr: Expression | undefined): number[] =>
   operandsOf(expr).map((operand) => Math.trunc(Number(operand.re)));

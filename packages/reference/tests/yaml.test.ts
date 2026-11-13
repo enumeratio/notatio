@@ -1,9 +1,9 @@
-// Every reference record goes through the one writer (@enumeratio/entry/node's writeYaml:
+// Every reference record goes through the one writer (@notatio/entry/node's writeYaml:
 // stringifyYaml, then oxfmt), so a file is exactly what that writer makes of its own data. The generated data the site and
 // the crosswalk read stays in step with the records.
 
-import { DEFINITIONS } from "@enumeratio/analytic/definitions";
-import { isWrittenHead } from "@enumeratio/entry/node";
+import { DEFINITIONS } from "@notatio/analytic/definitions";
+import { isWrittenHead } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { ORACLE_AGREEMENTS } from "../src/crosswalk/oracle-agreements-data.ts";
 import { loadReferenceData, oracleAgreementsOf, PACKAGES, referenceData } from "../src/node.ts";
@@ -34,6 +34,6 @@ test("reference bindings match analytic's DEFINITIONS", () => {
 test("the built oracle-agreements-data.ts tallies the current records", () => {
   expect(
     ORACLE_AGREEMENTS,
-    "rebuild: pnpm --filter @enumeratio/reference run build (or node packages/reference/scripts/collect-oracle-agreements.ts)",
+    "rebuild: pnpm --filter @notatio/reference run build (or node packages/reference/scripts/collect-oracle-agreements.ts)",
   ).toEqual(oracleAgreementsOf(referenceData()));
 });

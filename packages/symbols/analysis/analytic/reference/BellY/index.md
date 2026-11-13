@@ -6,7 +6,7 @@ summary: The partial (incomplete) Bell polynomial $B_{n,k}(x_1, x_2, \dots)$, by
 signatures:
   - call: BellY(n, k, xs)
     description: $B_{n,k}(x_1, \dots, x_{n-k+1})$, from the list `xs`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, integer, list) -> number
 primitive: kernel
 bindings:

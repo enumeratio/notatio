@@ -1,6 +1,6 @@
 // unstable: a bare engine to declare the analytic library against
-import { operandsOf } from "@enumeratio/engine";
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { operandsOf } from "@notatio/engine";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 

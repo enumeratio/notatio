@@ -523,7 +523,7 @@ export function paramsOf(spec: ControlSpec): string | undefined {
 
 // --- from a head's signature ---------------------------------------------------------
 
-/** One parameter of a head's typed signature (`@enumeratio/manifest`'s `Parameter`). */
+/** One parameter of a head's typed signature (`@notatio/manifest`'s `Parameter`). */
 export interface SignatureParameter {
   readonly name?: string;
   readonly type: string;
@@ -546,7 +546,7 @@ export interface HeadSignature {
   readonly options?: Readonly<Record<string, readonly (string | number | boolean)[]>>;
 }
 
-/** `Key -> value` as a `Rule`, `KeyValuePair` or the capitalised-key `Tuple` it canonicalises to (not `@enumeratio/engine`'s `ruleOf`: that would load the engine). */
+/** `Key -> value` as a `Rule`, `KeyValuePair` or the capitalised-key `Tuple` it canonicalises to (not `@notatio/engine`'s `ruleOf`: that would load the engine). */
 function ruleOf(node: Json): { name: string; value: Json } | undefined {
   const parts = Array.isArray(node) ? node : (node as { fn?: unknown[] } | null)?.fn;
   if (!Array.isArray(parts) || parts.length !== 3) return undefined;

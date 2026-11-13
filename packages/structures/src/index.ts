@@ -1,5 +1,5 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { registerNotation } from "@enumeratio/boxes";
+import { registerNotation } from "@notatio/boxes";
 import { ensureAlgebraHeads } from "./algebra.ts";
 import { declareGenericHeads } from "./generic.ts";
 export { readsOwnExtremum } from "./generic.ts";

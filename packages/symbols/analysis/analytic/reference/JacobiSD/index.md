@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{sd}(u,m) = \operatorname{sn
 signatures:
   - call: JacobiSD(u, m)
     description: the Jacobi elliptic function sd, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiSN

@@ -1,4 +1,4 @@
-# @enumeratio/combinatorics
+# @notatio/combinatorics
 
 Combinatorial collections and carriers for `@cortex-js/compute-engine`: permutations,
 partitions, set partitions, compositions, words, trees, tableaux, lattice paths and graphs,
@@ -68,9 +68,9 @@ vp pack   # build dist (also: vp pack --watch)
 ## Next
 
 Statistics over these carriers (`MajorIndex`, `Descents`, distributions, …) live in
-[@enumeratio/statistics](../statistics/README.md). Carrier and protocol machinery
+[@notatio/statistics](../statistics/README.md). Carrier and protocol machinery
 (`registerCarrier`, `conform`) lives in
-[@enumeratio/structures](../../../structures/README.md).
+[@notatio/structures](../../../structures/README.md).
 
 Its `enumeratio.reads` names `../statistics/reference` rather than depending on statistics: the
 build reads those records, and statistics sits above combinatorics, which may import only down the

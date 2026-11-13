@@ -8,7 +8,7 @@
 
 import { writeFileSync } from "node:fs";
 import * as adic from "../src/adic.ts";
-import { runKernel } from "@enumeratio/utils/bounded";
+import { runKernel } from "@notatio/utils/bounded";
 
 const PREC = 12;
 

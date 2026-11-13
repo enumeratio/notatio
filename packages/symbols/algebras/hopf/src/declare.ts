@@ -1,6 +1,6 @@
-import { declareAlgebra } from "@enumeratio/structures";
-import { registerNotation } from "@enumeratio/boxes";
-import { type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
+import { declareAlgebra } from "@notatio/structures";
+import { registerNotation } from "@notatio/boxes";
+import { type Engine, type Expr, integerAt, operandsOf } from "@notatio/engine";
 import {
   completeToRibbon,
   conjugateComposition,

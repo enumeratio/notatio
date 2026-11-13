@@ -4,8 +4,8 @@
 // `out`, and every `back`/`backOut`, the round trips that lose something. A printer or
 // transpiler change shows up here as a data diff to commit, in the same PR. No kernel needed.
 
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
-import { fromWolfram, toWolfram } from "@enumeratio/wolfram";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
+import { fromWolfram, toWolfram } from "@notatio/wolfram";
 import { expect, test } from "vite-plus/test";
 import { headForms, recordWithForms } from "../scripts/forms.ts";
 

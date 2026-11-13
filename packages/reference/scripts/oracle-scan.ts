@@ -52,9 +52,9 @@ import {
   restoreNames,
   type Verdict,
   wiredSystems,
-} from "@enumeratio/oracle";
-import { isSettled, orderImplementations, type SystemImplementation } from "@enumeratio/entry";
-import { updateHead } from "@enumeratio/entry/node";
+} from "@notatio/oracle";
+import { isSettled, orderImplementations, type SystemImplementation } from "@notatio/entry";
+import { updateHead } from "@notatio/entry/node";
 import { ownEngineEntries, ownEngineOf, referenceData, referenceEntries } from "../src/node.ts";
 import { libraryRecords } from "./library-records.ts";
 import { evaluateOwn } from "./own-engines.ts";

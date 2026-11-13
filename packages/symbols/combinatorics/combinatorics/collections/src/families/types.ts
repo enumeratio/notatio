@@ -1,4 +1,4 @@
-import { bigIntegerAt, type Expr, integerAt } from "@enumeratio/engine";
+import { bigIntegerAt, type Expr, integerAt } from "@notatio/engine";
 
 // The one collection contract, shared by every family. A FamilyKernel is a pure kernel
 // (count / unrank / rank / valid) over plain JS values, with NO compute-engine
@@ -16,7 +16,7 @@ import { bigIntegerAt, type Expr, integerAt } from "@enumeratio/engine";
 export type NestedTree = number | NestedTree[];
 
 /** A boxed MathJSON expression, as the CE collection handlers see it: the decoders
- *  below walk `ops`, and `intOf` reads the leaves through @enumeratio/engine. */
+ *  below walk `ops`, and `intOf` reads the leaves through @notatio/engine. */
 export interface Boxed {
   readonly ops?: readonly Boxed[];
 }

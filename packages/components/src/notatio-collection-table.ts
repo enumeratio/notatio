@@ -1,4 +1,4 @@
-import { describeCount } from "@enumeratio/boxes";
+import { describeCount } from "@notatio/boxes";
 import {
   automaticStatistics,
   collectionText,
@@ -12,7 +12,7 @@ import {
   rowSourceExpression,
   templateOfExpr,
   type RowSourceSpec,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { html, LitElement, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { type Evaluate, tally } from "./distribution-client.ts";
@@ -65,7 +65,7 @@ export class NotatioCollectionTable extends LitElement {
     /** The page (1-based, of `page-size` rows) the table opens on. */
     page: { type: Number, reflect: true },
     /**
-     * The carrier its rows inhabit -- the constructor head from `@enumeratio/combinatorics`,
+     * The carrier its rows inhabit -- the constructor head from `@notatio/combinatorics`,
      * e.g. `Permutation`. Auto-derived from the first row's own operator, so this is an OVERRIDE,
      * needed only when a story wants a different reading than the collection's own.
      */

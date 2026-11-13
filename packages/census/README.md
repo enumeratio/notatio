@@ -1,4 +1,4 @@
-# @enumeratio/census
+# @notatio/census
 
 The whole namespace in one engine: what we declare, what it collides with, and what Wolfram
 can do that we cannot. It exists for `fullEngine` alone — every library we ship, declared

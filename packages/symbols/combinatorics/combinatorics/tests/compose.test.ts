@@ -1,5 +1,5 @@
-import { bareEngine } from "@enumeratio/engine/testing";
-import { declareCompose, publicName } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { declareCompose, publicName } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 import { declareMaps, MAPS } from "../src/maps.ts";
@@ -49,7 +49,7 @@ test("a private name is one character from its public spelling", () => {
 test("extending a collection-backed head never leaks a private name into a result", () => {
   // `Complement` is collection-backed; a `Set` operand is not the carrier our combinatorics
   // extension handles, so the call stays genuinely unevaluated -- under its own name, not a
-  // private duplicate (see @enumeratio/structures' extend.ts).
+  // private duplicate (see @notatio/structures' extend.ts).
   const result = ce.box(["Complement", ["Set", 1, 2]]).evaluate();
   expect(result.operator).toBe("Complement");
   expect(JSON.stringify(result.json)).not.toContain("Complement_");

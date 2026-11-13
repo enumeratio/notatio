@@ -3,7 +3,7 @@
 // `*.test.ts`, and these are `*.spec.ts`) because a real browser + the dev server is a
 // different, slower kind of check. Run explicitly:
 //
-//   pnpm --filter @enumeratio/web run test:stories
+//   pnpm --filter @notatio/web run test:stories
 //
 // It starts and stops its own dev server, on a port `vp` doesn't reserve elsewhere.
 

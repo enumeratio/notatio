@@ -10,7 +10,7 @@ recovers the ordinary case at $a = 1$ ($\zeta(s, 1) = \zeta(s)$) and shifts the 
 otherwise, so $\zeta(s, 2) = \zeta(s) - 1$, and in general
 $\zeta(s, m) = \zeta(s) - \sum_{k=1}^{m-1} k^{-s}$ for a positive integer $m$.
 
-[`@enumeratio/analytic`](https://github.com/enumeratio/notatio) adds `HurwitzZeta` (and a
+[`@notatio/analytic`](https://github.com/enumeratio/notatio) adds `HurwitzZeta` (and a
 two-argument [`Zeta`](/reference/symbol/Zeta)) to compute-engine by Euler–Maclaurin
 summation, aligned with Wolfram. Because the head is declared on the playground engine,
 you can evaluate it in any cell:
@@ -95,7 +95,7 @@ Both of these sit inside the **Lerch transcendent**
 $$\Phi(z, s, a) \;=\; \sum_{n=0}^{\infty} \frac{z^n}{(n+a)^s},$$
 
 which is $\zeta(s, a)$ at $z = 1$ and the polylogarithm $\operatorname{Li}_s(z) = z\,\Phi(z, s, 1)$
-along $a = 1$. `@enumeratio/analytic` provides [`LerchPhi`](/reference/symbol/LerchPhi); the $z^n$
+along $a = 1$. `@notatio/analytic` provides [`LerchPhi`](/reference/symbol/LerchPhi); the $z^n$
 factor gives geometric convergence for $|z| < 1$, so the series is summed directly.
 
 <Story title="LerchPhi reductions">

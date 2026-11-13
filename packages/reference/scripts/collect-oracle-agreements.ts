@@ -4,7 +4,7 @@
 //
 //   vp node packages/reference/scripts/collect-oracle-agreements.ts
 
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 import { oracleAgreementsOf, referenceData } from "../src/node.ts";
 
 const agreements = oracleAgreementsOf(referenceData());

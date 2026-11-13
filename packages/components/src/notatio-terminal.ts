@@ -12,14 +12,14 @@ import {
   Repl,
   runCommand,
   splitArgs,
-} from "@enumeratio/cli/browser";
+} from "@notatio/cli/browser";
 import { html, LitElement, type PropertyValues } from "lit";
 import { createRef, ref } from "lit/directives/ref.js";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import type { Terminal } from "@xterm/xterm";
-import { environmentNamed, linePlotSvg, renderGlyph, TTY } from "@enumeratio/frontend/core";
+import { environmentNamed, linePlotSvg, renderGlyph, TTY } from "@notatio/frontend/core";
 
-// A real terminal emulator (xterm) running the actual @enumeratio/cli logic in
+// A real terminal emulator (xterm) running the actual @notatio/cli logic in
 // the browser. Three modes: `repl` drives the interactive core (In[n]/Out[n], :plot
 // draws below), `cli` runs one `notatio` command per line at a `$ notatio` prompt,
 // and `show` prints one expression as a terminal in `env` would, driving its

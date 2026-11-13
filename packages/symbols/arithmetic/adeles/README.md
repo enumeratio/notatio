@@ -1,4 +1,4 @@
-# @enumeratio/adeles
+# @notatio/adeles
 
 Adèles and idèles over $\mathbb{Q}$ for compute-engine — a port of Mathé Hertogh's Sage
 `adeles` package. Three value heads (`ProfiniteNumber`, `Adele`, `Idele`) carry a number
@@ -8,7 +8,7 @@ known only modulo something, and existing heads (arithmetic, `Equal`, `Numerator
 ## Usage
 
 ```ts
-import { declareAdeles } from "@enumeratio/adeles";
+import { declareAdeles } from "@notatio/adeles";
 
 declareAdeles(ce);
 ```
@@ -47,6 +47,6 @@ residue classes laid out by factorial digits.
 See [Adèles and idèles](docs/adeles-and-ideles.md) for the worked walkthrough — cosets,
 equality as "the sets meet", one prime at a time, and profinite Fibonacci.
 
-Builds on [`@enumeratio/number-theory`](../number-theory/README.md) (Hermite normal form, for the matrix
-decomposition), [`@enumeratio/numerals`](../numerals/README.md) (`AdicNumeral`, the p-adic values a profinite
-number's list form glues together), and [`@enumeratio/residues`](../residues/README.md) (CRT, modular inverse).
+Builds on [`@notatio/number-theory`](../number-theory/README.md) (Hermite normal form, for the matrix
+decomposition), [`@notatio/numerals`](../numerals/README.md) (`AdicNumeral`, the p-adic values a profinite
+number's list form glues together), and [`@notatio/residues`](../residues/README.md) (CRT, modular inverse).

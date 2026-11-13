@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { inDoublesIfComplex, isRealInt } from "@enumeratio/ce-patches";
+import { inDoublesIfComplex, isRealInt } from "@notatio/ce-patches";
 
 // FallingFactorial(x, n) = x(x−1)…(x−n+1). Integer n: (−1)^n·Pochhammer(−x, n), exact and
 // zero past a pole. Otherwise Γ(x+1)/Γ(x+1−n), numeric only.

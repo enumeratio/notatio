@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
 import { parseInterval, type Ivl } from "./optimize-core.ts";
 
 // NMinimize/NMaximize -- numeric univariate optimization on a BOUNDED interval given as an

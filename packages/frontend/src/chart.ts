@@ -22,7 +22,7 @@ import {
   rectangle,
   style,
   tag,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import { label, niceTicks, optionEdges, optionNumbers, optionPoints, plotItems, solidEdge } from "./plot-box.ts";
 import { categoryColors, type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 import { svg } from "./svg-draw.ts";

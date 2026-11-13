@@ -5,7 +5,7 @@
 // entity, and expressions come back as held FullForm, never evaluated, so an example's input is
 // what the documentation typed.
 
-import { runBounded, withFile, wolframFileArgs } from "@enumeratio/utils/bounded";
+import { runBounded, withFile, wolframFileArgs } from "@notatio/utils/bounded";
 
 export type WolframDataSource = "language" | "function" | "relation" | "formula";
 

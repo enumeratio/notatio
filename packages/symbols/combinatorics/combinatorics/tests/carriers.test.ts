@@ -1,6 +1,6 @@
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { contentsOf } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { contentsOf } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 

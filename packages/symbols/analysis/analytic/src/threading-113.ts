@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, threadOverLists, widenSignature, wrapOperator } from "@enumeratio/engine";
-import type { EvalOptions, NativeEval } from "@enumeratio/ce-patches";
+import { operandsOf, threadOverLists, widenSignature, wrapOperator } from "@notatio/engine";
+import type { EvalOptions, NativeEval } from "@notatio/ce-patches";
 
 /** No free variable anywhere in `expr` — a plain number, `Pi`/`ExponentialE`, or a closed
  * call over them (`Exp(Sqrt(2))`) all qualify, even though `evaluate()` alone leaves the

@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { createRegistryResolver, definitionRegistry, describe } from "@enumeratio/manifest";
+import { createRegistryResolver, definitionRegistry, describe } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { declareAbout } from "../src/index.ts";
 

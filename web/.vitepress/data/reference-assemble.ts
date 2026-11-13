@@ -4,10 +4,10 @@
 // dynamic routes and the virtual module (reference-node.ts, reference-data.ts); the browser
 // only looks things up in the result (reference-lookups.ts).
 
-import { CARRIERS } from "@enumeratio/combinatorics";
-import type { Carrier } from "@enumeratio/structures";
-import type { MathJSON, ReferenceEntry } from "@enumeratio/reference";
-import { engineEntries } from "@enumeratio/reference";
+import { CARRIERS } from "@notatio/combinatorics";
+import type { Carrier } from "@notatio/structures";
+import type { MathJSON, ReferenceEntry } from "@notatio/reference";
+import { engineEntries } from "@notatio/reference";
 import { lookups } from "./reference-lookups.ts";
 
 export type { HeadInfo } from "./reference-lookups.ts";

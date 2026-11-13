@@ -1,6 +1,6 @@
 // Tableaux' own declare (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible §4 step 5, A-94).
-import type { Engine } from "@enumeratio/engine";
-import { declareCarriers, registerCollectionCarrier } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { declareCarriers, registerCollectionCarrier } from "@notatio/structures";
 import { declareFamilies } from "../../collections/src/families/declare.ts";
 import { liftFamily } from "../../collections/src/families/epsil.ts";
 import { declareStatistics } from "../../src/statistics/declare.ts";

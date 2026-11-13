@@ -149,7 +149,7 @@ the input instead, as in Wolfram).
 Try it from a checkout:
 
 ```bash
-pnpm --filter @enumeratio/cli exec tsx src/main.ts
+pnpm --filter @notatio/cli exec tsx src/main.ts
 ```
 
 ```text

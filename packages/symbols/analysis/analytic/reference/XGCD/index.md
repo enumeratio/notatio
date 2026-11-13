@@ -6,7 +6,7 @@ summary: The extended Euclidean algorithm -- $(g, x, y)$ with $g = \gcd(a, b) = 
 signatures:
   - call: XGCD(a, b) -> Tuple(g, x, y)
     description: Bezout coefficients alongside the gcd
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, integer) -> tuple<integer, integer, integer>
 seeAlso:
   - GCD

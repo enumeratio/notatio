@@ -6,7 +6,7 @@ summary: "The Heaviside-family triangle function: 1 - |x| for -1 <= x <= 1, 0 ot
 signatures:
   - call: HeavisideLambda(x)
     description: max(1 - |x|, 0).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real) -> number
 names:
   wolframIdentity: true

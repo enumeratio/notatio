@@ -1,5 +1,5 @@
-import { DEFINED_NAMES } from "@enumeratio/oracle";
-import { isSystemName, REVERSE_HEADS } from "@enumeratio/wolfram";
+import { DEFINED_NAMES } from "@notatio/oracle";
+import { isSystemName, REVERSE_HEADS } from "@notatio/wolfram";
 import { expect, test } from "vite-plus/test";
 import { adaptInput, assignedNames, bucketOf, judge, mentions, showsPicture } from "../scripts/wolfram-examples.ts";
 

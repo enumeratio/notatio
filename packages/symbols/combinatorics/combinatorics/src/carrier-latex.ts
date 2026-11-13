@@ -11,8 +11,8 @@
 // so it is written with the list inside the parentheses, never as a variadic-looking call;
 // the variadic spelling `\permutation(2, 3, 1)` is still read.
 
-import type { Json, LatexReader, LatexRule, LatexWriter } from "@enumeratio/engine";
-import type { Carrier } from "@enumeratio/structures";
+import type { Json, LatexReader, LatexRule, LatexWriter } from "@notatio/engine";
+import type { Carrier } from "@notatio/structures";
 
 /** A carrier constructor's command, its type in camel case: `\permutation`, `\integerPartition`. */
 export const commandFor = (carrier: Carrier): string =>

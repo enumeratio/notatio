@@ -1,4 +1,4 @@
-# @enumeratio/structures
+# @notatio/structures
 
 Mathematical structure as compute-engine protocols ([Structures](https://github.com/enumeratio/notatio/wiki/Structures)): a
 generic head requires structure, a type conforms to it. `Min` works on anything with a total

@@ -1,6 +1,6 @@
 // Retiring packages/catalog/src/catalog-data.ts, step 3 of 3 (https://github.com/enumeratio/notatio/wiki/Archive-Symbol-Metadata's pattern, applied to the catalog dump): what `declareCatalog` needs --
 // CARRIERS, COLLECTIONS, STATS and MAPS -- moved onto each head's own record (`grades`/
-// `carrier`/`unbounded`, `catalogCarrier`, `statOn`/`mapOn`), and `@enumeratio/catalog` reads
+// `carrier`/`unbounded`, `catalogCarrier`, `statOn`/`mapOn`), and `@notatio/catalog` reads
 // a generated cache (`scripts/collect-catalog-records.ts` -> `catalog-records-data.ts`)
 // instead of the raw dump -- `declareCatalog` runs wherever compute-engine does, and cannot
 // parse YAML at runtime. The dump, its extractor and the one-time codemods that read it are
@@ -19,7 +19,7 @@
 // replay note.
 
 import { expect, test } from "vite-plus/test";
-import { CARRIERS, COLLECTIONS, MAPS, STATS } from "@enumeratio/catalog";
+import { CARRIERS, COLLECTIONS, MAPS, STATS } from "@notatio/catalog";
 import { referenceData } from "../src/node.ts";
 
 test("catalog-records-data.ts is what the current records collect to", () => {

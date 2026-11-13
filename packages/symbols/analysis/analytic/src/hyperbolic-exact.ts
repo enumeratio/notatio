@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf, wrapOperator } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { bigRationalAt, operandsOf, wrapOperator } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // The hyperbolic functions of ln q, q a positive rational, are rational in q:
 // sinh(ln q) = (q − 1/q)/2, cosh(ln q) = (q + 1/q)/2 and the rest by division. Wolfram

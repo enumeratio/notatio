@@ -6,7 +6,7 @@ summary: The u-derivative of the Jacobi theta function, $\vartheta_a'(u,q) = \df
 signatures:
   - call: EllipticThetaPrime(a, u, q)
     description: the u-derivative of the a-th Jacobi theta function (a = 1, 2, 3, or 4), argument u, nome q.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 seeAlso:
   - EllipticTheta

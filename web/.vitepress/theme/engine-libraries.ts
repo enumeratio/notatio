@@ -1,7 +1,7 @@
 // The declare ORDER and OPTIONS shared by two engines that must mean the same thing:
-// `./index.mts`'s page engine (`@enumeratio/frontend`'s `configureEngine`, dynamic
+// `./index.mts`'s page engine (`@notatio/frontend`'s `configureEngine`, dynamic
 // imports for bundle-splitting) and `./worker-engine-setup.ts`'s
-// `@enumeratio/evaluation/browser` session engine (a plain `ComputeEngine`, static
+// `@notatio/evaluation/browser` session engine (a plain `ComputeEngine`, static
 // imports since `openSession`'s `configure(ce)` runs synchronously). Each side does its
 // own importing -- this only owns the sequence and the options each `declare*` call
 // takes, so the two library sets can't quietly drift apart the way they had (the
@@ -19,37 +19,37 @@ import type { ComputeEngine } from "@cortex-js/compute-engine";
 // call sites below, rather than silently accepting a wrong signature the way a loose
 // `(ce: ComputeEngine) => void` would.
 export interface EngineLibraries {
-  readonly declareCombinatorics: typeof import("@enumeratio/combinatorics").declareCombinatorics;
-  readonly declareCarrierPlurals: typeof import("@enumeratio/structures").declareCarrierPlurals;
-  readonly declareCarrierElement: typeof import("@enumeratio/structures").declareCarrierElement;
-  readonly declareMaps: typeof import("@enumeratio/combinatorics").declareMaps;
-  readonly CARRIERS: typeof import("@enumeratio/combinatorics").CARRIERS;
-  readonly declareAnalytic: typeof import("@enumeratio/analytic").declareAnalytic;
-  readonly declareFractals: typeof import("@enumeratio/analytic").declareFractals;
-  readonly declareGraphics: typeof import("@enumeratio/formats").declareGraphics;
-  readonly declareBoxes: typeof import("@enumeratio/boxes").declareBoxes;
-  readonly declareStructures: typeof import("@enumeratio/structures").declareStructures;
-  readonly declareHypercomplex: typeof import("@enumeratio/hypercomplex").declareHypercomplex;
-  readonly declareGeometric: typeof import("@enumeratio/geometric").declareGeometric;
-  readonly declareDiagrams: typeof import("@enumeratio/diagram").declareDiagrams;
-  readonly declareResidues: typeof import("@enumeratio/residues").declareResidues;
-  readonly declareNumerals: typeof import("@enumeratio/numerals").declareNumerals;
-  readonly declareHecke: typeof import("@enumeratio/hecke").declareHecke;
-  readonly declareIncidence: typeof import("@enumeratio/incidence").declareIncidence;
-  readonly declareQuiver: typeof import("@enumeratio/quiver").declareQuiver;
-  readonly declareHopf: typeof import("@enumeratio/hopf").declareHopf;
-  readonly declareGroupAlgebra: typeof import("@enumeratio/groupalgebra").declareGroupAlgebra;
-  readonly declareModular: typeof import("@enumeratio/modular").declareModular;
-  readonly declareNumberTheory: typeof import("@enumeratio/number-theory").declareNumberTheory;
-  readonly declareAdeles: typeof import("@enumeratio/adeles").declareAdeles;
-  readonly declareBraid: typeof import("@enumeratio/braid").declareBraid;
-  readonly declareFrontendCarriers: typeof import("@enumeratio/frontend/declare-carriers").declareFrontendCarriers;
+  readonly declareCombinatorics: typeof import("@notatio/combinatorics").declareCombinatorics;
+  readonly declareCarrierPlurals: typeof import("@notatio/structures").declareCarrierPlurals;
+  readonly declareCarrierElement: typeof import("@notatio/structures").declareCarrierElement;
+  readonly declareMaps: typeof import("@notatio/combinatorics").declareMaps;
+  readonly CARRIERS: typeof import("@notatio/combinatorics").CARRIERS;
+  readonly declareAnalytic: typeof import("@notatio/analytic").declareAnalytic;
+  readonly declareFractals: typeof import("@notatio/analytic").declareFractals;
+  readonly declareGraphics: typeof import("@notatio/formats").declareGraphics;
+  readonly declareBoxes: typeof import("@notatio/boxes").declareBoxes;
+  readonly declareStructures: typeof import("@notatio/structures").declareStructures;
+  readonly declareHypercomplex: typeof import("@notatio/hypercomplex").declareHypercomplex;
+  readonly declareGeometric: typeof import("@notatio/geometric").declareGeometric;
+  readonly declareDiagrams: typeof import("@notatio/diagram").declareDiagrams;
+  readonly declareResidues: typeof import("@notatio/residues").declareResidues;
+  readonly declareNumerals: typeof import("@notatio/numerals").declareNumerals;
+  readonly declareHecke: typeof import("@notatio/hecke").declareHecke;
+  readonly declareIncidence: typeof import("@notatio/incidence").declareIncidence;
+  readonly declareQuiver: typeof import("@notatio/quiver").declareQuiver;
+  readonly declareHopf: typeof import("@notatio/hopf").declareHopf;
+  readonly declareGroupAlgebra: typeof import("@notatio/groupalgebra").declareGroupAlgebra;
+  readonly declareModular: typeof import("@notatio/modular").declareModular;
+  readonly declareNumberTheory: typeof import("@notatio/number-theory").declareNumberTheory;
+  readonly declareAdeles: typeof import("@notatio/adeles").declareAdeles;
+  readonly declareBraid: typeof import("@notatio/braid").declareBraid;
+  readonly declareFrontendCarriers: typeof import("@notatio/frontend/declare-carriers").declareFrontendCarriers;
 }
 
 /**
  * Declares every library the page ships, in dependency order, via `apply` -- either
  * `configureEngine` (deferred until the engine exists) or a direct `(fn) => fn(ce)`.
- * Does NOT include `@enumeratio/evaluation` itself or the LaTeX dictionary
+ * Does NOT include `@notatio/evaluation` itself or the LaTeX dictionary
  * (the packages' notation, `configureLatex`): the page engine needs both, but a session's
  * engine already has evaluation declared before `configure` runs (see
  * `browser-session-worker.ts`) and never parses LaTeX at all (see

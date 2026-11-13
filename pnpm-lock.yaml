@@ -163,20 +163,20 @@ importers:
 
   packages/bench:
     dependencies:
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@enumeratio/oracle':
+      '@notatio/oracle':
         specifier: workspace:*
         version: link:../oracle
-      '@enumeratio/utils':
+      '@notatio/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -194,14 +194,14 @@ importers:
 
   packages/boxes:
     dependencies:
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -216,23 +216,23 @@ importers:
 
   packages/catalog:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@enumeratio/plausible':
+      '@notatio/plausible':
         specifier: workspace:*
         version: link:../plausible
       typescript:
@@ -247,14 +247,14 @@ importers:
 
   packages/ce-patches:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -269,101 +269,101 @@ importers:
 
   packages/census:
     dependencies:
-      '@enumeratio/adeles':
+      '@notatio/adeles':
         specifier: workspace:*
         version: link:../symbols/arithmetic/adeles
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/braid':
+      '@notatio/braid':
         specifier: workspace:*
         version: link:../symbols/groups/braid
-      '@enumeratio/catalog':
+      '@notatio/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/diagram':
+      '@notatio/diagram':
         specifier: workspace:*
         version: link:../symbols/algebras/diagram
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../formats
-      '@enumeratio/frontend':
+      '@notatio/frontend':
         specifier: workspace:*
         version: link:../frontend
-      '@enumeratio/geometric':
+      '@notatio/geometric':
         specifier: workspace:*
         version: link:../symbols/algebras/geometric
-      '@enumeratio/groupalgebra':
+      '@notatio/groupalgebra':
         specifier: workspace:*
         version: link:../symbols/algebras/groupalgebra
-      '@enumeratio/hecke':
+      '@notatio/hecke':
         specifier: workspace:*
         version: link:../symbols/algebras/hecke
-      '@enumeratio/hopf':
+      '@notatio/hopf':
         specifier: workspace:*
         version: link:../symbols/algebras/hopf
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../symbols/algebras/hypercomplex
-      '@enumeratio/incidence':
+      '@notatio/incidence':
         specifier: workspace:*
         version: link:../symbols/algebras/incidence
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
-      '@enumeratio/modular':
+      '@notatio/modular':
         specifier: workspace:*
         version: link:../symbols/groups/modular
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../symbols/arithmetic/number-theory
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../symbols/arithmetic/numerals
-      '@enumeratio/quiver':
+      '@notatio/quiver':
         specifier: workspace:*
         version: link:../symbols/algebras/quiver
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../symbols/arithmetic/residues
-      '@enumeratio/statistics':
+      '@notatio/statistics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/statistics
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@enumeratio/oracle':
+      '@notatio/oracle':
         specifier: workspace:*
         version: link:../oracle
-      '@enumeratio/reference':
+      '@notatio/reference':
         specifier: workspace:*
         version: link:../reference
-      '@enumeratio/utils':
+      '@notatio/utils':
         specifier: workspace:*
         version: link:../utils
-      '@enumeratio/wolfram':
+      '@notatio/wolfram':
         specifier: workspace:*
         version: link:../wolfram
       '@types/node':
@@ -384,77 +384,77 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/braid':
+      '@notatio/braid':
         specifier: workspace:*
         version: link:../symbols/groups/braid
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/diagram':
+      '@notatio/diagram':
         specifier: workspace:*
         version: link:../symbols/algebras/diagram
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../formats
-      '@enumeratio/frontend':
+      '@notatio/frontend':
         specifier: workspace:*
         version: link:../frontend
-      '@enumeratio/groupalgebra':
+      '@notatio/groupalgebra':
         specifier: workspace:*
         version: link:../symbols/algebras/groupalgebra
-      '@enumeratio/hecke':
+      '@notatio/hecke':
         specifier: workspace:*
         version: link:../symbols/algebras/hecke
-      '@enumeratio/hopf':
+      '@notatio/hopf':
         specifier: workspace:*
         version: link:../symbols/algebras/hopf
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../symbols/algebras/hypercomplex
-      '@enumeratio/incidence':
+      '@notatio/incidence':
         specifier: workspace:*
         version: link:../symbols/algebras/incidence
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
-      '@enumeratio/modular':
+      '@notatio/modular':
         specifier: workspace:*
         version: link:../symbols/groups/modular
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../symbols/arithmetic/number-theory
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../symbols/arithmetic/numerals
-      '@enumeratio/quiver':
+      '@notatio/quiver':
         specifier: workspace:*
         version: link:../symbols/algebras/quiver
-      '@enumeratio/raster':
+      '@notatio/raster':
         specifier: workspace:*
         version: link:../raster
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../symbols/arithmetic/residues
-      '@enumeratio/statistics':
+      '@notatio/statistics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/statistics
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../structures
     devDependencies:
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -475,46 +475,46 @@ importers:
 
   packages/components:
     dependencies:
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../ce-patches
-      '@enumeratio/cli':
+      '@notatio/cli':
         specifier: workspace:*
         version: link:../cli
-      '@enumeratio/complex-numerals':
+      '@notatio/complex-numerals':
         specifier: workspace:*
         version: link:../symbols/arithmetic/complex-numerals
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../formats
-      '@enumeratio/frontend':
+      '@notatio/frontend':
         specifier: workspace:*
         version: link:../frontend
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../symbols/arithmetic/number-theory
-      '@enumeratio/polytope':
+      '@notatio/polytope':
         specifier: workspace:*
         version: link:../symbols/combinatorics/polytope
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../symbols/arithmetic/residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../structures
-      '@enumeratio/wolfram':
+      '@notatio/wolfram':
         specifier: workspace:*
         version: link:../wolfram
       '@xterm/addon-fit':
@@ -536,13 +536,13 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
       happy-dom:
@@ -565,7 +565,7 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       typescript:
@@ -590,7 +590,7 @@ importers:
         specifier: 2.9.0
         version: 2.9.0
     devDependencies:
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -608,16 +608,16 @@ importers:
 
   packages/formats:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/raster':
+      '@notatio/raster':
         specifier: workspace:*
         version: link:../raster
-      '@enumeratio/wolfram':
+      '@notatio/wolfram':
         specifier: workspace:*
         version: link:../wolfram
       asciimath2tex:
@@ -633,7 +633,7 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
       '@types/node':
@@ -651,43 +651,43 @@ importers:
 
   packages/frontend:
     dependencies:
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/braid':
+      '@notatio/braid':
         specifier: workspace:*
         version: link:../symbols/groups/braid
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../ce-patches
-      '@enumeratio/complex-numerals':
+      '@notatio/complex-numerals':
         specifier: workspace:*
         version: link:../symbols/arithmetic/complex-numerals
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../formats
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../symbols/arithmetic/number-theory
-      '@enumeratio/polytope':
+      '@notatio/polytope':
         specifier: workspace:*
         version: link:../symbols/combinatorics/polytope
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../symbols/arithmetic/residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../structures
       d3-scale-chromatic:
@@ -697,22 +697,22 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@enumeratio/oracle':
+      '@notatio/oracle':
         specifier: workspace:*
         version: link:../oracle
-      '@enumeratio/reference':
+      '@notatio/reference':
         specifier: workspace:*
         version: link:../reference
-      '@enumeratio/wolfram':
+      '@notatio/wolfram':
         specifier: workspace:*
         version: link:../wolfram
       '@types/d3-scale-chromatic':
@@ -733,10 +733,10 @@ importers:
 
   packages/manifest:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
       semver:
@@ -746,7 +746,7 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -767,92 +767,92 @@ importers:
 
   packages/oracle:
     dependencies:
-      '@enumeratio/utils':
+      '@notatio/utils':
         specifier: workspace:*
         version: link:../utils
-      '@enumeratio/wolfram':
+      '@notatio/wolfram':
         specifier: workspace:*
         version: link:../wolfram
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/adeles':
+      '@notatio/adeles':
         specifier: workspace:*
         version: link:../symbols/arithmetic/adeles
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/braid':
+      '@notatio/braid':
         specifier: workspace:*
         version: link:../symbols/groups/braid
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../ce-patches
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/diagram':
+      '@notatio/diagram':
         specifier: workspace:*
         version: link:../symbols/algebras/diagram
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../formats
-      '@enumeratio/geometric':
+      '@notatio/geometric':
         specifier: workspace:*
         version: link:../symbols/algebras/geometric
-      '@enumeratio/groupalgebra':
+      '@notatio/groupalgebra':
         specifier: workspace:*
         version: link:../symbols/algebras/groupalgebra
-      '@enumeratio/hecke':
+      '@notatio/hecke':
         specifier: workspace:*
         version: link:../symbols/algebras/hecke
-      '@enumeratio/hopf':
+      '@notatio/hopf':
         specifier: workspace:*
         version: link:../symbols/algebras/hopf
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../symbols/algebras/hypercomplex
-      '@enumeratio/incidence':
+      '@notatio/incidence':
         specifier: workspace:*
         version: link:../symbols/algebras/incidence
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
-      '@enumeratio/modular':
+      '@notatio/modular':
         specifier: workspace:*
         version: link:../symbols/groups/modular
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../symbols/arithmetic/number-theory
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../symbols/arithmetic/numerals
-      '@enumeratio/plausible':
+      '@notatio/plausible':
         specifier: workspace:*
         version: link:../plausible
-      '@enumeratio/quiver':
+      '@notatio/quiver':
         specifier: workspace:*
         version: link:../symbols/algebras/quiver
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../symbols/arithmetic/residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../structures
       '@types/node':
@@ -870,7 +870,7 @@ importers:
 
   packages/plausible:
     devDependencies:
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -907,101 +907,101 @@ importers:
 
   packages/reference:
     dependencies:
-      '@enumeratio/catalog':
+      '@notatio/catalog':
         specifier: workspace:*
         version: link:../catalog
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/combinatorics
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
-      '@enumeratio/oracle':
+      '@notatio/oracle':
         specifier: workspace:*
         version: link:../oracle
-      '@enumeratio/utils':
+      '@notatio/utils':
         specifier: workspace:*
         version: link:../utils
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/adeles':
+      '@notatio/adeles':
         specifier: workspace:*
         version: link:../symbols/arithmetic/adeles
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/braid':
+      '@notatio/braid':
         specifier: workspace:*
         version: link:../symbols/groups/braid
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../ce-patches
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/diagram':
+      '@notatio/diagram':
         specifier: workspace:*
         version: link:../symbols/algebras/diagram
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../formats
-      '@enumeratio/geometric':
+      '@notatio/geometric':
         specifier: workspace:*
         version: link:../symbols/algebras/geometric
-      '@enumeratio/groupalgebra':
+      '@notatio/groupalgebra':
         specifier: workspace:*
         version: link:../symbols/algebras/groupalgebra
-      '@enumeratio/hecke':
+      '@notatio/hecke':
         specifier: workspace:*
         version: link:../symbols/algebras/hecke
-      '@enumeratio/hopf':
+      '@notatio/hopf':
         specifier: workspace:*
         version: link:../symbols/algebras/hopf
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../symbols/algebras/hypercomplex
-      '@enumeratio/incidence':
+      '@notatio/incidence':
         specifier: workspace:*
         version: link:../symbols/algebras/incidence
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
-      '@enumeratio/modular':
+      '@notatio/modular':
         specifier: workspace:*
         version: link:../symbols/groups/modular
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../symbols/arithmetic/number-theory
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../symbols/arithmetic/numerals
-      '@enumeratio/plausible':
+      '@notatio/plausible':
         specifier: workspace:*
         version: link:../plausible
-      '@enumeratio/quiver':
+      '@notatio/quiver':
         specifier: workspace:*
         version: link:../symbols/algebras/quiver
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../symbols/arithmetic/residues
-      '@enumeratio/statistics':
+      '@notatio/statistics':
         specifier: workspace:*
         version: link:../symbols/combinatorics/statistics
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../structures
-      '@enumeratio/wolfram':
+      '@notatio/wolfram':
         specifier: workspace:*
         version: link:../wolfram
       '@types/node':
@@ -1022,20 +1022,20 @@ importers:
 
   packages/structures:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../engine
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest
       typescript:
@@ -1050,26 +1050,26 @@ importers:
 
   packages/symbols/algebras/diagram:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../hypercomplex
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1084,20 +1084,20 @@ importers:
 
   packages/symbols/algebras/geometric:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../hypercomplex
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1112,23 +1112,23 @@ importers:
 
   packages/symbols/algebras/groupalgebra:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1143,23 +1143,23 @@ importers:
 
   packages/symbols/algebras/hecke:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1174,23 +1174,23 @@ importers:
 
   packages/symbols/algebras/hopf:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1205,23 +1205,23 @@ importers:
 
   packages/symbols/algebras/hypercomplex:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1236,23 +1236,23 @@ importers:
 
   packages/symbols/algebras/incidence:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1267,23 +1267,23 @@ importers:
 
   packages/symbols/algebras/quiver:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1298,32 +1298,32 @@ importers:
 
   packages/symbols/analysis/analytic:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../../../ce-patches
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../../../entry
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
-      '@enumeratio/utils':
+      '@notatio/utils':
         specifier: workspace:*
         version: link:../../../utils
       typescript:
@@ -1338,26 +1338,26 @@ importers:
 
   packages/symbols/arithmetic/adeles:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../number-theory
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../numerals
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../residues
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
       typescript:
@@ -1372,11 +1372,11 @@ importers:
 
   packages/symbols/arithmetic/complex-numerals:
     dependencies:
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../numerals
     devDependencies:
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
       typescript:
@@ -1391,32 +1391,32 @@ importers:
 
   packages/symbols/arithmetic/number-theory:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../../../ce-patches
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../numerals
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
       typescript:
@@ -1431,29 +1431,29 @@ importers:
 
   packages/symbols/arithmetic/numerals:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/utils':
+      '@notatio/utils':
         specifier: workspace:*
         version: link:../../../utils
       typescript:
@@ -1468,26 +1468,26 @@ importers:
 
   packages/symbols/arithmetic/residues:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../../../ce-patches
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
       typescript:
@@ -1502,38 +1502,38 @@ importers:
 
   packages/symbols/combinatorics/combinatorics:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../../../ce-patches
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/plausible':
+      '@notatio/plausible':
         specifier: workspace:*
         version: link:../../../plausible
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../../arithmetic/residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../../../entry
-      '@enumeratio/groupalgebra':
+      '@notatio/groupalgebra':
         specifier: workspace:*
         version: link:../../algebras/groupalgebra
       typescript:
@@ -1548,14 +1548,14 @@ importers:
 
   packages/symbols/combinatorics/polytope:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
       typescript:
@@ -1570,23 +1570,23 @@ importers:
 
   packages/symbols/combinatorics/statistics:
     dependencies:
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../combinatorics
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../../../entry
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1601,20 +1601,20 @@ importers:
 
   packages/symbols/evaluation/evaluation:
     dependencies:
-      '@enumeratio/ce-patches':
+      '@notatio/ce-patches':
         specifier: workspace:*
         version: link:../../../ce-patches
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
       '@types/node':
@@ -1632,29 +1632,29 @@ importers:
 
   packages/symbols/groups/braid:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/diagram':
+      '@notatio/diagram':
         specifier: workspace:*
         version: link:../../algebras/diagram
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
-      '@enumeratio/modular':
+      '@notatio/modular':
         specifier: workspace:*
         version: link:../modular
       typescript:
@@ -1669,26 +1669,26 @@ importers:
 
   packages/symbols/groups/modular:
     dependencies:
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../../../boxes
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../../../engine
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../../arithmetic/residues
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../../../structures
     devDependencies:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../../config
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../../../manifest
       typescript:
@@ -1703,7 +1703,7 @@ importers:
 
   packages/utils:
     devDependencies:
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../config
       '@types/node':
@@ -1724,7 +1724,7 @@ importers:
 
   packages/wolfram:
     devDependencies:
-      '@enumeratio/entry':
+      '@notatio/entry':
         specifier: workspace:*
         version: link:../entry
       typescript:
@@ -1739,7 +1739,7 @@ importers:
 
   tools/perf:
     devDependencies:
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../../packages/config
       '@types/node':
@@ -1757,85 +1757,85 @@ importers:
 
   web:
     dependencies:
-      '@enumeratio/adeles':
+      '@notatio/adeles':
         specifier: workspace:*
         version: link:../packages/symbols/arithmetic/adeles
-      '@enumeratio/analytic':
+      '@notatio/analytic':
         specifier: workspace:*
         version: link:../packages/symbols/analysis/analytic
-      '@enumeratio/boxes':
+      '@notatio/boxes':
         specifier: workspace:*
         version: link:../packages/boxes
-      '@enumeratio/braid':
+      '@notatio/braid':
         specifier: workspace:*
         version: link:../packages/symbols/groups/braid
-      '@enumeratio/cli':
+      '@notatio/cli':
         specifier: workspace:*
         version: link:../packages/cli
-      '@enumeratio/combinatorics':
+      '@notatio/combinatorics':
         specifier: workspace:*
         version: link:../packages/symbols/combinatorics/combinatorics
-      '@enumeratio/components':
+      '@notatio/components':
         specifier: workspace:*
         version: link:../packages/components
-      '@enumeratio/diagram':
+      '@notatio/diagram':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/diagram
-      '@enumeratio/engine':
+      '@notatio/engine':
         specifier: workspace:*
         version: link:../packages/engine
-      '@enumeratio/evaluation':
+      '@notatio/evaluation':
         specifier: workspace:*
         version: link:../packages/symbols/evaluation/evaluation
-      '@enumeratio/formats':
+      '@notatio/formats':
         specifier: workspace:*
         version: link:../packages/formats
-      '@enumeratio/frontend':
+      '@notatio/frontend':
         specifier: workspace:*
         version: link:../packages/frontend
-      '@enumeratio/geometric':
+      '@notatio/geometric':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/geometric
-      '@enumeratio/groupalgebra':
+      '@notatio/groupalgebra':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/groupalgebra
-      '@enumeratio/hecke':
+      '@notatio/hecke':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/hecke
-      '@enumeratio/hopf':
+      '@notatio/hopf':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/hopf
-      '@enumeratio/hypercomplex':
+      '@notatio/hypercomplex':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/hypercomplex
-      '@enumeratio/incidence':
+      '@notatio/incidence':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/incidence
-      '@enumeratio/manifest':
+      '@notatio/manifest':
         specifier: workspace:*
         version: link:../packages/manifest
-      '@enumeratio/modular':
+      '@notatio/modular':
         specifier: workspace:*
         version: link:../packages/symbols/groups/modular
-      '@enumeratio/number-theory':
+      '@notatio/number-theory':
         specifier: workspace:*
         version: link:../packages/symbols/arithmetic/number-theory
-      '@enumeratio/numerals':
+      '@notatio/numerals':
         specifier: workspace:*
         version: link:../packages/symbols/arithmetic/numerals
-      '@enumeratio/quiver':
+      '@notatio/quiver':
         specifier: workspace:*
         version: link:../packages/symbols/algebras/quiver
-      '@enumeratio/reference':
+      '@notatio/reference':
         specifier: workspace:*
         version: link:../packages/reference
-      '@enumeratio/residues':
+      '@notatio/residues':
         specifier: workspace:*
         version: link:../packages/symbols/arithmetic/residues
-      '@enumeratio/statistics':
+      '@notatio/statistics':
         specifier: workspace:*
         version: link:../packages/symbols/combinatorics/statistics
-      '@enumeratio/structures':
+      '@notatio/structures':
         specifier: workspace:*
         version: link:../packages/structures
       katex:
@@ -1845,7 +1845,7 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
-      '@enumeratio/config':
+      '@notatio/config':
         specifier: workspace:*
         version: link:../packages/config
       '@playwright/test':

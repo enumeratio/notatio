@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/polytope",
+  "name": "@notatio/polytope",
   "version": "0.0.0",
   "private": true,
   "description": "Polytopes as face posets: the permutahedron, simplex and cross-polytope, with each face's dimension, barycentre and containment — and a projection into scene space.",
@@ -22,12 +22,12 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*"
+    "@notatio/engine": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -1,7 +1,7 @@
 // A family that declines past 2^53 still answers a small count through the interpreter when its
 // compiled count is absent; it declines only where compiled code ran and gave out.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, familyHash, kernelOn } from "../src/families/epsil.ts";
 

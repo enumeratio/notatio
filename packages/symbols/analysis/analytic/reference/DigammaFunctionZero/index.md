@@ -2,11 +2,11 @@
 name: DigammaFunctionZero
 domain: Special functions
 signature: DigammaFunctionZero(n)
-summary: 'The $n$-th real zero of the digamma function $\psi$: $n=0$ names the zero on $(0,\infty)$ ($x_0 \approx 1.4616$), $n \ge 1$ the zero on $(-n, -n+1)$. Provided by `@enumeratio/analytic`.'
+summary: 'The $n$-th real zero of the digamma function $\psi$: $n=0$ names the zero on $(0,\infty)$ ($x_0 \approx 1.4616$), $n \ge 1$ the zero on $(-n, -n+1)$. Provided by `@notatio/analytic`.'
 signatures:
   - call: DigammaFunctionZero(n)
     description: the $n$-th real zero of $\psi$, $n \ge 0$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer) -> number
 primitive: numeric
 bindings:

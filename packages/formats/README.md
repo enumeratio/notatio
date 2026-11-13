@@ -1,4 +1,4 @@
-# @enumeratio/formats
+# @notatio/formats
 
 A Wolfram-style format registry — `Import`/`Export` over MathJSON, Wolfram Language, TeX,
 AsciiMath, MathML, code targets (Python/JS/GLSL), and images. Reach for this when
@@ -31,7 +31,7 @@ notation and need it back as an expression.
 ## Usage
 
 ```ts
-import { exportTo, fileFormat, getFormat, importFrom } from "@enumeratio/formats";
+import { exportTo, fileFormat, getFormat, importFrom } from "@notatio/formats";
 
 exportTo(box(["Binomial", 10, 3]), "WL"); // "Binomial[10, 3]"
 exportTo(box(["Add", ["Power", "x", 2], 1]), "JavaScript"); // contains "x"

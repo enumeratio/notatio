@@ -26,7 +26,7 @@ import {
   parseEntries,
   scrubValue,
   sweepInterval,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { Sweep } from "./sweep.ts";
 import { defineControl, emitControl } from "./define.ts";
 

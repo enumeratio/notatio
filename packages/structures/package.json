@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/structures",
+  "name": "@notatio/structures",
   "version": "0.0.0",
   "private": true,
   "description": "Mathematical structure as compute-engine protocols: orders, lattices, ticks, products. A generic head requires structure; a type conforms to it (https://github.com/enumeratio/notatio/wiki/Structures).",
@@ -28,13 +28,13 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/engine": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/engine": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/manifest": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

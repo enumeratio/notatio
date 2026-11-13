@@ -1,8 +1,8 @@
-// @enumeratio/modular's heads in traditional notation: PSL(2,Z) matrices, Dedekind sums,
+// @notatio/modular's heads in traditional notation: PSL(2,Z) matrices, Dedekind sums,
 // class numbers, the Rademacher functions. (KroneckerSymbol is compute-engine's own head,
-// so its Legendre-family notation lives in @enumeratio/boxes' ENGINE_NOTATION.)
+// so its Legendre-family notation lives in @notatio/boxes' ENGINE_NOTATION.)
 
-import { fence, grid, named, type Notation, scalars, type PackageNotation } from "@enumeratio/boxes";
+import { fence, grid, named, type Notation, scalars, type PackageNotation } from "@notatio/boxes";
 
 export const MODULAR_NOTATION: Notation = {
   ModularMatrix: scalars((args, write) =>

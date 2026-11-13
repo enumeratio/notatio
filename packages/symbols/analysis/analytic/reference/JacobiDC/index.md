@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{dc}(u,m) = \operatorname{dn
 signatures:
   - call: JacobiDC(u, m)
     description: the Jacobi elliptic function dc, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiDN

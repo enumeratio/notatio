@@ -6,7 +6,7 @@ export type DivergenceSystem = "wolfram" | "numpy" | "sympy";
 /** How an external system's run of an example compared to ours. */
 export type OtherSystemVerdict = "agree" | "disagree" | "inconclusive" | "error";
 
-/** One system's exact run of one example — from the implementations records (see `@enumeratio/oracle`). */
+/** One system's exact run of one example — from the implementations records (see `@notatio/oracle`). */
 export interface OtherSystemRun {
   readonly input: string;
   readonly output: string;
@@ -91,7 +91,7 @@ export interface ReferenceExample {
   readonly volatile?: readonly string[];
   /**
    * For an example whose value draws: the shape of the box it lowers to, asserted in Node
-   * (`@enumeratio/frontend`'s `tests/example-boxes.test.ts`), never as pixels.
+   * (`@notatio/frontend`'s `tests/example-boxes.test.ts`), never as pixels.
    */
   readonly boxes?: BoxShape;
   /**
@@ -205,7 +205,7 @@ export type Environment = "engine" | "browser" | "gpu" | "node" | "external";
  *   derivable live from the expression, so normally not stored at all
  * - `component` bottoms out in a web component — the head's meaning IS the rendered element
  * - `mapped`    the equivalent call in an external system; the table lives in
- *   `@enumeratio/oracle`'s MAPPINGS, keyed by signature
+ *   `@notatio/oracle`'s MAPPINGS, keyed by signature
  */
 export type BindingOrigin = "reference" | "native" | "compiled" | "component" | "mapped";
 
@@ -228,10 +228,10 @@ export interface ReferenceBinding {
   /** What evaluating it produces here, when that is not simply a number or expression. */
   readonly produces?: string;
   /** `mapped` only: the operand count this row applies to. Omitted matches any arity --
-   * @enumeratio/oracle's `mappingFor` prefers a system's arity-specific row over its row with none, and ignores
+   * @notatio/oracle's `mappingFor` prefers a system's arity-specific row over its row with none, and ignores
    * rows that do not emit for that system. */
   readonly arity?: number;
-  /** `mapped` only: the source template, `$n` for the n-th operand (`@enumeratio/oracle`'s
+  /** `mapped` only: the source template, `$n` for the n-th operand (`@notatio/oracle`'s
    * `Mapping.emit` entry for this row's `form`). */
   readonly template?: string;
   /** `mapped` only: 1-based operand this head threads over, for a system whose plain function
@@ -300,9 +300,9 @@ export interface ReferenceNames {
 
 /**
  * A combinatorial map's law, checked at one element (https://github.com/enumeratio/notatio/wiki/Plausible §4.2) -- the
- * shorthand vocabulary written on a map's record (`@enumeratio/combinatorics`' own generator
+ * shorthand vocabulary written on a map's record (`@notatio/combinatorics`' own generator
  * writes it into `CombinatorialMap.laws`/`.orderIsomorphism` at build time; `checkLaws`
- * (@enumeratio/structures) reads that same shape, unchanged). `on` disambiguates a law that
+ * (@notatio/structures) reads that same shape, unchanged). `on` disambiguates a law that
  * applies to only ONE of a shared name's overloads (`BinaryTree` is two maps, from
  * `binary_tree_parent_array` and from `dyck_path`, each with its own inverse) -- the same
  * convention `ReferenceSignature.on` uses; omitted, the law applies to every overload this
@@ -410,7 +410,7 @@ export interface ReferenceEntry {
    */
   readonly catalog?: readonly Reference[];
   /**
-   * What `@enumeratio/catalog`'s `declareCatalog` needs to register this head as a resource
+   * What `@notatio/catalog`'s `declareCatalog` needs to register this head as a resource
    * (https://github.com/enumeratio/notatio/wiki/Examples-as-Data), moved here off the retired
    * packages/catalog/src/catalog-data.ts. Presence is the kind: `grades` marks a catalogued
    * collection, `statOn`/
@@ -431,7 +431,7 @@ export interface ReferenceEntry {
   readonly names?: ReferenceNames;
   /**
    * Old names this head was declared under, oldest first -- a data alias, same idea as the
-   * numerals systems' aliases. `@enumeratio/statistics`'s `blessedName` reads the generated
+   * numerals systems' aliases. `@notatio/statistics`'s `blessedName` reads the generated
    * table built from these, not this field directly (https://github.com/enumeratio/notatio/wiki/Examples-as-Data).
    */
   readonly formerly?: readonly string[];
@@ -510,7 +510,7 @@ export interface SystemImplementation {
   /** Wolfram (and any system that has one): its TeXForm of `in` and of `out`. */
   readonly tex?: RenderedForm;
   readonly verdict?: OtherSystemVerdict;
-  /** One of `DIVERGENCE_KINDS` (`@enumeratio/oracle`). Any verdict but `agree` needs one. */
+  /** One of `DIVERGENCE_KINDS` (`@notatio/oracle`). Any verdict but `agree` needs one. */
   readonly kind?: string;
   readonly note?: string;
   /** `ours` only: the GitHub issue tracking the gap. */
@@ -546,11 +546,11 @@ export type HeadImplementations = Readonly<Record<string, ExampleImplementations
 //
 // A component's demos, as data, the same way a head's examples are: `packages/components/
 // reference/<Name>.stories.yaml` beside the element sources, one file per component, read and
-// written through the same `@enumeratio/entry` machinery. A story's payload is `expr`, a
+// written through the same `@notatio/entry` machinery. A story's payload is `expr`, a
 // MathJSON expression over the component's own head -- exactly what an example's `expr` is --
 // not a vdom tree: "a MathJSON node `[head, ...args]` and a vdom node `{ tag, props, children }`
 // are the same tree under a renaming" (https://github.com/enumeratio/notatio/wiki/Vdom), and the vdom is a RENDERING of the
-// expression (`structuralOf` / `vdomOf` in `@enumeratio/frontend`), never stored on its own.
+// expression (`structuralOf` / `vdomOf` in `@notatio/frontend`), never stored on its own.
 
 /** One demo on a component's reference page. */
 export interface ComponentStory {

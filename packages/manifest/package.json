@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/manifest",
+  "name": "@notatio/manifest",
   "version": "0.0.0",
   "private": true,
   "description": "Every symbol head we know -- its packages, overloads and their types, parameter names, attributes and summary -- assembled at build time from the reference records and a bare compute-engine.",
@@ -33,13 +33,13 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/entry": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/entry": "workspace:*",
     "semver": "catalog:"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "@types/node": "^24",
     "@types/semver": "catalog:",
     "typescript": "^7.0.2",

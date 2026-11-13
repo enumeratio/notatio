@@ -3,7 +3,7 @@
 // over every small value of its source carrier and a few values that aren't the carrier's,
 // which both must decline.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { BinaryTreeUnrank, type BinTree, DyckPathUnrank } from "../collections/src/families/kernels-extra.ts";
 import { Factorial, PermutationUnrank } from "../collections/src/families/kernels.ts";

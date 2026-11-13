@@ -10,7 +10,7 @@
 //   - `html`, the lit-tag markup a plain-HTML host would write (`renderingOf`/`vdomOf` -- the
 //     same lowering that draws the live render -- plus `markupOf`);
 //   - `vdom`, the expression's own tree verbatim, as the vdom markup writes it
-//     (`@enumeratio/formats/markup`'s `markupOf`): every head a tag, every argument a child.
+//     (`@notatio/formats/markup`'s `markupOf`): every head a tag, every argument a child.
 //     It shows the AST shape
 //     https://github.com/enumeratio/notatio/wiki/Vdom is about, which `html` obscures the
 //     moment a component maps an argument to an attribute (a chart's `data`, say).
@@ -23,13 +23,13 @@
 
 import { readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { COMPONENT_STORIES_SCHEMA, validateSchema } from "@enumeratio/entry/schema";
-import { readStories, STORIES_SUFFIX, writeFormatted } from "@enumeratio/entry/node";
-import { toInputForm } from "@enumeratio/formats";
-import { expandDictionaries, markupOf, renderingOf } from "@enumeratio/frontend/symbols";
-import { markupOf as vdomMarkupOf } from "@enumeratio/formats/markup";
-import { vdomOf } from "@enumeratio/frontend/vdom";
-import type { ComponentStory } from "@enumeratio/entry";
+import { COMPONENT_STORIES_SCHEMA, validateSchema } from "@notatio/entry/schema";
+import { readStories, STORIES_SUFFIX, writeFormatted } from "@notatio/entry/node";
+import { toInputForm } from "@notatio/formats";
+import { expandDictionaries, markupOf, renderingOf } from "@notatio/frontend/symbols";
+import { markupOf as vdomMarkupOf } from "@notatio/formats/markup";
+import { vdomOf } from "@notatio/frontend/vdom";
+import type { ComponentStory } from "@notatio/entry";
 
 const referenceDir = new URL("../reference/", import.meta.url);
 const referencePath = fileURLToPath(referenceDir);

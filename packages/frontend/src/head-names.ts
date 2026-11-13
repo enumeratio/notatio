@@ -2,8 +2,8 @@
 // own and every record's, https://github.com/enumeratio/notatio/wiki/Manifest), the heads that draw, and the leaf tags of
 // the structural tree (https://github.com/enumeratio/notatio/wiki/Archive-Vdom-Markup-Design §1).
 
-import { GRAPHICS_HEADS } from "@enumeratio/formats";
-import { SYMBOLS } from "@enumeratio/manifest";
+import { GRAPHICS_HEADS } from "@notatio/formats";
+import { SYMBOLS } from "@notatio/manifest";
 
 const ATOMS = ["Integer", "Real", "Rational", "Complex", "String", "Symbol"];
 

@@ -1,14 +1,14 @@
 import { type Expression, type ComputeEngine, isSymbol } from "@cortex-js/compute-engine";
-import { BigDecimal, declareCompile, bigRationalAt, operandsOf } from "@enumeratio/engine";
-import type { Json } from "@enumeratio/ce-patches";
-import type { BoxInput, EvalOptions, NativeEval } from "@enumeratio/ce-patches";
-import { bigRealOperand, bigResult, exceedsDoublePrecision, isFiniteNum } from "@enumeratio/ce-patches";
+import { BigDecimal, declareCompile, bigRationalAt, operandsOf } from "@notatio/engine";
+import type { Json } from "@notatio/ce-patches";
+import type { BoxInput, EvalOptions, NativeEval } from "@notatio/ce-patches";
+import { bigRealOperand, bigResult, exceedsDoublePrecision, isFiniteNum } from "@notatio/ce-patches";
 
 // The Wolfram signal / piecewise-waveform family: UnitBox, UnitTriangle, HeavisideTheta,
 // HeavisideLambda, HeavisidePi, Ramp, SawtoothWave, TriangleWave, SquareWave, Rescale,
 // DiracDelta, DiscreteDelta, DiscreteShift. `Clip` is NOT here — `Clip[x, {lo, hi}]` (and its
 // 3-arg threshold-value form) already round-trips onto compute-engine's native `Clamp`, see
-// `@enumeratio/wolfram`'s SPECIAL/STRUCTURAL tables.
+// `@notatio/wolfram`'s SPECIAL/STRUCTURAL tables.
 //
 // All new heads decline (stay symbolic) on a complex or otherwise undecided argument. Where an
 // argument IS decided, arithmetic runs on an exact rational (`Frac`) when the operand itself is

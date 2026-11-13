@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 
 // Rigorous endpoints for an interval image: the promise an `Interval` result makes is that
 // it CONTAINS every value the function takes on the input (enumeratio/notatio#113 §2 --

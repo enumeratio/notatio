@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { type BigDecimal, wrapOperator } from "@enumeratio/engine";
+import { type BigDecimal, wrapOperator } from "@notatio/engine";
 import {
   type EvalOptions,
   bigRealOperand,
@@ -17,7 +17,7 @@ import {
   scale,
   sub,
   inexactComplex,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { carlsonRF, carlsonRJ, carlsonRJDeclines } from "./carlson.ts";
 import { ellipticPiBig, incompleteEllipticEBig, incompleteEllipticFBig } from "./elliptic-pi-big.ts";
 

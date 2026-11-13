@@ -3,7 +3,7 @@ import { dirname, join, relative } from "node:path";
 import { fileURLToPath } from "node:url";
 import { expect, test } from "vite-plus/test";
 
-// Repo-wide guard: `@enumeratio/entry` owns the strict YAML schema and the single reader/
+// Repo-wide guard: `@notatio/entry` owns the strict YAML schema and the single reader/
 // writer (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §4, §9 "YAML typing"). Nothing else may import `yaml`
 // directly -- a stray `yaml.parse()`/`YAML.stringify()` with the library's own default (YAML
 // 1.2 core) schema would quietly turn `True` into `true` and `0o17` into `15`, exactly the
@@ -34,7 +34,7 @@ function sourceFiles(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-test('only @enumeratio/entry imports "yaml" -- everyone else uses parseYaml/stringifyYaml', () => {
+test('only @notatio/entry imports "yaml" -- everyone else uses parseYaml/stringifyYaml', () => {
   const root = repoRoot(fileURLToPath(import.meta.url));
   const entryPackage = join(root, "packages", "entry");
   const offenders = sourceFiles(join(root, "packages"))

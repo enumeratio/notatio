@@ -1,6 +1,6 @@
 // The base package -- the symbol map, the renderers, the arithmetic -- re-exported, so
 // a consumer that wants the components has the whole of notatio from one import.
-export * from "@enumeratio/frontend";
+export * from "@notatio/frontend";
 
 // Every box primitive is a tag; the ones without behavior are empty elements.
 import { defineBoxElements } from "./box-elements.ts";

@@ -16,9 +16,9 @@ polylogarithm.
 
 compute-engine ships both heads natively, so this is an extension rather than an addition.
 [`PolyLog`](/reference/symbol/PolyLog) is native at integer order (including the continuation
-past the unit disk); `@enumeratio/analytic` adds non-integer and complex $s$.
+past the unit disk); `@notatio/analytic` adds non-integer and complex $s$.
 [`PolyGamma`](/reference/symbol/PolyGamma) is native at real argument;
-`@enumeratio/analytic` adds complex $z$, and the GPU kernel neither had.
+`@notatio/analytic` adds complex $z$, and the GPU kernel neither had.
 
 <Story title="Reductions">
 <notatio-cell value="PolyLog(1, z)" />

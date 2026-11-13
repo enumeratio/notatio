@@ -1,5 +1,5 @@
-import { bigRationalAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@enumeratio/engine";
-import type { EvalOptions, Json } from "@enumeratio/ce-patches";
+import { bigRationalAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@notatio/engine";
+import type { EvalOptions, Json } from "@notatio/ce-patches";
 import { JACOBI_POLE_HEADS, MAX_LAURENT_ORDER, jacobiLaurent } from "./jacobi-laurent.ts";
 import { JACOBI_M_SERIES_HEADS, MAX_ORDER, jacobiMCoefficients } from "./jacobi-m-series.ts";
 

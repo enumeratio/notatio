@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { isCrosswalkSystem, SOURCES } from "@enumeratio/reference";
+import { isCrosswalkSystem, SOURCES } from "@notatio/reference";
 import { computed, ref, watch } from "vue";
 import { fragment, setFragment } from "../fragment.ts";
 

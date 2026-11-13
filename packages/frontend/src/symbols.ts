@@ -18,9 +18,9 @@ import {
   makeBoxes,
   PROSE_HEADS,
   slot,
-} from "@enumeratio/boxes";
-import { optionsOf, withOptions } from "@enumeratio/formats";
-import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
+} from "@notatio/boxes";
+import { optionsOf, withOptions } from "@notatio/formats";
+import { parseExpression, serializeExpression } from "@notatio/formats/expression";
 import { FRAME_HEIGHT, figureLayerOf, VALUE_FRAMES } from "./figure-frames.ts";
 import { renderBox } from "./box-render.ts";
 import { fieldSourcesOf, regionFunctionOf } from "./field-margin.ts";
@@ -1007,7 +1007,7 @@ export const VISUAL_SYMBOLS: readonly VisualSymbol[] = [
   },
   {
     // `TestResultObject(KeyValuePair("Outcome", …), …)` -- `VerificationTest`'s return
-    // value (`@enumeratio/evaluation`). Every operand is a `KeyValuePair`, so
+    // value (`@notatio/evaluation`). Every operand is a `KeyValuePair`, so
     // `optionsOf` (called generically in `render`, below) treats the whole thing as
     // OPTIONS, not positional operands -- this symbol has no `attributes(ops)` of its
     // own, only the option map. `Outcome`/`Input`/`TestID` need no override: their
@@ -1166,7 +1166,7 @@ const trackedSymbolsOption = (value: Json): Record<string, string> => {
  * `Dynamic` (https://github.com/enumeratio/notatio/wiki/Computation): which kernel a `DynamicModule`'s cells evaluate
  * against. `"Local"` (the default, and anything not recognised as `"Worker"`) leaves
  * the attribute unset -- today's in-page evaluation; `"Worker"` sets it, routing
- * evaluation to the module's own `@enumeratio/evaluation/browser` session instead
+ * evaluation to the module's own `@notatio/evaluation/browser` session instead
  * (`dynamic-module-box.ts`'s `evaluateRemote`).
  */
 const evaluatorOption = (value: Json): Record<string, string> => {

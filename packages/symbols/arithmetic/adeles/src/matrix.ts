@@ -1,4 +1,4 @@
-import { hermiteDecomposition } from "@enumeratio/number-theory";
+import { hermiteDecomposition } from "@notatio/number-theory";
 import * as P from "./profinite.ts";
 import type { Profinite } from "./profinite.ts";
 import * as Q from "./rational.ts";

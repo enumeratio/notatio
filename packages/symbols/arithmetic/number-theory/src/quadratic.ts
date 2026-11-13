@@ -11,7 +11,7 @@
 // membership of the ideal's class in the class group, computed with binary quadratic forms of
 // discriminant D (an ideal [a, (−b + √D)/2] is the form (a, b, (b² − D)/4a)).
 
-import { extendedGcd, factorInteger, gcd, isqrt, powMod, powerModRoots } from "@enumeratio/residues";
+import { extendedGcd, factorInteger, gcd, isqrt, powMod, powerModRoots } from "@notatio/residues";
 
 /** x + yω. */
 export type QuadraticElement = readonly [x: bigint, y: bigint];

@@ -1,4 +1,4 @@
-# @enumeratio/braid
+# @notatio/braid
 
 Braid groups for compute-engine: the Artin presentation, positive braids and their
 closures, the Burau representation, Alexander polynomials, torus knots, and the Lorenz
@@ -12,7 +12,7 @@ complete combinatorial name for the knot its closure ties. Start with
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareBraid } from "@enumeratio/braid";
+import { declareBraid } from "@notatio/braid";
 
 const ce = new ComputeEngine();
 declareBraid(ce);
@@ -61,7 +61,7 @@ TripNumber("LLRLR")   // 2 — its braid index
 
 A modular geodesic word (`L`/`R`) and a braid closure can name the same knot; the Lorenz
 guide is where that correspondence comes from — see also
-[`@enumeratio/modular`](../modular/README.md), whose S/T words feed the Lorenz braid construction.
+[`@notatio/modular`](../modular/README.md), whose S/T words feed the Lorenz braid construction.
 
 ## Next
 

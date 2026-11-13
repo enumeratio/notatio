@@ -9,7 +9,7 @@ import {
   polygamma,
   polyLog,
   zetaGeneralizedChecked,
-} from "@enumeratio/analytic";
+} from "@notatio/analytic";
 import { Uncertain } from "./uncertain.ts";
 
 export { Uncertain };

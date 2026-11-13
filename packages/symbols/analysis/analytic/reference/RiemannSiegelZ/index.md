@@ -2,11 +2,11 @@
 name: RiemannSiegelZ
 domain: Special functions
 signature: RiemannSiegelZ(t)
-summary: The Riemann–Siegel function $Z(t) = e^{i\vartheta(t)}\zeta(\tfrac12 + it)$, real-valued for real $t$ by construction. Provided by `@enumeratio/analytic`.
+summary: The Riemann–Siegel function $Z(t) = e^{i\vartheta(t)}\zeta(\tfrac12 + it)$, real-valued for real $t$ by construction. Provided by `@notatio/analytic`.
 signatures:
   - call: RiemannSiegelZ(t)
     description: the Riemann–Siegel Z-function.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 primitive: numeric
 bindings:

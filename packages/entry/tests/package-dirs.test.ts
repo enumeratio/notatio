@@ -18,18 +18,18 @@ const write = (path: string, json: unknown): void => {
 // packages/census depends on `lib` (installed) and `dup` (installed, but the tree has one too).
 const packages = join(root, "packages");
 write(join(packages, "census", "package.json"), {
-  name: "@enumeratio/census",
-  dependencies: { "@enumeratio/lib": "1.0.0" },
-  devDependencies: { "@enumeratio/dup": "1.0.0", "@enumeratio/absent": "1.0.0", vite: "1" },
+  name: "@notatio/census",
+  dependencies: { "@notatio/lib": "1.0.0" },
+  devDependencies: { "@notatio/dup": "1.0.0", "@notatio/absent": "1.0.0", vite: "1" },
 });
 mkdirSync(join(packages, "census", "reference"), { recursive: true });
 mkdirSync(join(packages, "symbols", "g", "dup", "reference"), { recursive: true });
 const installed = join(root, "store");
 for (const name of ["lib", "dup"]) {
-  write(join(installed, name, "package.json"), { name: `@enumeratio/${name}` });
+  write(join(installed, name, "package.json"), { name: `@notatio/${name}` });
   mkdirSync(join(installed, name, "reference"), { recursive: true });
-  mkdirSync(join(packages, "census", "node_modules", "@enumeratio"), { recursive: true });
-  symlinkSync(join(installed, name), join(packages, "census", "node_modules", "@enumeratio", name));
+  mkdirSync(join(packages, "census", "node_modules", "@notatio"), { recursive: true });
+  symlinkSync(join(installed, name), join(packages, "census", "node_modules", "@notatio", name));
 }
 
 test("installed libraries follow the tree's packages, and the tree wins a name", () => {
@@ -52,14 +52,14 @@ test("records are read from both, installed last", () => {
 });
 
 test("a root that is not a checkout holds only what it holds", () => {
-  expect(packageDirs(join(packages, "census", "node_modules", "@enumeratio")).map((p) => p.package)).toEqual([
+  expect(packageDirs(join(packages, "census", "node_modules", "@notatio")).map((p) => p.package)).toEqual([
     "dup",
     "lib",
   ]);
 });
 
 test("an installed library's records are never written", async () => {
-  const dir = join(packages, "census", "node_modules", "@enumeratio", "lib", "reference");
+  const dir = join(packages, "census", "node_modules", "@notatio", "lib", "reference");
   expect(() => removeHead(dir, "Anything")).toThrow(/installed/);
   await expect(writeHead(dir, "Anything", {} as never)).rejects.toThrow(/installed/);
 });

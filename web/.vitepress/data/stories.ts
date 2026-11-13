@@ -1,10 +1,10 @@
-// The component stories a reference page renders, read out of @enumeratio/components'
+// The component stories a reference page renders, read out of @notatio/components'
 // generated stories-data.ts rather than parsed from YAML here -- ComponentPage.vue runs in the
 // browser and cannot read `reference/<Name>.stories.yaml` itself (https://github.com/enumeratio/notatio/wiki/Vdom). Keyed by
 // the component's head, the same rule ComponentPage.vue's `wrapper` computed derives a tag
 // by.
 
-import { STORIES_DATA, type StoryData } from "@enumeratio/components/stories-data";
+import { STORIES_DATA, type StoryData } from "@notatio/components/stories-data";
 
 export type { StoryData };
 

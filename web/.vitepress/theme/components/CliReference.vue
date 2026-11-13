@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// The `notatio` command's surface, generated from @enumeratio/cli: its USAGE text
+// The `notatio` command's surface, generated from @notatio/cli: its USAGE text
 // verbatim, then the subcommands and flags the completion scripts advertise, and the
 // form / syntax names `-f` and `-i` resolve against.
 import { data as cli } from "../../data/cli.data.ts";

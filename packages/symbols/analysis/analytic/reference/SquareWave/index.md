@@ -6,11 +6,11 @@ summary: "The square wave: period 1, default range {-1, 1}, value 1 on [0, 1/2) 
 signatures:
   - call: SquareWave(x)
     description: 1 for x - floor(x) in [0, 1/2), -1 for x - floor(x) in [1/2, 1).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real | vector<real^2>, real?) -> number
   - call: SquareWave({min, max}, x)
     description: the square wave rescaled to vary between min and max, unit period.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

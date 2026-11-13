@@ -1,4 +1,4 @@
-import type { Json } from "@enumeratio/ce-patches";
+import type { Json } from "@notatio/ce-patches";
 
 // Partial derivatives of the Jacobi functions in u and in the parameter m, of any order.
 //

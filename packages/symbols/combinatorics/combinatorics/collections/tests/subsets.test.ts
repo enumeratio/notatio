@@ -1,4 +1,4 @@
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { kSubsets, subsets } from "../src/families/closed-forms.ts";
 import { kernelsOn } from "../src/families/epsil.ts";

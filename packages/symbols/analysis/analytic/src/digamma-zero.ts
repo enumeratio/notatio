@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { type EvalOptions, isRealInt, wantsNumber } from "@enumeratio/ce-patches";
+import { type EvalOptions, isRealInt, wantsNumber } from "@notatio/ce-patches";
 
 // DigammaFunctionZero(n) — Fungrim's n-th real zero of the digamma function ψ.
 //

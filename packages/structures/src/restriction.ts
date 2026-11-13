@@ -282,7 +282,7 @@ export function declareRestricted(ce: ComputeEngine): void {
  * A named restriction is an anonymous one that has earned a name; both go through `Filter`,
  * so there is one mechanism rather than two.
  *
- * Several of these names ALREADY exist as fast collections in `@enumeratio/combinatorics/collections`, with
+ * Several of these names ALREADY exist as fast collections in `@notatio/combinatorics/collections`, with
  * hand-written count and unrank kernels. That is not a conflict to resolve — it is the
  * reference/accelerated pairing from https://github.com/enumeratio/notatio/wiki/Namespaces §6 arriving somewhere new. The
  * restriction is the SPECIFICATION ("permutations with no fixed point"); the kernel is the

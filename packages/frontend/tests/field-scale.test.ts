@@ -1,7 +1,7 @@
 // A zoomed field plot keeps the whole plot's scale: its levels and its colors are fitted once, to the
 // whole plot's samples, and a window resampled inside it is drawn with them.
 
-import { type BoxNode, optionsOfBox } from "@enumeratio/boxes";
+import { type BoxNode, optionsOfBox } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { autoLevels } from "../src/contour.ts";
 import { fieldAxes, fieldBoxOfGrids, fieldScaleOf } from "../src/plot-lowering.ts";

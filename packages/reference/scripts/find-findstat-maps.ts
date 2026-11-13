@@ -17,8 +17,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { parseArgs } from "node:util";
-import { CARRIERS, MAPS } from "@enumeratio/combinatorics";
-import { writeFormatted } from "@enumeratio/entry/node";
+import { CARRIERS, MAPS } from "@notatio/combinatorics";
+import { writeFormatted } from "@notatio/entry/node";
 import {
   COLLECTION_CARRIER,
   objectSize,

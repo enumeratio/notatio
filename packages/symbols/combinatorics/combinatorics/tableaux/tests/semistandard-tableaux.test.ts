@@ -2,7 +2,7 @@
 // entries read along the rows, against an independent generator, and its count against the
 // hook-content formula.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn } from "../../collections/src/families/epsil.ts";
 import { declareCombinatorics } from "../../src/index.ts";

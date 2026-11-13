@@ -1,5 +1,5 @@
-import { typeset } from "@enumeratio/formats/typeset";
-import { plainJson, POINT_REACH, pointWords, randomValue, type VariableSpec } from "@enumeratio/frontend/core";
+import { typeset } from "@notatio/formats/typeset";
+import { plainJson, POINT_REACH, pointWords, randomValue, type VariableSpec } from "@notatio/frontend/core";
 import { html, LitElement, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "./knob-box.ts";
@@ -272,7 +272,7 @@ export class TemplateSlot extends LitElement {
 
   /** The declared variables as Epsil, `[_r -> GaussianIntegers, _b -> (-1, 1), …]`. */
   async #settingsOf(): Promise<string> {
-    const { serializeExpression } = await import("@enumeratio/formats/expression");
+    const { serializeExpression } = await import("@notatio/formats/expression");
     const scope = this.#scope;
     if (!scope) return "";
     const rules = scope.declarations.map((d) => ["Rule", `_${d.name}`, scope.values.get(d.name) ?? "Nothing"]);
@@ -284,7 +284,7 @@ export class TemplateSlot extends LitElement {
 
   /** Set every variable a pasted sentence names; a sentence that doesn't read changes nothing. */
   async #applySettings(text: string): Promise<void> {
-    const { parseExpression } = await import("@enumeratio/formats/expression");
+    const { parseExpression } = await import("@notatio/formats/expression");
     const { json, errors } = parseExpression(text);
     if (errors.length > 0) return;
     const plain = plainJson(json) as unknown[];

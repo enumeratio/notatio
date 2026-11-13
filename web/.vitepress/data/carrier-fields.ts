@@ -14,9 +14,9 @@ import {
   MAPS,
   readObject,
   UNDEFINED_MAPS,
-} from "@enumeratio/combinatorics";
-import { allFamilies } from "@enumeratio/combinatorics/collections";
-import { crosswalkForMap, crosswalkForStatistic } from "@enumeratio/reference";
+} from "@notatio/combinatorics";
+import { allFamilies } from "@notatio/combinatorics/collections";
+import { crosswalkForMap, crosswalkForStatistic } from "@notatio/reference";
 import { repoRoot } from "./repo-docs.ts";
 
 const DATA = join(repoRoot, "packages/symbols/combinatorics/combinatorics/findstat/data");

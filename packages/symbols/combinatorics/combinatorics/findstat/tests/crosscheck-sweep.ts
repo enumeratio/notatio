@@ -1,8 +1,8 @@
 // The sweep behind distribution-crosscheck.test.ts and graph-crosscheck.test.ts; see the first for what is compared.
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { declareStructures } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { declareStructures } from "@notatio/structures";
 import { expect } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
 import { COLLECTION_CARRIER, objectLevel, objectSize, readObject } from "../src/objects.ts";

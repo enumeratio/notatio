@@ -1,5 +1,5 @@
-import type { Json } from "@enumeratio/engine";
-import { bareEngine, createLatexEngine } from "@enumeratio/engine/testing";
+import type { Json } from "@notatio/engine";
+import { bareEngine, createLatexEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 import { carrierLatex, commandFor, triggerFor } from "../src/carrier-latex.ts";

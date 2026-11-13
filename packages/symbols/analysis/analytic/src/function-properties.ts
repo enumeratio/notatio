@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
 import { specialFunctionRange } from "./function-range.ts";
 
 // The Wolfram `Function*` property family (FunctionDomain, FunctionRange,
@@ -82,7 +82,7 @@ function hasForeignSymbol(expr: Expression, x: string): boolean {
 
 /**
  * `isNumberLiteral` lives on compute-engine's NARROWED expression interface (like
- * `.ops`/`.symbol` — see `@enumeratio/engine`'s header comment); `Expression` is
+ * `.ops`/`.symbol` — see `@notatio/engine`'s header comment); `Expression` is
  * an alias for the public `Expression` union, which doesn't carry it. Read it
  * structurally rather than casting to the internal type.
  */

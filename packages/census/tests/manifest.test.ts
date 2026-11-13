@@ -1,4 +1,4 @@
-import { SYMBOLS } from "@enumeratio/manifest";
+import { SYMBOLS } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { contributions, ENGINE } from "../src/contributions.ts";
 import { fullEngine } from "../src/engine.ts";
@@ -21,7 +21,7 @@ const printed = (type: string): string => {
 };
 
 const libraryPackage = (library: string | undefined): string | undefined =>
-  library?.replace(/^@enumeratio\//, "").replace(/^enumeratio-/, "");
+  library?.replace(/^@notatio\//, "").replace(/^enumeratio-/, "");
 
 test("every head a package adds, re-signs or takes over has a typed row for that package", () => {
   const missing: string[] = [];

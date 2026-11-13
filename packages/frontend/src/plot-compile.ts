@@ -1,11 +1,11 @@
 // A plot's expression compiled where the definitions are: in a kernel (`kernel-host.ts`'s
 // `compile`), or on the page's own engine when there is none. The page gets source text, and
-// runs it with no engine of its own (`@enumeratio/components`' `plot-kernel.ts`).
+// runs it with no engine of its own (`@notatio/components`' `plot-kernel.ts`).
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { canCompile, GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
-import { selfContainedCode } from "@enumeratio/engine/compiled";
-import { withGLSL } from "@enumeratio/analytic/shader";
+import { selfContainedCode } from "@notatio/engine/compiled";
+import { withGLSL } from "@notatio/analytic/shader";
 
 /** What to compile a plot's expression to. */
 export interface PlotCompileSpec {

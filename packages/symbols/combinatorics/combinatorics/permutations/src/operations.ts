@@ -10,7 +10,7 @@ import {
   refusing,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 const isPermutation = (op: Expr): boolean => op.operator === "Permutation";
 

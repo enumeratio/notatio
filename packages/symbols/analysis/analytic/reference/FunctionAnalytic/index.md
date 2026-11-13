@@ -6,7 +6,7 @@ summary: True if f is analytic (entire) at every real x, False otherwise.
 signatures:
   - call: FunctionAnalytic(f, x)
     description: whether f, viewed as a function of a complex variable, is entire.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

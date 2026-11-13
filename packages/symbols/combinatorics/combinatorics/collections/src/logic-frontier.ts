@@ -6,7 +6,7 @@ import {
   operandsOf,
   stringAt,
   symbolNameOf,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 // A fourth wave of Wolfram-frontier heads: boolean normal forms (LogicalExpand,
 // BooleanConvert) and a batch of `Is…` predicates (our naming for Wolfram's `…Q` — see

@@ -2,7 +2,7 @@
 // (`box-render.ts`, `control-box.ts`): neither imports the other, so what both need sits here.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { serializeExpression } from "@enumeratio/formats/expression";
+import { serializeExpression } from "@notatio/formats/expression";
 import { expandDictionaries } from "./latex.ts";
 
 type Json = MathJsonExpression;

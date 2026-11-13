@@ -15,7 +15,7 @@ import {
   mul,
   scale,
   sub,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // ModularJ, ModularLambda, EisensteinG — Fungrim-frontier heads over τ in the upper
 // half-plane, delegating to compute-engine's own native EisensteinE/JacobiTheta rather

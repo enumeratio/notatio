@@ -13,7 +13,7 @@
 // `SymmetryDegree` is also defined on binary words, so its record is curated the same way.
 
 import { fileURLToPath } from "node:url";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
 import { areaStatisticsEntries, type Sample } from "../../src/statistics/generate-entries.ts";
 import { LATTICE_PATHS_FRONTIER } from "../src/statistics.frontier.ts";
 import { DYCK_STATISTICS } from "../src/statistics.ts";

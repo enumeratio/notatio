@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/utils",
+  "name": "@notatio/utils",
   "version": "0.0.0",
   "description": "Repo-wide guard tests, and the small Node helpers the tooling packages share.",
   "homepage": "https://github.com/author/library#readme",
@@ -32,7 +32,7 @@
     "prepublishOnly": "vp run build"
   },
   "devDependencies": {
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "@types/node": "^26.1.1",
     "bumpp": "^11.1.0",
     "typescript": "^7.0.2",

@@ -1,4 +1,4 @@
-import type { Engine } from "@enumeratio/engine";
+import type { Engine } from "@notatio/engine";
 import { declareAdditiveEnergy } from "./additive-energy.ts";
 import { declareArithHeads } from "./arith-heads.ts";
 import { declareControl } from "./control.ts";
@@ -33,12 +33,12 @@ import { declareSuccessor } from "./successor.ts";
  *
  * Declares only the families with NO carrier (`Subsets`, `Tuples`, `Multisets`, the numeric
  * families, …) — every carrier-bearing family lives in, and is declared by, its own
- * `@enumeratio/combinatorics` area (`declare<Area>`); `declareCombinatorics` calls both. A test
+ * `@notatio/combinatorics` area (`declare<Area>`); `declareCombinatorics` calls both. A test
  * that only needs the carrier-less heads may still call this alone.
  *
  * The fast permutation-statistic heads (Inversions, Descents, MajorIndex, …) moved out of
  * this bundle (step 6b): `declarePermutations` calls `stats.ts`'s `declareStats` itself, right
- * after its own carriers, so the fast kernel wins the name before `@enumeratio/combinatorics`'
+ * after its own carriers, so the fast kernel wins the name before `@notatio/combinatorics`'
  * own expr-based `PERMUTATION_STATISTICS` gets a turn (`declareStatistics`'s existing "a kernel
  * already claims this head" skip, unchanged). `declareStats`'s own isolated callers
  * (`collections/tests/definitions-helpers.ts`) are unaffected — they never call this function.

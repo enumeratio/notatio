@@ -7,7 +7,7 @@ $$\Phi(z, s, a) \;=\; \sum_{n=0}^{\infty} \frac{z^n}{(n+a)^s}.$$
 Set $z = 1$ and it is the [Hurwitz zeta](/explore/zeta/) $\zeta(s, a)$ (and $\zeta(s)$ at $a=1$).
 Walk along $a = 1$ and it is the polylogarithm, $\operatorname{Li}_s(z) = z\,\Phi(z, s, 1)$. Sit at
 $z = -1$ and it is the Dirichlet eta $\eta(s) = \Phi(-1, s, 1)$, whose value at $s = 1$ is
-$\ln 2$. `@enumeratio/analytic` provides [`LerchPhi`](/reference/symbol/LerchPhi); the $z^n$ factor
+$\ln 2$. `@notatio/analytic` provides [`LerchPhi`](/reference/symbol/LerchPhi); the $z^n$ factor
 makes the series converge geometrically inside the unit disk, so it is summed directly there. On
 the $z = -1$ rim the terms alternate and direct summation stalls, so those are summed by an Euler
 transform instead — enough to pin $\eta(1) = \ln 2$ and $\Phi(-1, 2, \tfrac12) = 4G$ to machine

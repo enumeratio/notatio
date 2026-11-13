@@ -4,8 +4,8 @@
 // element is the same either way.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import type { IndexRange } from "@enumeratio/boxes";
-import type { RowsReply, RowsRequest } from "@enumeratio/frontend/row-source";
+import type { IndexRange } from "@notatio/boxes";
+import type { RowsReply, RowsRequest } from "@notatio/frontend/row-source";
 import { pageKernel } from "./kernel-client.ts";
 
 type Json = MathJsonExpression;
@@ -38,9 +38,9 @@ export function openRowsClient(): RowsClient {
   const localHost = async (): Promise<NonNullable<typeof local>> => {
     if (local !== undefined) return local;
     const [{ createRowsHost }, { parseFor, ensureFor }, { parseExpression }] = await Promise.all([
-      import("@enumeratio/frontend/row-source"),
-      import("@enumeratio/frontend/core"),
-      import("@enumeratio/formats/expression"),
+      import("@notatio/frontend/row-source"),
+      import("@notatio/frontend/core"),
+      import("@notatio/formats/expression"),
     ]);
     const { engine } = await parseFor(() => ({}));
     const read = async ({ text }: { text: string }): Promise<unknown> => {

@@ -66,7 +66,7 @@ import { entries as numericClosedForm } from "./numeric-closed-form.ts";
 import { entries as numericRecurrence } from "./numeric-recurrence.ts";
 import { entries as numericDivisor } from "./numeric-divisor.ts";
 import { entries as numericDigitsPrimes } from "./numeric-digits-primes.ts";
-import type { Engine } from "@enumeratio/engine";
+import type { Engine } from "@notatio/engine";
 import { type AnyFamily, kernelsOn, liftFamily } from "./epsil.ts";
 import type { FamilyKernel } from "./types.ts";
 

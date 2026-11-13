@@ -2,11 +2,11 @@
 name: HypergeometricUStar
 domain: Special functions
 signature: HypergeometricUStar(a, b, z)
-summary: The regularized Tricomi confluent hypergeometric function $U^*(a,b,z) = z^a\,U(a,b,z)$, for $b$ not an integer. Provided by `@enumeratio/analytic`.
+summary: The regularized Tricomi confluent hypergeometric function $U^*(a,b,z) = z^a\,U(a,b,z)$, for $b$ not an integer. Provided by `@notatio/analytic`.
 signatures:
   - call: HypergeometricUStar(a, b, z)
     description: $z^a$ times Tricomi's confluent hypergeometric $U(a,b,z)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 primitive: numeric
 bindings:

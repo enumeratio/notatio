@@ -14,12 +14,12 @@
 // generator only ever merges in `details` and `examples`, the two fields it can derive from a
 // `Definition` alone (see `CURATED_FIELDS`/`STANDARD_FIELDS`).
 
-import type { ReferenceEntry, ReferenceExample } from "@enumeratio/entry";
-import { headExists, readEntry } from "@enumeratio/entry/node";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
-import { captionId, dedupeId } from "@enumeratio/entry";
-import { type Engine, isNativeHead } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import type { ReferenceEntry, ReferenceExample } from "@notatio/entry";
+import { headExists, readEntry } from "@notatio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
+import { captionId, dedupeId } from "@notatio/entry";
+import { type Engine, isNativeHead } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { readFileSync } from "node:fs";
 import { findstat } from "../../findstat/src/findstat-data.ts";
 import { readObject } from "../../findstat/src/objects.ts";
@@ -96,7 +96,7 @@ export interface AreaEntriesOptions {
    *  the same order `declareCombinatorics` uses in production. */
   readonly declareArea: (ce: Engine) => void;
   /**
-   * Heads that already have a hand-written record at `dir` (from `@enumeratio/combinatorics`'s
+   * Heads that already have a hand-written record at `dir` (from `@notatio/combinatorics`'s
    * own reference, predating this generator's move there, step 6b) — the curated `domain`,
    * `signature`, `summary` and everything else hand-written (`signatures`, `seeAlso`,
    * `references`, `catalog`, `statOn`) win; this generator only ever contributes `details` and

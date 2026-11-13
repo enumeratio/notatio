@@ -1,7 +1,7 @@
 // `<notatio-out>` on a layout, through the real route: the docs page mounts the element, which asks
 // the page's kernel (or engine), draws through the box renderer and typesets with KaTeX.
 //
-// Run with: pnpm --filter @enumeratio/web run test:stories
+// Run with: pnpm --filter @notatio/web run test:stories
 
 import { expect, test } from "@playwright/test";
 

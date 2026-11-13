@@ -1,7 +1,7 @@
 // A family's `tables` are computed once per distinct params and read by every call: from a
 // small bounded cache per kernel, as doubles for compiled code and exact for the interpreter.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { COMPILED_FAMILIES } from "../collections/src/families/compiled-families.generated.js";
 import {

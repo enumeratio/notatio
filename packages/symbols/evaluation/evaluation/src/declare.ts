@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { CancellationError } from "@cortex-js/compute-engine";
-import { applyNativeHeadPatches } from "@enumeratio/ce-patches";
+import { applyNativeHeadPatches } from "@notatio/ce-patches";
 import {
   applyFunction,
   DeadlineExceededError,
@@ -11,8 +11,8 @@ import {
   stringAt,
   symbolNameOf,
   withDeadline,
-} from "@enumeratio/engine";
-import { SUMMARIES } from "@enumeratio/manifest/package/evaluation";
+} from "@notatio/engine";
+import { SUMMARIES } from "@notatio/manifest/package/evaluation";
 import { declareAbout } from "./about.ts";
 import type { Outcome, TestResult } from "./verification-test.ts";
 import { verificationTest } from "./verification-test.ts";

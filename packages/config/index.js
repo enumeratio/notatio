@@ -2,7 +2,7 @@
 // same way in the monorepo and from a repository of its own. Plain JS, so a config can load it
 // without a build step.
 
-/** Oxfmt options; the record writer in @enumeratio/entry holds the same width (a test keeps them equal). */
+/** Oxfmt options; the record writer in @notatio/entry holds the same width (a test keeps them equal). */
 export const fmt = {
   printWidth: 120,
   // A record's index.md is written by that writer; formatting would rewrite its body.

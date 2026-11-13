@@ -1,5 +1,5 @@
-import { bigRationalAt, type Engine, type Expr, operandsOf, symbolNameOf } from "@enumeratio/engine";
-import { SUMMARIES } from "@enumeratio/manifest/package/combinatorics";
+import { bigRationalAt, type Engine, type Expr, operandsOf, symbolNameOf } from "@notatio/engine";
+import { SUMMARIES } from "@notatio/manifest/package/combinatorics";
 
 // GeneratingFunction / ExponentialGeneratingFunction / FindSequenceFunction / DiscreteRatio
 // (Wolfram frontier). The three sequence-recognition heads share one pipeline: sample the

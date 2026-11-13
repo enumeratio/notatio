@@ -1,7 +1,7 @@
 // A map's hand-written kernel is a fast path for its Epsil, which stays the meaning: each kernel gives the
 // Epsil's answer, over every small permutation (the standard run) and larger ones (the deep run).
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { evaluateDefinition, MAPS } from "../src/maps.ts";
 import { permutations } from "./maps-helpers.ts";

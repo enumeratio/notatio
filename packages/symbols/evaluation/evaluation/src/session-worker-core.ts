@@ -22,7 +22,7 @@
 // entry) and a consumer's own bundled worker entry.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import type { Library } from "@enumeratio/manifest";
+import type { Library } from "@notatio/manifest";
 import { evaluateCooperatively } from "./cooperative-evaluate.ts";
 import { declareEvaluation } from "./declare.ts";
 import { createKernel, type Kernel, type KernelOptions, type KernelSource } from "./kernel.ts";

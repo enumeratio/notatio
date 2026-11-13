@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { integerAt, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
 import { isExactExpression } from "./interval-bounds.ts";
 
 // FindInstance(expr, vars, [domain], [n]) — Wolfram finds `n` instances of `vars` that

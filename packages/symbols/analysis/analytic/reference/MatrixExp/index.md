@@ -6,11 +6,11 @@ summary: The matrix exponential $e^A = \sum_{k \ge 0} A^k / k!$, for a square ma
 signatures:
   - call: MatrixExp(A)
     description: the matrix exponential of the square matrix `A`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (matrix, list<number>?) -> list<number> | matrix
   - call: MatrixExp(A, v)
     description: "$e^A v$: `A`'s matrix exponential applied to the vector `v`."
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Exp
   - MatrixPower

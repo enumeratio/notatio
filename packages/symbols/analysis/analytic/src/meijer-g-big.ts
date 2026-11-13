@@ -1,5 +1,5 @@
 import { BigDecimal } from "@cortex-js/compute-engine";
-import type { Cx } from "@enumeratio/ce-patches";
+import type { Cx } from "@notatio/ce-patches";
 import {
   bigAdd as badd,
   atDigits,
@@ -10,7 +10,7 @@ import {
   bigMul as bmul,
   bigPow as bpow,
   logGammaBig,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // The BigDecimal twin of meijer-g.ts's `meijerGSeries` — same DLMF 16.17.2 sum, same term
 // structure, run at extended precision so a second cancellation this package's double kernels

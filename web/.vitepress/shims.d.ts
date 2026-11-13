@@ -8,12 +8,12 @@ declare module "*.vue" {
 
 /** The documented reference entries, one per head (.vitepress/reference-data.ts). */
 declare module "virtual:reference-entries" {
-  const entries: readonly import("@enumeratio/reference").ReferenceEntry[];
+  const entries: readonly import("@notatio/reference").ReferenceEntry[];
   export default entries;
 }
 
 /** Every package's notation entry, by manifest name (.vitepress/notation-entries.ts). */
 declare module "virtual:notation-entries" {
-  const entries: Readonly<Record<string, import("@enumeratio/boxes").PackageNotation>>;
+  const entries: Readonly<Record<string, import("@notatio/boxes").PackageNotation>>;
   export default entries;
 }

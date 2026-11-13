@@ -2,12 +2,12 @@
 name: Column
 domain: Graphics
 signature: Column(...)
-summary: Wolfram's own Column, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+summary: Wolfram's own Column, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
 signatures:
   - call: Column(...)
-    description: Wolfram's own Column, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+    description: Wolfram's own Column, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
     library: enumeratio-formats
     type: (any*) -> any
 ---

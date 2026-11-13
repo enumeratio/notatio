@@ -6,7 +6,7 @@ summary: "The integer part of x: x truncated toward 0."
 signatures:
   - call: IntegerPart(x)
     description: x truncated toward 0.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 names:
   wolframIdentity: true

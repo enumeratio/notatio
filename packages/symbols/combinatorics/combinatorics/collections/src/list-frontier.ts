@@ -9,7 +9,7 @@ import {
   seedRandom,
   symbolNameOf,
   uniform01,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 // Wolfram-frontier list/array heads compute-engine has no answer for at all: Array's
 // n-dimensional index-range construction, Accumulate/FoldList's running folds, Cases's
@@ -170,7 +170,7 @@ const declareSparseArray = (ce: Engine): void => {
 
 // --- RandomInteger: the Wolfram spelling of Random over a Range --------------------------
 //
-// One seeded stream per engine lives in @enumeratio/engine (`Random`, https://github.com/enumeratio/notatio/wiki/Random);
+// One seeded stream per engine lives in @notatio/engine (`Random`, https://github.com/enumeratio/notatio/wiki/Random);
 // `SeedRandom` restarts it and every draw -- RandomInteger, RandomGraph, RandomComplex,
 // statistics' RandomVariate -- comes from it.
 
@@ -303,7 +303,7 @@ const declareNumericPredicates = (ce: Engine): void => {
 
 // A bare (undefined) symbol isn't `isCollection`, so `collectionElements` falls back to
 // `operandsOf`, which reads `[]` off it same as a genuinely empty `List` (see that helper's
-// own doc in @enumeratio/engine) -- neither reading distinguishes "a free variable, stay
+// own doc in @notatio/engine) -- neither reading distinguishes "a free variable, stay
 // unevaluated" from "an empty collection, answer List()". Checked first, everywhere
 // `collectionElements`/`operandsOf` would otherwise be asked to materialise a bare operand
 // (`Accumulate`/`FoldList` below; `Sort`/`Join`/`Flatten`/`Gather`/`SortBy`/`Commonest`/
@@ -334,7 +334,7 @@ export function declareListFrontier(ce: Engine): void {
 
   // `operandsOf` reads a call's own constructor arguments -- for a lazy collection like
   // `Range(1, 10)` that is `[1, 10]`, not the ten elements it denotes (see `operandsOf`'s own
-  // doc in @enumeratio/engine). `collectionElements` walks the real elements instead, and
+  // doc in @notatio/engine). `collectionElements` walks the real elements instead, and
   // DECLINES (undefined) rather than fold over the wrong, short list when a collection runs
   // past compute-engine's iteration budget mid-walk -- the same call left unevaluated, not a
   // truncated answer.

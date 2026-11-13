@@ -22,7 +22,7 @@
 // first rule a face matches says what with: its Data (the carrier's element), Name (its
 // set-composition or subset as such), Index (among its dimension, from 1), Dimension or Vertices.
 
-import { cast, type Face, POLYTOPES, type Polytope, spanBasis } from "@enumeratio/polytope";
+import { cast, type Face, POLYTOPES, type Polytope, spanBasis } from "@notatio/polytope";
 import { argsOf, type FigureLayer, headOf, intOf, type Json, normal, UNIT_BASIS } from "./frame-json.ts";
 import { splitOptions } from "./graphics-rules.ts";
 import type { Address, FigureLabel, FramePoint, GraphicsPrimitive } from "./tiles-canvas.ts";

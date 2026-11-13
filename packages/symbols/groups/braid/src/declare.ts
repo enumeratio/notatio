@@ -1,6 +1,6 @@
-import { registerNotation } from "@enumeratio/boxes";
-import { type Engine, type Expr, integerAt, operandsOf, stringAt } from "@enumeratio/engine";
-import { compileExpression } from "@enumeratio/engine/compiled";
+import { registerNotation } from "@notatio/boxes";
+import { type Engine, type Expr, integerAt, operandsOf, stringAt } from "@notatio/engine";
+import { compileExpression } from "@notatio/engine/compiled";
 import {
   alexanderPolynomial,
   type Braid,

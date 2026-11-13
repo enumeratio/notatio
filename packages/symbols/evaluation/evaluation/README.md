@@ -1,4 +1,4 @@
-# @enumeratio/evaluation
+# @notatio/evaluation
 
 Controlling evaluation over `@cortex-js/compute-engine`: cancellable evaluation, cooperative
 deadlines, a memory cap enforced only where enforcement is real, and a Wolfram-style
@@ -30,7 +30,7 @@ worker.
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareEvaluation } from "@enumeratio/evaluation";
+import { declareEvaluation } from "@notatio/evaluation";
 
 const ce = new ComputeEngine();
 declareEvaluation(ce);
@@ -50,7 +50,7 @@ whose `evaluate()` calls share one worker's bindings — `:=` assignments persis
 calls until the worker is reset.
 
 ```ts
-import { evaluateIsolated, openSession } from "@enumeratio/evaluation/node";
+import { evaluateIsolated, openSession } from "@notatio/evaluation/node";
 
 await evaluateIsolated(["Add", 2, 3]); // 5
 await evaluateIsolated(slowLoop, { timeMs: 50 }); // "Aborted"
@@ -71,6 +71,6 @@ per-worker reading, so treat it as a heuristic, not an enforced limit.
 
 ## See also
 
-[`@enumeratio/manifest`](../../../manifest) supplies this package's declared-heads summaries
+[`@notatio/manifest`](../../../manifest) supplies this package's declared-heads summaries
 (`SUMMARIES`) used in `TimeConstrained`/`MemoryConstrained`/`VerificationTest`'s
 descriptions.

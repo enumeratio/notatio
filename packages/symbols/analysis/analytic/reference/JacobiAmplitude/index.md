@@ -6,7 +6,7 @@ summary: The Jacobi amplitude $\operatorname{am}(u,m)$ — the angle $\varphi$ i
 signatures:
   - call: JacobiAmplitude(u, m)
     description: the Jacobi amplitude, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiSN

@@ -1,7 +1,7 @@
-import { withGLSL } from "@enumeratio/analytic/shader";
+import { withGLSL } from "@notatio/analytic/shader";
 import { withDf64 } from "./df64-selftest.ts";
 import { getGpu } from "./gpu.ts";
-import { type ComplexGLSL, MAX_SLOTS } from "@enumeratio/ce-patches/glsl-complex";
+import { type ComplexGLSL, MAX_SLOTS } from "@notatio/ce-patches/glsl-complex";
 import { compileProgram, GLSL_HEADER, renderToFloats } from "./webgl.ts";
 import type { Df64Mode } from "./df64-selftest.ts";
 

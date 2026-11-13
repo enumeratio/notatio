@@ -27,7 +27,7 @@ interface Channel {
   readonly sinks: Message[][];
 }
 
-const CHANNEL = Symbol.for("@enumeratio/engine/messages");
+const CHANNEL = Symbol.for("@notatio/engine/messages");
 
 function channelOf(ce: ComputeEngine): Channel {
   const host = ce as unknown as { [CHANNEL]?: Channel };

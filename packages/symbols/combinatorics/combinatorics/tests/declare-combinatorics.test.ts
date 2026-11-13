@@ -3,8 +3,8 @@
 // families and maps all land without a host building `carrierTypes` or the constructor table
 // itself.
 
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../src/index.ts";
 

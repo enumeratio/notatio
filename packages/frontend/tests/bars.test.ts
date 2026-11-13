@@ -1,8 +1,8 @@
 // A bar is boxed as a row of single-entry boxes; the web draws the row as the one bar element it
 // always was, and `reduce` declares one control for it.
 
-import { makeBoxes } from "@enumeratio/boxes";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { makeBoxes } from "@notatio/boxes";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { renderBox } from "../src/box-render.ts";
 import { boxControls } from "../src/control-box.ts";

@@ -10,15 +10,15 @@ import { execFileSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { ReferenceEntry, ReferenceSignature } from "@enumeratio/entry";
-import { headNames, readEntry, recordDirs, writeEntry } from "@enumeratio/entry/node";
+import type { ReferenceEntry, ReferenceSignature } from "@notatio/entry";
+import { headNames, readEntry, recordDirs, writeEntry } from "@notatio/entry/node";
 import { contributions as contributionsOf, ENGINE } from "../src/contributions.ts";
 
 const PACKAGES = fileURLToPath(new URL("../../", import.meta.url));
 export const TODO_SUMMARY = "TODO: summary";
 
 const packageOf = (library: string | undefined): string =>
-  library === undefined ? ENGINE : library.replace(/^@enumeratio\//, "").replace(/^enumeratio-/, "");
+  library === undefined ? ENGINE : library.replace(/^@notatio\//, "").replace(/^enumeratio-/, "");
 const libraryOf = (pkg: string): string => (pkg === ENGINE ? ENGINE : `enumeratio-${pkg}`);
 
 const contributions = contributionsOf();
@@ -125,7 +125,7 @@ console.log(`${contributions.size} heads contributed to; ${typed} typed rows; ${
 
 // The manifest is built from these records and tests/manifest.test.ts reads its dist: rebuild it
 // here (dist-cache keys it on the records, so this is a no-op when nothing changed).
-execFileSync("node", ["tools/ci/dist-cache.ts", "build", "@enumeratio/manifest"], {
+execFileSync("node", ["tools/ci/dist-cache.ts", "build", "@notatio/manifest"], {
   cwd: fileURLToPath(new URL("../../../", import.meta.url)),
   stdio: "inherit",
 });

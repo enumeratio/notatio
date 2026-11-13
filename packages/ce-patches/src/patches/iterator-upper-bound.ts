@@ -1,6 +1,6 @@
 import { type Expression, type ComputeEngine, isFunction, isSymbol } from "@cortex-js/compute-engine";
 import type { Patch } from "../patch.ts";
-import { declareCompile } from "@enumeratio/engine";
+import { declareCompile } from "@notatio/engine";
 
 // Wolfram's `Sum[f, {k, n}]` and `Product[f, {k, n}]` run k from 1 to n. compute-engine 0.157
 // reads the tuple `(k, n)` that way but still leaves `Limits(k, Nothing, n)`, one bound, unevaluated

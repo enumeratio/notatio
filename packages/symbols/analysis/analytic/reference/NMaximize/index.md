@@ -6,7 +6,7 @@ summary: A numeric global maximum of f over a BOUNDED interval, as {value, {x ->
 signatures:
   - call: NMaximize({f, cons}, x)
     description: the numeric global maximum of f over the bounded interval cons implies, for any real-valued f (not just the exact core [[Maximize]] covers).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (tuple<expression, expression>, list<symbol> | symbol) -> expression
 seeAlso:
   - NMinimize

@@ -1,4 +1,4 @@
-import { registerNotation } from "@enumeratio/boxes";
+import { registerNotation } from "@notatio/boxes";
 import {
   BigDecimal,
   bigIntegerAt,
@@ -12,7 +12,7 @@ import {
   threadOverLists,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { continuedFractionKOf, convergentsOf } from "./convergents.ts";
 import { MODULAR_NOTATION } from "./notation.ts";
 import { pqaExpansion } from "./continued-fraction.ts";

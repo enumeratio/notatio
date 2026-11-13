@@ -17,7 +17,7 @@ function put(file: string, text: string): void {
 }
 
 function pkg(name: string, enumeratio: object = {}): void {
-  put(`packages/${name}/package.json`, JSON.stringify({ name: `@enumeratio/${name}`, enumeratio }));
+  put(`packages/${name}/package.json`, JSON.stringify({ name: `@notatio/${name}`, enumeratio }));
   put(`packages/${name}/src/index.ts`, `export const ${name} = 1;\n`);
 }
 
@@ -34,7 +34,7 @@ function keys(): Map<string, string> {
   return out;
 }
 
-const COMBINATORICS = "@enumeratio/combinatorics";
+const COMBINATORICS = "@notatio/combinatorics";
 
 beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), "ci-keys-"));
@@ -75,7 +75,7 @@ test("an unrelated record change leaves combinatorics' key alone", () => {
 test("a record change selects every package that declares the records", () => {
   put("packages/elsewhere/reference/Other/index.md", "other, changed\n");
   const picked = JSON.parse(node("affected.ts", "--base", "HEAD", "--json")) as { test: string[] };
-  expect(picked.test).toEqual(expect.arrayContaining(["@enumeratio/census", "@enumeratio/catalog"]));
+  expect(picked.test).toEqual(expect.arrayContaining(["@notatio/census", "@notatio/catalog"]));
   expect(picked.test).not.toContain(COMBINATORICS);
   git("checkout", "--", ".");
 });
@@ -84,7 +84,7 @@ test("a record change selects every package that declares the records", () => {
 test("a change in an unrelated package selects a package that declares the sources, and not a bystander", () => {
   put("packages/elsewhere/src/index.ts", "export const elsewhere = 2;\n");
   const picked = JSON.parse(node("affected.ts", "--base", "HEAD", "--json")) as { test: string[] };
-  expect(picked.test).toEqual(["@enumeratio/elsewhere", "@enumeratio/walker"]);
+  expect(picked.test).toEqual(["@notatio/elsewhere", "@notatio/walker"]);
   git("checkout", "--", ".");
 });
 
@@ -122,8 +122,8 @@ test("a no-op rebuild of one package restores from the cache and builds nothing 
       write(
         `packages/${name}/package.json`,
         JSON.stringify({
-          name: `@enumeratio/${name}`,
-          dependencies: Object.fromEntries(deps.map((d) => [`@enumeratio/${d}`, "workspace:*"])),
+          name: `@notatio/${name}`,
+          dependencies: Object.fromEntries(deps.map((d) => [`@notatio/${d}`, "workspace:*"])),
           scripts: { build: "node ../../fake-build.cjs" },
         }),
       );
@@ -152,6 +152,6 @@ test("a no-op rebuild of one package restores from the cache and builds nothing 
 test("a record change doesn't select a package that declares no reads", () => {
   put("packages/statistics/reference/Mean/index.md", "mean, changed\n");
   const picked = JSON.parse(node("affected.ts", "--base", "HEAD", "--json")) as { test: string[] };
-  expect(picked.test).not.toContain("@enumeratio/bystander");
+  expect(picked.test).not.toContain("@notatio/bystander");
   git("checkout", "--", ".");
 });

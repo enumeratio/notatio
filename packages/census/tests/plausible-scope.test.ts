@@ -3,9 +3,9 @@
 // engine rather than a registry means a collection can't escape by never registering.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { COLLECTIONS } from "@enumeratio/catalog";
-import { allFamilies as allEntries } from "@enumeratio/combinatorics/collections";
-import { PRIVATE_SUFFIX, publicName } from "@enumeratio/structures";
+import { COLLECTIONS } from "@notatio/catalog";
+import { allFamilies as allEntries } from "@notatio/combinatorics/collections";
+import { PRIVATE_SUFFIX, publicName } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { bindings, fullEngine } from "../src/engine.ts";
 import { FULL_ENGINE_TIMEOUT } from "./timeouts.ts";

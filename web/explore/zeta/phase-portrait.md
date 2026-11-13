@@ -10,7 +10,7 @@ complex plane and colour each point by the value there — a _domain colouring_:
 - faint **bands** mark each doubling of magnitude.
 
 Every pixel below runs the same Euler–Maclaurin kernel as the CPU path —
-`@enumeratio/analytic`'s exported `zetaGLSL`, evaluated per pixel, per frame, on the GPU,
+`@notatio/analytic`'s exported `zetaGLSL`, evaluated per pixel, per frame, on the GPU,
 through the general [`<notatio-complex-plot>`](/reference/component/ComplexPlot) element. Both conventions
 are drawn at once from the same $s$, so the difference between them is a glance rather
 than a toggle. Drag to pan, ⌘/Ctrl + scroll to zoom; hit ▶ to sweep $\operatorname{Im}(s)$ up the
@@ -63,7 +63,7 @@ the mpmath/Wolfram oracles remain the source of truth for accuracy.)
 ## Why it's fast
 
 Two compilers are at work. `ce.compile(expr, { to: "glsl" })` normally can't emit these
-heads — compute-engine doesn't know `HurwitzZeta` — so `@enumeratio/analytic` registers a
+heads — compute-engine doesn't know `HurwitzZeta` — so `@notatio/analytic` registers a
 `compile` handler that emits a call into `zetaGLSL`. That path is real-scalar, which suits
 a surface plot and not a portrait, where the phase _is_ the picture; so a second, complex
 lowering emits the same kernels as `vec2`, and that is what colours the plane above.

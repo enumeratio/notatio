@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{cn}(u,m)$, one of the three
 signatures:
   - call: JacobiCN(u, m)
     description: the Jacobi elliptic cosine, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiSN

@@ -32,7 +32,7 @@ import {
   sub,
   ZERO,
 } from "./gaussian.ts";
-import { type Group, MAX_ROOTS, powerModRoots, rootsInCyclicGroup } from "@enumeratio/residues";
+import { type Group, MAX_ROOTS, powerModRoots, rootsInCyclicGroup } from "@notatio/residues";
 
 /** Gaussian arithmetic with each part reduced into [0, q), q a positive rational integer. */
 const reduceParts = (z: Gaussian, q: bigint): Gaussian => [((z[0] % q) + q) % q, ((z[1] % q) + q) % q];

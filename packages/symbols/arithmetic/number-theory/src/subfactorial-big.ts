@@ -1,5 +1,5 @@
-import { BigDecimal, type Engine, type Expr } from "@enumeratio/engine";
-import { atDigits } from "@enumeratio/ce-patches";
+import { BigDecimal, type Engine, type Expr } from "@notatio/engine";
+import { atDigits } from "@notatio/ce-patches";
 
 // Subfactorial(n) = Γ(n+1, −1)/e at a real, non-integer n, to any number of digits. With a = n+1,
 //   Γ(a, −1) = Γ(a) − γ(a, −1),   γ(a, −1) = e^{iπa} Σ_{k≥0} 1/(k! (a+k))

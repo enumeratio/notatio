@@ -6,7 +6,7 @@ summary: The factoring counterpart of TrigExpand/TrigReduce — rewrites sums an
 signatures:
   - call: TrigFactor(expr)
     description: an identity for `expr`, factored via the sum-to-product/half-angle identities or, for a genuine polynomial in `Sin(x0)`/`Cos(x0)`, via `Factor` after substitution.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression) -> expression
 primitive: kernel
 bindings:

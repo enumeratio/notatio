@@ -3,8 +3,8 @@
 // state. This is the drawing `layout` reserves a leaf for; the keyboard driver (`drive.ts`) moves
 // the same controls. Pure: a control and its value in, one line of text out.
 
-import { serializeExpression } from "@enumeratio/formats/expression";
-import { type BoxControl, numOf, type pin, strOf, tupleOf } from "@enumeratio/frontend";
+import { serializeExpression } from "@notatio/formats/expression";
+import { type BoxControl, numOf, type pin, strOf, tupleOf } from "@notatio/frontend";
 
 type Json = Parameters<typeof pin>[0];
 

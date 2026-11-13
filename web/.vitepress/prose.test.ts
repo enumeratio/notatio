@@ -1,6 +1,6 @@
-import { type Box } from "@enumeratio/boxes";
-import { readInlineMarkdown, texSource } from "@enumeratio/boxes/render";
-import { referenceData } from "@enumeratio/reference/node";
+import { type Box } from "@notatio/boxes";
+import { readInlineMarkdown, texSource } from "@notatio/boxes/render";
+import { referenceData } from "@notatio/reference/node";
 import katex from "katex";
 import { expect, test } from "vite-plus/test";
 

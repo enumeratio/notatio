@@ -22,7 +22,7 @@ test("extending a built-in keeps everything the built-in did", () => {
   expect(ce.box(["Count", ["Reverse", ["List", 1, 2, 3]]]).evaluate().re).toBe(3);
   expect(ce.box(["At", ["Reverse", ["List", 1, 2, 3]], 1]).evaluate().re).toBe(3);
 
-  // Extending is done by `defineOverload` (`@enumeratio/engine`), attached to the operator
+  // Extending is done by `defineOverload` (`@notatio/engine`), attached to the operator
   // object already on `ce` in place — evaluate-backed (Inverse) and collection-backed
   // (Complement) heads both take the same row, no second definition declared for either, so
   // neither leaks a private name: a HELD built-in result prints under its own head.

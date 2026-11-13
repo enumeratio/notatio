@@ -3,8 +3,8 @@
 // notebook takes through At, Take and RandomChoice. Counts a plain-number kernel can't carry
 // exactly are unknown to the engine rather than an internal error.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { collectMessages } from "@enumeratio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { collectMessages } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { epsilEntries } from "../../permutations/src/families/core.ts";
 import { kernelOn } from "../src/families/epsil.ts";

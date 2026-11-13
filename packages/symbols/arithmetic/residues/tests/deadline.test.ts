@@ -1,4 +1,4 @@
-import { DeadlineExceededError, withDeadline } from "@enumeratio/engine";
+import { DeadlineExceededError, withDeadline } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { factorInteger } from "../src/index.ts";
 

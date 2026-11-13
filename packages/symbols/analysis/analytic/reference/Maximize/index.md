@@ -6,14 +6,14 @@ summary: The global maximum of f over the real line (or a simple interval constr
 signatures:
   - call: Maximize(f, x)
     description: the global maximum of f, a real expression in the single variable x, over f's own natural domain.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, list<symbol> | symbol) -> expression
   - call: Maximize(f, {x})
     description: same as Maximize(f, x) -- Wolfram accepts the variable either bare or wrapped in a one-element list.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
   - call: Maximize({f, cons}, x)
     description: the global maximum of f restricted to cons, a simple interval constraint (x >= a, a <= x <= b, an And of two one-sided bounds, ...).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Minimize
   - MinValue

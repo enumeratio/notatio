@@ -11,9 +11,9 @@ import {
   type EvaluateOptions,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
-import { registerNotation } from "@enumeratio/boxes";
-import { conform, declareCarriers, ensureProtocols } from "@enumeratio/structures";
+} from "@notatio/engine";
+import { registerNotation } from "@notatio/boxes";
+import { conform, declareCarriers, ensureProtocols } from "@notatio/structures";
 import { RESIDUES_CARRIERS } from "./carrier-data.ts";
 import { declareIntegerMod } from "./integer-mod.ts";
 import { INTEGER_MOD, RESIDUE_CLASS } from "./names.ts";

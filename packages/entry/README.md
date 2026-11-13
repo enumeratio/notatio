@@ -1,4 +1,4 @@
-# @enumeratio/entry
+# @notatio/entry
 
 The shape of a reference entry: the types every package's `reference/<Head>/` folder is
 written against, and the rule an `implementations` block has to satisfy. A leaf package —
@@ -26,7 +26,7 @@ mean on an example.
   `headNames`/`headExists`/`isWrittenHead`, component `.stories.yaml`. Node-only, so it never
   lands on the main export.
 
-**Read and write records through `@enumeratio/entry/node`, never by hand-parsing their
+**Read and write records through `@notatio/entry/node`, never by hand-parsing their
 files** — hand edits are fine; the writer normalizes them back. A record is written in two
 passes: `src/record.ts` decides the split across `index.md`/`examples.tsv`, oxfmt decides
 layout, so a written record is exactly what `vp fmt` would make of it. A TSV cell is its text
@@ -38,7 +38,7 @@ empty string) is JSON-encoded (`src/tsv.ts`).
 ```sh
 vp check                                       # format, lint, type check
 vp test                                        # tests/*.test.ts
-pnpm --filter @enumeratio/entry build          # write schema/*.schema.json
+pnpm --filter @notatio/entry build          # write schema/*.schema.json
 ```
 
 ## Next

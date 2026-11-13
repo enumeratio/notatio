@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/ce-patches",
+  "name": "@notatio/ce-patches",
   "version": "0.0.0",
   "private": true,
   "description": "Heads and fixes compute-engine would plausibly take, applied as patches until it ships them: kept apart from what is ours, so landing upstream is a deletion, not an excavation.",
@@ -26,12 +26,12 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*"
+    "@notatio/engine": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -7,12 +7,12 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { packageDirs } from "@enumeratio/entry/node";
+import { packageDirs } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { HIERARCHY, PACKAGES } from "../src/hierarchy.ts";
 
 const ROOT = fileURLToPath(new URL("../../../", import.meta.url));
-const SCOPE = "@enumeratio/";
+const SCOPE = "@notatio/";
 
 /** Not shipped: what a package's tests, scripts and records hold. */
 const SKIP = new Set([
@@ -62,7 +62,7 @@ function sources(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** The node an `@enumeratio/…` specifier lands on: `boxes/render` for that entry point. */
+/** The node an `@notatio/…` specifier lands on: `boxes/render` for that entry point. */
 function nodeOf(specifier: string): string {
   const [pkg, sub] = specifier.slice(SCOPE.length).split("/");
   return sub !== undefined && Object.hasOwn(HIERARCHY, `${pkg}/${sub}`) ? `${pkg}/${sub}` : pkg!;

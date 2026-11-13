@@ -2,7 +2,7 @@
 name: Interval
 domain: Interval arithmetic
 signature: Interval(a, b)
-summary: Arithmetic over compute-engine's native `Interval(a, b)` -- extended in place by `@enumeratio/analytic`, since compute-engine declares it only as a real set with no arithmetic of its own. A result contains every value the operation takes on its inputs.
+summary: Arithmetic over compute-engine's native `Interval(a, b)` -- extended in place by `@notatio/analytic`, since compute-engine declares it only as a real set with no arithmetic of its own. A result contains every value the operation takes on its inputs.
 signatures:
   - call: Interval(a, b)
     description: "the real interval [a, b], carried through arithmetic and the elementary and special functions: each result encloses the true image."

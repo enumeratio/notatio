@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/statistics",
+  "name": "@notatio/statistics",
   "version": "0.0.0",
   "private": true,
   "description": "Probability distributions and random processes, defined as Epsil expressions.",
@@ -24,15 +24,15 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*"
+    "@notatio/engine": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/combinatorics": "workspace:*",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/entry": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
+    "@notatio/combinatorics": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/entry": "workspace:*",
+    "@notatio/manifest": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

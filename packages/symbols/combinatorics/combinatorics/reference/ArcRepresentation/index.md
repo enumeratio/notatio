@@ -13,4 +13,4 @@ signatures:
 ---
 
 - Takes a `SetPartition` and returns a `Endofunction` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- The statistics frontier calls this the arc representation: within each block, consecutive elements (b1,b2), (b2,b3), .... Encoding it as an endofunction rather than a bare list of pairs keeps it a typed carrier — Crossings, Nestings and CrossingNestingTotal (@enumeratio/statistics) read the arcs off this without needing a carrier of their own.
+- The statistics frontier calls this the arc representation: within each block, consecutive elements (b1,b2), (b2,b3), .... Encoding it as an endofunction rather than a bare list of pairs keeps it a typed carrier — Crossings, Nestings and CrossingNestingTotal (@notatio/statistics) read the arcs off this without needing a carrier of their own.

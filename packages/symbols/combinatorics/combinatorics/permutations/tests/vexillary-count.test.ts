@@ -1,6 +1,6 @@
 // VexillaryPermutations' count: Gessel's recurrence against the interpreted table, and where it stops.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, kernelOn } from "../../collections/src/families/epsil.ts";
 import { RECURRENCE_TOP, vexillaryExact } from "../../collections/src/families/exact-recurrences.ts";

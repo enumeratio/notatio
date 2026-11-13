@@ -1,5 +1,5 @@
 // Ask FindStat which of its statistics each of ours IS, by value, and rewrite
-// `@enumeratio/combinatorics`' `findstat/src/findstat-data.ts`.
+// `@notatio/combinatorics`' `findstat/src/findstat-data.ts`.
 //
 // FindStat's finder takes a table of objects and values and answers with the statistics in
 // its database that agree. That is the honest way to cross-reference a statistic -- by what
@@ -32,8 +32,8 @@
 
 import { readdirSync, readFileSync } from "node:fs";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { writeFormatted } from "@enumeratio/entry/node";
-import { ALL_STATISTICS, applyDefinition } from "@enumeratio/combinatorics";
+import { writeFormatted } from "@notatio/entry/node";
+import { ALL_STATISTICS, applyDefinition } from "@notatio/combinatorics";
 import {
   type FindStatMatch,
   findstat as existing,

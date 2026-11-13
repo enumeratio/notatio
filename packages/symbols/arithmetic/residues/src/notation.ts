@@ -1,7 +1,7 @@
-// @enumeratio/residues' notation: ℤ/m in StandardForm, `a \pmod{n}` both ways, and the
+// @notatio/residues' notation: ℤ/m in StandardForm, `a \pmod{n}` both ways, and the
 // residue value as `(a mod n)` in TraditionalForm.
 
-import { fence, type Notation, type PackageNotation, scalars } from "@enumeratio/boxes";
+import { fence, type Notation, type PackageNotation, scalars } from "@notatio/boxes";
 import { RESIDUES_LATEX } from "./latex.ts";
 import { INTEGER_MOD } from "./names.ts";
 

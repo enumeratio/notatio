@@ -10,7 +10,7 @@ import {
   type Palette,
   resolvePalette,
   reverseGradient,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { ensureStyles } from "./styles.ts";
 
 /** What a palette picker holds; `notatio-palette-change` carries it whole. */

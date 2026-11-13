@@ -14,7 +14,7 @@ import {
   ringOption,
   SYMBOLS,
   toWolfram,
-} from "@enumeratio/wolfram";
+} from "@notatio/wolfram";
 import { CARRIER_NAMES, CARRIER_PARAMS } from "./carrier-names-data.ts";
 import { DEFINED_NAMES } from "./defined-names-data.ts";
 import { type Mapping, mappingFor, THREADS_MANUALLY } from "./mappings.ts";
@@ -102,7 +102,7 @@ const CONSTANTS: Record<string, Partial<Record<System, string>>> = {
   // branch below and get reported missing whenever it appears as a bare option VALUE
   // (`Over -> GaussianIntegers`) — a named value here too, same as True/False/NaN above,
   // not a free variable. Wolfram's own name for the same choice is unprefixed
-  // `GaussianIntegers` (see @enumeratio/wolfram's `FOREIGN` and `to-wolfram.ts`'s
+  // `GaussianIntegers` (see @notatio/wolfram's `FOREIGN` and `to-wolfram.ts`'s
   // `KeyValuePair` special case); no other system's emit ever reaches this bare, since none
   // has a curated `Over`-arity mapping for the heads that take it.
   GaussianIntegers: { wolfram: "GaussianIntegers" },

@@ -1,4 +1,4 @@
-import { bigRationalAt, type Engine, type Expr, isNumber } from "@enumeratio/engine";
+import { bigRationalAt, type Engine, type Expr, isNumber } from "@notatio/engine";
 
 // FunctionExpand of ExpIntegralE(n, z), as Wolfram's FunctionExpand gives it:
 //   • integer n ≤ 0: e^(−z) times a Laurent polynomial in z;

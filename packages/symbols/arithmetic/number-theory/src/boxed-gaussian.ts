@@ -1,4 +1,4 @@
-import { bigIntegerAt, type Engine, type Expr } from "@enumeratio/engine";
+import { bigIntegerAt, type Engine, type Expr } from "@notatio/engine";
 import type { Gaussian } from "./gaussian.ts";
 
 /** An integer part as MathJSON reads it: a JSON number, or `{ num }` past a double. */

@@ -1,6 +1,6 @@
 // Node surface (`.` entry): the browser-safe core plus the Node adapter — the
 // interactive loop, command runner, and graphic rendering. The bin and tests
-// import from here; browser hosts import "@enumeratio/cli/browser" instead.
+// import from here; browser hosts import "@notatio/cli/browser" instead.
 
 export * from "./browser.ts";
 export { main } from "./cli-main.ts";

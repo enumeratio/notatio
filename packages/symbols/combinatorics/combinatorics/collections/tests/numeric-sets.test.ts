@@ -1,4 +1,4 @@
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { kernels as numericSets } from "../src/families/numeric-sets.ts";
 import { declareCollections } from "../src/library.ts";
@@ -101,7 +101,7 @@ test("SmoothNumbers(k) is a one-parameter operator", () => {
 });
 
 // --- PrimeNumbers at bench scale (issue #205/#276): the segmented sieve/BPSW primality of
-// @enumeratio/residues, not a separate scan of our own -- compared against a naive
+// @notatio/residues, not a separate scan of our own -- compared against a naive
 // trial-division reference over a range, plus the bench's own golden value. ---
 
 function isPrimeTrial(n: number): boolean {

@@ -2,9 +2,9 @@
 // it can't be. An input is kept only when every Wolfram name in it is one we map back to a
 // head or symbol of ours, so the example means here what it meant there.
 
-import { GRAPHICS_HEADS } from "@enumeratio/formats";
-import { DEFINED_NAMES } from "@enumeratio/oracle";
-import { fromWolfram, isSystemName, READ_SYMBOLS, REVERSE_HEADS, SYMBOLS } from "@enumeratio/wolfram";
+import { GRAPHICS_HEADS } from "@notatio/formats";
+import { DEFINED_NAMES } from "@notatio/oracle";
+import { fromWolfram, isSystemName, READ_SYMBOLS, REVERSE_HEADS, SYMBOLS } from "@notatio/wolfram";
 
 /** Wolfram's documentation sections, as our page's (`null`: not an example we'd show). */
 export const SECTION: Readonly<Record<string, string | null>> = {

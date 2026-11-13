@@ -6,15 +6,15 @@ summary: Linearly rescale a value or list from one range to another.
 signatures:
   - call: Rescale(list)
     description: rescale every element of list so its own minimum maps to 0 and its maximum to 1.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list<real> | real, vector<real^2>?, vector<real^2>?) -> list<real> | real
   - call: Rescale(x, {min, max})
     description: (x - min) / (max - min) -- x rescaled from {min, max} to {0, 1}.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
   - call: Rescale(x, {min, max}, {ymin, ymax})
     description: x rescaled from {min, max} to {ymin, ymax}.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 3
 names:
   wolframIdentity: true

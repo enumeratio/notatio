@@ -7,8 +7,8 @@ import {
   integerAt,
   operandsOf,
   symbolNameOf,
-} from "@enumeratio/engine";
-import { symbolInfo } from "@enumeratio/manifest";
+} from "@notatio/engine";
+import { symbolInfo } from "@notatio/manifest";
 
 // Wolfram-frontier scoping/control heads: With, Reap/Sow, Do, Switch, NestWhile(List),
 // While, FixedPointList, Throw/Catch, Echo, AbsoluteTiming, Attributes/SetAttributes/ClearAttributes, AppendTo.
@@ -297,7 +297,7 @@ function readDoSpec(
  *  `Do(body, {i, a, b, step})`: evaluate the held `body` once per iteration (a loop
  *  variable, when named, lives in one fresh scope for the whole call, reassigned each
  *  step). Always returns `Nothing` -- our stand-in for Wolfram's `Null`, per the existing
- *  `Nothing: Null` entry in `@enumeratio/wolfram`'s `SYMBOLS` map. */
+ *  `Nothing: Null` entry in `@notatio/wolfram`'s `SYMBOLS` map. */
 function declareDo(ce: Engine): void {
   ce.declare("Do", {
     signature: "(any, any) -> any",
@@ -457,7 +457,7 @@ function declareFixedPointList(ce: Engine): void {
 
 // --- Echo / AbsoluteTiming -----------------------------------------------------------------
 
-/** `Echo::printed` / `Echo::labeled` templates are per-engine (see `@enumeratio/engine`'s
+/** `Echo::printed` / `Echo::labeled` templates are per-engine (see `@notatio/engine`'s
  *  `messages.ts`); this set tracks which engines already have them, so re-declaring the
  *  control heads on the same engine doesn't redefine the templates twice. */
 const echoMessagesDefined = new WeakSet<Engine>();
@@ -473,7 +473,7 @@ function defineEchoMessagesOnce(ce: Engine): void {
 /** `Echo(expr)` / `Echo(expr, label)` / `Echo(expr, label, f)`: prints `f(expr)` (or
  *  `expr` itself, with no `f`) -- prefixed by `label` when given -- and returns `expr`
  *  UNCHANGED. Printing is a side-effect this engine has no console for, so it's routed
- *  through `@enumeratio/engine`'s message channel instead (`Echo::printed` / `Echo::labeled`,
+ *  through `@notatio/engine`'s message channel instead (`Echo::printed` / `Echo::labeled`,
  *  collectible with `collectMessages`) rather than skipped outright -- a caller that wants
  *  the printed text can `collectMessages(ce, () => expr.evaluate())` and read it from
  *  there, same as any other head's declined-call message. */

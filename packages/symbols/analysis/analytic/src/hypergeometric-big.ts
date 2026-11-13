@@ -1,5 +1,5 @@
-import { BigDecimal } from "@enumeratio/engine";
-import { atDigits, bernoulliRational, bigCx } from "@enumeratio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
+import { atDigits, bernoulliRational, bigCx } from "@notatio/ce-patches";
 
 // The BigDecimal twin of `pfqRegularizedSeries` (hypergeometric.ts) for real operands:
 // Σ_k ∏(aᵢ)_k zᵏ/k! · ∏ⱼ 1/Γ(bⱼ+k), for `N(Hypergeometric0F1Regularized(b, z), d)`,

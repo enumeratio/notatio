@@ -1,4 +1,4 @@
-// @enumeratio/diagram's heads in traditional notation: the diagram-algebra family, each
+// @notatio/diagram's heads in traditional notation: the diagram-algebra family, each
 // `symbol_{n}`, or `symbol_{n}(δ)` with the loop parameter.
 
 import {
@@ -10,7 +10,7 @@ import {
   scalars,
   subscript,
   type PackageNotation,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 
 /** A family of algebras on `n` strands, `symbol_{n}`, or `symbol_{n}(parameter)`. */
 const algebra =

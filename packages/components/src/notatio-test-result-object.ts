@@ -2,7 +2,7 @@ import { html, LitElement, nothing } from "lit";
 import "./notatio-out.ts";
 import { ensureStyles } from "./styles.ts";
 
-/** `VerificationTest`'s outcome (`@enumeratio/evaluation`'s `Outcome`). */
+/** `VerificationTest`'s outcome (`@notatio/evaluation`'s `Outcome`). */
 type Outcome = "Success" | "Failure" | "Error" | "Aborted" | "";
 
 const BADGE: Readonly<Record<Exclude<Outcome, "">, { symbol: string; label: string }>> = {

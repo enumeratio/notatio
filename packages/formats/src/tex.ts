@@ -3,7 +3,7 @@
 // round an operand that fails its type check. Exported TeX is for a LaTeX document, so it is
 // rewritten into commands amsmath and amssymb provide.
 
-import { setMathSymbols } from "@enumeratio/boxes/render";
+import { setMathSymbols } from "@notatio/boxes/render";
 
 /** A letter for a command, spaced off a command name before it (`\lbrack e`, not `\lbracke`). */
 const letter =

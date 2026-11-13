@@ -6,7 +6,7 @@ summary: The Mellin transform $F(s) = \int_0^\infty f(x)\,x^{s-1}\,dx$, as a rul
 signatures:
   - call: MellinTransform(f, x, s)
     description: $F(s) = \int_0^\infty f(x)\,x^{s-1}\,dx$, for `f` a function of `x`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression) -> expression
 primitive: kernel
 bindings:

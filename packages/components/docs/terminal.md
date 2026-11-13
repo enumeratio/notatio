@@ -4,7 +4,7 @@ order: 11
 
 # Terminal
 
-`<notatio-terminal>` — the real `@enumeratio/cli` evaluation core in a browser terminal.
+`<notatio-terminal>` — the real `@notatio/cli` evaluation core in a browser terminal.
 Two modes: the interactive session (the default), which keeps `In[n]`/`Out[n]`, and
 `mode="cli"`, a fixed `$ notatio ` prompt that runs one invocation at a time. What either
 one accepts is the CLI's business, documented with it: the [REPL](/docs/cli/repl), the

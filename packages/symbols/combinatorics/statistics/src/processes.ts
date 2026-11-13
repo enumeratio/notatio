@@ -1,4 +1,4 @@
-import { type Engine, type Expr, extendHead, operandsOf, wrapOperator } from "@enumeratio/engine";
+import { type Engine, type Expr, extendHead, operandsOf, wrapOperator } from "@notatio/engine";
 import { normal01, numAt, poissonSample } from "./distributions.ts";
 
 // The Wolfram-frontier random-process heads: `WienerProcess`/`PoissonProcess` (inert process

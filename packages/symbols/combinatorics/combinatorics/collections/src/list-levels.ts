@@ -11,7 +11,7 @@ import {
   symbolNameOf,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 // Level-aware and structural list operations compute-engine doesn't answer yet: Partition's
 // multi-dimensional block form and its wraparound/padded overhangs, Flatten's infinite

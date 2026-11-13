@@ -1,4 +1,4 @@
-import { catalogOf, type MapExplorer, mapExplorerOf } from "@enumeratio/frontend/explorer";
+import { catalogOf, type MapExplorer, mapExplorerOf } from "@notatio/frontend/explorer";
 import { entries } from "../../../.vitepress/data/reference-node.ts";
 import { liveExpression, mapPages, siblingsOf, statisticPages } from "../../../.vitepress/data/carrier-fields.ts";
 

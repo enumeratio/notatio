@@ -5,7 +5,7 @@
 // 2^53, far out where only the interpreter answers, and past what a definition can reach, where the
 // answer is a decline and never a wrong one. DEEP_TESTS=1 goes farther out.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, isEpsilFamily, kernelOn, liftFamily } from "../src/families/epsil.ts";
 import { entries as closedForm } from "../src/families/numeric-closed-form.ts";
@@ -500,7 +500,7 @@ test("a number that is not an integer, or not a number, is no member", () => {
 // The definitions as the interpreter reads them, bypassing compiled code and the fast paths.
 for (const [head, family] of definitions) {
   test(`${head}: the interpreted definition gives the same terms and places`, async () => {
-    const { evaluateEpsil } = await import("@enumeratio/structures");
+    const { evaluateEpsil } = await import("@notatio/structures");
     const sequence = TERMS[head](24);
     const places = firstPlaces(sequence);
     sequence.slice(0, DEEP ? 9 : 5).forEach((term, r) => {

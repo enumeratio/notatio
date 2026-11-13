@@ -12,7 +12,7 @@
 // each area's own data; this only declares whatever table of them a host hands over.
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 import { attachConversion } from "./carriers.ts";
 import { applyComposition } from "./compose.ts";
 import { extendBuiltin } from "./extend.ts";

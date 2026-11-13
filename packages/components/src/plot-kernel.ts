@@ -1,10 +1,10 @@
 // A plot's side of a kernel: it sends the expression, gets source back
-// (`@enumeratio/frontend/plot-compile`), and samples that with no engine of its own. Free
+// (`@notatio/frontend/plot-compile`), and samples that with no engine of its own. Free
 // names, a Manipulate's wildcards (`_a`) included, are the scope's, so moving a control
 // samples the same code again rather than asking for new code.
 
-import type { CompiledItem, CompiledPlot, PlotCompileSpec } from "@enumeratio/frontend/plot-compile";
-import { loadBareEngine, loadEngineFor, parseFor } from "@enumeratio/frontend/core";
+import type { CompiledItem, CompiledPlot, PlotCompileSpec } from "@notatio/frontend/plot-compile";
+import { loadBareEngine, loadEngineFor, parseFor } from "@notatio/frontend/core";
 import { pageKernel, translate, WorkerUnavailableError } from "./kernel-client.ts";
 
 export type { CompiledItem, CompiledPlot, PlotCompileSpec };
@@ -51,8 +51,8 @@ async function compileOnce(text: string, spec: PlotCompileSpec): Promise<Compile
     }
   }
   const [{ compilePlot }, { parseExpression }] = await Promise.all([
-    import("@enumeratio/frontend/plot-compile"),
-    import("@enumeratio/formats/expression"),
+    import("@notatio/frontend/plot-compile"),
+    import("@notatio/formats/expression"),
   ]);
   const { engine, parsed } = await parseFor((ce) =>
     parseExpression(text, { ce, parseLatex: (tex) => ce.parse(tex).json }),
@@ -75,7 +75,7 @@ const systemHelpers = (): Promise<unknown> =>
 // (`_.__hz(…)`): loaded only for code that calls one.
 let analytic: Promise<Scope> | undefined;
 const analyticRuntime = (): Promise<Scope> =>
-  (analytic ??= import("@enumeratio/analytic").then((m) => ({
+  (analytic ??= import("@notatio/analytic").then((m) => ({
     __hz: m.hurwitzZetaReal,
     __zg: m.zetaGeneralizedReal,
     __lp: m.lerchPhiReal,
@@ -95,7 +95,7 @@ export async function numericValueOf(text: string): Promise<unknown> {
       if (!(err instanceof WorkerUnavailableError)) throw err;
     }
   }
-  const { parseExpression } = await import("@enumeratio/formats/expression");
+  const { parseExpression } = await import("@notatio/formats/expression");
   const { engine, parsed } = await parseFor((ce) =>
     parseExpression(text, { ce, parseLatex: (tex) => ce.parse(tex).json }),
   );
@@ -118,7 +118,7 @@ export async function canonicalOf(text: string): Promise<unknown> {
       if (!(err instanceof WorkerUnavailableError)) throw err;
     }
   }
-  const { parseExpression } = await import("@enumeratio/formats/expression");
+  const { parseExpression } = await import("@notatio/formats/expression");
   const { engine, parsed } = await parseFor((ce) =>
     parseExpression(text, { ce, parseLatex: (tex) => ce.parse(tex).json }),
   );
@@ -147,7 +147,7 @@ export async function readEpsil(text: string): Promise<unknown> {
   } catch {
     return undefined;
   }
-  const { parseExpression } = await import("@enumeratio/formats/expression");
+  const { parseExpression } = await import("@notatio/formats/expression");
   const { parsed } = await parseFor((ce) => parseExpression(text, { ce, parseLatex: (tex) => ce.parse(tex).json }));
   return parsed.errors.length > 0 ? undefined : parsed.json;
 }

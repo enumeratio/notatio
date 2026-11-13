@@ -1,14 +1,14 @@
 // The notebook's side of a kernel (https://github.com/enumeratio/notatio/wiki/Speculative-Kernels-and-Front-Ends):
 // how a cell's text reads, what a session remembers, and how an answer is shown, as
-// `@enumeratio/evaluation`'s `createKernel` options. A cell's front end then sends text and
+// `@notatio/evaluation`'s `createKernel` options. A cell's front end then sends text and
 // renders what comes back, with no engine of its own.
 
 import type { ComputeEngine, MathJsonExpression } from "@cortex-js/compute-engine";
-import { makeBoxes, notationOf } from "@enumeratio/boxes";
-import { toAscii } from "@enumeratio/boxes/render";
-import type { KernelOptions, KernelSession, KernelSource } from "@enumeratio/evaluation";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { toInputForm } from "@enumeratio/formats/inputform";
+import { makeBoxes, notationOf } from "@notatio/boxes";
+import { toAscii } from "@notatio/boxes/render";
+import type { KernelOptions, KernelSession, KernelSource } from "@notatio/evaluation";
+import { parseExpression } from "@notatio/formats/expression";
+import { toInputForm } from "@notatio/formats/inputform";
 import { type CodeForm, codeForms } from "./code-forms.ts";
 import { type DisplayBoxes, displayBoxes } from "./display.ts";
 import { compilePlot, type PlotCompileSpec } from "./plot-compile.ts";

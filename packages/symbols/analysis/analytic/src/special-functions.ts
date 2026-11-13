@@ -1,5 +1,5 @@
 import { type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
-import { type EvalOptions, evaluateBernoulliPolynomial } from "@enumeratio/ce-patches";
+import { type EvalOptions, evaluateBernoulliPolynomial } from "@notatio/ce-patches";
 import { compileChebyshevT, compileChebyshevU, evaluateChebyshevT, evaluateChebyshevU } from "./chebyshev.ts";
 import { evaluateCsgn } from "./csgn.ts";
 import { evaluateCongruentMod } from "./congruent-mod.ts";

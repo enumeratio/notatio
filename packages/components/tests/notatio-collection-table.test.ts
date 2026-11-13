@@ -21,9 +21,9 @@
 import type { Expression } from "@cortex-js/compute-engine";
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { CARRIERS, declareCombinatorics } from "@enumeratio/combinatorics";
-import { substituteRowPerHead, wantsCarrier } from "@enumeratio/frontend";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
+import { CARRIERS, declareCombinatorics } from "@notatio/combinatorics";
+import { substituteRowPerHead, wantsCarrier } from "@notatio/frontend";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 
 function productionEngine(): ComputeEngine {

@@ -1,7 +1,7 @@
 // Hurwitz numbers pass 2^53 at small sizes. The compiled code answers only while it is exact and
 // declines past that, so the interpreter's exact integer is the answer on every route.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
 import { ALL_STATISTICS } from "../../src/statistics/all.ts";

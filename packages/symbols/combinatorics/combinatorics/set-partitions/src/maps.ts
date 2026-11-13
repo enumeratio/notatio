@@ -337,7 +337,7 @@ export const SET_PARTITIONS_MAPS: readonly CombinatorialMap[] = [
       "list<integer>",
     ),
     summary: "Each position linked to the next in its block, or to itself when last.",
-    note: "The statistics frontier calls this the arc representation: within each block, consecutive elements (b1,b2), (b2,b3), .... Encoding it as an endofunction rather than a bare list of pairs keeps it a typed carrier — Crossings, Nestings and CrossingNestingTotal (@enumeratio/statistics) read the arcs off this without needing a carrier of their own.",
+    note: "The statistics frontier calls this the arc representation: within each block, consecutive elements (b1,b2), (b2,b3), .... Encoding it as an endofunction rather than a bare list of pairs keeps it a typed carrier — Crossings, Nestings and CrossingNestingTotal (@notatio/statistics) read the arcs off this without needing a carrier of their own.",
   },
   {
     name: "Reverse",

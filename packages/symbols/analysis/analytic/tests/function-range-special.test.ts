@@ -1,6 +1,6 @@
 // unstable: a test constructs its own engine
-import { ComputeEngine } from "@enumeratio/engine/unstable";
-import type { Json } from "@enumeratio/engine";
+import { ComputeEngine } from "@notatio/engine/unstable";
+import type { Json } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 

@@ -1,6 +1,6 @@
 import { expect, test } from "vite-plus/test";
-import { type Box, type BoxNode, graphicsOf, makeBoxes, optionsOfBox } from "@enumeratio/boxes";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { type Box, type BoxNode, graphicsOf, makeBoxes, optionsOfBox } from "@notatio/boxes";
+import { parseExpression } from "@notatio/formats/expression";
 import {
   arrayPlotBox,
   barChartBox,

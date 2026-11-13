@@ -6,11 +6,11 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { CARRIERS, declareCombinatorics } from "@enumeratio/combinatorics";
-import { readEntries, recordDirs } from "@enumeratio/entry/node";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
-import type { ReferenceEntry } from "@enumeratio/entry";
+import { CARRIERS, declareCombinatorics } from "@notatio/combinatorics";
+import { readEntries, recordDirs } from "@notatio/entry/node";
+import { parseExpression } from "@notatio/formats/expression";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
+import type { ReferenceEntry } from "@notatio/entry";
 import { expect, test } from "vite-plus/test";
 import { catalogOf, explorerOf } from "../src/explorer.ts";
 import { engineProbes } from "../src/explorer-engine.ts";

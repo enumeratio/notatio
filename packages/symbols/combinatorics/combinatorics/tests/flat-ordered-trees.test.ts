@@ -2,8 +2,8 @@
 // root's children. The codec round-trips every small tree and declines what isn't one; the flat
 // bodies, compiled, give independent readings' answers on every tree of up to 7 edges.
 
-import { compileTyped } from "@enumeratio/engine/compiled";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { compileTyped } from "@notatio/engine/compiled";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { interpretDefinition } from "../src/statistics/declare.ts";
 import { SUBJECT, signatureOf } from "../src/statistics/types.ts";

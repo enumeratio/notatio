@@ -3,11 +3,11 @@
 // compiled code agrees with the interpreter on a sample. Split from the script so that only the
 // processes doing the work load the families.
 
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { compileTyped } from "@enumeratio/engine/compiled";
-import { compileBigint, fromBigint, toBigint } from "@enumeratio/engine/compiled-bigint";
-import { evaluateEpsil } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { compileTyped } from "@notatio/engine/compiled";
+import { compileBigint, fromBigint, toBigint } from "@notatio/engine/compiled-bigint";
+import { evaluateEpsil } from "@notatio/structures";
 import {
   elementJson,
   elementOf,

@@ -5,7 +5,7 @@
 // Stateless per CALL, not per engine: this worker keeps one configured `ComputeEngine` per
 // `setup` URL for its whole lifetime (`engineFor` below) — declaring a whole library set on
 // every single message was the dominant cost of running many small cases through the pool
-// (see `@enumeratio/reference`'s `entries.test.ts`, which does exactly that). Only the
+// (see `@notatio/reference`'s `entries.test.ts`, which does exactly that). Only the
 // DECLARATIONS survive across calls: each call still runs in its own `pushScope()`/
 // `popScope()` (`handle` below), so a `:=` or other binding one caller makes is gone before
 // the next caller on this same (reused) worker ever sees it, and the types a call infers for

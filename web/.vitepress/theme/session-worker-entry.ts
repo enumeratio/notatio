@@ -1,6 +1,6 @@
 // This SITE's own worker entry -- the whole reason `./worker-factories.ts` points
 // `createWorker`/`createSharedWorker` here instead of at
-// `@enumeratio/evaluation/browser-session-worker.ts` directly.
+// `@notatio/evaluation/browser-session-worker.ts` directly.
 //
 // That file's own worker loop takes a `configure` URL over the wire (a connection's `{
 // setup }` handshake) and `import()`s it at RUNTIME -- fine for a plain dev server,
@@ -14,11 +14,11 @@
 // (`startSessionWorker`) and this site's catalogue (`./worker-catalogue.ts`) statically, so
 // Vite bundles them into the worker, each library a chunk of its own -- no runtime
 // `import()` of a URL the build never emitted.
-import { startSessionWorker } from "@enumeratio/evaluation/session-worker-core";
+import { startSessionWorker } from "@notatio/evaluation/session-worker-core";
 import { ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { combineNotation, registerNotation } from "@enumeratio/boxes";
-import { displayLatexSyntax } from "@enumeratio/frontend/display";
-import { NOTEBOOK_KERNEL } from "@enumeratio/frontend/kernel-host";
+import { combineNotation, registerNotation } from "@notatio/boxes";
+import { displayLatexSyntax } from "@notatio/frontend/display";
+import { NOTEBOOK_KERNEL } from "@notatio/frontend/kernel-host";
 import NOTATION_ENTRIES from "virtual:notation-entries";
 import { libraryRegistry, registerLibraryNotation } from "./libraries.ts";
 import { CATALOGUE } from "./worker-catalogue.ts";

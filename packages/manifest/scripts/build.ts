@@ -10,7 +10,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { canonicalOf } from "./declares-of.ts";
-import { packageDirs, recordDirs } from "@enumeratio/entry/node";
+import { packageDirs, recordDirs } from "@notatio/entry/node";
 import { assembleManifest, type PackageIndex } from "../src/assemble.ts";
 import type { Placement } from "../src/hierarchy.ts";
 import { notationSpecifier, type PackageField } from "../src/package-field.ts";
@@ -34,10 +34,10 @@ for (const dir of workspaceDirs) {
   if (!existsSync(file)) continue;
   const pkg = JSON.parse(readFileSync(file, "utf8")) as { name?: string; enumeratio?: PackageField };
   const specifier = pkg.name === undefined ? undefined : notationSpecifier(pkg.name, pkg.enumeratio);
-  if (specifier !== undefined) notations.set(pkg.name!.replace(/^@enumeratio\//, ""), specifier);
+  if (specifier !== undefined) notations.set(pkg.name!.replace(/^@notatio\//, ""), specifier);
   const field = pkg.enumeratio;
   if (pkg.name === undefined || field?.layer === undefined) continue;
-  const name = pkg.name.replace(/^@enumeratio\//, "");
+  const name = pkg.name.replace(/^@notatio\//, "");
   placements[name] = {
     layer: field.layer,
     ...(field.area === undefined ? {} : { area: field.area }),

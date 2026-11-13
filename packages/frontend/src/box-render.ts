@@ -11,8 +11,8 @@
 // A math run is a leaf too: one `form-box` holding its TeX (`Rendering.tex`), which the host
 // typesets (`box-leaf.ts`); everything around a run is drawn here.
 
-import { type Box, type BoxNode, gridCells, isNode, optionsOfBox, type OptionValue, rowsOf } from "@enumeratio/boxes";
-import { LIST_CELLS, toText } from "@enumeratio/boxes/render";
+import { type Box, type BoxNode, gridCells, isNode, optionsOfBox, type OptionValue, rowsOf } from "@notatio/boxes";
+import { LIST_CELLS, toText } from "@notatio/boxes/render";
 import { typesetLeaf } from "./box-leaf.ts";
 import { boxTag } from "./box-tags.ts";
 import { controlElement, isControlElement } from "./control-box.ts";

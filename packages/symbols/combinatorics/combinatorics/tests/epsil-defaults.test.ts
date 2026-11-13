@@ -1,7 +1,7 @@
 // What every Epsil family does, whatever its definitions: a rank outside the fiber is none (the
 // definitions read one as garbage), and a compiled membership that isn't a boolean is no answer.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import {
   allFamilies,

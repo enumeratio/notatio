@@ -1,4 +1,4 @@
-# Golden data for @enumeratio/adeles from Hertogh's Sage `adeles` (github.com/mathehertogh/adeles).
+# Golden data for @notatio/adeles from Hertogh's Sage `adeles` (github.com/mathehertogh/adeles).
 #
 #   sage -pip install git+https://github.com/mathehertogh/adeles
 #   sage -python packages/symbols/arithmetic/adeles/scripts/collect-golden.py > packages/symbols/arithmetic/adeles/tests/adeles.golden.json

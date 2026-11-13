@@ -9,32 +9,32 @@
 // ones are declared with the first call that declares anything.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import type { Library, LibraryDeclares } from "@enumeratio/manifest";
-import structuresDeclares from "@enumeratio/structures/declares.json" with { type: "json" };
-import combinatoricsDeclares from "@enumeratio/combinatorics/declares.json" with { type: "json" };
-import frontendDeclares from "@enumeratio/frontend/declares.json" with { type: "json" };
-import analyticDeclares from "@enumeratio/analytic/declares.json" with { type: "json" };
-import formatsDeclares from "@enumeratio/formats/declares.json" with { type: "json" };
-import boxesDeclares from "@enumeratio/boxes/declares.json" with { type: "json" };
-import hypercomplexDeclares from "@enumeratio/hypercomplex/declares.json" with { type: "json" };
-import geometricDeclares from "@enumeratio/geometric/declares.json" with { type: "json" };
-import diagramDeclares from "@enumeratio/diagram/declares.json" with { type: "json" };
-import residuesDeclares from "@enumeratio/residues/declares.json" with { type: "json" };
-import numeralsDeclares from "@enumeratio/numerals/declares.json" with { type: "json" };
-import heckeDeclares from "@enumeratio/hecke/declares.json" with { type: "json" };
-import incidenceDeclares from "@enumeratio/incidence/declares.json" with { type: "json" };
-import quiverDeclares from "@enumeratio/quiver/declares.json" with { type: "json" };
-import hopfDeclares from "@enumeratio/hopf/declares.json" with { type: "json" };
-import groupalgebraDeclares from "@enumeratio/groupalgebra/declares.json" with { type: "json" };
-import modularDeclares from "@enumeratio/modular/declares.json" with { type: "json" };
-import numberTheoryDeclares from "@enumeratio/number-theory/declares.json" with { type: "json" };
-import adelesDeclares from "@enumeratio/adeles/declares.json" with { type: "json" };
-import braidDeclares from "@enumeratio/braid/declares.json" with { type: "json" };
-import statisticsDeclares from "@enumeratio/statistics/declares.json" with { type: "json" };
+import type { Library, LibraryDeclares } from "@notatio/manifest";
+import structuresDeclares from "@notatio/structures/declares.json" with { type: "json" };
+import combinatoricsDeclares from "@notatio/combinatorics/declares.json" with { type: "json" };
+import frontendDeclares from "@notatio/frontend/declares.json" with { type: "json" };
+import analyticDeclares from "@notatio/analytic/declares.json" with { type: "json" };
+import formatsDeclares from "@notatio/formats/declares.json" with { type: "json" };
+import boxesDeclares from "@notatio/boxes/declares.json" with { type: "json" };
+import hypercomplexDeclares from "@notatio/hypercomplex/declares.json" with { type: "json" };
+import geometricDeclares from "@notatio/geometric/declares.json" with { type: "json" };
+import diagramDeclares from "@notatio/diagram/declares.json" with { type: "json" };
+import residuesDeclares from "@notatio/residues/declares.json" with { type: "json" };
+import numeralsDeclares from "@notatio/numerals/declares.json" with { type: "json" };
+import heckeDeclares from "@notatio/hecke/declares.json" with { type: "json" };
+import incidenceDeclares from "@notatio/incidence/declares.json" with { type: "json" };
+import quiverDeclares from "@notatio/quiver/declares.json" with { type: "json" };
+import hopfDeclares from "@notatio/hopf/declares.json" with { type: "json" };
+import groupalgebraDeclares from "@notatio/groupalgebra/declares.json" with { type: "json" };
+import modularDeclares from "@notatio/modular/declares.json" with { type: "json" };
+import numberTheoryDeclares from "@notatio/number-theory/declares.json" with { type: "json" };
+import adelesDeclares from "@notatio/adeles/declares.json" with { type: "json" };
+import braidDeclares from "@notatio/braid/declares.json" with { type: "json" };
+import statisticsDeclares from "@notatio/statistics/declares.json" with { type: "json" };
 
 const combinatorics = async (ce: ComputeEngine): Promise<void> => {
-  const { CARRIERS, declareCombinatorics, declareMaps } = await import("@enumeratio/combinatorics");
-  const { declareCarrierElement, declareCarrierPlurals } = await import("@enumeratio/structures");
+  const { CARRIERS, declareCombinatorics, declareMaps } = await import("@notatio/combinatorics");
+  const { declareCarrierElement, declareCarrierPlurals } = await import("@notatio/structures");
   declareCombinatorics(ce);
   declareCarrierPlurals(ce, CARRIERS);
   declareCarrierElement(ce, CARRIERS);
@@ -46,7 +46,7 @@ export const CATALOGUE: readonly Library<ComputeEngine>[] = [
   {
     name: "structures",
     declares: structuresDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/structures")).declareStructures(ce),
+    declare: async (ce) => (await import("@notatio/structures")).declareStructures(ce),
   },
   // As reference's LIBRARIES: `CombinatorialStat`'s table is a registry declaring can't see.
   {
@@ -60,13 +60,13 @@ export const CATALOGUE: readonly Library<ComputeEngine>[] = [
     name: "frontend",
     declares: frontendDeclares as LibraryDeclares,
     global: true,
-    declare: async (ce) => (await import("@enumeratio/frontend/declare-carriers")).declareFrontendCarriers(ce),
+    declare: async (ce) => (await import("@notatio/frontend/declare-carriers")).declareFrontendCarriers(ce),
   },
   {
     name: "analytic",
     declares: analyticDeclares as LibraryDeclares,
     declare: async (ce) => {
-      const { declareAnalytic, declareFractals } = await import("@enumeratio/analytic");
+      const { declareAnalytic, declareFractals } = await import("@notatio/analytic");
       declareAnalytic(ce);
       declareFractals(ce);
     },
@@ -75,89 +75,89 @@ export const CATALOGUE: readonly Library<ComputeEngine>[] = [
     name: "formats",
     declares: formatsDeclares as LibraryDeclares,
     global: true,
-    declare: async (ce) => (await import("@enumeratio/formats")).declareGraphics(ce),
+    declare: async (ce) => (await import("@notatio/formats")).declareGraphics(ce),
   },
   {
     name: "boxes",
     declares: boxesDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/boxes")).declareBoxes(ce),
+    declare: async (ce) => (await import("@notatio/boxes")).declareBoxes(ce),
   },
   {
     name: "hypercomplex",
     declares: hypercomplexDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/hypercomplex")).declareHypercomplex(ce),
+    declare: async (ce) => (await import("@notatio/hypercomplex")).declareHypercomplex(ce),
   },
   {
     name: "geometric",
     declares: geometricDeclares as LibraryDeclares,
     global: true,
-    declare: async (ce) => (await import("@enumeratio/geometric")).declareGeometric(ce),
+    declare: async (ce) => (await import("@notatio/geometric")).declareGeometric(ce),
   },
   {
     name: "diagram",
     declares: diagramDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/diagram")).declareDiagrams(ce),
+    declare: async (ce) => (await import("@notatio/diagram")).declareDiagrams(ce),
   },
   {
     name: "residues",
     declares: residuesDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/residues")).declareResidues(ce),
+    declare: async (ce) => (await import("@notatio/residues")).declareResidues(ce),
   },
   {
     name: "numerals",
     declares: numeralsDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/numerals")).declareNumerals(ce),
+    declare: async (ce) => (await import("@notatio/numerals")).declareNumerals(ce),
   },
   {
     name: "hecke",
     declares: heckeDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/hecke")).declareHecke(ce),
+    declare: async (ce) => (await import("@notatio/hecke")).declareHecke(ce),
   },
   {
     name: "incidence",
     declares: incidenceDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/incidence")).declareIncidence(ce),
+    declare: async (ce) => (await import("@notatio/incidence")).declareIncidence(ce),
   },
   {
     name: "quiver",
     declares: quiverDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/quiver")).declareQuiver(ce),
+    declare: async (ce) => (await import("@notatio/quiver")).declareQuiver(ce),
   },
   {
     name: "hopf",
     declares: hopfDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/hopf")).declareHopf(ce),
+    declare: async (ce) => (await import("@notatio/hopf")).declareHopf(ce),
   },
   {
     name: "groupalgebra",
     declares: groupalgebraDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/groupalgebra")).declareGroupAlgebra(ce),
+    declare: async (ce) => (await import("@notatio/groupalgebra")).declareGroupAlgebra(ce),
   },
   {
     name: "modular",
     declares: modularDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/modular")).declareModular(ce),
+    declare: async (ce) => (await import("@notatio/modular")).declareModular(ce),
   },
   {
     name: "number-theory",
     declares: numberTheoryDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/number-theory")).declareNumberTheory(ce),
+    declare: async (ce) => (await import("@notatio/number-theory")).declareNumberTheory(ce),
   },
   {
     name: "adeles",
     declares: adelesDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/adeles")).declareAdeles(ce),
+    declare: async (ce) => (await import("@notatio/adeles")).declareAdeles(ce),
   },
   {
     name: "braid",
     declares: braidDeclares as LibraryDeclares,
-    declare: async (ce) => (await import("@enumeratio/braid")).declareBraid(ce),
+    declare: async (ce) => (await import("@notatio/braid")).declareBraid(ce),
   },
   {
     name: "statistics",
     declares: statisticsDeclares as LibraryDeclares,
     declare: async (ce) => {
-      const stats = await import("@enumeratio/statistics");
+      const stats = await import("@notatio/statistics");
       stats.declareDistributions(ce);
       stats.declareDistributions2(ce);
       stats.declareDistributions3(ce);

@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/engine",
+  "name": "@notatio/engine",
   "version": "0.0.0",
   "private": true,
   "description": "Plumbing over @cortex-js/compute-engine: values read out of BoxedExpressions through checked accessors, operator wrapping and signature widening, Wolfram-style options, messages, deadlines.",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

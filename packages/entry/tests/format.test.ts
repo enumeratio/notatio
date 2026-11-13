@@ -1,4 +1,4 @@
-import { fmt } from "@enumeratio/config";
+import { fmt } from "@notatio/config";
 import { expect, test } from "vite-plus/test";
 import { FORMAT } from "../src/format.ts";
 

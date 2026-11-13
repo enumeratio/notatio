@@ -4,9 +4,9 @@
 // the kernel from the definitions alone and the one with its TS fast path agree with them where the
 // interpreter reaches, and decline, never answer wrong, past it. DEEP_TESTS=1 goes farther.
 
-import { compileTyped } from "@enumeratio/engine/compiled";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { compileTyped } from "@notatio/engine/compiled";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import {
   epsilKernelOn,

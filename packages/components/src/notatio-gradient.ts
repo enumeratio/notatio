@@ -7,7 +7,7 @@ import {
   gradientCss,
   gradientNamed,
   reverseGradient,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { defineControl, emitControl } from "./define.ts";
 import { ensureStyles } from "./styles.ts";
 

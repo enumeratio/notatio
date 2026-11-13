@@ -1,4 +1,4 @@
-// @enumeratio/complex-numerals: numbers written in a complex base. The arithmetic and the
+// @notatio/complex-numerals: numbers written in a complex base. The arithmetic and the
 // lattice layer are in `./lattice`; no heads are declared yet.
 
 export * from "./lattice.ts";

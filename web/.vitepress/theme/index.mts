@@ -6,8 +6,8 @@ import "./prerendered.css";
 import "./source-links.css";
 import "./styles/index.css";
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import type { PackageNotation } from "@enumeratio/boxes";
-import type { Resolver } from "@enumeratio/manifest";
+import type { PackageNotation } from "@notatio/boxes";
+import type { Resolver } from "@notatio/manifest";
 import Layout from "./Layout.vue";
 import NotatioPrerendered from "./components/NotatioPrerendered.vue";
 import SiteFooter from "./components/SiteFooter.vue";
@@ -15,8 +15,8 @@ import { hydrated } from "./hydration.ts";
 import { createSessionSharedWorker, createSessionWorker } from "./worker-factories.ts";
 
 // Every custom theme component is loaded lazily. They pull the heavy graphs —
-// @enumeratio/components (the whole element + compute-engine tree) via Playground, and
-// @enumeratio/reference (all the entry data) via the reference/component pages — which,
+// @notatio/components (the whole element + compute-engine tree) via Playground, and
+// @notatio/reference (all the entry data) via the reference/component pages — which,
 // resolved from source, is ~all of the monorepo. Keeping them out of the initial theme
 // bundle lets a page's shell paint immediately; each page pulls only the components it
 // actually uses, on demand.
@@ -74,7 +74,7 @@ export default {
       let combined: Promise<Required<PackageNotation>> | undefined;
       const notation = (): Promise<Required<PackageNotation>> =>
         (combined ??= Promise.all([
-          import("@enumeratio/boxes"),
+          import("@notatio/boxes"),
           import("virtual:notation-entries"),
           import("./worker-catalogue.ts"),
         ]).then(([{ combineNotation }, entries, { CATALOGUE }]) =>
@@ -84,8 +84,8 @@ export default {
       (globalThis as { __notatioEngineSetup?: () => Promise<unknown> }).__notatioEngineSetup = () =>
         (setup ??= (async () => {
           const [{ configureEngine, configureLatex }, { declareEvaluation }, { latex }] = await Promise.all([
-            import("@enumeratio/frontend/core"),
-            import("@enumeratio/evaluation"),
+            import("@notatio/frontend/core"),
+            import("@notatio/evaluation"),
             notation(),
           ]);
           configureLatex(latex);
@@ -97,13 +97,13 @@ export default {
       // (`loadEngine()`) gets every library, through the same resolver, so none is declared twice.
       let resolver: Promise<Resolver<ComputeEngine>> | undefined;
       const resolve = (): Promise<Resolver<ComputeEngine>> =>
-        (resolver ??= Promise.all([import("@enumeratio/manifest"), import("./worker-catalogue.ts")]).then(
+        (resolver ??= Promise.all([import("@notatio/manifest"), import("./worker-catalogue.ts")]).then(
           ([{ createResolver }, { CATALOGUE }]) => createResolver(CATALOGUE),
         ));
       (globalThis as { __notatioEngineResolver?: unknown }).__notatioEngineResolver = {
         ensure: async (ce: ComputeEngine, json: unknown) => (await resolve()).ensure(ce, json),
         ensureAll: async (ce: ComputeEngine) => {
-          const [{ SYMBOLS }, r] = await Promise.all([import("@enumeratio/manifest"), resolve()]);
+          const [{ SYMBOLS }, r] = await Promise.all([import("@notatio/manifest"), resolve()]);
           return r.ensure(ce, Object.keys(SYMBOLS));
         },
       };
@@ -118,7 +118,7 @@ export default {
       // Held until the prerendered placeholders have hydrated (NotatioPrerendered): an element that
       // upgrades first has its rendered children removed by Vue's hydration and stays blank.
       const define = (): void =>
-        void Promise.all([import("@enumeratio/components/lazy"), hydrated()]).then(([m]) => {
+        void Promise.all([import("@notatio/components/lazy"), hydrated()]).then(([m]) => {
           m.configureMacros(notation().then((n) => n.macros));
           m.defineOnUse();
         });
@@ -128,7 +128,7 @@ export default {
       else setTimeout(define, 0);
       // Points an `Evaluator -> "Worker"` `<dynamic-module-box>` at the module
       // whose `configure(ce)` declares this page's own libraries into its
-      // `@enumeratio/evaluation/browser` session -- `dynamic-module-box.ts`'s own
+      // `@notatio/evaluation/browser` session -- `dynamic-module-box.ts`'s own
       // `#openSession` reads this the same way `loadEngine` reads
       // `__notatioEngineSetup` above. A `URL` (not a bare specifier) so the worker's
       // own `import(setup)` -- running in a different module graph -- can resolve it.

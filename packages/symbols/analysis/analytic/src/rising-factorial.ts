@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { isFiniteNum, isRealInt, numberResult, cexp, cx, sub, logGamma } from "@enumeratio/ce-patches";
+import { isFiniteNum, isRealInt, numberResult, cexp, cx, sub, logGamma } from "@notatio/ce-patches";
 
 // RisingFactorial(a, n) — Fungrim's name for CE's native `Pochhammer`, delegated to. A complex
 // operand with a non-integer n is Γ(a+n)/Γ(a) here, not Pochhammer's, so the value is the same

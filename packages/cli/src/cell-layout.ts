@@ -15,9 +15,9 @@ import {
   makeBoxes,
   type Metrics,
   type Size,
-} from "@enumeratio/boxes";
-import { toText } from "@enumeratio/boxes/render";
-import { boxControls, declarationOfControl, pin, pinValue } from "@enumeratio/frontend";
+} from "@notatio/boxes";
+import { toText } from "@notatio/boxes/render";
+import { boxControls, declarationOfControl, pin, pinValue } from "@notatio/frontend";
 import { stripAnsi } from "./ansi.ts";
 import { type CellOptions, DOWN, drawGraphicsBox, JOINT, LEFT, RIGHT, UP } from "./cell-draw.ts";
 import { controlLine } from "./control-draw.ts";

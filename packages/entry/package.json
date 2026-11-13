@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/entry",
+  "name": "@notatio/entry",
   "version": "0.0.0",
   "private": true,
   "description": "The shape of a reference entry — the types every package's entries are written against, and the rules an implementations block has to satisfy. A leaf, so the packages that own the heads can type their entries without depending on the package that documents them.",
@@ -35,7 +35,7 @@
     "yaml": "2.9.0"
   },
   "devDependencies": {
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "@types/node": "^24",
     "typescript": "^7.0.2",
     "vite": "catalog:",

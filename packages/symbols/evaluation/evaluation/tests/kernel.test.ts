@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { definitionRegistry, type Library } from "@enumeratio/manifest";
+import { definitionRegistry, type Library } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { createKernel } from "../src/kernel.ts";
 

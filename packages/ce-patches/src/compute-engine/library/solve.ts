@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { declareCompile, integerAt, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { declareCompile, integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
 
 // cortex-js/compute-engine: `Solve`'s single-unknown path calls `equation.solve(unknown)`, which
 // answers a list that can be wrong by omission:

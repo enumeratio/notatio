@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
+import { parseExpression, serializeExpression } from "@notatio/formats/expression";
 import { afterAll, expect, test } from "vite-plus/test";
 import {
   browserEnvironment,

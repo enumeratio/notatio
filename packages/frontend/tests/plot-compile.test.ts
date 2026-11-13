@@ -4,7 +4,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { expect, test } from "vite-plus/test";
-import { declareAnalytic } from "@enumeratio/analytic";
+import { declareAnalytic } from "@notatio/analytic";
 import { compilePlot } from "../src/plot-compile.ts";
 
 const ce = new ComputeEngine();

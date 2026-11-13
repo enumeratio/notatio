@@ -6,11 +6,11 @@ summary: The numeric inverse discrete Fourier transform — [[Fourier]] with the
 signatures:
   - call: InverseFourier(list)
     description: the inverse discrete Fourier transform of a numeric list, or a rectangular numeric matrix.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list<list<number>> | list<number>, expression?) -> list<list<number>> | list<number>
   - call: InverseFourier(list, FourierParameters -> {a, b})
     description: equivalent to `Fourier(list, FourierParameters -> {-a, -b})`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: kernel
 bindings:
   - origin: native

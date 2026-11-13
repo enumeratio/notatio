@@ -24,7 +24,7 @@ import {
   polygon,
   style,
   tag,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import type { Edge } from "./graphics-rules.ts";
 import { categoryColors, type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 import type { Primitive } from "./primitives.ts";

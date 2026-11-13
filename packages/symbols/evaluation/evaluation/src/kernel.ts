@@ -5,14 +5,14 @@
 // answer is shown are the host's (`KernelOptions`).
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { collectMessages, type Message } from "@enumeratio/engine";
+import { collectMessages, type Message } from "@notatio/engine";
 import {
   createRegistryResolver,
   createResolver,
   type Library,
   type NotationData,
   type Registry,
-} from "@enumeratio/manifest";
+} from "@notatio/manifest";
 import { evaluateCooperatively } from "./cooperative-evaluate.ts";
 
 /** Text for the kernel to read, in one of the host's syntaxes (`epsil`, `latex`, `mathjson`). */
@@ -91,7 +91,7 @@ export interface KernelOptions {
    *  with no engine of its own. */
   readonly compile?: (ce: ComputeEngine, json: unknown, spec: unknown) => unknown;
   /**
-   * Published libraries (`@enumeratio/manifest/libraries`' `catalog`), whose qualified names
+   * Published libraries (`@notatio/manifest/libraries`' `catalog`), whose qualified names
    * (`ns.Name`) resolve after the catalogue's: each definition declared at its pin, its install
    * check run, the first time a call names it.
    */

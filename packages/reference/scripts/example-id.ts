@@ -2,7 +2,7 @@
 // with the operators spelled out so `-1` and `1` differ.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { captionId, slugId } from "@enumeratio/entry";
+import { captionId, slugId } from "@notatio/entry";
 import { toInputForm } from "../../formats/src/inputform.ts";
 
 const inputFormId = (expr: unknown): string => {

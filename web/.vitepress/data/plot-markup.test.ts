@@ -2,9 +2,9 @@
 
 // Loaded here, not on plotMarkup's first call: the front end and the engine behind it take seconds to
 // load on a busy machine, and that load is not what the cases below measure.
-import "@enumeratio/formats/expression";
-import "@enumeratio/frontend";
-import { plotSectionOf } from "@enumeratio/frontend/function-view";
+import "@notatio/formats/expression";
+import "@notatio/frontend";
+import { plotSectionOf } from "@notatio/frontend/function-view";
 import { expect, test } from "vite-plus/test";
 import { functionViewFor } from "./function-view.ts";
 import { plotMarkup } from "./plot-markup.ts";

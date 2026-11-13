@@ -7,10 +7,10 @@
 // (The variable is a guard: tests/forms.test.ts names this command when the records and the
 // printers disagree, and nothing should rewrite 600 files by accident.)
 
-import { orderImplementations } from "@enumeratio/entry";
-import { updateHead } from "@enumeratio/entry/node";
-import { SYSTEMS } from "@enumeratio/oracle";
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
+import { orderImplementations } from "@notatio/entry";
+import { updateHead } from "@notatio/entry/node";
+import { SYSTEMS } from "@notatio/oracle";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
 import { recordWithForms } from "./forms.ts";
 
 if (process.env.UPDATE_FORMS !== "1") {

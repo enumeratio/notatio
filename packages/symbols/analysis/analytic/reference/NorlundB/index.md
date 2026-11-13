@@ -6,7 +6,7 @@ summary: The Nörlund polynomial $B_n^{(a)}$, from the generating function $(t/(
 signatures:
   - call: NorlundB(n, a)
     description: $B_n^{(a)}$, exact.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, number) -> number
 primitive: kernel
 bindings:

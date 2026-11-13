@@ -1,4 +1,4 @@
-import { type Box, type BoxNode, optionsOfBox } from "@enumeratio/boxes";
+import { type Box, type BoxNode, optionsOfBox } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { isDiagramBox, renderDiagram } from "../src/diagram.ts";
 import {

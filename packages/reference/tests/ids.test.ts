@@ -1,4 +1,4 @@
-import { EXAMPLE_ID, EXAMPLE_ID_MAX } from "@enumeratio/entry";
+import { EXAMPLE_ID, EXAMPLE_ID_MAX } from "@notatio/entry";
 import { expect, test } from "vite-plus/test";
 import { referenceData } from "../src/node.ts";
 

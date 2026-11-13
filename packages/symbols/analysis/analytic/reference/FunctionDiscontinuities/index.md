@@ -6,7 +6,7 @@ summary: Where f fails to be continuous, as a condition in x.
 signatures:
   - call: FunctionDiscontinuities(f, x)
     description: the set of real x where f is discontinuous (or undefined).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

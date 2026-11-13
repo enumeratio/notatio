@@ -13,7 +13,7 @@ import {
   showJson,
   triangleOf,
   type Triangle,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import {
   countOf,
   type EquidistributionPhase,

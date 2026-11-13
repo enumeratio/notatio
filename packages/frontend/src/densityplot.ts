@@ -4,7 +4,7 @@
 // the same sampling code. Cells take their color from the palette's gradient (`viridis` unless
 // told otherwise); `renderPlot` draws the box.
 
-import { type Box, type BoxNode, graphics, raster, tag } from "@enumeratio/boxes";
+import { type Box, type BoxNode, graphics, raster, tag } from "@notatio/boxes";
 import { fieldFrame } from "./contour.ts";
 import { renderPlot } from "./plot-box.ts";
 import { type ColorOptions, gradientOf } from "./plot-color.ts";

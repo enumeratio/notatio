@@ -1,5 +1,5 @@
-import { isRealInt } from "@enumeratio/ce-patches";
-import { type Engine as ComputeEngine, type Expr as Expression, isNumber, operandsOf } from "@enumeratio/engine";
+import { isRealInt } from "@notatio/ce-patches";
+import { type Engine as ComputeEngine, type Expr as Expression, isNumber, operandsOf } from "@notatio/engine";
 
 // The n-th derivative and Taylor coefficient of c·u^a, for u linear in x and n a symbol: the
 // falling-factorial power rule, which D and SeriesCoefficient otherwise decline at a symbolic

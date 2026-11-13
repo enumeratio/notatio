@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/numerals",
+  "name": "@notatio/numerals",
   "version": "0.0.0",
   "private": true,
   "description": "Numeral-system extensions for @cortex-js/compute-engine: IntegerDigits/FromDigits over radix, mixed-radix, factoradic, balanced, negative, bijective, Zeckendorf, combinatorial and residue systems.",
@@ -29,18 +29,18 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/utils": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/utils": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

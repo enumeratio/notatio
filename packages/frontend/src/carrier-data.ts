@@ -4,7 +4,7 @@
 // package's own `GlyphKind` (glyphs.ts), which is an unrelated TypeScript union for the SVG
 // glyph renderer, not a compute-engine carrier.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const FRONTEND_CARRIERS: readonly Carrier[] = [
   {

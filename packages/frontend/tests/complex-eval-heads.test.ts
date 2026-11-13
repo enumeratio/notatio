@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { type Complex, complexFunction } from "../src/complex-eval.ts";
 

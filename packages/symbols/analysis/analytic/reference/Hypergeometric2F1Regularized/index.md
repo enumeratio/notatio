@@ -2,11 +2,11 @@
 name: Hypergeometric2F1Regularized
 domain: Special functions
 signature: Hypergeometric2F1Regularized(a, b, c, z)
-summary: The regularized Gauss hypergeometric function ${}_2F_1(a,b,c;z) / \Gamma(c)$ (fungrim:fe6e74) — entire in $c$; only converges for $|z| < 1$. Provided by `@enumeratio/analytic`.
+summary: The regularized Gauss hypergeometric function ${}_2F_1(a,b,c;z) / \Gamma(c)$ (fungrim:fe6e74) — entire in $c$; only converges for $|z| < 1$. Provided by `@notatio/analytic`.
 signatures:
   - call: Hypergeometric2F1Regularized(a, b, c, z)
     description: ${}_2F_1(a,b,c;z) / \Gamma(c)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number, number) -> number
 primitive: numeric
 bindings:

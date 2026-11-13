@@ -13,9 +13,9 @@ import {
   triangleSizes,
   type MapRow,
   type TriangleLine,
-} from "@enumeratio/frontend/core";
-import type { Triangle } from "@enumeratio/frontend/core";
-import type { MapExplorer } from "@enumeratio/frontend/explorer";
+} from "@notatio/frontend/core";
+import type { Triangle } from "@notatio/frontend/core";
+import type { MapExplorer } from "@notatio/frontend/explorer";
 import { getEntry, resolveHead } from "../../data/reference.ts";
 import { renderBlock, renderInline } from "../../prose.ts";
 import type { Field } from "../../data/carrier-fields.ts";
@@ -89,7 +89,7 @@ async function computeTriangle(): Promise<void> {
   failure.value = undefined;
   same.value = undefined;
   try {
-    const { distributionTriangle } = await import("@enumeratio/components");
+    const { distributionTriangle } = await import("@notatio/components");
     triangle.value = await distributionTriangle(
       props.distribution.template,
       props.field.name,
@@ -125,7 +125,7 @@ async function showMapTable(): Promise<void> {
   mapBusy.value = "table";
   mapFailure.value = undefined;
   try {
-    const { mapAtSize } = await import("@enumeratio/components");
+    const { mapAtSize } = await import("@notatio/components");
     const answer = await mapAtSize(explorer, mapSize.value);
     if (!answer.ok) {
       mapTable.value = undefined;
@@ -160,7 +160,7 @@ async function checkMapProperties(): Promise<void> {
   mapBusy.value = "properties";
   mapFailure.value = undefined;
   try {
-    const { mapProperties } = await import("@enumeratio/components");
+    const { mapProperties } = await import("@notatio/components");
     mapRows.value = await mapProperties(explorer, triangleSizes(1, Math.min(mapSizes.value, explorer.maxSize)), {
       progress: (n) => (mapBusy.value = `properties, size ${n}`),
     });
@@ -191,7 +191,7 @@ async function findTransported(): Promise<void> {
   transported.value = undefined;
   transportTriangle.value = undefined;
   try {
-    const { transportTriangle: triangleOf, findTransports } = await import("@enumeratio/components");
+    const { transportTriangle: triangleOf, findTransports } = await import("@notatio/components");
     const subject = await triangleOf(
       explorer,
       transportStat.value,
@@ -215,7 +215,7 @@ async function findSame(): Promise<void> {
   busy.value = "same";
   failure.value = undefined;
   try {
-    const { findEquidistributed } = await import("@enumeratio/components");
+    const { findEquidistributed } = await import("@notatio/components");
     same.value = await findEquidistributed(props.distribution.template, triangle.value, props.carrierStatistics ?? [], {
       maxSize: props.distribution.maxSize,
       progress: (checked, total, phase) =>

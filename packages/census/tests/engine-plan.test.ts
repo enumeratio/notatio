@@ -1,8 +1,8 @@
 // The census declares every library it depends on, and says why each is there: the engine is
-// built from the hierarchy (`@enumeratio/manifest`'s `enginePlan`), so a library added as a
+// built from the hierarchy (`@notatio/manifest`'s `enginePlan`), so a library added as a
 // dependency is declared, and one that leaves is not left behind in a list.
 
-import { DECLARE_ORDER, PACKAGES } from "@enumeratio/manifest";
+import { DECLARE_ORDER, PACKAGES } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { PACKAGE_DECLARATIONS, PLAN } from "../src/engine.ts";
 

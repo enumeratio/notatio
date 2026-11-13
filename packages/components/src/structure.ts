@@ -11,10 +11,10 @@
 
 import { isClaimed } from "./lazy.ts";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { closeDollar } from "@enumeratio/boxes/render";
-import { withOptions } from "@enumeratio/formats";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { tokenize } from "@enumeratio/formats/markup";
+import { closeDollar } from "@notatio/boxes/render";
+import { withOptions } from "@notatio/formats";
+import { parseExpression } from "@notatio/formats/expression";
+import { tokenize } from "@notatio/formats/markup";
 import {
   CONTROL_HEADS,
   debug,
@@ -26,7 +26,7 @@ import {
   renderingOf,
   slottedExceptDeclarations,
   type VisualSymbol,
-} from "@enumeratio/frontend";
+} from "@notatio/frontend";
 import { controlSelector } from "./define.ts";
 import { defineUsed, isExpressive } from "./generic.ts";
 

@@ -5,11 +5,11 @@
 //
 //   vp node packages/symbols/combinatorics/combinatorics/scripts/collect-statistics-naming.ts
 //
-// Read-only over this package's own reference/ AND @enumeratio/statistics' (the combinatorial
+// Read-only over this package's own reference/ AND @notatio/statistics' (the combinatorial
 // statistics moved here per area, step 6b, but a `formerly:` on a distribution head — none
 // today — would still need to count).
 
-import { readEntries, writeFormatted } from "@enumeratio/entry/node";
+import { readEntries, writeFormatted } from "@notatio/entry/node";
 
 const entries = [
   ...readEntries(new URL("../reference/", import.meta.url)),

@@ -6,7 +6,7 @@ summary: The inverse Laplace transform, as a small dictionary of common images (
 signatures:
   - call: InverseLaplaceTransform(F, s, t)
     description: $f(t)$ such that $\mathcal{L}\{f\}(s) = F(s)$, read off a fixed table of images.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression) -> expression
 primitive: kernel
 bindings:

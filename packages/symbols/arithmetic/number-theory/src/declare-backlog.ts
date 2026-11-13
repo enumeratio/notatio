@@ -1,6 +1,6 @@
-import { applyFunction, bigIntegerAt, operandsOf, symbolNameOf, type Engine, type Expr } from "@enumeratio/engine";
-import { factorInteger, gcd as gcdBig, isqrt } from "@enumeratio/residues";
-import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
+import { applyFunction, bigIntegerAt, operandsOf, symbolNameOf, type Engine, type Expr } from "@notatio/engine";
+import { factorInteger, gcd as gcdBig, isqrt } from "@notatio/residues";
+import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 
 // Heads new to compute-engine, from the Wolfram-sweep backlog (https://github.com/enumeratio/notatio/wiki/Symbols §4, issue
 // #113). Every one stays unevaluated — never approximate — when it cannot answer: a

@@ -13,7 +13,7 @@ import {
   makeBoxes,
   type Notation,
   optionsOfBox,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import {
   FIGURE_NOTATION,
   headOf,
@@ -23,9 +23,9 @@ import {
   plainJson,
   plotBox,
   registerLatticeModules,
-} from "@enumeratio/frontend";
-import * as numberTheory from "@enumeratio/number-theory/lattice";
-import * as residues from "@enumeratio/residues/table";
+} from "@notatio/frontend";
+import * as numberTheory from "@notatio/number-theory/lattice";
+import * as residues from "@notatio/residues/table";
 import { drawGraphicsBox, drawPlotBox } from "./cell-draw.ts";
 import { drawBoxes, type LayoutOptions } from "./cell-layout.ts";
 

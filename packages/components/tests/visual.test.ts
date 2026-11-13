@@ -1,9 +1,9 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { ENVIRONMENTS, plainJson } from "@enumeratio/frontend";
-import { prerender } from "@enumeratio/frontend/prerender";
+import { ENVIRONMENTS, plainJson } from "@notatio/frontend";
+import { prerender } from "@notatio/frontend/prerender";
 import { afterAll, expect, test } from "vite-plus/test";
 import { visualMarkup } from "../src/visual.ts";
 

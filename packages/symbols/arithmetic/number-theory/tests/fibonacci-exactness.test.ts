@@ -2,11 +2,11 @@
 // Binet rule): exact input must stay exact. The rule used to finish with an unconditional
 // `.N()`, so FunctionExpand(Fibonacci(n, x)) and FunctionExpand(Fibonacci(1/2, x)) came back
 // with Pi rounded to a float and stray ~1e-43 terms instead of a symbolic closed form.
-import type { Expr, Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
+import type { Expr, Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { declareNumberTheory } from "../src/declare.ts";
 
 const ce = createEngine(declareResidues, declareNumerals, declareNumberTheory);

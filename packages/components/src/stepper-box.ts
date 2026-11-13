@@ -1,4 +1,4 @@
-import { type Domain, randomInteger, stepInteger } from "@enumeratio/frontend/core";
+import { type Domain, randomInteger, stepInteger } from "@notatio/frontend/core";
 import { html, LitElement, nothing } from "lit";
 import { defineControl, emitControl } from "./define.ts";
 import { ensureStyles } from "./styles.ts";

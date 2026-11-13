@@ -2,13 +2,13 @@
 //
 // There is no hand-written TypeScript behind these heads, so there is no second implementation
 // to drift from; what runs fast is compiled from the definition itself (compiled.ts). Where a fast path does exist (the permutation statistics already in
-// @enumeratio/combinatorics/collections), the two are held together by a differential test instead.
+// @notatio/combinatorics/collections), the two are held together by a differential test instead.
 
-import { definitionHash, isCacheableDefinition, type MathJSON, pureResult } from "@enumeratio/engine/compiled";
+import { definitionHash, isCacheableDefinition, type MathJSON, pureResult } from "@notatio/engine/compiled";
 import { compiledStatistic } from "./compiled.ts";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { declareCompile, type Engine, type Expr, isNativeHead, operandsOf } from "@enumeratio/engine";
-import { symbolInfo } from "@enumeratio/manifest";
+import { bareEngine } from "@notatio/engine/testing";
+import { declareCompile, type Engine, type Expr, isNativeHead, operandsOf } from "@notatio/engine";
+import { symbolInfo } from "@notatio/manifest";
 import {
   allCarrierNames,
   carrierTypeForName,
@@ -16,7 +16,7 @@ import {
   operationOf,
   registerCarrier,
   registerOperation,
-} from "@enumeratio/structures";
+} from "@notatio/structures";
 import { findstat } from "../../findstat/src/findstat-data.ts";
 import { bySignature, type Definition, signatureOf, SUBJECT } from "./types.ts";
 
@@ -81,7 +81,7 @@ export interface DeclareOptions {
    * accepts a bare list, because that reading stands on its own (see `Definition.alsoOnList`).
    * It is also what lets `CombinatorialStat` find a value's carrier from its type.
    *
-   * Read back from `@enumeratio/structures`' carrier registry by default (`carrierTypeForName`,
+   * Read back from `@notatio/structures`' carrier registry by default (`carrierTypeForName`,
    * as families do since #458) — the caller's own area already declared its carriers on `ce`
    * before calling this, so the type is there to read rather than pass in. Pass an explicit map
    * only to override that, keyed by carrier (`definition.on`); a carrier missing from BOTH the
@@ -174,7 +174,7 @@ const isEngineHead = (head: string): boolean => isNativeHead((bare ??= bareEngin
  * File every definition in its carrier's `CombinatorialStat` table, and declare it as a
  * head of its own where the name is free. A taken name is fine in three cases, all explicit:
  * the table already holds another package's kernel for this very statistic
- * (@enumeratio/combinatorics/collections' permutation statistics); compute-engine owns the
+ * (@notatio/combinatorics/collections' permutation statistics); compute-engine owns the
  * name (`Sign`), when its head is generalised to take the carrier too; or another carrier's
  * OWN call to this function already declared it (`MajorIndex` on `Permutation` and on
  * `DyckPath`: one head, one owner, the first call wins — see each area's own `declare<Area>`,

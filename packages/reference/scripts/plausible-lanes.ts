@@ -1,6 +1,6 @@
 // How Plausible runs one oracle lane: its time budget, and the verdict arguments it shares with the scan.
 
-import type { MathJSON, System } from "@enumeratio/oracle";
+import type { MathJSON, System } from "@notatio/oracle";
 import { asksForDigits, type verdictOf } from "./oracle-verdict.ts";
 
 /** Minutes a lane may spend when its own entry below doesn't say. */

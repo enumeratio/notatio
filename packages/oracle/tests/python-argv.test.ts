@@ -3,8 +3,8 @@ import { expect, test, vi } from "vite-plus/test";
 
 // The batch program goes to the kernel in a file: as an argument it tops out at 128 KiB (spawn E2BIG).
 const calls: { args: readonly string[]; program: string }[] = [];
-vi.mock("@enumeratio/utils/bounded", async (original) => ({
-  ...(await original<typeof import("@enumeratio/utils/bounded")>()),
+vi.mock("@notatio/utils/bounded", async (original) => ({
+  ...(await original<typeof import("@notatio/utils/bounded")>()),
   runBounded: async (_command: string, args: readonly string[]) => {
     const file = args.at(-1) as string;
     calls.push({ args, program: readFileSync(file, "utf8") });

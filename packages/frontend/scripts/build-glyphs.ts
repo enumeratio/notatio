@@ -6,7 +6,7 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
 import { glyphTable } from "./glyph-table.ts";
 
 const TABLE = fileURLToPath(new URL("../generated/head-glyphs.json", import.meta.url));

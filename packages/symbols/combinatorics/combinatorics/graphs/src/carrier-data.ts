@@ -7,7 +7,7 @@
 // leading `integer` slot, ahead of the edge list -- so the oracle's packed-tuple unwrap
 // (emit.ts/structural.ts) reads it from here rather than guessing (TQ-5).
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const GRAPHS_CARRIERS: readonly Carrier[] = [
   {

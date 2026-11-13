@@ -1,4 +1,4 @@
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import type { Complex, ComplexFunction } from "./complex-eval.ts";
 import { type Graphics3dOptions, surfaceBox } from "./graphics-3d-box.ts";
 import { DEFAULT_PHASE_GRADIENT, type Gradient, sampleGradient } from "./palettes.ts";

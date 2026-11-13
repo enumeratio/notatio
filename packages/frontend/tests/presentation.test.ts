@@ -4,12 +4,12 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { CARRIERS, declareCombinatorics } from "@enumeratio/combinatorics";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
+import { CARRIERS, declareCombinatorics } from "@notatio/combinatorics";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { presentationOf } from "../src/presentation.ts";
 import { openRowSource } from "../src/row-source.ts";
-import { serializeExpression } from "@enumeratio/formats/expression";
+import { serializeExpression } from "@notatio/formats/expression";
 
 const ce = new ComputeEngine();
 declareCombinatorics(ce);

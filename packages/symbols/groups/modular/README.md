@@ -1,4 +1,4 @@
-# @enumeratio/modular
+# @notatio/modular
 
 The modular group $\mathrm{PSL}(2,\mathbb{Z})$ for compute-engine: S/T and L/R words,
 continued fractions, the Stern–Brocot tree, hyperbolic conjugacy classes as necklaces, and
@@ -12,7 +12,7 @@ trefoil by a number you read off the word.
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareModular } from "@enumeratio/modular";
+import { declareModular } from "@notatio/modular";
 
 const ce = new ComputeEngine();
 declareModular(ce);
@@ -67,6 +67,6 @@ RademacherPhi(ModularMatrix(1, 7, 0, 1))   // 7 — Phi on T^n just counts
 
 ## Next
 
-[`@enumeratio/braid`](../braid/README.md) builds its [Lorenz braids](../braid/docs/lorenz.md)
+[`@notatio/braid`](../braid/README.md) builds its [Lorenz braids](../braid/docs/lorenz.md)
 directly on the S/T words here; the guide's linking-number payoff is the bridge between
 the two packages.

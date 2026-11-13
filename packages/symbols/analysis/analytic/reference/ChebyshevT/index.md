@@ -2,11 +2,11 @@
 name: ChebyshevT
 domain: Special functions
 signature: ChebyshevT(n, x)
-summary: The Chebyshev polynomial of the first kind $T_n(x)$, defined by $T_n(\cos\theta) = \cos(n\theta)$. Provided by `@enumeratio/analytic`.
+summary: The Chebyshev polynomial of the first kind $T_n(x)$, defined by $T_n(\cos\theta) = \cos(n\theta)$. Provided by `@notatio/analytic`.
 signatures:
   - call: ChebyshevT(n, x)
     description: the degree-$n$ Chebyshev polynomial of the first kind at $x$, for an integer $n$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, number) -> number
 primitive: kernel
 bindings:

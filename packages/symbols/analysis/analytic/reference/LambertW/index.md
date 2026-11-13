@@ -6,12 +6,12 @@ summary: The Lambert $W$ function (Wolfram's `ProductLog`), the inverse of $w\,e
 signatures:
   - call: LambertW(z)
     description: the principal branch $W_0(z)$ — native, extended with exact values.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: "(z: complex | infinity, branch: integer?) -> number"
     overrides: compute-engine
   - call: LambertW(z, k)
     description: the $k$-th branch $W_k(z)$, by Halley's iteration from the standard log-log seed (Corless et al. 1996). $k=0$ and $k=-1$ stay on compute-engine's own native handler.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: kernel
 bindings:
   - origin: native

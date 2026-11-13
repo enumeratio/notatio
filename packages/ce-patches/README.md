@@ -1,4 +1,4 @@
-# @enumeratio/ce-patches
+# @notatio/ce-patches
 
 Heads and fixes `@cortex-js/compute-engine` would plausibly take, kept apart from what is ours
 so that landing upstream is a deletion, not an excavation. The model is Mathlib's
@@ -9,7 +9,7 @@ a native head, is written here from the start, whether or not an issue exists ye
 only ours stays in its own package. Some patches may never land upstream; they stay here,
 applied at run time like the rest.
 
-A leaf package: depends on compute-engine and `@enumeratio/engine`, nothing else of ours.
+A leaf package: depends on compute-engine and `@notatio/engine`, nothing else of ours.
 Other packages import from here; this package never imports from them.
 
 **Laid out like compute-engine itself.** `src/compute-engine/` mirrors compute-engine's own
@@ -29,7 +29,7 @@ has not landed, and is idempotent per engine, so any package can call it (or a s
 declares without building an engine.
 
 **Kernels several patches share** (complex arithmetic, the ball and BigDecimal helpers) are
-exported from `src/index.ts`, and `@enumeratio/analytic` calls them for its own heads too.
+exported from `src/index.ts`, and `@notatio/analytic` calls them for its own heads too.
 When a patch lands, a kernel still used elsewhere moves back into its package, or the package
 calls the compute-engine head instead.
 

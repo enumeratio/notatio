@@ -6,7 +6,7 @@ summary: "The Heaviside-family rectangular pulse: 1 for |x| < 1/2, unevaluated a
 signatures:
   - call: HeavisidePi(x)
     description: 1 inside (-1/2, 1/2), 0 outside [-1/2, 1/2], and unevaluated (stays symbolic) exactly at x = ±1/2.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real) -> number
 names:
   wolframIdentity: true

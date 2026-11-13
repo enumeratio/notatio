@@ -4,7 +4,7 @@
 // standard run samples ranks and DEEP_TESTS takes every member.
 
 // unstable: the tests build an engine to run the family on.
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, kernelOn } from "../src/families/epsil.ts";
 import { increasingBinaryTrees } from "../src/families/increasing-binary-trees.ts";

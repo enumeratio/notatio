@@ -1,15 +1,15 @@
-import type { Engine, Expr } from "@enumeratio/engine";
+import type { Engine, Expr } from "@notatio/engine";
 import {
   addMultivectors,
   type Generator,
   generatorSymbol,
   multiplyBlades,
   type Multivector,
-} from "@enumeratio/hypercomplex";
+} from "@notatio/hypercomplex";
 
 // The blade-level plumbing the rest of this package is written against.
 //
-// `@enumeratio/hypercomplex` owns the representation — a multivector is a coefficient
+// `@notatio/hypercomplex` owns the representation — a multivector is a coefficient
 // per blade, and a blade is an ordered word of distinct generators — and owns the
 // geometric product. Everything here is a GRADE-SELECTING view of that product, which
 // is what turns a Clifford algebra into a geometric one: the outer product is the

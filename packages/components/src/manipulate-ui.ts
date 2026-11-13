@@ -18,7 +18,7 @@ import "./slider-2d-box.ts";
 import "./slider-box.ts";
 import "./toggler-box.ts";
 import type { LongPress } from "./popover.ts";
-import { choiceEntries, choiceEntry, type Control, type ControlChange, formatValue } from "@enumeratio/frontend/core";
+import { choiceEntries, choiceEntry, type Control, type ControlChange, formatValue } from "@notatio/frontend/core";
 
 export interface ControlHandlers {
   /** Set a control's value from a raw input string. */

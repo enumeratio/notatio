@@ -12,7 +12,7 @@
 
 import { writeFileSync } from "node:fs";
 import { inflateSync } from "node:zlib";
-import { MAPPINGS } from "@enumeratio/oracle";
+import { MAPPINGS } from "@notatio/oracle";
 import { bareName, documents, INVENTORIES, type InventorySystem } from "../src/crosswalk/inventory.ts";
 import { CATALOG_REFERENCES } from "../src/crosswalk/catalog-references-data.ts";
 import { CURATED } from "../src/crosswalk/curated-data.ts";

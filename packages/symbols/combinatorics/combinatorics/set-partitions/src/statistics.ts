@@ -3,7 +3,7 @@
 // Almost everything here is a statement about the BLOCK SIZES, read over the blocks themselves.
 // Crossings and nestings are not: they read the standard ARC REPRESENTATION instead — within
 // each block (already ascending), link consecutive elements — and compare arcs pairwise. See
-// `ArcRepresentation` in @enumeratio/combinatorics for the same construction as a typed map.
+// `ArcRepresentation` in @notatio/combinatorics for the same construction as a typed map.
 
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";

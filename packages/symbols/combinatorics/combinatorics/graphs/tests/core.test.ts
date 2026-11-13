@@ -1,4 +1,4 @@
-import { ComputeEngine } from "@enumeratio/engine/unstable"; // unstable: a kernel test builds its own engine
+import { ComputeEngine } from "@notatio/engine/unstable"; // unstable: a kernel test builds its own engine
 import { expect, test } from "vite-plus/test";
 import { kernelOn } from "../../collections/src/families/epsil.ts";
 import { entries } from "../src/families/core.ts";

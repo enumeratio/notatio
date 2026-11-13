@@ -4,7 +4,7 @@
 // current.
 //
 // 11 heads here already have a hand-written record in `../../reference/` — `curatedHeads`
-// below, from the same folders `@enumeratio/combinatorics`' own reference always had. Their
+// below, from the same folders `@notatio/combinatorics`' own reference always had. Their
 // curated `domain`/`signature`/`summary`/`signatures`/`seeAlso`/`references`/`catalog`/`statOn`
 // win; this generator only merges in `details`/`examples`.
 //
@@ -14,7 +14,7 @@
 // excludes them via `omitHeads`.
 
 import { fileURLToPath } from "node:url";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
 import { areaStatisticsEntries, type Sample } from "../../src/statistics/generate-entries.ts";
 import { PERMUTATIONS_FRONTIER } from "../src/statistics.frontier.ts";
 import { PERMUTATION_STATISTICS } from "../src/statistics.ts";

@@ -3,7 +3,7 @@
 //
 //   vp node packages/symbols/combinatorics/combinatorics/trees/scripts/collect-entries.ts
 
-import { writeEntries } from "@enumeratio/entry/node";
+import { writeEntries } from "@notatio/entry/node";
 import { generated, REFERENCE_DIR } from "./entries.ts";
 
 await writeEntries(REFERENCE_DIR, generated.standard);

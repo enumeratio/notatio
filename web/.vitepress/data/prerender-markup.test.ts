@@ -2,7 +2,7 @@
 // compiled `code` is drawn only after the browser samples it, so nothing is prerendered.
 
 import { expect, test } from "vite-plus/test";
-import type { CompiledPlot } from "@enumeratio/frontend/plot-compile";
+import type { CompiledPlot } from "@notatio/frontend/plot-compile";
 import { pageKernel } from "./prerender-markup.ts";
 
 test("the prerender kernel returns compiled code for Sin(x)", async () => {

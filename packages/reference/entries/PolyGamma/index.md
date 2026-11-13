@@ -65,4 +65,4 @@ bindings:
 - Half-integer arguments pick up the alternating zeta: $\psi'(\tfrac12) = \pi^2/2$.
 - Recurrence from $\Gamma$: $\psi^{(m)}(z+1) = \psi^{(m)}(z) + (-1)^m m!\, z^{-m-1}$, so $\psi'(1) - \psi'(2) = 1$.
 - Poles at the nonpositive integers, of order $m+1$ — the poles of [[Gamma]], differentiated.
-- Real $z$ is compute-engine's own; `@enumeratio/analytic` adds complex $z$ through the Euler–Maclaurin Hurwitz kernel, and the GLSL lowering for GPU plotting.
+- Real $z$ is compute-engine's own; `@notatio/analytic` adds complex $z$ through the Euler–Maclaurin Hurwitz kernel, and the GLSL lowering for GPU plotting.

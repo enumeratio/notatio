@@ -9,7 +9,7 @@ import {
   iterate,
   modifierGear,
   numberLatex,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { defineControl, emitControl } from "./define.ts";
 
 /**

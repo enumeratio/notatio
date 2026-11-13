@@ -1,5 +1,5 @@
-import { asDouble, hasFloatOperand, isFiniteNum, wantsNumber } from "@enumeratio/ce-patches";
-import { type Engine, wrapOperator } from "@enumeratio/engine";
+import { asDouble, hasFloatOperand, isFiniteNum, wantsNumber } from "@notatio/ce-patches";
+import { type Engine, wrapOperator } from "@notatio/engine";
 
 // sinh(x + iy) = sinh x cos y + i cosh x sin y, cosh(x + iy) = cosh x cos y + i sinh x sin y.
 // At y = kπ/2 one of cos y, sin y is exactly 0, so the value has an exactly real or exactly

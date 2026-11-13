@@ -2,11 +2,11 @@
 name: QFactorial
 domain: Special functions
 signature: QFactorial(n, q)
-summary: The q-factorial $[n]_q! = [1]_q [2]_q \cdots [n]_q$, where $[k]_q = 1 + q + \cdots + q^{k-1}$. Provided by `@enumeratio/analytic`.
+summary: The q-factorial $[n]_q! = [1]_q [2]_q \cdots [n]_q$, where $[k]_q = 1 + q + \cdots + q^{k-1}$. Provided by `@notatio/analytic`.
 signatures:
   - call: QFactorial(n, q)
     description: the q-factorial $[n]_q!$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real, complex) -> number
 primitive: kernel
 bindings:

@@ -1,6 +1,6 @@
 // unstable: a bare ComputeEngine with only the analytic declarations, to pin derivative values
-import { operandsOf } from "@enumeratio/engine";
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { operandsOf } from "@notatio/engine";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 import { jacobiMCoefficients } from "../src/jacobi-m-series.ts";

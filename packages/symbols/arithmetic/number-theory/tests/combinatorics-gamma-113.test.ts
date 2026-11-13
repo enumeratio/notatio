@@ -1,6 +1,6 @@
-import { createEngine } from "@enumeratio/engine/testing";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
-import { declareNumerals } from "@enumeratio/numerals";
+import { declareNumerals } from "@notatio/numerals";
 import { declareNumberTheory } from "../src/declare.ts";
 
 const ce = createEngine(declareNumerals, declareNumberTheory);
@@ -94,8 +94,8 @@ test("Multinomial through Gamma reduces to Binomial's Gamma form at two real par
 // the full reference engine.)
 test("Pochhammer at a rational order routes through Gamma via evaluate, not N", () => {
   // (3/2)_(1/2) = Gamma(2)/Gamma(3/2) = 1/Gamma(3/2), left as the Gamma ratio here -- this file
-  // declares only @enumeratio/number-theory, and the ratio's further exact reduction to
-  // 2/sqrt(pi) is @enumeratio/analytic's Gamma simplification (see the full reference
+  // declares only @notatio/number-theory, and the ratio's further exact reduction to
+  // 2/sqrt(pi) is @notatio/analytic's Gamma simplification (see the full reference
   // engine's equivalent example, which pins that exact form end to end). The point this
   // test pins is narrower: the call reaches `.evaluate()`, not `.N()` -- so it stays
   // exact wherever the engine CAN simplify it further, instead of a decimal.

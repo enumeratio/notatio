@@ -1,7 +1,7 @@
-// @enumeratio/hypercomplex's heads in traditional notation: the Clifford algebra Cl_{p,q}(R)
+// @notatio/hypercomplex's heads in traditional notation: the Clifford algebra Cl_{p,q}(R)
 // and the multicomplex tower C_n.
 
-import { fence, indexed, type Notation, row, scalars, subscript, type PackageNotation } from "@enumeratio/boxes";
+import { fence, indexed, type Notation, row, scalars, subscript, type PackageNotation } from "@notatio/boxes";
 
 export const HYPERCOMPLEX_NOTATION: Notation = {
   CliffordAlgebra: scalars(([p, q, ...rest], write) =>

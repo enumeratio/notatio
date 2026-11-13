@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/catalog",
+  "name": "@notatio/catalog",
   "version": "0.0.0",
   "private": true,
   "description": "The enumeratio catalog as resolvable resources: lazy context namespaces, a search path, and the promotion ladder from namespaced to blessed to global.",
@@ -27,15 +27,15 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*"
+    "@notatio/engine": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/combinatorics": "workspace:*",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/entry": "workspace:*",
-    "@enumeratio/plausible": "workspace:*",
+    "@notatio/combinatorics": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/entry": "workspace:*",
+    "@notatio/plausible": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

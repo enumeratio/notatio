@@ -1,7 +1,7 @@
 // A curve's points out of an evaluated expression: `[[x, y, z], …]`.
 
 import type { Expression } from "@cortex-js/compute-engine";
-import type { Triple } from "@enumeratio/frontend/core";
+import type { Triple } from "@notatio/frontend/core";
 
 // `ops` lives on compute-engine's narrowed function interface; read it structurally.
 const opsOf = (e: Expression): readonly Expression[] => (e as unknown as { ops?: readonly Expression[] }).ops ?? [];

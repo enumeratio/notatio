@@ -3,7 +3,7 @@
 // reads as unknown) rather than hang or fill the heap. A bound is a work estimate in steps of a loop
 // (about 5 ns each, measured), not a clock, so the answer never depends on the machine.
 
-import { factorInteger, isPrime as isPrimeBig } from "@enumeratio/residues";
+import { factorInteger, isPrime as isPrimeBig } from "@notatio/residues";
 
 /** The work a single question may take, in the steps `Cost` counts (measured: about 5 ns each, so a second or so). */
 export const WORK = 2e8;

@@ -2,11 +2,11 @@
 // punchlist): every fast path must agree with a naive reference over a range including the
 // edges Wolfram's conventions care about — n = 0, 1, negative indices, a modulus that
 // divides the value, p = 1 — not just the bench's own three cases.
-import type { Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
+import type { Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { declareNumberTheory } from "../src/declare.ts";
 import { fibonacci, fibonacciMod, lucasL, lucasLMod } from "../src/fast-recurrence.ts";
 

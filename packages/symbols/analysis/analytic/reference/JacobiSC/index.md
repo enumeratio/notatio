@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{sc}(u,m) = \operatorname{sn
 signatures:
   - call: JacobiSC(u, m)
     description: the Jacobi elliptic function sc, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiSN

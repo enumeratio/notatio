@@ -1,5 +1,5 @@
-import { bigIntegerAt, type Engine, type Expr, operandsOf, optionsOf } from "@enumeratio/engine";
-import { SUMMARIES } from "@enumeratio/manifest/package/residues";
+import { bigIntegerAt, type Engine, type Expr, operandsOf, optionsOf } from "@notatio/engine";
+import { SUMMARIES } from "@notatio/manifest/package/residues";
 import { QUOTIENT_RING, RESIDUE_CLASS } from "./names.ts";
 import { combine, type ElementOrder, type TableOperation, tableElements } from "./table.ts";
 

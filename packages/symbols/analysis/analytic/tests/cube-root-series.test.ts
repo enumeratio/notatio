@@ -1,7 +1,7 @@
 // unstable: ComputeEngine, the class under test
-import { compileExpression } from "@enumeratio/engine/compiled";
-import { operandsOf } from "@enumeratio/engine";
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { compileExpression } from "@notatio/engine/compiled";
+import { operandsOf } from "@notatio/engine";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 

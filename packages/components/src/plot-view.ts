@@ -10,7 +10,7 @@
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 import { html, nothing } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { type Box, type BoxNode, optionsOfBox } from "@enumeratio/boxes";
+import { type Box, type BoxNode, optionsOfBox } from "@notatio/boxes";
 import {
   chartBoxOfSettings,
   debug,
@@ -54,7 +54,7 @@ import {
   vectorOptionsOf,
   vectorPlotBox,
   wheelZooms,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { compilePlotText, type LoadedPlot, plotFunctions, readEpsil } from "./plot-kernel.ts";
 
 const log = debug("plot");
@@ -181,7 +181,7 @@ export class PlotView {
   async recompute(): Promise<void> {
     const generation = ++this.#generation;
     const text = this.host.value.trim();
-    const { plotOfText } = await import("@enumeratio/frontend/symbols");
+    const { plotOfText } = await import("@notatio/frontend/symbols");
     const plot = plotOfText(text);
     if (generation !== this.#generation) return;
     if (plot === undefined) return this.#clear();

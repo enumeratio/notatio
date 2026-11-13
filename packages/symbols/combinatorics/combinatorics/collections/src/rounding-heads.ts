@@ -1,4 +1,4 @@
-import { type Engine, type Expr, widenSignature, wrapOperator } from "@enumeratio/engine";
+import { type Engine, type Expr, widenSignature, wrapOperator } from "@notatio/engine";
 
 // #113 rounding and clamping widenings: Chop with a tolerance,
 // Clamp with Clip's replacement values, and the empty-call identity elements of Min/Max.

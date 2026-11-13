@@ -12,7 +12,7 @@
 
 import { type ComputeEngine, LATEX_DICTIONARY, LatexSyntax, type MathJsonExpression } from "@cortex-js/compute-engine";
 import type { LatexDictionaryEntry, Parser, Serializer } from "@cortex-js/compute-engine/latex-syntax";
-import { commandTeX, escapeTeXText, markLanded, UNICODE_TEX, unicodeTeX } from "@enumeratio/boxes/render";
+import { commandTeX, escapeTeXText, markLanded, UNICODE_TEX, unicodeTeX } from "@notatio/boxes/render";
 
 type Entry = Partial<LatexDictionaryEntry>;
 

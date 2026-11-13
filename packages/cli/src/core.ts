@@ -4,10 +4,10 @@
 // terminal, and the golden tests all drive the same core. Node-only commands
 // (:export / :import) are injected by the host via `commands`.
 
-import { allFormats, exportFormats, importFormats, mimeTypeToFormatList } from "@enumeratio/formats";
+import { allFormats, exportFormats, importFormats, mimeTypeToFormatList } from "@notatio/formats";
 import type { Expression } from "@cortex-js/compute-engine";
-import { can, type Environment, ENVIRONMENTS, environmentNamed } from "@enumeratio/frontend";
-import { evaluateReadouts, reduce } from "@enumeratio/frontend";
+import { can, type Environment, ENVIRONMENTS, environmentNamed } from "@notatio/frontend";
+import { evaluateReadouts, reduce } from "@notatio/frontend";
 import { bold, cyan, dim, red } from "./ansi.ts";
 import type { Drawn } from "./cell-layout.ts";
 import { information } from "./information.ts";

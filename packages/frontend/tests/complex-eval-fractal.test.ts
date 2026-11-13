@@ -1,7 +1,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
-import { declareFractals } from "@enumeratio/analytic";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
+import { declareFractals } from "@notatio/analytic";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { type Complex, complexFunction, FRACTAL_DEFAULT_ITERATIONS } from "../src/complex-eval.ts";
 import { Uncertain } from "../src/uncertain.ts";

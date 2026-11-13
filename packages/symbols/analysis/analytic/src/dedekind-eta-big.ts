@@ -1,4 +1,4 @@
-import { type Engine, type Expr, wrapOperator, BigDecimal } from "@enumeratio/engine";
+import { type Engine, type Expr, wrapOperator, BigDecimal } from "@notatio/engine";
 import {
   type BigCx,
   atDigits,
@@ -10,7 +10,7 @@ import {
   isFiniteNum,
   periodsExceedDouble,
   wantsNumber,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // η(τ) = e^(πiτ/12)·Σ_k (−1)^k q^(k(3k−1)/2), q = e^(2πiτ) (Euler's pentagonal number theorem), in
 // BigDecimal. compute-engine's native η runs on doubles: N(η(τ), 50) comes back with 16 digits,

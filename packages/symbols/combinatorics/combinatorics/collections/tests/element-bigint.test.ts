@@ -2,7 +2,7 @@
 // reaches the kernels as a bigint, never rounded to a double, and a kernel that can't read it
 // (or a param past 2^53) leaves the call unevaluated rather than answering False.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, kernelOn, liftFamily } from "../src/families/epsil.ts";
 import { collectionsEntries } from "../src/families/index.ts";

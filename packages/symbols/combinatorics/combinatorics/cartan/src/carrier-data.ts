@@ -1,7 +1,7 @@
 // Carrier data for the finite Cartan types. A type is `CartanType(Tuple("A", 3))`: the letter and the rank,
 // FindStat's `['A', 3]`.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const CARTAN_CARRIERS: readonly Carrier[] = [
   {

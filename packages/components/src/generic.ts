@@ -2,7 +2,7 @@
 // no hand-written component, a generic `notatio-<head>` is registered here. It stands
 // for the expression `Head(args)`:
 //
-//   - its ARGUMENTS ARE ITS CHILDREN, as the vdom markup reads them (`@enumeratio/formats/markup`):
+//   - its ARGUMENTS ARE ITS CHILDREN, as the vdom markup reads them (`@notatio/formats/markup`):
 //     each child element contributes its own `expression`, and a run of text is
 //     whitespace-separated atoms, so `<notatio-binomial>n 2</notatio-binomial>` and
 //     `<notatio-binomial><notatio-symbol value="n" /><notatio-integer value="2" /></notatio-binomial>`
@@ -21,10 +21,10 @@
 
 import { isClaimed } from "./lazy.ts";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { optionsOf, withOptions } from "@enumeratio/formats";
-import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
-import { tokenize } from "@enumeratio/formats/markup";
-import { debug, HEADS, PARAMS, tagOf } from "@enumeratio/frontend";
+import { optionsOf, withOptions } from "@notatio/formats";
+import { parseExpression, serializeExpression } from "@notatio/formats/expression";
+import { tokenize } from "@notatio/formats/markup";
+import { debug, HEADS, PARAMS, tagOf } from "@notatio/frontend";
 import { html, LitElement, nothing } from "lit";
 import "./notatio-out.ts";
 import { ensureStyles } from "./styles.ts";

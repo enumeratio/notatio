@@ -13,7 +13,7 @@ import {
   textData,
   tooltip,
   text,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { markupOf } from "../src/box-leaf.ts";
 import { renderBox } from "../src/box-render.ts";

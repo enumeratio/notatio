@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, wrapOperator } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { operandsOf, wrapOperator } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // A few elementary special values Wolfram folds and compute-engine's native handlers
 // leave symbolic: the hyperbolic functions at a purely imaginary argument (rewritten

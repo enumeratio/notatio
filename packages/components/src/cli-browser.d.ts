@@ -1,9 +1,9 @@
-// Ambient types for @enumeratio/cli/browser. The CLI ships no declaration files
+// Ambient types for @notatio/cli/browser. The CLI ships no declaration files
 // (its build reaches into sibling source, which would litter dts), so this mirrors
 // the small browser surface the terminal element consumes. Keep in sync with
 // packages/cli/src/browser.ts.
-declare module "@enumeratio/cli/browser" {
-  import type { Environment } from "@enumeratio/frontend/core";
+declare module "@notatio/cli/browser" {
+  import type { Environment } from "@notatio/frontend/core";
 
   export type GlyphKind = "permutation" | "partition" | "composition" | "subset" | "dyck";
 

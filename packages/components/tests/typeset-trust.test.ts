@@ -1,7 +1,7 @@
 // The page's typesetter trusts exactly one thing: the `data-expr` an interpretation carries.
 // Real KaTeX, since what it does with a refused command is the point.
 
-import { exprOfData, katexStrict, toLatex, trustExpression } from "@enumeratio/boxes/render";
+import { exprOfData, katexStrict, toLatex, trustExpression } from "@notatio/boxes/render";
 import katex from "katex";
 import { expect, test } from "vite-plus/test";
 

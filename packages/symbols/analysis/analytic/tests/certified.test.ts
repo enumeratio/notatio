@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { BigDecimal, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import type { CertifiedGolden } from "../scripts/collect-certified-goldens.ts";
 import {
@@ -13,7 +13,7 @@ import {
   rational,
   upper,
   atDigits,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { CERTIFIED_HEADS, enclosure } from "../src/certified.ts";
 import { declareAnalytic, enclosureOf } from "../src/index.ts";
 

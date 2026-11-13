@@ -2,8 +2,8 @@
 // gives the interpreter's answers exactly, over the small elements of every family on its
 // source carrier.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { applyComposition } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { applyComposition } from "@notatio/structures";
 import { expect, test, vi } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 import { COMPILED_MAPS } from "../src/compiled-maps.generated.js";

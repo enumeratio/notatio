@@ -3,7 +3,7 @@
 
 import { loadMarkup } from "./mathlive.ts";
 import { mountPopover } from "./popover.ts";
-import { looksLikeMath } from "@enumeratio/frontend/core";
+import { looksLikeMath } from "@notatio/frontend/core";
 
 export interface ChoiceMenuOptions {
   /** The grip the menu hangs under. Focus returns here when the menu closes. */

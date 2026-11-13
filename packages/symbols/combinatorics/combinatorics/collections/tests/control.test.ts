@@ -1,5 +1,5 @@
-import { bareEngine } from "@enumeratio/engine/testing";
-import { collectMessages } from "@enumeratio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { collectMessages } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { declareCollections } from "../src/library.ts";
 

@@ -9,8 +9,8 @@ import {
   openSession,
   type SharedWorkerFactory,
   type WorkerFactory,
-} from "@enumeratio/evaluation/browser";
-import type { Message } from "@enumeratio/engine";
+} from "@notatio/evaluation/browser";
+import type { Message } from "@notatio/engine";
 
 /** Thrown by `evaluateRemote` when a session's worker (and its one respawned retry)
  * both failed to ever start -- `notatio-out.ts`'s worker branch catches exactly this and
@@ -33,9 +33,9 @@ export interface RemoteRequest {
   readonly raw?: boolean;
   /** Only translate, into this syntax. */
   readonly write?: string;
-  /** Only compile (`@enumeratio/frontend/plot-compile`'s `PlotCompileSpec`). */
+  /** Only compile (`@notatio/frontend/plot-compile`'s `PlotCompileSpec`). */
   readonly compile?: unknown;
-  /** A row source's call (`@enumeratio/frontend/row-source`'s `RowsRequest`), answered beside the queue. */
+  /** A row source's call (`@notatio/frontend/row-source`'s `RowsRequest`), answered beside the queue. */
   readonly rows?: unknown;
 }
 
@@ -43,7 +43,7 @@ export interface RemoteAnswer {
   readonly value: unknown;
   /** The kernel was hard-killed and restarted: earlier bindings are gone. */
   readonly reset: boolean;
-  /** The answer's display (`@enumeratio/frontend/kernel-host`'s `Display`). */
+  /** The answer's display (`@notatio/frontend/kernel-host`'s `Display`). */
   readonly boxes?: unknown;
   readonly input?: unknown;
   readonly line?: number;
@@ -58,7 +58,7 @@ export interface RemoteAnswer {
   readonly compiled?: unknown;
 }
 
-/** The session a page's loose cells share (`@enumeratio/frontend/kernel-host`'s `PAGE_SESSION`). */
+/** The session a page's loose cells share (`@notatio/frontend/kernel-host`'s `PAGE_SESSION`). */
 const PAGE_SESSION = "page";
 
 type WorkerSetupGate = { __notatioWorkerSetup?: string };

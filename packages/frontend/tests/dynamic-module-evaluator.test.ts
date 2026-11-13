@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareGraphics } from "@enumeratio/formats";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { declareGraphics } from "@notatio/formats";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { renderingOf } from "../src/symbols.ts";
 

@@ -6,7 +6,7 @@ summary: The Gudermannian function $\operatorname{gd}(x) = 2\arctan(\tanh(x/2)) 
 signatures:
   - call: Gudermannian(x)
     description: the Gudermannian function of x.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 names:
   wolframIdentity: true

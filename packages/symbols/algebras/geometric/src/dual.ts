@@ -1,11 +1,11 @@
-import type { Engine } from "@enumeratio/engine";
+import type { Engine } from "@notatio/engine";
 import {
   addMultivectors,
   type Generator,
   multiplyBlades,
   multiplyMultivectors,
   type Multivector,
-} from "@enumeratio/hypercomplex";
+} from "@notatio/hypercomplex";
 import { inBlade, same, scale, term, zero } from "./blades.ts";
 import { cliffordConjugate, wedge } from "./products.ts";
 

@@ -1,7 +1,7 @@
-// @enumeratio/frontend/core: the front end that runs without an engine -- the control
+// @notatio/frontend/core: the front end that runs without an engine -- the control
 // contract, scrubbing and playback, the environments, highlighting, and the renderers
 // that turn data into SVG. A page loads this at once; what parses or evaluates is the
-// main entry's, and loads with compute-engine. `@enumeratio/components`' `tests/lazy.test.ts`
+// main entry's, and loads with compute-engine. `@notatio/components`' `tests/lazy.test.ts`
 // holds the line.
 
 export * from "./assert.ts";

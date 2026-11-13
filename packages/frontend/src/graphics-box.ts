@@ -24,7 +24,7 @@ import {
   raster,
   style,
   tag,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import type { Json } from "./frame-json.ts";
 import { type ColorMixing, type Edge, type ElementStyle, plainJson } from "./graphics-rules.ts";
 import { type LatticeView, voronoiCell } from "./lattice.ts";

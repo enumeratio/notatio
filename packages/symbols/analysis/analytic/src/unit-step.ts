@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf } from "@enumeratio/engine";
-import { isFiniteNum } from "@enumeratio/ce-patches";
+import { bigRationalAt, operandsOf } from "@notatio/engine";
+import { isFiniteNum } from "@notatio/ce-patches";
 
 // UnitStep(x1, x2, …) — 0 where any argument is negative, 1 otherwise (1 at exactly 0,
 // unlike Heaviside's ½ there). Wolfram's UnitStep is Listable, but a single list

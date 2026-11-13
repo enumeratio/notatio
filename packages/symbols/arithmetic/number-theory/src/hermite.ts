@@ -1,4 +1,4 @@
-import { extendedGcd } from "@enumeratio/residues";
+import { extendedGcd } from "@notatio/residues";
 
 // Row-style Hermite normal form over ℤ, Wolfram's convention: u·m = h with u unimodular and
 // h upper triangular, each pivot positive and every entry above a pivot in [0, pivot).

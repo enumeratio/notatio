@@ -7,7 +7,7 @@
 // DOM measurement. These render server-side (VitePress SSR) and are asserted on exact
 // coordinates, so the same input must always produce the same box.
 
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import { ACCENT, GROUND, INK, RULE, Sketch, type Look, type TextStyle } from "./diagram.ts";
 
 const EDGE: Look = { stroke: { color: RULE, width: 1.5 } };

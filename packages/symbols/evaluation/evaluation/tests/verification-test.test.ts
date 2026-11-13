@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { ComputeEngine as Engine } from "@cortex-js/compute-engine";
-import { operandsOf, stringAt, symbolNameOf } from "@enumeratio/engine";
+import { operandsOf, stringAt, symbolNameOf } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { declareEvaluation } from "../src/index.ts";
 

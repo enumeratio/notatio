@@ -2,7 +2,7 @@
 // that declines there says so at once rather than interpret the table in minutes. Any other failure of the
 // compiled table leaves it to the interpreter, as before.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, familyHash, kernelOn } from "../src/families/epsil.ts";
 import { needsBigint } from "../src/families/types.ts";

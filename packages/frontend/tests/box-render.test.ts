@@ -1,6 +1,6 @@
 // The web's boxes are their own tags (`row-box`), and a TableViewBox is the one that behaves.
 
-import { form, fraction, grid, interpretation, pane, row, superscript, tableView, tag, text } from "@enumeratio/boxes";
+import { form, fraction, grid, interpretation, pane, row, superscript, tableView, tag, text } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { markupOf } from "../src/box-leaf.ts";
 import { renderBox } from "../src/box-render.ts";

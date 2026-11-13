@@ -7,11 +7,11 @@
 // carrier) rather than head. Signatures are where the overloads live, so signatures are
 // what carries a definition.
 
-import { definitionHash } from "@enumeratio/engine/compiled";
+import { definitionHash } from "@notatio/engine/compiled";
 
 /**
  * A MathJSON expression, structurally. Declared here rather than imported from
- * `@enumeratio/entry`: a definitions package should not depend on the documentation
+ * `@notatio/entry`: a definitions package should not depend on the documentation
  * package for a JSON shape.
  */
 export type MathJSON = string | number | boolean | readonly MathJSON[] | { readonly [key: string]: unknown };

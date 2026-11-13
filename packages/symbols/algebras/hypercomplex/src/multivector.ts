@@ -1,5 +1,5 @@
 import { compareGenerators, type Generator, generatorOf, generatorSymbol, sameGenerator } from "./units.ts";
-import { operandsOf, symbolNameOf, type Engine, type Expr } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf, type Engine, type Expr } from "@notatio/engine";
 
 // A hypercomplex element in normal form: a coefficient per BLADE, where a blade is
 // an ordered product of distinct generators (the empty blade is the scalar). Every

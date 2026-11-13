@@ -4,7 +4,7 @@
 // evaluating arbitrary expressions is only as safe as the machine it runs on.
 
 import { createServer } from "node:http";
-import { mimeTypeToFormatList } from "@enumeratio/formats";
+import { mimeTypeToFormatList } from "@notatio/formats";
 import { type Form, resolveForm, resolveSyntax, type Syntax } from "./engine.ts";
 import { evaluateCommand, formatsJson, toWire } from "./command.ts";
 

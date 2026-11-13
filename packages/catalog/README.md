@@ -1,4 +1,4 @@
-# @enumeratio/catalog
+# @notatio/catalog
 
 The enumeratio catalog as resolvable resources: lazy context namespaces, a search path, and
 the promotion ladder from namespaced to blessed to global

@@ -1,8 +1,8 @@
 import { join } from "node:path";
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { makeBoxes, makeExpression, MakeExpressionError } from "@enumeratio/boxes";
-import { readEntries, recordDirs } from "@enumeratio/entry/node";
+import { makeBoxes, makeExpression, MakeExpressionError } from "@notatio/boxes";
+import { readEntries, recordDirs } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 
 // MakeExpression over the reference examples' expressions: written as boxes and read back, each

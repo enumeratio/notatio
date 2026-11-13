@@ -1,7 +1,7 @@
 // GelfandTsetlin defined in Epsil: row by row, each row's entries smallest first, against an
 // independent generator of the triangles, and its count against the product formula.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn } from "../../collections/src/families/epsil.ts";
 import { declareCombinatorics } from "../../src/index.ts";

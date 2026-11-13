@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { stringAt } from "@enumeratio/engine";
+import { stringAt } from "@notatio/engine";
 import { catalogRegistry, ENUMERATIO } from "./resources.ts";
 import type { ResourceRegistry } from "./registry.ts";
 import type { Resource } from "./types.ts";

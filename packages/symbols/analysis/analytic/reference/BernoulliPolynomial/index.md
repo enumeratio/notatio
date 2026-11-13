@@ -6,7 +6,7 @@ summary: The Bernoulli polynomial $B_n(x)$ -- Wolfram's own `BernoulliB(n, x)`.
 signatures:
   - call: BernoulliPolynomial(n, x)
     description: exact for a symbolic or exact x, numeric via BernoulliB's own kernel otherwise
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, number) -> number
 seeAlso:
   - BernoulliB

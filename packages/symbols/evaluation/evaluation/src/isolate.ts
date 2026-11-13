@@ -1,8 +1,8 @@
 // Keeps one evaluation's inferred free-symbol types from reaching the next one on the same
-// engine. Shared by the pooled worker (./worker.ts) and `@enumeratio/reference`'s provenance
+// engine. Shared by the pooled worker (./worker.ts) and `@notatio/reference`'s provenance
 // sweep, which both run many unrelated expressions through one engine.
 
-import type { Engine } from "@enumeratio/engine";
+import type { Engine } from "@notatio/engine";
 
 type Scope = Engine["context"]["lexicalScope"];
 

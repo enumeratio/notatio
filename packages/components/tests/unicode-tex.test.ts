@@ -6,9 +6,9 @@ import {
   UNICODE_TEX,
   unicodeTeX,
   type UnicodeSymbol,
-} from "@enumeratio/boxes/render";
-import { conventionalLatexDictionary, probeLanded } from "@enumeratio/frontend/conventional-latex";
-import { displayLatexSyntax } from "@enumeratio/frontend/display";
+} from "@notatio/boxes/render";
+import { conventionalLatexDictionary, probeLanded } from "@notatio/frontend/conventional-latex";
+import { displayLatexSyntax } from "@notatio/frontend/display";
 import katex from "katex";
 import { convertLatexToMathMl } from "mathlive/ssr";
 import { expect, test } from "vite-plus/test";

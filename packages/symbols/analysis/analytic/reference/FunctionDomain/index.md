@@ -6,7 +6,7 @@ summary: The set of real x where f (an expression in the single real variable x)
 signatures:
   - call: FunctionDomain(f, x)
     description: the domain of f as a function of the real variable x, expressed as an inequality or a disjunction of inequalities.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

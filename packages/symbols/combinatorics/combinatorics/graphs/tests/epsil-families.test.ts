@@ -3,8 +3,8 @@
 // and near misses. Epsil alone (`epsilKernelOn`), compiled and interpreted, and past 2^53 where
 // the interpreter's exact integers take over.
 
-import { ComputeEngine } from "@enumeratio/engine/unstable"; // unstable: a kernel test builds its own engine
-import { evaluateEpsil } from "@enumeratio/structures";
+import { ComputeEngine } from "@notatio/engine/unstable"; // unstable: a kernel test builds its own engine
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, type EpsilFamily, evaluateTables } from "../../collections/src/families/epsil.ts";
 import {

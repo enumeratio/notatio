@@ -4,7 +4,7 @@
 // which each area's own `declareFamilies` call now guarantees by reading the carrier back off
 // `ce`'s registry instead (see collections/src/families/declare.ts). This sweeps every area's
 // entries, not just the handful `declare-combinatorics.test.ts` spot-checks.
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../src/index.ts";
 import type { FamilyKernel } from "../collections/src/families/types.ts";

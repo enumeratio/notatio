@@ -1,4 +1,4 @@
-import { readEntry, staleEntries } from "@enumeratio/entry/node";
+import { readEntry, staleEntries } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { generated, REFERENCE_DIR } from "../scripts/entries.ts";
 

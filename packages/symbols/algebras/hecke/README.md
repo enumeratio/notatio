@@ -1,4 +1,4 @@
-# @enumeratio/hecke
+# @notatio/hecke
 
 Iwahori–Hecke algebra extensions for compute-engine: the $q$-deformation of the symmetric
 group algebra, with $T$-basis multiplication over $\mathbb{Z}[q]$. $H_n(q)$ keeps the
@@ -9,7 +9,7 @@ by one rule applied a simple reflection at a time. See [the guide](docs/hecke-al
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareHecke } from "@enumeratio/hecke";
+import { declareHecke } from "@notatio/hecke";
 
 const ce = new ComputeEngine();
 declareHecke(ce);

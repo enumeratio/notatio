@@ -11,7 +11,7 @@ integers and digit strings**, and once you say it that way it is clear that base
 one member of a much larger family.
 
 compute-engine already has `IntegerDigits` and `FromDigits`, and they already do fixed
-radix. `@enumeratio/numerals` adds no head for that — it **widens the base slot to take
+radix. `@notatio/numerals` adds no head for that — it **widens the base slot to take
 a system**, the way Wolfram's `IntegerDigits[n, MixedRadix[…]]` does. An integer base
 still goes to the native handler, unchanged.
 

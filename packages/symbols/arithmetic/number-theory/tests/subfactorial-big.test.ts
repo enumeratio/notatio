@@ -1,6 +1,6 @@
-import { createEngine } from "@enumeratio/engine/testing";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
-import { declareNumerals } from "@enumeratio/numerals";
+import { declareNumerals } from "@notatio/numerals";
 import { declareNumberTheory } from "../src/declare.ts";
 
 const ce = createEngine(declareNumerals, declareNumberTheory);

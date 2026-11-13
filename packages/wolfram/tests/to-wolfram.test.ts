@@ -59,7 +59,7 @@ test("compute-engine names that differ from Wolfram", () => {
   expect(toWolfram(["Random"])).toBe("RandomReal[]");
   expect(toWolfram(["IsComposite", 9])).toBe("CompositeQ[9]");
   // Fungrim's names for the incomplete Legendre elliptic integrals — see
-  // @enumeratio/analytic's elliptic.ts.
+  // @notatio/analytic's elliptic.ts.
   expect(toWolfram(["IncompleteEllipticF", "phi", "m"])).toBe("EllipticF[phi, m]");
   expect(toWolfram(["IncompleteEllipticE", "phi", "m"])).toBe("EllipticE[phi, m]");
 });

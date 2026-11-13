@@ -1,4 +1,4 @@
-import { wrapOperator } from "@enumeratio/engine";
+import { wrapOperator } from "@notatio/engine";
 import type { Patch } from "../patch.ts";
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { evaluateLerch, principalAtZero } from "../compute-engine/library/special-functions.ts";

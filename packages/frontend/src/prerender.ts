@@ -5,7 +5,7 @@
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { toLatex } from "@enumeratio/boxes/render";
+import { toLatex } from "@notatio/boxes/render";
 import { markupOf, typesetLeaf } from "./box-leaf.ts";
 import { display, type Display, writeSource } from "./kernel-host.ts";
 import { layoutMarkupEverywhere } from "./layout-markup.ts";

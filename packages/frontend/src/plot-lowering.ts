@@ -6,7 +6,7 @@
 // expression it came from (an `InterpretationBox`) and `Producer -> head`, and an environment that
 // can sample asks for the marks (`plotBoxOfSamples`). Sampling stays with that environment.
 
-import { type Box, graphics, graphicsOf, interpretation } from "@enumeratio/boxes";
+import { type Box, graphics, graphicsOf, interpretation } from "@notatio/boxes";
 import { chartBox, type ChartBoxOptions, isChartKind, isNumber } from "./chart.ts";
 import { autoLevels, type ContourOptions, contourPlotBox, implicitPlotBox, LINE_WIDTH } from "./contour.ts";
 import { type DensityOptions, densityPlotBox } from "./densityplot.ts";

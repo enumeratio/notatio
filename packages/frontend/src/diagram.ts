@@ -24,7 +24,7 @@ import {
   polygon,
   style,
   tag,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import type { Edge } from "./graphics-rules.ts";
 import { plotItems } from "./plot-box.ts";
 import { svg } from "./svg-draw.ts";

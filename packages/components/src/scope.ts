@@ -16,7 +16,7 @@ import {
   variablesOf,
   plainJson,
   resolveNamedDomains,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import "./domains.ts";
 import type { Template } from "./bindings.ts";
 import { CONTROL_TAGS, type ControlElement, controlSelector } from "./define.ts";
@@ -198,7 +198,7 @@ export class Scope {
         if (!this.#values.has(spec.name)) this.#values.set(spec.name, seedOf(spec.start, spec.domain));
       return;
     }
-    const { parseExpression } = await import("@enumeratio/formats/expression");
+    const { parseExpression } = await import("@notatio/formats/expression");
     const { json, errors } = parseExpression(text);
     if (errors.length > 0) log("variables don't parse: %s", errors.join("; "));
     this.#declarations = errors.length > 0 ? [] : await resolveNamedDomains(variablesOf(plainJson(json)));

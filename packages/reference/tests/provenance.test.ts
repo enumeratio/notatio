@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { HEADS } from "@enumeratio/wolfram";
+import { HEADS } from "@notatio/wolfram";
 import { expect, test } from "vite-plus/test";
 import { referenceData, referenceEntries } from "../src/node.ts";
 
@@ -126,7 +126,7 @@ test("declaring our libraries changes nothing about vanilla compute-engine", () 
  * `GammaRegularized` are here for the third argument (Wolfram's generalized incomplete
  * gamma, which a bare engine rejects as an unexpected argument), plus Γ(1, z) = e^{−z}.
  * Most of the integer and special functions are here for threading over a list, which a
- * bare engine rejects as a type error (`threadOverLists` in @enumeratio/engine).
+ * bare engine rejects as a type error (`threadOverLists` in @notatio/engine).
  * `ModularInverse` is widened to Gaussian integers (number-theory) and `PolyGamma` is
  * redeclared for complex z (analytic); a wrong-typed argument now fails in the widened
  * signature rather than the native one, so even the error differs. `LambertW` is here for

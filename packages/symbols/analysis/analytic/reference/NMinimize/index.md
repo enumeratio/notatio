@@ -6,7 +6,7 @@ summary: A numeric global minimum of f over a BOUNDED interval, as {value, {x ->
 signatures:
   - call: NMinimize({f, cons}, x)
     description: the numeric global minimum of f over the bounded interval cons implies, for any real-valued f (not just the exact core [[Minimize]] covers).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (tuple<expression, expression>, list<symbol> | symbol) -> expression
 seeAlso:
   - NMaximize

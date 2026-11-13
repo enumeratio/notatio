@@ -8,8 +8,8 @@
 // The Epsil definition is the meaning: `Expand(Apply(Function(ci, x1 … xn), p_1 … p_n))`. The
 // declare only reads the variable list and builds the power sums, which depend on the weights' length.
 
-import type { Engine, Expr } from "@enumeratio/engine";
-import { evaluateEpsil } from "@enumeratio/structures";
+import type { Engine, Expr } from "@notatio/engine";
+import { evaluateEpsil } from "@notatio/structures";
 
 type MathJSON = unknown;
 

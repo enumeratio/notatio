@@ -3,7 +3,7 @@
 // emitted as `Nn` and a bigint `_SYS`; it covers what is pure integer arithmetic (walks, ballot
 // numbers, binomials, folds over ranges) and throws a TypeError or RangeError at run time for
 // anything that mixes in a double, which a caller reads as a decline and hands to the
-// interpreter. A separate entry (`@enumeratio/engine/compiled-bigint`).
+// interpreter. A separate entry (`@notatio/engine/compiled-bigint`).
 
 import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";

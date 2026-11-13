@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@notatio/engine";
 import { compare, member } from "./conform.ts";
 
 // The generic heads: compute-engine's own `Min`, `Max`, `Clamp`, `Floor`, `Ceil`, `Round`,

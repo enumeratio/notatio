@@ -1,10 +1,10 @@
 // Every graphics head formats declares has reference examples (its held value is pinned by
-// entries.test; a head that draws may also state its box shape, held to it by `@enumeratio/frontend`'s
+// entries.test; a head that draws may also state its box shape, held to it by `@notatio/frontend`'s
 // example-boxes test).
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareGraphics, GRAPHICS_HEADS } from "@enumeratio/formats";
-import { declareStructures } from "@enumeratio/structures";
+import { declareGraphics, GRAPHICS_HEADS } from "@notatio/formats";
+import { declareStructures } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { referenceData } from "../src/node.ts";
 

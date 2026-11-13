@@ -1,8 +1,8 @@
 // TransposePartition, Eulerian and MahonianNumber against independent readings: the partition
 // diagram, and permutations enumerated with their descents and inversions counted by hand.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../src/index.ts";
 import { MAHONIAN_EPSIL, mahonianNumber } from "../permutations/src/mahonian.ts";

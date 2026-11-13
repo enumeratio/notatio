@@ -3,7 +3,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { plotSectionOf } from "@enumeratio/frontend/function-view";
+import { plotSectionOf } from "@notatio/frontend/function-view";
 import { expect, test } from "vite-plus/test";
 import { functionViewFor } from "./function-view.ts";
 

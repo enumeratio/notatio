@@ -1,7 +1,7 @@
 // A subset of 1..n and its characteristic word: the conversions invert each other, and the
 // bitmask order of subsets is BinaryWords(n) read through Finset(word).
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../src/index.ts";
 

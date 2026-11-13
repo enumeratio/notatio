@@ -1,4 +1,4 @@
-import type { BrowserSession, SharedWorkerFactory, WorkerFactory } from "@enumeratio/evaluation/browser";
+import type { BrowserSession, SharedWorkerFactory, WorkerFactory } from "@notatio/evaluation/browser";
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import {
   closePageSession,
@@ -10,8 +10,8 @@ import {
 } from "./kernel-client.ts";
 
 export { WorkerUnavailableError };
-import { CONTROL_EVENT, Transcript } from "@enumeratio/frontend/core";
-import type { TrackedSymbols } from "@enumeratio/frontend";
+import { CONTROL_EVENT, Transcript } from "@notatio/frontend/core";
+import type { TrackedSymbols } from "@notatio/frontend";
 import { LitElement, nothing } from "lit";
 import "./dynamic-box.ts";
 import "./knob-box.ts";
@@ -41,7 +41,7 @@ function parseEvaluator(attr: string): Evaluator {
 }
 
 /** A host a page can point a `Worker`-evaluator module's session at -- set once by the
- * host (mirrors `@enumeratio/frontend`'s own `__notatioEngineReady` gate) before any
+ * host (mirrors `@notatio/frontend`'s own `__notatioEngineReady` gate) before any
  * `Evaluator -> "Worker"` module opens its session, since the worker needs to import
  * the same libraries the page declared into its own engine (`declareGraphics`,
  * `declareCollections`, …) to mean the same thing. A module with no such host set
@@ -64,7 +64,7 @@ type WorkerFactoriesGate = {
 
 /**
  * How long `stop()` waits for the worker's own answer to arrive on its own before
- * giving up and hard-killing the session. `@enumeratio/evaluation/browser`'s session
+ * giving up and hard-killing the session. `@notatio/evaluation/browser`'s session
  * has no channel to tell an ALREADY-DISPATCHED, no-deadline call to check a cooperative
  * stop -- that only happens for a call started with its own `timeMs` (`TimeConstraint`,
  * below). So this is the closest honest approximation of "cooperative, then hard kill":
@@ -107,7 +107,7 @@ const STOP_GRACE_MS = 300;
  *
  * A SECOND, unrelated capability lives here too: a **transcript**. When a `<Cell>`
  * inside a module asks (`transcriptFor`), the module lazily creates one shared
- * compute-engine scope and history (`@enumeratio/frontend`'s `Transcript`) and hands it back
+ * compute-engine scope and history (`@notatio/frontend`'s `Transcript`) and hands it back
  * to every cell that asks -- so `Cell(a := 5)` then `Cell(a^2)` share a binding and
  * `Out(n)` / `%` read each other back, Wolfram's `$Line` transcript. This is `Notebook`'s
  * rendering (`Notebook(cells)` is `DynamicModule([Cell(...), ...])` under a Wolfram name,
@@ -305,7 +305,7 @@ export class NotatioDynamicModule extends LitElement {
   /**
    * A `time-constraint` deadline never got a cooperative answer, so the session's own
    * hard kill fired: the worker was terminated and a fresh one spawned in its place
-   * (`@enumeratio/evaluation/browser`'s own `openSession`), losing every binding this
+   * (`@notatio/evaluation/browser`'s own `openSession`), losing every binding this
    * module's cells had made. There is no cooperative recovery from that -- the reader
    * has to re-run the cells that mattered -- so this says so, in the light DOM, since
    * nothing else here renders anything of its own (this class's own doc comment).

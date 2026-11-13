@@ -6,7 +6,7 @@ summary: The $n$-th complex Fourier coefficient of $f$ on $[-\pi, \pi]$, $c_n = 
 signatures:
   - call: FourierCoefficient(f, x, n)
     description: $c_n$, for a concrete integer $n$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, integer) -> expression
 primitive: kernel
 bindings:

@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { symbolNameOf } from "@enumeratio/engine";
+import { symbolNameOf } from "@notatio/engine";
 
 // Wolfram's chained-comparison form: `Inequality(a, Less, b, LessEqual, c, ...)` is
 // `a < b`, `b <= c`, ... all at once, with the relations possibly MIXED (a homogeneous

@@ -6,7 +6,7 @@ summary: The n-th Keiper–Li coefficient $\lambda_n = \dfrac{1}{(n-1)!}\dfrac{d
 signatures:
   - call: KeiperLiLambda(n)
     description: the n-th Keiper–Li coefficient, for a nonnegative integer n.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer) -> number
 seeAlso:
   - Zeta

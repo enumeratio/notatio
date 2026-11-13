@@ -6,11 +6,11 @@ summary: "The forward-shift operator: DiscreteShift(f, n) is f with every free n
 signatures:
   - call: DiscreteShift(f, n)
     description: f with every free occurrence of the symbol n replaced by n + 1.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression) -> expression
   - call: DiscreteShift(f, {n, h})
     description: f with every free occurrence of n replaced by n + h -- an h-step shift, given as the {n, h} pair.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

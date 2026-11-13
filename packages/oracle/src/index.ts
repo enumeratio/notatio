@@ -12,7 +12,7 @@ export {
   memoryCapMb,
   runBounded,
   runKernel,
-} from "@enumeratio/utils/bounded";
+} from "@notatio/utils/bounded";
 export {
   isSymbolicSystem,
   isWolframFamily,

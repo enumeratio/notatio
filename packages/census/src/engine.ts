@@ -16,11 +16,11 @@
 
 import { readFileSync } from "node:fs";
 import { ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { combineNotation, type PackageNotation, registerNotation } from "@enumeratio/boxes";
-import { declareAnalytic } from "@enumeratio/analytic";
-import { ENUMERATIO, declareCatalog } from "@enumeratio/catalog";
-import { displayLatexSyntax } from "@enumeratio/frontend/display";
-import { readCardinalityByType } from "@enumeratio/frontend/conventional-latex";
+import { combineNotation, type PackageNotation, registerNotation } from "@notatio/boxes";
+import { declareAnalytic } from "@notatio/analytic";
+import { ENUMERATIO, declareCatalog } from "@notatio/catalog";
+import { displayLatexSyntax } from "@notatio/frontend/display";
+import { readCardinalityByType } from "@notatio/frontend/conventional-latex";
 import {
   buildEngine,
   dependedLibraries,
@@ -29,8 +29,8 @@ import {
   loadLibraries,
   NOTATIONS,
   type StagedLibrary,
-} from "@enumeratio/manifest";
-import { declareCompose, declareRestricted, declareRestrictions, RESTRICTIONS } from "@enumeratio/structures";
+} from "@notatio/manifest";
+import { declareCompose, declareRestricted, declareRestrictions, RESTRICTIONS } from "@notatio/structures";
 
 type Declare = (ce: ComputeEngine) => void;
 

@@ -1,7 +1,7 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import type { DeclaredSymbol } from "@enumeratio/manifest";
-import { SYMBOLS } from "@enumeratio/manifest/package/boxes";
+import type { DeclaredSymbol } from "@notatio/manifest";
+import { SYMBOLS } from "@notatio/manifest/package/boxes";
 import { BOX_HEADS } from "./box.ts";
 import { toMathJson } from "./json.ts";
 import { makeBoxes } from "./make.ts";

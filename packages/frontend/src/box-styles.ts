@@ -1,5 +1,5 @@
 // The layout of the box renderer's elements (`box-render.ts`): one stylesheet for the host that
-// loads elements (`@enumeratio/components`) and for a page that is shown before any element loads
+// loads elements (`@notatio/components`) and for a page that is shown before any element loads
 // (a build's prerendered Out). The rules key on the tags and on `data-head`.
 
 export const BOX_LAYOUT_CSS = `

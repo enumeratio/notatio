@@ -1,4 +1,4 @@
-import { type Engine, type Expr, operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@enumeratio/engine";
+import { type Engine, type Expr, operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@notatio/engine";
 
 // Wolfram's operator forms: `Map[f][xs]` is `Map[f, xs]`. compute-engine boxes `Map(f)` with its
 // collection `missing`, so `Map(f)(xs)` evaluates to that error unless `Map(f)` is a valid call.

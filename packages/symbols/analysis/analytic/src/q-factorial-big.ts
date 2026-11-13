@@ -1,5 +1,5 @@
-import { BigDecimal } from "@enumeratio/engine";
-import { atDigits } from "@enumeratio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
+import { atDigits } from "@notatio/ce-patches";
 import { inverseGamma } from "./hypergeometric-big.ts";
 
 // [n]_q! for a real (non-integer) n, through the q-Gamma function: [n]_q! = Γ_q(n+1) and, for

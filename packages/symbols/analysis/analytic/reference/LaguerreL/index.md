@@ -2,15 +2,15 @@
 name: LaguerreL
 domain: Special functions
 signature: LaguerreL(n, x)
-summary: The Laguerre polynomial $L_n(x)$, and its generalization $L_n^{(a)}(x)$ with a parameter $a$, orthogonal on $(0, \infty)$ with weight $x^a e^{-x}$. Provided by `@enumeratio/analytic`.
+summary: The Laguerre polynomial $L_n(x)$, and its generalization $L_n^{(a)}(x)$ with a parameter $a$, orthogonal on $(0, \infty)$ with weight $x^a e^{-x}$. Provided by `@notatio/analytic`.
 signatures:
   - call: LaguerreL(n, x)
     description: the Laguerre polynomial $L_n(x)$ at $x$, for an integer $n \ge 0$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number?) -> number
   - call: LaguerreL(n, a, x)
     description: the generalized Laguerre polynomial $L_n^{(a)}(x)$ at $x$, for an integer $n \ge 0$ and any $a$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 bindings:
   - origin: reference
     form: notatio

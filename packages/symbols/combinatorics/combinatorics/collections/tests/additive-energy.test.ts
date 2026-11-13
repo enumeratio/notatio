@@ -1,6 +1,6 @@
 // AdditiveEnergy / MultiplicativeEnergy: the Σ r(x)² definition against a count over every quadruple.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCollections } from "../src/library.ts";
 

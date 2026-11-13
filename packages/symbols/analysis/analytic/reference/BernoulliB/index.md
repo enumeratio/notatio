@@ -8,7 +8,7 @@ signatures:
     description: the nth Bernoulli number $B_n$.
   - call: BernoulliB(n, x)
     description: the Bernoulli polynomial $B_n(x)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, number?) -> number
     overrides: compute-engine
 references:

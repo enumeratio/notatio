@@ -7,7 +7,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { expect, test } from "vite-plus/test";
 import { needsBigint, sampleable } from "../scripts/sampleable.ts";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { allKernels } from "../src/families/index.ts";
 import type { FamilyKernel } from "../src/families/types.ts";
 

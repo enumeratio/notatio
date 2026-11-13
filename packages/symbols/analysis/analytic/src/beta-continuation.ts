@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt, bigRationalAt, wrapOperator } from "@enumeratio/engine";
+import { bigIntegerAt, bigRationalAt, wrapOperator } from "@notatio/engine";
 import {
   atEnginePrecision,
   isFiniteNum,
@@ -7,7 +7,7 @@ import {
   logGammaReal,
   wantsBigDigits,
   wantsNumber,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // I_x(a, b) past x = 1 at a positive integer b: (1 − t)^(b−1) is a polynomial, so the
 // defining integral is a finite sum, B_x(a, b) = Σⱼ C(b−1, j)(−1)ʲ x^(a+j)/(a+j), real for

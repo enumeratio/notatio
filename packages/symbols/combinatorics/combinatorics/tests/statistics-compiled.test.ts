@@ -5,9 +5,9 @@
 //     has left to learn.
 
 import { appendFileSync } from "node:fs";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { declareCombinatorics } from "../src/index.ts";
-import { operationOf } from "@enumeratio/structures";
+import { operationOf } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { ALL_STATISTICS } from "../src/statistics/all.ts";
 import { compiledStatistic } from "../src/statistics/compiled.ts";

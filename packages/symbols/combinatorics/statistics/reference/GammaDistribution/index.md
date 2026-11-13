@@ -21,6 +21,6 @@ names:
 ---
 
 - $PDF(x) = \dfrac{x^{k-1}e^{-x/\theta}}{\theta^k\,\Gamma(k)}$, via [[Gamma]]. No domain clamp outside $x \ge 0$.
-- $CDF(x) = 1 - Q(k, x/\theta)$ via the native two-argument [[GammaRegularized]] (not the three-argument generalized form `@enumeratio/analytic` adds — this has no dependency on that package), clamped to $0$ below $x=0$.
+- $CDF(x) = 1 - Q(k, x/\theta)$ via the native two-argument [[GammaRegularized]] (not the three-argument generalized form `@notatio/analytic` adds — this has no dependency on that package), clamped to $0$ below $x=0$.
 - $Mean = k\theta$, $Variance = k\theta^2$, both exact.
 - [[RandomVariate]] samples via Marsaglia–Tsang (shape $\ge 1$; boosted via a $Gamma(k+1)$ draw scaled by $U^{1/k}$ below $1$) — see [[RandomVariate]] for the seeded-PRNG divergence from Wolfram.

@@ -7,9 +7,9 @@
 // The Epsil definition is the implementation. A collection is read as the set of its
 // distinct members, as mathlib's `Finset` is.
 
-import { bigRationalAt, operandsOf, type Engine, type Expr } from "@enumeratio/engine";
-import { SUMMARIES } from "@enumeratio/manifest/package/combinatorics";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bigRationalAt, operandsOf, type Engine, type Expr } from "@notatio/engine";
+import { SUMMARIES } from "@notatio/manifest/package/combinatorics";
+import { evaluateEpsil } from "@notatio/structures";
 
 type MathJSON = unknown;
 

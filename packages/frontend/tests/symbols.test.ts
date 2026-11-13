@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { afterAll, expect, test } from "vite-plus/test";
 import { boxTag } from "../src/box-tags.ts";
 import { controlNames, DRAWING_SYMBOLS, markupOf, renderingOf, visualSymbol } from "../src/symbols.ts";
@@ -110,7 +110,7 @@ const CORPUS = [
   'DensityPlot(Sin(x) * Cos(y), (x, 0, 6), (y, 0, 6), ColorFunction -> "Rainbow")',
   'ArrayPlot([[1, 0], [0, 2]], ColorFunction -> "cividis")',
   'Slider(k, (0, 5), Appearance -> "Labeled")',
-  // TestResultObject (@enumeratio/evaluation's VerificationTest): a Success with an
+  // TestResultObject (@notatio/evaluation's VerificationTest): a Success with an
   // actual output, a Failure that also carries the expected value, and an Error/Aborted
   // that has no ActualOutput to show.
   // A plot labeled by prose over the variables its label declares: the label a child.

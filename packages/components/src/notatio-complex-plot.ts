@@ -1,8 +1,8 @@
-import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
+import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
 import { html, LitElement, type PropertyValues } from "lit";
 import { bindWildcards, canonicalOf } from "./plot-kernel.ts";
 import { ensureStyles } from "./styles.ts";
-import type { ComplexFunction } from "@enumeratio/frontend";
+import type { ComplexFunction } from "@notatio/frontend";
 import {
   ComplexPlotRenderer,
   type ComplexPlotView,
@@ -14,7 +14,7 @@ import {
   WHEEL_HINT,
   wheelZooms,
   zoomAbout,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 
 /**
  * `<ComplexPlot value="PolyLog(2, z)">` -- domain-coloring of a complex-valued
@@ -258,7 +258,7 @@ export class NotatioComplexPlot extends LitElement {
       }
     }
     // No GPU lowering (or no GPU): the CPU takes this expression, and the GPU canvas stays for the next.
-    const { complexFunction } = await import("@enumeratio/frontend");
+    const { complexFunction } = await import("@notatio/frontend");
     if (mine !== this.#compiling) return;
     const f = complexFunction(canonical, this.var);
     if (!f) {

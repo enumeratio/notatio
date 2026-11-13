@@ -6,7 +6,7 @@ summary: The complex sign function -- $1$ in the right half-plane, $-1$ in the l
 signatures:
   - call: Csgn(z)
     description: broadcasts element-wise over a list, like compute-engine's other numeric heads
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 seeAlso:
   - RealSign

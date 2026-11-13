@@ -1,4 +1,4 @@
-import { box, type Engine, type Expr, type Json, operandsOf } from "@enumeratio/engine";
+import { box, type Engine, type Expr, type Json, operandsOf } from "@notatio/engine";
 import {
   cmpNum,
   type Constraint,

@@ -5,8 +5,8 @@ import "./notatio-out.ts";
 import { latexForText, pastedFrom } from "./clipboard.ts";
 import { translate } from "./kernel-client.ts";
 import { loadEngine } from "./mathlive.ts";
-import { AS_TYPED, assignLatex, typedLatex } from "@enumeratio/frontend/core";
-import type { Prerendered } from "@enumeratio/frontend/prerender";
+import { AS_TYPED, assignLatex, typedLatex } from "@notatio/frontend/core";
+import type { Prerendered } from "@notatio/frontend/prerender";
 import { ensureStyles } from "./styles.ts";
 
 /** The syntax `notatio-cell`'s `value` is written in -- what `format` names. */
@@ -53,7 +53,7 @@ async function parseSyntax(syntax: Syntax, text: string): Promise<unknown> {
     case "mathjson":
       return JSON.parse(text);
     case "wolfram":
-      return (await import("@enumeratio/wolfram")).fromWolfram(text);
+      return (await import("@notatio/wolfram")).fromWolfram(text);
     case "latex": {
       // The page's kernel reads it, when there is one, so the page needn't load an engine.
       const read = await translate({ source: { text, format: "latex" }, raw: true, write: "mathjson" });
@@ -70,7 +70,7 @@ async function parseSyntax(syntax: Syntax, text: string): Promise<unknown> {
         const range = (err as { range?: readonly [number, number] }).range;
         throw new SyntaxProblem(err instanceof Error ? err.message : String(err), range);
       }
-      const [engine, { parseExpression }] = await Promise.all([loadEngine(), import("@enumeratio/formats/expression")]);
+      const [engine, { parseExpression }] = await Promise.all([loadEngine(), import("@notatio/formats/expression")]);
       // `Assign` is otherwise a statement Epsil rejects outside a notebook -- a cell IS
       // a notebook line (`a := 5`, then `a^2` reads it back), whether or not it sits in a
       // transcript.
@@ -92,7 +92,7 @@ async function textInSyntax(syntax: Syntax, json: unknown, engine?: Engine): Pro
     case "mathjson":
       return JSON.stringify(json);
     case "wolfram": {
-      const { toWolfram } = await import("@enumeratio/wolfram");
+      const { toWolfram } = await import("@notatio/wolfram");
       return toWolfram(json as Parameters<typeof toWolfram>[0]);
     }
     case "latex": {
@@ -109,7 +109,7 @@ async function textInSyntax(syntax: Syntax, json: unknown, engine?: Engine): Pro
         const written = (await translate({ json, write: "epsil" }))?.written;
         if (written !== undefined) return written;
       }
-      const { toInputForm } = await import("@enumeratio/formats/inputform");
+      const { toInputForm } = await import("@notatio/formats/inputform");
       return toInputForm(json as Parameters<typeof toInputForm>[0]);
     }
   }
@@ -198,7 +198,7 @@ export class NotatioCell extends LitElement {
     pending: { type: Boolean, reflect: true },
     /** Property only: forwarded to the In and Out `notatio-out`s' `resolveHead`. */
     resolveHead: { attribute: false },
-    /** This cell answered ahead of time (`@enumeratio/frontend/prerender`): shown, without asking
+    /** This cell answered ahead of time (`@notatio/frontend/prerender`): shown, without asking
      *  the kernel, until the input is edited. */
     prerendered: { attribute: false },
     /** Property only: a remembered answer, typeset, shown in the Out until its own arrives. */
@@ -333,7 +333,7 @@ export class NotatioCell extends LitElement {
     // Structure only: the serializer (and its engine) loads when there is a child to read.
     const child = [...this.children].find((c) => !c.hasAttribute("slot") && "expression" in c);
     if (child === undefined) return;
-    const { serializeExpression } = await import("@enumeratio/formats/expression");
+    const { serializeExpression } = await import("@notatio/formats/expression");
     const expr = (child as { expression?: Parameters<typeof serializeExpression>[0] }).expression;
     if (expr === undefined || this.value.trim()) return;
     this.value = serializeExpression(expr);

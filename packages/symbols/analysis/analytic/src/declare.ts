@@ -1,7 +1,7 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { registerNotation } from "@enumeratio/boxes";
-import { widenSignature, wrapOperator } from "@enumeratio/engine";
-import { applyNativeHeadPatches, applyPatch, lerchPhiPatch, valuesAtZero } from "@enumeratio/ce-patches";
+import { registerNotation } from "@notatio/boxes";
+import { widenSignature, wrapOperator } from "@notatio/engine";
+import { applyNativeHeadPatches, applyPatch, lerchPhiPatch, valuesAtZero } from "@notatio/ce-patches";
 import { evaluateIncompleteGamma } from "./incomplete-gamma.ts";
 import { ANALYTIC_NOTATION } from "./notation.ts";
 import { declareInverseOutsideDomain, declareWidened } from "./widened.ts";
@@ -101,7 +101,7 @@ import { declareNSum } from "./nsum.ts";
  * Declare the analytic special-function heads on `ce`, numerically aligned with Wolfram.
  *
  * `LerchPhi` is a cortex-js/compute-engine#340 candidate: it lives in
- * `@enumeratio/ce-patches` as a patch and is applied here. `BarnesG`, `LogBarnesG`, `LogGamma`,
+ * `@notatio/ce-patches` as a patch and is applied here. `BarnesG`, `LogBarnesG`, `LogGamma`,
  * `ClausenCl`, the Dirichlet family and `StieltjesGamma` landed natively in compute-engine
  * 0.146 and are no longer patches. `HurwitzZeta`, the two-argument `Zeta`, and `PolyLog`/`PolyGamma`'s
  * complex-argument widenings landed natively in compute-engine 0.141 and are no longer

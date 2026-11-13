@@ -18,7 +18,7 @@ import { cached } from "./stamp.ts";
 
 const dir = resolve(process.argv[2] ?? ".");
 const own = JSON.parse(readFileSync(join(dir, "package.json"), "utf8")) as { name: string };
-const SCOPE = "@enumeratio/";
+const SCOPE = "@notatio/";
 const self = own.name.slice(SCOPE.length);
 
 // Each package resolved from the one that requires it, as Node would: the manifest depends on

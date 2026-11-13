@@ -5,8 +5,8 @@
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { EXAMPLE_ID, EXAMPLE_ID_MAX, parseYaml } from "@enumeratio/entry";
-import type { MathJSON } from "@enumeratio/oracle";
+import { EXAMPLE_ID, EXAMPLE_ID_MAX, parseYaml } from "@notatio/entry";
+import type { MathJSON } from "@notatio/oracle";
 import { drawSample, substitute } from "./random.ts";
 import { SUITES } from "./suites.ts";
 import type { BenchCase, ConcreteCase } from "./types.ts";

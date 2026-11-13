@@ -5,14 +5,14 @@
 // and pins the answer. scripts/collect-map-entries.ts writes them; tests/map-
 // generated.test.ts checks they're current.
 //
-// Used to live in @enumeratio/statistics, not combinatorics, because it needed
+// Used to live in @notatio/statistics, not combinatorics, because it needed
 // declareStatistics and combinatorics couldn't devDep statistics without cycling back
 // (per enumeratio#408) — moot since step 6b moved declareStatistics into combinatorics itself.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import type { ReferenceEntry, ReferenceExample } from "@enumeratio/entry";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
-import { captionId, dedupeId } from "@enumeratio/entry";
+import { bareEngine } from "@notatio/engine/testing";
+import type { ReferenceEntry, ReferenceExample } from "@notatio/entry";
+import type { GeneratedEntries } from "@notatio/entry/node";
+import { captionId, dedupeId } from "@notatio/entry";
 import {
   CARRIERS,
   type CombinatorialMap,

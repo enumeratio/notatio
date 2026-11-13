@@ -1,5 +1,5 @@
 // What a module loads before any of its code runs: its static value imports, followed through
-// the workspace's sources (an `@enumeratio/…` specifier resolves to its package's source, as
+// the workspace's sources (an `@notatio/…` specifier resolves to its package's source, as
 // the site's aliases do). Type-only imports and `import()` are not followed, nor a VitePress
 // data loader (`*.data.ts`), which the page gets as its data.
 
@@ -21,7 +21,7 @@ function packageDirs(): string[] {
 
 let specifiers: Map<string, string> | undefined;
 
-/** Each `@enumeratio/…` entry point's source file. */
+/** Each `@notatio/…` entry point's source file. */
 function workspaceEntries(): Map<string, string> {
   if (specifiers) return specifiers;
   specifiers = new Map();
@@ -29,7 +29,7 @@ function workspaceEntries(): Map<string, string> {
     const manifest = join(dir, "package.json");
     if (!existsSync(manifest)) continue;
     const pkg = JSON.parse(readFileSync(manifest, "utf8")) as { name?: string; exports?: Record<string, unknown> };
-    if (!pkg.name?.startsWith("@enumeratio/") || !pkg.exports) continue;
+    if (!pkg.name?.startsWith("@notatio/") || !pkg.exports) continue;
     for (const [sub, entry] of Object.entries(pkg.exports)) {
       const target = typeof entry === "string" ? entry : (entry as { import?: string } | null)?.import;
       if (typeof target !== "string") continue;

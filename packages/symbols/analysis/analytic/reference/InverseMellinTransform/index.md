@@ -6,7 +6,7 @@ summary: The inverse Mellin transform — $f$ such that $\mathcal{M}\{f\}(s) = F
 signatures:
   - call: InverseMellinTransform(F, s, x)
     description: $f(x)$ such that $\int_0^\infty f(x)\,x^{s-1}\,dx = F(s)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression) -> expression
 primitive: kernel
 bindings:

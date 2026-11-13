@@ -9,8 +9,8 @@
 // `*^` for exponents; both are sanitized before parsing.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { applyAllPatches } from "@enumeratio/ce-patches";
-import { runWolframKernel } from "@enumeratio/utils/bounded";
+import { applyAllPatches } from "@notatio/ce-patches";
+import { runWolframKernel } from "@notatio/utils/bounded";
 
 const ce = new ComputeEngine();
 applyAllPatches(ce);

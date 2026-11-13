@@ -1,12 +1,12 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { makeExpression, MakeExpressionError, row } from "@enumeratio/boxes";
-import { commandTeX, parseMathML, toLatex } from "@enumeratio/boxes/render";
+import { makeExpression, MakeExpressionError, row } from "@notatio/boxes";
+import { commandTeX, parseMathML, toLatex } from "@notatio/boxes/render";
 import { expect, test } from "vite-plus/test";
 import { exportFormats, exportTo, getFormat, importFormats, importFrom } from "../src/index.ts";
 import { boxesToExpression, toMathML } from "../src/mathml.ts";
 import { CORPUS } from "./corpus.ts";
 
-// The notation itself is `@enumeratio/boxes`' (its corpus and goldens); this is the format.
+// The notation itself is `@notatio/boxes`' (its corpus and goldens); this is the format.
 test("MathML: root element and display option", () => {
   expect(toMathML("x")).toBe('<math xmlns="http://www.w3.org/1998/Math/MathML"><mi>x</mi></math>');
   expect(toMathML("x", { display: "block" })).toBe(

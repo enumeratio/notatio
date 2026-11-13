@@ -1,5 +1,5 @@
 import type { BigDecimal, Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt, bigRationalAt, wrapOperator } from "@enumeratio/engine";
+import { bigIntegerAt, bigRationalAt, wrapOperator } from "@notatio/engine";
 import {
   isFiniteNum,
   cx,
@@ -9,7 +9,7 @@ import {
   logGammaBig,
   asDouble,
   hasFloatOperand,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 /**
  * Box a JS double as a float, not an exact bignum integer. `ce.number(x)` for a huge,

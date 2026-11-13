@@ -1,7 +1,7 @@
-// @enumeratio/incidence's heads in traditional notation: the poset families by size, the
+// @notatio/incidence's heads in traditional notation: the poset families by size, the
 // incidence algebra I(P), and the Möbius function μ_P(x, y).
 
-import { indexed, named, type Notation, scalars, subscript, type PackageNotation } from "@enumeratio/boxes";
+import { indexed, named, type Notation, scalars, subscript, type PackageNotation } from "@notatio/boxes";
 
 export const INCIDENCE_NOTATION: Notation = {
   DivisorLattice: scalars(indexed("D")),

@@ -48,7 +48,7 @@ async function build(): Promise<void> {
   const typed = props.parameters.some((p) => p.type !== "any") || props.optionValues !== undefined;
   if (!typed && props.explorer?.template === undefined) return show({});
   // Browser only, and lazy: the front end brings the engine with it.
-  const { argumentOf, tryItOf, tryItOfExplorer, withElement, withExplorerSize } = await import("@enumeratio/frontend");
+  const { argumentOf, tryItOf, tryItOfExplorer, withElement, withExplorerSize } = await import("@notatio/frontend");
   const signature = withExplorerSize(
     { head: props.name, parameters: props.parameters, maxSize: props.maxSize, options: props.optionValues },
     props.explorer,

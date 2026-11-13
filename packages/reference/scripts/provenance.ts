@@ -19,7 +19,7 @@
 // behaviour survives — and this file is what holds us to it.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { isolateFreeSymbols } from "@enumeratio/evaluation";
+import { isolateFreeSymbols } from "@notatio/evaluation";
 import type { MathJSON, ReferenceEntry } from "../src/types.ts";
 
 export type Provenance = "compute-engine" | "extension" | "override" | "unknown";
@@ -133,7 +133,7 @@ export function declaredLibrary(entry: ReferenceEntry): string | undefined {
   const named = entry.signatures?.find((signature) => signature.call.startsWith(entry.name));
   const library = named?.library ?? entry.signatures?.[0]?.library;
   if (library === undefined || library === "compute-engine") return undefined;
-  // `@enumeratio/analytic` and `enumeratio-analytic` are the same library.
+  // `@notatio/analytic` and `enumeratio-analytic` are the same library.
   return library.replace(/^@/, "").replace(/\//, "-");
 }
 

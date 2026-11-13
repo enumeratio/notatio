@@ -11,17 +11,17 @@ import { appendFileSync } from "node:fs";
 import { RECORD_PATH } from "./reads.ts";
 import { closure, dependents, git, loadWorkspace, owner, RECORDS, SOURCES } from "./workspace.ts";
 
-const WEB = "@enumeratio/web";
+const WEB = "@notatio/web";
 
 /** Packages whose change can move every other package. */
-const EVERYTHING = ["@enumeratio/engine", "@enumeratio/ce-patches"];
+const EVERYTHING = ["@notatio/engine", "@notatio/ce-patches"];
 
 /** Test shards by package; whatever is left runs in `rest`. Mirrors the matrix in ci.yml. */
 export const SHARDS: Record<string, string[]> = {
-  statistics: ["@enumeratio/statistics"],
-  combinatorics: ["@enumeratio/combinatorics"],
+  statistics: ["@notatio/statistics"],
+  combinatorics: ["@notatio/combinatorics"],
   // Its own runner: sharing `rest` pushed a cold build plus the reference tests past the timeout.
-  reference: ["@enumeratio/reference"],
+  reference: ["@notatio/reference"],
 };
 
 /** A shard's package split by vitest file shard (`--shard=i/n`), for a shard one runner can't finish in time. */

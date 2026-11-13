@@ -3,7 +3,7 @@
 // checked: every head the catalog knows for this carrier must either have a definition or sit
 // here.
 //
-// (Moved from @enumeratio/statistics' combined frontier.ts, split per area, step 6b.)
+// (Moved from @notatio/statistics' combined frontier.ts, split per area, step 6b.)
 
 import type { FrontierEntry } from "../../src/statistics/types.ts";
 

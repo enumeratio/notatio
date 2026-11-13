@@ -1,5 +1,5 @@
 import { type Expression, type ComputeEngine, isFunction } from "@cortex-js/compute-engine";
-import { declareCompile } from "@enumeratio/engine";
+import { declareCompile } from "@notatio/engine";
 import type { Patch } from "../patch.ts";
 
 // Wolfram's `Sum[f, {i, lo, hi, step}]` and `Product[f, {i, lo, hi, step}]` run i over

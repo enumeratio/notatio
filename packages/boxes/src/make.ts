@@ -628,7 +628,7 @@ function makeFunction(head: string, ops: unknown[]): Made {
       return atom(row([paren(make(fn), ATOM), APPLY_FUNCTION, fenced("(", list(args.map(make)), ")")]));
     }
 
-    // `Wedge(a, b, …)` -- the outer product from `@enumeratio/geometric`; associative
+    // `Wedge(a, b, …)` -- the outer product from `@notatio/geometric`; associative
     // like `Multiply`, so nesting needs no parens, but not commutative.
     case "Wedge":
       return {

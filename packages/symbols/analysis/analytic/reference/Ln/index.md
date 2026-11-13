@@ -59,4 +59,4 @@ bindings:
 
 - Inverse of [[Exp]]: $\ln(e^x) = x$.
 - The natural logarithm. Note compute-engine's own [[Log]] is not a synonym: it defaults to base 10 (see that entry).
-- $\ln(0) = -\infty$. A negative real argument reduces to the principal value $\ln(-q) = \ln(q) + i\pi$ for a positive rational $q$ (`@enumeratio/analytic`); compute-engine's own plain evaluation would otherwise leave it symbolic.
+- $\ln(0) = -\infty$. A negative real argument reduces to the principal value $\ln(-q) = \ln(q) + i\pi$ for a positive rational $q$ (`@notatio/analytic`); compute-engine's own plain evaluation would otherwise leave it symbolic.

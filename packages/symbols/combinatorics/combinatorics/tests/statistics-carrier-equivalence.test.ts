@@ -1,5 +1,5 @@
-import { bareEngine } from "@enumeratio/engine/testing";
-import { declareStructures } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { declareStructures } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps, MAPS } from "../src/index.ts";
 

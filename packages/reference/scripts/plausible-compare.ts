@@ -1,6 +1,6 @@
 // How Plausible compares a sample's answer with another system's printed one.
 
-import type { MathJSON } from "@enumeratio/oracle";
+import type { MathJSON } from "@notatio/oracle";
 
 /** The most significant figures `roundsTo` checks: it rounds in doubles. */
 const MAX_ROUNDING_DIGITS = 15;

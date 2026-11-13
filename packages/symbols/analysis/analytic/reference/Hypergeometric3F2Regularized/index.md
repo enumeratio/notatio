@@ -2,11 +2,11 @@
 name: Hypergeometric3F2Regularized
 domain: Special functions
 signature: Hypergeometric3F2Regularized(a1, a2, a3, b1, b2, z)
-summary: The regularized generalized hypergeometric function ${}_3F_2(a_1,a_2,a_3;b_1,b_2;z) / (\Gamma(b_1)\Gamma(b_2))$ — entire in $b_1, b_2$; only converges for $|z| < 1$. Provided by `@enumeratio/analytic`.
+summary: The regularized generalized hypergeometric function ${}_3F_2(a_1,a_2,a_3;b_1,b_2;z) / (\Gamma(b_1)\Gamma(b_2))$ — entire in $b_1, b_2$; only converges for $|z| < 1$. Provided by `@notatio/analytic`.
 signatures:
   - call: Hypergeometric3F2Regularized(a1, a2, a3, b1, b2, z)
     description: ${}_3F_2(a_1,a_2,a_3;b_1,b_2;z) / (\Gamma(b_1)\Gamma(b_2))$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number, number, number, number) -> number
 primitive: numeric
 bindings:

@@ -1,9 +1,9 @@
 // PermutationProduct / PermutationPower on `Permutation` values agree with their one-line-word and
 // `Cycles` readings (values checked against a Wolfram kernel in groupalgebra's tests).
-import { operandsOf } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { operandsOf } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
-import { declareGroupAlgebra } from "@enumeratio/groupalgebra";
+import { declareGroupAlgebra } from "@notatio/groupalgebra";
 import { declareCombinatorics } from "../../src/index.ts";
 
 const ce = bareEngine();

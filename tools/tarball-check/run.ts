@@ -385,7 +385,7 @@ function install(result: Result): void {
   for (const dir of [join(repo, "web"), join(repo, "packages/census")]) {
     const manifest = readManifest(dir);
     for (const [name, range] of Object.entries({ ...manifest.dependencies, ...manifest.devDependencies }))
-      if (!name.startsWith("@enumeratio/") && name !== "@playwright/test") external[name] = range;
+      if (!name.startsWith("@notatio/") && name !== "@playwright/test") external[name] = range;
   }
   writeFileSync(
     join(app, "package.json"),
@@ -400,7 +400,7 @@ function install(result: Result): void {
   }
   // No internal package may have come from anywhere but its tarball: the lockfile names no registry version.
   const lock = readFileSync(join(app, "pnpm-lock.yaml"), "utf8");
-  const stray = [...lock.matchAll(/^ {2}'?(@enumeratio\/[\w-]+)@(?!file:)[^\s':]+/gm)].map((m) => m[1]!);
+  const stray = [...lock.matchAll(/^ {2}'?(@notatio\/[\w-]+)@(?!file:)[^\s':]+/gm)].map((m) => m[1]!);
   for (const name of new Set(stray))
     result.findings.push({ package: name, kind: "resolved from the registry", detail: "an override missed it" });
   const missing = packed.filter((p) => !existsSync(join(app, "node_modules", p.name)));
@@ -430,7 +430,7 @@ function firstLine(message: string): string {
 }
 
 function census(result: Result): void {
-  const census = packages.find((p) => p.name === "@enumeratio/census");
+  const census = packages.find((p) => p.name === "@notatio/census");
   if (census?.tarball === undefined) throw new Error("census was not packed");
   const dir = join(app, "census");
   rmSync(dir, { recursive: true, force: true });
@@ -449,7 +449,7 @@ function census(result: Result): void {
   );
   if (!existsSync(json)) {
     result.status = "fail";
-    result.findings.push({ package: "@enumeratio/census", kind: "tests did not run", detail: tail("census", 12) });
+    result.findings.push({ package: "@notatio/census", kind: "tests did not run", detail: tail("census", 12) });
     return;
   }
   const report = JSON.parse(readFileSync(json, "utf8")) as VitestJson;
@@ -459,7 +459,7 @@ function census(result: Result): void {
     const failures = file.assertionResults.filter((a) => a.status === "failed");
     const failed = failures.length;
     result.findings.push({
-      package: "@enumeratio/census",
+      package: "@notatio/census",
       kind: failed === 0 ? "test file did not load" : `${failed} tests failed`,
       detail: `${relative(dir, file.name)}: ${failed === 0 ? firstLine(file.message) : failures.map((a) => `${a.title} (${firstLine(a.failureMessages.join("\n"))})`).join("; ")}`,
     });
@@ -490,7 +490,7 @@ function site(result: Result): void {
     const lines = readFileSync(join(web, file), "utf8").split("\n");
     lines.forEach((line, i) => {
       if (/^\s*(\/\/|\*)/.test(line)) return;
-      const src = /["'](@enumeratio\/[\w-]+\/(?:[\w-]+\/)*src[^"']*)["']/.exec(line)?.[1];
+      const src = /["'](@notatio\/[\w-]+\/(?:[\w-]+\/)*src[^"']*)["']/.exec(line)?.[1];
       if (src !== undefined)
         result.findings.push({
           package: "site",

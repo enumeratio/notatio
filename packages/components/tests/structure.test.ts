@@ -2,7 +2,7 @@
 // the line `adoptStructure` draws (`proseRuns`); the pages check the rest.
 
 import { expect, test } from "vite-plus/test";
-import { DRAWING_SYMBOLS } from "@enumeratio/frontend";
+import { DRAWING_SYMBOLS } from "@notatio/frontend";
 import { proseRuns } from "../src/structure.ts";
 
 test("prose between controls stays prose", () => {

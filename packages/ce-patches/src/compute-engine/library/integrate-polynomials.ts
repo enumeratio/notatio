@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { declareCompile, integerAt, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { declareCompile, integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
 
 type Evaluate = (ops: readonly Expression[], options: { numericApproximation?: boolean }) => unknown;
 

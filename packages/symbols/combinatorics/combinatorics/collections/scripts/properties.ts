@@ -12,11 +12,11 @@
 // not `Element | undefined` — range-checking is the adapter's job in declare.ts, and the
 // kernels never promised to decline.
 
-import { randomBelow } from "@enumeratio/plausible";
+import { randomBelow } from "@notatio/plausible";
 import type { FamilyKernel } from "../src/families/types.ts";
 
 export { needsBigint } from "./sampleable.ts";
-export { random, randomBelow, streamFor } from "@enumeratio/plausible";
+export { random, randomBelow, streamFor } from "@notatio/plausible";
 /** Counts past this are sampled but never enumerated — property 5 would not finish. */
 const ENUMERATE_CAP = 2_000n;
 

@@ -64,7 +64,7 @@ animation.
 
 This is the one that has actually changed the code.
 
-`@enumeratio/wolfram` compiles MathJSON to Wolfram Language, which makes a kernel
+`@notatio/wolfram` compiles MathJSON to Wolfram Language, which makes a kernel
 an **oracle**: take a reference entry, transpile it, evaluate it in a real kernel,
 compare. The last full sweep agreed on the large majority of entries and left a
 few dozen disagreements — each one classified and committed as golden data rather

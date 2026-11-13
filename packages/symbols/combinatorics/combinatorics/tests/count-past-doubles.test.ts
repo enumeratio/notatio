@@ -1,7 +1,7 @@
 // Through the engine, `Count` past 2^53 is an exact integer for every area's families, not only the
 // permutations': the `count` handler can't carry it, so `Count` answers from the kernel.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../src/index.ts";
 

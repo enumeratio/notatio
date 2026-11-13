@@ -1,4 +1,4 @@
-# @enumeratio/engine
+# @notatio/engine
 
 Plumbing over `@cortex-js/compute-engine`: checked accessors for reading values out of
 `BoxedExpression`, Wolfram-style options and messages, a cooperative deadline, one seeded
@@ -27,7 +27,7 @@ top of this one — it has no workspace dependencies of its own.
   call (`LatexReader`, `LatexWriter`); `latexEntries` is where it becomes compute-engine's own.
 - **`src/inputform.ts`** — `toInputForm`: an expression printed as Epsil you could retype,
   over compute-engine's `serializeEpsil`. Here so `ToString` needs no format registry;
-  `@enumeratio/formats/inputform` re-exports it.
+  `@notatio/formats/inputform` re-exports it.
 - **`src/facade.ts`** — what a library imports in place of `@cortex-js/compute-engine`: `Engine`,
   `Expr`, `Json`, `HeadDefinition`, `EvalOptions`, `Type` (aliases of compute-engine's own
   types), the `isNumber` / `isSymbol` guards, `box(ce, json)`, and the patterns libraries used

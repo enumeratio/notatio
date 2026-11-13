@@ -17,7 +17,7 @@
 //
 // - `declareCarrierPlurals` mints a plural type-space symbol for a carrier that has no family
 //   claiming it already -- `reference`'s engine never called it (or `declareCarrierElement`)
-//   at all, so a bare name like `GaussianIntegers` stayed whatever `@enumeratio/number-theory`
+//   at all, so a bare name like `GaussianIntegers` stayed whatever `@notatio/number-theory`
 //   later gave it. Folding it in here mints `GaussianIntegers` as `set<gaussian_integer>`
 //   FIRST, ahead of that library's own declaration, and every reference example that passes
 //   the symbol where a `string` carrier-tag was expected then fails a type check that used to
@@ -27,8 +27,8 @@
 // - `declareMaps` extends shared names (`Inverse`, `Reverse`) rather than minting fresh ones.
 //   `Inverse`'s permutation form is a row in its table (defineOverload), so it no longer has
 //   to be declared after modular's; the hosts still call it themselves, with their constructors.
-import type { Engine } from "@enumeratio/engine";
-import { declareCarrierElement, declareCarrierPlurals } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { declareCarrierElement, declareCarrierPlurals } from "@notatio/structures";
 import { declareCollections } from "../collections/src/index.ts";
 import { declareCartan } from "../cartan/src/declare.ts";
 import { declareCompositions } from "../compositions/src/declare.ts";
@@ -53,7 +53,7 @@ export { checkLaws, type LawFailure } from "./laws.ts";
 export { type CombinatorialMap, declareMaps, evaluateDefinition, type Law, MAPS } from "./maps.ts";
 
 // The combinatorial statistics' generic machinery (step 6b: moved here from
-// @enumeratio/statistics, one kernel per area — see each area's own `declare<Area>`).
+// @notatio/statistics, one kernel per area — see each area's own `declare<Area>`).
 export {
   applyDefinition,
   type DeclareOptions,
@@ -74,10 +74,10 @@ export {
   signatureOf,
   SUBJECT,
 } from "./statistics/types.ts";
-// `generate-entries.ts` is Node-only (`@enumeratio/entry/node`) and script-only — each area's
+// `generate-entries.ts` is Node-only (`@notatio/entry/node`) and script-only — each area's
 // own `scripts/entries.ts` imports it directly by relative path, never through this runtime
 // barrel (the same reason `MathJSON` above is declared locally rather than imported from
-// `@enumeratio/entry`).
+// `@notatio/entry`).
 export { PERMUTATION_STATISTICS } from "../permutations/src/statistics.ts";
 export { PARTITION_STATISTICS } from "../partitions/src/statistics.ts";
 export { DYCK_STATISTICS } from "../lattice-paths/src/statistics.ts";

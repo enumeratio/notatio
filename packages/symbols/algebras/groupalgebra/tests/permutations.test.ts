@@ -84,7 +84,7 @@ test("GroupGenerators(PermutationGroup(...)) returns the given generators", () =
 });
 
 test("PermutationCycles still computes when another library declared the name first", () => {
-  // @enumeratio/combinatorics' carrier constructor: held, no evaluate -- the page engine's order.
+  // @notatio/combinatorics' carrier constructor: held, no evaluate -- the page engine's order.
   const shared = new ComputeEngine();
   shared.declare("PermutationCycles", { signature: "(list<integer>) -> value" });
   declareGroupAlgebra(shared);

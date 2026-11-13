@@ -3,7 +3,7 @@
 // Imported statically: the entries are light, and a kernel needs all of them before it builds
 // its engine, whose LaTeX dictionary is fixed at construction.
 
-import { NOTATIONS } from "@enumeratio/manifest";
+import { NOTATIONS } from "@notatio/manifest";
 import type { Plugin } from "vite";
 
 const ID = "virtual:notation-entries";

@@ -9,7 +9,7 @@ import {
   numberLatex,
   parseComplex,
   type PlotFrame,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { defineControl, emitControl } from "./define.ts";
 
 interface Framed extends HTMLElement {

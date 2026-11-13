@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt } from "@enumeratio/engine";
+import { bigRationalAt } from "@notatio/engine";
 import {
   type BoxInput,
   declined,
@@ -12,7 +12,7 @@ import {
   numberResult,
   wantsBigDigits,
   wantsNumber,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { gammaExactValue } from "./widened.ts";
 
 // The three-argument generalized incomplete gamma, Wolfram's Gamma[s, z₀, z₁] =

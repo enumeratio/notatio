@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vite-plus/test";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { driver, keysOf } from "../src/drive.ts";
 
 const json = (src: string) => parseExpression(src).json as never;

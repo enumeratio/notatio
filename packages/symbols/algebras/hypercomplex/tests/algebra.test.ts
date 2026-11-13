@@ -1,4 +1,4 @@
-import { bareEngine, createEngine } from "@enumeratio/engine/testing";
+import { bareEngine, createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareHypercomplex } from "../src/declare.ts";
 

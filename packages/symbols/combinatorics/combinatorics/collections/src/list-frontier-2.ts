@@ -8,7 +8,7 @@ import {
   operandsOf,
   stringAt,
   symbolNameOf,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 // A second wave of Wolfram-frontier heads compute-engine has no answer for: list/array
 // utilities (Thread, MapAt, MovingMap, HankelMatrix), the discrete-math pair

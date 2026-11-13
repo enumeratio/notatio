@@ -1,5 +1,5 @@
-import { isRealInt } from "@enumeratio/ce-patches";
-import { BigDecimal, type Engine, type Expr, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { isRealInt } from "@notatio/ce-patches";
+import { BigDecimal, type Engine, type Expr, operandsOf, symbolNameOf } from "@notatio/engine";
 import { airyBig, airyPrimeBig, besselKYBig } from "./special-big.ts";
 
 // FunctionRange for the oscillating special functions on the reals: AiryAi, AiryBi and BesselY of

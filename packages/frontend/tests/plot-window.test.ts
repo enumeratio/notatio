@@ -1,7 +1,7 @@
 import { expect, test } from "vite-plus/test";
 import { budgeted, MAX_WINDOW_SAMPLES, plotSeries, plotSeriesIn, slideInterval, type SeriesItem } from "../src/plot.ts";
 import { polarPlotBox, polarPlotBoxSvg, samplePolar, samplePolarIn } from "../src/polarplot.ts";
-import type { BoxNode } from "@enumeratio/boxes";
+import type { BoxNode } from "@notatio/boxes";
 
 const curve: SeriesItem[] = [{ label: "sin" }];
 const sin = () => Math.sin;

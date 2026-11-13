@@ -1,5 +1,5 @@
 // Node-only: read and write the reference records. The reference package's loader
-// (`@enumeratio/reference/node`) reads every package, validates and collision-checks; this
+// (`@notatio/reference/node`) reads every package, validates and collision-checks; this
 // is the writer every tool goes through, and the reader for a package's own tests, which
 // can't depend on reference (it depends on them).
 //
@@ -56,7 +56,7 @@ export interface PackageDir {
   readonly installed?: true;
 }
 
-const SCOPE = "@enumeratio/";
+const SCOPE = "@notatio/";
 
 /** The first `node_modules/<name>` at or above `from` (an installed package is a symlink under pnpm). */
 function installedAt(from: string, name: string): string | undefined {
@@ -69,12 +69,12 @@ function installedAt(from: string, name: string): string | undefined {
 
 /**
  * Every package under `packages/` (`<package>/`, a symbol library's `symbols/<group>/<package>/`), then
- * the `@enumeratio/*` libraries those depend on that the tree doesn't hold: installed ones, found as
+ * the `@notatio/*` libraries those depend on that the tree doesn't hold: installed ones, found as
  * Node would find them from the dependent. A name in the tree wins over an installed one. Only a
  * checkout merges the two; any other root (an installed scope, a test fixture) is what it holds.
  */
 export function packageDirs(packagesRoot: string): PackageDir[] {
-  // A package may be a symlink (an installed one is, under node_modules/@enumeratio).
+  // A package may be a symlink (an installed one is, under node_modules/@notatio).
   const subdirs = (dir: string): string[] =>
     existsSync(dir)
       ? readdirSync(dir, { withFileTypes: true })

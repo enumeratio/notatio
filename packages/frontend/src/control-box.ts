@@ -16,7 +16,7 @@ import {
   isControlBoxHead,
   type OptionValue,
   optionsOfBox,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import { boxTag } from "./box-tags.ts";
 import { epsil, headOf, numOf, opsOf, optionAttribute, strOf, symOf, tupleOf } from "./mathjson.ts";
 

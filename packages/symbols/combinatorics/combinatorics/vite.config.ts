@@ -1,5 +1,5 @@
 import { defineConfig } from "vite-plus";
-import { fmt, lint } from "@enumeratio/config";
+import { fmt, lint } from "@notatio/config";
 import { configDefaults } from "vite-plus/test/config";
 import smoke from "./smoke-skip.json" with { type: "json" };
 

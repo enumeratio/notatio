@@ -1,6 +1,6 @@
 import { type Expression, type ComputeEngine, isNumber } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf, refusing, widenSignature, wrapOperator } from "@enumeratio/engine";
-import { declined, type EvalOptions, isRealInt } from "@enumeratio/ce-patches";
+import { bigRationalAt, operandsOf, refusing, widenSignature, wrapOperator } from "@notatio/engine";
+import { declined, type EvalOptions, isRealInt } from "@notatio/ce-patches";
 
 type Q = readonly [bigint, bigint];
 const gcdBig = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gcdBig(b, a % b));

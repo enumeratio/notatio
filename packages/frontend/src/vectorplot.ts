@@ -5,7 +5,7 @@
 // deterministic (fixed sample grid, fixed-step RK4, no randomness), so SSR and the browser draw the
 // same picture. `renderPlot` draws the box.
 
-import { arrow, type Box, graphics, line, type OptionValue, style, tag } from "@enumeratio/boxes";
+import { arrow, type Box, graphics, line, type OptionValue, style, tag } from "@notatio/boxes";
 import { fieldImageSize, plotArea } from "./plot-box.ts";
 import { type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 

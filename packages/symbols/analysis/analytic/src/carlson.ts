@@ -17,8 +17,8 @@ import {
   mul,
   scale,
   sub,
-} from "@enumeratio/ce-patches";
-import type { BigDecimal } from "@enumeratio/engine";
+} from "@notatio/ce-patches";
+import type { BigDecimal } from "@notatio/engine";
 import { carlsonRCBig, carlsonRDBig, carlsonRFBig, carlsonRGBig, carlsonRJBig } from "./carlson-big.ts";
 
 // Carlson symmetric elliptic integrals RF, RD, RJ, RC, RG (Carlson 1995, "Numerical

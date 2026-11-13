@@ -6,7 +6,7 @@ summary: Wolfram's Jacobi zeta function $Z(u,m) = E(\operatorname{am}(u,m),m) - 
 signatures:
   - call: JacobiZN(u, m)
     description: the Jacobi zeta function, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiAmplitude

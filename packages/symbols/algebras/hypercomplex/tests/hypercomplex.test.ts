@@ -1,4 +1,4 @@
-import { createEngine } from "@enumeratio/engine/testing";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareHypercomplex } from "../src/declare.ts";
 import { FAMILIES, GENERATOR_SYMBOLS, generatorOf } from "../src/units.ts";

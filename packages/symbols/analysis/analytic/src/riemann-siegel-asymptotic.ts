@@ -1,5 +1,5 @@
-import { BigDecimal } from "@enumeratio/engine";
-import { bernoulliRational, bigCx, bigRound, type BigCx } from "@enumeratio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
+import { bernoulliRational, bigCx, bigRound, type BigCx } from "@notatio/ce-patches";
 
 // The Riemann–Siegel formula with Gabcke's remainder, continued to complex t, in BigDecimal.
 //

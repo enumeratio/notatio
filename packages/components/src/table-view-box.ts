@@ -17,8 +17,8 @@ import {
   type IndexRange,
   type RowBatch,
   type RowCount,
-} from "@enumeratio/boxes";
-import { toText } from "@enumeratio/boxes/render";
+} from "@notatio/boxes";
+import { toText } from "@notatio/boxes/render";
 import {
   BLOCK_ROWS,
   blockOf,
@@ -38,7 +38,7 @@ import {
   topAt,
   visibleRows,
   windowOf,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { openRowsClient, type RowsClient } from "./rows-client.ts";
 
 const log = debug("table-view");

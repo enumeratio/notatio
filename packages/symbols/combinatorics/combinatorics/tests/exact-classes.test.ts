@@ -4,7 +4,7 @@
 // conjugation for partitions, Σ d·L(d) = k^n for Lyndon words, the generating tree for Baxter, the
 // product Π(1 − x^k)^−k for plane partitions, and a memoised (remaining, previous) walk for compositions.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import {
   baxterExact,

@@ -3,7 +3,7 @@
 // that has to hold once the packages are repos of their own, where nothing can say "declare me
 // last". See src/owners.ts.
 
-import { recordsRoot, referenceData } from "@enumeratio/reference/node";
+import { recordsRoot, referenceData } from "@notatio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { ENGINE } from "../src/contributions.ts";
 import { fullEngine } from "../src/engine.ts";

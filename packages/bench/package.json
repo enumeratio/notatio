@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/bench",
+  "name": "@notatio/bench",
   "version": "0.0.0",
   "private": true,
   "description": "Cross-system benchmarks: a catalogue of cases as data, native scripts generated per system through the oracle's emit, one measurement protocol, and per-run JSON reports. See https://github.com/enumeratio/notatio/wiki/Benchmarking.",
@@ -24,13 +24,13 @@
     "bench": "node scripts/bench.ts"
   },
   "dependencies": {
-    "@enumeratio/entry": "workspace:*",
-    "@enumeratio/oracle": "workspace:*",
-    "@enumeratio/utils": "workspace:*"
+    "@notatio/entry": "workspace:*",
+    "@notatio/oracle": "workspace:*",
+    "@notatio/utils": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "@types/node": "catalog:",
     "typescript": "^7.0.2",
     "vite": "catalog:",

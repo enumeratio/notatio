@@ -5,7 +5,7 @@
 // compute-engine grid sampling, and `renderPlot` draws the box. `grid[j][i]` is z at the (i-th x,
 // j-th y) sample -- the same row-major convention as plot3d.ts's height grids.
 
-import { type Box, type BoxNode, graphics, line, type OptionValue, raster, style, tag } from "@enumeratio/boxes";
+import { type Box, type BoxNode, graphics, line, type OptionValue, raster, style, tag } from "@notatio/boxes";
 import { niceTicks } from "./plot.ts";
 import { fieldImageSize, renderPlot } from "./plot-box.ts";
 import { categoryColors, type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";

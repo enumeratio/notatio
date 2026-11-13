@@ -5,13 +5,13 @@
 // is returned as structured data and drawn by whichever adapter runs the core.
 
 import { type Expression, ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { combineNotation, makeBoxes, registerNotation } from "@enumeratio/boxes";
-import { setEngineDefaults } from "@enumeratio/engine";
-import { CARRIERS, declareCombinatorics, declareMaps } from "@enumeratio/combinatorics";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
-import { declareGraphics, exportTo, importFrom } from "@enumeratio/formats";
-import { displayLatexSyntax } from "@enumeratio/frontend/display";
-import { readCardinalityByType } from "@enumeratio/frontend/conventional-latex";
+import { combineNotation, makeBoxes, registerNotation } from "@notatio/boxes";
+import { setEngineDefaults } from "@notatio/engine";
+import { CARRIERS, declareCombinatorics, declareMaps } from "@notatio/combinatorics";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
+import { declareGraphics, exportTo, importFrom } from "@notatio/formats";
+import { displayLatexSyntax } from "@notatio/frontend/display";
+import { readCardinalityByType } from "@notatio/frontend/conventional-latex";
 import { type Drawn, drawLaid } from "./cell-layout.ts";
 import { NOTATION_ENTRIES } from "./notation.ts";
 import {
@@ -22,7 +22,7 @@ import {
   declareDistributions5,
   declareDistributions6,
   declareProcesses,
-} from "@enumeratio/statistics";
+} from "@notatio/statistics";
 
 export type Syntax = "latex" | "mathjson" | "wolfram" | "epsil" | "asciimath" | "mathml";
 
@@ -93,7 +93,7 @@ export const FORM_LABEL: Record<Form, string> = {
   js: "JavaScript",
 };
 
-// A display form is just a @enumeratio/formats export format under a short name.
+// A display form is just a @notatio/formats export format under a short name.
 const FORMAT_OF: Record<Exclude<Form, "standardform">, string> = {
   inputform: "InputForm",
   tex: "TeX",
@@ -244,7 +244,7 @@ export class Session {
     declareCarrierElement(this.ce, CARRIERS);
     // The combinatorial statistics are declared inside `declareCombinatorics` itself now (each
     // area declares its own, after its own carriers and families -- step 6b). What's left of
-    // `@enumeratio/statistics` is its own: the distributions and processes.
+    // `@notatio/statistics` is its own: the distributions and processes.
     declareDistributions(this.ce);
     declareDistributions2(this.ce);
     declareDistributions3(this.ce);

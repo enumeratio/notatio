@@ -1,7 +1,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { createKernel, declareEvaluation } from "@enumeratio/evaluation";
+import { createKernel, declareEvaluation } from "@notatio/evaluation";
 import { expect, test } from "vite-plus/test";
-import { NOTEBOOK_KERNEL } from "@enumeratio/frontend/kernel-host";
+import { NOTEBOOK_KERNEL } from "@notatio/frontend/kernel-host";
 import { CATALOGUE } from "./worker-catalogue.ts";
 import { configure } from "./worker-engine-setup.ts";
 

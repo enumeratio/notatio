@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { figureText } from "../src/figure.ts";
 
 const draw = (src: string) => figureText(parseExpression(src).json as never);

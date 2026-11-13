@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 import { ballImage } from "./interval-balls.ts";
 import { type BoundOrigin, outwardBound } from "./interval-bounds.ts";
 import { logShape, SHAPES, type Shape } from "./interval-shapes.ts";

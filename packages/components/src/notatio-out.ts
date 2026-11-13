@@ -1,11 +1,11 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { type Box, makeBoxes, notationOf } from "@enumeratio/boxes";
-import { toAscii, toLatex } from "@enumeratio/boxes/render";
-import type { Display } from "@enumeratio/frontend/kernel-host";
-import type { Prerendered } from "@enumeratio/frontend/prerender";
-import type { Message } from "@enumeratio/engine";
-import { portableTeX } from "@enumeratio/formats/tex";
+import { type Box, makeBoxes, notationOf } from "@notatio/boxes";
+import { toAscii, toLatex } from "@notatio/boxes/render";
+import type { Display } from "@notatio/frontend/kernel-host";
+import type { Prerendered } from "@notatio/frontend/prerender";
+import type { Message } from "@notatio/engine";
+import { portableTeX } from "@notatio/formats/tex";
 import { html, LitElement, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import "./notatio-code.ts";
@@ -37,7 +37,7 @@ import {
   type Transcript,
   typesetLeaf,
   watchPageEnvironment,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 
 /** A cell's answer, as `#evaluate` gives it to `#compute`. */
 interface Evaluated {
@@ -76,7 +76,7 @@ function cachedMarkup(convert: (latex: string) => string, latex: string): string
   return made;
 }
 
-// `localStorage["notatio:debug"] = "out"` -- see @enumeratio/frontend's debug.ts. Used to
+// `localStorage["notatio:debug"] = "out"` -- see @notatio/frontend's debug.ts. Used to
 // make an `Evaluator -> "Worker"` cell's routing visible: a Worker-mode cell that never
 // logs `worker-evaluate` is silently running locally instead (see the guard right after
 // the worker branch, below).
@@ -324,7 +324,7 @@ export class NotatioOut extends LitElement {
      * reference page supplies one built from its entries.
      */
     resolveHead: { attribute: false },
-    /** This answer computed ahead of time (`@enumeratio/frontend/prerender`): rendered as it is,
+    /** This answer computed ahead of time (`@notatio/frontend/prerender`): rendered as it is,
      *  with no kernel call. */
     prerendered: { attribute: false },
     /** A remembered answer, typeset (a notebook's, from its last visit): shown until this
@@ -524,7 +524,7 @@ export class NotatioOut extends LitElement {
     // A host in Worker mode but missing `evaluateRemote` would otherwise fall through to
     // the LOCAL evaluation below without a trace -- exactly the failure mode that let
     // `Notebook(cells, Evaluator -> Worker)` silently run every cell on the page's own
-    // thread (a `Notebook`-signature bug, since fixed in `@enumeratio/formats`; see
+    // thread (a `Notebook`-signature bug, since fixed in `@notatio/formats`; see
     // `packages/frontend/tests/dynamic-module-evaluator.test.ts`). `evaluateRemote` is
     // always defined on `NotatioDynamicModule`, so this only fires for a non-conforming
     // host (e.g. a test double) -- loud on purpose.
@@ -658,7 +658,7 @@ export class NotatioOut extends LitElement {
   /**
    * Stop the in-flight Worker-evaluator call, if any -- the busy row's own stop
    * control and Escape (`#onKeydown`) both call this. Aborts THIS call only
-   * (`BrowserSession.evaluate`'s own contract, `@enumeratio/evaluation/browser`): the
+   * (`BrowserSession.evaluate`'s own contract, `@notatio/evaluation/browser`): the
    * worker may keep running in the background rather than actually halting -- a
    * module `time-constraint` is what turns an uncooperative loop into a hard-killed,
    * reset session (`dynamic-module-box.ts`'s own comment).
@@ -944,8 +944,8 @@ export class NotatioOut extends LitElement {
     try {
       const [engine, { openRowSource }, { serializeExpression }] = await Promise.all([
         loadEngineFor(json),
-        import("@enumeratio/frontend/row-source"),
-        import("@enumeratio/formats/expression"),
+        import("@notatio/frontend/row-source"),
+        import("@notatio/formats/expression"),
       ]);
       const presented = presentationOf(json, {
         serialize: (value) => serializeExpression(value as never, { libraryNames: "mathjson" }),
@@ -1154,8 +1154,8 @@ export class NotatioOut extends LitElement {
     const json = this.#value;
     if (json === undefined || (this.form !== "wolfram" && this.form !== "mathml")) return;
     const [{ toWolfram }, { toMathML }] = await Promise.all([
-      import("@enumeratio/wolfram"),
-      import("@enumeratio/formats/mathml"),
+      import("@notatio/wolfram"),
+      import("@notatio/formats/mathml"),
     ]);
     if (this.#value !== json) return;
     this._wolfram = toWolfram(json as Parameters<typeof toWolfram>[0]);

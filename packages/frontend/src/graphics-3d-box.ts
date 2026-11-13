@@ -22,7 +22,7 @@ import {
   type OptionValue,
   point3d,
   polygon3d,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import { type Gradient, sampleGradient } from "./palettes.ts";
 import { categoryColors, type ColorOptions, gradientOf, plotPalette, rampColor } from "./plot-color.ts";
 import { label } from "./plot-box.ts";

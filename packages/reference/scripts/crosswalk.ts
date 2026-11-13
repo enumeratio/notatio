@@ -12,7 +12,7 @@ interface Scope {
   readonly parent?: Scope;
 }
 
-/** Every name bound in an engine's scope chain -- the same walk `@enumeratio/census` does. */
+/** Every name bound in an engine's scope chain -- the same walk `@notatio/census` does. */
 function bindings(ce: ComputeEngine): string[] {
   const internal = ce as unknown as { context: { lexicalScope: Scope } };
   const names = new Set<string>();

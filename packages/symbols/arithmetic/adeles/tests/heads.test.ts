@@ -1,8 +1,8 @@
-import { box, type Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
-import { declareNumberTheory } from "@enumeratio/number-theory";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { box, type Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
+import { declareNumberTheory } from "@notatio/number-theory";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { expect, test } from "vite-plus/test";
 import { declareAdeles, visualPosition } from "../src/declare.ts";
 import { fibonacciPair } from "../src/profinite.ts";

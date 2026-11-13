@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { fromWolfram } from "@enumeratio/wolfram";
+import { fromWolfram } from "@notatio/wolfram";
 import { describe, expect, test } from "vite-plus/test";
 import { compare, parsePython } from "../src/compare.ts";
 import type { MathJSON } from "../src/emit.ts";

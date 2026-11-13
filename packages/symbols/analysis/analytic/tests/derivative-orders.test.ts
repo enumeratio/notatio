@@ -1,6 +1,6 @@
-import { BigDecimal } from "@enumeratio/engine";
+import { BigDecimal } from "@notatio/engine";
 // unstable: a bare engine to declare the analytic library against
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 import { ellipticPiBig, incompleteEllipticEBig } from "../src/elliptic-pi-big.ts";

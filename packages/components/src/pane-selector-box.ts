@@ -1,4 +1,4 @@
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { LitElement, nothing, type PropertyValues } from "lit";
 import { parseFor } from "./mathlive.ts";
 

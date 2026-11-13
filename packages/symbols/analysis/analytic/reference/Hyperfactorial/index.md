@@ -6,7 +6,7 @@ summary: 'The hyperfactorial $H(n) = \prod_{k=1}^n k^k$, continued to complex ar
 signatures:
   - call: Hyperfactorial(n)
     description: the hyperfactorial of n.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 primitive: numeric
 bindings:

@@ -1,4 +1,4 @@
-import { staleEntries } from "@enumeratio/entry/node";
+import { staleEntries } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { generated } from "../scripts/map-entries.ts";
 

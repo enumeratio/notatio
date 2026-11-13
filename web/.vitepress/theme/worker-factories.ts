@@ -1,5 +1,5 @@
 // The worker Vite must actually BUNDLE for a static build, not resolve at runtime the
-// way @enumeratio/evaluation's own browser.ts does internally: it computes
+// way @notatio/evaluation's own browser.ts does internally: it computes
 // `new URL('./browser-session-worker.ts', import.meta.url)` in one function
 // (`sessionWorkerUrl`) and hands the resulting URL to `new Worker(url, options)` in a
 // different one (`globalWorkerFactory`'s returned closure). Vite's worker plugin only
@@ -14,7 +14,7 @@
 // silently reverted to nothing running at all.
 //
 // The literal points at `./session-worker-entry.ts`, THIS SITE's own worker entry --
-// not `@enumeratio/evaluation/browser-session-worker.ts` directly -- because that
+// not `@notatio/evaluation/browser-session-worker.ts` directly -- because that
 // evaluation file ALSO takes its `configure` (this site's ~20-library declare list) as
 // a URL, resolved via a runtime `import()` inside the worker. That has the identical
 // problem one level down: invisible to the bundler, and a production build's own asset
@@ -39,7 +39,7 @@
 // is repeated (not hoisted to a shared constant) because Vite's detection is per call
 // site, not per string value.
 
-import type { SharedWorkerFactory, WorkerFactory, WorkerLike } from "@enumeratio/evaluation/browser";
+import type { SharedWorkerFactory, WorkerFactory, WorkerLike } from "@notatio/evaluation/browser";
 
 export const createSessionWorker: WorkerFactory = () =>
   new Worker(new URL("./session-worker-entry.ts", import.meta.url), {

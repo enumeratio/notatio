@@ -6,11 +6,11 @@ summary: Solves a linear, constant-coefficient ODE of order 1 or 2 for Y(x), wit
 signatures:
   - call: DSolveValue(eqn, Y(x), x)
     description: the general solution, with arbitrary constants C(1) (and C(2) for order 2).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, symbol) -> expression
   - call: DSolveValue({eqn, ic1, ic2, ...}, Y(x), x)
     description: the particular solution satisfying the stated initial conditions.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: kernel
 bindings:
   - origin: native

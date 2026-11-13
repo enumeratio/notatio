@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/formats",
+  "name": "@notatio/formats",
   "version": "0.0.0",
   "private": true,
   "description": "A Wolfram-style format registry with Import/Export over MathJSON, Wolfram, TeX, code, and image formats.",
@@ -64,17 +64,17 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/raster": "workspace:*",
-    "@enumeratio/wolfram": "workspace:*",
+    "@notatio/boxes": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/raster": "workspace:*",
+    "@notatio/wolfram": "workspace:*",
     "asciimath2tex": "catalog:",
     "htm": "^3.1.1",
     "katex": "catalog:"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/manifest": "workspace:*",
+    "@notatio/manifest": "workspace:*",
     "@types/node": "^24",
     "typescript": "^7.0.2",
     "vite": "catalog:",
