@@ -16,7 +16,7 @@ import {
   type Writer,
 } from "../src/index.ts";
 import { form } from "../src/box.ts";
-import { parseMathML, toLatex, toMathML, toText } from "../src/render/index.ts";
+import { parseMathML, toAscii, toLatex, toMathML, toText } from "../src/render/index.ts";
 import { CORPUS } from "./corpus.ts";
 
 const ce = new ComputeEngine();
@@ -47,8 +47,6 @@ const MISMATCHED = [
   "superscript",
   "sum canonical",
   "derivative default order",
-  "interval closed",
-  "interval open",
   "wedge",
   "wedge three",
   "vee",
@@ -249,4 +247,91 @@ test("a function's parameters named i or e read as letters, not constants", () =
   ]);
   // A lone `i` outside a parameter list is still the imaginary unit.
   expect(makeExpression(makeBoxes(["Add", "i", 1]))).toEqual(["Add", "ImaginaryUnit", 1]);
+});
+
+const INTERVALS: Record<string, MathJsonExpression> = {
+  closed: ["Interval", 0, 1],
+  open: ["Interval", ["Open", 0], ["Open", 1]],
+  "open below": ["Interval", ["Open", 0], 1],
+  "open above": ["Interval", 0, ["Open", 1]],
+};
+
+test("an interval is written as ISO 80000-2 and read back as an interval", () => {
+  const written = Object.fromEntries(Object.entries(INTERVALS).map(([k, json]) => [k, toText(makeBoxes(json))]));
+  // Only the closed one collides with a list, so only it is tagged.
+  expect(written).toEqual({ closed: "Interval(0, 1)", open: "]0, 1[", "open below": "(0, 1]", "open above": "[0, 1)" });
+  expect(JSON.stringify(makeBoxes(INTERVALS.closed!))).toContain('"TagBox"');
+  expect(JSON.stringify(makeBoxes(INTERVALS.open!))).not.toContain("TagBox");
+  for (const [name, json] of Object.entries(INTERVALS)) expect(roundTrip(json), name).toBe("exact");
+});
+
+test("an interval reads from the bracket pairs written as text, ISO's mixed ones too", () => {
+  const read = (...items: string[]) => makeExpression(row(items.map((t) => (t.length > 1 ? row(t.split(" ")) : t))));
+  expect(read("]", "a , b", "[")).toEqual(["Interval", ["Open", "a"], ["Open", "b"]]);
+  expect(read("]", "a , b", "]")).toEqual(["Interval", ["Open", "a"], "b"]);
+  expect(read("[", "a , b", "[")).toEqual(["Interval", "a", ["Open", "b"]]);
+  // Untagged, a closed pair is a list and a round pair a tuple.
+  expect(read("[", "a , b", "]")).toEqual(["List", "a", "b"]);
+  expect(read("(", "a , b", ")")).toEqual(["Tuple", "a", "b"]);
+  expect(read("x", "∈", "]", "a , b", "[")).toEqual(["Element", "x", ["Interval", ["Open", "a"], ["Open", "b"]]]);
+  // A `[` that closes an interval is no factor of what precedes it, however the pairs are mixed.
+  const open = ["Interval", ["Open", "a"], ["Open", "b"]];
+  const halfOpen = ["Interval", "c", ["Open", "d"]];
+  expect(read("y", "=", "[", "c , d", "[")).toEqual(["Equal", "y", halfOpen]);
+  expect(read("{", "]", "a , b", "[", ",", "[", "c , d", "[", "}")).toEqual(["Set", open, halfOpen]);
+  expect(read("(", "x", ",", "]", "a , b", "[", ")")).toEqual(["Tuple", "x", open]);
+});
+
+test("a closed interval is spelled where a set is expected as compute-engine reads it", () => {
+  const interval: MathJsonExpression = ["Interval", 0, 1];
+  const cases: [MathJsonExpression, string, string][] = [
+    [interval, "\\mathrm{Interval}(0, 1)", "Interval(0, 1)"],
+    [["Element", "x", interval], "x∈[0,1]", "x ∈ [0, 1]"],
+    [["NotElement", "x", interval], "x∉[0,1]", "x ∉ [0, 1]"],
+    [["Subset", interval, "A"], "[0,1]⊂A", "[0, 1] ⊂ A"],
+    [["Equal", "y", interval], "y=\\mathrm{Interval}(0, 1)", "y = Interval(0, 1)"],
+    [
+      ["Element", "x", ["Interval", ["Open", 0], ["Open", 1]]],
+      "x∈\\mathopen\\rbrack0,1\\mathclose\\lbrack",
+      "x ∈ ]0, 1[",
+    ],
+  ];
+  for (const [json, latex, text] of cases) {
+    expect(toLatex(makeBoxes(json)), JSON.stringify(json)).toBe(latex);
+    expect(toText(makeBoxes(json)), JSON.stringify(json)).toBe(text);
+    expect(roundTrip(json), JSON.stringify(json)).toBe("exact");
+  }
+});
+
+test("compute-engine reads the interval LaTeX written back", () => {
+  for (const json of Object.values(INTERVALS))
+    expect(ce.parse(toLatex(makeBoxes(json)), { form: "raw" }).json, JSON.stringify(json)).toEqual(json);
+  const element: MathJsonExpression = ["Element", "x", ["Interval", 0, 1]];
+  expect(ce.parse(toLatex(makeBoxes(element)), { form: "raw" }).json).toEqual(element);
+});
+
+test("an integer range is ⟦a, b⟧ when it counts up, and reads back", () => {
+  for (const json of [
+    ["Range", 1, 10],
+    ["Range", "a", "b", 1],
+    ["Range", 5, 5],
+  ] as [string, ...MathJsonExpression[]][]) {
+    const boxes = makeBoxes(json);
+    expect(toText(boxes), JSON.stringify(json)).toMatch(/^⟦.*⟧$/);
+    // A stated step of 1 is the default step.
+    expect(makeExpression(boxes), JSON.stringify(json)).toEqual(json.slice(0, 3));
+  }
+  // `Range(1, 0)` counts down, an unknown order and a step other than 1 are not `a ≤ … ≤ b`.
+  for (const json of [
+    ["Range", 1, 0],
+    ["Range", "a", "b"],
+    ["Range", 1, 10, 2],
+    ["Range", 5, 1, 1],
+    ["Range", 0.5, 3, 1],
+  ] as MathJsonExpression[])
+    expect(toText(makeBoxes(json)), JSON.stringify(json)).toMatch(/^Range\(/);
+  expect(toLatex(makeBoxes(["Range", 1, 10]))).toBe("1..10");
+  expect(toLatex(makeBoxes(["Add", 2, ["Range", 1, 3]]))).toBe("2+(1..3)");
+  expect(ce.parse("1..10", { form: "raw" }).json).toEqual(["Range", 1, 10]);
+  expect(toAscii(makeBoxes(["Range", 1, 10]))).toBe("Range(1, 10)");
 });

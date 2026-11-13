@@ -80,6 +80,12 @@ function styleAttrs(options: Options): Record<string, string | undefined> {
   };
 }
 
+const STRETCHY = { stretchy: "true" };
+/** The brackets of an open interval `]a, b[` face the way a closing and an opening one do, so
+ *  the operator dictionary does not know to stretch them. */
+const stretchy = (items: readonly Box[], i: number): boolean =>
+  items[0] === "]" && items.at(-1) === "[" && (i === 0 || i === items.length - 1);
+
 function write(box: Box): string {
   if (typeof box === "string") return element(TOKEN_ELEMENT[tokenClass(box)], escape(box));
   return writeNode(box);
@@ -89,7 +95,12 @@ function writeNode(box: BoxNode): string {
   const options = optionsOfBox(box);
   switch (box[0]) {
     case "RowBox":
-      return element("mrow", box[1].map(write).join(""));
+      return element(
+        "mrow",
+        box[1]
+          .map((b, i, items) => (stretchy(items, i) ? element("mo", escape(b as string), STRETCHY) : write(b)))
+          .join(""),
+      );
     case "TextBox":
       return element(options.ShowStringCharacters === true ? "ms" : "mtext", escape(box[1]));
     case "SuperscriptBox":

@@ -44,6 +44,8 @@ const vocabulary = (json: unknown): unknown => {
     return ["Multiply", args[0], reciprocal(args[1])];
   if (head === "Subtract" && args.length === 2) return ["Add", args[0], ["Multiply", -1, args[1]]];
   if (head === "Negate" && args.length === 1) return ["Multiply", -1, args[0]];
+  // `⟦a, b⟧` is written for a stated step of 1 as well, which is the default step.
+  if (head === "Range" && args.length === 3 && args[2] === 1) return ["Range", args[0], args[1]];
   if (head === "Power" && args.length === 2 && Number.isInteger(args[1]) && (args[1] as number) < 0)
     return reciprocal(["Power", args[0], -(args[1] as number)]);
   // `(a^-1 mod n)` is how both a modular inverse and a power with exponent -1 are written.

@@ -1210,16 +1210,16 @@
     "ascii": "f(x, y)"
   },
   "interval closed": {
-    "boxes": ["RowBox", ["[", ["RowBox", ["0", ",", "1"]], "]"]],
-    "latex": "[0,1]",
-    "text": "[0, 1]",
-    "ascii": "[0, 1]"
+    "boxes": ["TagBox", ["RowBox", ["[", ["RowBox", ["0", ",", "1"]], "]"]], "Interval"],
+    "latex": "\\mathrm{Interval}(0, 1)",
+    "text": "Interval(0, 1)",
+    "ascii": "Interval(0, 1)"
   },
   "interval open": {
-    "boxes": ["RowBox", ["(", ["RowBox", ["0", ",", "1"]], ")"]],
-    "latex": "(0,1)",
-    "text": "(0, 1)",
-    "ascii": "(0, 1)"
+    "boxes": ["RowBox", ["]", ["RowBox", ["0", ",", "1"]], "["]],
+    "latex": "\\mathopen\\rbrack0,1\\mathclose\\lbrack",
+    "text": "]0, 1[",
+    "ascii": "]0, 1["
   },
   "interval half open right": {
     "boxes": ["RowBox", ["[", ["RowBox", ["0", ",", "1"]], ")"]],

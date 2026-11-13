@@ -693,11 +693,11 @@
   },
   "interval closed": {
     "json": ["Interval", 0, 1],
-    "mathml": "<mrow><mo>[</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn></mrow><mo>]</mo></mrow>"
+    "mathml": "<semantics><mrow><mo>[</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn></mrow><mo>]</mo></mrow><annotation encoding=\"application/x-box-tag\">Interval</annotation></semantics>"
   },
   "interval open": {
     "json": ["Interval", ["Open", 0], ["Open", 1]],
-    "mathml": "<mrow><mo>(</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn></mrow><mo>)</mo></mrow>"
+    "mathml": "<mrow><mo stretchy=\"true\">]</mo><mrow><mn>0</mn><mo>,</mo><mn>1</mn></mrow><mo stretchy=\"true\">[</mo></mrow>"
   },
   "interval half open right": {
     "json": ["Interval", 0, ["Open", 1]],

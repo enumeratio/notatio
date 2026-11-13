@@ -751,6 +751,9 @@ const FENCES: Readonly<Record<string, readonly [string, string, string]>> = {
   "[": ["⎡", "⎢", "⎣"],
   "]": ["⎤", "⎥", "⎦"],
   "|": ["│", "│", "│"],
+  // No bracket pieces for the white brackets: the double-line box drawings stand in.
+  "⟦": ["╔", "║", "╚"],
+  "⟧": ["╗", "║", "╝"],
 };
 
 const SUPERSCRIPTS: Readonly<Record<string, string>> = {
