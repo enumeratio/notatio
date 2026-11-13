@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // Wraps VitePress's DefaultTheme.Layout to mount the review sidebar on every docs
-// page when review mode is on (see web/.vitepress/theme/components/ReviewPanel.vue
+// page when review mode is on (see theme/components/ReviewPanel.vue
 // and review/mode.ts). Gating on a reactive flag rather than a build-time constant
 // like the old `import.meta.env.DEV` still keeps ReviewPanel's chunk (and everything
 // it pulls in -- store.ts, the backlog sources) out of what a normal prod visitor's

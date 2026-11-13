@@ -14,8 +14,8 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
-// The backlog parser lives with the review panel in web/. It is loaded by URL, with its shape
-// restated here, so the build's declaration pass (which follows imports) leaves web/ alone.
+// The backlog parser lives with the review panel in the site theme. It is loaded by URL, with its shape
+// restated here, so the build's declaration pass (which follows imports) leaves the site theme alone.
 interface BacklogItem {
   id: string;
   status: string;
@@ -32,7 +32,7 @@ interface Backlog {
   ) => { raw: string } | undefined;
 }
 const { applyItemPatch, parseBacklog } = (await import(
-  new URL("../../../web/.vitepress/review/backlog.ts", import.meta.url).href
+  new URL("../../site-theme/src/review/backlog.ts", import.meta.url).href
 )) as Backlog;
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { parseExpression } from "@enumeratio/formats";

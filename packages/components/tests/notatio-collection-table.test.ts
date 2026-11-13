@@ -1,6 +1,6 @@
 // Integration test for the collection-table's per-column carrier dispatch (BL-1): a REAL engine,
 // declared in the same order and with the same options as the production page
-// (web/.vitepress/theme/engine-libraries.ts's declareCombinatorics -> carrier plurals ->
+// (packages/site-theme/src/theme/engine-libraries.ts's declareCombinatorics -> carrier plurals ->
 // statistics -> structures slice), driving the exact mechanism the component uses
 // (`wantsCarrier`, `substituteRowPerHead`, and the bare/wrapped representations
 // `#representations` computes) rather than re-deriving it.
@@ -30,7 +30,7 @@ function productionEngine(): ComputeEngine {
   const ce = new ComputeEngine();
   // The combinatorial statistics are declared inside `declareCombinatorics` itself now (step
   // 6b), typed uniformly across every area including SetPartition — matching
-  // web/.vitepress/theme/engine-libraries.ts, which never excluded it either.
+  // packages/site-theme/src/theme/engine-libraries.ts, which never excluded it either.
   declareCombinatorics(ce);
   declareCarrierPlurals(ce, CARRIERS);
   declareCarrierElement(ce, CARRIERS);

@@ -2,11 +2,11 @@ import { carrierSlotOf } from "@enumeratio/frontend/core";
 import { catalogOf, type ExplorerCatalog, explorerOf } from "@enumeratio/frontend/explorer";
 import { describeNow } from "@enumeratio/manifest";
 import type { ReferenceEntry } from "@enumeratio/reference";
-import { entries } from "../../.vitepress/data/reference-node.ts";
-import { fieldsOf } from "../../.vitepress/data/carrier-fields.ts";
-import { definitionsOf } from "../../.vitepress/data/definitions.ts";
-import { functionViewFor } from "../../.vitepress/data/function-view.ts";
-import { explorerProbes, PREVIEW, prerenderExamples } from "../../.vitepress/data/prerender.ts";
+import { entries } from "@enumeratio/site-theme/data/reference-node";
+import { fieldsOf } from "@enumeratio/site-theme/data/carrier-fields";
+import { definitionsOf } from "@enumeratio/site-theme/data/definitions";
+import { functionViewFor } from "@enumeratio/site-theme/data/function-view";
+import { explorerProbes, PREVIEW, prerenderExamples } from "@enumeratio/site-theme/data/prerender";
 
 /** The table a collection's page shows: its `enumerate:` filled in from what the record implies (the statistics on offer as names only). */
 async function explorerFor(entry: ReferenceEntry, catalog: ExplorerCatalog) {

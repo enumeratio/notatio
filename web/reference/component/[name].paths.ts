@@ -1,4 +1,4 @@
-import { collectComponents } from "../../.vitepress/data/components.ts";
+import { collectComponents } from "@enumeratio/site-theme/data/components";
 
 // One generated page per element module in @enumeratio/frontend, at its Vue/React name
 // (`/reference/component/BarChart3D`) -- the same rule /reference/symbol/<Head> follows.

@@ -1,5 +1,5 @@
 // Pure merge/flush logic behind the localhost `FileSource` (see
-// web/.vitepress/theme/review/fileSource.ts): reconciling items collected in
+// theme/review/fileSource.ts): reconciling items collected in
 // localStorage (always-on, see localStorageSource.ts) with the file's own items.
 // DOM/localStorage-free so it's unit-testable without mounting anything real.
 import type { BacklogItem } from "./backlog.ts";

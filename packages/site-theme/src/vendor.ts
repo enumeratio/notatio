@@ -36,13 +36,13 @@ const PACKAGES: readonly VendorPackage[] = [
   { name: "@cortex-js/compute-engine", from: here, entry: (exports, sub) => esm(exports[sub]) },
   {
     name: "katex",
-    from: resolve(here, "../../packages/components"),
+    from: resolve(repoRoot, "packages/components"),
     minify: true,
     entry: (exports, sub) => (exports[sub] as { import?: { default?: string } } | undefined)?.import?.default,
   },
   {
     name: "mathlive",
-    from: resolve(here, "../../packages/components"),
+    from: resolve(repoRoot, "packages/components"),
     // The production browser build, minified.
     entry: (exports, sub) =>
       sub === "." ? esm((exports["."] as { browser: { production: unknown } }).browser.production) : undefined,

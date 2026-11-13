@@ -1,7 +1,7 @@
 import { type CarrierPicker, hasPicker, pickerOf } from "@enumeratio/frontend/core";
 import { catalogOf, type DistributionSource, distributionSourceOf } from "@enumeratio/frontend/explorer";
-import { entries } from "../../../.vitepress/data/reference-node.ts";
-import { liveExpression, siblingsOf, statisticPages } from "../../../.vitepress/data/carrier-fields.ts";
+import { entries } from "@enumeratio/site-theme/data/reference-node";
+import { liveExpression, siblingsOf, statisticPages } from "@enumeratio/site-theme/data/carrier-fields";
 
 const catalog = catalogOf(entries);
 const sources = new Map<string, Promise<DistributionSource | undefined>>();

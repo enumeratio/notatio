@@ -7,8 +7,9 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Plugin } from "vite";
 
-const root = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const loaders = resolve(root, "web/.vitepress/data");
+const here = dirname(fileURLToPath(import.meta.url));
+const root = resolve(here, "../../..");
+const loaders = resolve(here, "data");
 
 /** Loader file -> the sources whose change re-runs it, and the directories to watch for them. */
 const rules: { loader: string; sources: RegExp; watch: string[] }[] = [

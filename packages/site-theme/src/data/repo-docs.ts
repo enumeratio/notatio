@@ -5,15 +5,13 @@
 // wiki (https://github.com/enumeratio/notatio/wiki), not here.
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
-import { dirname, join, posix, relative, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { join, posix, relative, resolve } from "node:path";
+import { repoRoot } from "../app-root.ts";
 
-const here = dirname(fileURLToPath(import.meta.url));
-export const repoRoot = resolve(here, "../../..");
+export { repoRoot };
 const githubBlob = "https://github.com/enumeratio/notatio/blob/main/";
-// Package docs link the site absolutely, so the link also works on GitHub; served here, the
-// origin is dropped so it stays on whichever deployment is showing it.
-const siteOrigin = "https://enumeratio.dev";
+// Package docs link their site absolutely, so the link also works on GitHub; served by that site,
+// the origin is dropped so it stays on whichever deployment is showing it. The app names its own.
 
 export interface DocPage {
   /** Repo-relative path of the markdown file. */
@@ -24,7 +22,8 @@ export interface DocPage {
   order: number;
 }
 
-export type Site = "enumeratio" | "notatio";
+/** The site a package's docs belong to. `shared` is a package both sites are built from (the site theme): it has no docs of its own. */
+export type Site = "enumeratio" | "notatio" | "shared";
 
 export interface WorkspacePackage {
   /** `@enumeratio/…` */
@@ -36,7 +35,7 @@ export interface WorkspacePackage {
   dir: string;
   /** Where the package sits on /docs: see `groupOf`. */
   group: string;
-  /** The site its docs belong to (`enumeratio.site`); unset for a package that doesn't say. Not read by the routes yet. */
+  /** The site its docs belong to (`enumeratio.site`); unset for a package that doesn't say. */
   site?: Site;
   /** Sibling packages this one depends on at runtime / only in development. */
   deps: string[];
@@ -158,7 +157,8 @@ function docPages(dir: string): DocPage[] {
     .toSorted((a, b) => a.order - b.order || a.page.localeCompare(b.page));
 }
 
-export function workspacePackages(): WorkspacePackage[] {
+/** The packages with docs on a site; `shared` adds the ones that have none (the site theme). */
+export function workspacePackages({ shared = false } = {}): WorkspacePackage[] {
   const found: WorkspacePackage[] = [];
   const inTree = packageGlobs.flatMap(expand);
   const fromPackages = process.env.SITE_FROM_PACKAGES === "1";
@@ -190,7 +190,7 @@ export function workspacePackages(): WorkspacePackage[] {
       pages: docPages(dir),
     });
   }
-  return found.toSorted((a, b) => a.slug.localeCompare(b.slug));
+  return found.filter((p) => shared || p.site !== "shared").toSorted((a, b) => a.slug.localeCompare(b.slug));
 }
 
 /** The site route of a doc page: `guide/index` is served at `…/guide/`. */
@@ -215,7 +215,7 @@ function siteRoutes(packages: WorkspacePackage[]): Routes {
  * Point a file's relative links where the site serves them, or at GitHub when it does not,
  * and absolute links to the site at the site itself. Other links, and anchors, are left alone.
  */
-export function rewriteLinks(markdown: string, file: string, routes: Routes): string {
+export function rewriteLinks(markdown: string, file: string, routes: Routes, siteOrigin: string): string {
   const from = posix.dirname(relative(repoRoot, file).split("\\").join("/"));
   return markdown.replace(
     /(\]\()<?([^)\s#>]+)>?(#[^)\s]*)?(\s+"[^"]*")?\)/g,
@@ -235,9 +235,9 @@ const link = (name: string) => {
 };
 
 /** The package's landing page: its README (or description), its pages, then its edges. */
-function packagePage(pkg: WorkspacePackage, routes: Routes): string {
+function packagePage(pkg: WorkspacePackage, routes: Routes, siteOrigin: string): string {
   const body = pkg.readme
-    ? rewriteLinks(readFileSync(pkg.readme, "utf8"), pkg.readme, routes)
+    ? rewriteLinks(readFileSync(pkg.readme, "utf8"), pkg.readme, routes, siteOrigin)
     : `# ${pkg.name}\n\n${pkg.description ?? ""}\n`;
   const pages = pkg.pages.length
     ? `## Pages\n\n${pkg.pages.map((d) => `- [${d.title}](${docRoute(pkg.slug, d.page)})`).join("\n")}\n\n`
@@ -250,15 +250,15 @@ function packagePage(pkg: WorkspacePackage, routes: Routes): string {
   return `${body.trimEnd()}\n\n${pages}---\n\n${facts.join("\n")}\n`;
 }
 
-/** Every route under /docs/<slug>/ with its content, for `web/docs/[page].paths.ts`. */
-export function docRoutes(): { params: { page: string }; content: string }[] {
+/** Every route under /docs/<slug>/ with its content, for the app's `docs/[page].paths.ts`; `siteOrigin` is the app's own address. */
+export function docRoutes(siteOrigin: string): { params: { page: string }; content: string }[] {
   const packages = workspacePackages();
   const routes = siteRoutes(packages);
   return packages.flatMap((pkg) => [
-    { params: { page: `${pkg.slug}/index` }, content: packagePage(pkg, routes) },
+    { params: { page: `${pkg.slug}/index` }, content: packagePage(pkg, routes, siteOrigin) },
     ...pkg.pages.map((d) => ({
       params: { page: `${pkg.slug}/${d.page}` },
-      content: rewriteLinks(readFileSync(join(repoRoot, d.file), "utf8"), join(repoRoot, d.file), routes),
+      content: rewriteLinks(readFileSync(join(repoRoot, d.file), "utf8"), join(repoRoot, d.file), routes, siteOrigin),
     })),
   ]);
 }

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // Review sidebar, mounted on every docs page through the theme Layout (see
-// web/.vitepress/theme/Layout.vue) only while review mode is on (`?review`, see
+// theme/Layout.vue) only while review mode is on (`?review`, see
 // review/mode.ts); always open then, with no toggle button. Content -- list, filters, detail, status buttons, autosaving feedback --
 // is the same backlog UI ReviewMode.vue had; what changed is the right-hand side:
 // selecting an item now navigates the SITE ITSELF (VitePress's router) instead of
-// framing it in an iframe. See web/.vitepress/review/link.ts for the link rewrite.
+// framing it in an iframe. See review/link.ts for the link rewrite.
 import { useRoute, useRouter } from "vitepress";
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { getEntry } from "../../data/reference.ts";

@@ -5,8 +5,7 @@
 // doesn't.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
 import { combineNotation, type PackageNotation, registerNotation } from "@enumeratio/boxes";
 import { setEngineDefaults } from "@enumeratio/engine";
@@ -17,6 +16,7 @@ import { engineProbes } from "@enumeratio/frontend/explorer-engine";
 import { outMarkup, type Prerendered, prerender } from "@enumeratio/frontend/prerender";
 import { createResolver, NOTATIONS } from "@enumeratio/manifest";
 import type { ReferenceEntry } from "@enumeratio/reference";
+import { appCache } from "../app-root.ts";
 import { CATALOGUE } from "../theme/worker-catalogue.ts";
 
 export type { Prerendered };
@@ -26,7 +26,7 @@ export const PREVIEW = process.argv.includes("preview");
 // The typeset HTML is the bulk of an answer (tenfold its data), so it isn't page data: each
 // page's goes in a file here, which `fillPrerendered` writes into the page's HTML, and the
 // page reads it back from the DOM before it hydrates.
-const HTML_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../cache/prerender");
+const HTML_DIR = appCache("prerender");
 const htmlFile = (page: string): string => resolve(HTML_DIR, `${encodeURIComponent(page)}.json`);
 
 /** `page`'s HTML, written into its placeholders (`<span data-prerender="3:in"></span>`). */

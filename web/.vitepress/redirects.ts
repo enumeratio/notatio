@@ -4,7 +4,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
-import { docRoute, workspacePackages } from "./data/repo-docs.ts";
+import { docRoute, workspacePackages } from "@enumeratio/site-theme/data/repo-docs";
 
 export interface Redirect {
   from: string;

@@ -21,7 +21,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, posix, relative, resolve } from "node:path";
-import { git, owner, RECORDS, root, SOURCES, type Pkg } from "./workspace.ts";
+import { git, owner, RECORDS, root, SITE_PACKAGES, SOURCES, type Pkg } from "./workspace.ts";
 
 /** What `RECORDS` covers: a package's `reference/` folder and its manifest. */
 export const RECORD_PATH = /(?:^|\/)(?:reference(?:\/|$)|package\.json$)/;
@@ -321,8 +321,8 @@ function sourceWalks(pkgs: Map<string, Pkg>, tests: boolean): Map<string, string
   const out = new Map<string, string>();
   for (const file of git("ls-files", "-z").split("\0")) {
     const home = owner(pkgs, file);
-    // The site (web/) has its own job, built from everything it reads.
-    if (home === undefined || home.dir === "web" || out.has(home.name)) continue;
+    // The site (web/ and its theme) has its own job, built from everything it reads.
+    if (home === undefined || SITE_PACKAGES.has(home.name) || out.has(home.name)) continue;
     const rel = relative(home.dir, file);
     if (tests ? !TEST.test(rel) : TEST.test(rel) || !BUILD_OR_TEST.test(rel)) continue;
     const text = readFileSync(join(root, file), "utf8");

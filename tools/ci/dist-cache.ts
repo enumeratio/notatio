@@ -36,11 +36,20 @@ import {
 import { availableParallelism } from "node:os";
 import { isAbsolute, join, resolve } from "node:path";
 import { RECORD_PATH } from "./reads.ts";
-import { closure, git, loadWorkspace, RECORDS, resolveNames, root, SOURCES, type Pkg } from "./workspace.ts";
+import {
+  closure,
+  git,
+  loadWorkspace,
+  RECORDS,
+  resolveNames,
+  root,
+  SITE_PACKAGES,
+  SOURCES,
+  type Pkg,
+} from "./workspace.ts";
 
 /** Bump when what the key covers or what is saved changes. */
 const KEY_VERSION = 2;
-const WEB = "@enumeratio/web";
 const MAX_AGE_DAYS = 14;
 const MAX_BYTES = 3 * 1024 ** 3;
 
@@ -253,9 +262,10 @@ function prune(dir: string): void {
 
 async function build(requested: string[]): Promise<void> {
   const all = loadWorkspace();
-  const wanted = requested.length > 0 ? resolveNames(all, requested) : [...all.keys()].filter((n) => n !== WEB);
+  const wanted =
+    requested.length > 0 ? resolveNames(all, requested) : [...all.keys()].filter((n) => !SITE_PACKAGES.has(n));
   const names = closure(wanted, (n) => all.get(n)!.deps);
-  names.delete(WEB);
+  for (const n of SITE_PACKAGES) names.delete(n);
   const unitMap = units(all, names);
   const keys = computeKeys(all, unitMap);
   const dir = cacheDir();
@@ -342,9 +352,9 @@ const [command, ...rest] = process.argv.slice(2);
 if (command === "build") await build(rest);
 else if (command === "keys") {
   const all = loadWorkspace();
-  const wanted = rest.length > 0 ? resolveNames(all, rest) : [...all.keys()].filter((n) => n !== WEB);
+  const wanted = rest.length > 0 ? resolveNames(all, rest) : [...all.keys()].filter((n) => !SITE_PACKAGES.has(n));
   const names = closure(wanted, (n) => all.get(n)!.deps);
-  names.delete(WEB);
+  for (const n of SITE_PACKAGES) names.delete(n);
   const unitMap = units(all, names);
   for (const [id, key] of computeKeys(all, unitMap)) console.log(`${key} ${id}`);
 } else {

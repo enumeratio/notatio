@@ -134,7 +134,7 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: node .github/scripts/example-ids.ts
-      - run: pnpm --filter @enumeratio/web run test
+      - run: pnpm --filter @enumeratio/web --filter @enumeratio/site-theme run test
 
   # The docs build; its dist is the artifact `preview` deploys. Skipped when `changes` finds nothing
   # the site reads (a PR to root docs, say); `preview` is then skipped too.

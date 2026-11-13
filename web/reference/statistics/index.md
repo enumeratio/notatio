@@ -13,7 +13,7 @@ value — the definition evaluated on every object up to a size and matched by F
 finder — or recorded in the enumeratio catalog, and the tooltip says which.
 
 <script setup>
-import { statisticsRows } from "../../.vitepress/data/catalogs.ts";
+import { statisticsRows } from "@enumeratio/site-theme/data/catalogs";
 </script>
 
 <ClientOnly>

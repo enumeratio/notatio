@@ -1,6 +1,6 @@
 import { catalogOf, type MapExplorer, mapExplorerOf } from "@enumeratio/frontend/explorer";
-import { entries } from "../../../.vitepress/data/reference-node.ts";
-import { liveExpression, mapPages, siblingsOf, statisticPages } from "../../../.vitepress/data/carrier-fields.ts";
+import { entries } from "@enumeratio/site-theme/data/reference-node";
+import { liveExpression, mapPages, siblingsOf, statisticPages } from "@enumeratio/site-theme/data/carrier-fields";
 
 const catalog = catalogOf(entries);
 const statistics = statisticPages();

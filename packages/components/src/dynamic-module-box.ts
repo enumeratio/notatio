@@ -49,7 +49,7 @@ function parseEvaluator(attr: string): Evaluator {
 type WorkerSetupGate = { __notatioWorkerSetup?: string };
 
 /** The `createWorker`/`createSharedWorker` factories a page builds around a literal,
- * Vite-bundleable `new Worker(new URL(...))` (`web/.vitepress/theme/worker-factories.ts`'s
+ * Vite-bundleable `new Worker(new URL(...))` (`packages/site-theme/src/theme/worker-factories.ts`'s
  * own comment explains why a library can't do this itself) -- set once by the host, same
  * gate pattern as `WorkerSetupGate`. Without it, `openSession` falls back to computing
  * the worker's own URL, which is fine for a dev server serving raw source on request but

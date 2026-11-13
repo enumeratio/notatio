@@ -1,5 +1,5 @@
 <script setup>
-import { data } from "../.vitepress/data/repo-docs.data.ts";
+import { data } from "@enumeratio/site-theme/data/repo-docs.data";
 
 const heading = {
   interface: "Interface",

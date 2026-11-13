@@ -1,0 +1,2 @@
+# The app caches under its own .vitepress; tests run here write the same layout.
+.vitepress/cache

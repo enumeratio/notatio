@@ -10,7 +10,7 @@ correspondence). The badge is `from → to`. Frontier maps (dimmed) are named an
 have a known signature but no definition yet.
 
 <script setup>
-import { mapsRows } from "../../.vitepress/data/catalogs.ts";
+import { mapsRows } from "@enumeratio/site-theme/data/catalogs";
 </script>
 
 <ClientOnly>

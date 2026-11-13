@@ -5,7 +5,7 @@
 // Needs the built site: pnpm --filter @enumeratio/web run build && run test:hydration
 
 import { expect, test } from "@playwright/test";
-import { PENDING_SELECTOR } from "../../.vitepress/theme/hydration.ts";
+import { PENDING_SELECTOR } from "@enumeratio/site-theme/hydration";
 
 const PAGE = "/docs/components/cell";
 // The page's own chunk, and the async `Story` component it hydrates through.

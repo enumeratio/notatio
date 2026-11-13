@@ -9,7 +9,7 @@
 
 import { appendFileSync } from "node:fs";
 import { RECORD_PATH } from "./reads.ts";
-import { closure, dependents, git, loadWorkspace, owner, RECORDS, SOURCES } from "./workspace.ts";
+import { closure, dependents, git, loadWorkspace, owner, RECORDS, SITE_PACKAGES, SOURCES } from "./workspace.ts";
 
 const WEB = "@enumeratio/web";
 
@@ -36,11 +36,11 @@ const INERT = /^(?:[^/]+\.md|LICENSE|\.vscode\/|\.vite-hooks\/|\.claude\/|\.scra
 
 export interface Selection {
   full: boolean;
-  /** Packages whose tests run (never web: it has its own job). */
+  /** Packages whose tests run (never the site's: they have their own job). */
   test: string[];
   /** Packages to build for those tests: the tests' packages and everything they read. */
   build: string[];
-  /** Whether the site build can differ: web/ changed, or a package web reads (or a record it scans). */
+  /** Whether the site build can differ: web/ or the theme changed, or a package web reads (or a record it scans). */
   site: boolean;
 }
 
@@ -57,7 +57,7 @@ function changes(base: string): { path: string; deleted: boolean }[] {
 
 export function select(base: string, forceFull = false): Selection {
   const pkgs = loadWorkspace();
-  const all = [...pkgs.keys()].filter((n) => n !== WEB).toSorted();
+  const all = [...pkgs.keys()].filter((n) => !SITE_PACKAGES.has(n)).toSorted();
   const dependentsOf = dependents(pkgs);
   const everything: Selection = { full: true, test: all, build: all, site: true };
   if (forceFull) return everything;
@@ -84,14 +84,14 @@ export function select(base: string, forceFull = false): Selection {
   }
   const siteReads = closure([WEB], (n) => pkgs.get(n)?.deps ?? []);
   site ||= [...seeds].some((n) => siteReads.has(n));
-  seeds.delete(WEB);
+  for (const n of SITE_PACKAGES) seeds.delete(n);
   // Nothing outside web and root docs changed: nothing to test.
   if (seeds.size === 0) return { full: false, test: [], build: [], site };
   const test = closure(seeds, (n) => dependentsOf.get(n) ?? []);
   for (const n of scanning) test.add(n);
-  test.delete(WEB);
+  for (const n of SITE_PACKAGES) test.delete(n);
   const build = closure(test, (n) => pkgs.get(n)?.deps ?? []);
-  build.delete(WEB);
+  for (const n of SITE_PACKAGES) build.delete(n);
   return { full: false, test: [...test].toSorted(), build: [...build].toSorted(), site };
 }
 

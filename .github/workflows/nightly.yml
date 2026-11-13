@@ -142,7 +142,7 @@ jobs:
         run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-maps.test.ts
       # Every statistic's and family's definition read back as the expression it runs (the standard run samples).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/web exec vp test run .vitepress/data/definitions.test.ts
+        run: pnpm --filter @enumeratio/site-theme exec vp test run src/data/definitions.test.ts
 
   deep-tests-reference:
     name: deep test sweeps (reference and number theory)

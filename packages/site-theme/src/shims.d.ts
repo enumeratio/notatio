@@ -6,13 +6,13 @@ declare module "*.vue" {
   export default component;
 }
 
-/** The documented reference entries, one per head (.vitepress/reference-data.ts). */
+/** The documented reference entries, one per head (reference-data.ts). */
 declare module "virtual:reference-entries" {
   const entries: readonly import("@enumeratio/reference").ReferenceEntry[];
   export default entries;
 }
 
-/** Every package's notation entry, by manifest name (.vitepress/notation-entries.ts). */
+/** Every package's notation entry, by manifest name (notation-entries.ts). */
 declare module "virtual:notation-entries" {
   const entries: Readonly<Record<string, import("@enumeratio/boxes").PackageNotation>>;
   export default entries;

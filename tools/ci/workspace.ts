@@ -29,6 +29,10 @@ export const RECORDS = "@records";
  *  outputs don't depend on a test's walk, so the dist-cache key leaves it out. */
 export const SOURCES = "@sources";
 
+/** The site's packages: the app (web/) and the theme both sites share. They have their own CI jobs, built from
+ *  everything they read, so the library build and the package test shards leave them out. */
+export const SITE_PACKAGES: ReadonlySet<string> = new Set(["@enumeratio/web", "@enumeratio/site-theme"]);
+
 export const root = resolve(import.meta.dirname, "../..");
 
 export function git(...args: string[]): string {

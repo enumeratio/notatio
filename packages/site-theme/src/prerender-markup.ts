@@ -6,9 +6,9 @@
 // the element takes over.
 
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 import { holdsPrerenderedPlot } from "@enumeratio/frontend/core";
+import { appCache } from "./app-root.ts";
 import { HYDRATED_ATTRIBUTE } from "./theme/hydration.ts";
 
 /** One element a page asks the build to render. */
@@ -25,7 +25,7 @@ export interface MarkupSpec {
 const PRERENDERED = new Set(["notatio-cell", "graphics-box"]);
 
 // A `graphics-box` is prerendered when it holds a sampled plot or a chart; a `Show` or a diagram is drawn live.
-const SPECS_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "cache/prerender-pages");
+const SPECS_DIR = appCache("prerender-pages");
 
 /** Where a page's specs are kept, by its source path. */
 export const specsFile = (relativePath: string): string =>

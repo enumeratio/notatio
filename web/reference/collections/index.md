@@ -10,7 +10,7 @@ numbers are established by count — the family's own kernel for the first sizes
 against the sequence's terms — and a ✓ says so.
 
 <script setup>
-import { collectionsRows } from "../../.vitepress/data/catalogs.ts";
+import { collectionsRows } from "@enumeratio/site-theme/data/catalogs";
 </script>
 
 <ClientOnly>

@@ -8,7 +8,7 @@ _meaning_ laid over that shape, which is what [statistics](/reference/statistics
 and [maps](/reference/maps/) dispatch on.
 
 <script setup>
-import { domainsRows } from "../../.vitepress/data/catalogs.ts";
+import { domainsRows } from "@enumeratio/site-theme/data/catalogs";
 </script>
 
 <ClientOnly>

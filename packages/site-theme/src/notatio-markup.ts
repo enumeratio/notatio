@@ -15,7 +15,7 @@ import { tex } from "./prose.ts";
 
 /** The components a page can use by a PascalCase tag: the theme's, VitePress's and Vue's. */
 export const VUE_COMPONENTS: ReadonlySet<string> = new Set([
-  // web/.vitepress/theme/index.mts (held to it by notatio-markup.test.ts)
+  // the theme's index.mts (held to it by notatio-markup.test.ts)
   "Playground",
   "ElementsDemo",
   "FieldPage",

@@ -1,6 +1,6 @@
 // The seam between the review sidebar (ReviewPanel.vue / store.ts) and wherever the
 // backlog actually lives. Today that's the dev-server's markdown-backed REST API
-// (see web/.vitepress/review/plugin.ts and backlog.ts); the panel only ever talks to
+// (see review/plugin.ts and backlog.ts); the panel only ever talks to
 // this interface, so a later "any user collects feedback on page elements" tool could
 // swap in a different BacklogSource without touching the panel.
 import type { BacklogItem } from "../../review/backlog.ts";
