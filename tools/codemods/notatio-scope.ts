@@ -14,8 +14,9 @@
 // packages named in comments), and the word enumeratio anywhere else. A package a branch adds
 // under the old scope is not in the list: rename it by hand.
 //
-// After it: `vp install` (rewrites pnpm-lock.yaml), then `vp check --fix` (import order follows
-// the new names), then rebuild (`node tools/ci/dist-cache.ts build`).
+// After it: `vp install` (rewrites pnpm-lock.yaml), `vp fmt` (import order follows the new
+// names), then rebuild (`node tools/ci/dist-cache.ts build`). `vp check` type-checks against the
+// built dists, so it runs after the rebuild.
 //
 // --check also fails while any workspace package.json is still named in the old scope.
 
