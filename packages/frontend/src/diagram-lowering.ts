@@ -1,4 +1,4 @@
-// The graph plots and the torus square as `makeBoxes` rules (the wiki's Speculative-Box-Primitives,
+// The graph plots and the torus square as `makeBoxes` rules (the wiki's Archive-Box-Primitives-Design,
 // §6 slice 4): each returns `Graphics`, so `GraphPlot`, `TreeGraph`, `LayeredGraphPlot`,
 // `Dendrogram` and `TorusSquare` lower to a `GraphicsBox` that `diagram.ts` draws. Their data is
 // finite, so the box holds the whole figure; only the torus square's travelling point moves, and

@@ -1,4 +1,4 @@
-// Figures in space as `Graphics3DBox`es (the wiki's Speculative-Box-Primitives, §6 slice 7). Wolfram's
+// Figures in space as `Graphics3DBox`es (the wiki's Archive-Box-Primitives-Design, §6 slice 7). Wolfram's
 // `Plot3D` returns `Graphics3D`, so a surface lowers to a `GraphicsComplex3DBox` (every vertex once,
 // the quads as `Indices`), a bar to a `CuboidBox`, a curve to a `Line3DBox` and a scatter to a
 // `Point3DBox`. The chrome rides as options (`Axes`, `PlotRange`, `ScalingFunctions`, `PlotLabel`,

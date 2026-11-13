@@ -1,4 +1,4 @@
-// The figures in space as `makeBoxes` rules (the wiki's Speculative-Box-Primitives, §6 slice 7).
+// The figures in space as `makeBoxes` rules (the wiki's Archive-Box-Primitives-Design, §6 slice 7).
 // `ListPlot3D` and `BarChart3D` hold their data, so they lower whole; `Plot3D` of an expression is
 // a producer, like a 2-D plot: sampling needs a compiled kernel (the page's, or a session's), so the
 // box holds the expression it came from and `Producer -> head`, and an environment that can sample

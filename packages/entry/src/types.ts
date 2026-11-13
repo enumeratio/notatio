@@ -270,7 +270,7 @@ export type PrimitiveReason =
 
 /**
  * A head's name in another system's own vocabulary, where that differs from ours -- the
- * hand-kept half of the crosswalk (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata). The mechanically
+ * hand-kept half of the crosswalk (https://github.com/enumeratio/notatio/wiki/Examples-as-Data). The mechanically
  * derived half (Fungrim identities, the oracle's per-arity mapping) lives in `bindings:` and
  * the generated crosswalk data; this is what a human had to type in.
  */
@@ -411,7 +411,7 @@ export interface ReferenceEntry {
   readonly catalog?: readonly Reference[];
   /**
    * What `@enumeratio/catalog`'s `declareCatalog` needs to register this head as a resource
-   * (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata), moved here off the retired
+   * (https://github.com/enumeratio/notatio/wiki/Examples-as-Data), moved here off the retired
    * packages/catalog/src/catalog-data.ts. Presence is the kind: `grades` marks a catalogued
    * collection, `statOn`/
    * `mapOn` a statistic or map (its overload set), `catalogCarrier` a bare carrier -- a name
@@ -432,7 +432,7 @@ export interface ReferenceEntry {
   /**
    * Old names this head was declared under, oldest first -- a data alias, same idea as the
    * numerals systems' aliases. `@enumeratio/statistics`'s `blessedName` reads the generated
-   * table built from these, not this field directly (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata).
+   * table built from these, not this field directly (https://github.com/enumeratio/notatio/wiki/Examples-as-Data).
    */
   readonly formerly?: readonly string[];
   /**
@@ -452,7 +452,7 @@ export interface ReferenceEntry {
 export type SymbolAttribute = "HoldAll";
 
 /**
- * A definition as its author writes it (https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup §4.2):
+ * A definition as its author writes it (https://github.com/enumeratio/notatio/wiki/Archive-Vdom-Markup-Design §4.2):
  * Epsil throughout. Packing parses it into `definition.json`, the body a `Function` over the
  * signature's parameter names, and fills each pin it can find.
  */

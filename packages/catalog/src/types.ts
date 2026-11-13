@@ -13,7 +13,7 @@ export interface Grade {
 }
 
 /** A catalogued collection, as its head's own record now carries it (`grades`/`carrier`/
- *  `unbounded`; https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata). `description` is that head's
+ *  `unbounded`; https://github.com/enumeratio/notatio/wiki/Examples-as-Data). `description` is that head's
  *  `summary`. */
 export interface CatalogCollection {
   readonly name: string;

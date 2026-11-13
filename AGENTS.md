@@ -33,7 +33,9 @@ from the repo, and new design writing goes on the wiki. This file keeps the rule
 must follow, each short, with a link where the wiki explains it:
 [Contributing](https://github.com/enumeratio/notatio/wiki/Contributing) is the long form of this file (toolchain, names, reference
 entries, tests, git, code), [CI-and-Deployment](https://github.com/enumeratio/notatio/wiki/CI-and-Deployment) the workflows, and
-[Lanes](https://github.com/enumeratio/notatio/wiki/Lanes) parallel work across sessions. When a rule here changes, change it there
+[Lanes](https://github.com/enumeratio/notatio/wiki/Lanes) parallel work across sessions;
+[Names](https://github.com/enumeratio/notatio/wiki/Names) defines the names, [Roadmap](https://github.com/enumeratio/notatio/wiki/Roadmap)
+is the vision and [Sites](https://github.com/enumeratio/notatio/wiki/Sites) the plan for the two sites. When a rule here changes, change it there
 too; when the wiki grows a rule an agent must follow, add its one line here.
 
 User-facing docs are not design docs: they ship with their package, as its `README.md` (the
@@ -44,28 +46,29 @@ so a page reads the same on GitHub and on the site.
 
 ## Names
 
-- **notatio** is the project: this repository, the docs site, and the interface: the notebook,
-  the `<notatio-*>` elements, the plots and glyphs, the CLI and REPL, the format registry, the
-  vdom (the component form of an expression). It is also the name of the restricted-Epsil
-  subset those read and write. **Epsil** is the language underneath (compute-engine's, in which
-  definitions are written). Never describe notatio as "the extension libraries" or
-  "combinatorial math for compute-engine"; that is enumeratio. Nor as a syntax: the text is Epsil.
-- **enumeratio** is the mathematics, the catalogue: the symbol definitions (collections,
-  domains, statistics and maps, the special functions, the algebras) and their evaluation,
-  built on `@cortex-js/compute-engine` and written in Epsil. It is also the `@enumeratio/*`
-  package scope, the GitHub org and the enumeratio.dev domain, which do not follow the project
-  name. When prose says "the library", "the catalogue", "a head we declare", it is talking
-  about enumeratio.
-- The line runs by what the word governs: enumeratio owns _meaning_ ("a head", "defined
-  as", "evaluates to"), notatio owns _writing and showing_ ("written as", "typed", "prints
-  as", InputForm, the `*Form` heads). What an attribute or cell holds is an expression:
-  MathJSON, written in Epsil (`$…$` LaTeX islands are Epsil's). `parseExpression` reports
-  statements and effects; a cell may be one `:=` binding (`allow: ["Assign"]`). See
-  the wiki's [Syntax-and-Formats](https://github.com/enumeratio/notatio/wiki/Syntax-and-Formats).
+- compute-engine computes: the engine and the mathematics (its standard library and the optional libraries
+  in its repository). Epsil is its language and the only text syntax we read or write. Neither is ours.
+- **enumeratio** is the catalogue: a permanent address and a record for every mathematical object (a head,
+  a collection, an element, a structure), and the checking that keeps the records true (the record format,
+  the manifest, the oracle lanes, Plausible, the census). It is also the `@enumeratio/*` scope, the GitHub
+  org and the enumeratio.dev domain. A set of definitions compute-engine does not hold is an enumeratio
+  library (`packages/symbols/`), written in Epsil and a candidate to move upstream.
+- **notatio** is how an expression is written and shown: the presentation heads (boxes, graphics, controls,
+  the `*Form` heads), the vdom and its markup, their implementations per environment, and the notebook,
+  worksheet, CLI and REPL and the format registry. It is also this repository's name, which holds both.
+  Never describe notatio as a syntax, a subset of Epsil, or the project; never describe enumeratio as "the
+  mathematics" or "the symbol definitions".
+- The verb says whose it is: "defined as" and "evaluates to" belong to compute-engine or a library (say
+  which); "recorded", "catalogued" and "checked against" belong to enumeratio ("the catalogue" is always
+  enumeratio); "written as", "typed" and "prints as" belong to notatio. What an attribute or cell holds is
+  an expression: MathJSON, written in Epsil (`$…$` LaTeX islands are Epsil's). `parseExpression` reports
+  statements and effects; a cell may be one `:=` binding (`allow: ["Assign"]`). See the wiki's
+  [Syntax-and-Formats](https://github.com/enumeratio/notatio/wiki/Syntax-and-Formats); its
+  [Names](https://github.com/enumeratio/notatio/wiki/Names) is the long form of this section.
 - In the reference data, an example's retypeable text form (its InputForm) is keyed `epsil`,
   and `notatio` keys its component serialisation, the vdom as markup: FullForm written as
   JSX, framework-free (the wiki's
-  [Speculative-Vdom-Markup](https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup)).
+  [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom)).
   There are no Vue or React wrappers; the elements are the component form.
 - On the web every box primitive is its own tag, the box head in kebab case (`RowBox` -> `row-box`,
   `Graphics3DBox` -> `graphics-3d-box`); `packages/frontend/src/box-tags.ts` is the one map. `notatio-`
@@ -73,7 +76,7 @@ so a page reads the same on GitHub and on the site.
 - Options are `Rule` (`Over -> R`); `parseExpression` normalizes a `->` in a call's arguments to `Rule`, and
   `KeyValuePair` stays the dictionary entry.
 - Package names have not all caught up, and the scope stays `@enumeratio/*`; do not rename them in passing — see the wiki's
-  [Component-Naming](https://github.com/enumeratio/notatio/wiki/Component-Naming) for how renames wait.
+  [Names](https://github.com/enumeratio/notatio/wiki/Names) for how renames wait.
 
 ## Upstream candidates
 

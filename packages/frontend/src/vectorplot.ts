@@ -1,4 +1,4 @@
-// A vector field as a `GraphicsBox` (the wiki's Speculative-Box-Primitives, §6 slice 4): a field
+// A vector field as a `GraphicsBox` (the wiki's Archive-Box-Primitives-Design, §6 slice 4): a field
 // function in, arrows (`ArrowBox`) or streamlines (`LineBox` with an `ArrowBox` head) in data
 // coordinates out, with the frame as options. Mirrors contour.ts's shape -- the element layer does
 // the compute-engine work and hands this module a plain `(x, y) => [u, v]`. Both modes are pure and

@@ -1,4 +1,4 @@
-// Graph & hierarchical layouts as `GraphicsBox`es (the wiki's Speculative-Box-Primitives, §6
+// Graph & hierarchical layouts as `GraphicsBox`es (the wiki's Archive-Box-Primitives-Design, §6
 // slice 4): TreePlot, GraphPlot, LayeredGraphPlot and Dendrogram from Wolfram's Data Visualization
 // guide. Vertices are `DiskBox`es, edges `LineBox`es (`ArrowBox`es when directed), labels
 // `InsetBox`es; `diagram.ts` draws the box.

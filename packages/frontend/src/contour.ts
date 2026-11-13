@@ -1,4 +1,4 @@
-// Contour plots as a `GraphicsBox` (the wiki's Speculative-Box-Primitives, §6 slice 7): a sampled
+// Contour plots as a `GraphicsBox` (the wiki's Archive-Box-Primitives-Design, §6 slice 7): a sampled
 // grid of z-values in, iso-lines (a `LineBox` per level) or filled bands (a `RasterBox`) in data
 // coordinates out, with the frame as options. The marching-squares core (`marchingSquares`) is
 // dependency-free and unit-tested on its own; the element layer (`plot-view.ts`) does the

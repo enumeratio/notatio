@@ -57,7 +57,7 @@ export const SYMBOLS: Record<string, string> = {
 };
 
 /** compute-engine head → Wolfram head, generated from every head's `names.wolfram` /
- * `names.wolframIdentity` field (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata step 4;
+ * `names.wolframIdentity` field (https://github.com/enumeratio/notatio/wiki/Archive-Symbol-Metadata step 4;
  * `packages/reference/scripts/collect-wolfram-names.ts`, pinned current by
  * `wolfram-heads-migration.test.ts`). Identity entries are kept on purpose: the map doubles
  * as the registry of heads the transpiler vouches for (`isWolframHead`), as opposed to heads
@@ -123,7 +123,7 @@ export const FOREIGN: Record<string, string> = {
   Depth: "the number of indices needed to reach any part of an expression",
   Word: "the token specification used by Read and Find",
   Restricted: "an Interpreter form narrowed by a condition",
-  // Ours is the carrier's plural type-space symbol (https://github.com/enumeratio/notatio/wiki/Domains §2 — Element(x,
+  // Ours is the carrier's plural type-space symbol (https://github.com/enumeratio/notatio/wiki/Archive-Domains §2 — Element(x,
   // GaussianIntegers) checks x's carrier); Wolfram's is an option flag (IsPrime[n,
   // GaussianIntegers -> True]), never a value on its own.
   GaussianIntegers: "the GaussianIntegers -> True/False option several number-theory functions take",
