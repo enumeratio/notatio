@@ -10,12 +10,19 @@ import { loadWorkspace, RECORDS, root, SOURCES } from "../../../tools/ci/workspa
 
 const PACKAGES = loadWorkspace();
 
-test("every path a package names inside another package is a dependency or a declared read", () => {
-  const bad = reads(PACKAGES)
-    .filter((read) => !declared(PACKAGES, read))
-    .map((read) => `${read.file} reads ${read.path}: list it in ${read.pkg}'s enumeratio.reads`);
-  expect([...new Set(bad)]).toEqual([]);
-});
+/** Lexes every package's sources: up to 5.1 s on a CI runner. */
+const SCAN_TIMEOUT = 30_000;
+
+test(
+  "every path a package names inside another package is a dependency or a declared read",
+  { timeout: SCAN_TIMEOUT },
+  () => {
+    const bad = reads(PACKAGES)
+      .filter((read) => !declared(PACKAGES, read))
+      .map((read) => `${read.file} reads ${read.path}: list it in ${read.pkg}'s enumeratio.reads`);
+    expect([...new Set(bad)]).toEqual([]);
+  },
+);
 
 test("a package whose scripts walk every record declares the records", () => {
   const bad = [...scanners(PACKAGES)]

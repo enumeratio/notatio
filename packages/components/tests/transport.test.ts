@@ -62,6 +62,9 @@ const rows = (t: Triangle): unknown =>
 
 const STATISTICS = ["Inversions", "MajorIndex", "Descents", "Ascents", "Excedances"];
 
+/** Two full scans over every statistic: up to 4.6 s on a CI runner. */
+const TWO_SCANS_TIMEOUT = 30_000;
+
 test("Foata's map sends the major index to the inversion number", async () => {
   const map = permutations("Foata");
   const subject = await transportTriangle(map, "Inversions", SIZES, { evaluate });
@@ -101,22 +104,26 @@ test("a map over more elements than the cap declines before tallying", async () 
   expect(subject[0]?.ok).toBe(false);
 });
 
-test("the scan reports progress in both phases, and stops when the budget is spent", async () => {
-  const map = permutations("Reverse");
-  const subject = await transportTriangle(map, "Descents", [1, 2, 3, 4, 5, 6], { evaluate });
-  const seen: string[] = [];
-  const full = await findTransports(map, subject, STATISTICS, {
-    evaluate,
-    progress: (checked, total, phase) => seen.push(`${phase} ${checked}/${total}`),
-  });
-  expect(seen[0]).toBe(`screen ${STATISTICS.length}/${STATISTICS.length}`);
-  expect(seen.some((s) => s.startsWith("confirm"))).toBe(true);
-  expect(full.stopped).toBe(false);
-  let tick = 0;
-  const cut = await findTransports(map, subject, STATISTICS, { evaluate, budgetMs: 0, now: () => tick++ });
-  expect(cut.stopped).toBe(true);
-  expect(cut.matches).toEqual([]);
-});
+test(
+  "the scan reports progress in both phases, and stops when the budget is spent",
+  { timeout: TWO_SCANS_TIMEOUT },
+  async () => {
+    const map = permutations("Reverse");
+    const subject = await transportTriangle(map, "Descents", [1, 2, 3, 4, 5, 6], { evaluate });
+    const seen: string[] = [];
+    const full = await findTransports(map, subject, STATISTICS, {
+      evaluate,
+      progress: (checked, total, phase) => seen.push(`${phase} ${checked}/${total}`),
+    });
+    expect(seen[0]).toBe(`screen ${STATISTICS.length}/${STATISTICS.length}`);
+    expect(seen.some((s) => s.startsWith("confirm"))).toBe(true);
+    expect(full.stopped).toBe(false);
+    let tick = 0;
+    const cut = await findTransports(map, subject, STATISTICS, { evaluate, budgetMs: 0, now: () => tick++ });
+    expect(cut.stopped).toBe(true);
+    expect(cut.matches).toEqual([]);
+  },
+);
 
 test("too few sizes say nothing", async () => {
   const map = permutations("Reverse");
