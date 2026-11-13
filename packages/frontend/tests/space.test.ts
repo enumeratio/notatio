@@ -28,6 +28,11 @@ test("nothing said means the projection's own Auto framing", () => {
   expect(resolveView("surface", new Map())).toEqual(AUTO_VIEW.surface);
 });
 
+test("a curve and a surface default to the same x range", () => {
+  const x = (kind: string) => domainsOf(resolveView(kind, new Map())).x;
+  expect(x("surface")).toEqual(x("curve"));
+});
+
 test("an unknown projection still yields a usable view", () => {
   expect(resolveView("nonsense", new Map()).extent).toBeGreaterThan(0);
 });

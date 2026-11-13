@@ -41,12 +41,15 @@ export interface SpaceView {
 /**
  * The view a projection gets when nothing says otherwise. These are the `Auto` values:
  * not arbitrary constants but the framing each kind of picture is usually about — the
- * unit disk and its surroundings for a portrait, a couple of periods for a curve.
+ * unit disk and its surroundings for a portrait, a couple of periods for a curve. A curve and
+ * a surface share theirs, so a sheet's `Sin(a x)` and `Sin(a x) Cos(y)` line up along x.
  */
+const PERIODS = 2 * Math.PI;
+
 export const AUTO_VIEW: Record<string, SpaceView> = {
   portrait: { center: [0, 0], extent: 2.4, azimuth: 0, elevation: 0, height: 320 },
-  curve: { center: [0, 0], extent: 2 * Math.PI, azimuth: 0, elevation: 0, height: 260 },
-  surface: { center: [0, 0], extent: 3, azimuth: 45, elevation: 30, height: 320 },
+  curve: { center: [0, 0], extent: PERIODS, azimuth: 0, elevation: 0, height: 260 },
+  surface: { center: [0, 0], extent: PERIODS, azimuth: 45, elevation: 30, height: 320 },
   image: { center: [0, 0], extent: 2, azimuth: 0, elevation: 0, height: 320 },
   curve3d: { center: [0, 0], extent: 2, azimuth: 45, elevation: 25, height: 340 },
 };
