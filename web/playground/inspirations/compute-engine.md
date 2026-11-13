@@ -3,7 +3,7 @@
 Everything here runs on [Compute Engine](https://cortexjs.io/compute-engine/),
 with [MathLive](https://cortexjs.io/mathlive/) for the editing and the
 typesetting and **Epsil** for the syntax — three pieces of Arno Gourdol's Cortex
-JS, and the reason enumeratio is a family of definitions declared onto an engine
+JS, and the reason an enumeratio library is a set of definitions declared onto an engine
 rather than a computer algebra system of its own, and notatio a set of components
 over the engine's own editor rather than a new editor.
 

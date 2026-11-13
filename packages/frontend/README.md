@@ -1,6 +1,6 @@
 # @enumeratio/frontend
 
-The base of notatio, the interface layer: the map from a symbol to the component that
+The base of notatio, how an expression is shown: the map from a symbol to the component that
 draws it, the AST as a vdom, the control contract, the arithmetic of scrubbing and
 playback, and pure SVG renderers for every plot and glyph. No UI framework of its own —
 `@enumeratio/components` (the Lit custom elements) and the Vue/React wrappers here are
@@ -52,7 +52,6 @@ backend downstream — Vue, React, the plain elements — sees the same reduced 
 - [`components`](../components/README.md) — the Lit custom elements built on this package.
 - [`/reference/component/`](https://enumeratio.dev/reference/component/) — every drawing symbol as a component,
   generated from these same sources.
-- [Components and Symbols](https://github.com/enumeratio/notatio/wiki/Components-and-Symbols) — the design
-  behind the symbol/component map.
-- [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom) — the AST-as-vdom design.
+- [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom) — the AST-as-vdom design, and the
+  design behind the symbol/component map.
 - [Try it](docs/try-it.md) — the panel on symbol pages, and how a signature becomes controls.

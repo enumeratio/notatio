@@ -1,7 +1,7 @@
 # Reference
 
-Reference material for the enumeratio symbols and the compute-engine functions they
-build on, and for the notatio interface. Look things up here; the [guides](/guide/)
+Reference material for the catalogue (compute-engine's heads and the enumeratio
+libraries') and for notatio's presentation heads and components. Look things up here; the [guides](/guide/)
 explain them.
 
 - [Symbol reference](/reference/symbol/) — every documented compute-engine head

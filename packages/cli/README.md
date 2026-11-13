@@ -1,7 +1,7 @@
 # CLI
 
 `notatio` on the command line: a Wolfram-style REPL for compute-engine with the
-enumeratio symbols declared. The same evaluation core runs three places:
+enumeratio libraries declared. The same evaluation core runs three places:
 an interactive terminal, a plain command line, and — thanks to a browser-safe core —
 a **real terminal emulator in the browser**.
 

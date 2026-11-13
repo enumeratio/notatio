@@ -5,8 +5,8 @@
 <template>
   <footer class="site-footer">
     <p>
-      <em>notatio</em> writes and shows mathematics; <em>enumeratio</em> is the catalogue it computes with. Set in
-      Source Serif 4, Inter and JetBrains Mono, with KaTeX's Computer Modern for the mathematics.
+      <em>notatio</em> writes and shows mathematics; <em>enumeratio</em> is the catalogue of its objects. Set in Source
+      Serif 4, Inter and JetBrains Mono, with KaTeX's Computer Modern for the mathematics.
     </p>
     <nav aria-label="Site">
       <a href="/docs/">Docs</a>

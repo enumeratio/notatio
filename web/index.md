@@ -11,7 +11,7 @@ pageClass: home-page
 <div class="home-hero-text">
 <p class="eyebrow">A notebook for mathematics</p>
 <h1>Write mathematics, <em>see it work.</em></h1>
-<p class="lede">notatio is mathematics you can compute, draw and check, live in your browser. It writes and shows what <em>enumeratio</em> means: a catalogue where every object has a home and every claim a test.</p>
+<p class="lede">notatio writes and shows mathematics you can compute, draw and check, live in your browser. <em>enumeratio</em> is the catalogue behind it: every object has a home and every claim a test.</p>
 <p class="home-actions">
 <a class="home-action is-primary" href="/worksheet/">Open a worksheet</a>
 <a class="home-action" href="/docs/">Read the docs</a>
