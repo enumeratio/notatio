@@ -8,19 +8,28 @@
 
 import { type Box, graphics, graphicsOf, interpretation } from "@enumeratio/boxes";
 import { chartBox, type ChartBoxOptions, isChartKind, isNumber } from "./chart.ts";
-import { type ContourOptions, contourPlotBox } from "./contour.ts";
+import { type ContourOptions, contourPlotBox, implicitPlotBox } from "./contour.ts";
 import { type DensityOptions, densityPlotBox } from "./densityplot.ts";
 import { DIAGRAM_HEADS } from "./diagram-lowering.ts";
+import { colorMixingOf, colorOf, paintOf } from "./graphics-rules.ts";
 import { type PlotOptions, type PlotPoint, type PlotSeries, plotBox } from "./plot-box.ts";
 import type { Primitive } from "./primitives.ts";
 import type { PolarPoint } from "./polarplot.ts";
+import { maskGrid, REGION_OPACITY, type RegionFill, type RegionOptions, regionPlotBox } from "./regionplot.ts";
 import type { VectorPlotOptions } from "./vectorplot.ts";
 
 /**
- * The heads of the field plots: a grid of values drawn as lines (`ContourPlot`) or cells
- * (`DensityPlot`), a `GraphicsBox` holding a `RasterBox` or `LineBox`es in data coordinates.
+ * The heads of the field plots: a grid of values drawn as lines (`ContourPlot`), cells
+ * (`DensityPlot`) or a filled region (`RegionPlot`), a `GraphicsBox` holding a `RasterBox` or
+ * `LineBox`es in data coordinates.
  */
-export const FIELD_PLOT_HEADS: readonly string[] = ["ContourPlot", "ListContourPlot", "DensityPlot", "ListDensityPlot"];
+export const FIELD_PLOT_HEADS: readonly string[] = [
+  "ContourPlot",
+  "ListContourPlot",
+  "DensityPlot",
+  "ListDensityPlot",
+  "RegionPlot",
+];
 
 /** The heads whose plots and diagrams are `GraphicsBox`es, drawn by `<graphics-box>`. */
 export const PLOT_HEADS: readonly string[] = [
@@ -228,7 +237,7 @@ export function fieldMatrixOf(data: unknown): number[][] | undefined {
   return rows.every((r) => r.length === rows[0]!.length && r.length > 0) ? rows : undefined;
 }
 
-/** `levels`: a bare count, or a JSON list of values. */
+/** `Contours`: a bare count, or a JSON list of values. */
 function levelsOf(raw: string | undefined): { levels?: readonly number[]; count?: number } {
   const text = raw?.trim();
   if (!text) return {};
@@ -238,30 +247,99 @@ function levelsOf(raw: string | undefined): { levels?: readonly number[]; count?
   return Array.isArray(parsed) && parsed.every(isNumber) ? { levels: parsed } : {};
 }
 
+/** A fill as `PlotStyle` writes it: a color, or `Opacity(a, color)`; a color alone keeps the default opacity. */
+function fillOf(json: unknown): RegionFill | undefined {
+  const paint = paintOf(json as never);
+  if (paint === undefined || typeof paint.paint !== "string") return undefined;
+  const opaque = Array.isArray(json) && json[0] === "Opacity";
+  return { color: paint.paint, opacity: opaque ? paint.opacity : REGION_OPACITY };
+}
+
+/** What a `RegionPlot`'s settings say about its fills and edges (`PlotStyle`, `BoundaryStyle`, `ColorMixing`). */
+function regionStyleOf(settings: PlotSettings): Pick<RegionOptions, "fills" | "boundary" | "mixing"> {
+  const style = jsonOf(settings["plot-style"]);
+  const fills =
+    style === undefined
+      ? undefined
+      : Array.isArray(style) && style[0] === "List"
+        ? style.slice(1).map(fillOf)
+        : [fillOf(style)];
+  const edge = jsonOf(settings["boundary-style"]);
+  const boundary = edge === "None" ? null : edge === undefined ? undefined : colorOf(edge as never);
+  return {
+    ...(fills && { fills }),
+    ...(boundary !== undefined && { boundary }),
+    mixing: colorMixingOf(settings["color-mixing"] as never),
+  };
+}
+
 /** What a field plot's settings say about how it is drawn: the chrome, the levels, the colors. */
-export function fieldOptionsOf(head: string, settings: PlotSettings): ContourOptions & DensityOptions {
+export function fieldOptionsOf(head: string, settings: PlotSettings): ContourOptions & DensityOptions & RegionOptions {
   return {
     axes: settings["axes"] !== "false",
     xLabel: settings["x-label"] || undefined,
     yLabel: settings["y-label"] || undefined,
     title: settings["label"] || undefined,
     gradient: settings["gradient"],
+    discrete: settings["discrete"],
     reverse: on(settings["reverse"]),
     ...(isDensity(head)
       ? { legend: on(settings["legend"]), zRange: spanOf(settings["zrange"]) }
-      : { filled: on(settings["filled"]), ...levelsOf(settings["levels"]) }),
+      : head === "RegionPlot"
+        ? regionStyleOf(settings)
+        : { filled: on(settings["contour-shading"]), ...levelsOf(settings["contours"]) }),
   };
 }
 
-/** The axes a field plot of an expression is sampled on: `n` per side over `xrange` by `yrange`. */
+/** Samples per side when `PlotPoints` gives none, and the most it may ask for, by head. */
+const FIELD_GRID: Readonly<Record<string, readonly [fallback: number, cap: number]>> = {
+  DensityPlot: [48, 160],
+  // A region's edge is its picture: a finer grid than a contour's, whose lines interpolate.
+  RegionPlot: [64, 160],
+};
+const CONTOUR_GRID = [40, 120] as const;
+/** An implicit curve is one thin level, lost between samples sooner than a family of contours. */
+const CURVES_GRID = [80, 160] as const;
+
+/** The axes a field plot of an expression is sampled on: `PlotPoints` per side over `xrange` by `yrange`. */
 export function fieldAxes(head: string, settings: PlotSettings): { xs: number[]; ys: number[] } {
   const [x0, x1] = spanOf(settings["xrange"]) ?? [-3, 3];
   const [y0, y1] = spanOf(settings["yrange"]) ?? [-3, 3];
-  const [fallback, cap] = isDensity(head) ? [48, 160] : [40, 120];
-  const n = Math.max(2, Math.min(cap, Math.round(Number(settings["n"]) || fallback)));
+  const [fallback, cap] = settings["field"] === "curves" ? CURVES_GRID : (FIELD_GRID[head] ?? CONTOUR_GRID);
+  const n = Math.max(2, Math.min(cap, Math.round(Number(settings["plot-points"]) || fallback)));
   const axis = (lo: number, hi: number): number[] =>
     Array.from({ length: n }, (_, k) => lo + ((hi - lo) * k) / (n - 1));
   return { xs: axis(x0, x1), ys: axis(y0, y1) };
+}
+
+/**
+ * A field plot of an expression, as a `GraphicsBox`: `grids` are its sources sampled in order
+ * (`fieldSourcesOf`: the function, or a margin per region, or a function per implicit curve), and
+ * `inside` its `RegionFunction`'s margin on the same axes, outside which nothing is drawn.
+ */
+export function fieldBoxOfGrids(
+  head: string,
+  settings: PlotSettings,
+  grids: readonly (readonly (readonly number[])[])[],
+  xs: readonly number[],
+  ys: readonly number[],
+  inside?: readonly (readonly number[])[],
+): Box {
+  const shown = inside === undefined ? grids : grids.map((g) => maskGrid(g, inside));
+  const options = fieldOptionsOf(head, settings);
+  if (settings["field"] === "regions") return regionPlotBox(shown, xs, ys, options);
+  if (settings["field"] === "curves") return implicitPlotBox(shown, xs, ys, options);
+  return fieldBoxOfGrid(head, settings, shown[0] ?? [], xs, ys);
+}
+
+/** The names a field plot's `RegionFunction` is written over, each with the plot variable it stands for. */
+export function regionFunctionVars(
+  settings: PlotSettings,
+  vx: string,
+  vy: string,
+): readonly (readonly [string, string])[] {
+  const params = (settings["region-function-vars"] ?? "").split(",").filter(Boolean);
+  return params.slice(0, 2).map((name, k) => [name, k === 0 ? vx : vy] as const);
 }
 
 /** A field plot of a grid of values, as a `GraphicsBox`. */

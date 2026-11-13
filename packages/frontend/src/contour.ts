@@ -8,7 +8,7 @@
 import { type Box, type BoxNode, graphics, line, type OptionValue, raster, style, tag } from "@enumeratio/boxes";
 import { niceTicks } from "./plot.ts";
 import { fieldImageSize, renderPlot } from "./plot-box.ts";
-import { type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
+import { categoryColors, type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 
 export interface ContourPoint {
   x: number;
@@ -294,6 +294,62 @@ export function contourPlotBox(
       );
     }
   }
+  return graphics(marks, options);
+}
+
+/** One level's iso-line as a `LineBox` in `color`, its segments disjoint; undefined when the level is never crossed. */
+function levelLine(
+  grid: Grid,
+  xs: readonly number[],
+  ys: readonly number[],
+  level: number,
+  color: string,
+): Box | undefined {
+  const segments = marchingSquares(grid, xs, ys, level);
+  if (segments.length === 0) return undefined;
+  // The pen lifts at each pair of points.
+  return style(
+    tag(
+      line({
+        Points: segments.flatMap(([a, b]) => [
+          [a.x, a.y],
+          [b.x, b.y],
+        ]),
+        Breaks: segments.map((_, k) => 2 * k).filter((k) => k > 0),
+      }),
+      "Series",
+    ),
+    { EdgeForm: [[color, LINE_WIDTH, 1, []]] },
+  );
+}
+
+/**
+ * Implicit curves as a `GraphicsBox`: each grid is `a - b` for an equation `a == b`, sampled at
+ * `xs` × `ys`, and its curve is that grid's zero contour, a `LineBox` in the equation's category color.
+ */
+export function implicitPlotBox(
+  grids: readonly Grid[],
+  xs: readonly number[],
+  ys: readonly number[],
+  opts: ContourOptions = {},
+): Box {
+  const first = grids[0] ?? [];
+  const ny = first.length;
+  const nx = ny > 0 ? first[0]!.length : 0;
+  const ready =
+    nx >= 2 &&
+    ny >= 2 &&
+    xs.length >= nx &&
+    ys.length >= ny &&
+    grids.every((g) => g.length === ny && g.every((r) => r.length === nx));
+  const options = fieldFrame(first, xs, ys, opts, ready);
+  if (!ready) return graphics([], options);
+  const colors = categoryColors(plotPalette(opts), grids.length);
+  // A box is itself an array, so each line is wrapped against `flatMap` spreading it.
+  const marks = grids.flatMap((g, k) => {
+    const curve = levelLine(g, xs.slice(0, nx), ys.slice(0, ny), 0, colors[k]!);
+    return curve === undefined ? [] : [curve];
+  });
   return graphics(marks, options);
 }
 

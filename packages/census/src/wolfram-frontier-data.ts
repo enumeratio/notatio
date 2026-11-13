@@ -145,10 +145,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 64,
   },
   {
-    head: "RegionPlot",
-    uses: 62,
-  },
-  {
     head: "VectorGreaterEqual",
     uses: 62,
   },

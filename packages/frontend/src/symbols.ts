@@ -23,6 +23,7 @@ import { optionsOf, withOptions } from "@enumeratio/formats";
 import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
 import { FRAME_HEIGHT, figureLayerOf, VALUE_FRAMES } from "./figure-frames.ts";
 import { renderBox } from "./box-render.ts";
+import { fieldSourcesOf, regionFunctionOf } from "./field-margin.ts";
 import { plainJson } from "./graphics-rules.ts";
 import { GRADIENTS } from "./palettes.ts";
 import type { ScaleName } from "./scales.ts";
@@ -489,8 +490,62 @@ const plotColorFunction = (value: Json): Record<string, string> => {
   return gradient === undefined ? {} : { "color-by": "x", gradient };
 };
 
-/** The 2-D field plots' options: the axis captions, and the gradient their values are drawn from. */
-const FIELD_OPTIONS = { ...AXES_LABEL_OPTIONS, PlotLabel: "label", ColorFunction: colorFunction };
+/** `FrameLabel -> [x, y]`: the captions of a framed plot's two axes. */
+const frameLabel = (value: Json): Record<string, string> => {
+  const [x, y] = tupleOf(value) ?? (headOf(value) === "List" ? opsOf(value) : [value]);
+  const text = (node: Json | undefined): string | undefined =>
+    node === undefined ? undefined : (strOf(node) ?? epsil(node));
+  const [xl, yl] = [text(x), text(y)];
+  return { ...(xl !== undefined && { "x-label": xl }), ...(yl !== undefined && { "y-label": yl }) };
+};
+
+/**
+ * `RegionFunction -> pred`: the plot is drawn only where the predicate holds. It lowers to the
+ * predicate's margin (`field-margin.ts`), and for a `Function` the parameters that stand for the
+ * plot's variables; a predicate with no margin declines the plot.
+ */
+const regionFunction = (value: Json): Record<string, string> => {
+  const region = regionFunctionOf(plainJson(value as never));
+  if (region === undefined) return { declined: "RegionFunction" };
+  return {
+    "region-function": epsil(region.margin as Json),
+    ...(region.params.length > 0 && { "region-function-vars": region.params.join(",") }),
+  };
+};
+
+/** The 2-D vector plots' options: the axis captions, and the gradient their values are drawn from. */
+const VECTOR_OPTIONS = { ...AXES_LABEL_OPTIONS, PlotLabel: "label", ColorFunction: colorFunction };
+
+/**
+ * The 2-D field plots' options. `Contours`, `ContourShading` and `PlotPoints` are read under their
+ * own names (`contours`, `contour-shading`, `plot-points`).
+ */
+const FIELD_OPTIONS = { ...VECTOR_OPTIONS, FrameLabel: frameLabel, RegionFunction: regionFunction };
+
+/** A style option's value as written, for the lowering to read (`PlotStyle -> Opacity(0.5, Teal)`). */
+const written =
+  (attribute: string) =>
+  (value: Json): Record<string, string> => ({ [attribute]: json(value) });
+
+/** `RegionPlot`'s options: the field options, and Wolfram's `PlotStyle` and `BoundaryStyle` for the fill and its edge. */
+const REGION_OPTIONS = { ...FIELD_OPTIONS, PlotStyle: written("plot-style"), BoundaryStyle: written("boundary-style") };
+
+/**
+ * A field plot's attributes: its two iterators, and in `expr` what its first argument asks to be
+ * sampled (`fieldSourcesOf`): the function itself, or a list of margins (`field: regions`) or of
+ * implicit curves' functions (`field: curves`). A predicate with no margin declines the plot.
+ */
+function fieldVariables(head: string, ops: readonly Json[]): Record<string, string> {
+  const out = twoVariables(ops, { value: "expr", x: "xvar", y: "yvar", xrange: "xrange", yrange: "yrange" });
+  if (ops[0] === undefined) return out;
+  const field = fieldSourcesOf(head, plainJson(ops[0] as never));
+  if (field === undefined) {
+    delete out["expr"];
+    return { ...out, declined: head };
+  }
+  if (field.kind === "value") return out;
+  return { ...out, expr: epsil(["List", ...field.sources] as Json), field: field.kind };
+}
 
 /**
  * `DensityPlot`'s options: the field options, Wolfram's `PlotLegends` for the color bar and its
@@ -603,7 +658,7 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
     head: "VectorPlot",
     tag: "graphics-box",
     attributes: (ops) => vectorField(ops),
-    options: FIELD_OPTIONS,
+    options: VECTOR_OPTIONS,
   },
   {
     // `StreamPlot` reuses `VectorPlot`'s field and options, with streamlines for arrows.
@@ -611,13 +666,13 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
     tag: "graphics-box",
     fixed: { type: "stream" },
     attributes: (ops) => vectorField(ops),
-    options: FIELD_OPTIONS,
+    options: VECTOR_OPTIONS,
   },
-  ...["ContourPlot", "DensityPlot"].map((head): VisualSymbol => ({
+  ...["ContourPlot", "DensityPlot", "RegionPlot"].map((head): VisualSymbol => ({
     head,
     tag: "graphics-box",
-    attributes: (ops) => twoVariables(ops, { value: "expr", x: "xvar", y: "yvar", xrange: "xrange", yrange: "yrange" }),
-    options: head === "DensityPlot" ? DENSITY_OPTIONS : FIELD_OPTIONS,
+    attributes: (ops) => fieldVariables(head, ops),
+    options: head === "DensityPlot" ? DENSITY_OPTIONS : head === "RegionPlot" ? REGION_OPTIONS : FIELD_OPTIONS,
   })),
   {
     // `ListContourPlot(grid)`: a pre-sampled grid contoured directly, no expression or
