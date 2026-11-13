@@ -36,9 +36,12 @@ const OR = 1;
 const AND = 2;
 const NOT = 3;
 const RELATION = 4;
-const ADD = 5;
-const MULTIPLY = 6;
-const ATOM = 7;
+const SYMMETRIC_DIFFERENCE = 5;
+const ADD = 6;
+const UNION = 7;
+const MULTIPLY = 8;
+const SET_MINUS = 9;
+const ATOM = 10;
 
 interface Made {
   box: Box;
@@ -424,7 +427,7 @@ function makeFunction(head: string, ops: unknown[]): Made {
     case "Power": {
       const [base, exponent] = ops.map(make);
       // A power as the base is fenced: `(a^b)^c`, which unfenced reads as a tower.
-      const nested = headOf(ops[0]) === "Power" || headOf(ops[0]) === "Square";
+      const nested = ["Power", "Square", "Complement"].includes(headOf(ops[0]) ?? "");
       return atom(superscript(nested ? fenced("(", [base.box], ")") : paren(base, ATOM), exponent.box));
     }
     case "Square":
@@ -658,6 +661,19 @@ function makeFunction(head: string, ops: unknown[]): Made {
       return { box: row(list(parts, head === "Implies" ? "⇒" : "⇔")), prec: OR };
     }
 
+    // Set operators, at compute-engine's precedences: `∪` and `∩` between a sum and a product, `∖` above a
+    // product, `△` above a relation. Operands are fenced against their own kind, so a chain is one call.
+    case "Union":
+    case "Intersection":
+      return setOperator(head, ops, head === "Union" ? "∪" : "∩", UNION);
+    case "SetMinus":
+      return setOperator(head, ops, "∖", SET_MINUS);
+    case "SymmetricDifference":
+      return setOperator(head, ops, "△", SYMMETRIC_DIFFERENCE);
+    // `A^∁`, as compute-engine writes `A^\complement`; a relative complement keeps its call.
+    case "Complement":
+      return ops.length === 1 ? atom(superscript(paren(make(ops[0]), ATOM), "∁")) : makeCall(head, ops);
+
     case "Error":
       return atom(error(row(ops.map((op) => make(op).box))));
 
@@ -679,6 +695,20 @@ function makeFunction(head: string, ops: unknown[]): Made {
       return makeCall(FUNCTIONS[head] ?? head, ops);
     }
   }
+}
+
+/** `a ∪ b ∪ c`: two or more operands, each bound tighter than the operator. */
+function setOperator(head: string, ops: unknown[], glyph: string, level: number): Made {
+  if (ops.length < 2) return makeCall(head, ops);
+  return {
+    box: row(
+      list(
+        ops.map((op) => atom(paren(make(op), level + 1))),
+        glyph,
+      ),
+    ),
+    prec: level,
+  };
 }
 
 /** What a host draws itself: boxes for a sub-expression (a figure, a readout), or undefined to write it. */
