@@ -1,8 +1,14 @@
 // A fast slice of our tests against a compute-engine build, for compute-engine's own CI
-// (cortex-js/compute-engine#515): every library outside combinatorics' build closure, about 3 minutes
-// locally and an estimated 10-15 on a hosted runner.
+// (cortex-js/compute-engine#515). Without memos the slice is every library outside combinatorics' build
+// closure, about 3 minutes locally and an estimated 10-15 on a hosted runner. With `--memos` it is every
+// library: combinatorics' cold build re-checks every compile verdict (about 90 minutes), but a verdict memo
+// whose code is unchanged re-checks only a sample when the engine moved (packages/manifest/scripts/stamp.ts).
 //
-//   node tools/ce-downstream/run.ts <tarball.tgz | compute-engine checkout> [--keep] [--summary FILE]
+//   node tools/ce-downstream/run.ts <tarball.tgz | compute-engine checkout> [--memos verdicts.tar.gz] [--keep] [--summary FILE]
+//
+// `--memos` is the `verdicts.tar.gz` asset of the `ce-downstream` prerelease that ci.yml publishes from main:
+// the `verdicts-<id>.json` files of main's dist cache. It is extracted into the dist cache directory the slice's
+// build uses, and the number of memos loaded is printed.
 //
 // A checkout is built and packed first (`npm ci`, `npm run build`, `npm pack`). The tarball then replaces
 // the pinned version through the same pnpm override ce-main.yml writes (.github/scripts/compute-engine-tarball.ts),
@@ -25,16 +31,17 @@ import { closure, loadWorkspace } from "../ci/workspace.ts";
 const repo = resolve(import.meta.dirname, "../..");
 
 /**
- * The slice: every library package whose build does not read `combinatorics` (its cold build is about 90 minutes,
- * and reference, frontend and the rest read it), each a place compute-engine's behavior shows through. Their tests
+ * The slice: every library package, minus those whose build reads `combinatorics` unless memos are loaded (its
+ * cold build is about 90 minutes, and reference, frontend and the rest read it), each a place compute-engine's
+ * behavior shows through. Their tests
  * are cheap (seconds to half a minute each), so the slice is all of them rather than a pick. A library is what
  * tools/ci builds and tests: a workspace package other than web with a `build` and a `test` script. The edges
  * are the declared and implicit dependencies a build follows (`deps`), not the files a test merely reads.
  */
-function deriveSlice(): string[] {
+function deriveSlice(withMemos: boolean): string[] {
   const pkgs = loadWorkspace();
   const readers = (name: string) => [...pkgs.values()].filter((p) => p.deps.has(name)).map((p) => p.name);
-  const excluded = closure(["@notatio/combinatorics"], readers);
+  const excluded = withMemos ? new Set<string>() : closure(["@notatio/combinatorics"], readers);
   const hasTest = (dir: string) =>
     "test" in (JSON.parse(readFileSync(join(repo, dir, "package.json"), "utf8")).scripts ?? {});
   return [...pkgs.values()]
@@ -45,15 +52,17 @@ function deriveSlice(): string[] {
 
 const { positionals, values: args } = parseArgs({
   allowPositionals: true,
-  options: { keep: { type: "boolean", default: false }, summary: { type: "string" } },
+  options: { keep: { type: "boolean", default: false }, summary: { type: "string" }, memos: { type: "string" } },
 });
 if (positionals.length !== 1) {
-  console.error("usage: ce-downstream/run.ts <tarball.tgz | compute-engine checkout> [--keep] [--summary FILE]");
+  console.error(
+    "usage: ce-downstream/run.ts <tarball.tgz | compute-engine checkout> [--memos verdicts.tar.gz] [--keep] [--summary FILE]",
+  );
   process.exit(2);
 }
 
-const SLICE = deriveSlice();
-console.log(`slice (${SLICE.length}): ${SLICE.join(" ")}`);
+const SLICE = deriveSlice(args.memos !== undefined);
+console.log(`slice${args.memos === undefined ? "" : " with memos"} (${SLICE.length}): ${SLICE.join(" ")}`);
 
 const strip = stripVTControlCharacters;
 const scratch = mkdtempSync(join(tmpdir(), "ce-downstream-"));
@@ -123,6 +132,28 @@ function tarballOf(input: string): string {
   );
 }
 
+/** Extracts the memo archive's `verdicts-<id>.json` files into the dist cache directory the build reads, and prints
+ *  how many. The archive is untrusted input: only flat names of that shape are accepted, nothing else is written. */
+function loadMemos(archive: string, dir: string): void {
+  if (!existsSync(archive)) {
+    console.error(`setup failed: ${archive} does not exist`);
+    process.exit(2);
+  }
+  const names = execFileSync("tar", ["-tzf", archive], { encoding: "utf8", maxBuffer: 1 << 26 })
+    .split("\n")
+    .filter((n) => n !== "");
+  const bad = names.filter((n) => !/^(\.\/)?verdicts-[\w.-]+\.json$/.test(n));
+  if (bad.length > 0) {
+    console.error(
+      `setup failed: ${archive} holds entries that are not verdicts-<id>.json: ${bad.slice(0, 3).join(", ")}`,
+    );
+    process.exit(2);
+  }
+  mkdirSync(dir, { recursive: true });
+  execFileSync("tar", ["-xzf", archive, "-C", dir], { stdio: "inherit" });
+  console.log(`memos: loaded ${names.length} verdict memo${names.length === 1 ? "" : "s"} from ${archive}`);
+}
+
 const tarball = tarballOf(positionals[0]);
 const tool = ".github/scripts/compute-engine-tarball.ts";
 must(sh("use the compute-engine build", "node", [tool, "apply", tarball]), "override");
@@ -132,8 +163,11 @@ must(
   "the swap did not take: every package must resolve the tarball",
 );
 
+const distCache = join(scratch, "dist-cache");
+if (args.memos !== undefined) loadMemos(resolve(args.memos), distCache);
+
 const build = sh("build the slice", "node", ["tools/ci/dist-cache.ts", "build", ...SLICE], {
-  env: { BUILD_JOBS: "3", DIST_CACHE_DIR: join(scratch, "dist-cache") },
+  env: { BUILD_JOBS: "3", DIST_CACHE_DIR: distCache },
   quiet: true,
 });
 if (!build.ok) {
