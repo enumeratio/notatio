@@ -28,7 +28,10 @@ graphics-box.inline-figure .graphics-box-layers { background: none !important; }
 
 /* Plots are block figures sized to a max width; the viewBox drives the ratio. */
 graphics-box[data-plot] { display: block; flex: 0 1 auto; width: auto; line-height: 0; position: relative; }
-graphics-box[data-plot] .graphics-box-plot { display: inline-block; max-width: 100%; }
+graphics-box[data-plot] .graphics-box-plot { display: inline-block; max-width: 100%; position: relative; }
+/* A region plot drawn per pixel: its canvas fills the plot area, under the frame the SVG draws. */
+graphics-box[data-plot] canvas.graphics-box-field { position: absolute; pointer-events: none; }
+graphics-box[data-plot] canvas.graphics-box-field + svg { position: relative; }
 graphics-box[data-plot] svg { width: 340px; max-width: 100%; height: auto; overflow: hidden; }
 
 /* ComplexPlot3D is a Plot3D with a hue per face; same frame. */

@@ -19,6 +19,12 @@ import {
   fieldAxes,
   fieldBoxOfData,
   fieldBoxOfGrids,
+  type FieldPaints,
+  fieldPaintsOf,
+  FieldRenderer,
+  fieldScaleOf,
+  fitsFieldShader,
+  getGpu,
   diagramBoxOf,
   followsClock,
   gestureHandlingOf,
@@ -49,7 +55,7 @@ import {
   vectorPlotBox,
   wheelZooms,
 } from "@enumeratio/frontend/core";
-import { plotFunctions, readEpsil } from "./plot-kernel.ts";
+import { compilePlotText, type LoadedPlot, plotFunctions, readEpsil } from "./plot-kernel.ts";
 
 const log = debug("plot");
 
@@ -58,6 +64,8 @@ export interface PlotHost extends HTMLElement {
   value: string;
   bindings: Readonly<Record<string, unknown>> | undefined;
   gestureHandling?: string;
+  /** Resolves once the element has rendered (a Lit element's). */
+  readonly updateComplete?: Promise<unknown>;
   requestUpdate(): void;
 }
 
@@ -73,6 +81,19 @@ const LINE_PIXELS = 16;
 const DEFAULT_PIXELS = 340;
 /** Pointer travel (px) below which a press is a click, not a drag. */
 const SLOP = 4;
+/** The most device pixels per side a shader's canvas takes. */
+const MAX_CANVAS = 4096;
+
+/** A field plot's shader: its renderer, pointed at the plot's functions, and how they are painted. */
+interface FieldShader {
+  readonly renderer: FieldRenderer;
+  readonly paints: FieldPaints;
+  /** The wildcards the functions take, in argument order. */
+  readonly params: readonly string[];
+}
+
+/** A plot box with its frame and no marks: what is drawn over a shader's canvas. */
+const bareOf = (box: BoxNode): BoxNode => [box[0], [], ...box.slice(2)] as unknown as BoxNode;
 
 const POLAR = new Set(["PolarPlot", "ListPolarPlot"]);
 const FIELD = new Set(["VectorPlot", "StreamPlot"]);
@@ -122,6 +143,12 @@ export class PlotView {
   #box: BoxNode | undefined;
   /** Whether the box is a vector field, which has no curve for a hover to read. */
   #field = false;
+  /** Whether the plot is of the plane (a field plot), whose window has a y-range of its own. */
+  #plane = false;
+  /** A region plot or implicit curves drawn per pixel, on `#canvas` under the frame. */
+  #shader: FieldShader | undefined;
+  #canvas: HTMLCanvasElement | undefined;
+  #resized: ResizeObserver | undefined;
   #charted = false;
   #svg = "";
   #hover: number | undefined;
@@ -208,6 +235,10 @@ export class PlotView {
     this.#stop();
     this.#charted = false;
     this.#field = false;
+    this.#plane = false;
+    this.#shader = undefined;
+    this.#resized?.disconnect();
+    this.#resized = undefined;
   }
 
   /** Forget how to resample: the plot is no longer one the reader can zoom. */
@@ -232,6 +263,8 @@ export class PlotView {
     this.#pending = false;
     this.#unwatch?.();
     this.#unwatch = undefined;
+    this.#resized?.disconnect();
+    this.#resized = undefined;
   }
 
   /** Draw a diagram, and with it a torus square's point as the page's clock moves it. */
@@ -465,10 +498,14 @@ export class PlotView {
     const free = loaded.plot.unknowns.filter((u) => !u.startsWith("_"));
     const vx = settings["xvar"] || free[0] || "x";
     const vy = settings["yvar"] || free.find((u) => u !== vx) || "y";
-    const { xs, ys } = fieldAxes(head, settings);
     const params = regionFunctionVars(settings, vx, vy);
     // Each sample is code the kernel compiled, read from the scope.
-    const sampled = (plot: typeof loaded, sampler: (typeof loaded.samplers)[number]): number[][] => {
+    const sampled = (
+      plot: typeof loaded,
+      sampler: (typeof loaded.samplers)[number],
+      xs: readonly number[],
+      ys: readonly number[],
+    ): number[][] => {
       const scope = plot.scope();
       Object.assign(scope, this.host.bindings);
       return ys.map((y) =>
@@ -480,11 +517,121 @@ export class PlotView {
         }),
       );
     };
-    const grids = loaded.samplers.map((sampler) => sampled(loaded, sampler));
-    const inside = region?.samplers[0] && sampled(region, region.samplers[0]);
-    this.#box = fieldBoxOfGrids(head, settings, grids, xs, ys, inside) as BoxNode;
+    // The plot over `over`'s ranges: the same compiled code, sampled again at the same density.
+    const boxOver = (over: Readonly<Record<string, string>>): { box: BoxNode; grids: number[][][] } => {
+      const { xs, ys } = fieldAxes(head, over);
+      const grids = loaded.samplers.map((sampler) => sampled(loaded, sampler, xs, ys));
+      const inside = region?.samplers[0] && sampled(region, region.samplers[0], xs, ys);
+      return { box: fieldBoxOfGrids(head, over, grids, xs, ys, inside) as BoxNode, grids };
+    };
+    const whole = boxOver(settings);
+    // A zoomed view keeps the whole plot's levels and colors.
+    const scaled = fieldScaleOf(head, settings, whole.grids[0] ?? []);
+    // A `RegionFunction` is sampled on the grid, so its plot stays the box's.
+    const shader = region === undefined ? await this.#fieldShader(head, raw, settings, [vx, vy], loaded) : undefined;
+    if (generation !== this.#generation) return;
+    const drawIn = (window: PlotWindow | undefined): void => {
+      this.#box =
+        window === undefined
+          ? whole.box
+          : boxOver({
+              ...scaled,
+              xrange: window.x.join(","),
+              ...(window.y && { yrange: window.y.join(",") }),
+              // Under a shader the box is only the frame: its marks are the canvas's.
+              ...(this.#shader && { "plot-points": "2" }),
+            }).box;
+      this.#draw();
+    };
+    this.#shader = shader;
     this.#field = true;
-    this.#draw();
+    this.#plane = true;
+    this.#home = this.#windowOf(whole.box);
+    this.#redo = drawIn;
+    drawIn(this.#window);
+  }
+
+  /**
+   * The shader for a region plot or implicit curves, or undefined where the box draws them: no WebGL2,
+   * a function with no GLSL, more functions or wildcards than the shader's slots, a wildcard that is
+   * not a number, or paints only the box has (`fieldPaintsOf`).
+   */
+  async #fieldShader(
+    head: string,
+    raw: string,
+    settings: Readonly<Record<string, string>>,
+    vars: readonly [string, string],
+    loaded: LoadedPlot,
+  ): Promise<FieldShader | undefined> {
+    const kind = settings["field"];
+    if ((kind !== "regions" && kind !== "curves") || typeof document === "undefined") return undefined;
+    const count = loaded.samplers.length;
+    const params = loaded.plot.unknowns.filter((u) => u.startsWith("_"));
+    const paints = fieldPaintsOf(head, settings, count);
+    if (paints === undefined || !fitsFieldShader(count, params.length, false)) return undefined;
+    if (params.some((name) => typeof this.host.bindings?.[name] !== "number")) return undefined;
+    try {
+      const [gpu, compiled] = await Promise.all([
+        getGpu(),
+        compilePlotText(raw, { target: "glsl", vars, each: true, fields: true, params }),
+      ]);
+      if (!gpu || compiled.unit === undefined) return undefined;
+      const renderer = new FieldRenderer(gpu);
+      return renderer.setFields(compiled.unit, { kind, count, params: params.length, mask: false })
+        ? { renderer, paints, params }
+        : undefined;
+    } catch (error) {
+      log("no shader for", raw, error);
+      return undefined;
+    }
+  }
+
+  /** Draw the shader's frame on its canvas, laid over the plot area as the SVG now shows it. */
+  #paint(): void {
+    const shader = this.#shader;
+    const frame = this.#frame;
+    const canvas = this.#canvas;
+    const svg = this.#liveSvg();
+    if (!shader || !frame || !canvas || !svg) return;
+    // The host is the one element every draw keeps; the SVG is made again each time.
+    this.#resized ??= new ResizeObserver(() => this.#paint());
+    this.#resized.observe(this.host);
+    const rect = svg.getBoundingClientRect();
+    const [, , vw, vh] = (svg.getAttribute("viewBox") ?? "0 0 340 200").split(" ").map(Number);
+    if (!(rect.width > 0) || !vw || !vh) return;
+    const [left, top, right, bottom] = frame.box;
+    const percent = (part: number, of: number): string => `${(part / of) * 100}%`;
+    Object.assign(canvas.style, {
+      left: percent(left, vw),
+      top: percent(top, vh),
+      width: percent(right - left, vw),
+      height: percent(bottom - top, vh),
+    });
+    // Device pixels per viewBox unit: what the shader's widths, given in the plot's px, are scaled by.
+    const scale = Math.min(
+      (rect.width / vw) * (globalThis.devicePixelRatio || 1),
+      MAX_CANVAS / Math.max(right - left, bottom - top),
+    );
+    const width = Math.max(1, Math.round((right - left) * scale));
+    const height = Math.max(1, Math.round((bottom - top) * scale));
+    if (canvas.width !== width) canvas.width = width;
+    if (canvas.height !== height) canvas.height = height;
+    const [x0, y0] = frame.toData(left, bottom);
+    const [x1, y1] = frame.toData(right, top);
+    const target = canvas.getContext("2d");
+    const drawn =
+      target !== null &&
+      shader.renderer.render(
+        target,
+        { x: [x0, x1], y: [y0, y1] },
+        shader.params.map((name) => Number(this.host.bindings?.[name])),
+        { ...shader.paints, width: shader.paints.width * scale },
+      );
+    // A lost context: the box draws the plot from here on.
+    if (!drawn && this.#shader === shader) {
+      this.#shader = undefined;
+      this.#redo?.(this.#window);
+    }
   }
 
   /** The box for the current samples and settings, over the zoomed window if the reader has one. */
@@ -501,11 +648,15 @@ export class PlotView {
   /** The box drawn, with the hover readout when the pointer is over it. */
   #draw(): void {
     if (this.#box === undefined) return;
-    const rendered = renderPlot(this.#box, this.#hover);
+    const rendered = renderPlot(this.#shader ? bareOf(this.#box) : this.#box, this.#hover);
     this.#svg = rendered.svg;
     this.#xAt = rendered.xAt;
     this.#frame = rendered.frame;
     this.#finish();
+    if (this.#shader === undefined) return;
+    this.#canvas ??= Object.assign(document.createElement("canvas"), { className: "graphics-box-field" });
+    // Once the element has rendered the frame the canvas is laid over.
+    void Promise.resolve(this.host.updateComplete).then(() => this.#paint());
   }
 
   #finish(): void {
@@ -571,7 +722,7 @@ export class PlotView {
 
   /** Whether the view has a y-window of its own (a parametric or polar plot's), not the samples'. */
   get #fitsY(): boolean {
-    return this.#polar !== undefined || on(this.#settings["parametric"]);
+    return this.#polar !== undefined || this.#plane || on(this.#settings["parametric"]);
   }
 
   /** `window`, or undefined once it shows the whole plot. */
@@ -693,7 +844,7 @@ export class PlotView {
       @lostpointercapture=${this.#onPointerUp}
       @wheel=${this.#onWheel}
       @dblclick=${this.#onDoubleClick}
-      >${unsafeHTML(this.#svg)}</span
+      >${this.#shader ? this.#canvas : nothing}${unsafeHTML(this.#svg)}</span
     >`;
   }
 }

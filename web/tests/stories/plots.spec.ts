@@ -209,6 +209,33 @@ test("pressing 0 on a zoomed 2-D plot returns it to its whole range, as the Plot
   await expect.poll(labels).toEqual(whole);
 });
 
+test("a contour plot zooms about the pointer and keeps its levels; 0 returns it to its whole range", async ({
+  page,
+}) => {
+  await page.goto("/reference/component/ContourPlot#story/concentric-circles");
+  const box = page.locator('[id="story/concentric-circles"] graphics-box').first();
+  await box.scrollIntoViewIfNeeded();
+  const labels = () => box.locator("svg text").allTextContents();
+  const rings = () => box.locator("svg g[clip-path] path").count();
+  await expect.poll(rings, { timeout: 60_000 }).toBeGreaterThan(1);
+  const [whole, all] = [await labels(), await rings()];
+  // Zoom in on the middle with ctrl + wheel: the window narrows both ways, about the circles' center.
+  const rect = (await box.locator("svg").first().boundingBox())!;
+  await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+  await page.keyboard.down("Control");
+  for (let i = 0; i < 5; i++) await page.mouse.wheel(0, -200);
+  await page.keyboard.up("Control");
+  await expect.poll(labels).not.toEqual(whole);
+  // The levels are the whole plot's: the outer circles leave the window, and none is refitted into it.
+  const inner = await rings();
+  expect(inner).toBeGreaterThan(0);
+  expect(inner).toBeLessThan(all);
+  await box.locator(".graphics-box-plot").focus();
+  await page.keyboard.press("0");
+  await expect.poll(labels).toEqual(whole);
+  await expect.poll(rings).toBe(all);
+});
+
 // --- WebGL2 ---------------------------------------------------------------------------------
 // Headless Chromium draws WebGL2 on SwiftShader when it is told to (GPU_ARGS); these run headed under
 // xvfb-run (WEBGL=1) and skip otherwise, as the portraits are heavy to shade in software.
@@ -229,6 +256,49 @@ if (process.env["WEBGL"]) test.use({ headless: false, launchOptions: { args: GPU
 
 test.describe("on the GPU", () => {
   test.skip(!process.env["WEBGL"], "needs a headed browser with software WebGL2: WEBGL=1 xvfb-run -a …");
+
+  test("a region plot is drawn per pixel under its frame, and stays sharp zoomed in (BL-396)", async ({ page }) => {
+    await page.goto("/reference/symbol/RegionPlot#example/disk");
+    const box = page.locator('[id="example/disk"] graphics-box[data-plot]').first();
+    await box.scrollIntoViewIfNeeded();
+    const canvas = box.locator("canvas.graphics-box-field");
+    await expect(canvas).toBeVisible({ timeout: 60_000 });
+    // The frame is the SVG's; the region and its boundary are the canvas's.
+    await expect(box.locator("svg text")).not.toHaveCount(0);
+    await expect(box.locator("svg image")).toHaveCount(0);
+    /** The alpha of the canvas's pixels along its middle row, as [at the left edge, in the middle]. */
+    const alphas = () =>
+      canvas.evaluate((el) => {
+        const c = el as HTMLCanvasElement;
+        const row = c.getContext("2d")!.getImageData(0, c.height >> 1, c.width, 1).data;
+        return [row[4 * 2 + 3]!, row[4 * (c.width >> 1) + 3]!];
+      });
+    // The disk x² + y² < 4 on [-3, 3]²: filled in the middle, clear at the edge.
+    await expect.poll(alphas).toEqual([0, expect.any(Number)]);
+    expect((await alphas())[1]).toBeGreaterThan(0);
+    // Its edge covers a pixel or two of the row, not a grid cell: count the partly covered pixels on the left half.
+    const soft = () =>
+      canvas.evaluate((el) => {
+        const c = el as HTMLCanvasElement;
+        const row = c.getContext("2d")!.getImageData(0, c.height >> 1, c.width >> 1, 1).data;
+        let fill = 0;
+        for (let i = (c.width >> 1) - 1; i >= 0 && fill === 0; i--) fill = row[4 * i + 3]!;
+        let count = 0;
+        for (let i = 0; i < c.width >> 1; i++) if (row[4 * i + 3]! > 0 && row[4 * i + 3]! < fill) count++;
+        return count;
+      });
+    expect(await soft()).toBeLessThanOrEqual(4);
+    // Zoomed in on the middle, the window is inside the disk: the left edge is filled too.
+    const rect = (await box.locator("svg").first().boundingBox())!;
+    await page.mouse.move(rect.x + rect.width / 2, rect.y + rect.height / 2);
+    await page.keyboard.down("Control");
+    for (let i = 0; i < 8; i++) await page.mouse.wheel(0, -200);
+    await page.keyboard.up("Control");
+    await expect.poll(async () => (await alphas())[0]).toBeGreaterThan(0);
+    await box.locator(".graphics-box-plot").focus();
+    await page.keyboard.press("0");
+    await expect.poll(async () => (await alphas())[0]).toBe(0);
+  });
 
   test("Plot3D with Gpu -> 100 compiles its shader and wears the GPU badge (E#7)", async ({ page }) => {
     await page.goto("/reference/component/Plot3D#surface-evaluated-on-gpu");

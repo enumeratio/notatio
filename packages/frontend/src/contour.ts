@@ -175,7 +175,8 @@ export interface ContourOptions extends ColorOptions {
   title?: string;
 }
 
-const LINE_WIDTH = 1.3;
+/** A contour's or an implicit curve's width, in px. */
+export const LINE_WIDTH = 1.3;
 const LINE_OPACITY = 0.85;
 
 /** The frame of a field plot (`ContourPlot`, `DensityPlot`): a frame with the range at its corners, no zero axes. */

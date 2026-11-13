@@ -92,3 +92,31 @@ test("a loop has no plotFn: the shader's 10,000-pass cap would give NaN where th
   });
   expect(sum.items[0]!.code).toBeUndefined();
 });
+
+test("fields compile to one GLSL unit: a function each, a shared helper once, wildcards as arguments", () => {
+  const margins = ["List", ["Subtract", ["Sinc", "x"], "y"], ["Subtract", ["Multiply", "_a", ["Sinc", "y"]], "x"]];
+  const plot = compilePlot(ce, margins, {
+    target: "glsl",
+    vars: ["x", "y"],
+    each: true,
+    fields: true,
+    params: ["_a"],
+  });
+  const unit = plot.unit!;
+  expect(unit).toContain("float field0(float x, float y, float _a) {");
+  expect(unit).toContain("float field1(float x, float y, float _a) {");
+  // Both margins call the target's sinc helper; two definitions of it would not compile.
+  expect(unit.split("float _gpu_sinc(float x) {")).toHaveLength(2);
+  // The helpers come before the functions that call them.
+  expect(unit.indexOf("float _gpu_sinc(")).toBeLessThan(unit.indexOf("float field0("));
+});
+
+test("fields with one that has no shader have no unit", () => {
+  const plot = compilePlot(ce, ["List", "x", ["Add", "x", ["Random"]]], {
+    target: "glsl",
+    vars: ["x", "y"],
+    each: true,
+    fields: true,
+  });
+  expect(plot.unit).toBeUndefined();
+});
