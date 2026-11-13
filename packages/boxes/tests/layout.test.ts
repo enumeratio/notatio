@@ -53,6 +53,9 @@ const CASES: Record<string, unknown> = {
   above: ["Labeled", "x", str("one"), "Top"],
   panel: ["Panel", ["Row", row("x", "y")]],
   fraction: ["Row", row(["Rational", 1, 2], "x")],
+  // The reversed and the white brackets stretch like the others.
+  "open interval": ["Interval", ["Open", ["Rational", 1, 2]], ["Open", 1]],
+  "integer range": ["Range", ["Rational", 1, 2], 3, 1],
 };
 
 for (const [name, json] of Object.entries(CASES)) {

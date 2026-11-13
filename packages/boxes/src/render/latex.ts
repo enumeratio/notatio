@@ -4,6 +4,15 @@
 import { type Box, type BoxNode, isNode, optionsOfBox, tokenClass } from "../box.ts";
 import { barOf } from "../control-group.ts";
 import { texSource } from "./markdown.ts";
+import {
+  besideRelation,
+  endsOf,
+  inSetPosition,
+  insideOf,
+  intervalEnds,
+  isClosedInterval,
+  isRange,
+} from "./interval.ts";
 import { isUnicodeTeX } from "./unicode-tex.ts";
 
 const COMMANDS: Record<string, string> = {
@@ -207,7 +216,22 @@ function writeNode(box: BoxNode): string {
           return `\\binom{${write(second[1])}}{${write(second[2])}}`;
         }
       }
-      return joined(box[1].map(write));
+      // Compute-engine's spellings: an open interval `]a, b[`, an integer range `a..b` (it reads no `⟦⟧`).
+      const open = insideOf(box[1], "]", "[");
+      if (open !== undefined) return joined(["\\mathopen\\rbrack", ...open.map(write), "\\mathclose\\lbrack"]);
+      const range = insideOf(box[1], "⟦", "⟧");
+      if (range !== undefined && endsOf(range).length === 2)
+        return endsOf(range)
+          .map((end) => joined(end.map(write)))
+          .join("..");
+      // A closed interval where a set is expected is `[a, b]`, as compute-engine reads it there.
+      return joined(
+        box[1].map((b, i) => {
+          if (isClosedInterval(b) && inSetPosition(box[1], i)) return write(b[1]);
+          // `a..b` inside arithmetic would read as part of it.
+          return isRange(b) && box[1].length > 1 && !besideRelation(box[1], i) ? `(${write(b)})` : write(b);
+        }),
+      );
     }
     case "TextBox":
       return `\\text{${escapeText(options.ShowStringCharacters === true ? `“${box[1]}”` : box[1])}}`;
@@ -258,7 +282,11 @@ function writeNode(box: BoxNode): string {
     case "PaneSelectorBox":
       return box[1][0] === undefined ? "" : write(box[1][0][1]);
     case "TagBox":
-      return write(box[1]);
+      return isClosedInterval(box)
+        ? `\\mathrm{Interval}(${intervalEnds(box)
+            .map((end) => joined(end.map(write)))
+            .join(", ")})`
+        : write(box[1]);
     case "InterpretationBox":
       return withData(write(box[1]), data ? dataOf(box[2]) : undefined);
     case "ErrorBox":

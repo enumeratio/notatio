@@ -79,10 +79,12 @@ const isMinus = (t: unknown): boolean => t === "−" || t === "-";
 const DIVIDES = new Set(["/", "÷"]);
 const PRIMES: Record<string, number> = { "′": 1, "″": 2, "‴": 3 };
 
-/** Each opener and the closers it takes (a half-open interval mixes them). */
+/** Each opener and the closers it takes (an interval may mix them: `[a, b)`, `]a, b[`, ISO 80000-2). */
 const CLOSERS: Record<string, readonly string[]> = {
   "(": [")", "]"],
-  "[": ["]", ")"],
+  "[": ["]", ")", "["],
+  "]": ["[", "]"],
+  "⟦": ["⟧"],
   "{": ["}"],
   "|": ["|"],
   "‖": ["‖"],
@@ -302,6 +304,8 @@ setAmbiguousNotation((extra) => {
 
 class Reader {
   pos = 0;
+  /** Inside `]a, b[` (or `[a, b[`): a `[` after an operand closes the interval, it is no factor. */
+  closesInterval = false;
   constructor(
     readonly items: readonly Box[],
     readonly options: MakeExpressionOptions,
@@ -455,7 +459,8 @@ class Reader {
     if (t === "mod" || t === "") return false;
     const kind = tokenClass(t);
     if (kind !== "operator") return true;
-    return SYMBOL_OF.has(t) || ["(", "[", "{", "⌊", "⌈", "⟨", "∑", "∏", "∫"].includes(t);
+    if (t === "[" && this.closesInterval) return false;
+    return SYMBOL_OF.has(t) || ["(", "[", "{", "⌊", "⌈", "⟨", "⟦", "∑", "∏", "∫"].includes(t);
   }
 
   factor(): Json {
@@ -594,6 +599,15 @@ class Reader {
     return undefined;
   }
 
+  /** `[a, b]` tagged `Interval` is a closed interval, not the list it looks like. */
+  closed(inner: Box, name: string): Atom {
+    const read = this.atomOf(inner);
+    const json = read.json;
+    return name === "Interval" && Array.isArray(json) && json[0] === "List" && json.length === 3
+      ? atom(["Interval", json[1], json[2]] as Json)
+      : read;
+  }
+
   /** Whether the caller's `heads` already say what the call a pattern starts with stands for. */
   written({ items }: Pattern): boolean {
     return typeof items[0] === "string" && this.options.heads?.[items[0]] !== undefined;
@@ -647,8 +661,14 @@ class Reader {
       this.pos += 2;
       return this.binomial(first);
     }
-    let elements: Json[] =
-      this.peek() !== undefined && CLOSERS[open]!.includes(this.peek() as string) ? [] : this.list();
+    const outer = this.closesInterval;
+    this.closesInterval = open === "]" || (open === "[" && !this.items.slice(this.pos).includes("]"));
+    let elements: Json[];
+    try {
+      elements = this.peek() !== undefined && CLOSERS[open]!.includes(this.peek() as string) ? [] : this.list();
+    } finally {
+      this.closesInterval = outer;
+    }
     const end = this.peek();
     if (typeof end !== "string" || !CLOSERS[open]!.includes(end)) return decline(`an unclosed ${open}`, end);
     this.pos++;
@@ -656,20 +676,27 @@ class Reader {
     if (elements.length === 1 && Array.isArray(only) && only[0] === "Sequence") elements = only.slice(1) as Json[];
     const one = (head: string): Json =>
       elements.length === 1 ? ([head, elements[0]] as Json) : decline(`${head} of ${elements.length} operands`);
+    // A bracket that faces away from its operand leaves that end out: `(a`, `a]` ... `]a`, `b[`.
     const interval = (): Json =>
       elements.length === 2
         ? ([
             "Interval",
-            open === "(" ? ["Open", elements[0]] : elements[0],
-            end === ")" ? ["Open", elements[1]] : elements[1],
+            open === "(" || open === "]" ? ["Open", elements[0]] : elements[0],
+            end === ")" || end === "[" ? ["Open", elements[1]] : elements[1],
           ] as Json)
-        : decline("a half-open interval of other than two ends");
+        : decline("an interval of other than two ends");
     switch (open) {
       case "(":
         if (end === "]") return interval();
         return elements.length === 1 ? elements[0]! : (["Tuple", ...elements] as Json);
       case "[":
-        return end === ")" ? interval() : (["List", ...elements] as Json);
+        return end === ")" || end === "[" ? interval() : (["List", ...elements] as Json);
+      case "]":
+        return interval();
+      case "⟦":
+        return elements.length === 2
+          ? (["Range", ...elements] as Json)
+          : decline("an integer range of other than two ends");
       case "{":
         return ["Set", ...elements] as Json;
       case "|":
@@ -743,7 +770,9 @@ class Reader {
         return this.atomOf(args[1]!);
       // A tag that names a head kept there reads as that head, its operands from the boxes inside.
       case "TagBox":
-        return this.tagged(args[1]!, args[2] as unknown as string) ?? this.atomOf(args[1]!);
+        return (
+          this.tagged(args[1]!, args[2] as unknown as string) ?? this.closed(args[1]!, args[2] as unknown as string)
+        );
       case "FormBox":
         return args[2] === "TeXForm" ? decline("TeX as written", box) : this.atomOf(args[1]!);
       // The box carries what it stands for.

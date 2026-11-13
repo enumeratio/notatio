@@ -7,12 +7,13 @@
 import { type Box, type BoxNode, isNode, optionsOfBox } from "../box.ts";
 import { barOf } from "../control-group.ts";
 import { type Alphabet, joinSpelled, scriptChars, spell } from "./linear.ts";
+import { endsOf, inSetPosition, insideOf, intervalEnds, isClosedInterval } from "./interval.ts";
 import { texToAlphabet } from "./tex-text.ts";
 
 /** Operators that read better with a space either side. */
 const SPACED = new Set("+ − = ≠ < ≤ > ≥ ≈ ≡ ∈ ∉ ⊂ ⊆ ⊃ ⊇ → ∧ ∨ ⇒ ⇔ ×".split(" "));
 
-const OPEN = new Set(["(", "[", "{", "|", "‖", "⟨", "⌊", "⌈"]);
+const OPEN = new Set(["(", "[", "]", "{", "|", "‖", "⟨", "⟦", "⌊", "⌈"]);
 
 /** Already one unit in linear text: a token, or a fenced row. */
 function isUnit(box: Box): boolean {
@@ -68,6 +69,13 @@ class Writer {
     return typeof box === "string" ? this.token(box) : this.node(box);
   }
 
+  call(name: string, args: readonly (readonly Box[])[]): string {
+    const written = args.map((arg) =>
+      arg.reduce<string>((out, b) => joinSpelled(out, this.write(b), this.alphabet), ""),
+    );
+    return `${name}(${written.join(", ")})`;
+  }
+
   node(box: BoxNode): string {
     switch (box[0]) {
       case "RowBox": {
@@ -87,9 +95,14 @@ class Writer {
             return `${first}${rows.join(", ")}${third}`;
           }
         }
+        // AsciiMath has no `⟦a, b⟧`: an integer range is the call.
+        const range = this.alphabet === "ascii" ? insideOf(items, "⟦", "⟧") : undefined;
+        if (range !== undefined && endsOf(range).length === 2) return this.call("Range", endsOf(range));
         // Two juxtaposed boxes (`x^2` then `dx`) need a space where MathML needs nothing.
         return items.reduce<string>((out, b, i) => {
-          const piece = typeof b === "string" ? this.token(b, i === 0) : this.write(b);
+          // A closed interval where a set is expected is `[a, b]`, as compute-engine reads it there.
+          const set = isClosedInterval(b) && inSetPosition(items, i);
+          const piece = typeof b === "string" ? this.token(b, i === 0) : this.write(set ? b[1] : b);
           const gap = i > 0 && typeof b !== "string" && typeof items[i - 1] !== "string" ? " " : "";
           return joinSpelled(out + gap, piece, this.alphabet);
         }, "");
@@ -133,6 +146,7 @@ class Writer {
       case "PaneBox":
       case "TooltipBox":
       case "TagBox":
+        return isClosedInterval(box) ? this.call("Interval", intervalEnds(box)) : this.write(box[1]);
       case "InterpretationBox":
       case "ErrorBox":
       case "ButtonBox":

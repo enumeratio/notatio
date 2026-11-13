@@ -332,6 +332,212 @@
       }
     ]
   },
+  "cells open interval": {
+    "width": 8,
+    "height": 3,
+    "baseline": 2,
+    "items": [
+      {
+        "kind": "text",
+        "x": 0,
+        "y": 0,
+        "text": "⎤",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 0,
+        "y": 1,
+        "text": "⎥",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 0,
+        "y": 2,
+        "text": "⎦",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 2,
+        "y": 0,
+        "text": "1",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "rule",
+        "x": 1,
+        "y": 1,
+        "length": 3
+      },
+      {
+        "kind": "text",
+        "x": 2,
+        "y": 2,
+        "text": "2",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "text",
+        "x": 4,
+        "y": 1,
+        "text": ",",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "text",
+        "x": 6,
+        "y": 1,
+        "text": "1",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "text",
+        "x": 7,
+        "y": 0,
+        "text": "⎡",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 7,
+        "y": 1,
+        "text": "⎢",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 7,
+        "y": 2,
+        "text": "⎣",
+        "font": {
+          "size": 1
+        }
+      }
+    ]
+  },
+  "cells integer range": {
+    "width": 8,
+    "height": 3,
+    "baseline": 2,
+    "items": [
+      {
+        "kind": "text",
+        "x": 0,
+        "y": 0,
+        "text": "╔",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 0,
+        "y": 1,
+        "text": "║",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 0,
+        "y": 2,
+        "text": "╚",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 2,
+        "y": 0,
+        "text": "1",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "rule",
+        "x": 1,
+        "y": 1,
+        "length": 3
+      },
+      {
+        "kind": "text",
+        "x": 2,
+        "y": 2,
+        "text": "2",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "text",
+        "x": 4,
+        "y": 1,
+        "text": ",",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "text",
+        "x": 6,
+        "y": 1,
+        "text": "3",
+        "font": {
+          "size": 16
+        }
+      },
+      {
+        "kind": "text",
+        "x": 7,
+        "y": 0,
+        "text": "╗",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 7,
+        "y": 1,
+        "text": "║",
+        "font": {
+          "size": 1
+        }
+      },
+      {
+        "kind": "text",
+        "x": 7,
+        "y": 2,
+        "text": "╝",
+        "font": {
+          "size": 1
+        }
+      }
+    ]
+  },
   "pixels row": {
     "width": 79.2,
     "height": 16,

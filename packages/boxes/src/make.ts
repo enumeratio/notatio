@@ -505,15 +505,30 @@ function makeFunction(head: string, ops: unknown[]): Made {
       return atom(fenced(open, inner, close));
     }
 
-    // `Interval(a, b)` -- an endpoint wrapped in `Open(x)` gets a round bracket;
-    // otherwise it is closed, `[a, b]`.
+    // `Interval(a, b)`, an endpoint wrapped in `Open(x)` left out (ISO 80000-2): `]a, b[`, `(a, b]`,
+    // `[a, b)`. A closed one is `[a, b]`, which is also a list, so it keeps its head in a `TagBox`.
     case "Interval": {
       const [lo, hi] = ops;
       const openLo = headOf(lo) === "Open";
       const openHi = headOf(hi) === "Open";
       const a = make(openLo ? opsOf(lo)[0] : lo);
       const b = make(openHi ? opsOf(hi)[0] : hi);
-      return atom(fenced(openLo ? "(" : "[", [row([a.box, ",", b.box])], openHi ? ")" : "]"));
+      const body = [row([a.box, ",", b.box])];
+      if (openLo && openHi) return atom(fenced("]", body, "["));
+      if (!openLo && !openHi) return atom(tag(fenced("[", body, "]"), "Interval"));
+      return atom(fenced(openLo ? "(" : "[", body, openHi ? ")" : "]"));
+    }
+
+    // `⟦a, b⟧` is the integers a through b, ascending: a stated step of 1, or numeric ends in
+    // order (`Range(1, 0)` counts down, so it keeps its call).
+    case "Range": {
+      const [lo, hi, step] = ops;
+      const [a, b] = [numberOf(lo), numberOf(hi)];
+      const integers = a !== undefined && b !== undefined && /^-?\d+$/.test(a) && /^-?\d+$/.test(b);
+      const ascending =
+        ops.length === 3 ? numberOf(step) === "1" : ops.length === 2 && integers && BigInt(a!) <= BigInt(b!);
+      if (!ascending) return makeCall(head, ops);
+      return atom(fenced("⟦", [row([make(lo).box, ",", make(hi).box])], "⟧"));
     }
 
     // `Which(cond1, val1, cond2, val2, …)` -- CE's spelling of a piecewise function
