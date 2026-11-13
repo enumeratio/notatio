@@ -75,12 +75,13 @@ jobs:
             echo "go=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
-            --json number,headRefName,body,commits \
-            --jq '.[] | select(.headRefName | startswith("chore/ce-")) | "\(.number) \(.body | contains(env.MARKER)) \(.commits | length)"' \
+          # REST, not `gh pr list --json commits`: that GraphQL query exceeds GitHub's node limit.
+          gh api --paginate "repos/$GITHUB_REPOSITORY/pulls?state=open&per_page=100" \
+            --jq '.[] | select(.head.ref | startswith("chore/ce-")) | "\(.number) \(.body // "" | contains(env.MARKER))"' \
             > "$RUNNER_TEMP/open.txt"
           stale=""
-          while read -r number ours commits; do
+          while read -r number ours; do
+            commits=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$number" --jq .commits)
             if [ "$ours" != "true" ] || [ "$commits" != "1" ]; then
               echo "#$number (ours: $ours, $commits commits) is a bump in flight: nothing to do"
               echo "go=false" >> "$GITHUB_OUTPUT"
