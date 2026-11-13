@@ -50,15 +50,18 @@ jobs:
       - name: pick the version
         id: pick
         run: |
-          node tools/ce-bump/run.ts --check --github-output | tee "$RUNNER_TEMP/check.txt"
-          if [ -n "$INPUT_VERSION" ]; then
-            echo "version=$INPUT_VERSION" >> "$GITHUB_OUTPUT"
-            echo "go=true" >> "$GITHUB_OUTPUT"
-          else
-            echo "version=$(sed -n 's/^latest=//p' "$GITHUB_OUTPUT" | tail -1)" >> "$GITHUB_OUTPUT"
-            echo "go=$(sed -n 's/^newer=//p' "$GITHUB_OUTPUT" | tail -1)" >> "$GITHUB_OUTPUT"
+          node tools/ce-bump/run.ts --check $INPUT_VERSION | tee "$RUNNER_TEMP/check.txt"
+          pinned=$(sed -n 's/^pinned=//p' "$RUNNER_TEMP/check.txt")
+          target=$(sed -n 's/^target=//p' "$RUNNER_TEMP/check.txt")
+          newer=$(sed -n 's/^newer=//p' "$RUNNER_TEMP/check.txt")
+          if [ -n "$INPUT_VERSION" ] && [ "$newer" != "true" ]; then
+            echo "::error::$INPUT_VERSION is not newer than the pinned $pinned"
+            exit 1
           fi
-      - name: skip when the branch or a PR already exists
+          { echo "pinned=$pinned"; echo "version=$target"; echo "go=$newer"; } >> "$GITHUB_OUTPUT"
+      # A bump PR still in flight holds this one back: a hand-made `chore/ce-*` PR, or a bot one someone
+      # has pushed fixes to. A bot PR with only its own bump commit is superseded by the new one.
+      - name: skip when a bump is already in flight
         id: gate
         if: steps.pick.outputs.go == 'true'
         env:
@@ -70,13 +73,22 @@ jobs:
             echo "go=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
-          open=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$branch" --json number --jq 'length')
-          if [ "$open" != "0" ]; then
-            echo "an open PR has head $branch: nothing to do"
-            echo "go=false" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          bot=$(gh api user --jq .login 2>/dev/null || echo app/github-actions)
+          gh pr list --repo "$GITHUB_REPOSITORY" --state open --limit 100 \
+            --json number,headRefName,author,commits \
+            --jq '.[] | select(.headRefName | startswith("chore/ce-")) | "\(.number) \(.author.login) \(.commits | length)"' \
+            > "$RUNNER_TEMP/open.txt"
+          stale=""
+          while read -r number author commits; do
+            if [ "$author" != "$bot" ] || [ "$commits" != "1" ]; then
+              echo "#$number (by $author, $commits commits) is a bump in flight: nothing to do"
+              echo "go=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            stale="$stale $number"
+          done < "$RUNNER_TEMP/open.txt"
           echo "go=true" >> "$GITHUB_OUTPUT"
+          echo "stale=$stale" >> "$GITHUB_OUTPUT"
       - name: bump, commit and push
         if: steps.gate.outputs.go == 'true'
         env:
@@ -98,15 +110,18 @@ jobs:
         if: steps.gate.outputs.go == 'true'
         env:
           VERSION: ${{ steps.pick.outputs.version }}
+          PINNED: ${{ steps.pick.outputs.pinned }}
+          STALE: ${{ steps.gate.outputs.stale }}
         run: |
           branch="chore/ce-$VERSION"
+          ce=https://github.com/cortex-js/compute-engine
           run_url=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow ce-main.yml --limit 1 --json url --jq '.[0].url // empty' || true)
           issue_url=$(gh issue list --repo "$GITHUB_REPOSITORY" --label ce-main --state open --limit 1 --json url --jq '.[0].url // empty' || true)
           {
-            echo "Bumps compute-engine to $VERSION: every manifest's range, \`CHECKED_COMPUTE_ENGINE\`, the \`minimumReleaseAgeExclude\` entry and the lockfile, by \`node tools/ce-bump/run.ts $VERSION\`."
+            echo "Bumps compute-engine from $PINNED to $VERSION: every manifest's range, \`CHECKED_COMPUTE_ENGINE\`, the \`minimumReleaseAgeExclude\` entry and the lockfile, by \`node tools/ce-bump/run.ts $VERSION\`."
             echo
-            echo "- Release: https://github.com/cortex-js/compute-engine/releases/tag/v$VERSION"
-            echo "- Changelog: https://github.com/cortex-js/compute-engine/blob/main/CHANGELOG.md"
+            echo "- What changed: $ce/compare/v$PINNED...v$VERSION"
+            echo "- Changelog: $ce/blob/v$VERSION/CHANGELOG.md"
             if [ -n "$run_url" ]; then
               echo "- Advance warning, the latest compute-engine main run: $run_url"
             else
@@ -120,5 +135,9 @@ jobs:
               echo "Opened with GITHUB_TOKEN (no \`CE_BUMP_TOKEN\` secret), so CI did not start: push an empty commit or close and reopen this PR."
             fi
           } > "$RUNNER_TEMP/body.md"
-          gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" \
-            --title "chore: compute-engine $VERSION" --body-file "$RUNNER_TEMP/body.md"
+          url=$(gh pr create --repo "$GITHUB_REPOSITORY" --base main --head "$branch" --label ce-bump \
+            --title "chore: compute-engine $VERSION" --body-file "$RUNNER_TEMP/body.md")
+          echo "$url"
+          for number in $STALE; do
+            gh pr close "$number" --repo "$GITHUB_REPOSITORY" --comment "Superseded by $url."
+          done

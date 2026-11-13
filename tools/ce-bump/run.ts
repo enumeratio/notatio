@@ -4,11 +4,11 @@
 // Idempotent: a second run with the same version changes nothing.
 //
 //   node tools/ce-bump/run.ts <version>   make the edits and run `pnpm install --lockfile-only`
-//   node tools/ce-bump/run.ts --check     print the pinned and latest versions; exit 0 either way
-//   node tools/ce-bump/run.ts --check --github-output   also write `pinned`, `latest` and `newer`
+//   node tools/ce-bump/run.ts --check [version]   print `pinned=`, `target=` (the version given, else
+//                                                  npm's latest) and `newer=` lines; exit 0 either way
 
 import { execFileSync } from "node:child_process";
-import { appendFileSync, readFileSync, writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { loadWorkspace, root } from "../ci/workspace.ts";
@@ -108,22 +108,20 @@ function bump(version: string): void {
   else console.log(`already at ${version}: nothing to do`);
 }
 
-function check(githubOutput: boolean): void {
+function check(version: string | undefined): void {
   const pinned = pinnedVersion();
-  const latest = latestVersion();
-  const newer = compare(latest, pinned) > 0;
-  console.log(`pinned ${pinned}, latest ${latest}${newer ? "" : ": nothing to do"}`);
-  const out = process.env.GITHUB_OUTPUT;
-  if (githubOutput && out !== undefined) appendFileSync(out, `pinned=${pinned}\nlatest=${latest}\nnewer=${newer}\n`);
+  const target = version ?? latestVersion();
+  console.log(`pinned=${pinned}\ntarget=${target}\nnewer=${compare(target, pinned) > 0}`);
 }
 
 const args = process.argv.slice(2);
-if (args.includes("--check")) check(args.includes("--github-output"));
-else {
-  const version = args.find((a) => !a.startsWith("--"));
-  if (version === undefined || !VERSION.test(version)) {
-    console.error("usage: node tools/ce-bump/run.ts <version> | --check [--github-output]");
-    process.exit(2);
-  }
-  bump(version);
+const version = args.find((a) => !a.startsWith("--"));
+if (version !== undefined && !VERSION.test(version)) {
+  console.error("usage: node tools/ce-bump/run.ts <version> | --check [version]");
+  process.exit(2);
 }
+if (args.includes("--check")) check(version);
+else if (version === undefined) {
+  console.error("usage: node tools/ce-bump/run.ts <version> | --check [version]");
+  process.exit(2);
+} else bump(version);
