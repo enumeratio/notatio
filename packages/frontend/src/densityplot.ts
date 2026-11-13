@@ -1,4 +1,4 @@
-// A density plot as a `GraphicsBox` (the wiki's Speculative-Box-Primitives, §6 slice 7): a sampled
+// A density plot as a `GraphicsBox` (the wiki's Archive-Box-Primitives-Design, §6 slice 7): a sampled
 // grid in, a `RasterBox` of colored cells out, spread over the plot area. Shares contour.ts's
 // `grid[j][i]` row-major convention (z at the i-th x, j-th y sample) so the two can be driven from
 // the same sampling code. Cells take their color from the palette's gradient (`viridis` unless

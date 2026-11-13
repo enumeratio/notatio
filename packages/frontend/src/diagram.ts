@@ -1,4 +1,4 @@
-// A diagram as a `GraphicsBox` (the wiki's Speculative-Box-Primitives, §3): a figure laid out in
+// A diagram as a `GraphicsBox` (the wiki's Archive-Box-Primitives-Design, §3): a figure laid out in
 // its own pixel frame, without axes. Vertices and rings are `DiskBox`es, edges `LineBox`es (an
 // arrow is an `ArrowBox`), text an `InsetBox`, a square a `PolygonBox`; each is tagged with its
 // role and styled by a `StyleBox`. `PlotRange` is the frame, `ImageSize` its size in px and

@@ -42,7 +42,7 @@ export { headOf, numOf, opsOf, optionAttribute, strOf, symOf, tupleOf, variable 
 export { expandDictionaries } from "./latex.ts";
 
 // A symbol and its component are the same thing seen from two ends
-// (https://github.com/enumeratio/notatio/wiki/Components-and-Symbols). This is the map between them: for every head that
+// (https://github.com/enumeratio/notatio/wiki/Vdom). This is the map between them: for every head that
 // draws, which tag draws it and where its arguments land as attributes. It is pure --
 // no DOM, no Lit -- so it can be read by the docs build to emit the Vue wrappers, by
 // `<notatio-out>` to render an evaluated `Plot(…)`, and by anything else that holds an

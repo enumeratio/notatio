@@ -1,4 +1,4 @@
-// The plots, charts and figures in space as `makeBoxes` rules (the wiki's Speculative-Box-Primitives, §6 slice 4).
+// The plots, charts and figures in space as `makeBoxes` rules (the wiki's Archive-Box-Primitives-Design, §6 slice 4).
 // A plot of data is a finite list and lowers whole; so does a chart. A plot of an expression is a
 // producer, like a lattice: sampling needs a compiled kernel (the page's, or a session's), so the
 // box holds the expression it came from and `Producer -> head`, and an environment that can sample

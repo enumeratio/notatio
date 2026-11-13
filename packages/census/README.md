@@ -10,7 +10,7 @@ dependency of the collections/statistics packages that type entries against it).
 
 Encodes the rule from [Symbols](https://github.com/enumeratio/notatio/wiki/Symbols) §2 (when a name is already Wolfram's,
 what we do about it) and the `HarmonicNumber`-shaped check from
-[Roadmap](https://github.com/enumeratio/notatio/wiki/Roadmap) §1 (a head the transpiler will emit that the engine
+[Symbols](https://github.com/enumeratio/notatio/wiki/Symbols) §3 (a head the transpiler will emit that the engine
 doesn't actually answer).
 
 ## Entry points
@@ -34,7 +34,7 @@ doesn't actually answer).
 - **`RENAME_QUEUE`/`QueuedRename`** (`rename-queue.ts`) — a head declared under a spelling
   we've decided against, and what it should become; a test fails the moment a rename lands so
   the row comes out. Web-component tag renames are queued in
-  [Component Naming](https://github.com/enumeratio/notatio/wiki/Component-Naming) §4 instead, since they aren't engine heads.
+  [Component Naming](https://github.com/enumeratio/notatio/wiki/Archive-Component-Naming) §4 instead, since they aren't engine heads.
 
 ## Commands
 

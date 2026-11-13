@@ -1,4 +1,4 @@
-// Symbol-metadata step 4 (https://github.com/enumeratio/notatio/wiki/Speculative-Symbol-Metadata), completed: `to-wolfram.ts`'s
+// Symbol-metadata step 4 (https://github.com/enumeratio/notatio/wiki/Archive-Symbol-Metadata), completed: `to-wolfram.ts`'s
 // hand `HEADS` literal is gone; it reads a generated table instead (`wolfram-names-data.ts`,
 // `packages/reference/scripts/collect-wolfram-names.ts`), rebuilt from every head's
 // `names.wolfram` / `names.wolframIdentity` field -- `to-wolfram.ts` runs in the browser too,

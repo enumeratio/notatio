@@ -1,4 +1,4 @@
-// A 2-D plot as a `GraphicsBox` (the wiki's Speculative-Box-Primitives, §3), and the box drawn:
+// A 2-D plot as a `GraphicsBox` (the wiki's Archive-Box-Primitives-Design, §3), and the box drawn:
 // Wolfram's `Plot` returns `Graphics`, so sampled data lowers to primitives in data
 // coordinates (a curve is a `LineBox`, dots a `PointBox`, a filled region a `PolygonBox`, an
 // arrow an `ArrowBox`) and the chrome rides as options (`PlotRange`, `Axes`, `GridLines`,

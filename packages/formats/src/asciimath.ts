@@ -1,7 +1,7 @@
 // AsciiMath (asciimath.org), in and out. Out is our StandardForm notation as boxes
 // (`makeBoxes`), linearised in AsciiMath's spellings (`toAscii`: `x^2 <= pi`,
 // `sqrt(x)`, `x in RR`). In goes through TeX, by asciimath2tex, and compute-engine reads
-// that; reading it through boxes instead is MakeExpression's job (see the Roadmap).
+// that; reading it through boxes instead is MakeExpression's job (the wiki's Ideas, "Boxes read back as expressions").
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";

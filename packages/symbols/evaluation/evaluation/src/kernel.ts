@@ -99,7 +99,7 @@ export interface KernelOptions {
   /** A library definition's notation, registered under the head it's declared as. */
   readonly notation?: (ce: ComputeEngine, head: string, data: NotationData) => void;
   /**
-   * A row source's calls (https://github.com/enumeratio/notatio/wiki/Speculative-Lazy-Grid): register, ask for a range,
+   * A row source's calls (https://github.com/enumeratio/notatio/wiki/Boxes): register, ask for a range,
    * release. They run beside the evaluation queue, not in it, so a scroll's range is never
    * stuck behind a cell; `signal` fires when the caller aborts the request.
    */

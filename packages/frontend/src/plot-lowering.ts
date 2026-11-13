@@ -1,4 +1,4 @@
-// The 2-D plots as `makeBoxes` rules (the wiki's Speculative-Box-Primitives, §6 slice 4): a plot
+// The 2-D plots as `makeBoxes` rules (the wiki's Archive-Box-Primitives-Design, §6 slice 4): a plot
 // returns `Graphics`, so `Plot`, `ListPlot` and the rest lower to a `GraphicsBox`.
 //
 // A plot of data is a finite list and lowers whole. A plot of an expression is a producer, like a

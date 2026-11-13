@@ -1,4 +1,4 @@
-// The 2-D charts as a `GraphicsBox` (the wiki's Speculative-Box-Primitives, §3), and the box drawn:
+// The 2-D charts as a `GraphicsBox` (the wiki's Archive-Box-Primitives-Design, §3), and the box drawn:
 // Wolfram's `BarChart`, `Histogram`, `PieChart`, `BoxWhiskerChart`, `ArrayPlot` and `DiscretePlot`
 // return `Graphics`, so a chart's data lowers to primitives in data coordinates (a bar or a cell is
 // a `RectangleBox`, a pie's wedge a `DiskBox` sector, a stem or a whisker a `LineBox`, a stem's dot

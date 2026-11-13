@@ -1,7 +1,7 @@
 // Restrictions — as SETS, and anonymous by default.
 //
 // A derangement is a permutation with no fixed points. The instinct is a subtype, and
-// compute-engine cannot express one between minted types (https://github.com/enumeratio/notatio/wiki/Domains §1.1). But the
+// compute-engine cannot express one between minted types (https://github.com/enumeratio/notatio/wiki/Archive-Domains §1.1). But the
 // instinct is worth questioning anyway: a subtype SPLITS the carrier, so a derangement would
 // stop being a permutation and every permutation statistic would need re-declaring. A set
 // KEEPS the carrier, and everything already written keeps working.

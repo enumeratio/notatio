@@ -44,7 +44,7 @@ the resolver possible (below).
   doesn't bring `semver`. `scripts/pack-library.ts <dir>` writes a package's index, its
   examples and its JavaScript entry.
 
-See [Speculative Vdom Markup](https://github.com/enumeratio/notatio/wiki/Speculative-Vdom-Markup).
+See [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom).
 
 ## Commands
 

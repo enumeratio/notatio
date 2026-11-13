@@ -193,7 +193,7 @@ export function complexSurfaceScene(surface: ComplexSurface, opts: ComplexSurfac
 }
 
 /**
- * The surface as a `Graphics3DBox` (the wiki's Speculative-Box-Primitives, §6 slice 7): the heights
+ * The surface as a `Graphics3DBox` (the wiki's Archive-Box-Primitives-Design, §6 slice 7): the heights
  * of a lone surface, each face colored by the circular mean of its corners' hues. This is the CPU
  * producer; on the web `<notatio-complex-plot-3d>` samples the grid on the GPU.
  */

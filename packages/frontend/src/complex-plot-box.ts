@@ -1,4 +1,4 @@
-// A `ComplexPlot` as a `GraphicsBox` holding a `RasterBox` (the wiki's Speculative-Box-Primitives,
+// A `ComplexPlot` as a `GraphicsBox` holding a `RasterBox` (the wiki's Archive-Box-Primitives-Design,
 // §6 slice 7). On the web the raster's producer is a WebGL2 shader (`complex-plot.ts`, drawn by
 // `<notatio-complex-plot>`: one invocation per pixel, so a drag or a Manipulate slider redraws at
 // frame rate). Everywhere else -- Node, a build, a terminal -- the same picture is evaluated here on
