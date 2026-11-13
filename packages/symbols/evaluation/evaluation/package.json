@@ -53,6 +53,7 @@
     "@cortex-js/compute-engine": "^0.187.1"
   },
   "enumeratio": {
+    "site": "enumeratio",
     "layer": "base",
     "extends": [],
     "group": "evaluation",

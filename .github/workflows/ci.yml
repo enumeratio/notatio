@@ -150,6 +150,10 @@ jobs:
           dist-key: ${{ needs.changes.outputs.dist_key }}
           artifact: "true"
       - run: pnpm --filter @enumeratio/web run build
+      # Every URL the site has published still answers (web/ledger.tsv), against this build.
+      - run: pnpm --filter @enumeratio/web exec vp test run .vitepress/ledger.test.ts
+        env:
+          LEDGER_REQUIRE_BUILD: "1"
       - uses: actions/upload-artifact@v4
         with:
           name: site-dist
