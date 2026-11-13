@@ -101,22 +101,33 @@ export interface EvalError {
 
 export type EvalReply = EvalOk | EvalError;
 
+/** An input already evaluated in its session, so a command's probes and its reply share one engine. */
+export interface Evaluated {
+  session: Session;
+  expr: Expression;
+  syntax: Syntax;
+}
+
 /**
  * One structured evaluation: a request in, a plain reply out. The seam under
  * every command surface — `eval`/`convert` (text or `--json`) and `POST /eval`
  * on the serve host — so they agree on what a result looks like.
  */
-export function evaluateCommand(req: EvalRequest, defaults: SessionDefaults = {}): EvalReply {
+export function evaluateCommand(req: EvalRequest, defaults: SessionDefaults = {}, prior?: Evaluated): EvalReply {
   const forms = req.forms?.length ? [...new Set(req.forms)] : [defaults.form ?? "inputform"];
-  const session = new Session({
-    ...defaults,
-    syntax: req.syntax ?? defaults.syntax,
-    precision: req.precision ?? defaults.precision,
-  });
+  const session =
+    prior?.session ??
+    new Session({
+      ...defaults,
+      syntax: req.syntax ?? defaults.syntax,
+      precision: req.precision ?? defaults.precision,
+    });
   try {
     let expr: Expression;
     let syntax: Syntax;
-    if (req.evaluate === false) {
+    if (prior !== undefined) {
+      ({ expr, syntax } = prior);
+    } else if (req.evaluate === false) {
       ({ raw: expr, syntax } = session.parse(req.input));
     } else {
       ({ expr, syntax } = session.evaluate(req.input));
@@ -185,22 +196,25 @@ export interface HostOptions {
   tables?: boolean;
 }
 
-/** The session and result of `input`, if it evaluates to a table. */
-function tableOf(input: string, defaults: SessionDefaults): CommandResult["table"] {
+/** `input` evaluated in a fresh session; an input that fails is left to the reply to report. */
+function tryEvaluate(input: string, defaults: SessionDefaults): Evaluated | undefined {
   try {
     const session = new Session(defaults);
-    const json = session.evaluate(input).expr.json as Parameters<typeof isTable>[0];
-    return isTable(json) ? { session, json } : undefined;
+    return { session, ...session.evaluate(input) };
   } catch {
     return undefined;
   }
 }
 
-/** The result of `input` drawn as a figure, if it is one; an input that fails is left to eval to report. */
-function figureOf(input: string, defaults: SessionDefaults, host: HostOptions): string | undefined {
+/** The session and result, if it evaluated to a table. */
+function tableOf({ session, expr }: Evaluated): CommandResult["table"] {
+  const json = expr.json as Parameters<typeof isTable>[0];
+  return isTable(json) ? { session, json } : undefined;
+}
+
+/** The result drawn as a figure, if it is one. */
+function figureOf({ session, expr }: Evaluated, host: HostOptions): string | undefined {
   try {
-    const session = new Session(defaults);
-    const { expr } = session.evaluate(input);
     return figureText(expr.json as never, {
       color: host.color,
       notation: notationOf(session.ce),
@@ -355,22 +369,18 @@ function evaluate(
       return usageError(`--precision expects a positive integer, got ${p.precision}`);
   }
 
+  const sessionDefaults = {
+    ...defaults,
+    syntax: syntax ?? defaults.syntax,
+    precision: precision ?? defaults.precision,
+  };
   // A table is rows by range, which only an async host can fetch: hand it over to draw.
-  if (host.tables === true && !p.json && forms.length === 0 && p.subcommand !== "convert") {
-    const held = tableOf(expr, {
-      ...defaults,
-      syntax: syntax ?? defaults.syntax,
-      precision: precision ?? defaults.precision,
-    });
+  const tabled = host.tables === true && !p.json && forms.length === 0 && p.subcommand !== "convert";
+  const evaluated = tabled || p.subcommand === "show" ? tryEvaluate(expr, sessionDefaults) : undefined;
+  if (evaluated !== undefined) {
+    const held = tabled ? tableOf(evaluated) : undefined;
     if (held !== undefined) return { stdout: "", stderr: "", code: 0, table: held };
-  }
-
-  if (p.subcommand === "show") {
-    const drawn = figureOf(
-      expr,
-      { ...defaults, syntax: syntax ?? defaults.syntax, precision: precision ?? defaults.precision },
-      host,
-    );
+    const drawn = p.subcommand === "show" ? figureOf(evaluated, host) : undefined;
     if (drawn !== undefined) return ok(`${drawn}\n`);
   }
 
@@ -389,6 +399,7 @@ function evaluate(
       color: !p.json && host.color,
     },
     defaults,
+    evaluated,
   );
   if (p.json) return { stdout: `${JSON.stringify(toWire(res))}\n`, stderr: "", code: res.ok ? 0 : 1 };
   if (!res.ok) return { stdout: "", stderr: `error: ${res.error}\n`, code: 1 };
