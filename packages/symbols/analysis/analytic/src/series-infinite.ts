@@ -1,5 +1,5 @@
-import { bigIntegerAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { bigIntegerAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 import { asymptoticSeries } from "./series-asymptotic.ts";
 
 // `Series(f, x, DirectedInfinity(z), n)`: compute-engine runs its Taylor rule at the point with

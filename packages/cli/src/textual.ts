@@ -4,8 +4,8 @@
 // stands in where it does not, and what the control strip draws under itself.
 
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
-import { type Box, notationOf } from "@enumeratio/boxes";
-import { optionsOf } from "@enumeratio/formats";
+import { type Box, notationOf } from "@notatio/boxes";
+import { optionsOf } from "@notatio/formats";
 import {
   headOf,
   numOf,
@@ -17,8 +17,8 @@ import {
   tupleOf,
   vectorOptionsOf,
   vectorPlotBox,
-} from "@enumeratio/frontend";
-import { compilePlot } from "@enumeratio/frontend/plot-compile";
+} from "@notatio/frontend";
+import { compilePlot } from "@notatio/frontend/plot-compile";
 import type { Drawn } from "./cell-layout.ts";
 import type { PlotPoint, Session } from "./engine.ts";
 import { figureText, plotText, type Sampled } from "./figure.ts";

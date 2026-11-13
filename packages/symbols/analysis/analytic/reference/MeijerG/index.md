@@ -6,7 +6,7 @@ summary: The Meijer G-function $G^{m,n}_{p,q}$, evaluated numerically via its re
 signatures:
   - call: MeijerG({{a1, .., an}, {a(n+1), .., ap}}, {{b1, .., bm}, {b(m+1), .., bq}}, z)
     description: $G^{m,n}_{p,q}\left(z \,\middle|\, \begin{matrix}a_1,\ldots,a_p\\b_1,\ldots,b_q\end{matrix}\right)$, numerically.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list, list, number) -> number
 primitive: kernel
 bindings:

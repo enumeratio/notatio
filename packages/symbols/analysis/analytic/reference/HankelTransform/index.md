@@ -6,11 +6,11 @@ summary: The order-$n$ Hankel transform $F(s) = \int_0^\infty f(r)\,J_n(sr)\,r\,
 signatures:
   - call: HankelTransform(f, r, s)
     description: the order-0 Hankel transform of `f`, $\int_0^\infty f(r)\,J_0(sr)\,r\,dr$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression, number?) -> expression
   - call: HankelTransform(f, r, s, n)
     description: the order-$n$ Hankel transform.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: kernel
 bindings:
   - origin: native

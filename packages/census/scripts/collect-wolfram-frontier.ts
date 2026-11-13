@@ -22,9 +22,9 @@ import { mkdtempSync, readFileSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { HEADS, isSystemName, STRUCTURAL, SYMBOLS } from "@enumeratio/wolfram";
+import { HEADS, isSystemName, STRUCTURAL, SYMBOLS } from "@notatio/wolfram";
 import { bindings, fullEngine } from "../src/engine.ts";
-import { runKernel } from "@enumeratio/utils/bounded";
+import { runKernel } from "@notatio/utils/bounded";
 
 /** The Wolfram symbols we claim to map to — the sweep set, derived rather than listed so it
  *  grows with the head map instead of drifting from it. */

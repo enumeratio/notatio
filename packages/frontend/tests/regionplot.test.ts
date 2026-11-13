@@ -1,6 +1,6 @@
 // A region plot's box: the fills in one raster, a line along each boundary (the wiki's Speculative-Plotting, §3.3).
 
-import { type BoxNode, optionsOfBox } from "@enumeratio/boxes";
+import { type BoxNode, optionsOfBox } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { implicitPlotBox } from "../src/contour.ts";
 import { coverage, maskGrid, REGION_OPACITY, regionPlotBox } from "../src/regionplot.ts";

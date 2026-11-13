@@ -4,8 +4,8 @@
 // the one `RowSource` and asks it for a range per move. Rows arrive asynchronously, so a key
 // changes the state at once and the frame is drawn when its rows are in (`idle` waits for that).
 
-import { type Box, describeCount, type RowBatch, type RowCount, type RowSource } from "@enumeratio/boxes";
-import { parseIndex, statusText } from "@enumeratio/frontend";
+import { type Box, describeCount, type RowBatch, type RowCount, type RowSource } from "@notatio/boxes";
+import { parseIndex, statusText } from "@notatio/frontend";
 import { dim } from "./ansi.ts";
 import type { DriveScreen, Driver, Key } from "./drive.ts";
 import { headersOf, ruled, skipOf } from "./table.ts";

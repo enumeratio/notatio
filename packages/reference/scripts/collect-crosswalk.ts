@@ -16,10 +16,10 @@
 //   vp node packages/reference/scripts/collect-crosswalk.ts
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 import { FUNGRIM_CORE } from "@cortex-js/compute-engine/identities";
-import { MAPPINGS } from "@enumeratio/oracle";
-import { HEADS, SYMBOLS } from "@enumeratio/wolfram";
+import { MAPPINGS } from "@notatio/oracle";
+import { HEADS, SYMBOLS } from "@notatio/wolfram";
 import { referenceEntries } from "../src/node.ts";
 import { crosswalk, engineSymbols } from "./crosswalk.ts";
 

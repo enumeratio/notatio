@@ -29,8 +29,8 @@ runs:
       shell: bash
       working-directory: ${{ github.action_path }}/../../..
       run: |
-        pnpm install --frozen-lockfile --filter '@enumeratio/manifest...'
-        pnpm --filter '@enumeratio/manifest...' run build
+        pnpm install --frozen-lockfile --filter '@notatio/manifest...'
+        pnpm --filter '@notatio/manifest...' run build
     - name: pack
       shell: bash
       env:

@@ -1,7 +1,7 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { applyFunction, symbolNameOf } from "@enumeratio/engine";
+import { applyFunction, symbolNameOf } from "@notatio/engine";
 import { isDiagonal, listOf, rowsOf, squareMatrixError } from "./matrix-exp.ts";
-import { type EvalOptions, wantsNumber } from "@enumeratio/ce-patches";
+import { type EvalOptions, wantsNumber } from "@notatio/ce-patches";
 
 // MatrixFunction(f, m) — a scalar function f extended to a square matrix m, via its
 // eigendecomposition. Reuses matrix-exp.ts's matrix reader and builder (`rowsOf`, `listOf`,

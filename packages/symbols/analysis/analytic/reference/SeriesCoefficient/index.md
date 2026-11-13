@@ -2,11 +2,11 @@
 name: SeriesCoefficient
 domain: Analytic
 signature: SeriesCoefficient(f, {x, x0, n})
-summary: The coefficient of $(x-x_0)^n$ in the Taylor series of $f$ about $x_0$, via $\frac{f^{(n)}(x_0)}{n!}$. Provided by `@enumeratio/analytic`.
+summary: The coefficient of $(x-x_0)^n$ in the Taylor series of $f$ about $x_0$, via $\frac{f^{(n)}(x_0)}{n!}$. Provided by `@notatio/analytic`.
 signatures:
   - call: SeriesCoefficient(f, {x, x0, n})
     description: the coefficient of $(x-x_0)^n$, for $n$ a nonnegative integer and $f$ analytic at $x_0$ (an ordinary point).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, list<any^3>) -> number
 names:
   wolframIdentity: true

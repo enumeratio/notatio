@@ -2,7 +2,7 @@
 // They are held to the enumeration of orbits, to Burnside run on the actual permutations of the
 // positions, and to OEIS terms.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { braceletCountExact, necklaceCountExact } from "../../collections/src/families/exact-counts.ts";
 import { allFamilies, kernelOn } from "../../collections/src/families/index.ts";

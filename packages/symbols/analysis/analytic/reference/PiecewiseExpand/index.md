@@ -2,15 +2,15 @@
 name: PiecewiseExpand
 domain: Analytic
 signature: PiecewiseExpand(expr, assumptions)
-summary: Rewrite [[Abs]], [[Sign]], [[Min]], [[Max]], [[UnitStep]], [[Clip]], [[UnitBox]], [[UnitTriangle]] and, over a bounded variable, [[Floor]], [[Ceil]], [[Round]], [[IntegerPart]], [[FractionalPart]], [[Mod]], [[Quotient]] and the waves inside $expr$ into [[Piecewise]], recursively. Provided by `@enumeratio/analytic`.
+summary: Rewrite [[Abs]], [[Sign]], [[Min]], [[Max]], [[UnitStep]], [[Clip]], [[UnitBox]], [[UnitTriangle]] and, over a bounded variable, [[Floor]], [[Ceil]], [[Round]], [[IntegerPart]], [[FractionalPart]], [[Mod]], [[Quotient]] and the waves inside $expr$ into [[Piecewise]], recursively. Provided by `@notatio/analytic`.
 signatures:
   - call: PiecewiseExpand(expr)
     description: rewrite using whatever is already assumed (e.g. inside an enclosing [[Assuming]]).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression?) -> expression
   - call: PiecewiseExpand(expr, assumptions)
     description: assume $assumptions$ (scoped, as in [[Assuming]]) for the rewrite, then forget it.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 names:
   wolframIdentity: true
 attributes:

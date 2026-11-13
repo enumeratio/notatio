@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/groupalgebra",
+  "name": "@notatio/groupalgebra",
   "version": "0.0.0",
   "private": true,
   "description": "Group-algebra extensions for @cortex-js/compute-engine: cyclic, dihedral and product groups, their group algebras, conjugacy classes and centres.",
@@ -29,16 +29,16 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/structures": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/structures": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

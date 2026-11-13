@@ -10,9 +10,9 @@
 //   node scripts/collect-zeta-goldens.ts
 
 import { writeFileSync } from "node:fs";
-import { runKernel } from "@enumeratio/utils/bounded";
+import { runKernel } from "@notatio/utils/bounded";
 import { BigDecimal } from "@cortex-js/compute-engine";
-import { bigCx, hurwitzZeta, hurwitzZetaBig } from "@enumeratio/ce-patches";
+import { bigCx, hurwitzZeta, hurwitzZetaBig } from "@notatio/ce-patches";
 
 type Pair = [number, number];
 

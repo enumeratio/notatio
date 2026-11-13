@@ -1,4 +1,4 @@
-import { type Engine, type Expr, operandsOf } from "@enumeratio/engine";
+import { type Engine, type Expr, operandsOf } from "@notatio/engine";
 
 /** Declare simple list manipulation heads: Prepend. */
 export function declareListOps(ce: Engine): void {

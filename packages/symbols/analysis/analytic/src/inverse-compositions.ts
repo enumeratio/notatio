@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { declareCompile, operandsOf } from "@enumeratio/engine";
+import { declareCompile, operandsOf } from "@notatio/engine";
 
 // Sin(Arcsin z) = z, Cosh(Arcosh z) = z and Tanh(Artanh z) = z hold for every complex z --
 // Wolfram folds all three, unconditionally. Cos/Arccos, Tan/Arctan and Sinh/Arsinh already

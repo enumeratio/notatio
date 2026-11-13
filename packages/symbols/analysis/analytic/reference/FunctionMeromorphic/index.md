@@ -6,7 +6,7 @@ summary: True if f is meromorphic (a ratio of entire functions, poles allowed) e
 signatures:
   - call: FunctionMeromorphic(f, x)
     description: whether f, viewed as a function of a complex variable, is meromorphic on the whole plane.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

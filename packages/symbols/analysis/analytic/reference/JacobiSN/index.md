@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{sn}(u,m)$, one of the three
 signatures:
   - call: JacobiSN(u, m)
     description: the Jacobi elliptic sine, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiCN

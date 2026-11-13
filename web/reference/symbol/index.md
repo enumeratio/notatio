@@ -33,7 +33,7 @@ instantiated and evaluated on both sides — and the tooltip says how many. A **
 the same computation ran and something disagreed, which is the more interesting outcome:
 every one of them so far has been a bug on our side, and the entry says which.
 
-The scripts in `@enumeratio/reference` keep it honest: `crosswalk:collect` (offline,
+The scripts in `@notatio/reference` keep it honest: `crosswalk:collect` (offline,
 test-guarded), `crosswalk:fetch` (the outside indexes), `crosswalk:find` (FindStat by
 value, the OEIS by count), `crosswalk:verify` (Fungrim's identities, numerically), `crosswalk:audit` (the engine's
 Wikidata ids) and `crosswalk:check` (follows every link).

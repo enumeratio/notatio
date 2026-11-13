@@ -3,7 +3,7 @@
 // LEFTOVER_DOMAINS, which is where every carrier without an area used to sit regardless of
 // what it actually was.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const FINDSTAT_CARRIERS: readonly Carrier[] = [
   {

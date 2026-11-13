@@ -6,7 +6,7 @@
 // retired ones live in tests/readings and are put back as `fast` here, so they are held to the
 // definitions all the same.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { gesselAv1234 } from "../collections/tests/av1234.ts";
 import { COMPILED_FAMILIES } from "../collections/src/families/compiled-families.generated.js";

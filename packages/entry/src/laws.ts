@@ -4,10 +4,10 @@
 // (tests/laws.test.ts) can catch the vocabulary silently changing meaning out from under every
 // record that uses it.
 //
-// This is documentation, not the runtime mechanism: `@enumeratio/combinatorics`' own generator
+// This is documentation, not the runtime mechanism: `@notatio/combinatorics`' own generator
 // writes the SHORTHAND (unexpanded) into generated TS data, which populates
 // `CombinatorialMap.laws`/`.orderIsomorphism` exactly as they were before this moved to
-// records -- `checkLaws` (@enumeratio/structures) never sees a `ForAll`.
+// records -- `checkLaws` (@notatio/structures) never sees a `ForAll`.
 
 import type { MathJSON } from "./types.ts";
 import type { EntryLaw } from "./types.ts";

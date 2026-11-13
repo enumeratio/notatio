@@ -50,12 +50,13 @@ so a page reads the same on GitHub and on the site.
   in its repository). Epsil is its language and the only text syntax we read or write. Neither is ours.
 - **enumeratio** is the catalogue: a permanent address and a record for every mathematical object (a head,
   a collection, an element, a structure), and the checking that keeps the records true (the record format,
-  the manifest, the oracle lanes, Plausible, the census). It is also the `@enumeratio/*` scope, the GitHub
-  org and the enumeratio.dev domain. A set of definitions compute-engine does not hold is an enumeratio
+  the manifest, the oracle lanes, Plausible, the census). It is also the GitHub account (`enumeratio`) and
+  the enumeratio.dev domain. A set of definitions compute-engine does not hold is an enumeratio
   library (`packages/symbols/`), written in Epsil and a candidate to move upstream.
 - **notatio** is how an expression is written and shown: the presentation heads (boxes, graphics, controls,
   the `*Form` heads), the vdom and its markup, their implementations per environment, and the notebook,
-  worksheet, CLI and REPL and the format registry. It is also this repository's name, which holds both.
+  worksheet, CLI and REPL and the format registry. It is also this repository's name, which holds both,
+  and the npm scope of every package in it.
   Never describe notatio as a syntax, a subset of Epsil, or the project; never describe enumeratio as "the
   mathematics" or "the symbol definitions".
 - The verb says whose it is: "defined as" and "evaluates to" belong to compute-engine or a library (say
@@ -75,8 +76,8 @@ so a page reads the same on GitHub and on the site.
   stays for the notebook and app shell. A tag someone else defined is logged and left; CSS keys on the tags.
 - Options are `Rule` (`Over -> R`); `parseExpression` normalizes a `->` in a call's arguments to `Rule`, and
   `KeyValuePair` stays the dictionary entry.
-- Package names have not all caught up, and the scope stays `@enumeratio/*`; do not rename them in passing — see the wiki's
-  [Names](https://github.com/enumeratio/notatio/wiki/Names) for how renames wait.
+- Every package is `@notatio/*`; the enumeratio npm scope is kept for data packages (none yet). See the wiki's
+  [Names](https://github.com/enumeratio/notatio/wiki/Names).
 
 ## Upstream candidates
 
@@ -107,7 +108,7 @@ so a page reads the same on GitHub and on the site.
   something). The format is on the wiki's
   [Contributing](https://github.com/enumeratio/notatio/wiki/Contributing#where-a-change-goes) and
   [Examples-as-Data](https://github.com/enumeratio/notatio/wiki/Examples-as-Data).
-- Read and write records through `@enumeratio/entry/node` (`readHead`, `writeHead`,
+- Read and write records through `@notatio/entry/node` (`readHead`, `writeHead`,
   `updateHead`, `readEntries`, `writeEntries`), never by hand-parsing their files. Hand edits
   are fine; `node packages/reference/scripts/format-records.ts` tidies them. A TSV cell is
   its text as written; one that can't sit in a row as written (a tab or line break, a
@@ -116,14 +117,14 @@ so a page reads the same on GitHub and on the site.
   "fix" a failing known check by rewriting `expected`.
 - An example whose value draws (`Plot`, `BarChart`, a control) may state a `boxes` shape: the head
   of the box it lowers to and, for a drawing, its marks and roles by count and key options
-  (`BoxShape`, `@enumeratio/entry`). `packages/frontend/tests/example-boxes.test.ts` lowers it in
+  (`BoxShape`, `@notatio/entry`). `packages/frontend/tests/example-boxes.test.ts` lowers it in
   Node (sampling a plot as the page does) and holds it to the shape, never to pixels; `expected`
   is still pinned by reference's own test.
 - After adding or changing an example (or a printer or transpiler), run
   `UPDATE_FORMS=1 node packages/frontend/scripts/collect-forms.ts`: it writes each system's
   `in` and refreshes the pins. Kernel answers come from
   `oracle-scan.ts --accept`; notes and classifications are the hand columns.
-- Everything reads the records through `@enumeratio/reference/node` (`referenceData`). Add a
+- Everything reads the records through `@notatio/reference/node` (`referenceData`). Add a
   head by adding its folder.
 - **Data derived from our own code is built, never committed.** The package's `build` writes it
   (gitignored, listed in its `package.json` `"generated"`), and its test checks the built file
@@ -132,15 +133,19 @@ so a page reads the same on GitHub and on the site.
   script. A new `src/patches/<slug>.ts` in `ce-patches` joins `PATCHES` on its own.
 - **A library's `build` calls manifest's bins** (`enumeratio-collect-notation`,
   `enumeratio-collect-declares`), never `node ../manifest/scripts/…`, and declares
-  `@enumeratio/manifest` as a dependency: `tools/ci` reads declared edges, and a library that
+  `@notatio/manifest` as a dependency: `tools/ci` reads declared edges, and a library that
   leaves the repository has only those.
 - **A library may be in the tree or installed.** Manifest's build, `recordDirs` and the site's package docs
-  read the tree's packages and then the `@enumeratio/*` libraries they depend on that the tree
+  read the tree's packages and then the `@notatio/*` libraries they depend on that the tree
   doesn't hold (found in `node_modules`); a name in the tree wins. Installed records are read-only:
   `writeHead` refuses them.
 
 ## Git hygiene
 
+- **A large mechanical change lands as a codemod** (`tools/codemods/`), and a branch that predates one
+  ports by running it: `node tools/codemods/pending.ts` lists what to run. Never hand-resolve a
+  codemod's conflicts; see the wiki's
+  [Contributing](https://github.com/enumeratio/notatio/wiki/Contributing#codemods).
 - **Never commit conflict markers** — the `<<<<<<<` / `=======` / `>>>>>>>` lines a
   merge or rebase leaves behind. After resolving any merge, and before committing,
   scan the result: `git grep -nE '^(<{7}|>{7})' $(git rev-parse --show-toplevel)` must

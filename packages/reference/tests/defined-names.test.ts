@@ -1,4 +1,4 @@
-// Checks `@enumeratio/oracle`'s built `defined-names-data.ts` (collect-defined-names.ts) is what
+// Checks `@notatio/oracle`'s built `defined-names-data.ts` (collect-defined-names.ts) is what
 // the records and engine give now: every
 // bare symbol used anywhere in a reference example, for which the fully-declared reference
 // engine (engines.ts's `declaredEngine`) has a definition. `emit.ts` uses this set to decide
@@ -8,7 +8,7 @@
 //
 // A stale build (oracle's `build` not rerun after a records change) is what fails this test.
 
-import { DEFINED_NAMES, type MathJSON } from "@enumeratio/oracle";
+import { DEFINED_NAMES, type MathJSON } from "@notatio/oracle";
 import { expect, test } from "vite-plus/test";
 import { declaredEngine } from "../scripts/engines.ts";
 import { isDefinedName, symbolsIn } from "../scripts/defined-names.ts";
@@ -25,5 +25,5 @@ test("the built defined-names-data.ts matches the records", () => {
   }
   const ce = declaredEngine({ graphics: false });
   const defined = [...names].filter((name) => isDefinedName(ce, name)).toSorted();
-  expect(defined, "rebuild: pnpm --filter @enumeratio/oracle run build").toEqual([...DEFINED_NAMES].toSorted());
+  expect(defined, "rebuild: pnpm --filter @notatio/oracle run build").toEqual([...DEFINED_NAMES].toSorted());
 }, 60_000); // walks every reference example and boxes every symbol through the full engine

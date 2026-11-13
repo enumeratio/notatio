@@ -1,7 +1,7 @@
-// @enumeratio/combinatorics' notation: each carrier's constructor in StandardForm,
+// @notatio/combinatorics' notation: each carrier's constructor in StandardForm,
 // `\permutation([2, 3, 1])` both ways, and the MathLive macros that show those commands.
 
-import type { PackageNotation } from "@enumeratio/boxes";
+import type { PackageNotation } from "@notatio/boxes";
 import { carrierLatex, carrierMacros } from "./carrier-latex.ts";
 import { CARRIERS } from "./carrier-list.ts";
 

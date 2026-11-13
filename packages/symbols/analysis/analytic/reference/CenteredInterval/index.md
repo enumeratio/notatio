@@ -2,15 +2,15 @@
 name: CenteredInterval
 domain: Interval arithmetic
 signature: CenteredInterval(c, r)
-summary: A ball c ± r with center-radius arithmetic -- the complex-capable sibling of [[Interval]]. Provided by `@enumeratio/analytic`.
+summary: A ball c ± r with center-radius arithmetic -- the complex-capable sibling of [[Interval]]. Provided by `@notatio/analytic`.
 signatures:
   - call: CenteredInterval(c, r)
     description: the ball of radius r centered at c.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number | set<real>, real?) -> number
   - call: CenteredInterval(interval)
     description: an [[Interval]] converted to center-radius form.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Interval
   - Around

@@ -9,9 +9,9 @@ import {
   symbolNameOf,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
-import { ADIC, adicOf, adic } from "@enumeratio/numerals";
-import { isPrime, mod } from "@enumeratio/residues";
+} from "@notatio/engine";
+import { ADIC, adicOf, adic } from "@notatio/numerals";
+import { isPrime, mod } from "@notatio/residues";
 import * as I from "./idele.ts";
 import type { IdeleFinite } from "./idele.ts";
 import { profiniteDecomposition } from "./matrix.ts";
@@ -19,7 +19,7 @@ import * as P from "./profinite.ts";
 import type { Profinite } from "./profinite.ts";
 import * as Q from "./rational.ts";
 import type { Q as Rational } from "./rational.ts";
-import { SUMMARIES } from "@enumeratio/manifest/package/adeles";
+import { SUMMARIES } from "@notatio/manifest/package/adeles";
 
 // Hertogh's adèles over Q as compute-engine values. Three value heads:
 //

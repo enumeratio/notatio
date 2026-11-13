@@ -7,10 +7,10 @@
 // session -- the same rewrite `reduce` uses for print, run once per keypress instead
 // of once. This is the base's `Rendering` mounted on a cell grid; nothing of lit here.
 
-import { serializeExpression } from "@enumeratio/formats/expression";
-import { iterate } from "@enumeratio/frontend";
-import { boxDeclarations, type Declaration, pinValue, pin, sampleValues } from "@enumeratio/frontend";
-import { numOf, strOf, tupleOf } from "@enumeratio/frontend";
+import { serializeExpression } from "@notatio/formats/expression";
+import { iterate } from "@notatio/frontend";
+import { boxDeclarations, type Declaration, pinValue, pin, sampleValues } from "@notatio/frontend";
+import { numOf, strOf, tupleOf } from "@notatio/frontend";
 import { bold, cyan, dim, stripAnsi } from "./ansi.ts";
 
 type Json = Parameters<typeof pin>[0];

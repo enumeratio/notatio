@@ -1,4 +1,4 @@
-import { box, type Engine, type Expr, isSymbol, type Json, operandsOf } from "@enumeratio/engine";
+import { box, type Engine, type Expr, isSymbol, type Json, operandsOf } from "@notatio/engine";
 import {
   type Atom,
   compact,

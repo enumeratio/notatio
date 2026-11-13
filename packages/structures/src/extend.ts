@@ -4,7 +4,7 @@
 // implementation per (type, protocol) — but only for NEW names. A protocol member named
 // `Reverse` does not extend compute-engine's `Reverse`; the built-in still wins.
 //
-// `defineOverload` (`@enumeratio/engine`) is the way that works for an EXISTING head: a row in
+// `defineOverload` (`@notatio/engine`) is the way that works for an EXISTING head: a row in
 // its table, attached to the operator object already on `ce` IN PLACE — `operator.evaluate`
 // becomes a dispatcher over the rows and the head's own handler, `operator.signature` gains our
 // clause — rather than `ce.declare`-ing a second definition. That is what preserves an
@@ -22,7 +22,7 @@
 //   Reverse("abc")                  'cba'                  string overload intact
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { defineOverload, extendHead, overloadTable, type EvaluateOptions } from "@enumeratio/engine";
+import { defineOverload, extendHead, overloadTable, type EvaluateOptions } from "@notatio/engine";
 
 /** Heads whose `evaluate` has already had the materialization fallback below layered on
  *  -- so a second `extendBuiltin` call for another carrier on the same collection-backed head

@@ -7,7 +7,7 @@
 // The colors are the shader's, written out: hue is the argument on a gradient, brightness a
 // compressed log-magnitude, poles white and zeros black.
 
-import { type Box, graphics, interpretation, type OptionValue, raster, tag } from "@enumeratio/boxes";
+import { type Box, graphics, interpretation, type OptionValue, raster, tag } from "@notatio/boxes";
 import type { Complex, ComplexFunction } from "./complex-eval.ts";
 import type { ComplexPlotView } from "./complex-plot.ts";
 import { parseNumeric } from "./manipulate.ts";

@@ -4,10 +4,10 @@
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import type { Box } from "@enumeratio/boxes";
-import { toText } from "@enumeratio/boxes/render";
-import { CARRIERS, declareCombinatorics } from "@enumeratio/combinatorics";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
+import type { Box } from "@notatio/boxes";
+import { toText } from "@notatio/boxes/render";
+import { CARRIERS, declareCombinatorics } from "@notatio/combinatorics";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import {
   bigintOf,

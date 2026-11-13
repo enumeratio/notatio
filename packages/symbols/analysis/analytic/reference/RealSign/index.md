@@ -6,7 +6,7 @@ summary: "The sign of a real number x: -1, 0 or 1, as a function defined only on
 signatures:
   - call: RealSign(x)
     description: -1, 0 or 1, according to the sign of the real number x.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 names:
   wolframIdentity: true

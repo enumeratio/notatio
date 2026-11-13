@@ -4,7 +4,7 @@
 // `FromContinuedFraction` in declare.ts. Kept apart so the bigint arithmetic is testable
 // without an engine, the same reasoning as `convergents.ts`.
 
-import { isqrt } from "@enumeratio/residues";
+import { isqrt } from "@notatio/residues";
 
 /** Floor division for bigints (rounds toward −∞, unlike `/`, which truncates toward 0). */
 function floorDiv(n: bigint, d: bigint): bigint {

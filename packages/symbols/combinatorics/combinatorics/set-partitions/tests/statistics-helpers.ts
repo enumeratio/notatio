@@ -1,7 +1,7 @@
 // Shared universe, independent readings, and evaluation machinery for the sharded
 // `setpartition-*.test.ts` files. Not itself a test file.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { applyDefinition } from "../../src/statistics/declare.ts";
 import { SET_PARTITION_STATISTICS } from "../src/statistics.ts";

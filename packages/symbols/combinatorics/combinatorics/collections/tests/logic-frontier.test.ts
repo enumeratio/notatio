@@ -1,5 +1,5 @@
-import { type Expr, operandsOf, symbolNameOf } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { type Expr, operandsOf, symbolNameOf } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCollections } from "../src/library.ts";
 

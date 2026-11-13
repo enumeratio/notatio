@@ -1,8 +1,8 @@
 // Shared universe, independent readings, and evaluation machinery for the sharded
 // `permutation-*.test.ts` files. Not itself a test file.
 
-import { operandsOf } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { operandsOf } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { applyDefinition } from "../../src/statistics/declare.ts";
 import { PERMUTATION_STATISTICS } from "../src/statistics.ts";

@@ -4,7 +4,7 @@
 // browser too, so it can't parse YAML at runtime. This pins that the generated table is
 // current; coverage.test.ts (unchanged by this migration) exercises `blessedName` itself.
 
-import { readEntries } from "@enumeratio/entry/node";
+import { readEntries } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { RENAMED_DATA } from "../src/statistics/naming-data.ts";
 
@@ -15,7 +15,7 @@ const NO_HEAD: Readonly<Record<string, string>> = { NumberOfStandardTableaux: "S
 
 test("naming-data.ts is what the current records collect to", () => {
   // The same two roots collect-statistics-naming.ts reads: this package's own reference (the
-  // combinatorial statistics, since step 6b) and @enumeratio/statistics' (the distributions).
+  // combinatorial statistics, since step 6b) and @notatio/statistics' (the distributions).
   const entries = [
     ...readEntries(new URL("../reference/", import.meta.url)),
     ...readEntries(new URL("../../statistics/reference/", import.meta.url)),

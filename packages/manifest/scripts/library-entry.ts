@@ -163,7 +163,7 @@ export const namespace = ${JSON.stringify(index.namespace)};
 /** Each definition, by name: the head it's declared as, its signature, its body with pins resolved, and its attributes and defaults. */
 export const definitions = ${JSON.stringify(definitionData, null, 2)};
 
-// What compute-engine is handed for a definition (@enumeratio/manifest's declaration.ts).
+// What compute-engine is handed for a definition (@notatio/manifest's declaration.ts).
 ${declarationOf.toString()}
 
 // Which members each engine's namespace records hold, shared with every generated entry.

@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { CARRIERS, declareCombinatoricsCarriers } from "@enumeratio/combinatorics";
-import { ALL_REPRESENTATIONS, canonicalFor, REPRESENTATIONS, representationsFor } from "@enumeratio/structures";
+import { CARRIERS, declareCombinatoricsCarriers } from "@notatio/combinatorics";
+import { ALL_REPRESENTATIONS, canonicalFor, REPRESENTATIONS, representationsFor } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { declareRendering } from "../src/carrier-render.ts";
 

@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { makeBoxes, named, registerNotation } from "@enumeratio/boxes";
+import { makeBoxes, named, registerNotation } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { boxesToExpression, fromMathML, toMathML } from "../src/mathml.ts";
 

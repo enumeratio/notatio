@@ -1,5 +1,5 @@
-import { defineMessages, emit, type Engine, type Expr, type HeadPatch, wrapOperator } from "@enumeratio/engine";
-import { carrierTypeForName, registerCollectionCarrier } from "@enumeratio/structures";
+import { defineMessages, emit, type Engine, type Expr, type HeadPatch, wrapOperator } from "@notatio/engine";
+import { carrierTypeForName, registerCollectionCarrier } from "@notatio/structures";
 import {
   asBlockList,
   asIntList,
@@ -275,7 +275,7 @@ export function familySuccessor(ce: Engine, collection: Expr): SuccessorOf | und
 /** Declare every family in `families` on `ce` (an Epsil family through its kernel on `ce`): an indexed-collection operator, or for paramCount 0
  *  an indexed-collection value (`PrimeNumbers`). A family's carrier, when it names one, has to already be declared on `ce` (its OWN
  *  area's declare runs its `declareCarriers` first) -- its minted type is read back through
- *  `@enumeratio/structures`' registry (`carrierTypeForName`), not passed in. Also registers
+ *  `@notatio/structures`' registry (`carrierTypeForName`), not passed in. Also registers
  *  which carrier each family's elements inhabit (`registerCollectionCarrier`), for
  *  `CombinatorialStat(family, name)` -- self-contained per call, so a single area's declare
  *  needs nothing extra for its own families to answer it. */

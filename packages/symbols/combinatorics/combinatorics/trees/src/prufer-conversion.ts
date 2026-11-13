@@ -1,12 +1,12 @@
 // LabeledTree(PruferSequence(...)): the Prüfer bijection, as a constructor overload rather than
 // a CombinatorialMap (src/maps.ts stays untouched -- TQ-2/step 6 move its generic machinery down
-// to structures separately). `attachConversion` (@enumeratio/structures) is the same mechanism
+// to structures separately). `attachConversion` (@notatio/structures) is the same mechanism
 // src/maps.ts's own `convert: true` map rows use, called directly here since this one conversion
 // isn't itself a catalogued map between two families -- PruferSequences already IS a family, and
 // LabeledTrees already IS one too; this only lets the same code you'd write by hand
 // (LabeledTree(PruferSequence([...]))) evaluate.
-import type { Engine, Expr } from "@enumeratio/engine";
-import { attachConversion } from "@enumeratio/structures";
+import type { Engine, Expr } from "@notatio/engine";
+import { attachConversion } from "@notatio/structures";
 import { asIntList, blocksMJ, type Boxed } from "../../collections/src/families/types.ts";
 import { pruferDecode } from "../../collections/src/families/kernels-extra.ts";
 

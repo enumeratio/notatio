@@ -6,8 +6,8 @@ import {
   operandsOf,
   symbolNameOf,
   wrapOperator,
-} from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+} from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // Exact values Wolfram folds on sight and compute-engine leaves as calls: the Airy functions
 // at 0, and the two Gauss reductions that drop a hypergeometric's parameters. Plus the pieces

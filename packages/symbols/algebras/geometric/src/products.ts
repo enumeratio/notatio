@@ -1,5 +1,5 @@
-import type { Engine } from "@enumeratio/engine";
-import type { Multivector } from "@enumeratio/hypercomplex";
+import type { Engine } from "@notatio/engine";
+import type { Multivector } from "@notatio/hypercomplex";
 import { bySign, gradedProduct } from "./blades.ts";
 
 // The products and involutions of a geometric algebra. Each is the geometric product

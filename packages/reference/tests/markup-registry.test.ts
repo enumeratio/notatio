@@ -5,9 +5,9 @@
 // checks the first few examples of each sampled head; `DEEP_TESTS=1` checks all of them.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareEvaluation } from "@enumeratio/evaluation";
-import { markupOf, readMarkupText } from "@enumeratio/formats/markup";
-import { createRegistryResolver, manifestRegistry, namespaceOf } from "@enumeratio/manifest";
+import { declareEvaluation } from "@notatio/evaluation";
+import { markupOf, readMarkupText } from "@notatio/formats/markup";
+import { createRegistryResolver, manifestRegistry, namespaceOf } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { declaredEngine, LIBRARIES } from "../scripts/engines.ts";
 import { loadReferenceData, PACKAGES } from "../src/node.ts";

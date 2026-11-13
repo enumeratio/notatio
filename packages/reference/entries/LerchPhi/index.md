@@ -2,7 +2,7 @@
 name: LerchPhi
 domain: Special functions
 signature: LerchPhi(z, s, a)
-summary: The Lerch transcendent $\Phi(z, s, a) = \sum_{n=0}^{\infty} \dfrac{z^n}{(n+a)^s}$ — a common generalization of the polylogarithm and the Hurwitz zeta. Provided by `@enumeratio/analytic`.
+summary: The Lerch transcendent $\Phi(z, s, a) = \sum_{n=0}^{\infty} \dfrac{z^n}{(n+a)^s}$ — a common generalization of the polylogarithm and the Hurwitz zeta. Provided by `@notatio/analytic`.
 signatures:
   - call: LerchPhi(z, s, a)
     description: the Lerch transcendent $\Phi(z, s, a)$.

@@ -1,9 +1,9 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { createEngine } from "@enumeratio/engine/testing";
-import { stringAt } from "@enumeratio/engine";
+import { createEngine } from "@notatio/engine/testing";
+import { stringAt } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
-import { invMod, mod } from "@enumeratio/residues";
+import { invMod, mod } from "@notatio/residues";
 import * as adic from "../src/adic.ts";
 import { declareNumerals } from "../src/declare.ts";
 

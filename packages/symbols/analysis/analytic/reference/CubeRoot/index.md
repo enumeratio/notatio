@@ -6,7 +6,7 @@ summary: The real cube root of x.
 signatures:
   - call: CubeRoot(x)
     description: the real cube root of x.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 names:
   wolframIdentity: true

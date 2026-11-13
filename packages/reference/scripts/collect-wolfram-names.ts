@@ -1,4 +1,4 @@
-// Rebuild `@enumeratio/wolfram`'s `wolfram-names-data.ts` from every head's `names.wolfram` /
+// Rebuild `@notatio/wolfram`'s `wolfram-names-data.ts` from every head's `names.wolfram` /
 // `names.wolframIdentity` field (symbol-metadata step 4, https://github.com/enumeratio/notatio/wiki/Archive-Symbol-Metadata).
 // `to-wolfram.ts` needs this as plain, synchronous, browser-safe data -- it runs in the site
 // build and in the browser, so it cannot parse YAML at runtime.
@@ -10,7 +10,7 @@
 //
 //   vp node packages/reference/scripts/collect-wolfram-names.ts
 
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 import { referenceData } from "../src/node.ts";
 
 const { entries } = referenceData();

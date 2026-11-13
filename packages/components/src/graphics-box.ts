@@ -51,7 +51,7 @@ import {
   wheelZooms,
   wildcardOf,
   zoomed,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { emitControl } from "./define.ts";
 import { scopeOf } from "./scope.ts";
 import { captionPlacement, type FramePlacement, figureFrame, isVertical, placementOf } from "./figure-frame.ts";
@@ -79,7 +79,7 @@ const headOf = (json: Json): string | undefined =>
  * (`IsPrime -> Teal`) that the engine would read as its own `IsPrime`.
  */
 async function readStructure(text: string): Promise<Json> {
-  const { parseExpression } = await import("@enumeratio/formats/expression");
+  const { parseExpression } = await import("@notatio/formats/expression");
   const { json, errors } = parseExpression(text);
   return errors.length > 0 ? undefined : plainJson(json);
 }
@@ -489,7 +489,7 @@ export class GraphicsBoxElement extends LitElement {
     const settings =
       spec.tiles && headOf(spec.tiles.data) === "RadixExpansions" ? radixSettingsOf(spec.tiles.data) : undefined;
     if (!names?.example || !settings) return false;
-    const { exampleOf, exampleSettings } = await import("@enumeratio/complex-numerals/lattice");
+    const { exampleOf, exampleSettings } = await import("@notatio/complex-numerals/lattice");
     const chosen = stringOf(this._params.get(names.example));
     const scope = scopeOf(this);
     // Back onto the lattice: the base and digits go to their nearest lattice points, 0 and

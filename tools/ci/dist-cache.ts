@@ -40,7 +40,7 @@ import { closure, git, loadWorkspace, RECORDS, resolveNames, root, SOURCES, type
 
 /** Bump when what the key covers or what is saved changes. */
 const KEY_VERSION = 2;
-const WEB = "@enumeratio/web";
+const WEB = "@notatio/web";
 const MAX_AGE_DAYS = 14;
 const MAX_BYTES = 3 * 1024 ** 3;
 
@@ -270,7 +270,7 @@ async function build(requested: string[]): Promise<void> {
 
   const doUnit = async (unit: Unit): Promise<void> => {
     const tar = join(dir, `${keys.get(unit.id)}.tar`);
-    const label = unit.members.map((m) => m.name.replace(/^@enumeratio\//, "")).join("+");
+    const label = unit.members.map((m) => m.name.replace(/^@notatio\//, "")).join("+");
     const t0 = Date.now();
     if (existsSync(tar)) {
       for (const p of outputsOf(unit)) rmSync(join(root, p), { recursive: true, force: true });

@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { symbolNameOf } from "@enumeratio/engine";
+import { symbolNameOf } from "@notatio/engine";
 import { ancestry, ensureProtocols, PROTOCOLS, type ProtocolName, protocol } from "./protocols.ts";
 
 /** A member's implementation: the receiver first. `undefined` when it has no answer, which

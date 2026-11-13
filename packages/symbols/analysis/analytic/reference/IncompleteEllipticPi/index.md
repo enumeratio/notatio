@@ -6,7 +6,7 @@ summary: The incomplete Legendre elliptic integral of the third kind, $\Pi(n;\va
 signatures:
   - call: IncompleteEllipticPi(n, phi, m)
     description: the incomplete elliptic integral of the third kind, characteristic n, amplitude φ, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 seeAlso:
   - EllipticPi

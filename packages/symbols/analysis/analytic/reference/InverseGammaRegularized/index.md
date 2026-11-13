@@ -6,7 +6,7 @@ summary: "The inverse of the regularized incomplete gamma $Q(a, z)$ in $z$: solv
 signatures:
   - call: InverseGammaRegularized(a, s)
     description: solves $s = Q(a, z)$ for $z$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 primitive: kernel
 bindings:

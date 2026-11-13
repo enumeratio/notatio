@@ -1,4 +1,4 @@
-# @enumeratio/polytope
+# @notatio/polytope
 
 Polytopes as face posets, not as vertex-coordinate lists: the permutahedron, simplex,
 cross-polytope, hypercube and associahedron, each stated purely as its combinatorics
@@ -12,7 +12,7 @@ Each polytope is a `Polytope` value keyed in `POLYTOPES`, and the `polytope()` h
 in the derived face-poset `contains` order from the four primitives a shape states directly:
 
 ```ts
-import { PERMUTAHEDRON, POLYTOPES, scene } from "@enumeratio/polytope";
+import { PERMUTAHEDRON, POLYTOPES, scene } from "@notatio/polytope";
 
 PERMUTAHEDRON.enumerate(3); // every set composition of {1, 2, 3} — the hexagon's 13 faces
 POLYTOPES["cross-polytope"]; // by the name a page or attribute would spell

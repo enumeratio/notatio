@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { CancellationError } from "@cortex-js/compute-engine";
-import { DeadlineExceededError, withDeadline } from "@enumeratio/engine";
+import { DeadlineExceededError, withDeadline } from "@notatio/engine";
 
 export type Outcome = "Success" | "Failure" | "Error" | "Aborted";
 

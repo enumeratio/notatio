@@ -1,4 +1,4 @@
-// Rebuild `@enumeratio/oracle`'s `mappings-data.ts` from every head's `origin: mapped`
+// Rebuild `@notatio/oracle`'s `mappings-data.ts` from every head's `origin: mapped`
 // `bindings:` rows (symbol-metadata step 5, https://github.com/enumeratio/notatio/wiki/Archive-Symbol-Metadata). The oracle
 // emitters need this as plain, synchronous data -- `emit.ts` runs in the site build and in the
 // browser, so it cannot parse YAML at runtime.
@@ -10,7 +10,7 @@
 //
 //   vp node packages/reference/scripts/collect-mappings.ts
 
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 // From the source: oracle's build runs this before oracle itself is built.
 import { mappingsFromBindings } from "../../oracle/src/mapping-rows.ts";
 import { referenceData } from "../src/node.ts";

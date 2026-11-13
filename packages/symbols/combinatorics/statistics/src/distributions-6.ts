@@ -7,7 +7,7 @@ import {
   symbolNameOf,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { bindingOf, finish, mentions, normal01, numAt, uniform01 } from "./distributions.ts";
 import { add, div, exp, mul, neg, pow, sub } from "./distributions-2.ts";
 

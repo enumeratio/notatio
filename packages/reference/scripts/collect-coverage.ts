@@ -23,8 +23,8 @@
 // the Hurwitz function restricted to real s > 1. Sage bundles mpmath and SymPy, so a Sage lane would subsume both,
 // at the cost of a much heavier dependency for no extra coverage. We call mpmath directly.
 
-import { writeFormatted } from "@enumeratio/entry/node";
-import { runKernel, runWolframKernel } from "@enumeratio/utils/bounded";
+import { writeFormatted } from "@notatio/entry/node";
+import { runKernel, runWolframKernel } from "@notatio/utils/bounded";
 import { referenceEntries } from "../src/node.ts";
 
 const names = referenceEntries().map((entry) => entry.name);

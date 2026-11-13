@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/combinatorics",
+  "name": "@notatio/combinatorics",
   "version": "0.0.0",
   "private": true,
   "description": "Combinatorial collections and carriers for @cortex-js/compute-engine, merged wholesale ahead of per-area carving (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible).",
@@ -41,24 +41,24 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/ce-patches": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/plausible": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/ce-patches": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/plausible": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/entry": "workspace:*",
-    "@enumeratio/groupalgebra": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/structures": "workspace:*",
+    "@notatio/boxes": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/entry": "workspace:*",
+    "@notatio/groupalgebra": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/structures": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

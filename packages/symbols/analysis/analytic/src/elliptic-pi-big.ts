@@ -1,5 +1,5 @@
-import { BigDecimal } from "@enumeratio/engine";
-import { atDigits } from "@enumeratio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
+import { atDigits } from "@notatio/ce-patches";
 import { carlsonRDBig, carlsonRFBig, carlsonRJBig } from "./carlson-big.ts";
 
 // The BigDecimal twin of `ellipticPiComplete` / `incompleteEllipticPi` (elliptic.ts) for real

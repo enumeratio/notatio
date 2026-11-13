@@ -8,8 +8,8 @@ import {
   isFiniteNum,
   wantsNumber,
   logGammaReal,
-} from "@enumeratio/ce-patches";
-import { BigDecimal } from "@enumeratio/engine";
+} from "@notatio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
 import { inverseGamma } from "./hypergeometric-big.ts";
 
 // InverseGammaRegularized(a, s) and InverseBetaRegularized(s, a, b): neither has a closed

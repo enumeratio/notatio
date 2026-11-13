@@ -1,4 +1,4 @@
-import type { Engine, Expr } from "@enumeratio/engine";
+import type { Engine, Expr } from "@notatio/engine";
 import { listOf, type GraphModel } from "./graphs.ts";
 
 // Edge weights: `Graph(edges, EdgeWeight -> {…})` (the model-building side lives in

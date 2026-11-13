@@ -1,6 +1,6 @@
 import { isNumber, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
-import { isRealInt } from "@enumeratio/ce-patches";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
+import { isRealInt } from "@notatio/ce-patches";
 import { powerSeriesCoefficient } from "./power-orders.ts";
 import { fractionFactors } from "./transforms.ts";
 

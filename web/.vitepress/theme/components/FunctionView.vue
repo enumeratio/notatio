@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { type FunctionView, plotSectionOf } from "@enumeratio/frontend/function-view";
+import { type FunctionView, plotSectionOf } from "@notatio/frontend/function-view";
 import { computed, onMounted, ref } from "vue";
 import { plotMarkup } from "../../data/plot-markup.ts";
 

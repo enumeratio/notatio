@@ -1,4 +1,4 @@
-// A head's notation as data (`@enumeratio/manifest`'s `NotationData`), compiled to the rules and
+// A head's notation as data (`@notatio/manifest`'s `NotationData`), compiled to the rules and
 // LaTeX entries a package's notation entry gives. A template is boxes, in their JSON form or
 // written in Epsil (`SubscriptBox("H", TemplateSlot("n"))`), with a `TemplateSlot` for each
 // parameter: filled with that argument's boxes, or fenced as a base would be with `{ Tight: true }`.
@@ -8,7 +8,7 @@
 //   { "trigger": "\\scaled", "kind": "function" }                                      \scaled(x)
 
 import type { LatexDictionaryEntry } from "@cortex-js/compute-engine/latex-syntax";
-import { type BoxTemplate, type NotationData, slotsOf } from "@enumeratio/manifest";
+import { type BoxTemplate, type NotationData, slotsOf } from "@notatio/manifest";
 import { type Box, isBoxHead, isNode } from "./box.ts";
 import type { NotationRule, PackageNotation, Writer } from "./notation.ts";
 import { isList } from "./notation.ts";

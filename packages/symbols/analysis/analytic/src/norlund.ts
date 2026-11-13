@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt, bigRationalAt } from "@enumeratio/engine";
-import { bernoulliRational, type Rat, type EvalOptions, isFiniteNum, wantsNumber } from "@enumeratio/ce-patches";
+import { bigIntegerAt, bigRationalAt } from "@notatio/engine";
+import { bernoulliRational, type Rat, type EvalOptions, isFiniteNum, wantsNumber } from "@notatio/ce-patches";
 
 // NorlundB(n, a): the Nörlund polynomial B_n^(a), from (t/(e^t − 1))^a = Σ B_n^(a) tⁿ/n!.
 // At a = 1 this is the ordinary Bernoulli number, already exact here as `bernoulliRational`;

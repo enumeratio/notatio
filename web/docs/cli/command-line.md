@@ -21,8 +21,8 @@ dropdown runs both; [Environments](/docs/components/environments) explains the r
 From a checkout of the monorepo:
 
 ```bash
-pnpm --filter @enumeratio/cli exec tsx src/main.ts "Binomial(10, 3)"
-# or, after `pnpm --filter @enumeratio/cli build`:
+pnpm --filter @notatio/cli exec tsx src/main.ts "Binomial(10, 3)"
+# or, after `pnpm --filter @notatio/cli build`:
 node packages/cli/bin/notatio.mjs "Binomial(10, 3)"
 ```
 

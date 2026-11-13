@@ -1,5 +1,5 @@
-import { bareEngine, createEngine } from "@enumeratio/engine/testing";
-import { collectMessages, messageLine, symbolNameOf } from "@enumeratio/engine";
+import { bareEngine, createEngine } from "@notatio/engine/testing";
+import { collectMessages, messageLine, symbolNameOf } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { declareNumerals, NUMERAL_ALIASES } from "../src/declare.ts";
 

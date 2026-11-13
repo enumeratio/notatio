@@ -1,5 +1,5 @@
 import { readFileSync } from "node:fs";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps, MAPS } from "../../src/index.ts";
 import { objectSize, readObject } from "../src/objects.ts";

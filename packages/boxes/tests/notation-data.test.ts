@@ -12,7 +12,7 @@ import {
   subscripted,
   superscript,
 } from "../src/index.ts";
-import { type NotationData, notationProblem } from "@enumeratio/manifest";
+import { type NotationData, notationProblem } from "@notatio/manifest";
 import { compileNotation } from "../src/notation-data.ts";
 import type { Notation } from "../src/notation.ts";
 import { toLatex } from "../src/render/index.ts";

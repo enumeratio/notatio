@@ -1,11 +1,4 @@
-import {
-  type Engine,
-  type EvaluateOptions,
-  type Expr,
-  operandsOf,
-  symbolNameOf,
-  wrapOperator,
-} from "@enumeratio/engine";
+import { type Engine, type EvaluateOptions, type Expr, operandsOf, symbolNameOf, wrapOperator } from "@notatio/engine";
 import { bindingOf, finish, mentions, numAt } from "./distributions.ts";
 
 // The fifth wave of Wolfram-frontier probability heads, narrowed (mid-batch) to exactly two
@@ -20,7 +13,7 @@ import { bindingOf, finish, mentions, numAt } from "./distributions.ts";
 // `Conditioned[a, b]` ("a conditioned on b") as `Probability`'s or `Expectation`'s first
 // argument, never a head of its own outside that position.
 //
-// No shared/exported quadrature utility exists yet (checked `@enumeratio/analytic`:
+// No shared/exported quadrature utility exists yet (checked `@notatio/analytic`:
 // `generalized-special.ts` has a private tanh-sinh integrator for the Nielsen polylog, not
 // exported). This file has its own, generalized from a single unit interval to all four
 // interval shapes (finite, semi-infinite either way, fully infinite) via the standard
@@ -118,7 +111,7 @@ function continuousDomain(dist: Expr): Range | undefined {
 // the standard DE substitutions (Takahasi-Mori). Converges doubly-exponentially for smooth
 // integrands, which is why the PDFs and indicator functions here (all bounded, and singular at
 // worst at an integrable endpoint) are a good fit. Tolerance and level cap match the existing
-// (private, unexported) `tanhSinhUnitInterval` in `@enumeratio/analytic`'s
+// (private, unexported) `tanhSinhUnitInterval` in `@notatio/analytic`'s
 // `generalized-special.ts` — same technique, independently implemented here since nothing is
 // exported to reuse.
 

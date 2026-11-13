@@ -12,7 +12,7 @@
 // the point and the two windings come apart — one dial turns p times while the other turns q.
 
 import { ACCENT, GROUND, INK, Sketch } from "./diagram.ts";
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import { categoryColors, type ColorOptions, plotPalette } from "./plot-color.ts";
 
 const FAINT = "var(--vp-c-divider, #ddd)";

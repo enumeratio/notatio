@@ -5,7 +5,7 @@
 // asks for the grid (`surfaceBox`). A curve in space is `Graphics3D(Line(points))`, its points the
 // value of an expression the page evaluates.
 
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import type { Triple } from "./plot3d.ts";
 import {
   barChart3dBox,

@@ -1,4 +1,4 @@
-# @enumeratio/boxes
+# @notatio/boxes
 
 Wolfram-style box primitives: the presentation tree between an expression and its
 rendering. Plain JSON in Wolfram's `FullForm` shape — a leaf is a string token, a node is
@@ -14,7 +14,7 @@ inline math in prose.
   precedence-driven, every node reporting how tightly it binds.
   The main entry is base (the box tree, `makeBoxes`, the notation registry and
   `declareBoxes`), what every symbol package's notation builds on. The serialisers and
-  readers are presentation, at `@enumeratio/boxes/render`.
+  readers are presentation, at `@notatio/boxes/render`.
 
 - `toLatex`, `toMathML`/`parseMathML`, `toText`/`toAscii` (`/render`) — boxes to LaTeX (for MathLive
   and KaTeX), to and from presentation MathML, to plain text and AsciiMath.
@@ -35,8 +35,8 @@ inline math in prose.
 ## Usage
 
 ```ts
-import { makeBoxes } from "@enumeratio/boxes";
-import { toAscii, toLatex, toText } from "@enumeratio/boxes/render";
+import { makeBoxes } from "@notatio/boxes";
+import { toAscii, toLatex, toText } from "@notatio/boxes/render";
 
 const boxes = makeBoxes(["Power", "x", 2]); // ["SuperscriptBox", "x", "2"]
 toLatex(boxes); // "x^2"

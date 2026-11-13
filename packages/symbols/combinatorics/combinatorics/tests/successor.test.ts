@@ -1,8 +1,8 @@
 // Successor(c, x): the rank kernel's answer against the Epsil definition (IndexOf, then At), element
 // by element over small families, plus the cases the definition leaves unevaluated.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { SUCCESSOR_EPSIL } from "../collections/src/successor.ts";
 import { declareCombinatorics } from "../src/index.ts";

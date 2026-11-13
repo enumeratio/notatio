@@ -6,14 +6,14 @@ summary: The global minimum of f over the real line (or a simple interval constr
 signatures:
   - call: Minimize(f, x)
     description: the global minimum of f, a real expression in the single variable x, over f's own natural domain.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, list<symbol> | symbol) -> expression
   - call: Minimize(f, {x})
     description: same as Minimize(f, x) -- Wolfram accepts the variable either bare or wrapped in a one-element list.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
   - call: Minimize({f, cons}, x)
     description: the global minimum of f restricted to cons, a simple interval constraint (x >= a, a <= x <= b, an And of two one-sided bounds, ...).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Maximize
   - MinValue

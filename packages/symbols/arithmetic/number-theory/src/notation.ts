@@ -1,6 +1,6 @@
-// @enumeratio/number-theory's heads in traditional notation: the p-adic valuation v_b(n).
+// @notatio/number-theory's heads in traditional notation: the p-adic valuation v_b(n).
 
-import { type Notation, scalars, subscript, type PackageNotation } from "@enumeratio/boxes";
+import { type Notation, scalars, subscript, type PackageNotation } from "@notatio/boxes";
 
 export const NUMBER_THEORY_NOTATION: Notation = {
   IntegerExponent: scalars(([n, b, ...rest], write) =>

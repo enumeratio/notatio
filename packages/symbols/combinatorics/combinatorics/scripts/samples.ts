@@ -3,7 +3,7 @@
 // first few ranks of each. Families overlap (the same small permutation is in dozens of them),
 // so each distinct element appears once: the checks cost per element.
 
-import type { Engine } from "@enumeratio/engine";
+import type { Engine } from "@notatio/engine";
 import { allKernels } from "../collections/src/families/index.ts";
 
 const toJson = (element: unknown): unknown => (Array.isArray(element) ? ["List", ...element.map(toJson)] : element);

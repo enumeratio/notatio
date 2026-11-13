@@ -2,7 +2,7 @@
 // write there is captured by them. The sets are the lanes' own (reserved-names-data.ts, from
 // scripts/collect-reserved-names.ts), so a library release that adds a name shows up as drift.
 //
-// Wolfram's globals are `@enumeratio/wolfram`'s `isSystemName`; Julia, Lean and Rust emit no
+// Wolfram's globals are `@notatio/wolfram`'s `isSystemName`; Julia, Lean and Rust emit no
 // variable names (a free symbol is `missing`, and no template there binds an operand's name).
 
 import { RESERVED_NAMES_DATA } from "./reserved-names-data.ts";

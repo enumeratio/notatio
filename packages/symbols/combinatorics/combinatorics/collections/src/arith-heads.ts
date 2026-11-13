@@ -1,4 +1,4 @@
-import { bigRationalAt, type Engine, type Expr, wrapOperator } from "@enumeratio/engine";
+import { bigRationalAt, type Engine, type Expr, wrapOperator } from "@notatio/engine";
 
 // #113 arithmetic-head extensions that don't belong to any single family, and are kept
 // OUT of packages/symbols/analysis/analytic on purpose:

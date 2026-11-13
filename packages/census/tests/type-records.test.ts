@@ -1,13 +1,13 @@
 // The typed rows in the records are written by scripts/type-records.ts; a package that changes
 // what it does to a head leaves its row stale until the script is run again.
 
-import { headNames, readEntry, recordDirs } from "@enumeratio/entry/node";
+import { headNames, readEntry, recordDirs } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { contributions, ENGINE } from "../src/contributions.ts";
 
 const PACKAGES = new URL("../../", import.meta.url).pathname;
 const packageOf = (library: string | undefined): string =>
-  library === undefined ? ENGINE : library.replace(/^@enumeratio\//, "").replace(/^enumeratio-/, "");
+  library === undefined ? ENGINE : library.replace(/^@notatio\//, "").replace(/^enumeratio-/, "");
 const libraryOf = (pkg: string): string => (pkg === ENGINE ? ENGINE : `enumeratio-${pkg}`);
 
 test("each record's typed rows say what its package does to the head", () => {

@@ -1,4 +1,4 @@
-# @enumeratio/statistics
+# @notatio/statistics
 
 Probability distributions and random processes, each defined once as an Epsil expression:
 the named laws, the functions over them (`PDF`, `CDF`, `Expectation`, `Moment`, …) and
@@ -7,7 +7,7 @@ sampling (`RandomVariate`).
 ## Usage
 
 ```ts
-import { declareDistributions, declareProcesses } from "@enumeratio/statistics";
+import { declareDistributions, declareProcesses } from "@notatio/statistics";
 
 declareDistributions(ce);
 declareProcesses(ce);

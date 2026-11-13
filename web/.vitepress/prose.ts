@@ -3,9 +3,9 @@
 // typeset from its TeX as written. Synchronous, so the same call renders at build
 // and in the browser.
 
-import { type Box } from "@enumeratio/boxes";
-import { readInlineMarkdown, readMarkdown, toHtml } from "@enumeratio/boxes/render";
-import { typeset as typesetTeX } from "@enumeratio/formats/typeset";
+import { type Box } from "@notatio/boxes";
+import { readInlineMarkdown, readMarkdown, toHtml } from "@notatio/boxes/render";
+import { typeset as typesetTeX } from "@notatio/formats/typeset";
 
 const typeset = new Map<string, string>();
 

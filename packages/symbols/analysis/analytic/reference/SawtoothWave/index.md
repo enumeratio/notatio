@@ -6,11 +6,11 @@ summary: "The sawtooth wave: x - floor(x), period 1, range [0, 1)."
 signatures:
   - call: SawtoothWave(x)
     description: x - floor(x), unit period, range [0, 1).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real | vector<real^2>, real?) -> number
   - call: SawtoothWave({min, max}, x)
     description: the sawtooth rescaled to vary from min to max, unit period.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

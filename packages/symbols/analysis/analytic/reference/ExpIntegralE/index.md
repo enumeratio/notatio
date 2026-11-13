@@ -6,7 +6,7 @@ summary: "The generalized exponential integral $E_n(z) = \\int_1^\\infty e^{-zt}
 signatures:
   - call: ExpIntegralE(n, z)
     description: $E_n(z)$, for any order $n$ (real, complex, or non-integer).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 primitive: kernel
 bindings:

@@ -6,11 +6,11 @@ summary: "The unit step function: 0 for x < 0 and 1 for x >= 0."
 signatures:
   - call: UnitStep(x)
     description: 0 if x < 0, 1 if x >= 0.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list<number> | number, number*) -> list<number> | number
   - call: UnitStep(x1, x2, …)
     description: the product of the unit steps -- 0 as soon as any argument is negative.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

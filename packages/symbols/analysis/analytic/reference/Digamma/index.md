@@ -74,5 +74,5 @@ bindings:
 - Recurrence inherited from Gamma's functional equation: $\psi(z+1) = \psi(z) + 1/z$.
 - $\psi(1/2) = -\gamma - 2\ln 2$.
 - Poles at the nonpositive integers, the same poles as [[Gamma]].
-- compute-engine's plain evaluation would otherwise leave Digamma at an exact integer argument symbolic except at the poles; `@enumeratio/analytic` overrides it at every positive integer via $\psi(n) = H_{n-1} - \gamma$, reusing [[HarmonicNumber]]. A rational, non-integer argument, or N(), still goes through the numeric path.
+- compute-engine's plain evaluation would otherwise leave Digamma at an exact integer argument symbolic except at the poles; `@notatio/analytic` overrides it at every positive integer via $\psi(n) = H_{n-1} - \gamma$, reusing [[HarmonicNumber]]. A rational, non-integer argument, or N(), still goes through the numeric path.
 - Differs from Wolfram: $Digamma(1/4)$ reduces to its closed form on evaluation; Wolfram keeps `Digamma[1/4]` until `FunctionExpand`. Both agree as identities.

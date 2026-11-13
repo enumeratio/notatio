@@ -10,7 +10,7 @@
 // With no pairs, checks every permutation match in `findstat-data.ts`. Prints rows checked and any disagreement.
 
 import { readFileSync } from "node:fs";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { applyDefinition } from "../../src/statistics/declare.ts";
 import { bySignature } from "../../src/statistics/types.ts";
 import { findstat } from "../../findstat/src/findstat-data.ts";

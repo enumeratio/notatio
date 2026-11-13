@@ -49,7 +49,7 @@ export interface IndexedRecord {
 
 /** A library's slice of the manifest: its records, in head order, and its notation entry. */
 export interface PackageIndex {
-  /** Its manifest name: `boxes`, not `@enumeratio/boxes`. */
+  /** Its manifest name: `boxes`, not `@notatio/boxes`. */
   readonly package: string;
   /** The specifier a host imports its notation entry by. */
   readonly notation?: string;
@@ -73,9 +73,9 @@ export interface Manifest {
 }
 
 /** A signature row's `library`, as the package it names: `enumeratio-boxes` and
- *  `@enumeratio/boxes` are both `boxes`; absent is the engine's own. */
+ *  `@notatio/boxes` are both `boxes`; absent is the engine's own. */
 export const packageOf = (library: string | undefined): string =>
-  library === undefined ? ENGINE : library.replace(/^@enumeratio\//, "").replace(/^enumeratio-/, "");
+  library === undefined ? ENGINE : library.replace(/^@notatio\//, "").replace(/^enumeratio-/, "");
 
 /** `SetMinus(a, b)` -> `["a", "b"]`, for a fixed arity spelled with plain names. */
 function paramsOf(signature: string | undefined): string[] | undefined {

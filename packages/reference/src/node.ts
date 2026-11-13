@@ -1,10 +1,10 @@
 // The fs-based loader for the records (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §8 step 1). Reads each
-// `<package>/reference/<Head>/` folder (see @enumeratio/entry's record.ts), through
-// `@enumeratio/entry`'s strict reader, validated against its JSON Schema, and checks for `id`
+// `<package>/reference/<Head>/` folder (see @notatio/entry's record.ts), through
+// `@notatio/entry`'s strict reader, validated against its JSON Schema, and checks for `id`
 // collisions on a head shared between two packages (§9 "Shared heads").
 //
 // Node-only (`node:fs`), so this lives on the `/node` subpath, never the package's `.` entry:
-// `ExampleAlternatives.vue` imports `@enumeratio/reference` in the browser, and a filesystem
+// `ExampleAlternatives.vue` imports `@notatio/reference` in the browser, and a filesystem
 // loader on the main export would break the site build.
 
 import { existsSync, readFileSync } from "node:fs";
@@ -15,15 +15,15 @@ import {
   type OtherSystemRun,
   type ReferenceEntry,
   type SystemImplementation,
-} from "@enumeratio/entry";
+} from "@notatio/entry";
 import {
   HEAD_IMPLEMENTATIONS_SCHEMA,
   REFERENCE_ENTRY_SCHEMA,
   REFERENCE_EXAMPLES_SCHEMA,
   validateSchema,
-} from "@enumeratio/entry/schema";
-import { OWN_FORMS as OWN_FORMS_LIST } from "@enumeratio/entry";
-import { EXAMPLES_FILE, headNames, type HeadRecord, INDEX_FILE, readHead, recordDirs } from "@enumeratio/entry/node";
+} from "@notatio/entry/schema";
+import { OWN_FORMS as OWN_FORMS_LIST } from "@notatio/entry";
+import { EXAMPLES_FILE, headNames, type HeadRecord, INDEX_FILE, readHead, recordDirs } from "@notatio/entry/node";
 import { isCrosswalkSystem } from "./crosswalk/sources.ts";
 
 export interface LoadedHead {
@@ -56,7 +56,7 @@ export interface LoadResult {
 }
 
 /**
- * Scan every package's record directory (see `recordDirs` in `@enumeratio/entry/node`) for head
+ * Scan every package's record directory (see `recordDirs` in `@notatio/entry/node`) for head
  * folders (`<Head>/index.md`, `examples.tsv`, `examples.values.<system>.tsv`), parse and validate
  * each, and check that no two packages assign the same id to the same head
  * (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §3, §9).
@@ -125,12 +125,12 @@ export function loadReferenceData(packagesRoot: string): LoadResult {
 const isCheckout = (dir: string): boolean => existsSync(join(dir, "symbols"));
 
 /**
- * The `@enumeratio` scope of the installed packages: the first `node_modules/@enumeratio` at or above
+ * The `@notatio` scope of the installed packages: the first `node_modules/@notatio` at or above
  * `from`. Not this package's own siblings, which under pnpm are only what it declares.
  */
 export function installedPackages(from: string = process.cwd()): string | undefined {
   for (let dir = resolve(from); ; dir = dirname(dir)) {
-    const scope = join(dir, "node_modules", "@enumeratio");
+    const scope = join(dir, "node_modules", "@notatio");
     if (existsSync(scope)) return scope;
     if (dirname(dir) === dir) return undefined;
   }
@@ -300,7 +300,7 @@ export function oracleAgreementsOf(
 export const OWN_ENGINE = new Set(["statistics"]);
 
 /** The combinatorics area's maps (originally `@enumeratio/domains`, before it merged into
- * `@enumeratio/combinatorics` wholesale, and before ITS domains area was retired: https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible's
+ * `@notatio/combinatorics` wholesale, and before ITS domains area was retired: https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible's
  * step 1) -- the same carrier-typed-argument problem as `OWN_ENGINE`, but the merge means
  * `packageOf` can no longer single them out from the collections area by package name alone.
  * This is the (former) domains area's reference/ folder listing as of the merge; it moves

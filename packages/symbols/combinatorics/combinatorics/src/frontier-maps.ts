@@ -16,7 +16,7 @@
 //
 // Neither was ever hard. They were written before the rules were understood, which is a
 // different thing from being out of reach — and worth remembering when reading what is left. Statistics hit this too (see the `atLeast`
-// guards in @enumeratio/statistics), but a map building a list of variable length hits it
+// guards in @notatio/statistics), but a map building a list of variable length hits it
 // harder: the guard has to cover every stage of the pipeline, not just the outer result.
 //
 // The RSK entries are gone entirely. What blocked them was never the growing accumulator —

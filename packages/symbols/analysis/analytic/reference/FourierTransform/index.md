@@ -6,7 +6,7 @@ summary: The Fourier transform under Wolfram's default convention ($\mathrm{Four
 signatures:
   - call: FourierTransform(f, t, w)
     description: $F(w) = \frac{1}{\sqrt{2\pi}}\int_{-\infty}^\infty f(t) e^{iwt}\,dt$, Wolfram's default `FourierParameters -> {0, 1}`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression) -> expression
 primitive: kernel
 bindings:

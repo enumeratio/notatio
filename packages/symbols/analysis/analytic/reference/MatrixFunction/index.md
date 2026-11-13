@@ -2,11 +2,11 @@
 name: MatrixFunction
 domain: Linear algebra
 signature: MatrixFunction(f, m)
-summary: A scalar function f extended to a square matrix m, via its eigendecomposition. Provided by `@enumeratio/analytic`.
+summary: A scalar function f extended to a square matrix m, via its eigendecomposition. Provided by `@notatio/analytic`.
 signatures:
   - call: MatrixFunction(f, m)
     description: f applied to the square matrix m, via its eigendecomposition.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (function, matrix) -> matrix
 seeAlso:
   - MatrixExp

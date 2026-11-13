@@ -15,7 +15,7 @@ import {
   type Cx,
   mul,
   scale,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // EllipticTheta(a, u, q) and EllipticThetaPrime(a, u, q) — the four Jacobi theta
 // functions (a = 1..4) and their u-derivatives, Wolfram's nome convention |q| < 1

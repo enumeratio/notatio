@@ -3,12 +3,12 @@
 // operands. `declare-gaussian.ts` already carries GCD into ℤ[i] when an operand is genuinely
 // complex, but a call where every operand is a real integer — the common case, and the
 // bench's 10000-bit pair — still falls through to that native Euclid. Below
-// `LEHMER_THRESHOLD_BITS` this uses @enumeratio/residues' Stein binary `gcd` (shifts and
+// `LEHMER_THRESHOLD_BITS` this uses @notatio/residues' Stein binary `gcd` (shifts and
 // subtraction beat a bigint division at these sizes too, and it's already well exercised);
 // above it, Lehmer's algorithm (leading-digit simulation, HAC 14.4) wins by turning most of
 // Euclid's O(log n) full-width divisions into a handful of them.
-import { bigIntegerAt, wrapOperator, type Engine, type Expr } from "@enumeratio/engine";
-import { gcd, lehmerGcd } from "@enumeratio/residues";
+import { bigIntegerAt, wrapOperator, type Engine, type Expr } from "@notatio/engine";
+import { gcd, lehmerGcd } from "@notatio/residues";
 
 // Chosen well above Lehmer's own internal small-number cutoff (2^32) so the hybrid only
 // pays for the leading-digit simulation once operands are large enough for it to pay off.

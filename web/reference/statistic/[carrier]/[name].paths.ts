@@ -1,5 +1,5 @@
-import { type CarrierPicker, hasPicker, pickerOf } from "@enumeratio/frontend/core";
-import { catalogOf, type DistributionSource, distributionSourceOf } from "@enumeratio/frontend/explorer";
+import { type CarrierPicker, hasPicker, pickerOf } from "@notatio/frontend/core";
+import { catalogOf, type DistributionSource, distributionSourceOf } from "@notatio/frontend/explorer";
 import { entries } from "../../../.vitepress/data/reference-node.ts";
 import { liveExpression, siblingsOf, statisticPages } from "../../../.vitepress/data/carrier-fields.ts";
 

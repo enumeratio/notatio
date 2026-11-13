@@ -6,7 +6,7 @@ summary: Klein's absolute invariant $J(\tau) = j(\tau)/1728$, normalised so $J(i
 signatures:
   - call: KleinInvariantJ(tau)
     description: $J(\tau) = j(\tau)/1728$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 primitive: kernel
 bindings:

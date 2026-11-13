@@ -8,7 +8,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { holdsPrerenderedPlot } from "@enumeratio/frontend/core";
+import { holdsPrerenderedPlot } from "@notatio/frontend/core";
 import { HYDRATED_ATTRIBUTE } from "./theme/hydration.ts";
 
 /** One element a page asks the build to render. */

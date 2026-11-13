@@ -4,7 +4,7 @@
 // same exact job in O(log n) bigint multiplications. Exact, never approximate; declines
 // (falls through to the native handler) past a documented size rather than pretend a budget
 // it doesn't have.
-import { bigIntegerAt, defineOverload, type Engine, type Expr } from "@enumeratio/engine";
+import { bigIntegerAt, defineOverload, type Engine, type Expr } from "@notatio/engine";
 import { fibonacci, lucasL } from "./fast-recurrence.ts";
 
 /** Above this, F(n)/L(n) would run past ~2M decimal digits — plenty past the bench range
@@ -39,5 +39,5 @@ export function declareFastRecurrence(ce: Engine): void {
 
   // `Mod(Fibonacci(n), p)` never reaches these: declare-modular-kernels.ts answers it modulo p
   // before Fibonacci is evaluated. (A `canonical` hook on `Mod` was tried for that and broke
-  // every call it declined; modular.ts in @enumeratio/engine says what it does instead.)
+  // every call it declined; modular.ts in @notatio/engine says what it does instead.)
 }

@@ -19,7 +19,7 @@ import {
   logGamma,
   zetaGeneralized,
   inexactComplex,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { LARGEST_ARGUMENT } from "./riemann-siegel-asymptotic.ts";
 import {
   riemannSiegelZBig,

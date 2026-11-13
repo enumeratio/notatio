@@ -1,6 +1,6 @@
 // unstable: a bare ComputeEngine with only the analytic declarations, to see what still compiles
-import { compileExpression, compileTyped } from "@enumeratio/engine/compiled";
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { compileExpression, compileTyped } from "@notatio/engine/compiled";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 

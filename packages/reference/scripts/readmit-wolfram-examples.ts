@@ -14,8 +14,8 @@
 // prune script's header).
 
 import { readFileSync } from "node:fs";
-import type { TriageBucket } from "@enumeratio/entry";
-import { emit } from "@enumeratio/oracle";
+import type { TriageBucket } from "@notatio/entry";
+import { emit } from "@notatio/oracle";
 import { loadReferenceData, PACKAGES } from "../src/node.ts";
 import { rewriteExamples, settle } from "./triage-records.ts";
 

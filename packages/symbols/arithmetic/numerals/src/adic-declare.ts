@@ -6,7 +6,7 @@ import {
   operandsOf,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import * as adic from "./adic.ts";
 import type { Adic } from "./adic.ts";
 

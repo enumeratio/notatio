@@ -1,6 +1,6 @@
 import { existsSync, readdirSync } from "node:fs";
 import { defineConfig } from "vite-plus";
-import { fmt, lint } from "@enumeratio/config";
+import { fmt, lint } from "@notatio/config";
 
 // One entry per package module scripts/build.ts wrote, so each is its own `./package/<name>`.
 const generated = "src/generated/package";

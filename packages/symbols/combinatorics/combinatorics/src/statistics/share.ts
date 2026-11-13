@@ -4,9 +4,9 @@
 // cannot disagree, and the bare head (which already takes the contents) agrees too. A few
 // statistics are instead one expression over the contents.
 
-import { type Engine, operandsOf } from "@enumeratio/engine";
+import { type Engine, operandsOf } from "@notatio/engine";
 import type { MathJSON } from "./types.ts";
-import { type Operation, operationOf, registerOperation } from "@enumeratio/structures";
+import { type Operation, operationOf, registerOperation } from "@notatio/structures";
 
 type Subject = Parameters<NonNullable<Operation["definition"]>>[0];
 

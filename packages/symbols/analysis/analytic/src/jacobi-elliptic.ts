@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 import {
   type EvalOptions,
   bigRealOperand,
@@ -23,7 +23,7 @@ import {
   mul,
   scale,
   sub,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { jacobiQuotientBig, jacobiZetaBig } from "./jacobi-big.ts";
 
 // The twelve Jacobi elliptic functions (Glaisher's `pq(u,m)` notation: `sn`, `cn`, `dn`

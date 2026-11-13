@@ -124,7 +124,7 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const targets = args.packages
     ? args.packages.map((name) => ({
-        name: `@enumeratio/${name}`,
+        name: `@notatio/${name}`,
         dir: join(REPO_ROOT, "packages", name),
       }))
     : discoverPackages(REPO_ROOT);

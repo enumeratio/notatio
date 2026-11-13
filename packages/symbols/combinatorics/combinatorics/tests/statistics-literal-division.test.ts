@@ -3,7 +3,7 @@
 // operand. Every compiled definition that divides by a literal other than a power of two must equal the
 // interpreter on subjects with big entries; a regression in either the compiler or a definition shows up here.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { ALL_STATISTICS } from "../src/statistics/all.ts";
 import { compiledStatistic } from "../src/statistics/compiled.ts";

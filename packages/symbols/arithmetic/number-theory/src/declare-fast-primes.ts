@@ -13,8 +13,8 @@
 // argument as a Wolfram-style nth-prime shortcut, but that overloads a head compute-engine
 // already owns for something else entirely. NthPrime is (and stays) the only head name for
 // it on our side; the crosswalk already maps NthPrime <-> Wolfram's Prime.
-import { integerAt, isNumber, wrapOperator, type Engine, type Expr } from "@enumeratio/engine";
-import { nthPrime, primeCount } from "@enumeratio/residues";
+import { integerAt, isNumber, wrapOperator, type Engine, type Expr } from "@notatio/engine";
+import { nthPrime, primeCount } from "@notatio/residues";
 
 export function declareFastPrimes(ce: Engine): void {
   /** A plain, non-negative, safe-integer real — the only shape π/nth-prime answer exactly. */

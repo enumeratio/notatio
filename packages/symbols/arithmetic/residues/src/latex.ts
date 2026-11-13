@@ -1,4 +1,4 @@
-import type { Json, LatexRule } from "@enumeratio/engine";
+import type { Json, LatexRule } from "@notatio/engine";
 import { INTEGER_MOD, QUOTIENT_RING, RESIDUE_CLASS } from "./names.ts";
 
 // Notation for ℤ/m, both ways. Not declared with the heads: a host loads these from the

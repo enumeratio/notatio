@@ -1,4 +1,4 @@
-import { wrapOperator } from "@enumeratio/engine";
+import { wrapOperator } from "@notatio/engine";
 import type { Patch } from "../patch.ts";
 import { evaluateAgm } from "../compute-engine/library/agm.ts";
 

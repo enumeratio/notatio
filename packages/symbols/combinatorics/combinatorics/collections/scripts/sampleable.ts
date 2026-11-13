@@ -6,7 +6,7 @@
 // inside the fiber. What a draw may cost comes from the declared cost classes; an empty or
 // too-expensive draw is a DISCARD (Plausible's gaveUp), never a failure.
 
-import { between, randomBelow, type Rng } from "@enumeratio/plausible";
+import { between, randomBelow, type Rng } from "@notatio/plausible";
 import { type Declared, type FamilyKernel, needsBigint } from "../src/families/types.ts";
 
 export interface Address {

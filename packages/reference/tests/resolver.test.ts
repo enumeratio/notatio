@@ -1,4 +1,4 @@
-// The resolver (`@enumeratio/manifest`'s `createResolver`) declares only what an expression
+// The resolver (`@notatio/manifest`'s `createResolver`) declares only what an expression
 // names. It means what the full engine means when every example evaluates the same in an
 // engine holding just the packages its head's examples name, and their requirements. The
 // standard run checks a few heads across the packages; `DEEP_TESTS=1` checks every head, each
@@ -7,9 +7,9 @@
 // rows are left out: one that reads state an earlier case left on the pooled engine (Transpose's
 // `m`) differs with which cases share an engine.
 
-import { isSettled } from "@enumeratio/entry";
-import { runCases } from "@enumeratio/evaluation/node";
-import { assembleDeclarers, packagesNeeded } from "@enumeratio/manifest";
+import { isSettled } from "@notatio/entry";
+import { runCases } from "@notatio/evaluation/node";
+import { assembleDeclarers, packagesNeeded } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { LIBRARIES } from "../scripts/engines.ts";
 import { referenceData } from "../src/node.ts";

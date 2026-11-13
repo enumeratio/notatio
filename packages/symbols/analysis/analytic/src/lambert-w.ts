@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { symbolNameOf, wrapOperator } from "@enumeratio/engine";
+import { symbolNameOf, wrapOperator } from "@notatio/engine";
 import {
   add,
   cexp,
@@ -13,7 +13,7 @@ import {
   isRealInt,
   wantsNumber,
   inexactComplex,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // LambertW(z) — compute-engine's native ProductLog — already evaluates the principal (k = 0)
 // and lower-real (k = -1) branches numerically. Missing: exact values at algebraically nice

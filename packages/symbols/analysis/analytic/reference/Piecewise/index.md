@@ -2,15 +2,15 @@
 name: Piecewise
 domain: Analytic
 signature: Piecewise(pairs, default)
-summary: "A conditional value: `List` of `{value, condition}` pairs, tried in order, plus a $default$ (0 when omitted) for when none holds. Provided by `@enumeratio/analytic`."
+summary: "A conditional value: `List` of `{value, condition}` pairs, tried in order, plus a $default$ (0 when omitted) for when none holds. Provided by `@notatio/analytic`."
 signatures:
   - call: Piecewise(pairs)
     description: pairs is a `List` of two-element `List`s `{value, condition}`; the default is 0.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list, expression?) -> expression
   - call: Piecewise(pairs, default)
     description: same, with an explicit fallback value.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 names:
   wolframIdentity: true
 ---

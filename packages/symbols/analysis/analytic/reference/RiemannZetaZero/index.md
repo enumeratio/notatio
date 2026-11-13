@@ -2,11 +2,11 @@
 name: RiemannZetaZero
 domain: Special functions
 signature: RiemannZetaZero(k)
-summary: The $k$-th nontrivial zero of the Riemann zeta function on the critical line, $\tfrac12 + i t_k$ for a positive integer $k$. Wolfram calls this `ZetaZero`; compute-engine's own Fungrim identity table already spells it `RiemannZetaZero`. Provided by `@enumeratio/analytic`.
+summary: The $k$-th nontrivial zero of the Riemann zeta function on the critical line, $\tfrac12 + i t_k$ for a positive integer $k$. Wolfram calls this `ZetaZero`; compute-engine's own Fungrim identity table already spells it `RiemannZetaZero`. Provided by `@notatio/analytic`.
 signatures:
   - call: RiemannZetaZero(k)
     description: the k-th nontrivial zero, $\tfrac12 + i t_k$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer) -> number
 primitive: numeric
 bindings:

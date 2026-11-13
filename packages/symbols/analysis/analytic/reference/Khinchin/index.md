@@ -6,7 +6,7 @@ summary: Khinchin's constant $K_0 = 2.68545\ldots$, the almost-sure geometric me
 signatures:
   - call: Khinchin
     description: Khinchin's constant, a new mathematical-constant symbol.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: numeric
 bindings:
   - origin: native

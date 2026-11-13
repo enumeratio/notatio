@@ -5,7 +5,7 @@
 // in the box (`FaceColors`, `VertexColors`, `PointColors`), so nothing here knows a gradient. Pure: the
 // same box and view give byte-identical SVG, in Node and in the browser.
 
-import { type Box, type BoxNode, graphics3dOf, isNode, type Options, optionsOfBox } from "@enumeratio/boxes";
+import { type Box, type BoxNode, graphics3dOf, isNode, type Options, optionsOfBox } from "@notatio/boxes";
 import { label } from "./plot-box.ts";
 import type { Triple } from "./plot3d.ts";
 import { camera } from "./project3d.ts";

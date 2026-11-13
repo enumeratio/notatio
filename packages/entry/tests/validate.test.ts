@@ -1,5 +1,5 @@
-import type { ReferenceEntry } from "@enumeratio/entry";
-import { checkImplementations } from "@enumeratio/entry";
+import type { ReferenceEntry } from "@notatio/entry";
+import { checkImplementations } from "@notatio/entry";
 import { expect, test } from "vite-plus/test";
 
 const base: Omit<ReferenceEntry, "bindings" | "primitive"> = {

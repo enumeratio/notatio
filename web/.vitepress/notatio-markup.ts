@@ -6,11 +6,11 @@
 // stays the component. Markup that doesn't read fails the build. Markup that draws as written
 // (a `Show`, the layout around it) is its element already, so it paints with no kernel.
 
-import { GRAPHICS_HEADS, GRAPHICS_OPTIONS } from "@enumeratio/formats";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { readMarkupText } from "@enumeratio/formats/markup";
-import { drawnAsWritten, markupOf } from "@enumeratio/frontend";
-import { SYMBOLS } from "@enumeratio/manifest";
+import { GRAPHICS_HEADS, GRAPHICS_OPTIONS } from "@notatio/formats";
+import { parseExpression } from "@notatio/formats/expression";
+import { readMarkupText } from "@notatio/formats/markup";
+import { drawnAsWritten, markupOf } from "@notatio/frontend";
+import { SYMBOLS } from "@notatio/manifest";
 import { tex } from "./prose.ts";
 
 /** The components a page can use by a PascalCase tag: the theme's, VitePress's and Vue's. */

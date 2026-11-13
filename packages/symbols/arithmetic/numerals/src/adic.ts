@@ -11,7 +11,7 @@
 //
 // Everything is bigint: 20 digits of base 10 is already past 2^53.
 
-import { gcd, invMod, isPrime, mod, valuation as integerValuation } from "@enumeratio/residues";
+import { gcd, invMod, isPrime, mod, valuation as integerValuation } from "@notatio/residues";
 
 export interface Adic {
   readonly base: bigint;

@@ -1,6 +1,6 @@
 import { ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { indexed, makeBoxes, registerNotation } from "@enumeratio/boxes";
-import { toLatex } from "@enumeratio/boxes/render";
+import { indexed, makeBoxes, registerNotation } from "@notatio/boxes";
+import { toLatex } from "@notatio/boxes/render";
 import { expect, test } from "vite-plus/test";
 import { displayBoxes, displayLatexSyntax } from "../src/display.ts";
 import { latexOf } from "../src/latex.ts";

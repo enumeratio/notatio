@@ -2,8 +2,8 @@
 // codec round-trips every small tree and declines what isn't one; a chain of maps keeps the
 // flat reading between its steps and converts only at its ends.
 
-import { compileTyped } from "@enumeratio/engine/compiled";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { compileTyped } from "@notatio/engine/compiled";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test, vi } from "vite-plus/test";
 import { BinaryTreeUnrank, type BinTree } from "../collections/src/families/kernels-extra.ts";
 import { evaluateTable } from "../scripts/compile-maps.ts";

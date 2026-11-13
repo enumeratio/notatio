@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/diagram",
+  "name": "@notatio/diagram",
   "version": "0.0.0",
   "private": true,
   "description": "Diagram-algebra extensions for @cortex-js/compute-engine — the partition algebra and its subalgebras (Brauer, Temperley–Lieb, Motzkin, rook, symmetric group), whose bases are combinatorial diagrams.",
@@ -29,17 +29,17 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/hypercomplex": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/structures": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/hypercomplex": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/structures": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -4,8 +4,8 @@
 // from the parse as `Dictionary(KeyValuePair(…))` and from the printer with its lists as text, and
 // the figure drew empty in the page while the CLI (which has the engine's own form) drew fine.
 
-import { readStories } from "@enumeratio/entry/node";
-import type { BoxNode } from "@enumeratio/boxes";
+import { readStories } from "@notatio/entry/node";
+import type { BoxNode } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { diagramBoxOf } from "../src/diagram-lowering.ts";
 import { renderDiagram } from "../src/diagram.ts";

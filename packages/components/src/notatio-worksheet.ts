@@ -6,9 +6,9 @@ import "./dynamic-module-box.ts";
 import "./notatio-complex-plot.ts";
 import "./graphics-box.ts";
 import "./graphics-3d-box.ts";
-import { imageUri } from "@enumeratio/formats";
-import { toInputForm } from "@enumeratio/formats/inputform";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { imageUri } from "@notatio/formats";
+import { toInputForm } from "@notatio/formats/inputform";
+import { parseExpression } from "@notatio/formats/expression";
 import { pointsOf } from "./curve-points.ts";
 import { loadEngine } from "./mathlive.ts";
 import { LONG_PRESS_MS } from "./choice-menu.ts";
@@ -34,7 +34,7 @@ import {
   stackLayers,
   type Triple,
   type WorksheetControl,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { SliderPlayback } from "./sweep.ts";
 
 /**

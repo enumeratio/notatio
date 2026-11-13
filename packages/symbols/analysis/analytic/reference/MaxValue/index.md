@@ -6,11 +6,11 @@ summary: The global maximum VALUE of f -- Maximize's value alone, without the wi
 signatures:
   - call: MaxValue(f, x)
     description: the global maximum of f over its own natural domain.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, list<symbol> | symbol) -> expression
   - call: MaxValue({f, cons}, x)
     description: the global maximum of f restricted to a simple interval constraint cons.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Maximize
   - MinValue

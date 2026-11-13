@@ -1,5 +1,5 @@
-import { defineOverload, operandsOf, type Engine, type Expr } from "@enumeratio/engine";
-import { readsOwnExtremum } from "@enumeratio/structures";
+import { defineOverload, operandsOf, type Engine, type Expr } from "@notatio/engine";
+import { readsOwnExtremum } from "@notatio/structures";
 
 // A Finset is a subset of {1, …, n}: `Finset(Tuple(n, members))`. The heads that read a
 // collection's members read it too: its largest and smallest member, and its cardinality as `Length`.

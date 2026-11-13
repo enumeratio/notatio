@@ -1,4 +1,4 @@
-# @enumeratio/hopf
+# @notatio/hopf
 
 Combinatorial Hopf algebra extensions for compute-engine: NSym and QSym on compositions,
 with product, coproduct and antipode. Every other algebra in this section has a product
@@ -10,7 +10,7 @@ against. See [the guide](docs/hopf-algebras.md).
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareHopf } from "@enumeratio/hopf";
+import { declareHopf } from "@notatio/hopf";
 
 const ce = new ComputeEngine();
 declareHopf(ce);

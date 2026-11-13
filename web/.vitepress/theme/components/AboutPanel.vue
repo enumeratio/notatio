@@ -1,14 +1,14 @@
 <script setup lang="ts">
 // What the manifest says of a head: the table `About(Head)` answers, read without a kernel.
-import type { Description, Overload } from "@enumeratio/manifest";
-import { describe } from "@enumeratio/manifest";
+import type { Description, Overload } from "@notatio/manifest";
+import { describe } from "@notatio/manifest";
 import {
   groupBySystem,
   isCrosswalkSystem,
   type ReferenceEntry,
   type ResolvedReference,
   SOURCES,
-} from "@enumeratio/reference";
+} from "@notatio/reference";
 import { computed, ref, watch } from "vue";
 
 const props = defineProps<{

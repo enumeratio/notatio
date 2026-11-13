@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt, bigRationalAt, operandsOf } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { bigIntegerAt, bigRationalAt, operandsOf } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 import { evaluateExpToTrig } from "./exp-to-trig.ts";
 
 // FullSimplify(expr) — compute-engine's own `simplify()` (the Pythagorean identity and the

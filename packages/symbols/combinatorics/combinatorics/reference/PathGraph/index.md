@@ -18,7 +18,7 @@ bindings:
   - origin: mapped
     form: wolfram
     counterpart: false
-    note: Real Wolfram's PathGraph takes a vertex list only -- our bare-integer form errors there (kernel-verified). Arity can't tell the two call shapes apart (both are arity 1), so the whole head is left unmapped rather than risk handing the kernel a call it rejects; see FOREIGN in @enumeratio/wolfram. Wolfram Function Repository searched; nothing that accepts both a bare vertex count and a vertex list under one name.
+    note: Real Wolfram's PathGraph takes a vertex list only -- our bare-integer form errors there (kernel-verified). Arity can't tell the two call shapes apart (both are arity 1), so the whole head is left unmapped rather than risk handing the kernel a call it rejects; see FOREIGN in @notatio/wolfram. Wolfram Function Repository searched; nothing that accepts both a bare vertex count and a vertex list under one name.
     checked:
       version: 15.0.0
       on: 2026-09-28
@@ -31,4 +31,4 @@ bindings:
       on: 2026-10-16
 ---
 
-- `PathGraph(n)` is a convenience this library adds; `PathGraph[3]` is an ERROR in real Wolfram (kernel-verified) — it only accepts a vertex list. Both forms are accepted here, but the Wolfram transpiler treats the whole head as foreign (its own context, not a plain rename) since it cannot tell the two call shapes apart — see `FOREIGN` in `@enumeratio/wolfram`.
+- `PathGraph(n)` is a convenience this library adds; `PathGraph[3]` is an ERROR in real Wolfram (kernel-verified) — it only accepts a vertex list. Both forms are accepted here, but the Wolfram transpiler treats the whole head as foreign (its own context, not a plain rename) since it cannot tell the two call shapes apart — see `FOREIGN` in `@notatio/wolfram`.

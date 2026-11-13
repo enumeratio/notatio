@@ -63,7 +63,7 @@ jobs:
       # The sampler reads only combinatorics (and what it reads); CI's dist cache holds it for this commit.
       - uses: ./.github/actions/setup
         with:
-          packages: "@enumeratio/combinatorics"
+          packages: "@notatio/combinatorics"
           dist-key: auto
 
       - id: run

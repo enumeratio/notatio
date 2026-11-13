@@ -2,7 +2,7 @@
 // placeholders, and none of that HTML left in the page's data.
 
 import { expect, test } from "vite-plus/test";
-import type { ReferenceEntry } from "@enumeratio/reference";
+import type { ReferenceEntry } from "@notatio/reference";
 import { fillPrerendered, prerenderExamples } from "./prerender.ts";
 
 const entry = {

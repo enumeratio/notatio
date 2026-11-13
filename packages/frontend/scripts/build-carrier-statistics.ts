@@ -6,8 +6,8 @@
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { readEntries, recordDirs } from "@enumeratio/entry/node";
-import type { ReferenceEntry } from "@enumeratio/entry";
+import { readEntries, recordDirs } from "@notatio/entry/node";
+import type { ReferenceEntry } from "@notatio/entry";
 import { catalogOf } from "../src/explorer.ts";
 import { DEFAULT_COLUMNS } from "../src/table-state.ts";
 

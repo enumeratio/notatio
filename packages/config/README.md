@@ -1,11 +1,11 @@
-# @enumeratio/config
+# @notatio/config
 
 The formatter and linter settings for `vp check`, shared by every enumeratio package.
 
 ```ts
 // vite.config.ts
 import { defineConfig } from "vite-plus";
-import { fmt, lint } from "@enumeratio/config";
+import { fmt, lint } from "@notatio/config";
 
 export default defineConfig({ fmt, lint });
 ```

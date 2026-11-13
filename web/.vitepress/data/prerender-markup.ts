@@ -7,9 +7,9 @@
 import { readFileSync } from "node:fs";
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
-import { createKernel, type Kernel } from "@enumeratio/evaluation";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { plotSettingsOf } from "@enumeratio/frontend/symbols";
+import { createKernel, type Kernel } from "@notatio/evaluation";
+import { parseExpression } from "@notatio/formats/expression";
+import { plotSettingsOf } from "@notatio/frontend/symbols";
 import {
   chartBoxOfSettings,
   parseControls,
@@ -19,10 +19,10 @@ import {
   renderChart,
   renderPlot,
   spanOf,
-} from "@enumeratio/frontend/core";
-import { NOTEBOOK_KERNEL } from "@enumeratio/frontend/kernel-host";
-import type { CompiledPlot } from "@enumeratio/frontend/plot-compile";
-import { outMarkup, prerender } from "@enumeratio/frontend/prerender";
+} from "@notatio/frontend/core";
+import { NOTEBOOK_KERNEL } from "@notatio/frontend/kernel-host";
+import type { CompiledPlot } from "@notatio/frontend/plot-compile";
+import { outMarkup, prerender } from "@notatio/frontend/prerender";
 import { libraryRegistry, registerLibraryNotation } from "../theme/libraries.ts";
 import { CATALOGUE } from "../theme/worker-catalogue.ts";
 import { type MarkupSpec, specsFile } from "../prerender-markup.ts";
@@ -87,7 +87,7 @@ async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
   // The wildcards start where a Manipulate's controls around it do.
   const scope: Record<string, unknown> = {};
   if (plot.items.some((item) => item.code!.includes("_.__"))) {
-    const m = await import("@enumeratio/analytic");
+    const m = await import("@notatio/analytic");
     Object.assign(scope, {
       __hz: m.hurwitzZetaReal,
       __zg: m.zetaGeneralizedReal,

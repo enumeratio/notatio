@@ -12,9 +12,9 @@
 // Extension heads with no Wolfram equivalent (our collections/statistics) stay
 // symbolic in Wolfram and are reported separately as "wl-unsupported", not failures.
 
-import { runWolframKernel } from "@enumeratio/utils/bounded";
-import { toWolfram } from "@enumeratio/wolfram";
-import { isSettled } from "@enumeratio/entry";
+import { runWolframKernel } from "@notatio/utils/bounded";
+import { toWolfram } from "@notatio/wolfram";
+import { isSettled } from "@notatio/entry";
 import { referenceEntries } from "../src/node.ts";
 
 const entries = referenceEntries();

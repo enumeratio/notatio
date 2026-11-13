@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import type { FunctionView as FunctionViewData } from "@enumeratio/frontend/function-view";
-import type { Prerendered } from "@enumeratio/frontend/prerender";
+import type { FunctionView as FunctionViewData } from "@notatio/frontend/function-view";
+import type { Prerendered } from "@notatio/frontend/prerender";
 import type { CarrierFields as CarrierFieldsData } from "../../data/carrier-fields.ts";
-import { crosswalkFor, type ReferenceEntry, type ResolvedReference } from "@enumeratio/reference";
+import { crosswalkFor, type ReferenceEntry, type ResolvedReference } from "@notatio/reference";
 import { computed, nextTick, onMounted, reactive, ref, watch } from "vue";
 import { data as components } from "../../data/components.data.ts";
 import { getEntry, resolveHead } from "../../data/reference.ts";
@@ -239,7 +239,7 @@ const onDirty = (i: number, event: Event): void => {
 };
 
 // Other systems' runs of each example, from the head's implementations record (the loader
-// attaches them; see `@enumeratio/oracle`).
+// attaches them; see `@notatio/oracle`).
 const alternativesOf = (ex: { others?: Record<string, Alternative> }): Record<string, Alternative> | undefined =>
   ex.others && Object.keys(ex.others).length > 0 ? ex.others : undefined;
 // A row's own note, preferring the entry's authored `divergence` prose over the scan's.

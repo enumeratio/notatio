@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import type { Json } from "@enumeratio/ce-patches";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
+import type { Json } from "@notatio/ce-patches";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
 
 // FourierSeries(f, x, n) / FourierCoefficient(f, x, n): the order-n complex exponential
 // Fourier series of `f` on [-pi, pi], `Sum_{k=-n}^{n} c_k Exp(i k x)`, and its individual

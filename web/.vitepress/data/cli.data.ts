@@ -1,4 +1,4 @@
-// Ships the CLI's own surface to the browser. The parse runs against @enumeratio/cli's
+// Ships the CLI's own surface to the browser. The parse runs against @notatio/cli's
 // source, so it can only run in node; this loader hands the result to the client as
 // static data, and re-runs when the CLI's usage, completion or form tables change.
 

@@ -2,7 +2,7 @@
 // prerendered placeholders hydrate (theme/hydration.ts); one that upgraded first would have its
 // rendered children removed by Vue's hydration and stay blank, with no error.
 //
-// Needs the built site: pnpm --filter @enumeratio/web run build && run test:hydration
+// Needs the built site: pnpm --filter @notatio/web run build && run test:hydration
 
 import { expect, test } from "@playwright/test";
 import { PENDING_SELECTOR } from "../../.vitepress/theme/hydration.ts";

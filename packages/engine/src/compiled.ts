@@ -1,6 +1,6 @@
 // Epsil definitions compiled to JavaScript by compute-engine's own compiler: at run time, or
 // ahead of time into a generated module. The Epsil is the definition; this is only how it runs
-// fast. A separate entry (`@enumeratio/engine/compiled`), so only what compiles pulls in the
+// fast. A separate entry (`@notatio/engine/compiled`), so only what compiles pulls in the
 // compiler.
 
 import { type Expression, type ComputeEngine, version } from "@cortex-js/compute-engine";

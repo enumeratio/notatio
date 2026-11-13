@@ -2,7 +2,7 @@
 // The full combinatorial-glyph vocabulary, one family per row -- a visual index of the
 // pictures each kind lowers to. Each item is the `<graphics-box>` it stands for, so this
 // doubles as an integration check of the frames in the browser.
-import { lowerFigure } from "@enumeratio/frontend/core";
+import { lowerFigure } from "@notatio/frontend/core";
 
 const families: Array<{
   kind: string;

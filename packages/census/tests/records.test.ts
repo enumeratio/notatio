@@ -2,7 +2,7 @@
 // reference's provenance test is what notices compute-engine shipping a head of ours
 // (BL-62), and it only sees heads with a record.
 
-import { recordsRoot, referenceData } from "@enumeratio/reference/node";
+import { recordsRoot, referenceData } from "@notatio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { declaredNames } from "../src/engine.ts";
 

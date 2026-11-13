@@ -7,7 +7,7 @@ import {
   operandsOf,
   symbolNameOf,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { canonicalCompare } from "./list-heads.ts";
 
 // A second wave of Wolfram list heads compute-engine doesn't have at all (Riffle, Gather,
@@ -213,7 +213,7 @@ export function declareListOpsWolfram(ce: Engine): void {
   // internal table safely would need a compute-engine hook this version doesn't expose, so
   // Take(c, UpTo(n)) stays aspirational — see the entry.
 
-  // Partition(c, UpTo(n)): unlike a plain integer (which @enumeratio/combinatorics/collections' own
+  // Partition(c, UpTo(n)): unlike a plain integer (which @notatio/combinatorics/collections' own
   // Partition override drops the ragged remainder of), UpTo keeps a shorter final chunk —
   // exactly compute-engine's native, un-overridden chunking. Implemented directly rather
   // than reached through the layer below, so it doesn't depend on attach order.
@@ -236,7 +236,7 @@ export function declareListOpsWolfram(ce: Engine): void {
   );
 
   // Ordering(c, UpTo(n)): at most n positions of the full ordering — n clamped by `slice`
-  // exactly as the plain-integer form already is (@enumeratio/combinatorics/collections' list-heads.ts).
+  // exactly as the plain-integer form already is (@notatio/combinatorics/collections' list-heads.ts).
   wrapOperator(
     ce,
     ["Ordering", 1, 1],
@@ -261,7 +261,7 @@ export function declareListOpsWolfram(ce: Engine): void {
       // Materialize before reading either operand's `.operator`: a lazy `Range` reads as
       // head "Range", not "List", and would otherwise bail here or be riffled by its own
       // two bounds instead of its elements (see `collectionElements`'s doc in
-      // @enumeratio/engine — used elsewhere in this file; inlined here since Riffle needs
+      // @notatio/engine — used elsewhere in this file; inlined here since Riffle needs
       // the materialized `.operator` itself, not just the elements).
       const materializedList = list.evaluate({ materialization: true });
       if (materializedList.operator !== "List") return undefined;

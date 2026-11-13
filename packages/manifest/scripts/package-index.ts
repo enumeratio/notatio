@@ -4,7 +4,7 @@
 
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
-import { decodeHead, EXAMPLES_FILE, headNames, INDEX_FILE, parseIndex } from "@enumeratio/entry/node";
+import { decodeHead, EXAMPLES_FILE, headNames, INDEX_FILE, parseIndex } from "@notatio/entry/node";
 import type { IndexedRecord, PackageIndex } from "../src/assemble.ts";
 
 const cmp = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);

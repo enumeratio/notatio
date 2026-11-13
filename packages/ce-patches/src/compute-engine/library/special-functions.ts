@@ -3,17 +3,17 @@
 //
 // BarnesG, LogBarnesG, LogGamma, ClausenCl, StieltjesGamma, DirichletEta/Beta/L/Character and
 // PolyGamma at order -1 landed in compute-engine 0.146 and were retired; their kernels
-// (numerics/) stay, called directly by @enumeratio/analytic and the frontend.
+// (numerics/) stay, called directly by @notatio/analytic and the frontend.
 //
 // EllipticE's complex-modulus fix (#346) landed in compute-engine 0.139 and was retired
 // from here; HurwitzZeta/Zeta (#340, arbitrary-precision N(x, d)), PolyGamma (complex z)
 // and PolyLog (non-integer/complex order) landed in compute-engine 0.141 and were retired
 // too. `evaluateHurwitz`/`evaluateZeta`/`evaluatePolygamma` and the arbitrary-precision
-// kernels below stay: @enumeratio/analytic still calls them directly for certified-
+// kernels below stay: @notatio/analytic still calls them directly for certified-
 // precision evaluation, and DirichletBeta/DirichletL still need HurwitzZeta/Zeta correct
 // beyond a double's digits.
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { wrapOperator } from "@enumeratio/engine";
+import { wrapOperator } from "@notatio/engine";
 import type { LibraryRecord } from "../../patch.ts";
 import { atEnginePrecision, bigRealOperand, bigResult, DOUBLE_DIGITS } from "../../support/precise.ts";
 import {

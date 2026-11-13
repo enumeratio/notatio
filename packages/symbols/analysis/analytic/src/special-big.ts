@@ -1,5 +1,5 @@
-import { BigDecimal, type Engine, type Expr, wrapOperator } from "@enumeratio/engine";
-import { atDigits, bigRealOperand, bigResult, wantsBigDigits, isFiniteNum, isRealInt } from "@enumeratio/ce-patches";
+import { BigDecimal, type Engine, type Expr, wrapOperator } from "@notatio/engine";
+import { atDigits, bigRealOperand, bigResult, wantsBigDigits, isFiniteNum, isRealInt } from "@notatio/ce-patches";
 import { pfqRegularizedBig } from "./hypergeometric-big.ts";
 
 // AiryAi, AiryBi, ExpIntegralEi, LogIntegral and integer-order BesselK and BesselY past a double's

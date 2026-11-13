@@ -1,4 +1,4 @@
-# @enumeratio/groupalgebra
+# @notatio/groupalgebra
 
 Group-algebra extensions for compute-engine: cyclic, dihedral and product groups, their
 group algebras, conjugacy classes and centres. The group algebra $k[G]$ is the most
@@ -11,7 +11,7 @@ subalgebra spanned by class sums, one per conjugacy class. See
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareGroupAlgebra } from "@enumeratio/groupalgebra";
+import { declareGroupAlgebra } from "@notatio/groupalgebra";
 
 const ce = new ComputeEngine();
 declareGroupAlgebra(ce);
@@ -37,8 +37,8 @@ declareGroupAlgebra(ce);
   [`InversePermutation`](https://enumeratio.dev/reference/symbol/InversePermutation)
 
 `src/group.ts` also exports the underlying group model (`directProduct`, `isAbelian`,
-`isCentral`, `conjugacyClasses`) used directly by [`@enumeratio/hecke`](../hecke/README.md) and
-[`@enumeratio/diagram`](../diagram/README.md) for their own symmetric-group bookkeeping.
+`isCentral`, `conjugacyClasses`) used directly by [`@notatio/hecke`](../hecke/README.md) and
+[`@notatio/diagram`](../diagram/README.md) for their own symmetric-group bookkeeping.
 
 ## Usage
 

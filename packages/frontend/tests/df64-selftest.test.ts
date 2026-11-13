@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { DF_OPAQUE_GLSL, DF_PLAIN_GLSL } from "@enumeratio/analytic/shader";
+import { DF_OPAQUE_GLSL, DF_PLAIN_GLSL } from "@notatio/analytic/shader";
 import { df64Exact } from "../src/df64-selftest.ts";
 import { portraitShader } from "../src/complex-plot.ts";
 import { complexComputeShader } from "../src/gpu-eval.ts";

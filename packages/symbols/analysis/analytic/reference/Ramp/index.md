@@ -6,7 +6,7 @@ summary: "The ramp function: x for x >= 0, 0 for x < 0."
 signatures:
   - call: Ramp(x)
     description: max(x, 0).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real) -> number
 names:
   wolframIdentity: true

@@ -10,7 +10,7 @@
 // reject a bare list — and, more usefully, reject a SetPartition.
 
 import { type Expression, type ComputeEngine, isSymbol } from "@cortex-js/compute-engine";
-import { declareCompile, operandsOf } from "@enumeratio/engine";
+import { declareCompile, operandsOf } from "@notatio/engine";
 import { carrierNameForType, registerCarrier, registerCollectionCarrier } from "./operations.ts";
 
 /** The structural shape a carrier's values have, as a compute-engine type expression. */
@@ -57,7 +57,7 @@ export interface Carrier {
   readonly predicate?: string;
   /** How many of a packed multi-arg operand's LEADING slots are params, not the element(s) --
    *  the same count a family with this carrier declares as its own `carrierParams`
-   *  (`@enumeratio/combinatorics/collections`'s `families/declare.ts`, e.g. `Tournament(n,
+   *  (`@notatio/combinatorics/collections`'s `families/declare.ts`, e.g. `Tournament(n,
    *  edges)`: `carrierParams: 1` for `n`). Default 0: no leading params, the operand's slots
    *  (one or more) are all element(s). The oracle's `emit`/`structural` (packages/oracle) read
    *  this to unwrap a packed `Tuple` operand to the system-comparable part, rather than
@@ -92,7 +92,7 @@ export const typeFor = (id: string): string => id;
  * `declareCarrierElement`, called by hand later) — needed only when a carrier's plural name
  * might still be claimed by a REAL collection family this same host declares afterward
  * (`Permutations`, `DyckPaths`, …): that family's own `ce.declare` throws "already declared" if
- * this already minted a bare `set<...>` symbol for the name first. `@enumeratio/combinatorics`'s
+ * this already minted a bare `set<...>` symbol for the name first. `@notatio/combinatorics`'s
  * domains are the one caller that still needs this — see its own `declareDomains`.
  */
 export function declareCarriers(
@@ -126,7 +126,7 @@ export function declareCarriers(
 /**
  * One carrier's constructor. Held, with no `evaluate` — unless the name is already declared
  * (a compute-engine native, or another library's head), in which case the two become
- * overloads of it. Attached IN PLACE, same reasoning as `wrapOperator` (`@enumeratio/engine`):
+ * overloads of it. Attached IN PLACE, same reasoning as `wrapOperator` (`@notatio/engine`):
  * `ce.declare` throws the SECOND time any name is declared, native or not, so a plain
  * re-declare only ever worked here by luck of engine composition order.
  *

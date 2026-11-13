@@ -4,7 +4,7 @@
 // the head before. The manifest must say the same; `tests/manifest.test.ts` holds it to it.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { joinSignatures, type OverloadTable, overloadTable } from "@enumeratio/engine";
+import { joinSignatures, type OverloadTable, overloadTable } from "@notatio/engine";
 import { PACKAGE_DECLARATIONS } from "./engine.ts";
 
 export const ENGINE = "compute-engine";

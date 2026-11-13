@@ -1,5 +1,5 @@
-import { type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
-import { conform } from "@enumeratio/structures";
+import { type Engine, type Expr, integerAt, operandsOf } from "@notatio/engine";
+import { conform } from "@notatio/structures";
 
 // Permutations of one n under the weak order (https://github.com/enumeratio/notatio/wiki/Structures), Sage's
 // `permutohedron_lequal` with its default `side="right"`: p ≤ q when the inversion set of p is

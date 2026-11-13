@@ -6,7 +6,7 @@ summary: 1 if f is nonnegative over its whole domain, -1 if nonpositive, Indeter
 signatures:
   - call: FunctionSign(f, x)
     description: the sign of f in the real variable x, when it is constant over the whole real line.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

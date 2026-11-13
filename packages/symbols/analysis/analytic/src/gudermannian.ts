@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
-import { type EvalOptions, isFiniteNum, wantsNumber } from "@enumeratio/ce-patches";
+import { operandsOf } from "@notatio/engine";
+import { type EvalOptions, isFiniteNum, wantsNumber } from "@notatio/ce-patches";
 
 // Gudermannian(x) = 2 arctan(tanh(x/2)) = arctan(sinh(x)) — links the circular and
 // hyperbolic functions without complex numbers. Exact at 0 and at the horizontal

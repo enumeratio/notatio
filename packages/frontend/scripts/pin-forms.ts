@@ -15,10 +15,10 @@
 //       Euler's e apart from a variable.
 // R2 and R3 skip examples naming ExponentialE, ImaginaryUnit, `e` or `i`.
 
-import { orderImplementations, OWN_FORMS } from "@enumeratio/entry";
-import { updateHead } from "@enumeratio/entry/node";
-import { SYSTEMS } from "@enumeratio/oracle";
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
+import { orderImplementations, OWN_FORMS } from "@notatio/entry";
+import { updateHead } from "@notatio/entry/node";
+import { SYSTEMS } from "@notatio/oracle";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
 import { declaredEngine } from "../../reference/scripts/engines.ts";
 import { headForms, recordWithForms } from "./forms.ts";
 

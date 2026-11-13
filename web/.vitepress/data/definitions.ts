@@ -2,9 +2,9 @@
 // Epsil family's count, unrank, rank and membership. Node-only, read at build straight from the
 // sources (nothing is written to disk), printed as InputForm so a reader can type it back.
 
-import { ALL_STATISTICS } from "@enumeratio/combinatorics";
-import { allFamilies, type AnyFamily, type EpsilFamily } from "@enumeratio/combinatorics/collections";
-import { toInputForm } from "@enumeratio/formats";
+import { ALL_STATISTICS } from "@notatio/combinatorics";
+import { allFamilies, type AnyFamily, type EpsilFamily } from "@notatio/combinatorics/collections";
+import { toInputForm } from "@notatio/formats";
 
 /** One definition as the page shows it. */
 export interface HeadDefinition {

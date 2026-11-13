@@ -1,4 +1,4 @@
-import { powerModList } from "@enumeratio/residues";
+import { powerModList } from "@notatio/residues";
 import { expect, test } from "vite-plus/test";
 import { rationalReconstruction } from "../src/reconstruct.ts";
 

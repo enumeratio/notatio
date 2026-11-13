@@ -34,13 +34,11 @@ const repo = resolve(import.meta.dirname, "../..");
 function deriveSlice(): string[] {
   const pkgs = loadWorkspace();
   const readers = (name: string) => [...pkgs.values()].filter((p) => p.deps.has(name)).map((p) => p.name);
-  const excluded = closure(["@enumeratio/combinatorics"], readers);
+  const excluded = closure(["@notatio/combinatorics"], readers);
   const hasTest = (dir: string) =>
     "test" in (JSON.parse(readFileSync(join(repo, dir, "package.json"), "utf8")).scripts ?? {});
   return [...pkgs.values()]
-    .filter(
-      (p) => p.name !== "@enumeratio/web" && p.buildScript !== undefined && hasTest(p.dir) && !excluded.has(p.name),
-    )
+    .filter((p) => p.name !== "@notatio/web" && p.buildScript !== undefined && hasTest(p.dir) && !excluded.has(p.name))
     .map((p) => p.name)
     .toSorted();
 }

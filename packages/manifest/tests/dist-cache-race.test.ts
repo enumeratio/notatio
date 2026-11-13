@@ -34,7 +34,7 @@ beforeAll(() => {
   put("pnpm-workspace.yaml", "packages:\n  - packages/*\n");
   put("package.json", '{"name":"root"}\n');
   put("pnpm-lock.yaml", "lockfileVersion: 9\n");
-  put("packages/slow/package.json", JSON.stringify({ name: "@enumeratio/slow", scripts: { build: "node build.js" } }));
+  put("packages/slow/package.json", JSON.stringify({ name: "@notatio/slow", scripts: { build: "node build.js" } }));
   put("packages/slow/.gitignore", "dist\n");
   put("packages/slow/src.txt", "before\n");
   // Copies its input to dist, then an edit lands before the build returns (`edit` file present).

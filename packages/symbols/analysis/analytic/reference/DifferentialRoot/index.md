@@ -2,11 +2,11 @@
 name: DifferentialRoot
 domain: Special functions
 signature: DifferentialRoot(Function([ode == 0, ic, ...], y, x))(x0)
-summary: A holonomic (D-finite) function object — a linear ODE with polynomial(x) coefficients plus enough derivatives at one point, exactly as [[DifferentialRootReduce]] emits it. Applied to a real number, it sums the ODE's Taylor series about the stored expansion point numerically; applied to anything it can't sum (a symbolic point, or one outside the radius of convergence), it stays inert. Provided by `@enumeratio/analytic`.
+summary: A holonomic (D-finite) function object — a linear ODE with polynomial(x) coefficients plus enough derivatives at one point, exactly as [[DifferentialRootReduce]] emits it. Applied to a real number, it sums the ODE's Taylor series about the stored expansion point numerically; applied to anything it can't sum (a symbolic point, or one outside the radius of convergence), it stays inert. Provided by `@notatio/analytic`.
 signatures:
   - call: DifferentialRoot(fn)(x0)
     description: the function's value at $x_0$, by summing the Taylor series the ODE (and the stored initial derivatives) determine.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (any) -> any
 seeAlso:
   - DifferentialRootReduce

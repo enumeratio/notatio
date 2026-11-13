@@ -2,15 +2,15 @@
 name: Refine
 domain: Analytic
 signature: Refine(expr, cond)
-summary: Simplify $expr$ using $cond$ (or, with no $cond$, whatever is already assumed) as a fact — the same fact-driven simplification [[Assuming]] scopes for a whole subcomputation, but applied once. Provided by `@enumeratio/analytic`.
+summary: Simplify $expr$ using $cond$ (or, with no $cond$, whatever is already assumed) as a fact — the same fact-driven simplification [[Assuming]] scopes for a whole subcomputation, but applied once. Provided by `@notatio/analytic`.
 signatures:
   - call: Refine(expr, cond)
     description: simplify $expr$ under $cond$ (a single condition, a `List`, or an `And`), then forget it.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression?) -> expression
   - call: Refine(expr)
     description: simplify $expr$ under whatever is already assumed (e.g. inside an enclosing [[Assuming]]).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 names:
   wolframIdentity: true
 attributes:

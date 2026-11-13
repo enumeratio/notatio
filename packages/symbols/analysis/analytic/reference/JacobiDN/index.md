@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{dn}(u,m)$, one of the three
 signatures:
   - call: JacobiDN(u, m)
     description: the Jacobi elliptic delta amplitude, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiSN

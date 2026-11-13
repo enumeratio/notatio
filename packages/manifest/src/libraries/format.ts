@@ -27,7 +27,7 @@ export interface LibraryField extends PackageField {
   readonly index: string;
   /** The range of the system its definitions were written against. */
   readonly system?: string;
-  /** The targets it tracks (`@enumeratio/entry`'s `SOURCES`): what its scans run and its `mappings.json` hold. */
+  /** The targets it tracks (`@notatio/entry`'s `SOURCES`): what its scans run and its `mappings.json` hold. */
   readonly mappings?: readonly string[];
 }
 
@@ -82,7 +82,7 @@ export function paramsOf(definition: Definition): string[] | undefined {
   return names.every((n): n is string => typeof n === "string") ? names : undefined;
 }
 
-/** The triggers and heads of a notation entry (`PackageNotation`'s shape, from @enumeratio/boxes). */
+/** The triggers and heads of a notation entry (`PackageNotation`'s shape, from @notatio/boxes). */
 export function notationSummaryOf(notation: {
   readonly latex?: readonly {
     readonly name?: string;

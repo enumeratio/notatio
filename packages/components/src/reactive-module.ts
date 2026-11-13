@@ -1,6 +1,6 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import {
   affected,
   boundName,
@@ -10,7 +10,7 @@ import {
   type Schedule,
   type TrackedSymbols,
   type Transcript,
-} from "@enumeratio/frontend";
+} from "@notatio/frontend";
 
 /** A stable id per element, the same idiom `scope.ts` uses for templates and controls. */
 const ids = new WeakMap<Element, number>();
@@ -57,7 +57,7 @@ interface WorkerHost {
 }
 
 /**
- * The DOM-facing half of `TrackedSymbols` (`@enumeratio/frontend`'s `tracked-symbols.ts`
+ * The DOM-facing half of `TrackedSymbols` (`@notatio/frontend`'s `tracked-symbols.ts`
  * has the pure graph): one `CellBindings` per `<notatio-cell>` a `<dynamic-module-box>`
  * has seen, kept current as each cell commits, and `schedule`'s diagnostics turned into
  * `data-reactive-error` on the cells they cite -- a duplicate definition or a cycle shown

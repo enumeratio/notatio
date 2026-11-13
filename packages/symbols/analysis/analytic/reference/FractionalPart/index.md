@@ -6,7 +6,7 @@ summary: "The fractional part of x, with the sign of x: x minus its integer part
 signatures:
   - call: FractionalPart(x)
     description: x minus [[IntegerPart]](x), with the sign of x.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 names:
   wolframIdentity: true

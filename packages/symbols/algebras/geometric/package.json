@@ -1,8 +1,8 @@
 {
-  "name": "@enumeratio/geometric",
+  "name": "@notatio/geometric",
   "version": "0.0.0",
   "private": true,
-  "description": "The geometric-algebra layer over @enumeratio/hypercomplex: grade projection, the outer and regressive products, the contractions, the involutions and the Poincare dual.",
+  "description": "The geometric-algebra layer over @notatio/hypercomplex: grade projection, the outer and regressive products, the contractions, the involutions and the Poincare dual.",
   "license": "WTFPL",
   "files": [
     "dist",
@@ -24,13 +24,13 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/hypercomplex": "workspace:*"
+    "@notatio/engine": "workspace:*",
+    "@notatio/hypercomplex": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/manifest": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

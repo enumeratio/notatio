@@ -3,9 +3,9 @@
 // heavy and a page may draw none), or a host that has them already hands them over; either way
 // `layerOf` is then synchronous, so lowering a `Show` to a `GraphicsBox` is too.
 
-import type * as RadixLattice from "@enumeratio/complex-numerals/lattice";
-import type * as QuadraticLattice from "@enumeratio/number-theory/lattice";
-import type * as ResidueTable from "@enumeratio/residues/table";
+import type * as RadixLattice from "@notatio/complex-numerals/lattice";
+import type * as QuadraticLattice from "@notatio/number-theory/lattice";
+import type * as ResidueTable from "@notatio/residues/table";
 import { argsOf, headOf, type Json } from "./frame-json.ts";
 import { splitOptions } from "./graphics-rules.ts";
 import type { LatticeView, Vec2 } from "./lattice.ts";
@@ -43,12 +43,12 @@ export function registerLatticeModules(loaded: LatticeModules): void {
 /** Load the libraries `tiles` is made from; a figure frame needs none. */
 export async function loadLatticeModules(tiles: ShowTiles | undefined): Promise<void> {
   if (tiles?.head === "ArrayPlot") {
-    if (!modules.residues) registerLatticeModules({ residues: await import("@enumeratio/residues/table") });
+    if (!modules.residues) registerLatticeModules({ residues: await import("@notatio/residues/table") });
   } else if (tiles?.head === "LatticeTiles" && headOf(tiles.data) === "RadixExpansions") {
     if (!modules.complexNumerals)
-      registerLatticeModules({ complexNumerals: await import("@enumeratio/complex-numerals/lattice") });
+      registerLatticeModules({ complexNumerals: await import("@notatio/complex-numerals/lattice") });
   } else if (tiles?.head === "LatticeTiles" && !modules.numberTheory) {
-    registerLatticeModules({ numberTheory: await import("@enumeratio/number-theory/lattice") });
+    registerLatticeModules({ numberTheory: await import("@notatio/number-theory/lattice") });
   }
 }
 

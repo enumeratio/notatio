@@ -1,8 +1,8 @@
-// @enumeratio/braid's heads in traditional notation: braid words as crossings σᵢ, knot and
+// @notatio/braid's heads in traditional notation: braid words as crossings σᵢ, knot and
 // link invariants, torus and pretzel presentations. Each head's is data,
 // `reference/<Head>/notation.json`, compiled here, but for the braid word below.
 
-import type { Json } from "@enumeratio/engine";
+import type { Json } from "@notatio/engine";
 import {
   combineNotation,
   compileNotation,
@@ -12,7 +12,7 @@ import {
   subscript,
   superscript,
   type PackageNotation,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import { NOTATION_DATA } from "./notation.generated.ts";
 
 /** A literal list of numbers, or `undefined`. */

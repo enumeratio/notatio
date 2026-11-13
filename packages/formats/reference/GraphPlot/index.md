@@ -2,7 +2,7 @@
 name: GraphPlot
 domain: Graphics
 signature: GraphPlot(...)
-summary: Wolfram's own GraphPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+summary: Wolfram's own GraphPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
 optionValues:
@@ -11,7 +11,7 @@ optionValues:
     - false
 signatures:
   - call: GraphPlot(...)
-    description: Wolfram's own GraphPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @enumeratio/formats/src/graphics.ts).
+    description: Wolfram's own GraphPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
     library: enumeratio-formats
     type: (any*) -> any
 ---

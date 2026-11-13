@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { collectMessages } from "@enumeratio/engine";
+import { collectMessages } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { declareEvaluation } from "../src/index.ts";
 

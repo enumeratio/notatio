@@ -5,11 +5,11 @@
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { type Box, grid, isNode, type RowSource, tag, text } from "@enumeratio/boxes";
-import { toText } from "@enumeratio/boxes/render";
-import { optionsOf } from "@enumeratio/formats";
-import { headOf, numOf, opsOf, rowSourceSpec, splitColumns, strOf, symOf } from "@enumeratio/frontend";
-import { bigintOf, type CollectionRows, openRowSource, staticTable } from "@enumeratio/frontend/row-source";
+import { type Box, grid, isNode, type RowSource, tag, text } from "@notatio/boxes";
+import { toText } from "@notatio/boxes/render";
+import { optionsOf } from "@notatio/formats";
+import { headOf, numOf, opsOf, rowSourceSpec, splitColumns, strOf, symOf } from "@notatio/frontend";
+import { bigintOf, type CollectionRows, openRowSource, staticTable } from "@notatio/frontend/row-source";
 import { drawBoxes } from "./cell-layout.ts";
 
 type Json = MathJsonExpression;

@@ -16,11 +16,11 @@ export { applyPatch, applyPatches, declareLibrary, patchSymbols } from "./patch.
 // Every patch offered upstream, one per file in src/patches/ (scripts/generate-patches.ts).
 export { PATCHES };
 
-// #340 special-function family (@enumeratio/analytic's
+// #340 special-function family (@notatio/analytic's
 // declareAnalytic calls applyPatch for each of these at the point their declares used to run).
 // round-places, zeta-hurwitz (HurwitzZeta/Zeta's N(x, d) precision), polylog-order and
 // polygamma-complex all landed in compute-engine 0.141 and were retired; the functions
-// still used directly by @enumeratio/analytic (evaluateHurwitz/evaluateZeta/
+// still used directly by @notatio/analytic (evaluateHurwitz/evaluateZeta/
 // evaluatePolygamma) and the arbitrary-precision kernels are re-exported straight from
 // their library file below.
 export {
@@ -99,7 +99,7 @@ export { clausen } from "./compute-engine/numerics/clausen.ts";
 export { stieltjesGamma, stieltjesGammaReal, STIELTJES_MAX_ORDER } from "./compute-engine/numerics/stieltjes.ts";
 export { stieltjesGammaBall, stieltjesGammaBig } from "./compute-engine/numerics/stieltjes-big.ts";
 
-// Kernels several of the above (and @enumeratio/analytic's own non-candidate heads) depend
+// Kernels several of the above (and @notatio/analytic's own non-candidate heads) depend
 // on (see the README, "Kernels several patches share").
 export {
   type Cx,

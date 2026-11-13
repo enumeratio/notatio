@@ -1,4 +1,4 @@
-# @enumeratio/numerals
+# @notatio/numerals
 
 Numeral-system extensions for `@cortex-js/compute-engine`. compute-engine's `IntegerDigits`
 and `FromDigits` already do fixed radix, so this package adds no head for that case — it
@@ -8,7 +8,7 @@ widens the **base slot** to accept a system value, the way Wolfram's
 `PrimorialNumerals`, `CombinatorialNumerals(k)`, `ResidueNumerals([…])`,
 `AdicNumerals(b, prec?)` and `PositionalNumerals(b)` are all just values passed where an
 integer base would go. An integer base still goes to the native handler, unchanged. Builds on
-`@enumeratio/residues` for the residue system and `gcd`.
+`@notatio/residues` for the residue system and `gcd`.
 
 `AdicNumeral` (singular) is a separate value head: the $b$-adic number itself, with its own
 arithmetic (`Add`/`Multiply`/`Negate`/`Divide`/`Power` widened to carry it), infinite to the
@@ -20,8 +20,8 @@ still evaluate to their `…Numerals` spelling — see `NUMERAL_ALIASES`.
 ## Usage
 
 ```ts
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareAdic } from "@enumeratio/numerals"; // AdicNumeral alone, without the systems
+import { declareNumerals } from "@notatio/numerals";
+import { declareAdic } from "@notatio/numerals"; // AdicNumeral alone, without the systems
 
 declareNumerals(ce); // declares AdicNumeral too
 ```
@@ -71,5 +71,5 @@ between integers and digit strings, and a table of every system this package add
 See [b-adic numbers](docs/adic.md) for how `AdicNumeral` and `AdicNumerals` relate, and where
 they part ways off the non-negative integers.
 
-Builds on `@enumeratio/residues` ([`residues`](../residues/README.md)) for `ResidueNumerals` and `gcd`.
-`@enumeratio/number-theory` ([`number-theory`](../number-theory/README.md)) depends on this package.
+Builds on `@notatio/residues` ([`residues`](../residues/README.md)) for `ResidueNumerals` and `gcd`.
+`@notatio/number-theory` ([`number-theory`](../number-theory/README.md)) depends on this package.

@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/number-theory",
+  "name": "@notatio/number-theory",
   "version": "0.0.0",
   "private": true,
   "description": "Number theory past Z/m for @cortex-js/compute-engine: Gaussian integers, rational reconstruction, Hermite normal form and integer valuations, all over bigints.",
@@ -33,21 +33,21 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/ce-patches": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/numerals": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/ce-patches": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/numerals": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/ce-patches": "workspace:*",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/numerals": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
+    "@notatio/ce-patches": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/numerals": "workspace:*",
+    "@notatio/residues": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

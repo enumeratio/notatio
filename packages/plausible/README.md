@@ -1,4 +1,4 @@
-# @enumeratio/plausible
+# @notatio/plausible
 
 Seeded, size-aware generators for Plausible, the property sampler over our value spaces
 ([Plausible](https://github.com/enumeratio/notatio/wiki/Plausible)), after Lean 4's Plausible: a `Gen` reads a random

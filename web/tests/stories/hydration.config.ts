@@ -1,9 +1,9 @@
 // Playwright config for the hydration-race check (hydration-race.e2e.ts). Unlike the component
 // stories this needs the BUILT site -- the prerendered placeholders only exist in the build --
-// so it serves `.vitepress/dist` with `vitepress preview`. Run after `pnpm --filter @enumeratio/web
+// so it serves `.vitepress/dist` with `vitepress preview`. Run after `pnpm --filter @notatio/web
 // run build`:
 //
-//   pnpm --filter @enumeratio/web run test:hydration
+//   pnpm --filter @notatio/web run test:hydration
 
 import { defineConfig, devices } from "@playwright/test";
 

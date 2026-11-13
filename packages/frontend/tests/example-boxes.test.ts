@@ -5,7 +5,7 @@
 // package (it depends on reference), and there is nothing to compare pixel by pixel.
 // Evaluating the same example to its held value is reference's `entries.test.ts`.
 
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { declaredEngine } from "../../reference/scripts/engines.ts";
 import { boxOfExample, settledShape, shapeOf } from "../scripts/example-boxes.ts";

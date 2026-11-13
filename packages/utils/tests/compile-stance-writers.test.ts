@@ -5,7 +5,7 @@ import { expect, test } from "vite-plus/test";
 
 // A package that replaces a library head's `evaluate` or `canonical` in place (`operator.evaluate = ...`)
 // bypasses `extendHead` and `wrapOperator`, which state how the head compiles. Such a file says it itself
-// with `declareCompile` (@enumeratio/engine), or a head silently keeps compute-engine's lowering of what
+// with `declareCompile` (@notatio/engine), or a head silently keeps compute-engine's lowering of what
 // the replacement changed. This is a source scan: a new unrouted writer fails it.
 
 const WRITER =

@@ -1,5 +1,5 @@
-import { type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
-import { conform } from "@enumeratio/structures";
+import { type Engine, type Expr, integerAt, operandsOf } from "@notatio/engine";
+import { conform } from "@notatio/structures";
 
 // Carriers' orders (https://github.com/enumeratio/notatio/wiki/Structures): what makes `Min`, `Max` and `Clamp` work on them.
 //

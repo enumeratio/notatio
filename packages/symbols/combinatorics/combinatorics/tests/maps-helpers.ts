@@ -1,9 +1,9 @@
 // Shared setup and reference helpers for the map.test.ts shards (maps-*.test.ts). Pulled
 // out so each shard pays for its own engine instance without duplicating the reference
-// algorithms. Used to live in @enumeratio/statistics (moved from combinatorics' domains area)
+// algorithms. Used to live in @notatio/statistics (moved from combinatorics' domains area)
 // because it wired declareStatistics into the shared engine, which would have devDepped back
 // on statistics from combinatorics — moot since step 6b moved declareStatistics here.
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import {
   ALL_STATISTICS,
   CARRIERS,

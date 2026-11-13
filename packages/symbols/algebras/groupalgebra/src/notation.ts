@@ -1,8 +1,8 @@
-// @enumeratio/groupalgebra's heads in traditional notation: the cyclic and dihedral
+// @notatio/groupalgebra's heads in traditional notation: the cyclic and dihedral
 // families by order, the group algebra k[G], the direct product, and |G|. Each head's is data,
 // `reference/<Head>/notation.json`, compiled here.
 
-import { combineNotation, compileNotation, type Notation, type PackageNotation } from "@enumeratio/boxes";
+import { combineNotation, compileNotation, type Notation, type PackageNotation } from "@notatio/boxes";
 import { NOTATION_DATA } from "./notation.generated.ts";
 
 const compiled = combineNotation(Object.entries(NOTATION_DATA).map(([head, data]) => compileNotation(head, data)));

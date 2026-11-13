@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { HIERARCHY, plan } from "@enumeratio/manifest";
+import { HIERARCHY, plan } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { CATALOGUE } from "./worker-catalogue.ts";
 
@@ -29,9 +29,9 @@ test("every declaring package the site depends on is in the catalogue", () => {
     JSON.parse(readFileSync(join(root, path), "utf8"));
   const have = new Set(CATALOGUE.map((l) => l.name));
   const missing = Object.keys(read("package.json").dependencies ?? {})
-    .filter((dep) => dep.startsWith("@enumeratio/"))
+    .filter((dep) => dep.startsWith("@notatio/"))
     .filter((dep) => (read(`node_modules/${dep}/package.json`).enumeratio?.declare?.length ?? 0) > 0)
-    .map((dep) => dep.slice("@enumeratio/".length))
+    .map((dep) => dep.slice("@notatio/".length))
     // The kernel declares evaluation itself, before any library.
     .filter((name) => name !== "evaluation" && !have.has(name));
   expect(missing).toEqual([]);

@@ -2,7 +2,7 @@
 // generator, one-time, from the last generated domain-data.ts. Families for this area move
 // here in step 5.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const COMPOSITIONS_CARRIERS: readonly Carrier[] = [
   {

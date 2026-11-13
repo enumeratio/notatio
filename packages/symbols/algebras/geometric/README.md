@@ -1,8 +1,8 @@
-# @enumeratio/geometric
+# @notatio/geometric
 
-The geometric-algebra layer over [`@enumeratio/hypercomplex`](../hypercomplex/README.md): grade
+The geometric-algebra layer over [`@notatio/hypercomplex`](../hypercomplex/README.md): grade
 projection, the outer and regressive products, the contractions, the involutions and the
-Poincaré dual. Where `@enumeratio/hypercomplex` gives a Clifford algebra its arithmetic, this
+Poincaré dual. Where `@notatio/hypercomplex` gives a Clifford algebra its arithmetic, this
 package gives a multivector its **structure** — which blades it lives in, and the operations
 that only make sense once grade is in view.
 
@@ -10,8 +10,8 @@ that only make sense once grade is in view.
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareHypercomplex } from "@enumeratio/hypercomplex";
-import { declareGeometric } from "@enumeratio/geometric";
+import { declareHypercomplex } from "@notatio/hypercomplex";
+import { declareGeometric } from "@notatio/geometric";
 
 const ce = new ComputeEngine();
 declareHypercomplex(ce);
@@ -19,7 +19,7 @@ declareGeometric(ce);
 ```
 
 `declareGeometric` needs the units declared first — it operates on the multivectors
-`@enumeratio/hypercomplex` already knows how to add and multiply.
+`@notatio/hypercomplex` already knows how to add and multiply.
 
 ## Heads
 

@@ -1,4 +1,4 @@
-// `@enumeratio/reference/node`'s fs loader, over small fixture directories -- not real data
+// `@notatio/reference/node`'s fs loader, over small fixture directories -- not real data
 // (none exists yet; the data flip is step 4 of https://github.com/enumeratio/notatio/wiki/Examples-as-Data). Each fixture
 // under tests/fixtures/ mimics `<packagesRoot>/<package>/reference/*.yaml`.
 

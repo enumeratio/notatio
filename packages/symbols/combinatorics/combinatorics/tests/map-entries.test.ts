@@ -1,8 +1,8 @@
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../src/index.ts";
-import { readEntries } from "@enumeratio/entry/node";
+import { readEntries } from "@notatio/entry/node";
 
 const entries = [
   // combinatorics' reference/ is now one directory shared by the collections and (former)

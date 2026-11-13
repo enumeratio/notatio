@@ -3,8 +3,8 @@
 // word near the family. Compiled and interpreted, and past 2^53 where the interpreter's exact
 // integers take over.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, epsilKernelOn, kernelOn } from "../../collections/src/families/epsil.ts";
 import type { FamilyKernel } from "../../collections/src/families/types.ts";

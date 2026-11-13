@@ -1,6 +1,6 @@
-import { withGLSL } from "@enumeratio/analytic/shader";
+import { withGLSL } from "@notatio/analytic/shader";
 import { type Df64Mode, withDf64 } from "./df64-selftest.ts";
-import { type ComplexGLSL, MAX_SLOTS } from "@enumeratio/ce-patches/glsl-complex";
+import { type ComplexGLSL, MAX_SLOTS } from "@notatio/ce-patches/glsl-complex";
 import type { Gpu } from "./gpu.ts";
 import { compileProgram, createContext, drawFullScreen, GLSL_HEADER, useParams } from "./webgl.ts";
 import {
@@ -17,7 +17,7 @@ import { glslFloat as f, PORTRAIT as P } from "./portrait-color.ts";
 // invocation per pixel, color = arg on a gradient, brightness = a compressed log-magnitude.
 //
 // Internal to the element -- deliberately not re-exported from the package index, since
-// its signatures name types from `@enumeratio/analytic` and pulling those into the
+// its signatures name types from `@notatio/analytic` and pulling those into the
 // public .d.ts makes the declaration build resolve a second package's source tree.
 //
 // The point of the split from `notatio-complex-plot.ts` is the pipeline cache. A

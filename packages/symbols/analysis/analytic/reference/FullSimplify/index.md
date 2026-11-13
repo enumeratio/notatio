@@ -2,11 +2,11 @@
 name: FullSimplify
 domain: Transformations
 signature: FullSimplify(expr)
-summary: Simplify `expr` harder than Simplify, trying a wider set of transformations including special-function identities. Provided by `@enumeratio/analytic`.
+summary: Simplify `expr` harder than Simplify, trying a wider set of transformations including special-function identities. Provided by `@notatio/analytic`.
 signatures:
   - call: FullSimplify(expr)
     description: compute-engine's own `simplify()`, plus a few extra targeted passes.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression) -> expression
 seeAlso:
   - FunctionExpand

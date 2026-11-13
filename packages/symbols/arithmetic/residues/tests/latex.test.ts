@@ -1,5 +1,5 @@
-import type { Json } from "@enumeratio/engine";
-import { createLatexEngine } from "@enumeratio/engine/testing";
+import type { Json } from "@notatio/engine";
+import { createLatexEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareResidues } from "../src/declare.ts";
 import { RESIDUES_LATEX } from "../src/latex.ts";

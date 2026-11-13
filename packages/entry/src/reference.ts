@@ -75,7 +75,7 @@ export interface ResolvedReference extends Reference {
 }
 
 /** A grade axis of a catalogued collection -- `role` separates a size axis from a shape
- * parameter (`@enumeratio/catalog`'s `Grade`, packages/catalog/src/types.ts). */
+ * parameter (`@notatio/catalog`'s `Grade`, packages/catalog/src/types.ts). */
 export interface CatalogGrade {
   readonly name: string;
   readonly role: "axis" | "param";

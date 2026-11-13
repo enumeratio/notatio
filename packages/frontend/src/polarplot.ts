@@ -18,7 +18,7 @@ import {
   polygon,
   style,
   tag,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import type { Edge } from "./graphics-rules.ts";
 import { label, type PlotFrame } from "./plot-box.ts";
 import { budgeted, runsThrough, samplesFor } from "./plot.ts";

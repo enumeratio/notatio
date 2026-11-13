@@ -4,7 +4,7 @@ order: 7
 
 # Verification
 
-`VerificationTest(input, expected, …)` — `@enumeratio/evaluation`'s reference-example
+`VerificationTest(input, expected, …)` — `@notatio/evaluation`'s reference-example
 primitive (https://github.com/enumeratio/notatio/wiki/Computation §5.4). It evaluates `input` under the given constraints,
 compares the result with `expected` (default: structural sameness), and returns a
 `TestResultObject`: the outcome (`Success`, `Failure`, `Error` or `Aborted`), the input
@@ -41,7 +41,7 @@ In/Out pair with an outcome badge.
 Wolfram's way. `SameTest` takes any predicate of two arguments, applied instead of
 structural sameness. `MemoryConstraint` is enforced only inside the isolated (worker)
 evaluator — in-process, asking for one turns the test itself into an `Error` rather
-than silently skipping the bound (see `@enumeratio/evaluation`'s own comment on
+than silently skipping the bound (see `@notatio/evaluation`'s own comment on
 `MemoryConstrained`).
 
 <Story
@@ -51,8 +51,8 @@ than silently skipping the bound (see `@enumeratio/evaluation`'s own comment on
 
 ## In the browser: `evaluateInWorker`
 
-`@enumeratio/evaluation/browser` runs one evaluation in a plain dedicated `Worker` —
-the browser counterpart of `@enumeratio/evaluation/node`'s `evaluateIsolated`. A hard
+`@notatio/evaluation/browser` runs one evaluation in a plain dedicated `Worker` —
+the browser counterpart of `@notatio/evaluation/node`'s `evaluateIsolated`. A hard
 time limit is a real `terminate()`; a memory limit is best-effort only, since a browser
 gives a worker no memory cap to set — the host polls `performance
 .measureUserAgentSpecificMemory()` (or Chromium's `performance.memory` where that isn't

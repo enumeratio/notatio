@@ -6,7 +6,7 @@ summary: The one-sided Laplace transform $F(s) = \int_0^\infty f(t) e^{-st}\,dt$
 signatures:
   - call: LaplaceTransform(f, t, s)
     description: $F(s) = \int_0^\infty f(t) e^{-st}\,dt$, for `f` a function of `t`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression) -> expression
 primitive: kernel
 bindings:

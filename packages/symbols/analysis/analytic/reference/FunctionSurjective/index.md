@@ -6,7 +6,7 @@ summary: True if every real y is f(x) for some x on f's domain, False otherwise.
 signatures:
   - call: FunctionSurjective(f, x, Reals)
     description: whether f, as a function of the real variable x, is onto the real numbers.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol, symbol?) -> expression
 names:
   wolframIdentity: true

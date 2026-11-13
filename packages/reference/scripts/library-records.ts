@@ -5,9 +5,9 @@
 
 import { readFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import type { ReferenceEntry } from "@enumeratio/entry";
-import { headNames, readHead } from "@enumeratio/entry/node";
-import type { Mapping } from "@enumeratio/oracle";
+import type { ReferenceEntry } from "@notatio/entry";
+import { headNames, readHead } from "@notatio/entry/node";
+import type { Mapping } from "@notatio/oracle";
 // From the source, as collect-mappings does: oracle's build runs before oracle is built.
 import { mappingsFromBindings } from "../../oracle/src/mapping-rows.ts";
 

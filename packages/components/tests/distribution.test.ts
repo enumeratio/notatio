@@ -5,10 +5,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { CARRIERS, declareCombinatorics } from "@enumeratio/combinatorics";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { coefficients, DISTRIBUTION_ROW_CAP, polynomial } from "@enumeratio/frontend/core";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
+import { CARRIERS, declareCombinatorics } from "@notatio/combinatorics";
+import { parseExpression } from "@notatio/formats/expression";
+import { coefficients, DISTRIBUTION_ROW_CAP, polynomial } from "@notatio/frontend/core";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
 import { afterAll, expect, test } from "vite-plus/test";
 import {
   distributionTriangle,

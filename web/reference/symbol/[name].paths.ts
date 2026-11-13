@@ -1,7 +1,7 @@
-import { carrierSlotOf } from "@enumeratio/frontend/core";
-import { catalogOf, type ExplorerCatalog, explorerOf } from "@enumeratio/frontend/explorer";
-import { describeNow } from "@enumeratio/manifest";
-import type { ReferenceEntry } from "@enumeratio/reference";
+import { carrierSlotOf } from "@notatio/frontend/core";
+import { catalogOf, type ExplorerCatalog, explorerOf } from "@notatio/frontend/explorer";
+import { describeNow } from "@notatio/manifest";
+import type { ReferenceEntry } from "@notatio/reference";
 import { entries } from "../../.vitepress/data/reference-node.ts";
 import { fieldsOf } from "../../.vitepress/data/carrier-fields.ts";
 import { definitionsOf } from "../../.vitepress/data/definitions.ts";

@@ -2,11 +2,11 @@
 name: LegendrePolynomial
 domain: Special functions
 signature: LegendrePolynomial(n, x)
-summary: The Legendre polynomial $P_n(x)$, orthogonal on $[-1, 1]$ with unit weight and normalised by $P_n(1) = 1$. Provided by `@enumeratio/analytic`.
+summary: The Legendre polynomial $P_n(x)$, orthogonal on $[-1, 1]$ with unit weight and normalised by $P_n(1) = 1$. Provided by `@notatio/analytic`.
 signatures:
   - call: LegendrePolynomial(n, x)
     description: the degree-$n$ Legendre polynomial at $x$, for an integer $n$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, number) -> number
 primitive: kernel
 bindings:

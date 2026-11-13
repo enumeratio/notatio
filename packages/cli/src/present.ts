@@ -3,7 +3,7 @@
 // surface as `:env`, and, where the environment can drive its controls, the same
 // keyboard driver the Node REPL hands a result to.
 
-import { can, type Environment } from "@enumeratio/frontend";
+import { can, type Environment } from "@notatio/frontend";
 import { dim, red } from "./ansi.ts";
 import type { Drawn } from "./cell-layout.ts";
 import { Repl } from "./core.ts";

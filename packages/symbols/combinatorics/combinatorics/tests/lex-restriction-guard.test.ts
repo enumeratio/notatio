@@ -3,7 +3,7 @@
 // used to be the fallback. Now a call answers or declines at once (a RangeError: unknown through
 // the engine), never hangs.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { kernelOn } from "../collections/src/families/epsil.ts";
 import { allFamilies } from "../collections/src/families/index.ts";

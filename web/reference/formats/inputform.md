@@ -92,4 +92,4 @@ prints expressions, it does not rewrite them.
   `notatio -f inputform` exports it. `notatio`, `text` and the old `Notatio` still
   resolve to it.
 - **API** — `toInputForm(json)` and `normalizeInputForm(json)` from
-  `@enumeratio/formats`.
+  `@notatio/formats`.

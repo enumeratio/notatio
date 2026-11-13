@@ -1,7 +1,7 @@
 // StandardTableaux and ShiftedStandardTableaux defined in Epsil, against independent readings:
 // every tableau grown a cell at a time, listed by shape and then by where n, n − 1, … sit.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { COMPILED_FAMILIES } from "../../collections/src/families/compiled-families.generated.js";
 import { epsilKernelOn, kernelOn } from "../../collections/src/families/epsil.ts";

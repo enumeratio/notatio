@@ -17,7 +17,7 @@
 // exact: the coefficients are Laurent polynomials in A, and δ's powers are multiplied out
 // rather than evaluated.
 
-import { composeDiagrams, type Diagram, diagram, diagramKey, identityDiagram } from "@enumeratio/diagram";
+import { composeDiagrams, type Diagram, diagram, diagramKey, identityDiagram } from "@notatio/diagram";
 import { type Braid, writhe } from "./braid.ts";
 import { add, constant, divide, type Laurent, monomial, multiply, trim, ZERO } from "./laurent.ts";
 

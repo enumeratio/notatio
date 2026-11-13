@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/complex-numerals",
+  "name": "@notatio/complex-numerals",
   "version": "0.0.0",
   "private": true,
   "description": "Numbers written in a complex base: radix expansions over the Gaussian and Eisenstein integers (twindragon, quater-imaginary, Gosper island), as lattices to draw.",
@@ -27,10 +27,10 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/numerals": "workspace:*"
+    "@notatio/numerals": "workspace:*"
   },
   "devDependencies": {
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

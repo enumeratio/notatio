@@ -1,5 +1,5 @@
-import type { Engine, Expr } from "@enumeratio/engine";
-import { registerCarrier, registerCollectionCarrier, registerOperation } from "@enumeratio/structures";
+import type { Engine, Expr } from "@notatio/engine";
+import { registerCarrier, registerCollectionCarrier, registerOperation } from "@notatio/structures";
 import { type Boxed, intOf } from "./families/types.ts";
 
 // Permutation statistics over a one-line word (a List of 1..n). Pure functions,
@@ -114,7 +114,7 @@ export function minorIndex(p: number[]): number {
  * The statistics, split by what they actually read. A `word` statistic compares entries with
  * each OTHER, so the same reading stands on any integer sequence; a `perm` statistic reads a
  * value against its position or walks the orbits, and means nothing without the bijection.
- * The same split as `word` vs `stat` in @enumeratio/statistics, for the heads this package
+ * The same split as `word` vs `stat` in @notatio/statistics, for the heads this package
  * owns instead.
  */
 const WORD_STATS: Record<string, (p: number[]) => number> = {
@@ -136,7 +136,7 @@ const PERM_STATS: Record<string, (p: number[]) => number> = {
 
 export interface StatsOptions {
   /**
-   * The minted carrier type for a permutation (`@enumeratio/combinatorics`' `permutation`). Given
+   * The minted carrier type for a permutation (`@notatio/combinatorics`' `permutation`). Given
    * it, each head takes the CARRIER: `Cycles(Permutation([2,3,1]))` is the question and
    * `Cycles([2,3,1])` is a type error. A word statistic additionally accepts a bare list,
    * because that reading stands on its own.
@@ -174,7 +174,7 @@ export function declareStats(ce: Engine, options: StatsOptions = {}): void {
   for (const [head, fn] of Object.entries(PERM_STATS)) declare(head, fn, false);
 
   // The same kernels as the preferred implementation of each statistic in the permutations'
-  // table, where @enumeratio/statistics files the definition beside them.
+  // table, where @notatio/statistics files the definition beside them.
   registerCarrier(ce, { name: carrier, ...(type === undefined ? {} : { type }) });
   registerCollectionCarrier(ce, "SymmetricGroup", carrier);
   for (const [name, fn] of Object.entries({ ...WORD_STATS, ...PERM_STATS })) {

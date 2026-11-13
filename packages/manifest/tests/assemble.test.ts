@@ -13,7 +13,7 @@ test("the manifest is assembled from each library's index, overloads attributed 
           name: "Twist",
           summary: "A twist.",
           signature: "Twist(n)",
-          signatures: [{ library: "@enumeratio/low", type: "(integer) -> integer" }],
+          signatures: [{ library: "@notatio/low", type: "(integer) -> integer" }],
         },
         examples: 2,
       },
@@ -21,7 +21,7 @@ test("the manifest is assembled from each library's index, overloads attributed 
   };
   const high: PackageIndex = {
     package: "high",
-    notation: "@enumeratio/high/notation",
+    notation: "@notatio/high/notation",
     records: [
       {
         record: {
@@ -43,7 +43,7 @@ test("the manifest is assembled from each library's index, overloads attributed 
   expect(symbols.Abs!.overloads.map((o) => o.package).toSorted()).toEqual(["compute-engine", "high"]);
   expect(declared.get("high")).toEqual({ Abs: { summary: "Abs, widened.", type: "(list) -> list" } });
   expect(examples.get("low")).toEqual({ Twist: 2 });
-  expect(notations).toEqual({ high: "@enumeratio/high/notation" });
+  expect(notations).toEqual({ high: "@notatio/high/notation" });
 });
 
 test("a record's optionValues reach the head's info", () => {

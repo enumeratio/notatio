@@ -6,8 +6,8 @@
 export async function plotMarkup(value: string): Promise<string | undefined> {
   // Browser-side and lazy: the front end brings the engine with it.
   const [{ plainJson, markupOf, renderingOf }, { parseExpression }] = await Promise.all([
-    import("@enumeratio/frontend"),
-    import("@enumeratio/formats/expression"),
+    import("@notatio/frontend"),
+    import("@notatio/formats/expression"),
   ]);
   const { json, errors } = parseExpression(value);
   if (errors.length > 0) return undefined;

@@ -1,5 +1,5 @@
-import { box, type Engine, type Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
+import { box, type Engine, type Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
 import { beforeEach, describe, expect, test } from "vite-plus/test";
 import { declareDistributions } from "../src/distributions.ts";
 
@@ -62,7 +62,7 @@ describe("GammaDistribution", () => {
     expect(evalOf(["Variance", ["GammaDistribution", 2, 2]]).json).toEqual(8);
   });
 
-  test("no dependency on @enumeratio/analytic's generalized GammaRegularized", () => {
+  test("no dependency on @notatio/analytic's generalized GammaRegularized", () => {
     // CDF is built from the native two-argument GammaRegularized (1 - Q), not the
     // three-argument generalized form that package adds — this engine never declares it.
     expect(N(["CDF", ["GammaDistribution", 2], 2])).toBeCloseTo(0.5939941502901619, 12);

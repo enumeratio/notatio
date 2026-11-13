@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ResolvedReference } from "@enumeratio/reference";
+import type { ResolvedReference } from "@notatio/reference";
 import { computed, ref } from "vue";
 import { renderInline } from "../../prose.ts";
 import Crosswalk from "./Crosswalk.vue";

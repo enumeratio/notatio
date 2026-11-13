@@ -1,7 +1,7 @@
 // Every carrier combinatorics owns, as data: what the declare (carriers.ts) and the notation
 // entry (notation.ts) both read. Light: the areas' carrier data and a type.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 import { CARTAN_CARRIERS } from "../cartan/src/carrier-data.ts";
 import { COMPOSITIONS_CARRIERS } from "../compositions/src/carrier-data.ts";
 import { FINDSTAT_CARRIERS } from "../findstat/src/carrier-data.ts";

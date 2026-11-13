@@ -16,7 +16,7 @@
 
 import { readFileSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
 import { COLLECTION_CARRIER, objectSize, readObject } from "../src/objects.ts";
 import { findstatMaps } from "../src/findstat-maps-data.ts";

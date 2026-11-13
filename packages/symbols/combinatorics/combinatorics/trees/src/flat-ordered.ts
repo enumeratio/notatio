@@ -9,7 +9,7 @@
 // Every body reads the word `_raw` as a valid Dyck word: the codec's `encode` only makes those.
 // Depths come from prefix counts of ups, so a body is a pass of folds and filters over positions.
 
-import type { FlatCodec } from "@enumeratio/structures";
+import type { FlatCodec } from "@notatio/structures";
 import { add, and, at, equal, fold, iff, less, map, sub, upTo } from "../../collections/src/families/tables.ts";
 import { given } from "./flat.ts";
 

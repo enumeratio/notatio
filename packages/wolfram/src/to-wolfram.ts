@@ -51,7 +51,7 @@ export const SYMBOLS: Record<string, string> = {
   ComplexInfinity: "ComplexInfinity",
   Nothing: "Null",
   ...NUMBER_SETS,
-  // @enumeratio/evaluation's own marker, under Wolfram's `$`-prefixed spelling — compute-engine's
+  // @notatio/evaluation's own marker, under Wolfram's `$`-prefixed spelling — compute-engine's
   // symbol grammar rejects a leading `$` (see evaluation/src/declare.ts).
   Aborted: "$Aborted",
 };
@@ -529,7 +529,7 @@ const SPECIAL: Record<string, (args: MathJson[]) => string> = {
 
 /** `x` is a plain integer literal, in whichever of the two forms a `SPECIAL` case may see it
  * (see `unwrapFunctionArg`'s doc comment): raw MathJson, or an already-rendered Wolfram
- * source string (from `@enumeratio/oracle`'s pre-walked `emit`). */
+ * source string (from `@notatio/oracle`'s pre-walked `emit`). */
 function isIntegerLiteral(x: MathJson): boolean {
   if (typeof x === "number") return Number.isInteger(x);
   if (typeof x === "string") return /^-?\d+$/.test(x);
@@ -549,7 +549,7 @@ function isIntegerLiteral(x: MathJson): boolean {
  * `fn` arrives one of two ways, and this handles both: raw MathJSON (array or `{fn:[...]}`),
  * when `toWolfram` is called directly (the `fullform` reference column, this package's own
  * tests); or an ALREADY-RENDERED Wolfram source string, when it's reached through
- * `@enumeratio/oracle`'s `emit` -- which pre-walks every operand (to collect its own
+ * `@notatio/oracle`'s `emit` -- which pre-walks every operand (to collect its own
  * `missing`/free-variable bookkeeping) before calling `toWolfram` with the walked, now
  * string, results. The rest of this file's SPECIAL cases dodge that distinction for free:
  * `toWolfram` on an already-rendered string is the identity (nothing here matches its own
@@ -578,7 +578,7 @@ function unwrapFunctionArg(fn: MathJson, fallback: string): { variable: string; 
 
 /** `node`'s head and arguments, whichever of the THREE shapes it may arrive in (see
  * `unwrapFunctionArg`'s doc comment, the same distinction): a bare array, the `{fn:[...]}`
- * object form, or an ALREADY-RENDERED Wolfram source string (`@enumeratio/oracle`'s `emit`
+ * object form, or an ALREADY-RENDERED Wolfram source string (`@notatio/oracle`'s `emit`
  * pre-walks every operand before a `SPECIAL` case ever sees it, so a nested call reaches
  * here as `"Head[a, b]"` text, not a tree) -- `undefined` for anything else (an atom, or a
  * string that doesn't parse as one call). The args of the string form are themselves

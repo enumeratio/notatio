@@ -2,7 +2,7 @@
 // family whose declaration understates its cost costs a restart, not the run.
 
 import { parentPort } from "node:worker_threads";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { allKernels } from "../src/families/index.ts";
 import { type RunOptions, runFamily } from "./run-family.ts";
 

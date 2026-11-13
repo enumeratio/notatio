@@ -6,7 +6,7 @@ import {
   operandsOf,
   symbolNameOf,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 // Heads that take or build with a FUNCTION argument (Nest, NestList, FixedPoint, Outer,
 // RecurrenceTable), two heads that generate exact recurrence sequences (LinearRecurrence,

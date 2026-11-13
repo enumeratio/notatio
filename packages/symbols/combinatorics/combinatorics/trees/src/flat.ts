@@ -11,7 +11,7 @@
 // array: the codec's `encode` only makes those. Quadratic passes (`Height`, the child counts) are
 // folds and filters over the positions.
 
-import type { FlatCodec } from "@enumeratio/structures";
+import type { FlatCodec } from "@notatio/structures";
 import { add, at, equal, fold, iff, less, map, sub, upTo } from "../../collections/src/families/tables.ts";
 
 type MathJSON = unknown;

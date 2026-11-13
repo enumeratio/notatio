@@ -5,7 +5,7 @@
 // DEEP_TESTS takes every member.
 
 // unstable: the tests build an engine to run the families on.
-import { ComputeEngine } from "@enumeratio/engine/unstable";
+import { ComputeEngine } from "@notatio/engine/unstable";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, type EpsilFamily, type FastKernel, kernelOn } from "../../collections/src/families/epsil.ts";
 import { binaryTreesFast, fullKAryTreesFast, orderedTreesFast } from "../src/families/core.ts";

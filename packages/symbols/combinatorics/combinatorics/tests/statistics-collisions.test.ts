@@ -1,4 +1,4 @@
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declarePermutations } from "../permutations/src/declare.ts";
 import { ALL_STATISTICS, declareStatistics, StatisticCollisionError } from "../src/index.ts";

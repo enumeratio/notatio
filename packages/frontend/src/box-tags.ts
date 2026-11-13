@@ -2,7 +2,7 @@
 // the head in kebab case, `RowBox` -> `row-box`, so web markup is the box tree itself and the
 // suffix meets the custom-element hyphen rule without a brand.
 
-import { BAR_KINDS, BOX_HEADS } from "@enumeratio/boxes";
+import { BAR_KINDS, BOX_HEADS } from "@notatio/boxes";
 
 /**
  * `head` in kebab case, broken before each capital that follows a lowercase letter and before each

@@ -1,9 +1,9 @@
-// A `setup` module for `@enumeratio/evaluation/node` that declares only the packages its URL
+// A `setup` module for `@notatio/evaluation/node` that declares only the packages its URL
 // names (`lazy-engines.ts?packages=analytic,boxes`), and what they require, in the order
 // LIBRARIES lists them: the resolver's engine, for checking it means what the full one does.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { plan } from "@enumeratio/manifest";
+import { plan } from "@notatio/manifest";
 import { EXTRAS, LIBRARIES } from "./engines.ts";
 
 export function configure(ce: ComputeEngine): void {

@@ -91,7 +91,7 @@ underlying <code>\begin{pmatrix}…</code> string.
   title="WolframFullForm">
 <template #description>
 The expression transpiled to Wolfram Language full form (<code>Binomial[n, k]</code>)
-via <code>@enumeratio/wolfram</code> — the same serializer the reference
+via <code>@notatio/wolfram</code> — the same serializer the reference
 validation loop uses. Shown in a <code>&lt;notatio-code&gt;</code> box.
 </template>
 <notatio-out value='["Binomial","n","k"]' format="mathjson" form="wolfram" label="Out" />

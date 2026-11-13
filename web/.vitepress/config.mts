@@ -2,7 +2,7 @@ import { cpSync, existsSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { constants } from "node:os";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { HOLE_TAGS, isBoxTag } from "@enumeratio/frontend/box-tags";
+import { HOLE_TAGS, isBoxTag } from "@notatio/frontend/box-tags";
 import { defineConfig } from "vitepress";
 import { codeThemes } from "./code-theme.ts";
 import { notatioMarkup, useLibraryParams } from "./notatio-markup.ts";
@@ -14,7 +14,7 @@ import { notationEntriesPlugin } from "./notation-entries.ts";
 import { docRoute, docsSidebar, workspacePackages } from "./data/repo-docs.ts";
 import { writeRedirects } from "./redirects.ts";
 import { loaderWatchPlugin } from "./loader-watch.ts";
-import { BOX_LAYOUT_CSS } from "@enumeratio/frontend/core";
+import { BOX_LAYOUT_CSS } from "@notatio/frontend/core";
 import { fillPrerendered } from "./data/prerender.ts";
 import { fillMarkup } from "./data/prerender-markup.ts";
 import { chunksIn, pageTags, preloads, prerenderMarkup } from "./prerender-markup.ts";
@@ -24,12 +24,12 @@ import { CATALOGUE } from "./theme/worker-catalogue.ts";
 import { reviewModePlugin } from "./review/plugin.ts";
 import { vendorExternals, vendorHref, writeVendor } from "./vendor.ts";
 
-// Resolve every @enumeratio/* import (bare and subpaths) to its source, so the docs
+// Resolve every @notatio/* import (bare and subpaths) to its source, so the docs
 // site reads sibling packages directly and never depends on a prior `vp pack` of
 // them — dev and build both stay in sync with source, with no stale-dist surprises.
 // Each package's exports are read, and any target under dist/ is remapped to the
 // matching src/*.ts; exports that already point at src are used as-is.
-// SITE_FROM_PACKAGES=1 turns them off: the site resolves `@enumeratio/*` through whatever is installed,
+// SITE_FROM_PACKAGES=1 turns them off: the site resolves `@notatio/*` through whatever is installed,
 // as it would from the registry (tools/tarball-check builds it that way, from packed tarballs).
 // A library installed beside the tree's packages has no alias: web/ resolves it through node_modules.
 const fromPackages = process.env.SITE_FROM_PACKAGES === "1";
@@ -50,7 +50,7 @@ for (const dir of packageDirs) {
     name?: string;
     exports?: Record<string, unknown>;
   };
-  if (!pkg.name?.startsWith("@enumeratio/") || !pkg.exports) continue;
+  if (!pkg.name?.startsWith("@notatio/") || !pkg.exports) continue;
   for (const [sub, entry] of Object.entries(pkg.exports)) {
     const target = typeof entry === "string" ? entry : (entry as { import?: string })?.import;
     if (typeof target !== "string") continue;
@@ -70,17 +70,17 @@ for (const dir of packageDirs) {
   }
 }
 
-// `@enumeratio/combinatorics` keeps its `collections` area (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
+// `@notatio/combinatorics` keeps its `collections` area (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible)
 // under its own nested `<area>/src/index.ts` rather than a package-root `src/`, so the
 // generic dist->src rewrite above (which only swaps the `/dist/` segment) can't find it.
 // So are the other entries whose source isn't `src/<entry>.ts`; alias them by hand.
 const sourceEntries: [specifier: string, source: string][] = fromPackages
   ? []
   : [
-      ["@enumeratio/combinatorics/collections", "symbols/combinatorics/combinatorics/collections/src/index.ts"],
-      ["@enumeratio/combinatorics/findstat", "symbols/combinatorics/combinatorics/findstat/src/findstat-data.ts"],
-      ["@enumeratio/catalog/records", "catalog/src/catalog-records-data.ts"],
-      ["@enumeratio/ce-patches/glsl-complex", "ce-patches/src/compute-engine/compilation/glsl-complex.ts"],
+      ["@notatio/combinatorics/collections", "symbols/combinatorics/combinatorics/collections/src/index.ts"],
+      ["@notatio/combinatorics/findstat", "symbols/combinatorics/combinatorics/findstat/src/findstat-data.ts"],
+      ["@notatio/catalog/records", "catalog/src/catalog-records-data.ts"],
+      ["@notatio/ce-patches/glsl-complex", "ce-patches/src/compute-engine/compilation/glsl-complex.ts"],
     ];
 for (const [specifier, source] of sourceEntries) {
   const abs = resolve(pkgsDir, source);

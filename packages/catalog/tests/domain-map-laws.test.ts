@@ -3,24 +3,17 @@
 // over that carrier: pick a family, then an address in it, the way Plausible's Sum instance
 // does. Seeded per map, so a failure replays.
 //
-// Moved here from @enumeratio/combinatorics' now-retired domains area (originally domains/tests/
+// Moved here from @notatio/combinatorics' now-retired domains area (originally domains/tests/
 // laws.test.ts) to break a devDependency cycle: combinatorics -> catalog -> combinatorics, once
 // collections and domains merged into one package (https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible). catalog already devDeps combinatorics' public API for its own tests, so
 // this moved to the side of the edge that doesn't cycle; the engine setup below was originally
 // domains/tests/map-helpers.ts's, inlined since that helper was package-internal.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { allKernels, type FamilyKernel } from "@enumeratio/combinatorics/collections";
-import { sampleable } from "@enumeratio/combinatorics/collections/sampleable";
-import {
-  CARRIERS,
-  checkLaws,
-  declareCombinatorics,
-  declareMaps,
-  type LawFailure,
-  MAPS,
-} from "@enumeratio/combinatorics";
-import { streamFor } from "@enumeratio/plausible";
+import { allKernels, type FamilyKernel } from "@notatio/combinatorics/collections";
+import { sampleable } from "@notatio/combinatorics/collections/sampleable";
+import { CARRIERS, checkLaws, declareCombinatorics, declareMaps, type LawFailure, MAPS } from "@notatio/combinatorics";
+import { streamFor } from "@notatio/plausible";
 import { expect, test } from "vite-plus/test";
 
 const constructorFor = Object.fromEntries(CARRIERS.map((c) => [c.type, c.name]));

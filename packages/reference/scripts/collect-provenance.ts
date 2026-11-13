@@ -6,15 +6,15 @@
 // to make sure the built copy ran against these records.
 //
 // Everything collected here is offline: two compute-engine instances, plus a reflection of
-// the head map in `@enumeratio/wolfram`. No external kernel, so it can run in CI. The one
+// the head map in `@notatio/wolfram`. No external kernel, so it can run in CI. The one
 // column a kernel answers, `elsewhere`, is the committed `coverage-data.ts`
 // (collect-coverage.ts), folded in here.
 //
 //   vp node packages/reference/scripts/collect-provenance.ts
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { writeFormatted } from "@enumeratio/entry/node";
-import { HEADS } from "@enumeratio/wolfram";
+import { writeFormatted } from "@notatio/entry/node";
+import { HEADS } from "@notatio/wolfram";
 import { referenceEntries } from "../src/node.ts";
 import { declaredEngine } from "./engines.ts";
 import { coverage } from "../src/coverage-data.ts";

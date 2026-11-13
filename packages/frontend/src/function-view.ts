@@ -4,7 +4,7 @@
 // The plot's choice is `inferPlotOver`'s (real -> Plot, complex -> ComplexPlot, integer ->
 // DiscretePlot), in Wolfram's names; the other arguments are `inferControl`s.
 
-import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
+import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
 import {
   controllableType,
   inferControl,

@@ -1,15 +1,15 @@
-# @enumeratio/components
+# @notatio/components
 
 The `notatio-*` custom elements (Lit): every symbol that draws or controls, built on
 [`frontend`](../frontend/README.md). This is the package an app installs to get notatio working in
-plain HTML, or under the Vue/React wrappers `@enumeratio/frontend` generates.
+plain HTML, or under the Vue/React wrappers `@notatio/frontend` generates.
 
 Importing the package registers every element as a side effect and installs a page-level
 `Scope`: controls and readouts with no `<DynamicModule>` around them bind through it,
 client side.
 
 ```ts
-import "@enumeratio/components";
+import "@notatio/components";
 ```
 
 ```html
@@ -39,7 +39,7 @@ import "@enumeratio/components";
   `<dynamic-module-box>`: bind a body's controls to its own expression and re-render
   on change.
 - **Other** — `<notatio-code>`, `<notatio-terminal>` (a real terminal emulator running
-  `@enumeratio/cli`'s logic), `<notatio-collection-table>`, `<notatio-clock>`.
+  `@notatio/cli`'s logic), `<notatio-collection-table>`, `<notatio-clock>`.
 
 `./define.ts`'s `defineControl` is how a new control registers its tag and joins
 `CONTROL_TAGS`, the set a scope's `querySelectorAll` reads.

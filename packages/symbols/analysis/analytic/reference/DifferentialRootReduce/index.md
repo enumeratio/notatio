@@ -2,11 +2,11 @@
 name: DifferentialRootReduce
 domain: Special functions
 signature: DifferentialRootReduce(f(x), x)
-summary: Reduces a function $f(x)$ to its holonomic (D-finite) representation — $\mathrm{DifferentialRoot}$, a linear ODE with polynomial(x) coefficients plus enough derivatives at one point, applied straight back to $x$. Covers $e^{ax}$, $\sin(ax)$, $\cos(ax)$, polynomials, a single-pole rational function, $\ln(1{+}x)$, $\arctan(x)$, $\mathrm{erf}(x)$, BesselJ, AiryAi and AiryBi; declines sums, products, and anything else. Provided by `@enumeratio/analytic`.
+summary: Reduces a function $f(x)$ to its holonomic (D-finite) representation — $\mathrm{DifferentialRoot}$, a linear ODE with polynomial(x) coefficients plus enough derivatives at one point, applied straight back to $x$. Covers $e^{ax}$, $\sin(ax)$, $\cos(ax)$, polynomials, a single-pole rational function, $\ln(1{+}x)$, $\arctan(x)$, $\mathrm{erf}(x)$, BesselJ, AiryAi and AiryBi; declines sums, products, and anything else. Provided by `@notatio/analytic`.
 signatures:
   - call: DifferentialRootReduce(f(x), x)
     description: the D-finite reduction of $f(x)$, as $\mathrm{DifferentialRoot}(\ldots)(x)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 seeAlso:
   - DifferentialRoot

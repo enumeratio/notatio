@@ -1,5 +1,5 @@
-import { bigRationalAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { bigRationalAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // Series of QBinomial(n, k, q) and QFactorial(n, q) at q = 0 for a non-integer rational argument.
 // Neither is analytic there (each is a series in q^(1/den)), so compute-engine's Taylor fallback,

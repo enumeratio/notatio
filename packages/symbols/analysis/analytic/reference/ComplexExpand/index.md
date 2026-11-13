@@ -2,11 +2,11 @@
 name: ComplexExpand
 domain: Transformations
 signature: ComplexExpand(expr)
-summary: Split `expr` into real and imaginary parts, treating every free symbol as real. Provided by `@enumeratio/analytic`.
+summary: Split `expr` into real and imaginary parts, treating every free symbol as real. Provided by `@notatio/analytic`.
 signatures:
   - call: ComplexExpand(expr)
     description: "`expr`, rewritten as `Re + i·Im` with its symbols assumed real."
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression) -> expression
 seeAlso:
   - ExpToTrig

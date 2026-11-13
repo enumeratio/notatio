@@ -6,11 +6,11 @@ summary: "The triangle wave: period 1, default range {-1, 1}, sine-like phase (0
 signatures:
   - call: TriangleWave(x)
     description: a triangular approximation to sin(2*Pi*x) -- 0 at x = 0, 1 at x = 1/4, 0 at x = 1/2, -1 at x = 3/4.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real | vector<real^2>, real?) -> number
   - call: TriangleWave({min, max}, x)
     description: the triangle wave rescaled to vary from min to max, unit period.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

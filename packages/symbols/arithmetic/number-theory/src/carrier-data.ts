@@ -6,13 +6,13 @@
 // `rational_number` — numerals' own carriers — so `declareNumberTheory` has to run after
 // `declareNumerals` on any engine declaring both; every host already orders them that way.
 // `ContinuedFraction` sits here rather than in numerals for a sharper reason: compute-engine's
-// native `ContinuedFraction` is widened in place by `@enumeratio/modular` (the quadratic-
+// native `ContinuedFraction` is widened in place by `@notatio/modular` (the quadratic-
 // irrational PQa expansion), and this carrier's constructor overloads onto whatever
 // `ContinuedFraction` already is at declare time (`declareCarriers`' `declareConstructor`) — so
 // it has to run after modular's widening, the same relative position combinatorics held it in
 // before this move. Every host declares modular before number-theory already.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 
 export const NUMBER_THEORY_CARRIERS: readonly Carrier[] = [
   {

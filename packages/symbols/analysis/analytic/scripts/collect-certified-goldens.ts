@@ -10,7 +10,7 @@
 //   node scripts/collect-certified-goldens.ts
 
 import { writeFileSync } from "node:fs";
-import { runKernel } from "@enumeratio/utils/bounded";
+import { runKernel } from "@notatio/utils/bounded";
 
 export interface CertifiedGolden {
   /** A head in certified.ts, or a primitive of ball.ts: `exp`, `ln`, `pow`. */

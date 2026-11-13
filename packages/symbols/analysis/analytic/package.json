@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/analytic",
+  "name": "@notatio/analytic",
   "version": "0.0.0",
   "private": true,
   "description": "Analytic / special-function extensions for @cortex-js/compute-engine — Hurwitz zeta and friends. Separate from the combinatorial collections.",
@@ -36,19 +36,19 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/ce-patches": "workspace:*",
-    "@enumeratio/engine": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/ce-patches": "workspace:*",
+    "@notatio/engine": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/ce-patches": "workspace:*",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/entry": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/structures": "workspace:*",
-    "@enumeratio/utils": "workspace:*",
+    "@notatio/ce-patches": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/entry": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/structures": "workspace:*",
+    "@notatio/utils": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

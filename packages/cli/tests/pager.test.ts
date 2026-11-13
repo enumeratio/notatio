@@ -1,5 +1,5 @@
 import { expect, it } from "vite-plus/test";
-import type { IndexRange, RowBatch, RowCount, RowSource } from "@enumeratio/boxes";
+import type { IndexRange, RowBatch, RowCount, RowSource } from "@notatio/boxes";
 import { keysOf } from "../src/drive.ts";
 import { clip, pager } from "../src/pager.ts";
 

@@ -2,11 +2,11 @@
 name: PowerExpand
 domain: Transformations
 signature: PowerExpand(expr)
-summary: Expand powers and logarithms of products in `expr` as though every variable were positive. Provided by `@enumeratio/analytic`.
+summary: Expand powers and logarithms of products in `expr` as though every variable were positive. Provided by `@notatio/analytic`.
 signatures:
   - call: PowerExpand(expr)
     description: "`expr` with Ln and Power distributed over products, assuming positivity."
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression) -> expression
 bindings:
   - origin: mapped

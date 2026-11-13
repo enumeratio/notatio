@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, ruleOf } from "@enumeratio/engine";
-import { add, cosPi, cx, mul, scale, sinPi, type Cx, type BoxInput, isFiniteNum } from "@enumeratio/ce-patches";
+import { operandsOf, ruleOf } from "@notatio/engine";
+import { add, cosPi, cx, mul, scale, sinPi, type Cx, type BoxInput, isFiniteNum } from "@notatio/ce-patches";
 
 // Fourier(list) / InverseFourier(list): the numeric discrete Fourier transform of a
 // list, or of a rectangular matrix (a 2D DFT is separable -- apply the 1D transform

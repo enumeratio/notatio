@@ -3,9 +3,9 @@
 // heads to evaluate would read as symbolic. Each engine is built as its package's own tests build
 // theirs: its `enumeratio.declare` list over a bare compute-engine.
 
-import { box, type Engine, type Json } from "@enumeratio/engine";
-import { type Declare, createEngine } from "@enumeratio/engine/testing";
-import type { MathJSON } from "@enumeratio/oracle";
+import { box, type Engine, type Json } from "@notatio/engine";
+import { type Declare, createEngine } from "@notatio/engine/testing";
+import type { MathJSON } from "@notatio/oracle";
 import {
   declareDistributions,
   declareDistributions2,
@@ -14,7 +14,7 @@ import {
   declareDistributions5,
   declareDistributions6,
   declareProcesses,
-} from "@enumeratio/statistics";
+} from "@notatio/statistics";
 
 /** Keyed by package name, as `ownEngineOf` in src/node.ts names it. */
 const DECLARES: Readonly<Record<string, readonly Declare[]>> = {

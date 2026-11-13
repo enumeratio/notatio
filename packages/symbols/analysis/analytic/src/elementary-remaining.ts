@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf, widenSignature, wrapOperator } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { bigRationalAt, operandsOf, widenSignature, wrapOperator } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // Issue #113's remaining elementary backlog (excluding every Interval/CenteredInterval/Around
 // example, owned by another lane): parity and reflection identities for Cos/Tan/Cot/Sec/Csc/

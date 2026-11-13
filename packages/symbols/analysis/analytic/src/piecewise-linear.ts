@@ -1,4 +1,4 @@
-import { bigRationalAt, type Expr, isSymbol, type Json, operandsOf } from "@enumeratio/engine";
+import { bigRationalAt, type Expr, isSymbol, type Json, operandsOf } from "@notatio/engine";
 
 // The exact arithmetic under the PiecewiseExpand rewrites: small rationals, linear forms over
 // atoms, the conditions Wolfram writes for them (`a - b >= 0`, `x <= 2`), and Wolfram's own

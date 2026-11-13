@@ -1,10 +1,10 @@
-# @enumeratio/number-theory
+# @notatio/number-theory
 
 Number theory past $\mathbb{Z}/m$ for `@cortex-js/compute-engine`, over bigints: Gaussian
 integers, rational reconstruction, Hermite normal form and integer valuations, plus a sweep
 of Wolfram heads compute-engine doesn't have (divisor sums, Jacobi/Kronecker/Legendre
-symbols, Stirling and Bell numbers, Frobenius, …). Builds on `@enumeratio/residues` (declare
-that first) and `@enumeratio/numerals`. Every head answers exactly or stays unevaluated —
+symbols, Stirling and Bell numbers, Frobenius, …). Builds on `@notatio/residues` (declare
+that first) and `@notatio/numerals`. Every head answers exactly or stays unevaluated —
 never approximate.
 
 A handful of compute-engine's own heads (`Fibonacci`, `LucasL`, `Factorial`, `GCD`,
@@ -15,9 +15,9 @@ binary splitting, Lehmer's algorithm, a segmented sieve — for the same results
 ## Usage
 
 ```ts
-import { declareNumberTheory } from "@enumeratio/number-theory";
+import { declareNumberTheory } from "@notatio/number-theory";
 
-declareNumberTheory(ce); // declares @enumeratio/residues first if not already declared
+declareNumberTheory(ce); // declares @notatio/residues first if not already declared
 ```
 
 `./src` exports the raw TypeScript entry for a workspace consumer. `gaussian` is a namespace
@@ -55,7 +55,7 @@ HermiteDecomposition([[1, 2], [3, 4]])      // the unimodular u and Hermite form
 
 **Sequences and combinatorial number theory**
 
-- [`Fibonacci`](https://enumeratio.dev/reference/symbol/Fibonacci) / [`LucasL`](https://enumeratio.dev/reference/symbol/LucasL) — fast doubling, and continuous on the profinite integers `@enumeratio/adeles` adds
+- [`Fibonacci`](https://enumeratio.dev/reference/symbol/Fibonacci) / [`LucasL`](https://enumeratio.dev/reference/symbol/LucasL) — fast doubling, and continuous on the profinite integers `@notatio/adeles` adds
 - [`BellNumber`](https://enumeratio.dev/reference/symbol/BellNumber) / [`CatalanNumber`](https://enumeratio.dev/reference/symbol/CatalanNumber) / [`Stirling`](https://enumeratio.dev/reference/symbol/Stirling) / [`StirlingS1`](https://enumeratio.dev/reference/symbol/StirlingS1) / [`Multinomial`](https://enumeratio.dev/reference/symbol/Multinomial) / [`Subfactorial`](https://enumeratio.dev/reference/symbol/Subfactorial)
 - [`PartitionsQ`](https://enumeratio.dev/reference/symbol/PartitionsQ) / [`SquaresR`](https://enumeratio.dev/reference/symbol/SquaresR) / [`PowersRepresentations`](https://enumeratio.dev/reference/symbol/PowersRepresentations) / [`RamanujanTau`](https://enumeratio.dev/reference/symbol/RamanujanTau)
 - [`FrobeniusNumber`](https://enumeratio.dev/reference/symbol/FrobeniusNumber) / [`FrobeniusSolve`](https://enumeratio.dev/reference/symbol/FrobeniusSolve) — the largest non-representable value, and every representation, for a coin-problem instance
@@ -65,11 +65,11 @@ HermiteDecomposition([[1, 2], [3, 4]])      // the unimodular u and Hermite form
 
 - [`GaussianIntegers`](https://enumeratio.dev/reference/symbol/GaussianIntegers) — $\mathbb{Z}[i]$; `PowerMod`, `PowerModList`, `GCD`, `LCM`, `IntegerExponent` and `Divisors` all reach into it when an operand is genuinely complex
 - [`RationalReconstruction`](https://enumeratio.dev/reference/symbol/RationalReconstruction) — the rational nearest a residue mod $m$
-- [`HermiteDecomposition`](https://enumeratio.dev/reference/symbol/HermiteDecomposition) — unimodular $u$ with $um$ in Hermite normal form; backs `@enumeratio/adeles`' strong approximation
+- [`HermiteDecomposition`](https://enumeratio.dev/reference/symbol/HermiteDecomposition) — unimodular $u$ with $um$ in Hermite normal form; backs `@notatio/adeles`' strong approximation
 
 ## See also
 
-Builds on `@enumeratio/residues` ([`residues`](../residues/README.md)) and `@enumeratio/numerals`
-([`numerals`](../numerals/README.md)). `@enumeratio/adeles` ([`adeles`](../adeles/README.md)) depends on this
+Builds on `@notatio/residues` ([`residues`](../residues/README.md)) and `@notatio/numerals`
+([`numerals`](../numerals/README.md)). `@notatio/adeles` ([`adeles`](../adeles/README.md)) depends on this
 package for `HermiteDecomposition` and extends `Fibonacci`/`LucasL` to the profinite
 integers.

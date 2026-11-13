@@ -8,7 +8,7 @@
 // `to` overrides that when the text is not a head at all, or the target is a page the
 // crosswalk does not carry (`<Symbol type="wikipedia" to="Dyck_path">Dyck paths</Symbol>`);
 // for a system with a URL scheme the bare text is the slug of last resort.
-import { crosswalkFor } from "@enumeratio/reference";
+import { crosswalkFor } from "@notatio/reference";
 import { computed, useSlots } from "vue";
 import { getEntry } from "../../data/reference.ts";
 import { type SymbolKind, SYMBOL_SOURCES } from "../../data/symbol-links.ts";

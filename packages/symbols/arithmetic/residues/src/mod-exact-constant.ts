@@ -1,4 +1,4 @@
-import { bigRationalAt, symbolNameOf, wrapOperator, type Engine } from "@enumeratio/engine";
+import { bigRationalAt, symbolNameOf, wrapOperator, type Engine } from "@notatio/engine";
 
 export function declareModExactConstant(ce: Engine): void {
   // A bare constant symbol (Pi) against a float modulus (Mod(Pi, 2.5)): evaluate returns the number, where

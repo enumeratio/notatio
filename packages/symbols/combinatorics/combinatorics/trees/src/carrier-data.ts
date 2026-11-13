@@ -2,7 +2,7 @@
 // generator, one-time, from the last generated domain-data.ts. Families for this area move
 // here in step 5.
 
-import type { Carrier } from "@enumeratio/structures";
+import type { Carrier } from "@notatio/structures";
 import { BINARY_TREE_FLAT } from "./flat.ts";
 import { ORDERED_TREE_FLAT } from "./flat-ordered.ts";
 

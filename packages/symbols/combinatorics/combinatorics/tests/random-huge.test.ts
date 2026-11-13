@@ -1,8 +1,8 @@
 // `Random` over collections past 2^53: a uniform bigint rank, unranked by the family. A collection
 // that is infinite or can't be addressed stays unevaluated and says why.
 
-import { collectMessages, ensureRandom, randomBelow } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { collectMessages, ensureRandom, randomBelow } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../src/index.ts";
 

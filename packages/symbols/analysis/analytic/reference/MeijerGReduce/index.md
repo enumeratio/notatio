@@ -6,7 +6,7 @@ summary: Rewrites a handful of elementary and special functions into MeijerG for
 signatures:
   - call: MeijerGReduce(expr, x)
     description: "`expr` (a function of `x`) rewritten as a `MeijerG` call, for the heads below."
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression) -> expression
 primitive: kernel
 bindings:

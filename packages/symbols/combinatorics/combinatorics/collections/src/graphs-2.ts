@@ -1,4 +1,4 @@
-import { defineMessages, emit, type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
+import { defineMessages, emit, type Engine, type Expr, integerAt, operandsOf } from "@notatio/engine";
 import { allPairsWeightedDistances, weightedAdjacencyMatrixExpr } from "./graph-weights.ts";
 import { degrees, directedAdjacency, type GraphModel, graphOf, integerGraph, listOf, vertexKey } from "./graphs.ts";
 import { rngFor } from "./list-frontier.ts";

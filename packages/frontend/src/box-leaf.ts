@@ -2,8 +2,8 @@
 // math run is one `form-box` that holds its TeX, and the host typesets it. Apart from
 // `box-render.ts` because the front end's core, which loads no engine, draws a leaf too.
 
-import type { Box } from "@enumeratio/boxes";
-import { toLatex, toText } from "@enumeratio/boxes/render";
+import type { Box } from "@notatio/boxes";
+import { toLatex, toText } from "@notatio/boxes/render";
 import { boxTag } from "./box-tags.ts";
 import type { Rendering } from "./symbols.ts";
 

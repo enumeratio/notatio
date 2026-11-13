@@ -1,4 +1,4 @@
-import { bigRationalAt, type Engine, type Expr, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { bigRationalAt, type Engine, type Expr, operandsOf, symbolNameOf } from "@notatio/engine";
 
 // Asymptotic expansions at x → +∞ of Airy, Bessel, Ei, EllipticK and the ₁F₁ and ₂F₁ with symbolic
 // parameters (DLMF §9.7, §10.17, §10.40, §6.12, §19.12, §13.7, §15.8), as `Series(f, x, ∞, n)` returns them.

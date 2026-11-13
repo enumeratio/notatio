@@ -2,7 +2,7 @@
 // and the heads compute-engine's own canonicalise to, for the manifest's build.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { overloadTable } from "@enumeratio/engine";
+import { overloadTable } from "@notatio/engine";
 import type { LibraryDeclares } from "../src/declares.ts";
 import { namesOf } from "../src/names.ts";
 

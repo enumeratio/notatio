@@ -1,7 +1,7 @@
-// @enumeratio/quiver's heads in traditional notation: the linearly oriented A_n and the
+// @notatio/quiver's heads in traditional notation: the linearly oriented A_n and the
 // path algebra kQ.
 
-import { type Notation, overscript, row, scalars, subscript, type PackageNotation } from "@enumeratio/boxes";
+import { type Notation, overscript, row, scalars, subscript, type PackageNotation } from "@notatio/boxes";
 
 export const QUIVER_NOTATION: Notation = {
   LinearQuiver: scalars(([n, ...rest], write) =>

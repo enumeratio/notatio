@@ -1,11 +1,11 @@
-# @enumeratio/bench
+# @notatio/bench
 
 Cross-system benchmarks; the design is `https://github.com/enumeratio/notatio/wiki/Benchmarking`.
 
 - `catalogue/*.yaml`: cases in the example shape plus a `bench` block, keyed by head. This is
   their interim home; they move into each head's `reference/<Head>.yaml` as `role: bench`
   examples later.
-- `buildPlan` emits every case for every system through `@enumeratio/oracle`'s `emit`, or
+- `buildPlan` emits every case for every system through `@notatio/oracle`'s `emit`, or
   records why a system sits it out: the support matrix.
 - Each system runs as one long-lived harness speaking a line protocol (a case name in,
   `<<name>>{json}` out; Wolfram over TCP, since wolframscript's kernel can't read stdin). The

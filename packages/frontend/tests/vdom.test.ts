@@ -1,4 +1,4 @@
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { renderingOf, scopeOf } from "../src/symbols.ts";
 import { type StructuralNode, structuralOf, tagOf, toVNode, vdomOf } from "../src/vdom.ts";

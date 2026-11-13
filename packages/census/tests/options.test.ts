@@ -2,8 +2,8 @@
 // (`PlotRange -> All`), so an option key that is also a head reads as a call in one place and a
 // key in another, and `Options(f)` could not say which it meant. Enforced for now.
 
-import { DRAWING_SYMBOLS, PLOT_SETTINGS } from "@enumeratio/frontend";
-import { recordsRoot, referenceData } from "@enumeratio/reference/node";
+import { DRAWING_SYMBOLS, PLOT_SETTINGS } from "@notatio/frontend";
+import { recordsRoot, referenceData } from "@notatio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { declaredNames } from "../src/engine.ts";
 

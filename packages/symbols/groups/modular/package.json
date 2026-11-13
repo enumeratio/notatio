@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/modular",
+  "name": "@notatio/modular",
   "version": "0.0.0",
   "private": true,
   "description": "The modular group PSL(2,Z) for @cortex-js/compute-engine: S/T and L/R words, continued fractions, the Stern-Brocot tree, hyperbolic conjugacy classes as necklaces, and the Rademacher symbol.",
@@ -29,18 +29,18 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
-    "@enumeratio/structures": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/residues": "workspace:*",
+    "@notatio/structures": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

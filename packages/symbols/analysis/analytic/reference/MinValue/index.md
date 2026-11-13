@@ -6,11 +6,11 @@ summary: The global minimum VALUE of f -- Minimize's value alone, without the wi
 signatures:
   - call: MinValue(f, x)
     description: the global minimum of f over its own natural domain.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, list<symbol> | symbol) -> expression
   - call: MinValue({f, cons}, x)
     description: the global minimum of f restricted to a simple interval constraint cons.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Minimize
   - MaxValue

@@ -7,7 +7,7 @@ import {
   operandsOf,
   symbolNameOf,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { bindingOf, finish, mentions, numAt, uniform01 } from "./distributions.ts";
 import { add, div, exp, If, lt, mul, neg, pow, sub } from "./distributions-2.ts";
 

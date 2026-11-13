@@ -1,5 +1,5 @@
-import { createEngine } from "@enumeratio/engine/testing";
-import { collectMessages, messageLine, type Json } from "@enumeratio/engine";
+import { createEngine } from "@notatio/engine/testing";
+import { collectMessages, messageLine, type Json } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { declareResidues } from "../src/declare.ts";
 

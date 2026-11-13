@@ -1,4 +1,4 @@
-import type { Json } from "@enumeratio/ce-patches";
+import type { Json } from "@notatio/ce-patches";
 
 // Taylor coefficients in the parameter m, at m = 0, of the Jacobi functions at a fixed u.
 //

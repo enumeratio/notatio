@@ -3,7 +3,7 @@
 // scroll position maps to a row when the content is taller than a browser will scroll. Pure, so
 // the web element and the terminal pager share it and a test needs no document.
 
-import type { IndexRange, RowCount } from "@enumeratio/boxes";
+import type { IndexRange, RowCount } from "@notatio/boxes";
 
 /** Rows per cache block: aligned, so overlapping requests share. */
 export const BLOCK_ROWS = 64n;

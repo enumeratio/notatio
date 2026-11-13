@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 import { withAssumed } from "./piecewise-assumptions.ts";
 
 // Assuming(cond, expr) and Refine(expr, cond?) — thin wrappers over compute-engine's own

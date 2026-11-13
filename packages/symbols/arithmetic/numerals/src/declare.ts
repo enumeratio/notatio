@@ -1,4 +1,4 @@
-import { registerNotation } from "@enumeratio/boxes";
+import { registerNotation } from "@notatio/boxes";
 import {
   bigIntegerAt,
   bigRationalAt,
@@ -13,9 +13,9 @@ import {
   wrapOperator,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
-import { gcd } from "@enumeratio/residues";
-import { declareCarriers } from "@enumeratio/structures";
+} from "@notatio/engine";
+import { gcd } from "@notatio/residues";
+import { declareCarriers } from "@notatio/structures";
 import { declareAdic } from "./adic-declare.ts";
 import { NUMERALS_CARRIERS } from "./carrier-data.ts";
 import { NUMERALS_NOTATION } from "./notation.ts";

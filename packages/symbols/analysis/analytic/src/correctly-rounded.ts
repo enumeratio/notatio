@@ -1,7 +1,7 @@
 import { isNumber, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
-import { lower, upper, DOUBLE_DIGITS } from "@enumeratio/ce-patches";
+import { lower, upper, DOUBLE_DIGITS } from "@notatio/ce-patches";
 import { enclosure } from "./certified.ts";
-import { declareCompile } from "@enumeratio/engine";
+import { declareCompile } from "@notatio/engine";
 
 // `N(x, d)`: `x` to `d` significant digits, every one of them right -- the last included.
 //

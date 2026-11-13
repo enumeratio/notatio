@@ -19,7 +19,7 @@ import {
   hurwitzZetaBall,
   lerchPhiBall,
   stieltjesGammaBall,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { argumentBall } from "./certified.ts";
 
 // A head's image over an interval, proven: the route interval.ts takes for the heads whose

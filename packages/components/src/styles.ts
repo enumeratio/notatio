@@ -2,7 +2,7 @@
 // MathLive stylesheets), so their styles live in one document-level stylesheet
 // injected on first use rather than per-shadow-root.
 
-import { BOX_LAYOUT_CSS } from "@enumeratio/frontend/core";
+import { BOX_LAYOUT_CSS } from "@notatio/frontend/core";
 import { ensureCopyHandler } from "./selection.ts";
 
 let injected = false;

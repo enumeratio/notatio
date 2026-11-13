@@ -1,7 +1,7 @@
-import { createEngine } from "@enumeratio/engine/testing";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
-import { emitComplexGLSL, type Json, MAX_SLOTS } from "@enumeratio/ce-patches";
+import { emitComplexGLSL, type Json, MAX_SLOTS } from "@notatio/ce-patches";
 import { complexGLSL } from "../src/shader-complex.ts";
 import { zetaGLSL } from "../src/shader.ts";
 

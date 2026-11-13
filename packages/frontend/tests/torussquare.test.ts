@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { type Box, type BoxNode, optionsOfBox } from "@enumeratio/boxes";
+import { type Box, type BoxNode, optionsOfBox } from "@notatio/boxes";
 import { renderDiagram } from "../src/diagram.ts";
 import { diagramBoxOf, followsClock } from "../src/diagram-lowering.ts";
 import { plotItems } from "../src/plot-box.ts";

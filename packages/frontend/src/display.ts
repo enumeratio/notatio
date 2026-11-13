@@ -6,8 +6,8 @@
 
 import type { ComputeEngine, MathJsonExpression } from "@cortex-js/compute-engine";
 import type { LatexDictionaryEntry } from "@cortex-js/compute-engine/latex-syntax";
-import { type Box, form, makeBoxes, notationOf } from "@enumeratio/boxes";
-import { BOXES_LATEX } from "@enumeratio/boxes/render";
+import { type Box, form, makeBoxes, notationOf } from "@notatio/boxes";
+import { BOXES_LATEX } from "@notatio/boxes/render";
 import { CONVENTIONAL_LATEX, DisplayLatexSyntax, probeLanded } from "./conventional-latex.ts";
 import { mergeLatex } from "./engine.ts";
 import { latexOf, NOTATIO_LATEX } from "./latex.ts";

@@ -7,9 +7,9 @@
 // keyed on the tag, keeps drawing. A host that wants other names registers these in a scoped
 // registry (`defineBoxElements(registry)`).
 
-import { CONTROL_BOX_HEADS } from "@enumeratio/boxes";
-import { BOX_TAGS, boxTag } from "@enumeratio/frontend/box-tags";
-import { debug } from "@enumeratio/frontend/core";
+import { CONTROL_BOX_HEADS } from "@notatio/boxes";
+import { BOX_TAGS, boxTag } from "@notatio/frontend/box-tags";
+import { debug } from "@notatio/frontend/core";
 
 const log = debug("box-elements");
 

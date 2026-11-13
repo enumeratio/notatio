@@ -5,9 +5,9 @@
 // notation), `typedLatex`, `AS_TYPED`, `toInputForm`.
 
 import { LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { combineNotation } from "@enumeratio/boxes";
-import { toInputForm } from "@enumeratio/engine";
-import { loadReferenceData, PACKAGES } from "@enumeratio/reference/node";
+import { combineNotation } from "@notatio/boxes";
+import { toInputForm } from "@notatio/engine";
+import { loadReferenceData, PACKAGES } from "@notatio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { declaredEngine, packageNotations } from "../../reference/scripts/engines.ts";
 import { readCardinalityByType } from "../src/conventional-latex.ts";

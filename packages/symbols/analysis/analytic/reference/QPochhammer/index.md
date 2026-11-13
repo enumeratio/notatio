@@ -2,11 +2,11 @@
 name: QPochhammer
 domain: Special functions
 signature: QPochhammer(a, q, n)
-summary: The q-Pochhammer symbol $(a; q)_n = \prod_{k=0}^{n-1} (1 - a q^k)$, for a nonnegative integer $n$ or $n = \infty$. Provided by `@enumeratio/analytic`.
+summary: The q-Pochhammer symbol $(a; q)_n = \prod_{k=0}^{n-1} (1 - a q^k)$, for a nonnegative integer $n$ or $n = \infty$. Provided by `@notatio/analytic`.
 signatures:
   - call: QPochhammer(a, q, n)
     description: the q-Pochhammer symbol $(a; q)_n$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (complex, complex, infinity | integer) -> number
 primitive: kernel
 bindings:

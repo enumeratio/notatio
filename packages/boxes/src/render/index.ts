@@ -1,4 +1,4 @@
-// `@enumeratio/boxes/render`: boxes written out as LaTeX, MathML, HTML, Markdown and plain
+// `@notatio/boxes/render`: boxes written out as LaTeX, MathML, HTML, Markdown and plain
 // text, and MathML and Markdown read back. Presentation; the main entry is the base the
 // symbol packages build their notation on.
 

@@ -1,5 +1,5 @@
-import { BigDecimal } from "@enumeratio/engine";
-import { atDigits } from "@enumeratio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
+import { atDigits } from "@notatio/ce-patches";
 
 // The BigDecimal twin of carlson.ts for positive real arguments: the same duplication steps
 // (DLMF 19.26), run until the arguments agree to the working digits. RC comes in closed form

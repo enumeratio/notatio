@@ -3,8 +3,8 @@
 // and near misses. Compiled and interpreted, and past 2^53 where the interpreter's exact
 // integers take over.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, kernelOn } from "../../collections/src/families/epsil.ts";
 import { entries as binaryEntries } from "../src/families/binary-word-families.ts";

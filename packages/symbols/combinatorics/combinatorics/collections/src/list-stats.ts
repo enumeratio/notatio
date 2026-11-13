@@ -8,7 +8,7 @@ import {
   symbolNameOf,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { isMatrixLike } from "./list-heads.ts";
 
 // The remaining #113 list/statistics gaps: Mean/Median on data compute-engine's own

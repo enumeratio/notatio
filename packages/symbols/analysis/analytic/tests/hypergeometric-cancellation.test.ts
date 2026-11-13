@@ -1,4 +1,4 @@
-import { ComputeEngine } from "@enumeratio/engine/unstable"; // unstable: the same engine the other analytic tests use
+import { ComputeEngine } from "@notatio/engine/unstable"; // unstable: the same engine the other analytic tests use
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 

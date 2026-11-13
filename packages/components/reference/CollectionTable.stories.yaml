@@ -99,7 +99,7 @@
 - id: integer-partitions-8-ferrers
   caption: IntegerPartitions(8) as Ferrers diagrams
   category: Other carriers
-  notes: Partitions unrank in reverse-lexicographic order. The partition statistics come from @enumeratio/statistics, where each is a definition over the part list; filter `IsSelfConjugate(_) == 1` for the two self-conjugate partitions of 8, or `Length(_) == 3` for the five into three parts.
+  notes: Partitions unrank in reverse-lexicographic order. The partition statistics come from @notatio/statistics, where each is a definition over the part list; filter `IsSelfConjugate(_) == 1` for the two self-conjugate partitions of 8, or `Length(_) == 3` for the five into three parts.
   expr:
     [
       CollectionTable,

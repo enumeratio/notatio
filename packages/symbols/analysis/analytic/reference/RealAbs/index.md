@@ -6,7 +6,7 @@ summary: The absolute value of a real number x, as a function defined only on th
 signatures:
   - call: RealAbs(x)
     description: the absolute value of the real number x.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 names:
   wolframIdentity: true

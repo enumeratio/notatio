@@ -1,7 +1,7 @@
 // Every box primitive is a registered tag: empty elements for the boxes without behavior, the
 // interactive ones left to their own modules, and a tag someone else defined left alone.
 
-import { BOX_TAGS } from "@enumeratio/frontend/box-tags";
+import { BOX_TAGS } from "@notatio/frontend/box-tags";
 import { expect, test } from "vite-plus/test";
 import { defineBoxElements, INTERACTIVE_BOX_TAGS, PLAIN_BOX_TAGS } from "../src/box-elements.ts";
 import { LAZY_TAGS } from "../src/lazy.ts";

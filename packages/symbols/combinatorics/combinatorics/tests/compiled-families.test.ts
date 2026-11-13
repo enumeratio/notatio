@@ -2,7 +2,7 @@
 // compiled-families.generated.js); operations whose compiled code disagrees with the
 // interpreter are left interpreted.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { COMPILED_FAMILIES } from "../collections/src/families/compiled-families.generated.js";
 import { type EpsilFamily, isEpsilFamily } from "../collections/src/families/epsil.ts";

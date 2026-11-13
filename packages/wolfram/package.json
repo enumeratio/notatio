@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/wolfram",
+  "name": "@notatio/wolfram",
   "version": "0.0.0",
   "private": true,
   "description": "MathJSON → Wolfram Language transpiler — a compute-engine compilation target, for cross-validating against a Wolfram kernel.",
@@ -22,7 +22,7 @@
     "check": "vp check"
   },
   "devDependencies": {
-    "@enumeratio/entry": "workspace:*",
+    "@notatio/entry": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -1,4 +1,4 @@
-import { fromMathJson, graphicsOf, isBox, optionsOfBox, toMathJson } from "@enumeratio/boxes";
+import { fromMathJson, graphicsOf, isBox, optionsOfBox, toMathJson } from "@notatio/boxes";
 import { expect, it } from "vite-plus/test";
 import { figureGraphicsBox } from "../src/show-box.ts";
 import { displayListOf, type DisplayList, type TileDrawOptions, type TileLayer } from "../src/tiles-canvas.ts";

@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { graphicsOf, makeBoxes } from "@enumeratio/boxes";
+import { graphicsOf, makeBoxes } from "@notatio/boxes";
 import { afterAll, expect, it } from "vite-plus/test";
 import { FIGURE_DEFAULTS, type FigureHead, figureLayerOf } from "../src/figure-frames.ts";
 import { FIGURE_NOTATION } from "../src/show-box.ts";

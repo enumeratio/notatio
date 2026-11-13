@@ -2,7 +2,7 @@
 // LaTeX compute-engine writes for an expression. Callers ask for markup, not for KaTeX, so a
 // different typesetter (MathLive's static renderer) is a change here and nowhere else.
 
-import { katexStrict, trustExpression } from "@enumeratio/boxes/render";
+import { katexStrict, trustExpression } from "@notatio/boxes/render";
 import katex from "katex";
 import { portableTeX } from "./tex.ts";
 

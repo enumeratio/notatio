@@ -5,7 +5,7 @@ title: Components, one at a time
 
 # Components, one at a time
 
-notatio, one piece at a time: a storybook for the `@enumeratio/frontend` web
+notatio, one piece at a time: a storybook for the `@notatio/frontend` web
 components — the notebook, the input and output, the plots, glyphs, tables and prose
 controls that make up the interface. One page per component, each a focused, shared
 place to look at the behaviour and talk about how to improve it. Some pages are
@@ -53,7 +53,7 @@ The other direction: a head that draws _is_ its component. `Plot`, `Histogram`,
 `Manipulate` and the rest are declared on the engine and held rather than evaluated, so
 `Plot(Sin(x), (x, 0, 10))` is an expression a cell can hold — and its Out draws it, the
 way a notebook does, instead of printing the word. The map from a head's arguments to
-the component's attributes is `@enumeratio/frontend/symbols`; the family head `Chart`
+the component's attributes is `@notatio/frontend/symbols`; the family head `Chart`
 leaves `type` unset and lets the data decide.
 
 <Story

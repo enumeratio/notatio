@@ -1,8 +1,8 @@
-import { bigIntegerAt, bigRationalAt, defineOverload, operandsOf, type Engine, type Expr } from "@enumeratio/engine";
+import { bigIntegerAt, bigRationalAt, defineOverload, operandsOf, type Engine, type Expr } from "@notatio/engine";
 import { gcd, mod } from "./arith.ts";
 import { INTEGER_MOD, RESIDUE_CLASS } from "./names.ts";
 import { residueClassOf } from "./residue-class-declare.ts";
-import { SUMMARIES } from "@enumeratio/manifest/package/residues";
+import { SUMMARIES } from "@notatio/manifest/package/residues";
 
 // IntegerMod(a, m) is Sage's Mod(a, m): the strict ResidueClass(a, m), except that classes of
 // different moduli combine in ℤ/gcd(m, n), where both reduce (Sage coerces to the common

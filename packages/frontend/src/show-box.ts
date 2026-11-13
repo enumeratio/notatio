@@ -10,7 +10,7 @@
 // `makeBoxes` rule is a pure function of the expression; `loweredShow` does both, and loads the
 // libraries a lattice layer reads, so an environment asks for a box and draws what it gets.
 
-import { type Box, makeBoxes, type Notation, type NotationRule, optionsOfBox } from "@enumeratio/boxes";
+import { type Box, makeBoxes, type Notation, type NotationRule, optionsOfBox } from "@notatio/boxes";
 import { cameraSpecOf, throughCamera } from "./camera-frame.ts";
 import { loadEngineFor } from "./engine.ts";
 import { FIGURE_HEADS, type FigureHead, figureLayerOf, VALUE_FRAMES } from "./figure-frames.ts";

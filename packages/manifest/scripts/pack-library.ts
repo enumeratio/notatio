@@ -16,9 +16,9 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { isCrosswalkSystem, mappingsOf, targetsOf } from "@enumeratio/entry";
-import { readHead } from "@enumeratio/entry/node";
-import { SYMBOL_MAPPINGS_SCHEMA, validateSchema } from "@enumeratio/entry/schema";
+import { isCrosswalkSystem, mappingsOf, targetsOf } from "@notatio/entry";
+import { readHead } from "@notatio/entry/node";
+import { SYMBOL_MAPPINGS_SCHEMA, validateSchema } from "@notatio/entry/schema";
 import { validRange } from "semver";
 import { type NotationData, notationProblem } from "../src/notation-data.ts";
 import type { Definition, Example } from "../src/registry.ts";

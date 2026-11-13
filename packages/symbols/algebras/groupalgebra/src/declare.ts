@@ -1,7 +1,7 @@
-import { declareAlgebra } from "@enumeratio/structures";
+import { declareAlgebra } from "@notatio/structures";
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { registerNotation } from "@enumeratio/boxes";
-import { integerAt, operandsOf, stringAt, symbolNameOf, widenSignature, wrapOperator } from "@enumeratio/engine";
+import { registerNotation } from "@notatio/boxes";
+import { integerAt, operandsOf, stringAt, symbolNameOf, widenSignature, wrapOperator } from "@notatio/engine";
 import {
   basisElement,
   classSum,
@@ -258,7 +258,7 @@ export function declareGroupAlgebra(ce: ComputeEngine): void {
   };
 
   aboutGroup("GroupOrder", `(${anyGroupLike}) -> integer`, (g) => ce.number(order(g)));
-  // GroupOrder(SymmetricGroup(n)) -> n!. SymmetricGroup is @enumeratio/combinatorics/collections' own
+  // GroupOrder(SymmetricGroup(n)) -> n!. SymmetricGroup is @notatio/combinatorics/collections' own
   // lazy indexed family (n! one-line words) rather than a Group this package builds a
   // Cayley table for -- n! elements would make that table, not the answer, the expensive
   // part. Attached right here (not from collections, which declares SymmetricGroup) so it
@@ -445,7 +445,7 @@ export function declareGroupAlgebra(ce: ComputeEngine): void {
       evaluate: permutationCycles,
     });
   } else {
-    // @enumeratio/combinatorics' carrier constructor got the name first; a second declare throws.
+    // @notatio/combinatorics' carrier constructor got the name first; a second declare throws.
     widenSignature(
       ce,
       "PermutationCycles",

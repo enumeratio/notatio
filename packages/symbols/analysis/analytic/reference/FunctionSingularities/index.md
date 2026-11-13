@@ -6,7 +6,7 @@ summary: Where f fails to be analytic, as a condition in x.
 signatures:
   - call: FunctionSingularities(f, x)
     description: the set of real x where f is not analytic (a pole, or outside its domain, including its branch points).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

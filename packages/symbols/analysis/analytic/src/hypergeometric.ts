@@ -15,8 +15,8 @@ import {
   bigRealOperand,
   bigResult,
   exceedsDoublePrecision,
-} from "@enumeratio/ce-patches";
-import { bigRationalAt } from "@enumeratio/engine";
+} from "@notatio/ce-patches";
+import { bigRationalAt } from "@notatio/engine";
 import {
   hypergeometric1F1RegularizedBig,
   hypergeometric2F1RegularizedBig,

@@ -128,13 +128,16 @@ jobs:
           dist-key: ${{ needs.changes.outputs.dist_key }}
           artifact: "true"
       - run: pnpm exec vp check
+      # While branches that predate a codemod are open, a stale one fails here with the script to run.
+      - name: codemods applied
+        run: node tools/codemods/notatio-scope.ts --check
       - name: example ids aren't renamed silently
         if: github.event_name == 'pull_request'
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: node .github/scripts/example-ids.ts
-      - run: pnpm --filter @enumeratio/web run test
+      - run: pnpm --filter @notatio/web run test
 
   # The docs build; its dist is the artifact `preview` deploys. Skipped when `changes` finds nothing
   # the site reads (a PR to root docs, say); `preview` is then skipped too.
@@ -149,9 +152,9 @@ jobs:
         with:
           dist-key: ${{ needs.changes.outputs.dist_key }}
           artifact: "true"
-      - run: pnpm --filter @enumeratio/web run build
+      - run: pnpm --filter @notatio/web run build
       # Every URL the site has published still answers (web/ledger.tsv), against this build.
-      - run: pnpm --filter @enumeratio/web exec vp test run .vitepress/ledger.test.ts
+      - run: pnpm --filter @notatio/web exec vp test run .vitepress/ledger.test.ts
         env:
           LEDGER_REQUIRE_BUILD: "1"
       - uses: actions/upload-artifact@v4

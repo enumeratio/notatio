@@ -1,5 +1,5 @@
 import { isNumber, isSymbol, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
-import { type Json, operandsOf } from "@enumeratio/engine";
+import { type Json, operandsOf } from "@notatio/engine";
 import { type Knowledge, knowledgeOf, narrowPiecewise, withAssumed } from "./piecewise-assumptions.ts";
 import { compose } from "./piecewise-compose.ts";
 import { equation, type Relation, relation } from "./piecewise-linear.ts";

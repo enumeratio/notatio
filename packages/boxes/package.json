@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/boxes",
+  "name": "@notatio/boxes",
   "version": "0.0.0",
   "private": true,
   "description": "Wolfram-style box primitives: the presentation tree between an expression and its rendering, with MathML, LaTeX and text serialisers.",
@@ -28,11 +28,11 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/manifest": "workspace:*"
+    "@notatio/manifest": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

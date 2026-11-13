@@ -8,8 +8,8 @@ import {
   wrapOperator,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
-import { extendedGcd, factorInteger, isPrime } from "@enumeratio/residues";
+} from "@notatio/engine";
+import { extendedGcd, factorInteger, isPrime } from "@notatio/residues";
 
 // compute-engine's integer functions, widened to the arguments Wolfram also answers and the
 // native handler leaves unevaluated or rejects: φ(0), σ of a negative order, the GCD and LCM

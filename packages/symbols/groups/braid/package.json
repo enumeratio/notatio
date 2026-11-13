@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/braid",
+  "name": "@notatio/braid",
   "version": "0.0.0",
   "private": true,
   "description": "Braid groups for @cortex-js/compute-engine: the Artin presentation, positive braids and their closures, the Burau representation, Alexander polynomials, torus knots, and the Lorenz braids of modular geodesics.",
@@ -33,19 +33,19 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/boxes": "workspace:*",
-    "@enumeratio/diagram": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/structures": "workspace:*"
+    "@notatio/boxes": "workspace:*",
+    "@notatio/diagram": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/structures": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/diagram": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/modular": "workspace:*",
-    "@enumeratio/structures": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/diagram": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/modular": "workspace:*",
+    "@notatio/structures": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

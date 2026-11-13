@@ -2,9 +2,9 @@
 // Epsil you can type back: it reads as the very expression the implementation runs.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { ALL_STATISTICS } from "@enumeratio/combinatorics";
-import { allFamilies } from "@enumeratio/combinatorics/collections";
-import { parseExpression } from "@enumeratio/formats";
+import { ALL_STATISTICS } from "@notatio/combinatorics";
+import { allFamilies } from "@notatio/combinatorics/collections";
+import { parseExpression } from "@notatio/formats";
 import { expect, test } from "vite-plus/test";
 import { applied, definitionsOf, isEpsilFamily, statisticDefinition } from "./definitions.ts";
 

@@ -1,6 +1,6 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { PIPE, TTY } from "@enumeratio/frontend";
+import { PIPE, TTY } from "@notatio/frontend";
 import { afterAll, expect, it } from "vite-plus/test";
 import { stripAnsi } from "../src/ansi.ts";
 import { present } from "../src/present.ts";

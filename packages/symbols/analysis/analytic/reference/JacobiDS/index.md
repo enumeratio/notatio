@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{ds}(u,m) = \operatorname{dn
 signatures:
   - call: JacobiDS(u, m)
     description: the Jacobi elliptic function ds, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiDN

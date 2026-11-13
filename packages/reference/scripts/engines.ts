@@ -7,7 +7,7 @@
 
 import { readFileSync } from "node:fs";
 import { ComputeEngine, type LatexSyntax } from "@cortex-js/compute-engine";
-import type { PackageNotation } from "@enumeratio/boxes";
+import type { PackageNotation } from "@notatio/boxes";
 import {
   buildEngine,
   declarePlan,
@@ -18,11 +18,11 @@ import {
   loadLibraries,
   NOTATIONS,
   type StagedLibrary,
-} from "@enumeratio/manifest";
-import { declareCatalog, ENUMERATIO } from "@enumeratio/catalog";
-import { installPurityDefault } from "@enumeratio/engine";
-import { declareGraphics } from "@enumeratio/formats";
-import { declareCompose, declareRestricted } from "@enumeratio/structures";
+} from "@notatio/manifest";
+import { declareCatalog, ENUMERATIO } from "@notatio/catalog";
+import { installPurityDefault } from "@notatio/engine";
+import { declareGraphics } from "@notatio/formats";
+import { declareCompose, declareRestricted } from "@notatio/structures";
 import { OWN_ENGINE } from "../src/node.ts";
 
 // The libraries are the ones this package depends on (it can import each, so each specifier
@@ -37,7 +37,7 @@ const importer: Importer = (specifier, options) =>
 const own = JSON.parse(readFileSync(new URL("../package.json", import.meta.url), "utf8")) as Parameters<
   typeof dependedLibraries
 >[0];
-/** Every library this package depends on, with `@enumeratio/evaluation`: what the engines are built from. */
+/** Every library this package depends on, with `@notatio/evaluation`: what the engines are built from. */
 export const AVAILABLE = await loadLibraries<ComputeEngine>(
   dependedLibraries(own).filter((name) => !OWN_ENGINE.has(name)),
   importer,
@@ -45,7 +45,7 @@ export const AVAILABLE = await loadLibraries<ComputeEngine>(
 const NAMES = AVAILABLE.map((library) => library.name);
 
 // Note: GlyphKind (frontend's own carrier) is deliberately NOT declared in this engine --
-// wiring it in would make @enumeratio/reference depend on @enumeratio/frontend, which already
+// wiring it in would make @notatio/reference depend on @notatio/frontend, which already
 // devDeps reference for its own tests, a real build cycle. GlyphKind's reference entry states its
 // `library` directly (read, not derived from this engine -- see `declaredLibrary` in
 // provenance.ts), so this only affects its `provenance` classification, and it is a stub with
@@ -55,7 +55,7 @@ const NAMES = AVAILABLE.map((library) => library.name);
 // (as in census's engine), and their examples run here. `formats` is a presentation library, so
 // not in the plan by default; its graphics heads (`Plot`, `Slider`, … held inert, and the
 // `Histogram` widening of compute-engine's head) join alone, last, as in every host. Lowering a
-// drawn value to boxes needs `@enumeratio/frontend`, which sits above this package: its
+// drawn value to boxes needs `@notatio/frontend`, which sits above this package: its
 // `tests/example-boxes.test.ts` does that for the examples that carry a `boxes` shape.
 const late = (
   name: string,
@@ -80,8 +80,8 @@ export const EXTRAS = [
 export const PLAN = enginePlan({ libraries: NAMES, available: AVAILABLE, include: EXTRAS });
 
 /**
- * The same libraries by package, for the resolver (`@enumeratio/manifest`'s `createResolver`).
- * Without `@enumeratio/evaluation`: every host runs it first, so the resolver never declares it.
+ * The same libraries by package, for the resolver (`@notatio/manifest`'s `createResolver`).
+ * Without `@notatio/evaluation`: every host runs it first, so the resolver never declares it.
  */
 export const LIBRARIES: readonly Library<ComputeEngine>[] = AVAILABLE.filter(
   (library) => library.name !== "evaluation",
@@ -120,11 +120,11 @@ export const declaredEngine = ({
   }).engine;
 
 /**
- * `configure(ce)` for `@enumeratio/evaluation/node`'s isolated evaluator (`evaluateIsolated`,
+ * `configure(ce)` for `@notatio/evaluation/node`'s isolated evaluator (`evaluateIsolated`,
  * `openSession`, `runCases`'s `setup` option): declares every library the reference engine
  * declares, so a case evaluated in a worker means the same thing it would in-process. Not
  * `declaredEngine`'s plan verbatim -- the worker's own engine already declares
- * `@enumeratio/evaluation` before running `setup` (see `worker.ts`/`session-worker.ts`), and
+ * `@notatio/evaluation` before running `setup` (see `worker.ts`/`session-worker.ts`), and
  * redeclaring throws: "already declared in this scope".
  */
 export function configure(ce: ComputeEngine): void {

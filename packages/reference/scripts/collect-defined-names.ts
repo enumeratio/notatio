@@ -1,4 +1,4 @@
-// Build `@enumeratio/oracle`'s `defined-names-data.ts` (gitignored; oracle's `build` runs this
+// Build `@notatio/oracle`'s `defined-names-data.ts` (gitignored; oracle's `build` runs this
 // once every library is built, which is why oracle devDepends on them): every bare MathJSON symbol that
 // appears anywhere in a reference example, for which the fully-declared reference engine
 // (engines.ts's `declaredEngine`, less the graphics heads) counts as defined (`defined-names.ts`'s
@@ -14,8 +14,8 @@
 //
 //   vp node packages/reference/scripts/collect-defined-names.ts
 
-import type { MathJSON } from "@enumeratio/oracle";
-import { writeFormatted } from "@enumeratio/entry/node";
+import type { MathJSON } from "@notatio/oracle";
+import { writeFormatted } from "@notatio/entry/node";
 import { declaredEngine } from "./engines.ts";
 import { isDefinedName, symbolsIn } from "./defined-names.ts";
 import { referenceData, referenceEntries } from "../src/node.ts";

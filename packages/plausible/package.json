@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/plausible",
+  "name": "@notatio/plausible",
   "version": "0.0.0",
   "private": true,
   "description": "Seeded, size-aware generators for Plausible, the property sampler over our value spaces (https://github.com/enumeratio/notatio/wiki/Plausible). A leaf with no workspace dependencies, so collections, reference and bench can all import it.",
@@ -22,7 +22,7 @@
     "check": "vp check"
   },
   "devDependencies": {
-    "@enumeratio/config": "workspace:*",
+    "@notatio/config": "workspace:*",
     "@types/node": "^24",
     "typescript": "^7.0.2",
     "vite": "catalog:",

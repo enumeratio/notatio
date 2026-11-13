@@ -1,5 +1,5 @@
-import { box, type Engine, type Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
+import { box, type Engine, type Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
 import { beforeEach, expect, test } from "vite-plus/test";
 import { declareDistributions } from "../src/distributions.ts";
 

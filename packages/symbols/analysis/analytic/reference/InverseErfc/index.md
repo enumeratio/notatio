@@ -6,7 +6,7 @@ summary: 'The inverse complementary error function: solves $\operatorname{erfc}(
 signatures:
   - call: InverseErfc(s)
     description: solves $\operatorname{erfc}(y) = s$ for $y$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 primitive: kernel
 bindings:

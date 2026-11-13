@@ -7,7 +7,7 @@
 //   1. they SAY what the head means, in a form a reader can unfold (≝) and evaluate;
 //   2. they are a differential oracle for the kernel — `tests/definitions.test.ts` evaluates
 //      both and checks they agree, which is what stops a second implementation from rotting;
-//   3. they place each head against the primitive frontier. `@enumeratio/reference` reads
+//   3. they place each head against the primitive frontier. `@notatio/reference` reads
 //      them straight from here, so the symbol pages and the definitions cannot drift apart.
 //
 // WILDCARD ORDER IS LOAD-BEARING: the unfold binds call arguments to wildcards in order of
@@ -15,7 +15,7 @@
 // is why the Dirichlet series below is written `exp(-s·ln(n+a))` rather than `(n+a)^{-s}`:
 // same principal branch, but `_s` comes first.
 
-import type { Json } from "@enumeratio/ce-patches";
+import type { Json } from "@notatio/ce-patches";
 
 /** Σ over n ≥ 0 of `summand`. */
 const seriesOverN = (summand: Json): Json => ["Sum", summand, ["Triple", "n", 0, "Infinity"]];

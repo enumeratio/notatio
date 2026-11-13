@@ -19,8 +19,8 @@
 //   node packages/reference/scripts/oracle-plausible.ts julia --seed 2026-09-25 --samples 4
 
 import { appendFileSync, writeFileSync } from "node:fs";
-import { runCases } from "@enumeratio/evaluation/node";
-import { allFamilies, type AnyFamily } from "@enumeratio/combinatorics/collections";
+import { runCases } from "@notatio/evaluation/node";
+import { allFamilies, type AnyFamily } from "@notatio/combinatorics/collections";
 import {
   emit,
   interpretSymbolicAgreement,
@@ -31,9 +31,9 @@ import {
   symbolicAgreementSource,
   type System,
   type Verdict,
-} from "@enumeratio/oracle";
-import { between as edgeBiased } from "@enumeratio/plausible";
-import { isSettled } from "@enumeratio/entry";
+} from "@notatio/oracle";
+import { between as edgeBiased } from "@notatio/plausible";
+import { isSettled } from "@notatio/entry";
 import { referenceEntries } from "../src/node.ts";
 import {
   agreesInNorm,

@@ -1,4 +1,4 @@
-// @enumeratio/hecke's heads in traditional notation: H_n(q) and its standard basis T_w,
+// @notatio/hecke's heads in traditional notation: H_n(q) and its standard basis T_w,
 // indexed by a permutation's one-line word. Each head's is data, `reference/<Head>/notation.json`,
 // compiled here, but for the code below.
 
@@ -10,7 +10,7 @@ import {
   type Notation,
   subscript,
   type PackageNotation,
-} from "@enumeratio/boxes";
+} from "@notatio/boxes";
 import { NOTATION_DATA } from "./notation.generated.ts";
 
 /** A literal list of numbers, or `undefined`. */

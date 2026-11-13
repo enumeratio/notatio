@@ -18,9 +18,9 @@ import {
   reduce,
   scopeOf,
   watchPageEnvironment,
-} from "@enumeratio/frontend";
-import { type StructuralNode, structuralOf, toVNode } from "@enumeratio/frontend/vdom";
-import { parseExpression, serializeExpression } from "@enumeratio/formats/expression";
+} from "@notatio/frontend";
+import { type StructuralNode, structuralOf, toVNode } from "@notatio/frontend/vdom";
+import { parseExpression, serializeExpression } from "@notatio/formats/expression";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { fragment, setFragment } from "../fragment.ts";
 import { vueFactory } from "../vdom-props.ts";

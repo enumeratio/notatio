@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/adeles",
+  "name": "@notatio/adeles",
   "version": "0.0.0",
   "private": true,
   "description": "Adèles and idèles over Q for @cortex-js/compute-engine: profinite numbers (Ẑ and Q̂) known modulo a rational, adèles, idèles, profinite Fibonacci and the GL_n(Q̂) = GL_n(Ẑ)·GL_n⁺(Q) factorisation — a port of Hertogh's Sage `adeles`.",
@@ -25,19 +25,19 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/manifest": "workspace:*",
-    "@enumeratio/number-theory": "workspace:*",
-    "@enumeratio/numerals": "workspace:*",
-    "@enumeratio/residues": "workspace:*"
+    "@notatio/engine": "workspace:*",
+    "@notatio/manifest": "workspace:*",
+    "@notatio/number-theory": "workspace:*",
+    "@notatio/numerals": "workspace:*",
+    "@notatio/residues": "workspace:*"
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
-    "@enumeratio/config": "workspace:*",
-    "@enumeratio/engine": "workspace:*",
-    "@enumeratio/number-theory": "workspace:*",
-    "@enumeratio/numerals": "workspace:*",
-    "@enumeratio/residues": "workspace:*",
+    "@notatio/config": "workspace:*",
+    "@notatio/engine": "workspace:*",
+    "@notatio/number-theory": "workspace:*",
+    "@notatio/numerals": "workspace:*",
+    "@notatio/residues": "workspace:*",
     "typescript": "^7.0.2",
     "vite": "catalog:",
     "vite-plus": "catalog:"

@@ -1,8 +1,8 @@
 // FinePaths defined in Epsil: against its TS kernel (its fast path), against an independent
 // reading of "a Dyck path with no hill" over every word, and the interpreter against compiled code.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, evaluateTables } from "../../collections/src/families/epsil.ts";
 import { finePaths } from "../src/families/fine-paths.ts";

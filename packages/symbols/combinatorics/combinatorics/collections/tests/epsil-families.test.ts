@@ -5,8 +5,8 @@
 // membership over members and near misses. Compiled and interpreted; at the last size a double
 // counts exactly, and (under DEEP_TESTS) past 2^53 where the interpreter's exact integers take over.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { RETIRED_FAST } from "../../tests/readings/index.ts";
 import { allFamilies, type EpsilFamily, epsilKernelOn, evaluateTables, isEpsilFamily } from "../src/families/index.ts";

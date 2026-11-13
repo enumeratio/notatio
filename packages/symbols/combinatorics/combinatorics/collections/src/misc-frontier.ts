@@ -1,4 +1,4 @@
-import { type Engine, type Expr, integerAt, operandsOf, stringAt, wrapOperator } from "@enumeratio/engine";
+import { type Engine, type Expr, integerAt, operandsOf, stringAt, wrapOperator } from "@notatio/engine";
 import { matches } from "./expression-ops.ts";
 import { integerGraph } from "./graphs.ts";
 import { rngFor } from "./list-frontier.ts";

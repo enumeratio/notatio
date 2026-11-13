@@ -1,6 +1,6 @@
 // What the oracle scans established about a head, per system.
 //
-// `@enumeratio/oracle` already does the hard part: emit every documented example into
+// `@notatio/oracle` already does the hard part: emit every documented example into
 // another system's syntax, run it in that system's kernel, and compare the answers. The
 // result is each head's implementations record — exactly the evidence a crosswalk chip
 // wants: "this is the same function over there" is a claim, and the record is a check of

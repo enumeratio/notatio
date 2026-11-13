@@ -1,5 +1,5 @@
 import type { Expression } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
 import { MATRIX_RANK_SOURCE } from "../numerics/matrix-rank.ts";
 
 // JavaScript lowering of `MatrixRank`. A literal matrix of integers and rationals compiles to exact

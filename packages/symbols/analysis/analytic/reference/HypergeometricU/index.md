@@ -2,11 +2,11 @@
 name: HypergeometricU
 domain: Special functions
 signature: HypergeometricU(a, b, z)
-summary: Tricomi's confluent hypergeometric function $U(a,b,z)$, for $b$ not an integer — see [[HypergeometricUStar]] for the $z^a$-regularized form Fungrim builds most of its identities from. Provided by `@enumeratio/analytic`.
+summary: Tricomi's confluent hypergeometric function $U(a,b,z)$, for $b$ not an integer — see [[HypergeometricUStar]] for the $z^a$-regularized form Fungrim builds most of its identities from. Provided by `@notatio/analytic`.
 signatures:
   - call: HypergeometricU(a, b, z)
     description: Tricomi's confluent hypergeometric $U(a,b,z)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 primitive: numeric
 bindings:

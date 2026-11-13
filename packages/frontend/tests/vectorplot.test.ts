@@ -1,6 +1,6 @@
 import { expect, test } from "vite-plus/test";
-import { type BoxNode, graphicsOf, makeBoxes, optionsOfBox } from "@enumeratio/boxes";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { type BoxNode, graphicsOf, makeBoxes, optionsOfBox } from "@notatio/boxes";
+import { parseExpression } from "@notatio/formats/expression";
 import { plainJson } from "../src/graphics-rules.ts";
 import { isPlotBox, plotItems, renderPlot } from "../src/plot-box.ts";
 import { unsampledPlot, vectorOptionsOf } from "../src/plot-lowering.ts";

@@ -1,4 +1,4 @@
-import { type Engine, type Expr, integerAt, operandsOf, optionsOf } from "@enumeratio/engine";
+import { type Engine, type Expr, integerAt, operandsOf, optionsOf } from "@notatio/engine";
 import { dijkstraDistances, dijkstraPath } from "./graph-weights.ts";
 
 // Graphs (Wolfram frontier: UndirectedEdge/DirectedEdge top the gap list at 756/69 doc
@@ -83,7 +83,7 @@ function edgeOf(expr: Expr): { directed: boolean; a: Expr; b: Expr } | undefined
  *
  *  Takes `ce` (every caller already has one, being a `declare(…)` callback) so the option's
  *  value — read off as MathJSON by `optionsOf`, the same `OptionsPattern`-style splitter
- *  `VerificationTest` uses (`@enumeratio/engine`) — can be reboxed into `Expr`s. */
+ *  `VerificationTest` uses (`@notatio/engine`) — can be reboxed into `Expr`s. */
 export function graphOf(ce: Engine, expr: Expr): GraphModel | undefined {
   if (expr.operator !== "Graph") return undefined;
   const rawOps = operandsOf(expr);

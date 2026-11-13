@@ -1,10 +1,10 @@
-// The engine builder (`@enumeratio/manifest`'s `buildEngine`) over the real libraries: an
+// The engine builder (`@notatio/manifest`'s `buildEngine`) over the real libraries: an
 // engine built for one library holds that library, what it requires and the base, and every
 // head its examples name that one of them declares resolves in it. The libraries' own
 // repositories will run this check for themselves; here it covers every library we ship.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { assembleDeclarers, buildEngine, DECLARE_ORDER, PACKAGES, reachedNames } from "@enumeratio/manifest";
+import { assembleDeclarers, buildEngine, DECLARE_ORDER, PACKAGES, reachedNames } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { AVAILABLE, PLAN } from "../scripts/engines.ts";
 import { referenceData } from "../src/node.ts";

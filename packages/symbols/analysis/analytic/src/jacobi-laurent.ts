@@ -1,4 +1,4 @@
-import type { Json } from "@enumeratio/ce-patches";
+import type { Json } from "@notatio/ce-patches";
 
 // The expansion in u at u = 0 of the Jacobi functions that have a pole there, ns = 1/sn, cs = cn/sn
 // and ds = dn/sn: u⁻¹ times a power series whose coefficients are polynomials in m.

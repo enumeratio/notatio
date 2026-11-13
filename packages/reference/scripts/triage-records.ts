@@ -1,8 +1,8 @@
 // The Wolfram triage set, as it lives in the records: examples with `role: triage`, their
 // bucket in `triage`, a lane's reason in the Wolfram row's `note`.
 
-import type { HeadImplementations, ReferenceExample, TriageBucket } from "@enumeratio/entry";
-import { writeHead } from "@enumeratio/entry/node";
+import type { HeadImplementations, ReferenceExample, TriageBucket } from "@notatio/entry";
+import { writeHead } from "@notatio/entry/node";
 import type { LoadedHead } from "../src/node.ts";
 
 /** One row in triage, with what the lanes need to settle it. */

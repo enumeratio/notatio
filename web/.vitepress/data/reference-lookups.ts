@@ -1,6 +1,6 @@
 // Lookups over the assembled reference (reference-assemble.ts), for the browser and Node alike.
 
-import type { ReferenceEntry } from "@enumeratio/reference";
+import type { ReferenceEntry } from "@notatio/reference";
 
 export interface HeadInfo {
   href?: string;

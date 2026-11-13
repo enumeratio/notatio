@@ -17,10 +17,10 @@
 //   vp node packages/symbols/combinatorics/combinatorics/scripts/compile-maps.ts
 
 import { fileURLToPath } from "node:url";
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { compileTyped, fromJs, runtimeHelpers, toJs } from "@enumeratio/engine/compiled";
-import type { FlatCodec } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { compileTyped, fromJs, runtimeHelpers, toJs } from "@notatio/engine/compiled";
+import type { FlatCodec } from "@notatio/structures";
 import { CARRIERS } from "../src/carriers.ts";
 import {
   bareParts,

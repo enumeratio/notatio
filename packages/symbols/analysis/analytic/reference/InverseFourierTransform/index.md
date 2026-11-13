@@ -6,7 +6,7 @@ summary: The inverse Fourier transform under Wolfram's default convention — th
 signatures:
   - call: InverseFourierTransform(F, w, t)
     description: $f(t)$ such that $\mathcal{F}\{f\}(w) = F(w)$, for the two forms below.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression) -> expression
 primitive: kernel
 bindings:

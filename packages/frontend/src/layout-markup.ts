@@ -3,7 +3,7 @@
 // and a build writes it into the page ahead of that, so both come from here.
 
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import { markupOf } from "./box-leaf.ts";
 import { renderBox } from "./box-render.ts";
 import { ENVIRONMENTS, type Environment, WEB } from "./environment.ts";

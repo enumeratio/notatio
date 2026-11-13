@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { stringAt, symbolNameOf } from "@enumeratio/engine";
+import { stringAt, symbolNameOf } from "@notatio/engine";
 
 // Named operations on a carrier: the combinatorial statistics and maps
 // (https://github.com/enumeratio/notatio/wiki/Statistics-and-Maps). A carrier like `Permutation` has dozens of
@@ -76,7 +76,7 @@ interface Registry {
 type Transport = (subject: Expression) => Expression | undefined;
 
 // On the engine, so a package's dist and another's source share one registry.
-const REGISTRY = Symbol.for("@enumeratio/structures:operations");
+const REGISTRY = Symbol.for("@notatio/structures:operations");
 
 export class OperationCollisionError extends Error {
   constructor(head: OperationHead, carrier: string, name: string, part: string) {
@@ -243,7 +243,7 @@ export function operationOf(
 }
 
 /** The Epsil of the statistic or map `name` on `carrier`, for compiling a definition that calls
- *  it (`inlineCalls` in @enumeratio/engine/compiled). */
+ *  it (`inlineCalls` in @notatio/engine/compiled). */
 export function operationEpsil(ce: ComputeEngine, carrier: string, name: string): OperationEpsil | undefined {
   return (
     operationOf(ce, "CombinatorialStat", carrier, name)?.epsil ??

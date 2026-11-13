@@ -8,7 +8,7 @@ import {
   logGammaBig,
   logGammaReal,
   wantsNumber,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // BesselJZero(ν, k) — the k-th positive zero of the Bessel function J_ν, real ν > −1,
 // positive integer k. compute-engine 0.128's native `BesselJ` only evaluates

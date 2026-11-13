@@ -3,7 +3,7 @@
 // compiled type), a few hundred milliseconds an operation, so the Epsil kernel is asked a few
 // ranks; the TS kernel, its fast path, is held to the plain RSK over every rank.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn } from "../../collections/src/families/epsil.ts";
 import { standardTableauPairs } from "../src/families/rsk-pairs.ts";

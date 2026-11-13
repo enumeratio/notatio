@@ -2,7 +2,7 @@
 // carrier, x + yω in ℚ(√d)'s ring of integers — or as the number itself, `x + y·Sqrt(d)`
 // (halves allowed when d ≡ 1 mod 4). Results come back as the number.
 
-import { bigIntegerAt, type Engine, type Expr, operandsOf } from "@enumeratio/engine";
+import { bigIntegerAt, type Engine, type Expr, operandsOf } from "@notatio/engine";
 import { type QuadraticElement, type QuadraticRing, quadraticRing } from "./quadratic.ts";
 
 /** p/q with q > 0. */

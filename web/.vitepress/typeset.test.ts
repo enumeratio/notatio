@@ -6,17 +6,17 @@ import { readdirSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { closeDollar } from "@enumeratio/boxes/render";
-import { portableTeX } from "@enumeratio/formats/tex";
+import { closeDollar } from "@notatio/boxes/render";
+import { portableTeX } from "@notatio/formats/tex";
 import katex from "katex";
 import { expect, test } from "vite-plus/test";
 import { repoRoot, workspacePackages } from "./data/repo-docs.ts";
 
 type Printed = { in?: string; out?: string };
-// Written by @enumeratio/frontend's build (scripts/build-forms.ts).
+// Written by @notatio/frontend's build (scripts/build-forms.ts).
 const FORMS = JSON.parse(
   readFileSync(
-    join(dirname(createRequire(import.meta.url).resolve("@enumeratio/frontend/package.json")), "generated/forms.json"),
+    join(dirname(createRequire(import.meta.url).resolve("@notatio/frontend/package.json")), "generated/forms.json"),
     "utf8",
   ),
 ) as Record<string, Record<string, Record<string, Printed | undefined>>>;

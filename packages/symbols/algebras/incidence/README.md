@@ -1,4 +1,4 @@
-# @enumeratio/incidence
+# @notatio/incidence
 
 Incidence-algebra extensions for compute-engine: finite posets, the zeta and Möbius
 functions, and Möbius inversion. The algebra's basis is indexed by a poset's
@@ -10,7 +10,7 @@ zero. See [the guide](docs/incidence-algebras.md).
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareIncidence } from "@enumeratio/incidence";
+import { declareIncidence } from "@notatio/incidence";
 
 const ce = new ComputeEngine();
 declareIncidence(ce);

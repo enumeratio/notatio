@@ -3,10 +3,10 @@
 // images on a capable terminal. It keeps the interactive loop (repl.ts) and the
 // bin (main.ts) thin.
 
-import { fileFormat, isImageFormat, isImageValue, readFormat, writeFormat } from "@enumeratio/formats/node";
+import { fileFormat, isImageFormat, isImageValue, readFormat, writeFormat } from "@notatio/formats/node";
 import { type CommandHandler, type Graphic, type LineOutput, Repl } from "./core.ts";
 import type { SessionDefaults } from "./engine.ts";
-import { notationOf } from "@enumeratio/boxes";
+import { notationOf } from "@notatio/boxes";
 import { figureText, plotText } from "./figure.ts";
 import { graphicLabel, graphicToSvg, inlineImage, writeSvg } from "./node-graphics.ts";
 import { sampledField, sampledPlot, samplePlot } from "./textual.ts";

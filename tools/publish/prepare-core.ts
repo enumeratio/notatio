@@ -20,13 +20,13 @@ const root = resolve(import.meta.dirname, "../..");
 for (const name of CORE) {
   const file = join(root, "packages", name, "package.json");
   const pkg = JSON.parse(readFileSync(file, "utf8")) as Record<string, unknown>;
-  if (pkg.name !== `@enumeratio/${name}`) throw new Error(`${file} is ${String(pkg.name)}`);
+  if (pkg.name !== `@notatio/${name}`) throw new Error(`${file} is ${String(pkg.name)}`);
   delete pkg.private;
   pkg.version = version;
   pkg.publishConfig = { registry: REGISTRY };
   writeFileSync(file, `${JSON.stringify(pkg, null, 2)}\n`);
 }
 // The workflow publishes exactly these, by pnpm filter.
-const filters = CORE.map((name) => `--filter=@enumeratio/${name}`).join(" ");
+const filters = CORE.map((name) => `--filter=@notatio/${name}`).join(" ");
 if (process.env.GITHUB_OUTPUT !== undefined) appendFileSync(process.env.GITHUB_OUTPUT, `filters=${filters}\n`);
 console.log(`${CORE.join(", ")} at ${version} for ${REGISTRY}`);

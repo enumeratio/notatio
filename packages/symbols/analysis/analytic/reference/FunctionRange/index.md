@@ -6,7 +6,7 @@ summary: The set of values f takes as x ranges over its domain, as a condition i
 signatures:
   - call: FunctionRange(f, x, y)
     description: the range of f as a function of the real variable x, expressed as a condition in y.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol, symbol) -> expression
 names:
   wolframIdentity: true

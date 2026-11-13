@@ -1,7 +1,7 @@
-import { declareAlgebra } from "@enumeratio/structures";
+import { declareAlgebra } from "@notatio/structures";
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { registerNotation } from "@enumeratio/boxes";
-import { integerAt, operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { registerNotation } from "@notatio/boxes";
+import { integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
 import {
   add,
   basisElement,

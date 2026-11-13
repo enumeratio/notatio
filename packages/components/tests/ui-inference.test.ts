@@ -6,7 +6,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { inferControls, loadEngine, paramsOf } from "@enumeratio/frontend/core";
+import { inferControls, loadEngine, paramsOf } from "@notatio/frontend/core";
 import { afterAll, beforeAll, expect, test } from "vite-plus/test";
 
 // (`import.meta.url` is not a file URL under the DOM environment.)

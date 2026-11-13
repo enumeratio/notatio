@@ -4,8 +4,8 @@
 // rectangles (a Young diagram) is ruled with box-drawing characters instead. Pure: boxes in,
 // text out. Selection and hover are the web's; the marks' own colors are kept where the terminal has color.
 
-import { type Box, type BoxNode, graphicsOf, isNode, optionsOfBox, type Options } from "@enumeratio/boxes";
-import { arrowhead, complexOf, isChartBox, isDiagramBox, isPlotBox, pinnedBox, plotItems } from "@enumeratio/frontend";
+import { type Box, type BoxNode, graphicsOf, isNode, optionsOfBox, type Options } from "@notatio/boxes";
+import { arrowhead, complexOf, isChartBox, isDiagramBox, isPlotBox, pinnedBox, plotItems } from "@notatio/frontend";
 
 type Point = readonly number[];
 

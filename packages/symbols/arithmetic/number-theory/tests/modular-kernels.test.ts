@@ -1,10 +1,10 @@
 // `Mod(f(args), m)` computed modulo m (declare-modular-kernels.ts, issue #205): every fast
 // answer must equal `Mod` of the exact value, for moduli of every shape, and every call the
 // registry declines must run as it always did.
-import { type Json, registerModularKernel } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { type Json, registerModularKernel } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { expect, test } from "vite-plus/test";
 import { declareNumberTheory } from "../src/declare.ts";
 import { MODULAR_KERNELS } from "../src/declare-modular-kernels.ts";

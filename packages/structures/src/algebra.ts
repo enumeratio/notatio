@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { defineOverload, symbolNameOf, wrapOperator } from "@enumeratio/engine";
+import { defineOverload, symbolNameOf, wrapOperator } from "@notatio/engine";
 import { conform, member } from "./conform.ts";
 import { ensureProtocols } from "./protocols.ts";
 
@@ -23,7 +23,7 @@ const PRODUCT_HEADS = ["NonCommutativeMultiply", "GeometricProduct", "CircleTime
 
 // On the engine rather than in a module-level map: a library's dist and another's source can
 // both load this module, and they must share one list.
-const PRODUCTS = Symbol.for("@enumeratio/structures:products");
+const PRODUCTS = Symbol.for("@notatio/structures:products");
 const productsOf = (ce: ComputeEngine): Map<string, Product> | undefined =>
   (ce as unknown as Record<symbol, Map<string, Product> | undefined>)[PRODUCTS];
 

@@ -6,7 +6,7 @@ summary: The order-$n$ complex exponential Fourier series of $f$ on $[-\pi, \pi]
 signatures:
   - call: FourierSeries(f, x, n)
     description: the order-$n$ Fourier series of $f(x)$ on $[-\pi, \pi]$, for a nonnegative integer $n$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, integer<0..>) -> expression
 primitive: kernel
 bindings:

@@ -1,5 +1,5 @@
-import { type Engine, type Expr, integerAt, operandsOf } from "@enumeratio/engine";
-import { conform } from "@enumeratio/structures";
+import { type Engine, type Expr, integerAt, operandsOf } from "@notatio/engine";
+import { conform } from "@notatio/structures";
 
 // Set partitions of one ground set under refinement (https://github.com/enumeratio/notatio/wiki/Structures):
 // π ≤ σ when every block of π lies inside a block of σ, so the finest partition (all singletons)

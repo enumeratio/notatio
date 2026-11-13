@@ -1,5 +1,5 @@
 import { spawnSync } from "node:child_process";
-import { fromWolfram, SYSTEM_NAMES } from "@enumeratio/wolfram";
+import { fromWolfram, SYSTEM_NAMES } from "@notatio/wolfram";
 import { describe, expect, test } from "vite-plus/test";
 import { emit, type MathJSON } from "../src/emit.ts";
 import type { Mapping } from "../src/mappings.ts";

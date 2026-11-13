@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { operandsOf } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 import { expandExpIntegralE } from "./exp-integral-e-expand.ts";
 import { expandAiryRotation, expandCompleteElliptic, expandEllipticKPrime } from "./special-values.ts";
 

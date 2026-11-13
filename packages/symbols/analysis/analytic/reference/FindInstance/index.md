@@ -6,14 +6,14 @@ summary: n instances of vars that make expr true, over domain -- scoped to a pro
 signatures:
   - call: FindInstance(expr, vars)
     description: one instance of vars satisfying expr. Declined here -- the unstated domain is Wolfram's Complexes, outside this scope. See below.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, list<symbol> | symbol, symbol?, integer<1..>?) -> expression
   - call: FindInstance(expr, vars, domain)
     description: one instance over domain, which must be Reals or Integers.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
   - call: FindInstance(expr, vars, domain, n)
     description: up to n instances over domain.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Solve
   - Rule

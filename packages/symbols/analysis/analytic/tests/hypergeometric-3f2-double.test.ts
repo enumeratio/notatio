@@ -1,5 +1,5 @@
-import { atDigits } from "@enumeratio/ce-patches";
-import { BigDecimal, ComputeEngine } from "@enumeratio/engine/unstable"; // unstable: the same engine the other analytic tests use
+import { atDigits } from "@notatio/ce-patches";
+import { BigDecimal, ComputeEngine } from "@notatio/engine/unstable"; // unstable: the same engine the other analytic tests use
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "../src/declare.ts";
 import { hypergeometric2F1RegularizedBig } from "../src/hypergeometric-big.ts";

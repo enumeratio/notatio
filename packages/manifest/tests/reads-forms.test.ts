@@ -25,7 +25,7 @@ function put(file: string, text: string): void {
 const git = (...args: string[]): string => execFileSync("git", args, { cwd: dir, encoding: "utf8" });
 
 function pkg(name: string): void {
-  put(`packages/${name}/package.json`, JSON.stringify({ name: `@enumeratio/${name}` }));
+  put(`packages/${name}/package.json`, JSON.stringify({ name: `@notatio/${name}` }));
 }
 
 /** The repo-relative paths a file names inside other packages, sorted and without repeats. */
@@ -113,7 +113,7 @@ beforeAll(() => {
   put(
     "packages/joiner/package.json",
     JSON.stringify({
-      name: "@enumeratio/joiner",
+      name: "@notatio/joiner",
       scripts: { build: "tsc", test: "node ../statistics/scripts/check.ts && vp test", own: "node scripts/x.ts" },
     }),
   );
@@ -225,11 +225,9 @@ test("a path inside a comment, a string or a template is not a read", () => {
 
 test("a test that walks every package's sources is found by the shape of the walk, whatever it calls its helpers", () => {
   // `quiet` lists the packages and reads nothing; `builder`'s test only walks its own folder.
-  expect(found.scanners.toSorted()).toEqual(
-    ["follower", "globber", "renamed", "walker"].map((n) => `@enumeratio/${n}`),
-  );
+  expect(found.scanners.toSorted()).toEqual(["follower", "globber", "renamed", "walker"].map((n) => `@notatio/${n}`));
 });
 
 test("a build script that walks every package's sources is found apart from the tests", () => {
-  expect(found.buildWalkers).toEqual(["@enumeratio/builder"]);
+  expect(found.buildWalkers).toEqual(["@notatio/builder"]);
 });

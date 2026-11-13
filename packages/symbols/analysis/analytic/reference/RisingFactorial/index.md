@@ -2,11 +2,11 @@
 name: RisingFactorial
 domain: Combinatorics
 signature: RisingFactorial(a, n)
-summary: "The rising factorial $a(a+1)\\cdots(a+n-1)$: Fungrim's name for [[Pochhammer]], which it delegates to, extended to a complex non-integer order. Provided by `@enumeratio/analytic`."
+summary: "The rising factorial $a(a+1)\\cdots(a+n-1)$: Fungrim's name for [[Pochhammer]], which it delegates to, extended to a complex non-integer order. Provided by `@notatio/analytic`."
 signatures:
   - call: RisingFactorial(a, n)
     description: the rising factorial $(a)_n = \Gamma(a+n)/\Gamma(a)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 bindings:
   - origin: reference

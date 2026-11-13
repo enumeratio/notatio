@@ -2,11 +2,11 @@
 name: RiemannSiegelTheta
 domain: Special functions
 signature: RiemannSiegelTheta(t)
-summary: The Riemann–Siegel theta function $\vartheta(t) = \operatorname{Im}\ln\Gamma(\tfrac14 + \tfrac{it}{2}) - \tfrac{t}{2}\ln\pi$, for real $t$. Provided by `@enumeratio/analytic`.
+summary: The Riemann–Siegel theta function $\vartheta(t) = \operatorname{Im}\ln\Gamma(\tfrac14 + \tfrac{it}{2}) - \tfrac{t}{2}\ln\pi$, for real $t$. Provided by `@notatio/analytic`.
 signatures:
   - call: RiemannSiegelTheta(t)
     description: the Riemann–Siegel theta function $\vartheta(t)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 primitive: numeric
 bindings:

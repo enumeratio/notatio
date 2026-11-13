@@ -1,5 +1,5 @@
-import { type BoxNode, graphics3dOf, graphicsOf, makeBoxes, optionsOfBox } from "@enumeratio/boxes";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { type BoxNode, graphics3dOf, graphicsOf, makeBoxes, optionsOfBox } from "@notatio/boxes";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import type { Complex } from "../src/complex-eval.ts";
 import { complexSurfaceBox, sampleComplexSurface } from "../src/complex-plot-3d.ts";

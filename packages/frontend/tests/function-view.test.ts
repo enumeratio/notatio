@@ -4,8 +4,8 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { parseParameters, SYMBOLS, winningOverload } from "@enumeratio/manifest";
+import { parseExpression } from "@notatio/formats/expression";
+import { parseParameters, SYMBOLS, winningOverload } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { functionViewOf, type FunctionSignature, type FunctionView, returnTypeOf } from "../src/function-view.ts";
 import { inferPlotOver, numericDomainOf } from "../src/infer-controls.ts";

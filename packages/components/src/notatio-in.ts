@@ -18,22 +18,22 @@ import {
   symbolLatex,
   typedLatex,
   wrapHead,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { Sweep } from "./sweep.ts";
 import { translate } from "./kernel-client.ts";
 
 /** The page's engine, with Epsil's reader and InputForm's writer. */
 interface Local {
   readonly engine: Awaited<ReturnType<typeof loadEngine>>;
-  readonly parseExpression: typeof import("@enumeratio/formats/expression").parseExpression;
-  readonly toInputForm: typeof import("@enumeratio/formats/inputform").toInputForm;
+  readonly parseExpression: typeof import("@notatio/formats/expression").parseExpression;
+  readonly toInputForm: typeof import("@notatio/formats/inputform").toInputForm;
 }
 
 async function loadLocal(): Promise<Local> {
   const [engine, { parseExpression }, { toInputForm }] = await Promise.all([
     loadEngine(),
-    import("@enumeratio/formats/expression"),
-    import("@enumeratio/formats/inputform"),
+    import("@notatio/formats/expression"),
+    import("@notatio/formats/inputform"),
   ]);
   return { engine, parseExpression, toInputForm };
 }

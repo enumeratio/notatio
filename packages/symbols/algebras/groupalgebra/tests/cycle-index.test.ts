@@ -1,4 +1,4 @@
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareGroupAlgebra } from "../src/declare.ts";
 import { alternatingIndex, cyclicIndex, dihedralIndex, listedIndex, symmetricIndex } from "../src/cycle-index.ts";

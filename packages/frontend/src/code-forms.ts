@@ -4,7 +4,7 @@
 // GPUShaderForm is the whole shader one of our GPU paths runs for the expression.
 
 import { type ComputeEngine, compile, type Expression, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine";
-import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
+import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
 import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
 import { toGlslFn } from "./plot-compile.ts";

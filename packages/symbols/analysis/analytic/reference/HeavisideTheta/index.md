@@ -6,11 +6,11 @@ summary: "The Heaviside step function: 0 for x < 0, 1 for x > 0, unevaluated at 
 signatures:
   - call: HeavisideTheta(x)
     description: 0 if x < 0, 1 if x > 0, and unevaluated (stays symbolic) at x = 0.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (real, real*) -> number
   - call: HeavisideTheta(x1, x2, …)
     description: the product of the individual steps -- 0 as soon as any argument is negative, unevaluated if none is negative but at least one is exactly 0.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     arity: 2
 names:
   wolframIdentity: true

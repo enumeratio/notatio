@@ -27,7 +27,7 @@ export interface DocPage {
 export type Site = "enumeratio" | "notatio";
 
 export interface WorkspacePackage {
-  /** `@enumeratio/…` */
+  /** `@notatio/…` */
   name: string;
   /** The route slug: the name without its scope. */
   slug: string;
@@ -47,15 +47,15 @@ export interface WorkspacePackage {
 }
 
 // The workspace globs, less web/ itself, then the libraries installed beside them (a name in the tree
-// wins). SITE_FROM_PACKAGES=1 reads only the installed packages (`node_modules/@enumeratio/*`, beside
+// wins). SITE_FROM_PACKAGES=1 reads only the installed packages (`node_modules/@notatio/*`, beside
 // web/), as a build from the registry would.
 const packageGlobs =
   process.env.SITE_FROM_PACKAGES === "1"
-    ? ["node_modules/@enumeratio/*"]
+    ? ["node_modules/@notatio/*"]
     : ["packages/*", "packages/symbols/*/*", "tools/*"];
 
 /**
- * The `@enumeratio/*` libraries that `dirs` (and web/) depend on and the tree doesn't hold, as
+ * The `@notatio/*` libraries that `dirs` (and web/) depend on and the tree doesn't hold, as
  * repo-relative directories: installed ones, found as Node would find them from the dependent.
  */
 function installedLibraries(dirs: string[]): string[] {
@@ -74,7 +74,7 @@ function installedLibraries(dirs: string[]): string[] {
   const found = new Map<string, string>();
   for (const { dir, pkg } of seeds)
     for (const dep of Object.keys({ ...pkg?.dependencies, ...pkg?.devDependencies })) {
-      if (!dep.startsWith("@enumeratio/") || known.has(dep) || found.has(dep)) continue;
+      if (!dep.startsWith("@notatio/") || known.has(dep) || found.has(dep)) continue;
       for (let at = dir; ; at = posix.dirname(at)) {
         const candidate = posix.join(at, "node_modules", dep);
         if (existsSync(join(repoRoot, candidate, "package.json"))) {
@@ -172,11 +172,11 @@ export function workspacePackages(): WorkspacePackage[] {
       devDependencies?: Record<string, string>;
       enumeratio?: { group?: string; site?: Site };
     };
-    if (!pkg.name?.startsWith("@enumeratio/")) continue;
-    const siblings = (deps = {}) => Object.keys(deps).filter((d) => d.startsWith("@enumeratio/"));
+    if (!pkg.name?.startsWith("@notatio/")) continue;
+    const siblings = (deps = {}) => Object.keys(deps).filter((d) => d.startsWith("@notatio/"));
     const deps = siblings(pkg.dependencies);
     const readme = join(repoRoot, dir, "README.md");
-    const slug = pkg.name.slice("@enumeratio/".length);
+    const slug = pkg.name.slice("@notatio/".length);
     found.push({
       name: pkg.name,
       slug,
@@ -230,7 +230,7 @@ export function rewriteLinks(markdown: string, file: string, routes: Routes): st
 }
 
 const link = (name: string) => {
-  const slug = name.slice("@enumeratio/".length);
+  const slug = name.slice("@notatio/".length);
   return `[\`${slug}\`](${docRoute(slug)})`;
 };
 

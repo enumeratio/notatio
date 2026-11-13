@@ -8,7 +8,7 @@ signatures:
     description: x at the engine's working precision.
   - call: N(x, d)
     description: x to exactly d significant digits, the last one correctly rounded.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (any, (integer | list<number>)?) -> unknown
     overrides: compute-engine
 seeAlso:
@@ -85,7 +85,7 @@ attributes:
 ---
 
 - $\mathrm{N}(x, d)$ evaluates x at $d + 20$ digits and again at $d + 10$, rounds both to d, and answers when they agree; when they don't, the value lies near a rounding boundary, and the guard doubles until they do (Ziv's loop). Agreement across precisions is strong evidence rather than a proof.
-- Some heads prove their digits instead: [[Zeta]], [[HurwitzZeta]], [[LerchPhi]], [[PolyLog]] and [[StieltjesGamma]], on exact real arguments (integers, rationals, decimals). Their kernels bound their own error and return an enclosure, a ball that provably holds the value. When both ends of it round to the same d digits, those digits are certain; when they don't, the working precision rises, with no appeal to agreement. The enclosure travels with the answer (`enclosureOf` in `@enumeratio/analytic`). An argument like $\sqrt 2$ arrives already rounded, by an evaluation that bounds nothing, so such a call takes the agreement path.
+- Some heads prove their digits instead: [[Zeta]], [[HurwitzZeta]], [[LerchPhi]], [[PolyLog]] and [[StieltjesGamma]], on exact real arguments (integers, rationals, decimals). Their kernels bound their own error and return an enclosure, a ball that provably holds the value. When both ends of it round to the same d digits, those digits are certain; when they don't, the working precision rises, with no appeal to agreement. The enclosure travels with the answer (`enclosureOf` in `@notatio/analytic`). An argument like $\sqrt 2$ arrives already rounded, by an evaluation that bounds nothing, so such a call takes the agreement path.
 - The answer carries exactly d significant digits, never more, and the working precision is left as it was: a later evaluation runs at the precision it would have anyway.
 - A value exactly halfway between two d-digit answers -- only a terminating decimal, like $1/8$ -- rounds to the even one.
 - A list, or a symbolic result, is rounded number by number; integers in it are left alone.

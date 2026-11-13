@@ -5,7 +5,7 @@
 // The default kind is `notatio`: an internal link to /reference/symbol/<Name>, which is the
 // only kind that also carries a tooltip (the entry knows its own signature and summary).
 
-import { type CrosswalkSystem, SOURCES } from "@enumeratio/reference";
+import { type CrosswalkSystem, SOURCES } from "@notatio/reference";
 
 export type SymbolKind = "notatio" | CrosswalkSystem;
 
@@ -18,7 +18,7 @@ export interface SymbolSource {
   readonly external: boolean;
 }
 
-// The outside systems are the crosswalk's (`@enumeratio/reference`), so a `<Symbol type>`
+// The outside systems are the crosswalk's (`@notatio/reference`), so a `<Symbol type>`
 // in prose and a chip on a reference page name the same places the same way.
 export const SYMBOL_SOURCES: Readonly<Record<SymbolKind, SymbolSource>> = {
   notatio: {

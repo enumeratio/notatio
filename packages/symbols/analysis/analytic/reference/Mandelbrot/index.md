@@ -6,7 +6,7 @@ summary: The $n$-th iterate of $z \mapsto z^2 + c$ starting from $0$ -- the comp
 signatures:
   - call: Mandelbrot(c, n?)
     description: iterates from 0 at the parameter c, n times (default 64), stopping early once it has clearly escaped
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 seeAlso:
   - Julia
 ---

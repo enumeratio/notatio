@@ -20,7 +20,7 @@ const distTargets = (exports: Exports): string[] =>
 
 const packages: Pkg[] = JSON.parse(pnpm("ls", "-r", "--depth", "-1", "--json"));
 const missing = packages
-  .filter(({ name }) => name !== "@enumeratio/web")
+  .filter(({ name }) => name !== "@notatio/web")
   .filter(({ path }) => {
     const pkg = JSON.parse(readFileSync(join(path, "package.json"), "utf8"));
     const { generated = [] }: { generated?: string[] } = pkg;

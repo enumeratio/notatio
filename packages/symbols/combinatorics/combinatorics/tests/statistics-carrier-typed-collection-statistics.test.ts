@@ -1,7 +1,7 @@
 // BL-1 (typed family elements): a statistic over a family element must type-check with no
 // wrapping by the caller, on an engine that declares carriers before collections (the real
 // shape every production engine uses — cli, web, census, reference/scripts/engines.ts).
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../src/index.ts";
 

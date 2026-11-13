@@ -4,7 +4,7 @@
 // tests/fast-kernels.test.ts holds the same families to Epsil; tests/lex-restriction-guard.test.ts to a
 // time budget at large n.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { kernelOn } from "../collections/src/families/epsil.ts";
 import {

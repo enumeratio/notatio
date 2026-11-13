@@ -1,5 +1,5 @@
-import { declareCombinatorics } from "@enumeratio/combinatorics";
-import { makeBoxes, optionsOfBox } from "@enumeratio/boxes";
+import { declareCombinatorics } from "@notatio/combinatorics";
+import { makeBoxes, optionsOfBox } from "@notatio/boxes";
 import { expect, it } from "vite-plus/test";
 import { configureEngine } from "../src/engine.ts";
 import { displayListOfBox, graphicsOf } from "../src/graphics-box.ts";

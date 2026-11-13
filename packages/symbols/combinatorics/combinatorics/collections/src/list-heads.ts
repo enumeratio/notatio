@@ -11,7 +11,7 @@ import {
   symbolNameOf,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { positionsOf } from "./list-levels.ts";
 
 // The core list/statistics heads compute-engine ships but doesn't fully answer yet —

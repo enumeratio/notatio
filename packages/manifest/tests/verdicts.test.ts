@@ -13,7 +13,7 @@ const put = (file: string, text: string): void => {
   writeFileSync(join(dir, file), text);
 };
 const open = (): Verdicts =>
-  verdictCache("t", { dir, roots: [join(dir, "src")], imports: ["@enumeratio/dep"], omitDists: [] });
+  verdictCache("t", { dir, roots: [join(dir, "src")], imports: ["@notatio/dep"], omitDists: [] });
 
 const labels = Array.from({ length: 40 }, (_, i) => `item${i}`);
 
@@ -39,11 +39,11 @@ beforeAll(() => {
   dir = mkdtempSync(join(tmpdir(), "verdicts-"));
   put("package.json", '{"name":"t"}');
   put("pnpm-lock.yaml", "lockfileVersion: 9\n");
-  put("node_modules/@enumeratio/dep/package.json", '{"name":"@enumeratio/dep"}');
+  put("node_modules/@notatio/dep/package.json", '{"name":"@notatio/dep"}');
 });
 beforeEach(() => {
   put("src/a.ts", "a");
-  put("node_modules/@enumeratio/dep/dist/a.js", "engine 1");
+  put("node_modules/@notatio/dep/dist/a.js", "engine 1");
   rmSync(join(dir, "node_modules/.cache"), { recursive: true, force: true });
 });
 afterEach(() => {
@@ -62,7 +62,7 @@ test("a moved engine re-checks a sample and carries the rest", () => {
   const first = open();
   runOver(first);
   first.save();
-  put("node_modules/@enumeratio/dep/dist/a.js", "engine 2");
+  put("node_modules/@notatio/dep/dist/a.js", "engine 2");
   const second = open();
   const checked = runOver(second);
   expect(checked.length).toBeGreaterThanOrEqual(SAMPLE_MIN);
@@ -75,7 +75,7 @@ test("a moved engine re-checks a sample and carries the rest", () => {
   expect(runOver(third)).toEqual([]);
   expect(third.share().carried).toBe(labels.length - checked.length);
   // Another engine samples other items.
-  put("node_modules/@enumeratio/dep/dist/a.js", "engine 3");
+  put("node_modules/@notatio/dep/dist/a.js", "engine 3");
   expect(runOver(open())).not.toEqual(checked);
 });
 
@@ -95,7 +95,7 @@ test("a sampled answer that differs re-checks everything", () => {
   const first = open();
   runOver(first);
   first.save();
-  put("node_modules/@enumeratio/dep/dist/a.js", "engine 2");
+  put("node_modules/@notatio/dep/dist/a.js", "engine 2");
   const second = open();
   let passes = 0;
   second.settle(() => {
@@ -111,7 +111,7 @@ test("a carried answer is never a disagreement", () => {
   const first = open();
   runOver(first, (label) => label !== "item3");
   first.save();
-  put("node_modules/@enumeratio/dep/dist/a.js", "engine 2");
+  put("node_modules/@notatio/dep/dist/a.js", "engine 2");
   expect(runOver(open(), () => true)).toContain("item3");
 });
 
@@ -120,7 +120,7 @@ test("unlabelled and changed items are always checked", () => {
   first.remember({ k: 1 }, () => true);
   first.remember({ k: 2 }, () => true, "x");
   first.save();
-  put("node_modules/@enumeratio/dep/dist/a.js", "engine 2");
+  put("node_modules/@notatio/dep/dist/a.js", "engine 2");
   const second = open();
   second.plan(Array.from({ length: 100 }, (_, i) => `y${i}`).concat("x"));
   let ran = 0;

@@ -2,11 +2,11 @@
 name: Hypergeometric1F1Regularized
 domain: Special functions
 signature: Hypergeometric1F1Regularized(a, b, z)
-summary: The regularized Kummer confluent hypergeometric function ${}_1F_1(a,b;z) / \Gamma(b)$ — entire in $b$ and $z$. Provided by `@enumeratio/analytic`.
+summary: The regularized Kummer confluent hypergeometric function ${}_1F_1(a,b;z) / \Gamma(b)$ — entire in $b$ and $z$. Provided by `@notatio/analytic`.
 signatures:
   - call: Hypergeometric1F1Regularized(a, b, z)
     description: ${}_1F_1(a,b;z) / \Gamma(b)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 primitive: numeric
 bindings:

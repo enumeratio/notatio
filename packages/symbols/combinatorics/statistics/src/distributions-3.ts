@@ -1,4 +1,4 @@
-import { type Engine, type EvaluateOptions, type Expr, integerAt, operandsOf, wrapOperator } from "@enumeratio/engine";
+import { type Engine, type EvaluateOptions, type Expr, integerAt, operandsOf, wrapOperator } from "@notatio/engine";
 import { finish, gammaParams } from "./distributions.ts";
 import { add, div, exp, If, lt, mul, neg, one, pdfOf2, pow, sub, three, two } from "./distributions-2.ts";
 

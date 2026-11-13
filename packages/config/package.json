@@ -1,5 +1,5 @@
 {
-  "name": "@enumeratio/config",
+  "name": "@notatio/config",
   "version": "0.0.0",
   "description": "The formatter and linter settings every enumeratio package checks against, so `vp check` agrees inside the monorepo and in a repository of its own.",
   "license": "WTFPL",

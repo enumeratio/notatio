@@ -6,7 +6,7 @@
 //
 //   vp node packages/reference/scripts/collect-findstat-catalog.ts
 
-import { updateHead } from "@enumeratio/entry/node";
+import { updateHead } from "@notatio/entry/node";
 import { canonicalHeads, referenceData } from "../src/node.ts";
 import { type Wanted, wanted, withFindStat } from "./findstat-catalog.ts";
 

@@ -1,4 +1,4 @@
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { ALL_STATISTICS } from "../src/statistics/all.ts";
 import { core, cycles, headUsage, tower } from "../src/statistics/core.ts";

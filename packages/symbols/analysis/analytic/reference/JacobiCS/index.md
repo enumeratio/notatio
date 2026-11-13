@@ -6,7 +6,7 @@ summary: The Jacobi elliptic function $\operatorname{cs}(u,m) = \operatorname{cn
 signatures:
   - call: JacobiCS(u, m)
     description: the Jacobi elliptic function cs, argument u, parameter m.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - JacobiCN

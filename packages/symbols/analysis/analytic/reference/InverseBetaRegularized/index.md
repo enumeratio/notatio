@@ -6,7 +6,7 @@ summary: "The inverse of the regularized incomplete beta $I_x(a, b)$ in $x$: the
 signatures:
   - call: InverseBetaRegularized(s, a, b)
     description: solves $s = I_x(a, b)$ for $x$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number, number) -> number
 primitive: kernel
 bindings:

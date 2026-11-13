@@ -50,7 +50,7 @@ export {
   type ComplexGLSL,
   emitComplexGLSL,
   MAX_SLOTS,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 export { declareThreading113 } from "./threading-113.ts";
 export { declareClosedForms113 } from "./closed-forms-113.ts";
 export { declareInverseCompositions } from "./inverse-compositions.ts";

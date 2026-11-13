@@ -6,7 +6,7 @@ summary: The falling factorial $x(x-1)\cdots(x-n+1)$ -- Wolfram's own `Factorial
 signatures:
   - call: FallingFactorial(x, n)
     description: exact for an integer x and n, numeric otherwise
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number) -> number
 seeAlso:
   - RisingFactorial

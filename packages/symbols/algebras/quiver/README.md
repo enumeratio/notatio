@@ -1,4 +1,4 @@
-# @enumeratio/quiver
+# @notatio/quiver
 
 Path-algebra extensions for compute-engine: quivers, their paths, and the path algebra
 $kQ$ — finite-dimensional exactly when the quiver is acyclic. $kQ$'s basis is all directed
@@ -10,7 +10,7 @@ this section, $kQ$ need not be finite-dimensional. See [the guide](docs/path-alg
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareQuiver } from "@enumeratio/quiver";
+import { declareQuiver } from "@notatio/quiver";
 
 const ce = new ComputeEngine();
 declareQuiver(ce);

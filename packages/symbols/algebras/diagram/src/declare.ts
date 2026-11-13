@@ -1,5 +1,5 @@
-import { registerNotation } from "@enumeratio/boxes";
-import { integerAt, operandsOf, type Engine, type Expr } from "@enumeratio/engine";
+import { registerNotation } from "@notatio/boxes";
+import { integerAt, operandsOf, type Engine, type Expr } from "@notatio/engine";
 import {
   CLASS_ADMITS,
   composeDiagrams,
@@ -18,11 +18,11 @@ import {
   orbitToDiagram,
   partitionMobius,
 } from "./orbit.ts";
-import { declareAlgebra } from "@enumeratio/structures";
+import { declareAlgebra } from "@notatio/structures";
 import { dimensionOf } from "./dimensions.ts";
 import { DIAGRAM_NOTATION } from "./notation.ts";
 
-// How diagrams reach compute-engine. Same seam as @enumeratio/hypercomplex: replace an
+// How diagrams reach compute-engine. Same seam as @notatio/hypercomplex: replace an
 // operator's definition, keep a reference to the previous handler, and dispatch only
 // when an operand is ours. Because each wrapper defers, the two packages compose — a
 // `Basis` call falls through to whichever of them recognises the algebra, in either

@@ -14,7 +14,7 @@
 
 import { writeFileSync } from "node:fs";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { runKernel } from "@enumeratio/utils/bounded";
+import { runKernel } from "@notatio/utils/bounded";
 import { declareAnalytic } from "../src/index.ts";
 
 const ce = new ComputeEngine();

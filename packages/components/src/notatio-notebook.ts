@@ -3,7 +3,7 @@ import { keyed } from "lit/directives/keyed.js";
 import { repeat } from "lit/directives/repeat.js";
 import "./notatio-cell.ts";
 import "./dynamic-module-box.ts";
-import { referencesOrdinal, toIpynb } from "@enumeratio/frontend/core";
+import { referencesOrdinal, toIpynb } from "@notatio/frontend/core";
 import {
   browserStore,
   type CellAnswer,

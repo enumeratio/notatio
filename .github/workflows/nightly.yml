@@ -51,17 +51,17 @@ jobs:
       - uses: actions/checkout@v4
       - id: setup
         uses: ./.github/actions/setup
-      - run: pnpm -r --filter @enumeratio/analytic run test
+      - run: pnpm -r --filter @notatio/analytic run test
       # Hand-written kernels against the interpreter, and each family's Epsil counts past 2^53.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/fast-kernels.test.ts tests/map-kernels.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run tests/fast-kernels.test.ts tests/map-kernels.test.ts
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/lattice-orders.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run tests/lattice-orders.test.ts
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run words/tests/epsil-families trees/tests/epsil-families graphs/tests/epsil-families collections/tests/epsil-families permutations/tests/epsil-families permutations/tests/permutation-classes
+        run: pnpm --filter @notatio/combinatorics exec vp test run words/tests/epsil-families trees/tests/epsil-families graphs/tests/epsil-families collections/tests/epsil-families permutations/tests/epsil-families permutations/tests/permutation-classes
       # Every member of the larger families, and the sizes the standard run skips (about six minutes together).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/unlabeled-tree-classes trees/tests/nested-families collections/tests/increasing-binary-trees compositions/tests/epsil-families partitions/tests/epsil-families tableaux/tests/boxed-plane-partitions tableaux/tests/rsk-pairs tableaux/tests/skew-standard-tableaux words/tests/parking-functions
+        run: pnpm --filter @notatio/combinatorics exec vp test run trees/tests/unlabeled-tree-classes trees/tests/nested-families collections/tests/increasing-binary-trees compositions/tests/epsil-families partitions/tests/epsil-families tableaux/tests/boxed-plane-partitions tableaux/tests/rsk-pairs tableaux/tests/skew-standard-tableaux words/tests/parking-functions
 
   deep-tests-statistics:
     name: deep test sweeps (statistics)
@@ -77,49 +77,49 @@ jobs:
         uses: ./.github/actions/setup
       # Statistics compiled from their Epsil against the hand-written kernels; the timing table
       # goes to the job summary.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/statistics-compiled.test.ts
+      - run: pnpm --filter @notatio/combinatorics exec vp test run tests/statistics-compiled.test.ts
       # Dyck-path statistics over the longer paths.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run lattice-paths/tests/dyck-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run lattice-paths/tests/dyck-statistics
       # Integer-partition statistics over the larger partitions.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run partitions/tests/partition-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run partitions/tests/partition-statistics
       # FindStat integer-partition statistics over the larger partitions.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run partitions/tests/partition-findstat
+        run: pnpm --filter @notatio/combinatorics exec vp test run partitions/tests/partition-findstat
       # FindStat Dyck-path statistics over the larger paths.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run lattice-paths/tests/dyck-findstat
+        run: pnpm --filter @notatio/combinatorics exec vp test run lattice-paths/tests/dyck-findstat
       # FindStat maps against their independent readings, over the larger objects (Demazure product, tableau actions).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/map-findstat.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run findstat/tests/map-findstat.test.ts
       # Our statistic distributions against FindStat's, per size, for every adopted statistic the pairs cover.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/distribution-crosscheck.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run findstat/tests/distribution-crosscheck.test.ts
       # The graph statistics against FindStat's rows, object by object (split from the distributions; one test per slow head).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run findstat/tests/graph-crosscheck.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run findstat/tests/graph-crosscheck.test.ts
       # Cartan type statistics over the larger types and the group-generating readings.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run cartan/tests/cartan-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run cartan/tests/cartan-statistics
       # Tree statistics over the larger trees.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run trees/tests/tree-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run trees/tests/tree-statistics
       # Composition statistics over the larger compositions.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run compositions/tests/composition-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run compositions/tests/composition-statistics
       # Tableau statistics over the larger tableaux.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run tableaux/tests/tableau-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run tableaux/tests/tableau-statistics
       # Permutation statistics over the larger permutations.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/permutation-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run permutations/tests/permutation-statistics
       # Signed-permutation, alternating-sign-matrix and perfect-matching statistics over the next size up.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run permutations/tests/signed-permutation-statistics tableaux/tests/alternating-sign-matrix-statistics set-partitions/tests/perfect-matching-statistics
+        run: pnpm --filter @notatio/combinatorics exec vp test run permutations/tests/signed-permutation-statistics tableaux/tests/alternating-sign-matrix-statistics set-partitions/tests/perfect-matching-statistics
       # The numeric sequences and predicate scans defined in Epsil, against references in bigints and sieves, farther out.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run collections/tests/numeric-epsil.test.ts collections/tests/sequence-epsil.test.ts collections/tests/scan-epsil.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run collections/tests/numeric-epsil.test.ts collections/tests/sequence-epsil.test.ts collections/tests/scan-epsil.test.ts
 
   # The compiled code against the interpreter, the slow side of both: each file takes a deterministic share of
   # the subjects per head, so its time holds as heads are added.
@@ -136,13 +136,13 @@ jobs:
       - id: setup
         uses: ./.github/actions/setup
       # Compiled families against the interpreter on the fibers the build skips.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-families.test.ts
+      - run: pnpm --filter @notatio/combinatorics exec vp test run tests/compiled-families.test.ts
       # Compiled maps against the interpreter, over the larger sample.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/compiled-maps.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run tests/compiled-maps.test.ts
       # Every statistic's and family's definition read back as the expression it runs (the standard run samples).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/web exec vp test run .vitepress/data/definitions.test.ts
+        run: pnpm --filter @notatio/web exec vp test run .vitepress/data/definitions.test.ts
 
   deep-tests-reference:
     name: deep test sweeps (reference and number theory)
@@ -157,26 +157,26 @@ jobs:
       - id: setup
         uses: ./.github/actions/setup
       # Each map's graded, surjection and bijection laws, a size at a time, one size deeper.
-      - run: pnpm --filter @enumeratio/combinatorics exec vp test run tests/map-laws-per-size.test.ts
+      - run: pnpm --filter @notatio/combinatorics exec vp test run tests/map-laws-per-size.test.ts
       # Every head in an engine holding only what the resolver picks, against the full one.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/reference exec vp test run tests/resolver.test.ts
+        run: pnpm --filter @notatio/reference exec vp test run tests/resolver.test.ts
       # Every sampled head's examples, read back from markup and evaluated through the registry.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/reference exec vp test run tests/markup-registry.test.ts
+        run: pnpm --filter @notatio/reference exec vp test run tests/markup-registry.test.ts
       # Every example through a bare and a declared engine: the exact list of heads we override.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/reference exec vp test run tests/provenance.test.ts
+        run: pnpm --filter @notatio/reference exec vp test run tests/provenance.test.ts
       # Every declaration order of the packages that extend one head (BL-13).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/census exec vp test run tests/declaration-order.test.ts
+        run: pnpm --filter @notatio/census exec vp test run tests/declaration-order.test.ts
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/ce-patches exec vp test run tests/algebraic-numbers.test.ts
+        run: pnpm --filter @notatio/ce-patches exec vp test run tests/algebraic-numbers.test.ts
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/cli exec vp test run tests/table.test.ts
+        run: pnpm --filter @notatio/cli exec vp test run tests/table.test.ts
       # π(x) by the combinatorial count against Lucy_Hedgehog, then 10^14 … 10^17 (minutes at the top).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @enumeratio/residues exec vp test run tests/prime-count.test.ts
+        run: pnpm --filter @notatio/residues exec vp test run tests/prime-count.test.ts
 
   # The compile steps' interpreter cross-checks, every definition (a PR run re-checks only a sample
   # when just the engine's dists moved). The generated files must come out as the build made them:
@@ -207,7 +207,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm --filter @enumeratio/reference exec node scripts/review-check.ts --claims
+      - run: pnpm --filter @notatio/reference exec node scripts/review-check.ts --claims
 
   # A real browser against a real dev server, checking every component story renders (the
   # custom element upgrades, draws something, no console errors) -- see web/tests/stories.
@@ -227,16 +227,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @notatio/web exec playwright install --with-deps chromium
         continue-on-error: true
-      - run: pnpm --filter @enumeratio/web run test:stories --shard=${{ matrix.shard }}/3
+      - run: pnpm --filter @notatio/web run test:stories --shard=${{ matrix.shard }}/3
       # The hydration race needs the built site (the prerendered placeholders): one shard does it.
       # Not advisory like the stories: a regression goes red, for the fixup routine to file.
       - if: matrix.shard == 1
-        run: pnpm --filter @enumeratio/web run build
+        run: pnpm --filter @notatio/web run build
         continue-on-error: true
       - if: matrix.shard == 1
-        run: pnpm --filter @enumeratio/web run test:hydration
+        run: pnpm --filter @notatio/web run test:hydration
       # A failed test's trace and page snapshot: the log says what timed out, not what the page was doing.
       - if: always()
         uses: actions/upload-artifact@v4
@@ -262,7 +262,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
-      - run: pnpm --filter @enumeratio/web exec playwright install --with-deps chromium
+      - run: pnpm --filter @notatio/web exec playwright install --with-deps chromium
         continue-on-error: true
       - run: xvfb-run -a node node_modules/@playwright/test/cli.js test -c tests/stories/playwright.gpu.config.ts --shard=${{ matrix.shard }}/3
         working-directory: web
@@ -299,7 +299,7 @@ jobs:
           cache-dependency-path: packages/oracle/python/requirements.txt
       - run: pip install -r packages/oracle/python/requirements.txt
       # The SymPy helpers run in SymPy (the gate has none, so these skip there).
-      - run: pnpm --filter @enumeratio/oracle exec vp test run tests/symbolic.test.ts
+      - run: pnpm --filter @notatio/oracle exec vp test run tests/symbolic.test.ts
       - uses: ./.github/actions/oracle-drift
         with:
           system: mpmath
@@ -383,7 +383,7 @@ jobs:
           workspaces: packages/oracle/rust
       - run: node packages/oracle/scripts/setup.ts rust
       # The adapters' own tests build against the crates (the gate has no toolchain, so they skip there).
-      - run: pnpm --filter @enumeratio/oracle exec vp test run tests/rust-helpers.test.ts
+      - run: pnpm --filter @notatio/oracle exec vp test run tests/rust-helpers.test.ts
       - uses: ./.github/actions/oracle-drift
         with:
           system: rust
@@ -479,7 +479,7 @@ jobs:
           sudo chmod +x /usr/local/bin/sage
           sage --version
       # The Sage helpers run in Sage (the gate has none, so these skip there).
-      - run: pnpm --filter @enumeratio/oracle exec vp test run tests/symbolic.test.ts
+      - run: pnpm --filter @notatio/oracle exec vp test run tests/symbolic.test.ts
       - uses: ./.github/actions/oracle-drift
         with:
           system: sage
@@ -574,7 +574,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
         with:
-          packages: "@enumeratio/${{ matrix.package }}"
+          packages: "@notatio/${{ matrix.package }}"
       - run: node tools/split-check/ci.ts ${{ matrix.package }} --out "$RUNNER_TEMP/split-report"
       - if: ${{ !cancelled() }}
         run: cat "$RUNNER_TEMP/split-report/report.md" >> "$GITHUB_STEP_SUMMARY"

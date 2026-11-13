@@ -1,11 +1,11 @@
 // `Element(x, <plural>)` membership (https://github.com/enumeratio/notatio/wiki/Archive-Domains §2, `declareCarrierElement` in
-// @enumeratio/structures): True for a value of the matching carrier, False for one of ours on a
+// @notatio/structures): True for a value of the matching carrier, False for one of ours on a
 // DIFFERENT carrier, unevaluated for anything else (a bare symbol, a value with no
 // declared carrier at all).
 
-import type { Engine } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
-import { type Carrier, declareCarrierElement, declareCarrierPlurals } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
+import { type Carrier, declareCarrierElement, declareCarrierPlurals } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatoricsCarriers } from "../src/carriers.ts";
 
@@ -72,7 +72,7 @@ test("Element stays unevaluated for a bare, unresolved symbol", () => {
 
 test("a compute-engine native meaning still answers when x is not one of ours", () => {
   // RationalNumbers is both a compute-engine native (the mathematical set of all rationals)
-  // and one of our own carriers (@enumeratio/number-theory's rational_number) -- our layer
+  // and one of our own carriers (@notatio/number-theory's rational_number) -- our layer
   // only claims the case it recognises, so a plain number still gets compute-engine's own
   // answer.
   const ce = engine();

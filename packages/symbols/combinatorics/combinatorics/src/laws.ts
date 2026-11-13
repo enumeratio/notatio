@@ -1,2 +1,2 @@
-// Law checking lives in @enumeratio/structures; this keeps the package's own path.
-export { checkLaws, type LawFailure } from "@enumeratio/structures";
+// Law checking lives in @notatio/structures; this keeps the package's own path.
+export { checkLaws, type LawFailure } from "@notatio/structures";

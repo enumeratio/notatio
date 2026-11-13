@@ -2,11 +2,11 @@
 name: SloaneA
 domain: Special functions
 signature: SloaneA(id, n)
-summary: The $n$-th term of an OEIS sequence, `id` a quoted A-number — scoped to the specific sequences Fungrim's own `SloaneA` identities cite, each aliased to a head that already computes it. Provided by `@enumeratio/analytic`.
+summary: The $n$-th term of an OEIS sequence, `id` a quoted A-number — scoped to the specific sequences Fungrim's own `SloaneA` identities cite, each aliased to a head that already computes it. Provided by `@notatio/analytic`.
 signatures:
   - call: SloaneA(id, n)
     description: the $n$-th term of OEIS sequence `id`.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (string, integer) -> number
 primitive: numeric
 bindings:

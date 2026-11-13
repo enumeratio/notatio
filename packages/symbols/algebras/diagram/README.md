@@ -1,4 +1,4 @@
-# @enumeratio/diagram
+# @notatio/diagram
 
 Diagram-algebra extensions for compute-engine: the partition algebra and its subalgebras
 (Brauer, Temperley–Lieb, Motzkin, rook, symmetric group), whose bases are combinatorial
@@ -10,7 +10,7 @@ construction, the lattice of subalgebras and the dimension formulas are in
 
 ```ts
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { declareDiagrams } from "@enumeratio/diagram";
+import { declareDiagrams } from "@notatio/diagram";
 
 const ce = new ComputeEngine();
 declareDiagrams(ce);

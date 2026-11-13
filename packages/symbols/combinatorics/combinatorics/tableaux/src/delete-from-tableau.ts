@@ -6,8 +6,8 @@
 // The Epsil definition is the meaning; the declare only checks the domain: a semistandard tableau
 // (rows weakly, columns strictly increasing) of small integers, with r a row that ends in a corner.
 
-import { type Engine, type Expr } from "@enumeratio/engine";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { type Engine, type Expr } from "@notatio/engine";
+import { evaluateEpsil } from "@notatio/structures";
 
 import { at, fold, iff, less, lets, sub, upTo } from "../../collections/src/families/tables.ts";
 

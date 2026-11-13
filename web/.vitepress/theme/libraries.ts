@@ -3,9 +3,9 @@
 // fetched, checked and declared by the kernel the first time a call names it, over jsDelivr.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { compileNotation, registerNotation } from "@enumeratio/boxes";
-import type { NotationData, Registry } from "@enumeratio/manifest";
-import { catalog, githubHost, type LibraryField, type LibraryIndex } from "@enumeratio/manifest/libraries";
+import { compileNotation, registerNotation } from "@notatio/boxes";
+import type { NotationData, Registry } from "@notatio/manifest";
+import { catalog, githubHost, type LibraryField, type LibraryIndex } from "@notatio/manifest/libraries";
 
 /** Each library at an exact version: GitHub's `owner/repo@version`. */
 export const LIBRARIES: readonly string[] = ["enumeratio/library-template@0.1.1"];

@@ -5,7 +5,7 @@
 // multiplication in far fewer, far-better-balanced bigint multiplications.
 //
 // `Mod(Factorial(n), p)` never builds n!: declare-modular-kernels.ts answers it modulo p.
-import { bigIntegerAt, wrapOperator, type Engine, type Expr } from "@enumeratio/engine";
+import { bigIntegerAt, wrapOperator, type Engine, type Expr } from "@notatio/engine";
 import { factorial } from "./fast-factorial.ts";
 
 /** Above this, n! would run past ~1M decimal digits; native Factorial (or a documented

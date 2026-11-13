@@ -1,5 +1,5 @@
-import { doublesForFloats, evaluateHurwitz, exceedsDoublePrecision, wantsNumber } from "@enumeratio/ce-patches";
-import { type Engine, type Expr, wrapOperator } from "@enumeratio/engine";
+import { doublesForFloats, evaluateHurwitz, exceedsDoublePrecision, wantsNumber } from "@notatio/ce-patches";
+import { type Engine, type Expr, wrapOperator } from "@notatio/engine";
 
 // A float operand gets a float answer. These heads reach compute-engine's bignum arithmetic
 // (a closed form, an AGM at m = 1, a Gamma ratio), which pads a double-precision input to

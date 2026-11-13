@@ -1,6 +1,6 @@
 // The head-to-glyph table the records imply, shared by the build and its test.
 
-import type { ReferenceEntry } from "@enumeratio/entry";
+import type { ReferenceEntry } from "@notatio/entry";
 
 /**
  * Each carrier's `glyph:` under the carrier's name, and under the name of every record whose

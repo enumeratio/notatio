@@ -6,7 +6,7 @@ summary: The Caputo fractional derivative of order $\alpha > 0$ of $f$ with resp
 signatures:
   - call: CaputoD(f, {x, alpha})
     description: $D^\alpha_C f(x) = \frac{1}{\Gamma(n-\alpha)}\int_0^x f^{(n)}(t)\,(x-t)^{n-\alpha-1}\,dt$, $n=\lceil\alpha\rceil$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, tuple<symbol, real>) -> expression
 primitive: kernel
 bindings:

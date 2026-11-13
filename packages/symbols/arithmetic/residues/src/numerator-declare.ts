@@ -10,7 +10,7 @@ import {
   type Engine,
   type Expr,
   type Json,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { gcd as integerGcd, mod } from "./arith.ts";
 import {
   addFractions,

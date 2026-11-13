@@ -3,14 +3,14 @@
 // of a sieve-backed value (PrimeNumbers), a closed form (SquareNumbers), a predicate scan
 // (AbundantNumbers), and a one-parameter operator (SmoothNumbers(k)) — not the full 88-set
 // catalogue; see design/rendering-environments-planning or the spike report for the rest.
-import { isPrime as isPrimeBig, nthPrime as sieveNthPrime, primeCountUpTo } from "@enumeratio/residues";
+import { isPrime as isPrimeBig, nthPrime as sieveNthPrime, primeCountUpTo } from "@notatio/residues";
 import type { EpsilFamily } from "./epsil.ts";
 import { withDefinitions } from "./numeric-definitions.ts";
 import { withScanDefinitions } from "./scan-definitions.ts";
 import type { Declared, NumberKernel } from "./types.ts";
 import { declineWork, factorsOf, matchCache, memoBy, PRIME_BITS, sigmaOf } from "./work.ts";
 
-// ---- PrimeNumbers: the segmented sieve/BPSW primality of @enumeratio/residues (issue #205's
+// ---- PrimeNumbers: the segmented sieve/BPSW primality of @notatio/residues (issue #205's
 // nth-prime work) — no separate sieve of our own to keep in sync with it. ----
 
 /** The k-th prime (1-indexed). */

@@ -12,7 +12,7 @@
 //      Count / Filter / Map / Sum / Range / Length / At / Max / Take and comparisons, and
 //      nothing else. `CycleCount` does not reduce at all — see PRIMITIVE below.
 
-import type { MathJSON } from "@enumeratio/entry";
+import type { MathJSON } from "@notatio/entry";
 
 const length: MathJSON = ["Length", "_p"];
 /** Positions `1 .. n`. */

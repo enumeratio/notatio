@@ -2,7 +2,7 @@
 // the rules that style it, the frame's furniture (grid, axes, locators). Engine-free and DOM-free,
 // so the lowering to a `GraphicsBox` (`show-box.ts`) and the web element read it the same way.
 
-import { GRAPHICS_OPTIONS } from "@enumeratio/formats/graphics-options";
+import { GRAPHICS_OPTIONS } from "@notatio/formats/graphics-options";
 import { FIGURE_DEFAULTS, FIGURE_HEADS, type FigureHead } from "./figure-frames.ts";
 import { argsOf, headOf, type Json } from "./frame-json.ts";
 import {

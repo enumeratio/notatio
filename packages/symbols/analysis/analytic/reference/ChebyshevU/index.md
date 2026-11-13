@@ -2,11 +2,11 @@
 name: ChebyshevU
 domain: Special functions
 signature: ChebyshevU(n, x)
-summary: The Chebyshev polynomial of the second kind $U_n(x)$, defined by $U_n(\cos\theta)\sin\theta = \sin((n+1)\theta)$. Provided by `@enumeratio/analytic`.
+summary: The Chebyshev polynomial of the second kind $U_n(x)$, defined by $U_n(\cos\theta)\sin\theta = \sin((n+1)\theta)$. Provided by `@notatio/analytic`.
 signatures:
   - call: ChebyshevU(n, x)
     description: the degree-$n$ Chebyshev polynomial of the second kind at $x$, for an integer $n$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, number) -> number
 primitive: kernel
 bindings:

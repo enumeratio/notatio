@@ -1,9 +1,9 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { widenSignature, wrapOperator } from "@enumeratio/engine";
+import { widenSignature, wrapOperator } from "@notatio/engine";
 
 // Graphics as *values*: an `Image` head, and a `Rasterize` that makes one.
 //
-// Rasterizing already existed as a library call (`@enumeratio/raster`, used to put
+// Rasterizing already existed as a library call (`@notatio/raster`, used to put
 // pictures in the terminal), but a raster was never something an expression could be.
 // That left anything wanting to show a picture reaching for a bespoke element instead
 // of a value -- so a worksheet's screen had to special-case "a portrait" rather than
@@ -20,7 +20,7 @@ export type Rasterizer = (svg: string, options?: { width?: number }) => Uint8Arr
 let rasterizer: Rasterizer | undefined;
 
 /**
- * Install the rasterizer. Node does this on import of `@enumeratio/formats/node`, which
+ * Install the rasterizer. Node does this on import of `@notatio/formats/node`, which
  * is where the native renderer lives; without one, `Rasterize` stays symbolic rather
  * than pretending. A browser has no synchronous path to pixels -- decoding an image is
  * asynchronous -- so it simply does not install one.
@@ -84,7 +84,7 @@ function svgOf(expr: Expression): string | undefined {
  * The heads that draw. Each names a picture rather than a value -- Wolfram's `Plot`,
  * `Histogram`, `Manipulate` print as pictures, not formulas -- and each has a component
  * of the same name (kebab-cased, `notatio-` in front) that is its rendering; the
- * argument-to-attribute map lives with the components (`@enumeratio/frontend/symbols`).
+ * argument-to-attribute map lives with the components (`@notatio/frontend/symbols`).
  * Here they are declared so the engine can *hold* one: `Plot(Sin(x), (x, 0, 10))` is an
  * expression a REPL prints, a cell evaluates to, a worksheet composites. Evaluation
  * leaves them alone, and a `Manipulate` body keeps its free parameters because a free
@@ -226,7 +226,7 @@ export function declareGraphics(ce: ComputeEngine): void {
 
   // `Notebook([Cell(...), ...])` -- Wolfram's transcript: a `DynamicModule` configured
   // with a `List` of `Cell`s as its body, evaluated in document order in one shared scope
-  // (`@enumeratio/frontend/transcript`). Held like `Cell`, for the same reason: the cells
+  // (`@notatio/frontend/transcript`). Held like `Cell`, for the same reason: the cells
   // are evaluated by whatever renders the notebook, one at a time, not by boxing the whole
   // tree at once. Variadic (`any*`), matching `DynamicModule` above: `Notebook` takes the
   // same trailing options (`TrackedSymbols`, `Evaluator`, …) `DynamicModule` does -- a

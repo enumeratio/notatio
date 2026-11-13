@@ -1,6 +1,6 @@
 import { expect, test } from "vite-plus/test";
 import { iterateQuadratic, julia, mandelbrot } from "../src/fractal.ts";
-import { emitComplexGLSL, type Json } from "@enumeratio/ce-patches";
+import { emitComplexGLSL, type Json } from "@notatio/ce-patches";
 
 const mag = (c: { re: number; im: number }) => Math.hypot(c.re, c.im);
 

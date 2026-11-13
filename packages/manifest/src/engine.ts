@@ -228,7 +228,7 @@ export function declarePlan<E extends object>(
 export function dependedLibraries(
   pkg: { readonly dependencies?: Record<string, string>; readonly devDependencies?: Record<string, string> },
   layers: readonly Layer[] = ["base", "extension"],
-  scope = "@enumeratio/",
+  scope = "@notatio/",
 ): string[] {
   return Object.keys({ ...pkg.devDependencies, ...pkg.dependencies })
     .filter((dep) => dep.startsWith(scope))
@@ -267,7 +267,7 @@ async function declaring(pkg: string, field: string | readonly string[], load: I
 export async function loadLibraries<E extends object>(
   names: Iterable<string>,
   load: Importer,
-  scope = "@enumeratio/",
+  scope = "@notatio/",
   { declares: withDeclares = true }: { readonly declares?: boolean } = {},
 ): Promise<StagedLibrary<E>[]> {
   const libraries: StagedLibrary<E>[] = [];

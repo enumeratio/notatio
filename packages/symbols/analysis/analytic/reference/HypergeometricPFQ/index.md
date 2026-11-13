@@ -6,7 +6,7 @@ summary: The generalized hypergeometric function ${}_pF_q(a; b; z)$, built on th
 signatures:
   - call: HypergeometricPFQ(a, b, z)
     description: ${}_pF_q(a; b; z)$, for parameter lists `a` (length $p$) and `b` (length $q$).
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list, list, number) -> number
 primitive: kernel
 bindings:

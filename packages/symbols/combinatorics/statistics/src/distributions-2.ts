@@ -6,7 +6,7 @@ import {
   integerAt,
   operandsOf,
   wrapOperator,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { finish, gammaSample, list2, normal01, numAt, uniform01 } from "./distributions.ts";
 import { declareMedian } from "./median.ts";
 
@@ -15,7 +15,7 @@ import { declareMedian } from "./median.ts";
 // distribution — old (native, or `distributions.ts`'s own) or new. None of the thirty heads
 // below is compute-engine native (probed via `ce.lookupDefinition`, see `.scratch/probe1.mjs`
 // during development), so every distribution constructor is a fresh `ce.declare`, and every
-// extension to PDF/CDF/Mean/Variance/RandomVariate goes through `@enumeratio/engine`'s
+// extension to PDF/CDF/Mean/Variance/RandomVariate goes through `@notatio/engine`'s
 // `wrapOperator` — the same "attach in place, fall back to what was there" idiom
 // `distributions.ts` hand-rolls for itself, just declared through the shared helper instead
 // of duplicated. `wrapOperator` composes: `distributions.ts` runs first (`declareDistributions`

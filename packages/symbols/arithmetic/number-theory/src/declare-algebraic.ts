@@ -1,6 +1,6 @@
-import { algebraicNumbers, applyPatch, deadlineTick, numberField, readAlgebraic } from "@enumeratio/ce-patches";
-import { type Engine, type Expr, operandsOf, optionsOf, wrapOperator } from "@enumeratio/engine";
-import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
+import { algebraicNumbers, applyPatch, deadlineTick, numberField, readAlgebraic } from "@notatio/ce-patches";
+import { type Engine, type Expr, operandsOf, optionsOf, wrapOperator } from "@notatio/engine";
+import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 
 // Orders of number fields past degree 2: AlgebraicIntegers(θ), the ring of integers of ℚ(θ), and
 // AlgebraicOrder(θ), ℤ[θ]. In degrees 1 and 2 they are the rings already named: Integers,

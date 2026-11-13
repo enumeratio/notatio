@@ -1,8 +1,8 @@
-// @enumeratio/numerals' heads in traditional notation: the p-adic valuation and norm read
+// @notatio/numerals' heads in traditional notation: the p-adic valuation and norm read
 // off a literal `AdicNumeral(p, x, …)`, naming the prime once as a subscript.
 
-import type { Json } from "@enumeratio/engine";
-import { fence, type Notation, scalars, subscript, type PackageNotation } from "@enumeratio/boxes";
+import type { Json } from "@notatio/engine";
+import { fence, type Notation, scalars, subscript, type PackageNotation } from "@notatio/boxes";
 
 /** A literal `AdicNumeral(p, x, …)` as its prime and value: `v_p(x)` names the prime once. */
 const adic = (x: Json | undefined): { p: number; value: Json } | undefined =>

@@ -6,12 +6,12 @@
 import type { Expression } from "@cortex-js/compute-engine";
 import { compile, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine/compile";
 import { parseEpsil, serializeEpsil } from "@cortex-js/compute-engine/epsil";
-import { MATHJSON_MIME } from "@enumeratio/boxes/render";
-import { fromWolfram, toWolfram } from "@enumeratio/wolfram";
+import { MATHJSON_MIME } from "@notatio/boxes/render";
+import { fromWolfram, toWolfram } from "@notatio/wolfram";
 import { toFullForm } from "./fullform.ts";
 import { toInputForm } from "./inputform.ts";
-import { makeBoxes } from "@enumeratio/boxes";
-import { toText } from "@enumeratio/boxes/render";
+import { makeBoxes } from "@notatio/boxes";
+import { toText } from "@notatio/boxes/render";
 import { fromAsciiMath, toAsciiMath } from "./asciimath.ts";
 import { fromMathML, type MathMLOptions, toMathML } from "./mathml.ts";
 import { parseExpression, ruleAsPair, rulesInCalls } from "./expression.ts";

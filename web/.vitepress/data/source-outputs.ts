@@ -29,7 +29,7 @@ export const sourceLanguages: readonly SourceLanguageMeta[] = [
     form: "wolfram",
     system: "Wolfram",
     blurb:
-      "Wolfram Language full form (functional Head[…]), via @enumeratio/wolfram. Differing names are remapped; unmapped heads pass through as Head[args].",
+      "Wolfram Language full form (functional Head[…]), via @notatio/wolfram. Differing names are remapped; unmapped heads pass through as Head[args].",
     sample: "Binomial(n, k) + Sin(x)",
   },
   {

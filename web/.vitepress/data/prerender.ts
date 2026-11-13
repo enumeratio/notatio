@@ -8,15 +8,15 @@ import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { ComputeEngine, LATEX_DICTIONARY } from "@cortex-js/compute-engine";
-import { combineNotation, type PackageNotation, registerNotation } from "@enumeratio/boxes";
-import { setEngineDefaults } from "@enumeratio/engine";
-import { registerTeXMacros } from "@enumeratio/formats/tex";
-import { typeset as typesetTeX } from "@enumeratio/formats/typeset";
-import { displayLatexSyntax } from "@enumeratio/frontend/display";
-import { engineProbes } from "@enumeratio/frontend/explorer-engine";
-import { outMarkup, type Prerendered, prerender } from "@enumeratio/frontend/prerender";
-import { createResolver, NOTATIONS } from "@enumeratio/manifest";
-import type { ReferenceEntry } from "@enumeratio/reference";
+import { combineNotation, type PackageNotation, registerNotation } from "@notatio/boxes";
+import { setEngineDefaults } from "@notatio/engine";
+import { registerTeXMacros } from "@notatio/formats/tex";
+import { typeset as typesetTeX } from "@notatio/formats/typeset";
+import { displayLatexSyntax } from "@notatio/frontend/display";
+import { engineProbes } from "@notatio/frontend/explorer-engine";
+import { outMarkup, type Prerendered, prerender } from "@notatio/frontend/prerender";
+import { createResolver, NOTATIONS } from "@notatio/manifest";
+import type { ReferenceEntry } from "@notatio/reference";
 import { CATALOGUE } from "../theme/worker-catalogue.ts";
 
 export type { Prerendered };
@@ -44,7 +44,7 @@ export function fillPrerendered(html: string, page: string): string {
   );
 }
 
-/** TeX as the page's `<notatio-out>` typesets it (`@enumeratio/components`' `loadMarkup`). */
+/** TeX as the page's `<notatio-out>` typesets it (`@notatio/components`' `loadMarkup`). */
 export const typeset = (latex: string): string => typesetTeX(latex, { expression: true });
 
 /** An engine as the site's worker kernel makes one: its dictionary and every package's notation. */

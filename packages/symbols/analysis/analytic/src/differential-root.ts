@@ -1,6 +1,6 @@
 import { type Expression, type ComputeEngine, isNumber, isSymbol } from "@cortex-js/compute-engine";
-import { declareCompile, operandsOf } from "@enumeratio/engine";
-import type { EvalOptions, NativeEval } from "@enumeratio/ce-patches";
+import { declareCompile, operandsOf } from "@notatio/engine";
+import type { EvalOptions, NativeEval } from "@notatio/ce-patches";
 
 // DifferentialRootReduce(f(x), x) / DifferentialRoot(...)[x]: Wolfram's holonomic (D-finite)
 // representation of a function — DifferentialRoot[Function[{y, x}, {ODE == 0, y[x0] == …,

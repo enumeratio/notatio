@@ -2,7 +2,7 @@
 // interpreter is the oracle: the same family without the opt-in. The wide sweep is in
 // compiled-families.test.ts (DEEP_TESTS).
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { COMPILED_FAMILIES } from "../collections/src/families/compiled-families.generated.js";
 import { allFamilies } from "../collections/src/families/index.ts";

@@ -1,14 +1,14 @@
 // `About(name)`: compute-engine's dictionary, widened with what the manifest knows (`describe`,
-// @enumeratio/manifest), so a head the engine hasn't declared yet, or a library's `ns.Name`,
+// @notatio/manifest), so a head the engine hasn't declared yet, or a library's `ns.Name`,
 // is described as well as a declared one.
 //
 // A name is given as a symbol (`About(Zeta)`) or a field chain (`About(ada.Sq)`). A string is a
 // value, as compute-engine has it: `About("Sin")` describes the string.
 
 import { type Expression, type ComputeEngine, isFunction, isString, isSymbol } from "@cortex-js/compute-engine";
-import { dictionaryOf, entriesOf } from "@enumeratio/ce-patches";
-import { describe, describeNow } from "@enumeratio/manifest";
-import { declareCompile } from "@enumeratio/engine";
+import { dictionaryOf, entriesOf } from "@notatio/ce-patches";
+import { describe, describeNow } from "@notatio/manifest";
+import { declareCompile } from "@notatio/engine";
 
 /** `describe`'s keys `About` doesn't carry: the example count (compute-engine's `examples` are
  *  the definition's own, a list), the kind, which compute-engine settles for a declared name, and

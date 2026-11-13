@@ -4,7 +4,7 @@
 // The Epsil definition is the meaning; the bigint kernel beside it is the fast path
 // `tests/mahonian.test.ts` holds to it. Both read the same rows: M(m, c) = Σ_{d<m} M(m − 1, c − d).
 
-import { bigIntegerAt, type Engine, type Expr } from "@enumeratio/engine";
+import { bigIntegerAt, type Engine, type Expr } from "@notatio/engine";
 
 import {
   add,

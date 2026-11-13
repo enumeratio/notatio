@@ -10,7 +10,7 @@
 //   node packages/reference/scripts/collect-named-characters.ts
 
 import { writeFileSync } from "node:fs";
-import { runWolframKernel } from "@enumeratio/utils/bounded";
+import { runWolframKernel } from "@notatio/utils/bounded";
 
 const code = [
   'Do[With[{f = StringTake[ToString[FromCharacterCode[c], InputForm, CharacterEncoding -> "ASCII"], {2, -2}]},',

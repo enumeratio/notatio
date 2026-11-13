@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt, bigRationalAt, operandsOf, symbolNameOf, wrapOperator } from "@enumeratio/engine";
-import { declined, type EvalOptions } from "@enumeratio/ce-patches";
+import { bigIntegerAt, bigRationalAt, operandsOf, symbolNameOf, wrapOperator } from "@notatio/engine";
+import { declined, type EvalOptions } from "@notatio/ce-patches";
 import { gammaExactValue, type Rational } from "./widened.ts";
 
 /**

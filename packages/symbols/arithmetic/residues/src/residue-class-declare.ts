@@ -8,12 +8,12 @@ import {
   wrapOperator,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 import { gcd, mod } from "./arith.ts";
 import { INTEGER_MOD, INTEGER_MOD_RING, QUOTIENT_RING, RESIDUE_CLASS } from "./names.ts";
 import * as Z from "./residue-class.ts";
 import type { Residue } from "./residue-class.ts";
-import { SUMMARIES } from "@enumeratio/manifest/package/residues";
+import { SUMMARIES } from "@notatio/manifest/package/residues";
 
 // Elements of ℤ/m are compute-engine's `ResidueClass(a, m)`, after Sage's Mod(a, m): canonical
 // k in 0…m-1, equality, sums, products, inverses and powers inside one ring, ℤ/m itself as

@@ -12,9 +12,9 @@
 // comment, and enumeratio#411). Every host (cli, census, reference's engines.ts) still calls
 // this one function, at its own unchanged position, with its own `constructorFor`.
 
-import type { Engine } from "@enumeratio/engine";
-import { symbolInfo } from "@enumeratio/manifest";
-import { declareMaps as declareMapsGeneric, evaluateDefinition, type Law } from "@enumeratio/structures";
+import type { Engine } from "@notatio/engine";
+import { symbolInfo } from "@notatio/manifest";
+import { declareMaps as declareMapsGeneric, evaluateDefinition, type Law } from "@notatio/structures";
 import { CARRIERS } from "./carriers.ts";
 import { COMPILED_MAPS } from "./compiled-maps.generated.js";
 import { FLAT } from "./flat.ts";
@@ -96,7 +96,7 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...SIGNED_PERMUTATIONS_ALGORITHM_MAPS,
 ].map(withLaws);
 
-/** Declare every combinatorics map, typed by carrier, via @enumeratio/structures' generic
+/** Declare every combinatorics map, typed by carrier, via @notatio/structures' generic
  *  `declareMaps`: combinatorics supplies the fast (compiled) definition and the FindStat ids,
  *  which are the two things a generic map declaration knows nothing about. */
 export function declareMaps(

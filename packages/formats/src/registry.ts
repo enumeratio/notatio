@@ -121,4 +121,4 @@ export function importFrom(data: string | Uint8Array, format: string | Format, o
 }
 
 // File I/O (writeFormat / readFormat) and the PNG codec live in the Node-only
-// `@enumeratio/formats/node` entry so this core stays browser-safe.
+// `@notatio/formats/node` entry so this core stays browser-safe.

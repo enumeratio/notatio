@@ -1,4 +1,4 @@
-import { BigDecimal } from "@enumeratio/engine";
+import { BigDecimal } from "@notatio/engine";
 import {
   atDigits,
   bernoulliRational,
@@ -11,7 +11,7 @@ import {
   bigScale,
   hurwitzZetaBig,
   type BigCx,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { reaches, riemannSiegelZAsymptotic } from "./riemann-siegel-asymptotic.ts";
 
 // The BigDecimal twin of `riemannSiegelZ` (riemann-siegel.ts): Z(z) = e^{iϑ(z)} ζ(½ + iz) with

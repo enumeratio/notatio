@@ -76,10 +76,7 @@ export class NotatioInputField extends LitElement {
       return;
     }
     // Only parsed here: what evaluates the value declares what it names.
-    const [engine, { parseExpression }] = await Promise.all([
-      loadBareEngine(),
-      import("@enumeratio/formats/expression"),
-    ]);
+    const [engine, { parseExpression }] = await Promise.all([loadBareEngine(), import("@notatio/formats/expression")]);
     const { json, errors } = parseExpression(trimmed, {
       ce: engine,
       parseLatex: (tex) => engine.parse(tex).json,

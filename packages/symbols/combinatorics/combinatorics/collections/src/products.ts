@@ -1,4 +1,4 @@
-import { type Engine, type Expr, integerAt, operandsOf, symbolNameOf, wrapOperator } from "@enumeratio/engine";
+import { type Engine, type Expr, integerAt, operandsOf, symbolNameOf, wrapOperator } from "@notatio/engine";
 
 // General symbolic rules for `Product`, layered on top of compute-engine's native
 // evaluate (which already handles a literal-bound product by unrolling it term by

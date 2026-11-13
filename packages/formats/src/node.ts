@@ -3,7 +3,7 @@
 // the built-in text/SVG formats too, so a Node consumer can import just this.
 
 import { readFileSync, writeFileSync } from "node:fs";
-import { rasterize } from "@enumeratio/raster";
+import { rasterize } from "@notatio/raster";
 import { setRasterizer } from "./graphics.ts";
 import "./index.ts"; // register the browser-safe formats (text, SVG)
 import {

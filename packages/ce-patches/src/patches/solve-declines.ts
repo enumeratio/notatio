@@ -1,6 +1,6 @@
 import type { Patch } from "../patch.ts";
 import { evaluateSolveDeclines } from "../compute-engine/library/solve.ts";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 
 // See solve.ts: `Solve` answers lists that are wrong by omission -- `List()` for an equation with
 // complex solutions (or declining where it is provably empty), principal trig solutions alone.

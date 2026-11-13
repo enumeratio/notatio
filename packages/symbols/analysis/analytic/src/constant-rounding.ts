@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { symbolNameOf, wrapOperator } from "@enumeratio/engine";
+import { symbolNameOf, wrapOperator } from "@notatio/engine";
 
 // Floor, Ceil and Round are idempotent, Max and Min drop an exactly-repeated argument, and
 // IsOdd is False at a non-integer exact constant. (compute-engine folds Floor/Ceil/Round and

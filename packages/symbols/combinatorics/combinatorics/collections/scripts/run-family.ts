@@ -3,7 +3,7 @@
 // discard up to `retries` times), and the properties run there. A failure shrinks along the
 // address before it's reported. Nothing here knows any family by name.
 
-import { sizeAt, streamFor } from "@enumeratio/plausible";
+import { sizeAt, streamFor } from "@notatio/plausible";
 import type { FamilyKernel } from "../src/families/types.ts";
 import { check, checkFamily, type Failure } from "./properties.ts";
 import { type Address, sampleable, type Sampleable } from "./sampleable.ts";

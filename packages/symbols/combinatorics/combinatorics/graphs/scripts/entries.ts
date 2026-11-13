@@ -3,7 +3,7 @@
 // into `../../reference/`; `tests/statistics-generated.test.ts` checks they're current.
 
 import { fileURLToPath } from "node:url";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
 import { areaStatisticsEntries, type Sample } from "../../src/statistics/generate-entries.ts";
 import { declareGraphsArea } from "../src/declare.ts";
 import { GRAPHS_FRONTIER } from "../src/statistics.frontier.ts";

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { Expression, ComputeEngine } from "@enumeratio/components";
+import type { Expression, ComputeEngine } from "@notatio/components";
 import { onMounted, ref, shallowRef, watch } from "vue";
 
 type Mode = "latex" | "mathjson";
@@ -55,7 +55,7 @@ function setMode(next: Mode): void {
 onMounted(async () => {
   // Imported here, not at the top: the elements package needs `HTMLElement`, which a static
   // import would pull into the server render and empty the page there.
-  const { loadEngine } = await import("@enumeratio/components");
+  const { loadEngine } = await import("@notatio/components");
   ce.value = await loadEngine();
   run();
 });

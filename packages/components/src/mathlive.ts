@@ -5,11 +5,11 @@
 // for an editor.
 //
 // This module owns the whole MathLive integration (fonts, CSS) so hosts depend on
-// @enumeratio/components alone, not on mathlive.
+// @notatio/components alone, not on mathlive.
 
-import { registerTeXMacros, texMacros } from "@enumeratio/formats/tex";
+import { registerTeXMacros, texMacros } from "@notatio/formats/tex";
 
-// The engine itself lives in the base (`@enumeratio/frontend`); re-exported here so
+// The engine itself lives in the base (`@notatio/frontend`); re-exported here so
 // the elements' imports read as before.
 export {
   configureEngine,
@@ -18,7 +18,7 @@ export {
   loadBareEngine,
   loadEngine,
   parseFor,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 
 let assetsPromise: Promise<void> | undefined;
 let markupPromise: Promise<(latex: string) => string> | undefined;
@@ -63,7 +63,7 @@ export async function loadEditor(): Promise<Readonly<Record<string, string>>> {
  */
 export function loadMarkup(): Promise<(latex: string) => string> {
   markupPromise ??= Promise.all([
-    import("@enumeratio/formats/typeset"),
+    import("@notatio/formats/typeset"),
     import("katex/dist/katex.min.css"),
     macrosPromise,
   ]).then(

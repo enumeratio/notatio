@@ -2,7 +2,7 @@
 // the recording tableau leaves the insertion tableaux of the word's prefixes, and what it drops
 // is the letters read backwards. Plus Combinatorica's own values and the domain it declines.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../src/index.ts";
 import { permutations } from "./maps-helpers.ts";

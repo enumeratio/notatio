@@ -3,8 +3,8 @@
 // counts. The fast path (plain numbers) is held to the same.
 
 import { readFileSync } from "node:fs";
-import { collectMessages } from "@enumeratio/engine";
-import { bareEngine } from "@enumeratio/engine/testing";
+import { collectMessages } from "@notatio/engine";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, kernelOn } from "../../collections/src/families/epsil.ts";
 import { declareCombinatorics } from "../../src/index.ts";

@@ -30,8 +30,8 @@ import {
   type Verdict,
   Undecided,
   valuesOnly,
-} from "@enumeratio/oracle";
-import { fromWolfram } from "@enumeratio/wolfram";
+} from "@notatio/oracle";
+import { fromWolfram } from "@notatio/wolfram";
 import { measuredTolerance } from "../src/known.ts";
 
 /** Boxing `x^a` types `a` as a number for good: each verdict boxes in a scope of its own. */

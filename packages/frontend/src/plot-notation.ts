@@ -5,7 +5,7 @@
 // asks for the marks (`plotBoxOfSamples`). Not in `/core`: reading an expression's options needs the
 // engine's parser.
 
-import type { Notation, NotationRule } from "@enumeratio/boxes";
+import type { Notation, NotationRule } from "@notatio/boxes";
 import { diagramBoxOf } from "./diagram-lowering.ts";
 import { plainJson } from "./graphics-rules.ts";
 import { plotBox } from "./plot-box.ts";

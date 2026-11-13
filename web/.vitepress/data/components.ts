@@ -1,15 +1,15 @@
-// The component reference: the attribute tables `@enumeratio/frontend/reflect` reads out
+// The component reference: the attribute tables `@notatio/frontend/reflect` reads out
 // of the element sources, plus which doc page demos each component.
 
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";
-import { type ComponentDoc as Reflected, collectComponents as reflect, headOfTag } from "@enumeratio/frontend/reflect";
-import { STORIES_DATA } from "@enumeratio/components/stories-data";
-import { DRAWING_SYMBOLS } from "@enumeratio/frontend/symbols";
+import { type ComponentDoc as Reflected, collectComponents as reflect, headOfTag } from "@notatio/frontend/reflect";
+import { STORIES_DATA } from "@notatio/components/stories-data";
+import { DRAWING_SYMBOLS } from "@notatio/frontend/symbols";
 import { docRoute, repoRoot, workspacePackages } from "./repo-docs.ts";
 
-export type { AttributeDoc } from "@enumeratio/frontend/reflect";
+export type { AttributeDoc } from "@notatio/frontend/reflect";
 
 export interface ComponentDoc extends Reflected {
   /** The head (`BarChart3D`) -- the page's own name, and its route. Read
@@ -25,10 +25,7 @@ export interface ComponentDoc extends Reflected {
 }
 
 // The element sources the package ships: the reference is read out of them.
-export const srcDir = join(
-  dirname(createRequire(import.meta.url).resolve("@enumeratio/components/package.json")),
-  "src",
-);
+export const srcDir = join(dirname(createRequire(import.meta.url).resolve("@notatio/components/package.json")), "src");
 // The pages that demo components live in the package docs of the library each one belongs
 // to: the interface in components, a polytope in polytope, combinatorial figures in
 // combinatorics. Other pages (guides) mention elements without being their demo.

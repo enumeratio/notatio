@@ -6,7 +6,7 @@ summary: The prime zeta function $P(s) = \sum_p p^{-s}$, the sum over primes. Co
 signatures:
   - call: PrimeZetaP(s)
     description: $P(s)$, for $\operatorname{Re}(s) > 0$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number) -> number
 primitive: kernel
 bindings:

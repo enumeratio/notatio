@@ -6,7 +6,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { packageDirs } from "@enumeratio/entry/node";
+import { packageDirs } from "@notatio/entry/node";
 import { expect, test } from "vite-plus/test";
 import { NOTATIONS } from "../src/generated/notations.ts";
 import { notationSpecifier, type PackageField } from "../src/package-field.ts";
@@ -55,7 +55,7 @@ const STATEMENT =
 /** Why an entry may not import `specifier` this way, or undefined when it may. */
 function forbidden(specifier: string, typeOnly: boolean): string | undefined {
   // A type import is erased: it costs the entry nothing at run time.
-  if (typeOnly || specifier === "@enumeratio/boxes") return undefined;
+  if (typeOnly || specifier === "@notatio/boxes") return undefined;
   if (specifier.startsWith("@cortex-js/compute-engine")) return "compute-engine beyond types";
   return specifier;
 }
@@ -106,7 +106,7 @@ test("a package whose src/notation.ts exports `notation` names it in package.jso
 
 test("the manifest lists every notation entry", () => {
   const expected = Object.fromEntries(
-    WITH_NOTATION.map((ws) => [ws.name.replace(/^@enumeratio\//, ""), notationSpecifier(ws.name, ws.field)]),
+    WITH_NOTATION.map((ws) => [ws.name.replace(/^@notatio\//, ""), notationSpecifier(ws.name, ws.field)]),
   );
   expect({ ...NOTATIONS }).toEqual(expected);
 });

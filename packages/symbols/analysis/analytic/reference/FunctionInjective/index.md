@@ -6,7 +6,7 @@ summary: True if distinct x on f's domain always give distinct f(x), False other
 signatures:
   - call: FunctionInjective(f, x)
     description: whether f, as a function of the real variable x over its own domain, is one-to-one.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

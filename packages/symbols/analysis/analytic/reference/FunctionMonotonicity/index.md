@@ -6,7 +6,7 @@ summary: 1 if f is increasing over its whole domain, -1 if decreasing, 0 if cons
 signatures:
   - call: FunctionMonotonicity(f, x)
     description: whether f is monotonic in the real variable x over the whole real line.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

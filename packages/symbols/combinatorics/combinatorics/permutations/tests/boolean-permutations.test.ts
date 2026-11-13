@@ -1,7 +1,7 @@
 // BooleanPermutations defined in Epsil as completion counts over the symmetric group's lex order,
 // against an independent reading: the permutations avoiding 321 and 3412, filtered from all of S_n.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { COMPILED_FAMILIES } from "../../collections/src/families/compiled-families.generated.js";
 import { epsilKernelOn, kernelOn } from "../../collections/src/families/epsil.ts";

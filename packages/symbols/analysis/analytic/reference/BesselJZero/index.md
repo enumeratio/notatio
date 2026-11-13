@@ -2,11 +2,11 @@
 name: BesselJZero
 domain: Special functions
 signature: BesselJZero(nu, k)
-summary: The $k$-th positive zero of the Bessel function $J_\nu$, for real $\nu > -1$ and positive integer $k$. Provided by `@enumeratio/analytic`.
+summary: The $k$-th positive zero of the Bessel function $J_\nu$, for real $\nu > -1$ and positive integer $k$. Provided by `@notatio/analytic`.
 signatures:
   - call: BesselJZero(nu, k)
     description: the $k$-th positive zero of $J_\nu$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, integer) -> number
 primitive: numeric
 bindings:

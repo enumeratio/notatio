@@ -1,11 +1,11 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { defineOverload, type EvaluateOptions, operandsOf } from "@enumeratio/engine";
+import { defineOverload, type EvaluateOptions, operandsOf } from "@notatio/engine";
 
 // A shared, low-overhead registration for the arithmetic heads Interval, CenteredInterval
 // and Around all extend (Add, Negate, Multiply, Divide, Power, Abs, Sin, plus Sqrt/Erf for
 // Around alone) — see interval.ts, centered-interval.ts and around.ts for the actual math.
 //
-// Each head gets rows in its table (defineOverload, @enumeratio/engine) rather than one
+// Each head gets rows in its table (defineOverload, @notatio/engine) rather than one
 // `wrapOperator` per tagged type: a wrapper re-evaluates every lazy operand just to test it,
 // three of them on Add stacked three evaluate passes on every sum, a measured ~4x slowdown on
 // Add/Multiply-heavy code. The table reads the operands' heads as written first (one level

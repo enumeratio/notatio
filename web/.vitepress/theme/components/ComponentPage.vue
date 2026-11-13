@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { DRAWING_SYMBOLS } from "@enumeratio/frontend/symbols";
+import { DRAWING_SYMBOLS } from "@notatio/frontend/symbols";
 import { data as components } from "../../data/components.data.ts";
 import { storiesFor } from "../../data/stories.ts";
 import { inline, paragraphs as split } from "./jsdoc.ts";
@@ -92,9 +92,9 @@ const propertyOnly = computed(() => component.value?.attributes.filter((a) => a.
 
     <h2>As a web component</h2>
     <p>
-      Plain custom elements, no framework required: import <code>@enumeratio/frontend</code> for the side effect and
-      write <code>&lt;{{ component.tag }}&gt;</code> in any HTML. Attributes are kebab-case and always strings; the
-      props table above names each one's attribute where it differs from its prop.
+      Plain custom elements, no framework required: import <code>@notatio/frontend</code> for the side effect and write
+      <code>&lt;{{ component.tag }}&gt;</code> in any HTML. Attributes are kebab-case and always strings; the props
+      table above names each one's attribute where it differs from its prop.
     </p>
     <p v-if="propertyOnly.length > 0">
       Settable only as a JS property, not an attribute --

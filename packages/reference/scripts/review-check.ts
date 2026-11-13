@@ -35,7 +35,7 @@ const { applyItemPatch, parseBacklog } = (await import(
   new URL("../../../web/.vitepress/review/backlog.ts", import.meta.url).href
 )) as Backlog;
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { parseExpression } from "@enumeratio/formats";
+import { parseExpression } from "@notatio/formats";
 import { declaredEngine } from "./engines.ts";
 
 export interface Expect {

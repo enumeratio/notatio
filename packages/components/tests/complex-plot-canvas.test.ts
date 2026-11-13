@@ -14,7 +14,7 @@ const mocks = vi.hoisted(() => ({
   render: undefined as unknown as ReturnType<typeof vi.fn<(...a: unknown[]) => unknown>>,
 }));
 
-vi.mock("@enumeratio/frontend/core", async (original) => ({
+vi.mock("@notatio/frontend/core", async (original) => ({
   ...(await original<object>()),
   getGpu: () => new Promise((resolve) => setTimeout(() => resolve(mocks.gpu ? {} : null), 20)),
   ComplexPlotRenderer: {
@@ -22,8 +22,8 @@ vi.mock("@enumeratio/frontend/core", async (original) => ({
   },
   renderPortrait: async () => ({ step: 0, complete: true }),
 }));
-vi.mock("@enumeratio/frontend", () => ({ complexFunction: (...a: unknown[]) => mocks.complexFunction(...a) }));
-vi.mock("@enumeratio/ce-patches/glsl-complex", async (original) => ({
+vi.mock("@notatio/frontend", () => ({ complexFunction: (...a: unknown[]) => mocks.complexFunction(...a) }));
+vi.mock("@notatio/ce-patches/glsl-complex", async (original) => ({
   ...(await original<object>()),
   emitComplexGLSL: () =>
     (mocks.lowerSequence ? mocks.lowerSequence.shift() : mocks.lowers) ? { code: "", shape: "s", literals: [] } : null,

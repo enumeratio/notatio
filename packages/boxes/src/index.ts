@@ -1,5 +1,5 @@
 // The box tree, `MakeBoxes` and the notation registry: base, what every symbol package's
-// notation extends. The serialisers are presentation, at `@enumeratio/boxes/render`.
+// notation extends. The serialisers are presentation, at `@notatio/boxes/render`.
 
 export * from "./box.ts";
 export * from "./layout.ts";

@@ -9,8 +9,8 @@
 // that declares the head, or its rows name a head that may not be there when it runs.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { isExtension, overloadTable } from "@enumeratio/engine";
-import { HIERARCHY } from "@enumeratio/manifest";
+import { isExtension, overloadTable } from "@notatio/engine";
+import { HIERARCHY } from "@notatio/manifest";
 import { contributions, ENGINE } from "./contributions.ts";
 import { fullEngine, PACKAGE_DECLARATIONS } from "./engine.ts";
 

@@ -5,7 +5,7 @@
 //
 // A page opts out with `autolinkSymbols: false`, as for notatio-symbols.ts.
 
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { documented } from "./data/reference-node.ts";
 
 const CALL = /\b([A-Z][A-Za-z0-9]*)\(/g;

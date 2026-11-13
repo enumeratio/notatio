@@ -25,11 +25,11 @@
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { parseArgs } from "node:util";
-import { bySection, dedupeId, type ReferenceExample } from "@enumeratio/entry";
-import { writeHead } from "@enumeratio/entry/node";
-import { runCases } from "@enumeratio/evaluation/node";
-import type { FunctionRecord, LanguageRecord, RelationRecord } from "@enumeratio/oracle";
-import { HEADS } from "@enumeratio/wolfram";
+import { bySection, dedupeId, type ReferenceExample } from "@notatio/entry";
+import { writeHead } from "@notatio/entry/node";
+import { runCases } from "@notatio/evaluation/node";
+import type { FunctionRecord, LanguageRecord, RelationRecord } from "@notatio/oracle";
+import { HEADS } from "@notatio/wolfram";
 import { toInputForm } from "../../formats/src/inputform.ts";
 import { comparable, DEFAULT_TOLERANCE, disagreement, measuredTolerance } from "../src/known.ts";
 import { loadReferenceData, PACKAGES } from "../src/node.ts";

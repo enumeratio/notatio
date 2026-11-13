@@ -1,5 +1,5 @@
-import { type Engine, type Expr, extendHead, isSymbol, operandsOf, symbolNameOf } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { type Engine, type Expr, extendHead, isSymbol, operandsOf, symbolNameOf } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // Solve(g(f(x)) == c, x) for a head f that is a bijection of the reals with a known inverse: the
 // equation is solved for y = f(x), and each real root y gives x = f⁻¹(y), as Wolfram substitutes.

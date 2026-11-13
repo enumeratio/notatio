@@ -1,5 +1,5 @@
-import { createEngine } from "@enumeratio/engine/testing";
-import { declareHypercomplex } from "@enumeratio/hypercomplex";
+import { createEngine } from "@notatio/engine/testing";
+import { declareHypercomplex } from "@notatio/hypercomplex";
 import { expect, test } from "vite-plus/test";
 import { declareGeometric } from "../src/index.ts";
 

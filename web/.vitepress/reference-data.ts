@@ -3,8 +3,8 @@
 // module and reloads the page.
 
 import { resolve } from "node:path";
-import type { ReferenceEntry } from "@enumeratio/reference";
-import { referenceData } from "@enumeratio/reference/node";
+import type { ReferenceEntry } from "@notatio/reference";
+import { referenceData } from "@notatio/reference/node";
 import { assemble } from "./data/reference-assemble.ts";
 import { recordsRoot } from "./data/records-root.ts";
 import type { Plugin, ViteDevServer } from "vite";

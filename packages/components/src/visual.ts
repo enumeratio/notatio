@@ -1,5 +1,5 @@
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
-import { type Environment, layoutMarkup, type LayoutLeaves, markupOf, reduce, renderingOf } from "@enumeratio/frontend";
+import { type Environment, layoutMarkup, type LayoutLeaves, markupOf, reduce, renderingOf } from "@notatio/frontend";
 
 /** What typesets the math in a picture: a host's typesetter, and the value's boxes where it has them. */
 export type Leaves = LayoutLeaves;

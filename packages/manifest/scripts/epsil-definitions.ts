@@ -14,7 +14,7 @@
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { parseEpsil, resolveLibraryNames } from "@cortex-js/compute-engine/epsil";
-import type { EpsilDefinition, SymbolAttribute } from "@enumeratio/entry";
+import type { EpsilDefinition, SymbolAttribute } from "@notatio/entry";
 import { type Definition, pinOf, qualifiedNamesOf, shortForm } from "../src/registry.ts";
 
 let engine: ComputeEngine | undefined;

@@ -1,15 +1,15 @@
 // Shared by every worker script (Node and browser, one-shot and session): evaluates `json`
 // under the deadline the host asked for, using the same cooperative machinery
-// `TimeConstrained` does (./declare.ts) -- `ce.withTimeLimit` plus `@enumeratio/engine`'s
+// `TimeConstrained` does (./declare.ts) -- `ce.withTimeLimit` plus `@notatio/engine`'s
 // `withDeadline`/`checkpoint()`, so compute-engine's own loops AND our bigint kernels'
-// checkpoints (`@enumeratio/residues`'s Pollard-rho, baby-step giant-step, ...) both see
+// checkpoints (`@notatio/residues`'s Pollard-rho, baby-step giant-step, ...) both see
 // it. When a call's own code cooperates, this returns `Aborted` as an ordinary value: the
 // worker survives, and a session loses no state. Only a tight, uncooperative loop still
 // needs the host's hard kill -- see node.ts/browser.ts's own grace margin around this.
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { CancellationError } from "@cortex-js/compute-engine";
-import { DeadlineExceededError, withDeadline } from "@enumeratio/engine";
+import { DeadlineExceededError, withDeadline } from "@notatio/engine";
 
 /** MathJSON for `declareEvaluation`'s `Aborted` symbol -- see ./declare.ts's own comment. */
 const ABORTED = "Aborted";

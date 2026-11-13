@@ -3,8 +3,8 @@
 // agree with them on the first terms, on membership around them, and past 2^53, where a term is a
 // bigint (as the TS kernels returned it) and only the interpreter answers.
 
-import { bareEngine } from "@enumeratio/engine/testing";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { bareEngine } from "@notatio/engine/testing";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn, isEpsilFamily, kernelOn, liftFamily } from "../src/families/epsil.ts";
 import { entries as closedForm } from "../src/families/numeric-closed-form.ts";

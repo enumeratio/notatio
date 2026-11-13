@@ -2,11 +2,11 @@
 name: Around
 domain: Interval arithmetic
 signature: Around(x, dx)
-summary: A number x with an uncertainty dx, propagated to first order through arithmetic and functions -- the same uncertainty-arithmetic layer as [[Interval]] and [[CenteredInterval]]. Provided by `@enumeratio/analytic`, though the head's natural home is `@enumeratio/statistics`.
+summary: A number x with an uncertainty dx, propagated to first order through arithmetic and functions -- the same uncertainty-arithmetic layer as [[Interval]] and [[CenteredInterval]]. Provided by `@notatio/analytic`, though the head's natural home is `@notatio/statistics`.
 signatures:
   - call: Around(x, dx)
     description: x with uncertainty dx, propagated as Around(f(x), |f′(x)|·dx) through a function f.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, real?) -> number
 seeAlso:
   - Interval

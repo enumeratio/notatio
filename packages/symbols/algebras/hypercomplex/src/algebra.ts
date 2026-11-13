@@ -1,5 +1,5 @@
-import { operandsOf, symbolNameOf, type Engine, type Expr } from "@enumeratio/engine";
-import { declareAlgebra } from "@enumeratio/structures";
+import { operandsOf, symbolNameOf, type Engine, type Expr } from "@notatio/engine";
+import { declareAlgebra } from "@notatio/structures";
 import { containsGenerator, generatorsOf, multiplyMultivectors, toExpression, toMultivector } from "./multivector.ts";
 import { FAMILIES, type Generator, generatorSymbol } from "./units.ts";
 

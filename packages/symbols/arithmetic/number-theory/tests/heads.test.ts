@@ -1,8 +1,8 @@
-import { createEngine } from "@enumeratio/engine/testing";
-import { bigIntegerAt, operandsOf, type Json } from "@enumeratio/engine";
+import { createEngine } from "@notatio/engine/testing";
+import { bigIntegerAt, operandsOf, type Json } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { declareNumberTheory } from "../src/declare.ts";
 
 const ce = createEngine(declareResidues, declareNumerals, declareNumberTheory);

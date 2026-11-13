@@ -1,7 +1,7 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { combineNotation } from "@enumeratio/boxes";
-import { notation as combinatorics } from "@enumeratio/combinatorics/notation";
-import { notation as residues } from "@enumeratio/residues/notation";
+import { combineNotation } from "@notatio/boxes";
+import { notation as combinatorics } from "@notatio/combinatorics/notation";
+import { notation as residues } from "@notatio/residues/notation";
 import { afterEach, beforeEach, expect, test, vi } from "vite-plus/test";
 
 // A package's LaTeX notation reaches a running engine: the shared engine takes entries after it

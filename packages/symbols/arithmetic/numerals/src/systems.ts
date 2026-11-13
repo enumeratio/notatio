@@ -11,7 +11,7 @@
 // the unranking maps for permutations and subsets wearing a different hat; one
 // (Zeckendorf) has a digit ALPHABET but a forbidden pattern instead of a place bound.
 
-import { crtSolve, gcd } from "@enumeratio/residues";
+import { crtSolve, gcd } from "@notatio/residues";
 
 /** A numeral system: the two directions, plus what its digits are allowed to be. */
 export interface NumeralSystem {

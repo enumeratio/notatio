@@ -6,7 +6,7 @@
 //
 //   vp node packages/reference/scripts/collect-curated.ts
 
-import { writeFormatted } from "@enumeratio/entry/node";
+import { writeFormatted } from "@notatio/entry/node";
 import { referenceData } from "../src/node.ts";
 
 const { entries } = referenceData();

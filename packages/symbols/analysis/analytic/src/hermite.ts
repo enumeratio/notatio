@@ -1,17 +1,7 @@
 // unstable: the Expression and ComputeEngine types, which the nucleus facade doesn't re-export
-import type { Expression, ComputeEngine } from "@enumeratio/engine/unstable";
-import type { Json } from "@enumeratio/ce-patches";
-import {
-  type BoxInput,
-  isFiniteNum,
-  isRealInt,
-  numberResult,
-  cx,
-  mul,
-  scale,
-  sub,
-  type Cx,
-} from "@enumeratio/ce-patches";
+import type { Expression, ComputeEngine } from "@notatio/engine/unstable";
+import type { Json } from "@notatio/ce-patches";
+import { type BoxInput, isFiniteNum, isRealInt, numberResult, cx, mul, scale, sub, type Cx } from "@notatio/ce-patches";
 import { coeffsExpr } from "./chebyshev.ts";
 
 // HermiteH(n, x): the physicists' Hermite polynomial, H_0 = 1, H_1 = 2x,

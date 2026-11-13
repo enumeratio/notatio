@@ -5,12 +5,12 @@
 // Node-only and handled by the bin before it gets here.
 
 import type { Expression } from "@cortex-js/compute-engine";
-import { allFormats } from "@enumeratio/formats";
-import { can, type Environment, ENVIRONMENTS, environmentNamed, PIPE } from "@enumeratio/frontend";
-import { evaluateReadouts, reduce } from "@enumeratio/frontend";
+import { allFormats } from "@notatio/formats";
+import { can, type Environment, ENVIRONMENTS, environmentNamed, PIPE } from "@notatio/frontend";
+import { evaluateReadouts, reduce } from "@notatio/frontend";
 import { completionScript, type Shell, SHELLS, SUBCOMMANDS } from "./completion.ts";
 import { formatsTable } from "./core.ts";
-import { notationOf } from "@enumeratio/boxes";
+import { notationOf } from "@notatio/boxes";
 import { figureText } from "./figure.ts";
 import { sampledField, sampledPlot } from "./textual.ts";
 import { isTable } from "./table.ts";

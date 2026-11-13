@@ -6,7 +6,7 @@ summary: Wolfram's chained-comparison form -- v1 rel1 v2, v2 rel2 v3, ... all at
 signatures:
   - call: Inequality(v1, rel1, v2, rel2, v3, ...)
     description: the conjunction of every consecutive link, where each relᵢ is one of Equal, NotEqual, Less, LessEqual, Greater, GreaterEqual.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression, expression, expression*) -> boolean
 seeAlso:
   - Less

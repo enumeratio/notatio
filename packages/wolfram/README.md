@@ -1,4 +1,4 @@
-# @enumeratio/wolfram
+# @notatio/wolfram
 
 MathJSON → Wolfram Language transpiler — a compute-engine compilation target, for
 cross-validating the reference against a Wolfram kernel. Pure in both directions (MathJSON

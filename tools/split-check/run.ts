@@ -3,8 +3,8 @@
 //
 //   node tools/split-check/run.ts <package> [--build] [--keep] [--scratch DIR] [--out DIR] [--only a,b]
 //
-// <package> is a name (`@enumeratio/hopf`) or a bare one (`hopf`). The steps, in order:
-//   pack      `pnpm pack` the @enumeratio packages it depends on (and theirs, by dependencies and peers)
+// <package> is a name (`@notatio/hopf`) or a bare one (`hopf`). The steps, in order:
+//   pack      `pnpm pack` the @notatio packages it depends on (and theirs, by dependencies and peers)
 //   install   a scratch app holding the package's files from git, its internal dependencies sent to those
 //             tarballs, and nothing else from this repo: no workspace links, no hoisting
 //   build     its own `build` script, run in the scratch app
@@ -93,7 +93,7 @@ function workspacePackages(): Map<string, Pkg> {
   );
 }
 const workspace = workspacePackages();
-const targetName = wantedName.startsWith("@") ? wantedName : `@enumeratio/${wantedName}`;
+const targetName = wantedName.startsWith("@") ? wantedName : `@notatio/${wantedName}`;
 const found = workspace.get(targetName);
 if (found === undefined) throw new Error(`no package ${targetName} under packages/`);
 const target: Pkg = found;
@@ -176,7 +176,7 @@ function pack(result: Result): void {
     if (code !== 0 || !existsSync(file)) result.findings.push(`${pkg.manifest.name}: pnpm pack exited ${code}`);
     else pkg.tarball = file;
   }
-  result.note = `${deps.length} packed: ${deps.map((p) => p.manifest.name.replace("@enumeratio/", "")).join(", ")}`;
+  result.note = `${deps.length} packed: ${deps.map((p) => p.manifest.name.replace("@notatio/", "")).join(", ")}`;
 }
 
 // ---- install ----
@@ -237,7 +237,7 @@ function install(result: Result): void {
   }
   // No internal package may have come from anywhere but its tarball.
   const lock = readFileSync(join(app, "pnpm-lock.yaml"), "utf8");
-  const stray = [...lock.matchAll(/^ {2}'?(@enumeratio\/[\w-]+)@(?!file:)[^\s':]+/gm)].map((m) => m[1]!);
+  const stray = [...lock.matchAll(/^ {2}'?(@notatio\/[\w-]+)@(?!file:)[^\s':]+/gm)].map((m) => m[1]!);
   for (const name of new Set(stray)) result.findings.push(`${name} resolved from somewhere but its tarball`);
 }
 
@@ -330,7 +330,7 @@ const plan: [Step, (r: Result) => void][] = [
 
 function main(): void {
   console.log(
-    `${targetName} from ${deps.length} tarballs: ${deps.map((p) => p.manifest.name.replace("@enumeratio/", "")).join(", ")}`,
+    `${targetName} from ${deps.length} tarballs: ${deps.map((p) => p.manifest.name.replace("@notatio/", "")).join(", ")}`,
   );
   if (args.build) {
     const code = sh("prebuild", "pnpm", ["--filter", `${targetName}^...`, "run", "build"], { cwd: repo });

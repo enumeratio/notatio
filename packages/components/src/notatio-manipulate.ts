@@ -5,7 +5,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { applyTemplates, captureTemplates, type Template, takesBindings, whenTemplatesDefined } from "./bindings.ts";
 import { controlsTemplate, rawOf } from "./manipulate-ui.ts";
 import { ensureFor, loadMarkup } from "./mathlive.ts";
-import type { Rendering } from "@enumeratio/frontend/symbols";
+import type { Rendering } from "@notatio/frontend/symbols";
 import { inferenceScope } from "./transcript-scope.ts";
 import "./dynamic-box.ts";
 import "./knob-box.ts";
@@ -24,7 +24,7 @@ import {
   parseControls,
   parseProse,
   type ProsePart,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { SliderPlayback } from "./sweep.ts";
 
 /** A lowered rendering as the element it names. */
@@ -236,7 +236,7 @@ export class NotatioManipulate extends LitElement {
   async #replot(engine: ComputeEngine, run: <T>(fn: () => T) => T): Promise<void> {
     if (!this.plotOf || !this.plotAxes) return;
     const axes = this.plotAxes.split(",").filter(Boolean);
-    const { replotWithEngine } = await import("@enumeratio/frontend/symbols");
+    const { replotWithEngine } = await import("@notatio/frontend/symbols");
     const names = new Set(this._controls.map((c) => c.name));
     const rendering = run(() => replotWithEngine(this.plotOf!, axes, names, engine));
     if (rendering === undefined) return;

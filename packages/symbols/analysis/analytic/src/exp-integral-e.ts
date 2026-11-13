@@ -8,8 +8,8 @@ import {
   isFiniteNum,
   asDouble,
   wantsNumber,
-} from "@enumeratio/ce-patches";
-import { BigDecimal } from "@enumeratio/engine";
+} from "@notatio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
 
 // ExpIntegralE(n, z) = E_n(z) = ∫₁^∞ e^{−zt}/tⁿ dt, built on this package's own generalized
 // incomplete Gamma (`Gamma(s, z₀)`, already extended for complex operands): the standard

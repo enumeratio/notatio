@@ -1,15 +1,15 @@
 // Row data for the four reference catalogue pages, read straight from the packages
 // that own each class. Kept in one module so the shared row shape stays in sync.
-import { allFamilies } from "@enumeratio/combinatorics/collections";
-import { CARRIERS, MAPS, UNDEFINED_MAPS } from "@enumeratio/combinatorics";
+import { allFamilies } from "@notatio/combinatorics/collections";
+import { CARRIERS, MAPS, UNDEFINED_MAPS } from "@notatio/combinatorics";
 import {
   crosswalkFor,
   crosswalkForCollection,
   crosswalkForMap,
   crosswalkForStatistic,
   type ResolvedReference,
-} from "@enumeratio/reference";
-import { ALL_STATISTICS } from "@enumeratio/combinatorics";
+} from "@notatio/reference";
+import { ALL_STATISTICS } from "@notatio/combinatorics";
 import { getEntry } from "./reference.ts";
 
 export interface CatalogRow {

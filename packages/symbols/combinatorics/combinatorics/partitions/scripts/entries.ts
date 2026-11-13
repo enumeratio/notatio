@@ -7,7 +7,7 @@
 // into the record, so they are `curatedHeads`; so is `WeightedSize`, also defined on standard tableaux.
 
 import { fileURLToPath } from "node:url";
-import type { GeneratedEntries } from "@enumeratio/entry/node";
+import type { GeneratedEntries } from "@notatio/entry/node";
 import { areaStatisticsEntries, type Sample } from "../../src/statistics/generate-entries.ts";
 import { PARTITIONS_FRONTIER } from "../src/statistics.frontier.ts";
 import { PARTITION_STATISTICS } from "../src/statistics.ts";

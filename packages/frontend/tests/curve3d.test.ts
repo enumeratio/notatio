@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { lorenzCurve, type Point3, torusKnotCurve } from "@enumeratio/braid";
+import { lorenzCurve, type Point3, torusKnotCurve } from "@notatio/braid";
 import { curveBox } from "../src/graphics-3d-box.ts";
 import { graphics3dSvg } from "../src/graphics-3d-draw.ts";
 

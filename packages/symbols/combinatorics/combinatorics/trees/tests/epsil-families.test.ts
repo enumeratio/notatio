@@ -4,8 +4,8 @@
 // interpreter's exact integers take over, under DEEP_TESTS.
 
 // unstable: the tests build an engine to run the families on.
-import { ComputeEngine } from "@enumeratio/engine/unstable";
-import { evaluateEpsil } from "@enumeratio/structures";
+import { ComputeEngine } from "@notatio/engine/unstable";
+import { evaluateEpsil } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { type EpsilFamily, epsilKernelOn, evaluateTables } from "../../collections/src/families/epsil.ts";
 import { pruferDecode } from "../../collections/src/families/kernels-extra.ts";

@@ -2,7 +2,7 @@
 // kernel would show it, less the code forms.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { parseExpression } from "@enumeratio/formats/expression";
+import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { ENVIRONMENTS } from "../src/environment.ts";
 import { plainJson } from "../src/graphics-rules.ts";

@@ -7,7 +7,7 @@
 // disagreement, so it doubles as the validate-*.ts run for these heads.
 //
 // The grid also exercises Gamma / GammaRegularized's generalized (three-argument) form and
-// HarmonicNumber, which stayed in @enumeratio/analytic (no compute-engine issue for them);
+// HarmonicNumber, which stayed in @notatio/analytic (no compute-engine issue for them);
 // those rows are filtered out before writing here -- see
 // packages/symbols/analysis/analytic/scripts/collect-special-goldens.ts for their own,
 // smaller oracle script.
@@ -29,8 +29,8 @@
 
 import { writeFileSync } from "node:fs";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { applyAllPatches, character, eulerPhi } from "@enumeratio/ce-patches";
-import { runKernel, runWolframKernel } from "@enumeratio/utils/bounded";
+import { applyAllPatches, character, eulerPhi } from "@notatio/ce-patches";
+import { runKernel, runWolframKernel } from "@notatio/utils/bounded";
 
 const ce = new ComputeEngine();
 applyAllPatches(ce);
@@ -333,7 +333,7 @@ for (const [z, r] of harmonicRGrid) {
   });
 }
 
-// Drop the rows for heads that stayed in @enumeratio/analytic (Gamma, GammaRegularized,
+// Drop the rows for heads that stayed in @notatio/analytic (Gamma, GammaRegularized,
 // HarmonicNumber) -- this file's golden covers only the #340 candidates above.
 const moved = pending.filter((p) => MOVED_HEADS.has(p.golden.head));
 pending.length = 0;

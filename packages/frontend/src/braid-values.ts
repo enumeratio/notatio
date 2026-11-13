@@ -10,7 +10,7 @@ import {
   lorenzBraid,
   positivePermutationBraid,
   torusBraid,
-} from "@enumeratio/braid/words";
+} from "@notatio/braid/words";
 import { argsOf, headOf, intOf, intsOf, type Json, unwrapped } from "./frame-json.ts";
 
 /** The heads that name a braid, besides a literal `Braid(n, word)`. */

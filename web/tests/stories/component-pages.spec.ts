@@ -3,18 +3,18 @@
 // not just that the page returned 200. Data-driven off stories-data.ts (packages/components/
 // scripts/collect-stories.ts), so a new story or component picks up its own test for free.
 //
-// Run with: pnpm --filter @enumeratio/web run test:stories
+// Run with: pnpm --filter @notatio/web run test:stories
 
 import { fileURLToPath } from "node:url";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 import type { Locator } from "@playwright/test";
-import { STORIES_DATA } from "@enumeratio/components/stories-data";
-import { DRAWING_SYMBOLS, renderingOf } from "@enumeratio/frontend/symbols";
-import { collectComponents, headOfTag } from "@enumeratio/frontend/reflect";
+import { STORIES_DATA } from "@notatio/components/stories-data";
+import { DRAWING_SYMBOLS, renderingOf } from "@notatio/frontend/symbols";
+import { collectComponents, headOfTag } from "@notatio/frontend/reflect";
 import { expect, test } from "@playwright/test";
 
 // The elements' sources, beside the package's manifest (they are what `collectComponents` reads).
-const srcDir = fileURLToPath(new URL("./src/", import.meta.resolve("@enumeratio/components/package.json")));
+const srcDir = fileURLToPath(new URL("./src/", import.meta.resolve("@notatio/components/package.json")));
 
 // STORIES_DATA is keyed by the Vue/React wrapper name (`ComplexPlot3D`); the page route is the
 // custom-element tag (`notatio-complex-plot-3d`) -- the same rule ComponentPage.vue's `wrapper`

@@ -4,8 +4,8 @@
 // library symbol, its pin. A name with `*` lists the heads it matches.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { aboutRecord } from "@enumeratio/evaluation";
-import { loadSummaries, matching } from "@enumeratio/manifest";
+import { aboutRecord } from "@notatio/evaluation";
+import { loadSummaries, matching } from "@notatio/manifest";
 import { bold, cyan, dim } from "./ansi.ts";
 
 const text = (v: unknown): string => (typeof v === "string" ? v : JSON.stringify(v));

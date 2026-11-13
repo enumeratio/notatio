@@ -2,11 +2,11 @@
 name: FunctionExpand
 domain: Transformations
 signature: FunctionExpand(expr)
-summary: Rewrite special functions in `expr` in terms of more elementary or better-known ones. Provided by `@enumeratio/analytic`.
+summary: Rewrite special functions in `expr` in terms of more elementary or better-known ones. Provided by `@notatio/analytic`.
 signatures:
   - call: FunctionExpand(expr)
     description: "`expr` with a handful of named special-function identities applied."
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression) -> expression
 bindings:
   - origin: mapped

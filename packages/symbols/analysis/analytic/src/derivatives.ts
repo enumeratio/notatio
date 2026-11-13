@@ -1,7 +1,7 @@
 import { type Expression, type ComputeEngine, isSymbol } from "@cortex-js/compute-engine";
-import type { Json } from "@enumeratio/ce-patches";
-import type { BoxInput, EvalOptions, NativeEval } from "@enumeratio/ce-patches";
-import { declareCompile, operandsOf, symbolNameOf, wrapOperator } from "@enumeratio/engine";
+import type { Json } from "@notatio/ce-patches";
+import type { BoxInput, EvalOptions, NativeEval } from "@notatio/ce-patches";
+import { declareCompile, operandsOf, symbolNameOf, wrapOperator } from "@notatio/engine";
 import { ORDER_RESOLVERS } from "./derivative-orders.ts";
 import { powerOrderDerivative } from "./power-orders.ts";
 

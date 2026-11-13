@@ -1,11 +1,11 @@
 // Binary-splitting Factorial(n) (declare-fast-factorial.ts, issue #205): exact against a
 // naive sequential-multiply reference, including n = 0, 1, and the bench's own case through
 // Mod.
-import type { Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
+import type { Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { declareNumberTheory } from "../src/declare.ts";
 import { factorial } from "../src/fast-factorial.ts";
 

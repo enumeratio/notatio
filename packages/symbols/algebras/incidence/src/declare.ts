@@ -1,6 +1,6 @@
-import { declareAlgebra } from "@enumeratio/structures";
-import { registerNotation } from "@enumeratio/boxes";
-import { integerAt, operandsOf, type Engine, type Expr } from "@enumeratio/engine";
+import { declareAlgebra } from "@notatio/structures";
+import { registerNotation } from "@notatio/boxes";
+import { integerAt, operandsOf, type Engine, type Expr } from "@notatio/engine";
 import { INCIDENCE_NOTATION } from "./notation.ts";
 import {
   booleanLattice,

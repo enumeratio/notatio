@@ -1,4 +1,4 @@
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import {
   barBoxOfSettings,
   type Clock,
@@ -19,7 +19,7 @@ import {
   surfaceDomains,
   surfaceBox,
   type Triple,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { html, LitElement, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { pointsOfJson } from "./curve-points.ts";
@@ -163,7 +163,7 @@ export class Graphics3DBoxElement extends LitElement {
     if (this.box !== undefined) return this.box;
     const text = this.value.trim();
     if (!text) return undefined;
-    const { graphics3dOfText } = await import("@enumeratio/frontend/symbols");
+    const { graphics3dOfText } = await import("@notatio/frontend/symbols");
     const figure = graphics3dOfText(text);
     if (generation !== this.#generation || figure === undefined) return undefined;
     this.#settings = figure.settings;

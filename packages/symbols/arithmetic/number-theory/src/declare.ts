@@ -1,11 +1,11 @@
-import { registerNotation } from "@enumeratio/boxes";
+import { registerNotation } from "@notatio/boxes";
 import {
   bigRealOperand,
   doublesForFloats,
   exceedsDoublePrecision,
   inDoubles,
   inDoublesIfComplex,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import {
   bigIntegerAt,
   bigRationalAt,
@@ -21,9 +21,9 @@ import {
   type Overload,
   type Engine,
   type Expr,
-} from "@enumeratio/engine";
-import { valuation } from "@enumeratio/residues";
-import { declareCarriers } from "@enumeratio/structures";
+} from "@notatio/engine";
+import { valuation } from "@notatio/residues";
+import { declareCarriers } from "@notatio/structures";
 import { gaussianAt, gaussianExpression, isComplexGaussian } from "./boxed-gaussian.ts";
 import { NUMBER_THEORY_CARRIERS } from "./carrier-data.ts";
 import { declareAlgebraic } from "./declare-algebraic.ts";
@@ -42,9 +42,9 @@ import { hermiteDecomposition } from "./hermite.ts";
 import { NUMBER_THEORY_NOTATION } from "./notation.ts";
 import { rationalReconstruction } from "./reconstruct.ts";
 import { boxComplex, subfactorialBig } from "./subfactorial-big.ts";
-import { SUMMARIES } from "@enumeratio/manifest/package/number-theory";
+import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 
-// Number theory past ℤ/m, on top of @enumeratio/residues (declare that first): PowerMod and
+// Number theory past ℤ/m, on top of @notatio/residues (declare that first): PowerMod and
 // PowerModList reach ℤ[i], plus rational reconstruction, integer valuations and Hermite
 // normal form. Every head stays unevaluated — never approximate — when it cannot answer.
 

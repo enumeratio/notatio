@@ -1,6 +1,6 @@
 // unstable: the Expression and ComputeEngine types, which the nucleus facade doesn't re-export
-import type { Expression, ComputeEngine } from "@enumeratio/engine/unstable";
-import type { Json } from "@enumeratio/ce-patches";
+import type { Expression, ComputeEngine } from "@notatio/engine/unstable";
+import type { Json } from "@notatio/ce-patches";
 import {
   type BoxInput,
   isFiniteNum,
@@ -12,7 +12,7 @@ import {
   scale,
   sub,
   type Cx,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // LaguerreL(n, x) = L_n(x) and LaguerreL(n, a, x) = L_n^(a)(x), one head: the two-argument
 // form is a = 0. Wolfram spells both the same way.

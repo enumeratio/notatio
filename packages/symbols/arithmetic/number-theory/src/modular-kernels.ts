@@ -3,8 +3,8 @@
 // in [0, m), or `undefined` to decline (outside its range, or past the step budget) so the
 // ordinary evaluation runs. Fibonacci and LucasL are fast-recurrence.ts's `fibonacciMod`
 // and `lucasLMod`.
-import { checkpoint } from "@enumeratio/engine";
-import { crt, factorInteger, invMod, isPrime } from "@enumeratio/residues";
+import { checkpoint } from "@notatio/engine";
+import { crt, factorInteger, invMod, isPrime } from "@notatio/residues";
 
 /** Multiplications a kernel may spend before declining, in double-product units: seconds, and far
  *  past what building the exact value could do. */

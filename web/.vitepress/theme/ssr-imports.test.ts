@@ -9,7 +9,7 @@ import { pathsInto } from "../../../tools/static-imports.ts";
 import { expect, test } from "vite-plus/test";
 
 // `components/stories-data` is generated data and touches no DOM.
-const BROWSER_ONLY = /^(@enumeratio\/components(?!\/stories-data)(\/|$)|lit(\/|-|$)|@lit\/|mathlive(\/|$))/;
+const BROWSER_ONLY = /^(@notatio\/components(?!\/stories-data)(\/|$)|lit(\/|-|$)|@lit\/|mathlive(\/|$))/;
 const here = fileURLToPath(new URL(".", import.meta.url));
 
 const modules = (dir: string): string[] =>

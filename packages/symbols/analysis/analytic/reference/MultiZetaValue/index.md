@@ -2,11 +2,11 @@
 name: MultiZetaValue
 domain: Special functions
 signature: MultiZetaValue(s1, s2)
-summary: The depth-2 multiple zeta value $\zeta(s_1, s_2) = \sum_{n_1 > n_2 \ge 1} n_1^{-s_1} n_2^{-s_2}$, for integers $s_1, s_2 \ge 2$. Provided by `@enumeratio/analytic`.
+summary: The depth-2 multiple zeta value $\zeta(s_1, s_2) = \sum_{n_1 > n_2 \ge 1} n_1^{-s_1} n_2^{-s_2}$, for integers $s_1, s_2 \ge 2$. Provided by `@notatio/analytic`.
 signatures:
   - call: MultiZetaValue(s1, s2)
     description: the depth-2 Euler sum $\zeta(s_1, s_2)$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (integer, integer) -> number
 primitive: numeric
 bindings:

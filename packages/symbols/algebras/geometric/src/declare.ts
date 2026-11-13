@@ -1,5 +1,5 @@
-import type { Engine, Expr } from "@enumeratio/engine";
-import { type Algebra, algebraOf, type Multivector, toExpression, toMultivector } from "@enumeratio/hypercomplex";
+import type { Engine, Expr } from "@notatio/engine";
+import { type Algebra, algebraOf, type Multivector, toExpression, toMultivector } from "@notatio/hypercomplex";
 import { gradePart, gradesOf } from "./blades.ts";
 import { poincareDual, pseudoscalar, sandwich, vee } from "./dual.ts";
 import {
@@ -24,7 +24,7 @@ import {
 // `Wedge(a, b)`, not `a \wedge b`.
 //
 // Wolfram-wise, `Wedge` and `Vee` are genuine `System\`` symbols for these same outer and
-// regressive products — see `HEADS` in `@enumeratio/wolfram`, which vouches for them. Every
+// regressive products — see `HEADS` in `@notatio/wolfram`, which vouches for them. Every
 // other name here (`Dual`, `Grade`, `GradePart`, `Pseudoscalar`, `Reversion`,
 // `GradeInvolution`, `CliffordConjugate`, `LeftContraction`, `RightContraction`,
 // `ScalarProduct`, `Sandwich`) is one we coined; Wolfram has no symbol by any of those
@@ -129,7 +129,7 @@ export function declareGeometric(ce: Engine): void {
   });
 
   // `CliffordAlgebra(...)`, its sibling constructors and the named algebras (`Quaternions`,
-  // …) are all `@enumeratio/hypercomplex`'s `clifford_algebra`.
+  // …) are all `@notatio/hypercomplex`'s `clifford_algebra`.
   const algebraLike = "clifford_algebra";
 
   ce.declare("Pseudoscalar", {

@@ -1,4 +1,4 @@
-import { BigDecimal, type Engine, type Expr, onlyForIntegers, wrapOperator } from "@enumeratio/engine";
+import { BigDecimal, type Engine, type Expr, onlyForIntegers, wrapOperator } from "@notatio/engine";
 import {
   atDigits,
   bigRealOperand,
@@ -7,7 +7,7 @@ import {
   isFiniteNum,
   isRealInt,
   wantsNumber,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { pfqRegularizedBig } from "./hypergeometric-big.ts";
 
 // BesselI(n, x) and BesselJ(n, x) past a double's digits, for integer order and real x: native

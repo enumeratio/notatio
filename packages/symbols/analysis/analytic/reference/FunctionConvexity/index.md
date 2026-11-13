@@ -6,7 +6,7 @@ summary: 1 if f is convex over its whole domain, -1 if concave, 0 if affine, Ind
 signatures:
   - call: FunctionConvexity(f, x)
     description: the convexity of f in the real variable x over the whole real line, from the sign of its second derivative.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, symbol) -> expression
 names:
   wolframIdentity: true

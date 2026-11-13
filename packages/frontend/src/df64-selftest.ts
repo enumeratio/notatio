@@ -1,4 +1,4 @@
-import { DF_OPAQUE_GLSL, DF_PLAIN_GLSL, withGLSL } from "@enumeratio/analytic/shader";
+import { DF_OPAQUE_GLSL, DF_PLAIN_GLSL, withGLSL } from "@notatio/analytic/shader";
 import { compileProgram, GLSL_HEADER, renderToFloats } from "./webgl.ts";
 
 // df64 (the Hurwitz kernel's double-float sums) rests on error-free transforms a GPU compiler may

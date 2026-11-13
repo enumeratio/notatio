@@ -4,8 +4,8 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
-import { readEntries, recordDirs } from "@enumeratio/entry/node";
-import type { ReferenceEntry } from "@enumeratio/entry";
+import { readEntries, recordDirs } from "@notatio/entry/node";
+import type { ReferenceEntry } from "@notatio/entry";
 import { expect, test } from "vite-plus/test";
 import { catalogOf, type MapField, mapExplorerOf } from "../src/explorer.ts";
 import {

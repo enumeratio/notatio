@@ -3,7 +3,7 @@
 // boundary out. Shares contour.ts's `grid[j][i]` convention. This is the drawing every environment
 // has; a page with a shader draws the same margins per pixel.
 
-import { type Box, type BoxNode, graphics, line, raster, style, tag } from "@enumeratio/boxes";
+import { type Box, type BoxNode, graphics, line, raster, style, tag } from "@notatio/boxes";
 import { fieldFrame, marchingSquares } from "./contour.ts";
 import { type ColorMixing, mixColors } from "./graphics-rules.ts";
 import { renderPlot } from "./plot-box.ts";

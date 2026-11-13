@@ -1,5 +1,5 @@
 import { defineConfig } from "vite-plus";
-import { fmt, lint } from "@enumeratio/config";
+import { fmt, lint } from "@notatio/config";
 
 // web/ is a VitePress site (its own Vite config lives in .vitepress/config.mts),
 // not a packed library -- this file exists only so `vp test` has something to run

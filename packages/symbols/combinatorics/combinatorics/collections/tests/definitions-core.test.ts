@@ -4,9 +4,9 @@
 // the differential.
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { checkImplementations } from "@enumeratio/entry";
+import { checkImplementations } from "@notatio/entry";
 import { expect, test } from "vite-plus/test";
-import { readEntries } from "@enumeratio/entry/node";
+import { readEntries } from "@notatio/entry/node";
 import { ce, DEFINITIONS, evaluate, permutations, PRIMITIVE } from "./definitions-helpers.ts";
 
 const entries = readEntries(new URL("../../reference/", import.meta.url));

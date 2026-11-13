@@ -1,4 +1,4 @@
-import { type BoxNode, optionsOfBox } from "@enumeratio/boxes";
+import { type BoxNode, optionsOfBox } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { densityColor, densityPlotBox, densitySvg, normalize } from "../src/densityplot.ts";
 import { imagesIn } from "./png.ts";

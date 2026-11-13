@@ -6,8 +6,8 @@
 //   CycleDecomposition(Cycles(…), n)  needs n to put them back (as Wolfram's PermutationList(c, n)).
 // combinatorics extends groupalgebra (its `package.json`) for this, so `Cycles` is declared first. The
 // guard is only for a bare host, a package test declaring combinatorics alone.
-import { type Engine, type Expr, isNativeHead, operandsOf } from "@enumeratio/engine";
-import { attachConversion, evaluateEpsil } from "@enumeratio/structures";
+import { type Engine, type Expr, isNativeHead, operandsOf } from "@notatio/engine";
+import { attachConversion, evaluateEpsil } from "@notatio/structures";
 import {
   cycleDecompositionOfCyclesBody,
   cycleDecompositionOfCyclesGuard,

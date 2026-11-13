@@ -1,7 +1,7 @@
 # Wolfram FullForm
 
 A **code output form**: the Wolfram Language full form (functional `Head[…]`
-syntax) of an expression, via `@enumeratio/wolfram` — surfaced as the
+syntax) of an expression, via `@notatio/wolfram` — surfaced as the
 `WolframFullForm` form. Wolfram's uniform `Head[args]` means most heads translate
 directly; only differing names are remapped, and a few argument forms are
 rewritten. Unmapped heads pass through as `Head[args]`, so coverage degrades

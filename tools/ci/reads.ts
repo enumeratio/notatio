@@ -17,7 +17,7 @@
 // or the root; `import.meta.glob` with `*`; a chained `new URL(new URL(…), …)`; a tsconfig's
 // `extends`, `paths` or `files`; a path built from a variable, a `${…}` or a statement away
 // (`base + "/x"`); and a path that is data (a record or a config naming a file). A package named
-// by its specifier (`import "@enumeratio/x"`) is a dependency, declared in package.json.
+// by its specifier (`import "@notatio/x"`) is a dependency, declared in package.json.
 
 import { existsSync, readFileSync } from "node:fs";
 import { dirname, join, posix, relative, resolve } from "node:path";
@@ -267,10 +267,10 @@ export function reads(pkgs: Map<string, Pkg>): Read[] {
   return [...found.values()];
 }
 
-/** `@enumeratio/reference/node` reads every package's records; `@enumeratio/entry/node` does only
+/** `@notatio/reference/node` reads every package's records; `@notatio/entry/node` does only
  *  through `recordDirs` and `packageDirs` (its other calls read or write one directory). */
-const REFERENCE_NODE = /@enumeratio\/reference\/node/;
-const ENTRY_NODE = /@enumeratio\/entry\/node/;
+const REFERENCE_NODE = /@notatio\/reference\/node/;
+const ENTRY_NODE = /@notatio\/entry\/node/;
 const WALKERS = /\b(?:recordDirs|packageDirs)\b/;
 const walksRecords = (source: string): boolean => {
   const { code } = lex(source);

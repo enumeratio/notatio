@@ -133,14 +133,14 @@ test("buildEngine declares into a fresh engine in plan order", () => {
 
 test("a library's package says what declares it, and where", async () => {
   const modules: Record<string, unknown> = {
-    "@enumeratio/one/package.json": { enumeratio: { declare: ["declareA", "declareB"], names: ["Registry"] } },
-    "@enumeratio/one": {
+    "@notatio/one/package.json": { enumeratio: { declare: ["declareA", "declareB"], names: ["Registry"] } },
+    "@notatio/one": {
       declareA: (ce: Engine) => ce.declared.push("a"),
       declareB: (ce: Engine) => ce.declared.push("b"),
     },
-    "@enumeratio/two/package.json": { enumeratio: { declare: "./sub#declareTwo", requires: ["one"] } },
-    "@enumeratio/two/sub": { declareTwo: (ce: Engine) => ce.declared.push("two") },
-    "@enumeratio/nothing/package.json": {},
+    "@notatio/two/package.json": { enumeratio: { declare: "./sub#declareTwo", requires: ["one"] } },
+    "@notatio/two/sub": { declareTwo: (ce: Engine) => ce.declared.push("two") },
+    "@notatio/nothing/package.json": {},
   };
   const loaded = await loadLibraries<Engine>(["two", "nothing", "one"], async (specifier) => modules[specifier]);
   // A package with no `declare` is no library; a name the hierarchy does not place keeps the order given.
@@ -156,16 +156,16 @@ test("a library's package says what declares it, and where", async () => {
 
 test("a declare the package names but does not export is an error", async () => {
   const modules: Record<string, unknown> = {
-    "@enumeratio/one/package.json": { enumeratio: { declare: "declareMissing" } },
-    "@enumeratio/one": {},
+    "@notatio/one/package.json": { enumeratio: { declare: "declareMissing" } },
+    "@notatio/one": {},
   };
   await expect(loadLibraries(["one"], async (specifier) => modules[specifier])).rejects.toThrow(/declareMissing/);
 });
 
 test("a host's libraries are the ones its package depends on, in the layers it asks for", () => {
   const pkg = {
-    dependencies: { "@enumeratio/residues": "workspace:*", "@enumeratio/formats": "workspace:*", react: "^19" },
-    devDependencies: { "@enumeratio/boxes": "workspace:*", "@enumeratio/census": "workspace:*" },
+    dependencies: { "@notatio/residues": "workspace:*", "@notatio/formats": "workspace:*", react: "^19" },
+    devDependencies: { "@notatio/boxes": "workspace:*", "@notatio/census": "workspace:*" },
   };
   expect(dependedLibraries(pkg).toSorted()).toEqual(["boxes", "residues"]);
   expect(dependedLibraries(pkg, ["presentation"])).toEqual(["formats"]);

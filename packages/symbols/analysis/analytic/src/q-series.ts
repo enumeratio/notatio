@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { extendHead } from "@enumeratio/engine";
+import { extendHead } from "@notatio/engine";
 import {
   atDigits,
   bigRealOperand,
@@ -20,7 +20,7 @@ import {
   isRealInt,
   numberResult,
   wantsNumber,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 import { qFactorialBig } from "./q-factorial-big.ts";
 
 // The q-series heads: QPochhammer(a, q, n), QFactorial(n, q), QBinomial(n, k, q).

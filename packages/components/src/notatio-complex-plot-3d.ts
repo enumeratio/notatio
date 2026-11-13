@@ -1,8 +1,8 @@
-import { emitComplexGLSL } from "@enumeratio/ce-patches/glsl-complex";
-import type { ComplexFunction } from "@enumeratio/frontend";
+import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
+import type { ComplexFunction } from "@notatio/frontend";
 import { html, LitElement, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
-import { loadEngineFor } from "@enumeratio/frontend/core";
+import { loadEngineFor } from "@notatio/frontend/core";
 import { bindWildcards, canonicalOf } from "./plot-kernel.ts";
 import { ensureStyles } from "./styles.ts";
 import {
@@ -21,7 +21,7 @@ import {
   type SurfacePaint,
   type SurfaceScene,
   surfaceSceneSvg,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 
 const W = 360;
 const H = 260;
@@ -209,7 +209,7 @@ export class NotatioComplexPlot3D extends LitElement {
       }
       this.#usedGpu = surface !== undefined;
       if (!surface) {
-        const { complexFunction } = await import("@enumeratio/frontend");
+        const { complexFunction } = await import("@notatio/frontend");
         const f = complexFunction(json, variable) ?? (await engineFunction(json, variable));
         surface = sampleComplexSurface(f, { domain, samples: Number(this.samples), maxHeight });
       }

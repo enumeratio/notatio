@@ -1,17 +1,17 @@
 // A reference example's drawn value as boxes, in Node: the lowering a page's element or a cell
 // does, minus the DOM. An expression that draws lowers by `makeBoxes` with the frontend's notation;
 // a plot of an expression is sampled first (the compiled code, as the page's element runs it), and
-// its samples lower. `shapeOf` reads a box's shape (`BoxShape`, in `@enumeratio/entry`) for a test
+// its samples lower. `shapeOf` reads a box's shape (`BoxShape`, in `@notatio/entry`) for a test
 // to hold to what a record says. Pixels never come into it.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
-import { type Box, type BoxNode, graphics3dOf, graphicsOf, makeBoxes, notationOf } from "@enumeratio/boxes";
-import type { BoxShape, MathJSON } from "@enumeratio/entry";
+import { type Box, type BoxNode, graphics3dOf, graphicsOf, makeBoxes, notationOf } from "@notatio/boxes";
+import type { BoxShape, MathJSON } from "@notatio/entry";
 import { graphics3dOptionsOf, gridAxis, gridSide, sampleGrids, surfaceDomains } from "../src/graphics-3d-lowering.ts";
 import { surfaceBox } from "../src/graphics-3d-box.ts";
 import { unsampledGraphics3d } from "../src/graphics-3d-draw.ts";
-import { optionsOf } from "@enumeratio/formats";
+import { optionsOf } from "@notatio/formats";
 import { fieldSourcesOf, regionFunctionOf } from "../src/field-margin.ts";
 import { plainJson } from "../src/graphics-rules.ts";
 import { type CompiledItem, compilePlot } from "../src/plot-compile.ts";

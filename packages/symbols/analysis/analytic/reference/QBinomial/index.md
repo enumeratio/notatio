@@ -2,11 +2,11 @@
 name: QBinomial
 domain: Special functions
 signature: QBinomial(n, k, q)
-summary: The Gaussian (q-)binomial coefficient $\binom{n}{k}_q$, the generating polynomial in $q$ for partitions fitting in a $k \times (n-k)$ box. Provided by `@enumeratio/analytic`.
+summary: The Gaussian (q-)binomial coefficient $\binom{n}{k}_q$, the generating polynomial in $q$ for partitions fitting in a $k \times (n-k)$ box. Provided by `@notatio/analytic`.
 signatures:
   - call: QBinomial(n, k, q)
     description: the Gaussian binomial coefficient $\binom{n}{k}_q$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (complex, complex, complex) -> number
 primitive: kernel
 bindings:

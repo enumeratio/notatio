@@ -1,5 +1,5 @@
 import { type Expression, type ComputeEngine, isNumber, isSymbol } from "@cortex-js/compute-engine";
-import { operandsOf, wrapOperator } from "@enumeratio/engine";
+import { operandsOf, wrapOperator } from "@notatio/engine";
 
 // DifferenceRootReduce(f(n), n) / DifferenceRoot(...)[n]: Wolfram's holonomic (P-recursive)
 // representation of a sequence — DifferenceRoot[Function[{y, n}, {recurrence == 0, y[i] ==

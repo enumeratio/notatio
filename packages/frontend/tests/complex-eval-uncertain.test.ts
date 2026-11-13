@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import type { BoxNode } from "@enumeratio/boxes";
+import type { BoxNode } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { type Complex, complexFunction, Uncertain } from "../src/complex-eval.ts";
 import { complexPlotBox } from "../src/complex-plot-box.ts";

@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
-import type { EvalOptions } from "@enumeratio/ce-patches";
+import { operandsOf } from "@notatio/engine";
+import type { EvalOptions } from "@notatio/ce-patches";
 
 // ComplexExpand(expr) — split `expr` into real and imaginary parts, treating every free
 // symbol as real: `ComplexExpand(f(x + iy))` becomes `Re + i·Im` with `x, y` kept symbolic.

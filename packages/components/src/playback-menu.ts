@@ -3,7 +3,7 @@
 // Manipulate slider -- so the same two questions get the same two rows everywhere.
 
 import { mountPopover } from "./popover.ts";
-import { type Loop, LOOPS, RATES } from "@enumeratio/frontend/core";
+import { type Loop, LOOPS, RATES } from "@notatio/frontend/core";
 
 export interface PlaybackSettings {
   rate: number;

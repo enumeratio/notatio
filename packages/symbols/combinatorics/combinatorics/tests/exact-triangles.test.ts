@@ -2,7 +2,7 @@
 // minutes (tests/fast-kernels.test.ts holds them to Epsil where it is quick): each is held to a
 // second route to the same number, the formula or the direct recursion the family is named for.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { integerOf, isEpsilFamily, kernelOn } from "../collections/src/families/epsil.ts";
 import { allFamilies } from "../collections/src/families/index.ts";

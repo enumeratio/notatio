@@ -37,8 +37,8 @@ import {
   symbolNameOf,
   widenSignature,
   wrapOperator,
-} from "@enumeratio/engine";
-import { carrierTypeForName } from "@enumeratio/structures";
+} from "@notatio/engine";
+import { carrierTypeForName } from "@notatio/structures";
 import {
   BellB,
   IsSetPartitionOf,

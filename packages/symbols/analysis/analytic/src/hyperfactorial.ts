@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt } from "@enumeratio/engine";
-import { logBarnesG, cx, logGamma, wantsNumber, type EvalOptions } from "@enumeratio/ce-patches";
+import { bigIntegerAt } from "@notatio/engine";
+import { logBarnesG, cx, logGamma, wantsNumber, type EvalOptions } from "@notatio/ce-patches";
 
 // Hyperfactorial H(n) = ∏_{k=1}^n k^k, continued off the integers by
 // H(z) = Γ(z+1)^z / G(z+1) (G = Barnes G) — checked at n = 1..4 against the exact

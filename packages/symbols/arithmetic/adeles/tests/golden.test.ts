@@ -1,8 +1,8 @@
-import { box, type Json } from "@enumeratio/engine";
-import { createEngine } from "@enumeratio/engine/testing";
-import { declareNumberTheory } from "@enumeratio/number-theory";
-import { declareNumerals } from "@enumeratio/numerals";
-import { declareResidues } from "@enumeratio/residues";
+import { box, type Json } from "@notatio/engine";
+import { createEngine } from "@notatio/engine/testing";
+import { declareNumberTheory } from "@notatio/number-theory";
+import { declareNumerals } from "@notatio/numerals";
+import { declareResidues } from "@notatio/residues";
 import { describe, expect, test } from "vite-plus/test";
 import { declareAdeles } from "../src/declare.ts";
 import golden from "./adeles.golden.json" with { type: "json" };

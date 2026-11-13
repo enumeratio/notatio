@@ -14,7 +14,7 @@ import {
   symbolNameOf,
   uniform01 as engineUniform01,
   widenSignature,
-} from "@enumeratio/engine";
+} from "@notatio/engine";
 
 // The Wolfram-frontier distribution heads: Distributed, RandomVariate, EmpiricalDistribution,
 // BetaDistribution, GammaDistribution, BinormalDistribution, Expectation, Probability — plus
@@ -31,7 +31,7 @@ import {
 //
 // A distribution is an inert head carrying its parameters — declared with a signature and no
 // `evaluate` (or, for the ones needing a default filled in, an `evaluate` that only
-// normalizes the call shape and returns itself), the same pattern `@enumeratio/combinatorics`'
+// normalizes the call shape and returns itself), the same pattern `@notatio/combinatorics`'
 // carrier constructors use. PDF/CDF/Mean/Variance are exact wherever a closed form exists;
 // Expectation/Probability recognize a handful of closed-form shapes (linear/quadratic
 // polynomials in the bound variable; simple and chained relational conditions) and otherwise
@@ -269,7 +269,7 @@ const cdfOf = (ce: Engine, dist: Expr, x: Expr, options: EvaluateOptions): Expr 
       const [k, theta] = params;
       // P(k, x/theta) = 1 - Q(k, x/theta), compute-engine's native (two-argument)
       // `GammaRegularized` already being the upper tail Q — no need for the three-argument
-      // generalized form `@enumeratio/analytic` adds, so this has no dependency on that
+      // generalized form `@notatio/analytic` adds, so this has no dependency on that
       // package having been declared. Clamped below x = 0 (same pre-`finish`-the-branch
       // reasoning as `BetaDistribution` above).
       const inRange = finish(
@@ -607,7 +607,7 @@ function declareRelations(ce: Engine): void {
 
 // --- RandomVariate: Random over a distribution -------------------------------------------
 //
-// Every draw comes from the engine's one seeded stream (@enumeratio/engine, https://github.com/enumeratio/notatio/wiki/Random),
+// Every draw comes from the engine's one seeded stream (@notatio/engine, https://github.com/enumeratio/notatio/wiki/Random),
 // the same one `RandomInteger` and `Random` over a collection use, so `SeedRandom(n)` fixes
 // them all. A distribution is one more domain `Random` samples: this file registers the
 // sampler and the overload, and `RandomVariate` is its Wolfram spelling.

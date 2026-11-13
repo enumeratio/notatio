@@ -6,7 +6,7 @@ import {
   glyphSvg,
   rankBounds,
   showJson,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { html, LitElement, nothing, type PropertyValues } from "lit";
 import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { countOf, type Evaluate, evaluateText } from "./distribution-client.ts";

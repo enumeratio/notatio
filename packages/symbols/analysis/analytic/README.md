@@ -1,4 +1,4 @@
-# @enumeratio/analytic
+# @notatio/analytic
 
 Analytic and special-function extensions for `@cortex-js/compute-engine` — everything past
 the combinatorial collections: the Hurwitz-zeta family, Gamma-adjacent functions, elliptic
@@ -117,7 +117,7 @@ function-analysis predicates (`FunctionContinuous`, `FunctionMonotonicity`,
 
 The patches these heads land through (`lerch-phi`, `dirichlet`, `barnes-g`, `log-gamma`,
 `clausen`, `stieltjes`) live in
-[`@enumeratio/ce-patches`](../../../ce-patches) — see its README for
+[`@notatio/ce-patches`](../../../ce-patches) — see its README for
 the upstreaming model. (`round-places`, `zeta-hurwitz`, `polylog-order` and
 `polygamma-complex` landed in compute-engine 0.141 and were retired.)
 

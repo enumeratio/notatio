@@ -4,7 +4,7 @@
 // finite, so the box holds the whole figure; only the torus square's travelling point moves, and
 // that is the page clock's (`phase`), not a different box.
 
-import type { Box } from "@enumeratio/boxes";
+import type { Box } from "@notatio/boxes";
 import { dendrogramBox, graphOf, graphPlotBox, layeredGraphPlotBox, treeOf, treePlotBox } from "./graph.ts";
 import { torusSquareBox } from "./torussquare.ts";
 

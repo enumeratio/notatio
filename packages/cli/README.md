@@ -31,7 +31,7 @@ syntax pragma forces a syntax for one line, and `:in <syntax>` changes the defau
 | MathJSON          | `:mathjson ["Binomial", 10, 3]` | the interchange form       |
 
 All evaluate to the same thing — the combinatorial heads (`Binomial`, `Inversions`,
-`Descents`, `MajorIndex`, …) come from `@enumeratio/combinatorics/collections`. Bare LaTeX (a line
+`Descents`, `MajorIndex`, …) come from `@notatio/combinatorics/collections`. Bare LaTeX (a line
 starting with `\`) is **not** accepted in Epsil — use a `$…$` island or `:latex`.
 
 ## Output forms
@@ -236,13 +236,13 @@ The CLI is part of the notatio monorepo. In a checkout:
 
 ```bash
 # interactive REPL
-pnpm --filter @enumeratio/cli exec tsx src/main.ts
+pnpm --filter @notatio/cli exec tsx src/main.ts
 
 # evaluate one expression
-pnpm --filter @enumeratio/cli exec tsx src/main.ts "Binomial(10, 3)"
+pnpm --filter @notatio/cli exec tsx src/main.ts "Binomial(10, 3)"
 
 # or build the bin and run it directly
-pnpm --filter @enumeratio/cli build
+pnpm --filter @notatio/cli build
 node packages/cli/bin/notatio.mjs "2 + 2"
 ```
 

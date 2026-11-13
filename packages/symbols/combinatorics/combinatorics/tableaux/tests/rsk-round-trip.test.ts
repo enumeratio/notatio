@@ -1,7 +1,7 @@
 // Rsk and ToPermutation through compiled code: inverse RSK of the pair is the permutation, for every permutation of
 // n <= 6. The interpreter never answers here; compiled-maps.test.ts holds the compiled code to it.
 
-import { bareEngine } from "@enumeratio/engine/testing";
+import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS } from "../../src/carriers.ts";
 import { bareParts, fastDefinition } from "../../src/compiled.ts";

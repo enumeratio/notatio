@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "vite-plus/test";
-import { emitComplexGLSL, type Json } from "@enumeratio/ce-patches";
+import { emitComplexGLSL, type Json } from "@notatio/ce-patches";
 import { reachableGLSL, withGLSL } from "../src/shader-prune.ts";
 import { zetaGLSL } from "../src/shader.ts";
 

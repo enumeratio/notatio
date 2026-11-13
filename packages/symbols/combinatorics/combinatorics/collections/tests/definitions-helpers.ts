@@ -1,9 +1,9 @@
 // Shared setup for the definitions.test.ts shards (definitions-*.test.ts): the engine, the
 // reference-vs-implementation differential, and the permutation generator each shard's loop
 // runs over.
-import type { Engine } from "@enumeratio/engine";
-import { fill } from "@enumeratio/structures";
-import { bareEngine } from "@enumeratio/engine/testing";
+import type { Engine } from "@notatio/engine";
+import { fill } from "@notatio/structures";
+import { bareEngine } from "@notatio/engine/testing";
 import { declareStats } from "../src/stats.ts";
 import { DEFINITIONS, PRIMITIVE } from "../src/definitions.ts";
 

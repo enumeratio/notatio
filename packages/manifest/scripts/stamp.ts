@@ -21,7 +21,7 @@ import {
 import { createRequire } from "node:module";
 import { basename, dirname, isAbsolute, join, relative, resolve } from "node:path";
 
-const SCOPE = "@enumeratio/";
+const SCOPE = "@notatio/";
 const SKIPPED = new Set(["node_modules", "dist", ".git"]);
 
 /** Every file under `root` (itself, if a file), in a stable order, minus `skip`ped ones. */

@@ -9,12 +9,12 @@ import {
   type MapRow,
   readCollection,
   readImages,
-} from "@enumeratio/frontend/core";
+} from "@notatio/frontend/core";
 import { countOf, type Evaluate, evaluateText } from "./distribution-client.ts";
 
 export type { MapCheck, MapRow };
 
-/** What the client needs of a map: `MapExplorer` from `@enumeratio/frontend/explorer`, less its drawing. */
+/** What the client needs of a map: `MapExplorer` from `@notatio/frontend/explorer`, less its drawing. */
 export interface MapSource {
   readonly name: string;
   readonly template: string;

@@ -6,7 +6,7 @@ import { applyAllPatches, polygammaReal, polyLog, polyLogReal, polygamma } from 
 // PolyLog and complex-argument PolyGamma widenings landed in compute-engine 0.141
 // (polylog-order/polygamma-complex retired); these tests now exercise the plain kernels
 // (numerics/polylog.ts, numerics/polygamma.ts) and PolyGamma's bignum-cancellation path
-// (evaluatePolygamma), still called directly by @enumeratio/analytic.
+// (evaluatePolygamma), still called directly by @notatio/analytic.
 
 const ce = new ComputeEngine();
 applyAllPatches(ce);

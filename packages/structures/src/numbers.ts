@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf, stringAt } from "@enumeratio/engine";
+import { bigRationalAt, operandsOf, stringAt } from "@notatio/engine";
 import { conform } from "./conform.ts";
 
 // compute-engine's own types, conforming. A real number is the model everything else

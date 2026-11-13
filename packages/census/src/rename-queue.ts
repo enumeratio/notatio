@@ -1,7 +1,7 @@
 // Renames agreed but not executed — the queue to drain when a package is quiet.
 //
 // A head's own `formerly:` field (https://github.com/enumeratio/notatio/wiki/Examples-as-Data) records renames
-// that HAVE happened (catalog name → head; @enumeratio/statistics's `blessedName` reads the
+// that HAVE happened (catalog name → head; @notatio/statistics's `blessedName` reads the
 // generated table built from it). This is the other end: a head we still declare under a
 // spelling we have decided
 // against, with the spelling it should get and what is holding it. Data rather than prose so

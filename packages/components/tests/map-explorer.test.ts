@@ -6,10 +6,10 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { CARRIERS, declareCombinatorics, declareMaps } from "@enumeratio/combinatorics";
-import { parseExpression } from "@enumeratio/formats/expression";
-import { mapBadges, type MapRow } from "@enumeratio/frontend/core";
-import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@enumeratio/structures";
+import { CARRIERS, declareCombinatorics, declareMaps } from "@notatio/combinatorics";
+import { parseExpression } from "@notatio/formats/expression";
+import { mapBadges, type MapRow } from "@notatio/frontend/core";
+import { declareCarrierElement, declareCarrierPlurals, declareStructures } from "@notatio/structures";
 import { afterAll, expect, test, vi } from "vite-plus/test";
 import { mapAtSize, mapProperties, type MapSource } from "../src/map-client.ts";
 

@@ -20,14 +20,14 @@ import {
   type MathJSON,
   OWN_FORMS,
   type SystemImplementation,
-} from "@enumeratio/entry";
-import { setEngineDefaults } from "@enumeratio/engine";
-import { toFullForm } from "@enumeratio/formats/fullform";
-import { toInputForm } from "@enumeratio/formats/inputform";
-import { markupOf, readMarkupText, stripMetadata } from "@enumeratio/formats/markup";
-import { parseExpression, withoutProgramBlock } from "@enumeratio/formats/expression";
-import { portableTeX, registerTeXMacros } from "@enumeratio/formats/tex";
-import { emit, SYSTEMS, type System } from "@enumeratio/oracle";
+} from "@notatio/entry";
+import { setEngineDefaults } from "@notatio/engine";
+import { toFullForm } from "@notatio/formats/fullform";
+import { toInputForm } from "@notatio/formats/inputform";
+import { markupOf, readMarkupText, stripMetadata } from "@notatio/formats/markup";
+import { parseExpression, withoutProgramBlock } from "@notatio/formats/expression";
+import { portableTeX, registerTeXMacros } from "@notatio/formats/tex";
+import { emit, SYSTEMS, type System } from "@notatio/oracle";
 import {
   conventionalLatexDictionary,
   DisplayLatexSyntax,
@@ -35,8 +35,8 @@ import {
   withStringsWrapped,
 } from "../src/conventional-latex.ts";
 import { mergeLatex } from "../src/engine.ts";
-import { combineNotation, makeBoxes, notationOf } from "@enumeratio/boxes";
-import { toLatex } from "@enumeratio/boxes/render";
+import { combineNotation, makeBoxes, notationOf } from "@notatio/boxes";
+import { toLatex } from "@notatio/boxes/render";
 import { declaredEngine, packageNotations } from "../../reference/scripts/engines.ts";
 
 // StandardForm: every package's LaTeX, and its macros expanded, so `tex` is portable TeX.

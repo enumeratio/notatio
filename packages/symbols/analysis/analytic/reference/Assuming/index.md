@@ -2,11 +2,11 @@
 name: Assuming
 domain: Analytic
 signature: Assuming(cond, expr)
-summary: Evaluate $expr$ with $cond$ assumed for the duration of the call, then forget it. Provided by `@enumeratio/analytic`.
+summary: Evaluate $expr$ with $cond$ assumed for the duration of the call, then forget it. Provided by `@notatio/analytic`.
 signatures:
   - call: Assuming(cond, expr)
     description: evaluate $expr$ under a single assumed condition, a `List` of them (an implicit conjunction), or an `And` of them.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (expression, expression) -> expression
 names:
   wolframIdentity: true

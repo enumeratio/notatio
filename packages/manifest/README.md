@@ -1,4 +1,4 @@
-# @enumeratio/manifest
+# @notatio/manifest
 
 Every head we know — its packages, overloads and their types, parameter names, attributes
 and summary — assembled at build time from the reference records and a bare compute-engine
@@ -57,7 +57,7 @@ vp test
 
 `scripts/build.ts` reads every package's records and a bare compute-engine and sits at the
 bottom of the build graph — it loads no package's code, only its records
-(`@enumeratio/entry/node`). Run it after adding or changing a head; `vp run build` chains it
+(`@notatio/entry/node`). Run it after adding or changing a head; `vp run build` chains it
 into the pack step.
 
 ## Next

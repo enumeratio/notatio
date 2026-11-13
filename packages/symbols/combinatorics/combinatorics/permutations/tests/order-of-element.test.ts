@@ -1,5 +1,5 @@
-import { createEngine } from "@enumeratio/engine/testing";
-import { declareStructures } from "@enumeratio/structures";
+import { createEngine } from "@notatio/engine/testing";
+import { declareStructures } from "@notatio/structures";
 import { expect, test } from "vite-plus/test";
 import { declarePermutations } from "../src/declare.ts";
 import { permutations } from "./permutation-helpers.ts";

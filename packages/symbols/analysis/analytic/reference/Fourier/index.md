@@ -6,11 +6,11 @@ summary: The numeric discrete Fourier transform of a list, or of a rectangular m
 signatures:
   - call: Fourier(list)
     description: the discrete Fourier transform of a numeric list, or a rectangular numeric matrix.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (list<list<number>> | list<number>, expression?) -> list<list<number>> | list<number>
   - call: Fourier(list, FourierParameters -> {a, b})
     description: the general two-parameter transform $f_s = \sqrt{|b|/n^{1-a}}\sum_r \mathrm{list}_r\, e^{2\pi i b (r-1)(s-1)/n}$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 primitive: kernel
 bindings:
   - origin: native

@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { isFiniteNum, type NativeEval, numberResult, realCompile } from "@enumeratio/ce-patches";
-import type { Cx } from "@enumeratio/ce-patches";
+import { isFiniteNum, type NativeEval, numberResult, realCompile } from "@notatio/ce-patches";
+import type { Cx } from "@notatio/ce-patches";
 
 // Iterated quadratic maps -- the Mandelbrot and Julia sets, as expressions.
 //

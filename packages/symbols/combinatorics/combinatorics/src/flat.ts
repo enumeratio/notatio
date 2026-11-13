@@ -1,8 +1,8 @@
 // The carriers that have a flat reading (`Carrier.flat`), by type id (a map's `from`/`to`) and by
 // constructor name (a statistic's `on`). Light, so generated code can import it.
 
-import { toJs } from "@enumeratio/engine/compiled";
-import type { FlatCodec } from "@enumeratio/structures";
+import { toJs } from "@notatio/engine/compiled";
+import type { FlatCodec } from "@notatio/structures";
 import { CARRIERS } from "./carrier-list.ts";
 
 const flatCarriers = CARRIERS.filter((carrier) => carrier.flat !== undefined);

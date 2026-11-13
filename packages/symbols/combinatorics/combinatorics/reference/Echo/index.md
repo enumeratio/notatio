@@ -20,4 +20,4 @@ names:
   wolframIdentity: true
 ---
 
-- This engine has no console: printing is routed through @enumeratio/engine's message channel instead (`Echo::printed` for the plain form, `Echo::labeled` with a label), collectible with `collectMessages` — not skipped outright, so a caller that wants the printed text still can get it.
+- This engine has no console: printing is routed through @notatio/engine's message channel instead (`Echo::printed` for the plain form, `Echo::labeled` with a label), collectible with `collectMessages` — not skipped outright, so a caller that wants the printed text still can get it.

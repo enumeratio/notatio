@@ -7,8 +7,8 @@
 // interpreted. A definition with a `flat` alternative is compiled from it where it compiles and
 // agrees (its entry carries the flat hash), and its subject is encoded to the carrier's flat reading first.
 
-import type { Engine } from "@enumeratio/engine";
-import { definitionHash, fromJs, type MathJSON, runtimeHelpers } from "@enumeratio/engine/compiled";
+import type { Engine } from "@notatio/engine";
+import { definitionHash, fromJs, type MathJSON, runtimeHelpers } from "@notatio/engine/compiled";
 import { COMPILED as PERMUTATIONS_COMPILED } from "../../permutations/src/statistics.compiled.generated.js";
 import { COMPILED as PARTITIONS_COMPILED } from "../../partitions/src/statistics.compiled.generated.js";
 import { COMPILED as COMPOSITIONS_COMPILED } from "../../compositions/src/statistics.compiled.generated.js";

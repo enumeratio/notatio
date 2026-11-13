@@ -1,6 +1,6 @@
 import type { Expression } from "@cortex-js/compute-engine";
 import { BigDecimal } from "@cortex-js/compute-engine";
-import { operandsOf } from "@enumeratio/engine";
+import { operandsOf } from "@notatio/engine";
 import {
   type Ball,
   certify,
@@ -15,7 +15,7 @@ import {
   lerchPhiBall,
   stieltjesGammaBall,
   STIELTJES_MAX_ORDER,
-} from "@enumeratio/ce-patches";
+} from "@notatio/ce-patches";
 
 // Certified values: the heads whose arbitrary-precision kernels bound their own error, and so
 // return an enclosure -- a ball proven to hold the true value -- rather than a point value.

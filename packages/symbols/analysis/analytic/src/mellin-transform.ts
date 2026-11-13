@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf } from "@enumeratio/engine";
+import { operandsOf, symbolNameOf } from "@notatio/engine";
 import { fractionFactors } from "./transforms.ts";
 
 // MellinTransform(f, x, s) = ∫_0^∞ f(x) x^(s-1) dx and InverseMellinTransform(F, s, x): a

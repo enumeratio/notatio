@@ -1,5 +1,5 @@
-import { BigDecimal } from "@enumeratio/engine";
-import { atDigits } from "@enumeratio/ce-patches";
+import { BigDecimal } from "@notatio/engine";
+import { atDigits } from "@notatio/ce-patches";
 import { rd, rf } from "./carlson-big.ts";
 
 // The BigDecimal twin of jacobi-elliptic.ts's real kernel: the descending Landen/AGM amplitude

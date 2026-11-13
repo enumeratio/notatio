@@ -1,9 +1,9 @@
-# @enumeratio/frontend
+# @notatio/frontend
 
 The base of notatio, how an expression is shown: the map from a symbol to the component that
 draws it, the AST as a vdom, the control contract, the arithmetic of scrubbing and
 playback, and pure SVG renderers for every plot and glyph. No UI framework of its own —
-`@enumeratio/components` (the Lit custom elements) and the Vue/React wrappers here are
+`@notatio/components` (the Lit custom elements) and the Vue/React wrappers here are
 built on top of it. Reach for this package directly when you're writing a new renderer
 or framework binding; reach for [`components`](../components/README.md) or the framework subpaths to
 just use notatio in an app.
@@ -32,7 +32,7 @@ discriminating attribute unset and lets the component choose among the members i
 draws.
 
 ```ts
-import { structuralOf, tagOf, toVNode } from "@enumeratio/frontend/vdom";
+import { structuralOf, tagOf, toVNode } from "@notatio/frontend/vdom";
 
 tagOf("Plot3D"); // "notatio-plot-3d"
 toVNode(structuralOf(["Add", "x", 1]), h); // { tag: "notatio-add", attributes: {}, children: [...] }

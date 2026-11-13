@@ -2,15 +2,15 @@
 name: HarmonicNumber
 domain: Special functions
 signature: HarmonicNumber(n)
-summary: The harmonic number $H_n = \sum_{k=1}^n \tfrac1k$, exact at a non-negative integer $n$; with a second argument, the generalized $H_n^{(r)} = \sum_{k=1}^n k^{-r}$. Continued off the integers by $H_z = \psi(z+1) + \gamma$. Provided by `@enumeratio/analytic`.
+summary: The harmonic number $H_n = \sum_{k=1}^n \tfrac1k$, exact at a non-negative integer $n$; with a second argument, the generalized $H_n^{(r)} = \sum_{k=1}^n k^{-r}$. Continued off the integers by $H_z = \psi(z+1) + \gamma$. Provided by `@notatio/analytic`.
 signatures:
   - call: HarmonicNumber(n)
     description: the harmonic number $H_n = \sum_{k=1}^n 1/k$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
     type: (number, number?) -> number
   - call: HarmonicNumber(n, r)
     description: the generalized harmonic number $H_n^{(r)} = \sum_{k=1}^n k^{-r}$.
-    library: "@enumeratio/analytic"
+    library: "@notatio/analytic"
 bindings:
   - origin: reference
     form: notatio
