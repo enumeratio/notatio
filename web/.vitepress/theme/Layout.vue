@@ -13,6 +13,7 @@ import { useRouter } from "vitepress";
 import { defineAsyncComponent, onMounted } from "vue";
 import { installFragment } from "./fragment.ts";
 import { initReviewMode, reviewModeOn } from "./review/mode.ts";
+import SiteFooter from "./components/SiteFooter.vue";
 
 const { Layout: Base } = DefaultTheme;
 
@@ -33,15 +34,16 @@ onMounted(() => {
     <template #layout-top>
       <component :is="ReviewPanel" v-if="reviewModeOn" />
     </template>
+    <template #doc-after><SiteFooter /></template>
   </Base>
 </template>
 
 <style>
 /* The element the URL's fragment names (fragment.ts): outlined for as long as it's named. */
 .fragment-target {
-  outline: 1.5px solid var(--vp-c-brand-1);
+  outline: 1.5px solid var(--rubric);
   outline-offset: 4px;
-  border-radius: 6px;
+  border-radius: var(--radius-2);
   transition: outline-color 0.2s;
 }
 </style>

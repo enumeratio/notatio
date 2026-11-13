@@ -25,12 +25,3 @@ Everything evaluates here, in the page. For what a cell can say, see the
 [worksheet stories](/docs/components/worksheet); for the heads it can call, the
 [symbol reference](/reference/symbol/). Looking for `In[n]`/`Out[n]` and prose between
 the cells? That is the [notebook](/notebook/).
-
-<style>
-/* The screen wants the width: past VPDoc's centred reading column (same selectors, one
-   class more specific), as wide as the viewport allows up to a point. */
-.worksheet-page .VPDoc:not(.has-sidebar) .container,
-.worksheet-page .VPDoc:not(.has-sidebar) .content {
-  max-width: 1280px;
-}
-</style>

@@ -10,7 +10,7 @@
 // The shared engine carries these via its configureLatex list (engine.ts); engines built
 // elsewhere pass `conventionalLatexDictionary()`.
 
-import { LATEX_DICTIONARY, LatexSyntax, type MathJsonExpression } from "@cortex-js/compute-engine";
+import { type ComputeEngine, LATEX_DICTIONARY, LatexSyntax, type MathJsonExpression } from "@cortex-js/compute-engine";
 import type { LatexDictionaryEntry, Parser, Serializer } from "@cortex-js/compute-engine/latex-syntax";
 import { commandTeX, escapeTeXText, markLanded, UNICODE_TEX, unicodeTeX } from "@enumeratio/boxes/render";
 
@@ -246,28 +246,52 @@ const setOperation = (name: "Union" | "Intersection"): Entry => {
   } as Entry;
 };
 
-/** The heads whose value is a set, so `|…|` around one is its cardinality. compute-engine's canonical
- *  `Abs` of a set-typed operand is `Count`, but the editor reads without canonicalizing, so it has no
- *  types: `|𝒫(s)|` stays `Abs` unless the head is known to be a set. */
-const SET_HEADS = new Set(["Set", "PowerSet", "QuotientRing", "Union", "Intersection", "SetMinus"]);
-
-/** The native `|…|` entries (`|` and `\vert`), reading a set-valued body as `Count`. */
-const cardinality = (): Entry[] =>
+/** The native `|…|` entries (`|` and `\vert`), reading a body that `ce` types as a set (or a string)
+ *  as `Count`. compute-engine's canonical `Abs` of such an operand is `Count`, but the editor reads
+ *  without canonicalizing and a `Parser` has no engine, so the entry boxes the body itself, in a
+ *  scope that is dropped (an undeclared symbol stays undeclared), and takes the engine's decision:
+ *  `Abs` of it is `Count` or it is not. What the result holds is the body as read. A body the
+ *  engine cannot type or box stays `Abs`. */
+const cardinality = (ce: ComputeEngine): Entry[] =>
   LATEX_DICTIONARY.filter((e) => {
     const { kind, openTrigger } = e as { kind?: string; openTrigger?: unknown };
     return kind === "matchfix" && ['"|"', '["\\\\vert"]'].includes(JSON.stringify(openTrigger));
   }).map((entry) => {
     const { parse } = entry as unknown as { parse: (p: Parser, body: MathJsonExpression) => MathJsonExpression | null };
+    // Reads only: the native entry keeps the name `Abs` and the writing, and a second entry of
+    // that name, or one that writes with no name, is a dictionary warning.
+    const { name: _name, serialize: _serialize, ...reads } = entry as Entry;
     return {
-      ...entry,
+      ...reads,
       parse: (parser: Parser, body: MathJsonExpression) => {
         const read = parse(parser, body);
-        return Array.isArray(read) && read[0] === "Abs" && Array.isArray(read[1]) && SET_HEADS.has(read[1][0] as string)
-          ? (["Count", read[1]] as unknown as MathJsonExpression)
-          : read;
+        if (!Array.isArray(read) || read[0] !== "Abs" || read.length !== 2) return read;
+        return countsOf(ce, read[1] as MathJsonExpression) ? (["Count", read[1]] as MathJsonExpression) : read;
       },
     } as Entry;
   });
+
+/** Whether compute-engine's canonical `Abs` of `operand` is `Count`, which it is for a set or a string. */
+const countsOf = (ce: ComputeEngine, operand: MathJsonExpression): boolean => {
+  ce.pushScope();
+  try {
+    return ce.box(["Abs", operand] as MathJsonExpression).operator === "Count";
+  } catch {
+    return false;
+  } finally {
+    ce.popScope();
+  }
+};
+
+/** Make `ce` read `|…|` and `\vert…\vert` around a set as its `Count`, by the operand's type in `ce`. An
+ *  engine reads it only through this: the syntax it was built with has no engine to type with, so
+ *  without it `|s|` is `Abs`. */
+export function readCardinalityByType(ce: ComputeEngine): void {
+  const syntax = ce.latexSyntax;
+  if (syntax?.addEntries === undefined)
+    throw new Error("readCardinalityByType: the engine's LaTeX syntax takes no entries");
+  syntax.addEntries(cardinality(ce) as never);
+}
 
 /** The integrand of an `Integrate`, which the boxed form carries as `Function(f, x, y)`. */
 const integrandOf = (integrand: MathJsonExpression | undefined): MathJsonExpression | undefined =>
@@ -482,7 +506,6 @@ export const CONVENTIONAL_LATEX: readonly Entry[] = [
   setOperation("Union"),
   setOperation("Intersection"),
   integrate,
-  ...cardinality(),
   transpose,
   polyLog,
   derivative,

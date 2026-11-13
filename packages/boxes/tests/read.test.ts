@@ -164,3 +164,42 @@ test("what is not an expression is declined, not guessed", () => {
   ] as const)
     expect(() => makeExpression(box as never), JSON.stringify(box)).toThrow(MakeExpressionError);
 });
+
+test("every operand of an iterated operator, a derivative or a limit reaches the boxes and reads back", () => {
+  const exact = (json: MathJsonExpression) => expect(roundTrip(json)).toBe("exact");
+  // A second `Limits` is an inner operator, the first outermost.
+  exact(["Product", ["Power", 2, ["Add", "j", "k"]], ["Limits", "k", 1, "p"], ["Limits", "j", 1, "k"]]);
+  exact(["Sum", ["Multiply", "j", "k"], ["Limits", "j", 1, 3], ["Limits", "k", 1, "j"]]);
+  exact(["Integrate", ["Multiply", "x", "y"], ["Limits", "x", 0, 1], ["Limits", "y", 0, "x"]]);
+  exact(["Integrate", "x", ["Limits", "x", 0, 1], ["Limits", "y", 0, 1], ["Limits", "z", 0, 1]]);
+  // A step is the first two terms.
+  expect(makeExpression(makeBoxes(["Sum", "i", ["Limits", "i", 1, 9, 2]]))).toEqual([
+    "Sum",
+    "i",
+    ["Limits", "i", 1, 9, ["Subtract", 3, 1]],
+  ]);
+  expect(roundTrip(["Sum", "i", ["Limits", "i", 1, 9, 2]])).toBe("equivalent");
+  // Repeated and mixed Leibniz derivatives.
+  exact(["D", ["Power", "x", 3], "x", "x"]);
+  exact(["D", ["Multiply", "x", "y"], "x", "y"]);
+  // One order per argument, or a symbolic one.
+  exact(["Derivative", "Beta", 0, 1]);
+  exact(["Derivative", "f", 5]);
+  exact(["Derivative", "f", "k"]);
+  exact(["Derivative", "f", 2]);
+  exact(["Apply", ["Derivative", "f", "k"], "x"]);
+  // The side a limit is taken from.
+  exact(["Limit", ["Function", ["Block", ["Divide", 1, "_1"]], "_1"], 0, 1]);
+  exact(["Limit", ["Function", ["Block", ["Divide", 1, "_1"]], "_1"], 0, -1]);
+});
+
+test("a function's parameters named i or e read as letters, not constants", () => {
+  expect(makeExpression(makeBoxes(["Function", ["Add", "i", "j"], "i", "j"]))).toEqual([
+    "Function",
+    ["Add", "i", "j"],
+    "i",
+    "j",
+  ]);
+  // A lone `i` outside a parameter list is still the imaginary unit.
+  expect(makeExpression(makeBoxes(["Add", "i", 1]))).toEqual(["Add", "ImaginaryUnit", 1]);
+});

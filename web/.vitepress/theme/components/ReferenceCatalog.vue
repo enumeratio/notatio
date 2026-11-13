@@ -97,7 +97,7 @@ const linked = computed(() => shown.value.filter((r) => r.references?.length).le
   flex: 1 1 auto;
   padding: 0.35rem 0.6rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-bg);
   color: var(--vp-c-text-1);
   font-size: 0.85rem;
@@ -155,7 +155,7 @@ const linked = computed(() => shown.value.filter((r) => r.references?.length).le
   margin-right: 0.3rem;
   padding: 0.05rem 0.4rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 999px;
+  border-radius: var(--radius-1);
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
   font-family: var(--vp-font-family-mono, ui-monospace, monospace);

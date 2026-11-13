@@ -1,7 +1,7 @@
 {
   "powers": "y³ + x²",
   "fraction": " a + b\n───────\n c + d",
-  "radical": "√(x + 1)",
+  "radical": " ─────\n√x + 1",
   "nested": "    1\n─────────\n  1\n ─── + 1\n  x",
   "sum": "  n\n  ∑  k⁻²\nk = 1",
   "binomial": "⎛n⎞ + 1\n⎝k⎠",

@@ -35,7 +35,7 @@ declare module "@enumeratio/cli/browser" {
     prompt(): string;
     banner(): string;
     eval(line: string): LineOutput;
-    formatOut(n: number, body: string): string;
+    formatOut(n: number, body: string | { text: string; baseline?: number }): string;
   }
 
   export interface Demo {

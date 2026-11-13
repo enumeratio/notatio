@@ -9,6 +9,7 @@ import type { Expression } from "@cortex-js/compute-engine";
 import { can, type Environment, ENVIRONMENTS, environmentNamed } from "@enumeratio/frontend";
 import { evaluateReadouts, reduce } from "@enumeratio/frontend";
 import { bold, cyan, dim, red } from "./ansi.ts";
+import type { Drawn } from "./cell-layout.ts";
 import { information } from "./information.ts";
 import {
   FORM_LABEL,
@@ -108,7 +109,7 @@ export class Repl {
       if (input.startsWith("?")) return { text: information(this.session.ce, input, this.color) };
       if (/^let\s/.test(input)) return this.assignment(input);
       const res = this.session.evaluate(input);
-      return { text: this.formatOut(res.n, this.session.render(this.reduced(res.expr))) };
+      return { text: this.formatOut(res.n, this.session.renderDrawn(this.reduced(res.expr))) };
     } catch (err) {
       return { text: red(`  error: ${(err as Error).message}`, this.color) };
     }
@@ -125,10 +126,21 @@ export class Repl {
     return ce.box(out as never).evaluate();
   }
 
-  /** Style an `Out[n]= …` line (multi-line bodies start on the next line). */
-  formatOut(n: number, body: string): string {
-    const label = dim(`Out[${n}]= `, this.color);
-    return body.includes("\n") ? `${label}\n${body}` : label + body;
+  /**
+   * Style an `Out[n]= …` line. A multi-line body with a baseline sits beside the label,
+   * its other rows indented by the label's width; one without starts on the next line.
+   */
+  formatOut(n: number, body: string | Drawn): string {
+    const { text, baseline } = typeof body === "string" ? { text: body, baseline: undefined } : body;
+    const plain = `Out[${n}]= `;
+    const label = dim(plain, this.color);
+    if (!text.includes("\n")) return label + text;
+    if (baseline === undefined) return `${label}\n${text}`;
+    const pad = " ".repeat(plain.length);
+    return text
+      .split("\n")
+      .map((row, i) => (i === baseline ? label : pad) + row)
+      .join("\n");
   }
 
   private assignment(input: string): LineOutput {
@@ -216,7 +228,7 @@ export class Repl {
       case "ep":
       case "epsil": {
         const res = s.evaluate(input);
-        return { text: this.formatOut(res.n, s.render(res.expr)) };
+        return { text: this.formatOut(res.n, s.renderDrawn(res.expr)) };
       }
       default: {
         const handler = this.extra.get(cmd);

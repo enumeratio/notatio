@@ -251,7 +251,7 @@ const defaults = (d?: Readonly<Record<string, unknown>>): [string, string][] =>
   display: inline-block;
   margin: 0 0.3rem 0.15rem 0;
   padding: 0.05rem 0.45rem;
-  border-radius: 999px;
+  border-radius: var(--radius-1);
   background: var(--vp-c-default-soft);
   color: var(--vp-c-text-2);
   font-family: var(--vp-font-family-mono);

@@ -1,0 +1,323 @@
+/* Type and the reading column. Prose elements take the serif at the prose size; everything
+   else (the chrome a page component draws) stays in the interface face. */
+html {
+  scroll-padding-top: calc(var(--vp-nav-height) + 1rem);
+}
+body {
+  font-family: var(--font-ui);
+  font-feature-settings: "cv05", "cv08", "ss03";
+  background: var(--paper);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection {
+  background: color-mix(in srgb, var(--blue) 22%, transparent);
+}
+
+/* Focus is always drawn, the same way everywhere. */
+:focus-visible {
+  outline: var(--focus);
+  outline-offset: 2px;
+  border-radius: var(--radius-1);
+}
+
+.vp-doc :where(p, li, dd, dt, blockquote, figcaption) {
+  font-family: var(--font-prose);
+  font-size: var(--text-prose);
+  font-optical-sizing: auto;
+  font-variant-numeric: oldstyle-nums proportional-nums;
+  hanging-punctuation: first;
+}
+.vp-doc :where(p, ul, ol, dl, blockquote, h1, h2, h3, h4, h5, h6) {
+  max-width: var(--measure);
+}
+.vp-doc :where(li) :where(p, li) {
+  font-size: inherit;
+}
+.vp-doc p,
+.vp-doc summary {
+  margin: 1.1rem 0;
+  line-height: var(--leading-prose);
+}
+.vp-doc li {
+  line-height: var(--leading-prose);
+}
+.vp-doc li + li {
+  margin-top: 0.35rem;
+}
+.vp-doc ul,
+.vp-doc ol {
+  padding-left: 1.4rem;
+  margin: 1.1rem 0;
+}
+.vp-doc ul > li::marker {
+  color: var(--ink-3);
+}
+.vp-doc ol > li::marker {
+  font-family: var(--font-ui);
+  font-size: 0.8em;
+  font-variant-numeric: tabular-nums;
+  color: var(--rubric);
+}
+.vp-doc strong {
+  font-weight: 620;
+}
+
+/* Headings: the serif at display sizes, set tight; h2 opens a section under a hairline. */
+.vp-doc :where(h1, h2, h3, h4) {
+  font-family: var(--font-prose);
+  font-optical-sizing: auto;
+  color: var(--ink);
+  text-wrap: balance;
+}
+.vp-doc h1 {
+  font-size: var(--text-h1);
+  font-weight: 500;
+  line-height: var(--leading-tight);
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+}
+.vp-doc h2 {
+  font-size: var(--text-h2);
+  font-weight: 560;
+  line-height: 1.2;
+  letter-spacing: -0.012em;
+  margin: 3.5rem 0 1rem;
+  padding-top: 1.5rem;
+  border-top: var(--hairline);
+  max-width: none;
+}
+.vp-doc h3 {
+  font-size: var(--text-h3);
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+  margin: 2.25rem 0 0.5rem;
+}
+.vp-doc h4 {
+  font-size: var(--text-h4);
+  font-weight: 600;
+  font-style: italic;
+  margin: 1.75rem 0 0.25rem;
+}
+.vp-doc .header-anchor {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--rubric);
+}
+@media (max-width: 640px) {
+  .vp-doc :where(p, li, dd, dt, blockquote, figcaption) {
+    font-size: 1.0625rem;
+  }
+  .vp-doc h1 {
+    font-size: 2rem;
+  }
+  .vp-doc h2 {
+    font-size: 1.45rem;
+    margin-top: 2.75rem;
+  }
+}
+
+/* Links: ink blue, underlined by a hairline that thickens on hover. */
+.vp-doc a {
+  color: var(--blue);
+  font-weight: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--blue) 35%, transparent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  transition:
+    color 0.15s,
+    text-decoration-color 0.15s;
+}
+.vp-doc a:hover {
+  color: var(--blue-strong);
+  text-decoration-color: currentColor;
+}
+
+/* Inline code: the mono face in ink on sunken paper; a block sits in a hairline frame. */
+.vp-doc :not(pre) > code {
+  font-family: var(--font-code);
+  font-size: 0.84em;
+  font-variant-ligatures: none;
+  color: var(--code-ink);
+  background: var(--paper-sunken);
+  padding: 0.08em 0.3em;
+  border-radius: var(--radius-1);
+}
+.vp-doc a > code {
+  color: var(--blue);
+}
+.vp-doc :where(h1, h2, h3, h4) > code {
+  font-size: 0.8em;
+}
+.vp-doc div[class*="language-"] {
+  border-radius: var(--radius-2);
+  border: var(--hairline);
+  margin: 1.5rem 0;
+}
+.vp-doc div[class*="language-"] code {
+  font-variant-ligatures: none;
+  line-height: 1.6;
+}
+@media (max-width: 639px) {
+  .vp-doc div[class*="language-"] {
+    border-radius: 0;
+    border-left: 0;
+    border-right: 0;
+  }
+}
+
+/* A quotation is indented under a rubric rule. */
+.vp-doc blockquote {
+  margin: 1.5rem 0;
+  padding: 0 0 0 1.25rem;
+  border-left: 2px solid var(--rubric);
+  color: var(--ink-2);
+}
+.vp-doc blockquote > p {
+  font-size: var(--text-prose);
+  font-style: italic;
+  color: inherit;
+}
+.vp-doc hr {
+  border: 0;
+  border-top: var(--hairline);
+  margin: 3rem 0;
+}
+
+/* Tables: a booktabs table, rules above and below and under the head, none between columns. */
+.vp-doc table {
+  display: block;
+  overflow-x: auto;
+  margin: 1.75rem 0;
+  border-collapse: collapse;
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  font-variant-numeric: tabular-nums;
+}
+.vp-doc tr,
+.vp-doc tr:nth-child(2n) {
+  background: none;
+  border: 0;
+}
+.vp-doc th,
+.vp-doc td {
+  border: 0;
+  padding: 0.5rem 1.25rem 0.5rem 0;
+  text-align: left;
+  vertical-align: baseline;
+}
+.vp-doc th {
+  background: none;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  border-top: 1.5px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  white-space: nowrap;
+}
+.vp-doc td {
+  border-bottom: var(--hairline);
+}
+.vp-doc tbody tr:last-child td {
+  border-bottom: 1.5px solid var(--ink);
+}
+
+/* Notes (::: tip, warning, …): a marginal note, a colored rule and a small-caps label. */
+.vp-doc .custom-block {
+  margin: 1.5rem 0;
+  padding: 0.1rem 0 0.1rem 1.1rem;
+  border: 0;
+  border-left: 2px solid var(--rule-strong);
+  border-radius: 0;
+  max-width: var(--measure);
+}
+.vp-doc .custom-block.tip {
+  border-left-color: var(--green);
+}
+.vp-doc .custom-block.warning {
+  border-left-color: var(--ochre);
+}
+.vp-doc .custom-block.danger {
+  border-left-color: var(--red);
+}
+.vp-doc .custom-block.info {
+  padding: 0.75rem 1.1rem;
+}
+.vp-doc .custom-block .custom-block-title {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  margin: 0.4rem 0 0.2rem;
+}
+.vp-doc .custom-block.tip .custom-block-title {
+  color: var(--green);
+}
+.vp-doc .custom-block.warning .custom-block-title {
+  color: var(--ochre);
+}
+.vp-doc .custom-block.danger .custom-block-title {
+  color: var(--red);
+}
+.vp-doc .custom-block p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0.4rem 0;
+}
+.vp-doc .custom-block a {
+  color: var(--blue);
+}
+.vp-doc .custom-block.details summary {
+  font-family: var(--font-ui);
+  font-size: var(--text-ui);
+  font-weight: 600;
+  margin: 0.4rem 0;
+}
+
+/* Typeset mathematics: KaTeX's Computer Modern, a touch over the serif's size so the
+   x-heights meet; a display formula scrolls sideways inside the column rather than the page. */
+.katex {
+  font-size: 1.08em;
+}
+.vp-doc .katex-display {
+  max-width: var(--measure);
+  margin: 1.5rem 0;
+  padding: 0.25rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.vp-doc :where(h1, h2, h3, h4) .katex {
+  font-size: 1em;
+}
+
+.vp-doc kbd {
+  font-family: var(--font-code);
+  font-size: 0.78em;
+  padding: 0.1em 0.4em;
+  border: 1px solid var(--rule-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--radius-2);
+  background: var(--paper-raised);
+}
+.vp-doc img,
+.vp-doc video {
+  border-radius: var(--radius-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

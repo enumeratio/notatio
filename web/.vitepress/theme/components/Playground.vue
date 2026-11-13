@@ -114,7 +114,7 @@ watch([source, mode], run);
 .ce-modes button {
   padding: 0.25rem 0.75rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 6px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-2);
   font-size: 0.85rem;
@@ -128,7 +128,7 @@ watch([source, mode], run);
   width: 100%;
   padding: 0.75rem;
   border: 1px solid var(--vp-c-divider);
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-bg-soft);
   color: var(--vp-c-text-1);
   font-family: var(--vp-font-family-mono);
@@ -159,7 +159,7 @@ watch([source, mode], run);
 .ce-grid pre {
   margin: 0;
   padding: 0.75rem;
-  border-radius: 8px;
+  border-radius: var(--radius-2);
   background: var(--vp-c-bg-alt);
   overflow-x: auto;
   font-size: 0.82rem;

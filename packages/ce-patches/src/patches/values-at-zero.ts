@@ -6,7 +6,8 @@ import { evaluateZetaAtNonpositiveShift, evaluateZetaAtZero } from "../compute-e
 // term dropped at a = 0, −1, … and Zeta(s, −n) = ζ(s) + Σ j^(−s) for an integer s ≥ 2.
 export const valuesAtZero: Patch = {
   id: "values-at-zero",
-  issue: "https://github.com/cortex-js/compute-engine/issues/409",
+  issue: "https://github.com/cortex-js/compute-engine/issues/524",
+  pr: "https://github.com/cortex-js/compute-engine/pull/529",
   lands: "Zeta(0, a) = 1/2 − a; Zeta(2, −1) = 1 + π²/6",
   files: ["src/compute-engine/library/special-functions.ts"],
   heads: ["Zeta"],

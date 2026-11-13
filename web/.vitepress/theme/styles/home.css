@@ -1,0 +1,239 @@
+/* The home page (web/index.md): a title page, three plates and a table of contents. */
+.home-page .VPPage {
+  padding: 0 24px;
+}
+.home {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+.home :where(p, ul, ol, h1, h2) {
+  max-width: none;
+}
+.home .eyebrow,
+.eyebrow {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rubric);
+  margin: 0 0 1rem;
+}
+
+.home-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem;
+  align-items: center;
+  padding: 3rem 0 3.5rem;
+}
+@media (min-width: 960px) {
+  .home-hero {
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 4rem;
+    padding: 5.5rem 0 5rem;
+  }
+}
+.home .home-hero h1 {
+  font-size: var(--text-display);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: -0.03em;
+  margin: 0 0 1.5rem;
+}
+.home .home-hero h1 em {
+  font-style: italic;
+  color: var(--rubric);
+}
+.home .lede {
+  font-size: 1.3rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+  max-width: 32rem;
+  margin: 0 0 2rem;
+}
+.home .lede em {
+  color: var(--ink);
+}
+.home .home-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+  align-items: center;
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.95rem;
+}
+.home .home-action {
+  font-weight: 550;
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--rule-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.3em;
+}
+.home .home-action:hover {
+  color: var(--blue);
+  text-decoration-color: currentColor;
+}
+.home .home-action.is-primary {
+  padding: 0.65rem 1.15rem;
+  background: var(--ink);
+  color: var(--paper);
+  border-radius: var(--radius-2);
+  text-decoration: none;
+  transition: background-color 0.15s;
+}
+.home .home-action.is-primary:hover {
+  background: var(--blue);
+  color: var(--paper);
+}
+
+/* A plate: a figure in a hairline frame with its caption beneath, as in a printed book. */
+.plate {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.plate > :not(figcaption) {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+  padding: 1.25rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius-2);
+  background: var(--plate);
+  overflow-x: auto;
+}
+.vp-doc .plate figcaption {
+  margin-top: 0.75rem;
+  font-size: 0.98rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.plate .plate-no {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--rubric);
+  margin-right: 0.5rem;
+}
+.home-hero-plate graphics-box[data-plot] svg {
+  width: 100%;
+}
+.home-hero-plate graphics-box[data-plot] .graphics-box-plot {
+  display: block;
+}
+
+.home-plates {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 2.5rem 2rem;
+  padding: 3rem 0;
+  border-top: var(--hairline);
+}
+@media (min-width: 768px) {
+  .home-plates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .home-plates .plate.is-wide {
+    grid-column: 1 / -1;
+  }
+}
+@media (min-width: 1100px) {
+  .home-plates {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 0.9fr) minmax(0, 1.3fr);
+  }
+  .home-plates .plate.is-wide {
+    grid-column: auto;
+  }
+}
+
+/* Contents: a book's table of contents, numbered in rubric. */
+.home-contents {
+  padding: 3rem 0 1rem;
+  border-top: var(--hairline);
+}
+.home .home-contents h2 {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  margin: 0 0 1rem;
+  padding: 0;
+  border: 0;
+}
+.home .home-contents ol {
+  list-style: none;
+  counter-reset: contents;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: 4rem;
+}
+@media (min-width: 768px) {
+  .home .home-contents ol {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.home .home-contents li {
+  counter-increment: contents;
+  margin: 0;
+  border-top: var(--hairline);
+}
+.home .home-contents a {
+  display: grid;
+  grid-template-columns: 2.25rem minmax(0, 1fr);
+  padding: 1rem 0 1.1rem;
+  text-decoration: none;
+  color: inherit;
+}
+.home .home-contents a::before {
+  content: counter(contents, upper-roman);
+  font-family: var(--font-prose);
+  font-size: 1rem;
+  font-style: italic;
+  color: var(--rubric);
+  padding-top: 0.3rem;
+}
+.home-contents-title {
+  grid-column: 2;
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.3;
+  color: var(--ink);
+  transition: color 0.15s;
+}
+.home-contents-desc {
+  grid-column: 2;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.home .home-contents a:hover .home-contents-title {
+  color: var(--blue);
+}
+
+/* Each plate holds its height before its element draws, so nothing moves when it does. */
+.home-hero-plate > :not(figcaption) {
+  min-height: 21rem;
+}
+.home-plates .plate-body {
+  min-height: 24rem;
+  align-items: stretch;
+}
+.home-plates graphics-3d-box {
+  text-align: center;
+}
+.home-plates graphics-3d-box svg {
+  width: 100%;
+  max-width: 26rem;
+}

@@ -621,14 +621,24 @@ class Layout {
     return { width: x + side, height: up.height + b.height + down.height, baseline: up.height + b.baseline, items };
   }
 
+  /** `√` with a bar over the radicand, which keeps its baseline; a tall radicand gets a `┌│√` sign. */
   radical(radicand: Box, index: Box | undefined, style: Style): Laid {
     const inner = this.lay(radicand, style);
-    const sign = this.text("√", style);
-    const root = index === undefined ? EMPTY : this.lay(index, style);
-    // A single token reads as `√x`; anything longer is fenced, since there is no vinculum to extend.
-    const single = typeof radicand === "string" && Array.from(radicand).length <= 1;
-    const body = single ? inner : this.across([this.text("(", style), inner, this.text(")", style)], 0);
-    return this.across([root, sign, body], 0);
+    const text = (c: string, y: number, x = 0): Item => ({ ...this.text(c, style).items[0]!, x, y });
+    const tall = inner.height > 1;
+    const sign: Item[] = [];
+    if (tall) for (let y = 0; y < inner.height; y++) sign.push(text(y === 0 ? "┌" : "│", y));
+    sign.push(text("√", inner.height));
+    const bar = inner.width === 0 ? [] : [text("─".repeat(inner.width), 0, 1)];
+    const body: Laid = {
+      width: 1 + inner.width,
+      height: inner.height + 1,
+      baseline: inner.baseline + 1,
+      items: [...sign, ...bar, ...moved(inner, 1, 1)],
+    };
+    if (index === undefined) return body;
+    const small = raised(plain(index), SUPERSCRIPTS);
+    return this.across([small === undefined ? this.lay(index, style) : this.text(small, style), body], 0);
   }
 
   stackedAbout(base: Box, under: Box | undefined, over: Box | undefined, style: Style): Laid {

@@ -205,7 +205,7 @@ function commitUrl(p: TimePoint): string {
   transform: translate(-50%, -110%);
   background: var(--vp-c-bg-elv);
   border: 1px solid var(--vp-c-divider);
-  border-radius: 6px;
+  border-radius: var(--radius-2);
   padding: 0.35rem 0.5rem;
   font-size: 0.75rem;
   pointer-events: none;
@@ -226,7 +226,7 @@ function commitUrl(p: TimePoint): string {
   display: inline-block;
   width: 0.7rem;
   height: 0.7rem;
-  border-radius: 2px;
+  border-radius: var(--radius-1);
   margin-right: 0.3rem;
   vertical-align: -1px;
 }
