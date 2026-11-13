@@ -19,6 +19,7 @@ import {
   subscript,
   subsuperscript,
   superscript,
+  tag,
   text,
   underoverscript,
   underscript,
@@ -343,6 +344,18 @@ function bigOperator(symbol: string, over: unknown): Box {
 
 /** The notation `makeBoxes` is writing with: compute-engine's heads, then the caller's. */
 let notation: Notation = ENGINE_NOTATION;
+/** The caller's own notation: it decides which heads keep their name in a `TagBox`. */
+const NO_NOTATION: Notation = {};
+let extraNotation = NO_NOTATION;
+/** Whether notation boxes carry their head (off while the reader learns what they look like). */
+let tagging = true;
+
+/** The heads (`Head/arity`) whose notation another head shares, or that any expression of the same
+ *  structure writes alike: their boxes keep the head in a `TagBox`. The reader learns it. */
+let ambiguous: (extra: Notation) => ReadonlySet<string> = () => new Set();
+export function setAmbiguousNotation(decide: typeof ambiguous): void {
+  ambiguous = decide;
+}
 
 const WRITER: Writer = {
   box: (json) => make(json).box,
@@ -353,7 +366,10 @@ const WRITER: Writer = {
 function makeFunction(head: string, ops: unknown[]): Made {
   const rule = Object.hasOwn(notation, head) ? notation[head] : undefined;
   const written = rule?.(ops as MathJsonExpression[], WRITER);
-  if (written !== undefined) return atom(written);
+  if (written !== undefined) {
+    const keeps = tagging && ambiguous(extraNotation).has(`${head}/${ops.length}`);
+    return atom(keeps ? tag(written, head) : written);
+  }
   switch (head) {
     case "Add": {
       const items: Box[] = [paren(make(ops[0]), ADD)]; // left-associative: no parens on a leading sum
@@ -667,14 +683,22 @@ function make(node: unknown): Made {
 
 /** `json`'s traditional notation, as boxes: compute-engine's heads as this package writes them,
  *  every other head as `notation` (its packages', `notationOf(engine)`) says, or as a call. */
-export function makeBoxes(json: MathJsonExpression, extra: Notation = {}, options: MakeOptions = {}): Box {
-  const outer = [notation, hostLeaf] as const;
+export function makeBoxes(json: MathJsonExpression, extra: Notation = NO_NOTATION, options: MakeOptions = {}): Box {
+  return write(json, extra, options, true);
+}
+
+/** `makeBoxes` with every head written bare: what the reader learns each notation looks like from. */
+export const makeBareBoxes = (json: MathJsonExpression, extra: Notation = NO_NOTATION): Box =>
+  write(json, extra, {}, false);
+
+function write(json: MathJsonExpression, extra: Notation, options: MakeOptions, tags: boolean): Box {
+  const outer = [notation, hostLeaf, extraNotation, tagging] as const;
   notation = { ...ENGINE_NOTATION, ...LAYOUT_NOTATION, ...PROSE_NOTATION, ...CONTROL_NOTATION, ...extra };
-  hostLeaf = options.leaf;
+  [hostLeaf, extraNotation, tagging] = [options.leaf, extra, tags];
   try {
     return make(json).box;
   } finally {
-    [notation, hostLeaf] = outer;
+    [notation, hostLeaf, extraNotation, tagging] = outer;
   }
 }
 

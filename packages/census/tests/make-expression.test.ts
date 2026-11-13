@@ -104,6 +104,6 @@ test("MakeExpression reads the reference examples back", () => {
   // What is left is heads whose notation shares a spelling with another (`ζ(s, a)`, an interval and a
   // list), operands `makeBoxes` drops (a second integration variable, a step), or layout and
   // interfaces: boxes that say nothing of the expression.
-  expect(rows.exact + rows.equivalent).toBeGreaterThan(0.975 * total);
+  expect(rows.exact + rows.equivalent).toBeGreaterThan(0.985 * total);
   expect(rows.declined).toBeLessThan(0.01 * total);
 }, 600_000);

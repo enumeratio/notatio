@@ -11,8 +11,16 @@
 // an error box, boxes the grammar does not cover) throws `MakeExpressionError`, never a guess.
 
 import type { MathJsonExpression as Json } from "@cortex-js/compute-engine/epsil";
-import { type Box, type BoxNode, optionsOfBox, tokenClass } from "./box.ts";
-import { APPLY_FUNCTION, FUNCTIONS, INVISIBLE_TIMES, makeBoxes, RELATIONS, SYMBOLS } from "./make.ts";
+import { type Box, type BoxNode, isBoxHead, optionsOfBox, tokenClass } from "./box.ts";
+import {
+  APPLY_FUNCTION,
+  FUNCTIONS,
+  INVISIBLE_TIMES,
+  makeBareBoxes,
+  RELATIONS,
+  SYMBOLS,
+  setAmbiguousNotation,
+} from "./make.ts";
 import { ENGINE_NOTATION } from "./notation-engine.ts";
 import type { Notation } from "./notation.ts";
 
@@ -169,6 +177,8 @@ interface Notated {
   readonly byFirst: ReadonlyMap<string, readonly Pattern[]>;
   /** Names a notation writes a call with (`μ`, `ζ`). */
   readonly calls: ReadonlySet<string>;
+  /** The patterns of heads kept in a `TagBox`, by head: read by the tag, never by their look. */
+  readonly tagged: ReadonlyMap<string, readonly Pattern[]>;
 }
 
 /** Placeholder operands a rule is run on: each a symbol `makeBoxes` writes as itself. */
@@ -198,10 +208,47 @@ const literalsIn = (box: unknown): number =>
 const mentions = (box: unknown, slot: string): boolean =>
   box === slot || (Array.isArray(box) && box.some((x) => mentions(x, slot)));
 
+const NOTHING: Notated = { byFirst: new Map(), calls: new Set(), tagged: new Map() };
+
+/** Operand names a structural reading is run on: placeholders are not symbols the reader knows. */
+const NAMES = ["opA", "opB", "opC", "opD"];
+const named = (box: unknown): unknown =>
+  Array.isArray(box) ? box.map(named) : slotOf(box as Box) >= 0 ? NAMES[slotOf(box as Box)] : box;
+
+/** Whether `box` writes out a name (`F`, `μ`, `1`): a letter or a number that is not an operand's place. */
+const writesName = (box: unknown): boolean =>
+  Array.isArray(box)
+    ? box.slice(isBoxHead(box[0]) ? 1 : 0).some(writesName)
+    : typeof box === "string" && slotOf(box) < 0 && box !== "mod" && tokenClass(box) !== "operator";
+
+const mentionsHead = (json: Json, head: string): boolean =>
+  json === head || (Array.isArray(json) && json.some((x) => mentionsHead(x as Json, head)));
+
+/**
+ * Whether a head's boxes name nothing: they are operands in a bracket, a script or a fraction,
+ * which any other expression of that structure writes the same (a quotient in parentheses,
+ * `(a)_n`). A reading of the boxes that finds the head itself leaves nothing to tell apart.
+ */
+function generic({ head, items }: Pattern): boolean {
+  if (writesName(items)) return false;
+  const operandsOnly = (json: Json): boolean =>
+    Array.isArray(json)
+      ? (json as Json[]).slice(1).every(operandsOnly)
+      : typeof json === "string" && NAMES.includes(json);
+  try {
+    const json = new Reader(named(items) as Box[], {}, NOTHING).whole();
+    return operandsOnly(json) && !mentionsHead(json, head);
+  } catch {
+    return false;
+  }
+}
+
 /**
  * What each rule writes, learned by running it: for every head and arity, the boxes of the head
  * applied to placeholders. A head whose rule declines (it writes a call by name) or drops an
- * operand has no pattern; heads whose patterns come out the same are not told apart.
+ * operand has no pattern. Heads whose patterns come out the same, and a pattern that is only
+ * operands in a structure, are ambiguous: `makeBoxes` keeps their head in a `TagBox`, and the
+ * reader takes it from there. The rest are read by their look.
  */
 function notatedFrom(notation: Notation): Notated {
   const byShape = new Map<string, Pattern[]>();
@@ -209,7 +256,7 @@ function notatedFrom(notation: Notation): Notated {
     for (let arity = 1; arity <= SLOTS.length; arity++) {
       let box: Box;
       try {
-        box = makeBoxes([head, ...SLOTS.slice(0, arity)] as never, notation);
+        box = makeBareBoxes([head, ...SLOTS.slice(0, arity)] as never, notation);
       } catch {
         continue;
       }
@@ -220,28 +267,38 @@ function notatedFrom(notation: Notation): Notated {
     }
   }
   const byFirst = new Map<string, Pattern[]>();
+  const tagged = new Map<string, Pattern[]>();
   const calls = new Set<string>();
   for (const patterns of byShape.values()) {
     const [pattern] = patterns;
     const [first, second] = pattern!.items;
     if (typeof first === "string" && second === APPLY_FUNCTION) calls.add(first);
+    if (patterns.length > 1 || generic(pattern!)) {
+      for (const p of patterns) tagged.set(p.head, [...(tagged.get(p.head) ?? []), p]);
+      continue;
+    }
+    if (slotOf(first!) >= 0) continue;
     const key = firstKey(first);
-    if (slotOf(first!) >= 0 || patterns.length > 1) continue;
     byFirst.set(key, [...(byFirst.get(key) ?? []), pattern!].toSorted(compare));
   }
-  return { byFirst, calls };
+  return { byFirst, calls, tagged };
 }
 
-const DEFAULT = notatedFrom(ENGINE_NOTATION);
+let defaults: Notated | undefined;
 const cache = new WeakMap<Notation, Notated>();
 
 /** The patterns of compute-engine's notation, and of `extra` over it. */
 function notatedBy(extra: Notation | undefined): Notated {
-  if (extra === undefined) return DEFAULT;
+  if (extra === undefined || Object.keys(extra).length === 0) return (defaults ??= notatedFrom(ENGINE_NOTATION));
   let found = cache.get(extra);
   if (found === undefined) cache.set(extra, (found = notatedFrom({ ...ENGINE_NOTATION, ...extra })));
   return found;
 }
+
+setAmbiguousNotation((extra) => {
+  const { tagged } = notatedBy(extra);
+  return new Set([...tagged.values()].flatMap((patterns) => patterns.map((p) => `${p.head}/${p.arity}`)));
+});
 
 class Reader {
   pos = 0;
@@ -522,6 +579,21 @@ class Reader {
     return atom([best.pattern.head, ...operands] as Json);
   }
 
+  /** `inner` read as `head` when the notation keeps that head in a `TagBox`, with a pattern that fits. */
+  tagged(inner: Box, head: string): Atom | undefined {
+    const items = isNodeOf(inner, "RowBox") ? rowItems(inner) : [inner];
+    for (const pattern of this.notated.tagged.get(head) ?? []) {
+      const binds = new Map<number, Box>();
+      if (
+        items.length === pattern.items.length &&
+        pattern.items.every((p, k) => matches(p, items[k]!, binds)) &&
+        binds.size === pattern.arity
+      )
+        return atom([head, ...Array.from({ length: pattern.arity }, (_, i) => this.box(binds.get(i)!))] as Json);
+    }
+    return undefined;
+  }
+
   /** Whether the caller's `heads` already say what the call a pattern starts with stands for. */
   written({ items }: Pattern): boolean {
     return typeof items[0] === "string" && this.options.heads?.[items[0]] !== undefined;
@@ -668,8 +740,10 @@ class Reader {
       case "PanelBox":
       case "PaneBox":
       case "TooltipBox":
-      case "TagBox":
         return this.atomOf(args[1]!);
+      // A tag that names a head kept there reads as that head, its operands from the boxes inside.
+      case "TagBox":
+        return this.tagged(args[1]!, args[2] as unknown as string) ?? this.atomOf(args[1]!);
       case "FormBox":
         return args[2] === "TeXForm" ? decline("TeX as written", box) : this.atomOf(args[1]!);
       // The box carries what it stands for.

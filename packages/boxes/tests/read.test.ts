@@ -2,6 +2,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import type { MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 import { expect, test } from "vite-plus/test";
 import {
+  fence,
   fraction,
   graphics,
   interpretation,
@@ -12,9 +13,10 @@ import {
   named,
   row,
   superscript,
+  type Writer,
 } from "../src/index.ts";
 import { form } from "../src/box.ts";
-import { parseMathML, toMathML } from "../src/render/index.ts";
+import { parseMathML, toLatex, toMathML, toText } from "../src/render/index.ts";
 import { CORPUS } from "./corpus.ts";
 
 const ce = new ComputeEngine();
@@ -42,8 +44,6 @@ function roundTrip(json: MathJsonExpression): "exact" | "equivalent" | "declined
 const DECLINED = ["matrix no delimiters", "delimiter brackets", "error", "dictionary"];
 const MISMATCHED = [
   "product with a reciprocal",
-  // `(a + b)_n` is also how a Pochhammer symbol is written.
-  "subscript of sum",
   "superscript",
   "sum canonical",
   "derivative default order",
@@ -134,10 +134,57 @@ test("a registered notation reads back to its head", () => {
     expect(makeExpression(makeBoxes(json)), JSON.stringify(json)).toEqual(json);
 });
 
-test("heads that share one notation are read by structure", () => {
-  // `B_n` is a Bell and a Bernoulli number, `ζ(s, a)` a Zeta and a Hurwitz zeta.
-  expect(makeExpression(makeBoxes(["BellNumber", "n"]))).toEqual("B_n");
-  expect(makeExpression(makeBoxes(["Zeta", "s", "a"]))).toEqual(["HurwitzZeta", "s", "a"]);
+test("heads that share one notation keep their head in a TagBox", () => {
+  for (const json of [
+    ["JacobiSymbol", "a", "n"],
+    ["KroneckerSymbol", "a", "n"],
+    ["LegendreSymbol", "a", "p"],
+    ["Zeta", "s", "a"],
+    ["HurwitzZeta", "s", "a"],
+    ["Pochhammer", ["Add", "x", 1], "n"],
+    ["PowerMod", "a", "b", "n"],
+  ] as MathJsonExpression[]) {
+    const boxes = makeBoxes(json);
+    expect(boxes, JSON.stringify(json)).toMatchObject(["TagBox", expect.anything(), (json as unknown as string[])[0]]);
+    expect(makeExpression(boxes), JSON.stringify(json)).toEqual(json);
+  }
+  // The same boxes with no tag are what any other expression of that structure writes.
+  expect(makeExpression(makeBoxes(["Divide", "a", "n"]))).toEqual(["Divide", "a", "n"]);
+});
+
+test("a tag is not seen in what is written, and MathML keeps it", () => {
+  const strip = (b: unknown): unknown => (Array.isArray(b) ? (b[0] === "TagBox" ? strip(b[1]) : b.map(strip)) : b);
+  const boxes = makeBoxes(["Multiply", 2, ["Zeta", "s", "a"]]);
+  expect(JSON.stringify(boxes)).toContain("TagBox");
+  expect(toLatex(boxes)).toBe(toLatex(strip(boxes) as never));
+  expect(toText(boxes)).toBe(toText(strip(boxes) as never));
+  expect(makeExpression(parseMathML(toMathML(boxes)))).toEqual(["Multiply", 2, ["Zeta", "s", "a"]]);
+});
+
+test("a notation that names its head stays untagged", () => {
+  for (const json of [
+    ["Fibonacci", "n"],
+    ["NthPrime", "n"],
+    ["BernoulliB", "n"],
+    ["MoebiusMu", "n"],
+    ["Zeta", "s"],
+  ] as MathJsonExpression[])
+    expect(JSON.stringify(makeBoxes(json)), JSON.stringify(json)).not.toContain("TagBox");
+});
+
+test("a Bell number is a call, a Bernoulli number is B_n", () => {
+  expect(makeExpression(makeBoxes(["BellNumber", "n"]))).toEqual(["BellNumber", "n"]);
+  expect(makeExpression(makeBoxes(["BernoulliB", "n"]))).toEqual(["BernoulliB", "n"]);
+});
+
+test("a tag on a notation passed in is kept and read back", () => {
+  const notation = {
+    Quotient: ([a, b]: readonly MathJsonExpression[], write: Writer) =>
+      fence("(", [fraction(write.box(a!), write.box(b!))], ")"),
+  };
+  const boxes = makeBoxes(["Quotient", "a", "n"], notation);
+  expect(boxes).toMatchObject(["TagBox", expect.anything(), "Quotient"]);
+  expect(makeExpression(boxes, { notation })).toEqual(["Quotient", "a", "n"]);
 });
 
 test("a notation passed in is read back too", () => {
