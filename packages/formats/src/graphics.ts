@@ -100,6 +100,7 @@ export const GRAPHICS_HEADS: readonly string[] = [
   "ListContourPlot",
   "DensityPlot",
   "ListDensityPlot",
+  "RegionPlot",
   "PolarPlot",
   "ListPolarPlot",
   "VectorPlot",

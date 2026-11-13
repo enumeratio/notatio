@@ -11,13 +11,16 @@ import type { BoxShape, MathJSON } from "@enumeratio/entry";
 import { graphics3dOptionsOf, gridAxis, gridSide, sampleGrids, surfaceDomains } from "../src/graphics-3d-lowering.ts";
 import { surfaceBox } from "../src/graphics-3d-box.ts";
 import { unsampledGraphics3d } from "../src/graphics-3d-draw.ts";
+import { optionsOf } from "@enumeratio/formats";
+import { fieldSourcesOf, regionFunctionOf } from "../src/field-margin.ts";
 import { plainJson } from "../src/graphics-rules.ts";
 import { type CompiledItem, compilePlot } from "../src/plot-compile.ts";
 import {
   FIELD_PLOT_HEADS,
   fieldAxes,
-  fieldBoxOfGrid,
+  fieldBoxOfGrids,
   plotBoxOfSamples,
+  regionFunctionVars,
   spanOf,
   unsampledPlot,
   vectorOptionsOf,
@@ -120,18 +123,32 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
   if (settings["epilog"] || settings["prolog"]) throw new Error("an Epilog or Prolog is read by the page, not here");
   const body = held[1];
   if (FIELD_PLOT_HEADS.includes(String(held[0]))) {
-    const { free, items } = samplers(ce, body);
+    const head = String(held[0]);
+    if (settings["declined"] !== undefined) throw new Error(`no margin for ${settings["declined"]}`);
+    const field = fieldSourcesOf(head, body)!;
+    const { free, items } = samplers(ce, field.kind === "value" ? body : ["List", ...field.sources]);
     const [vx, vy] = [
       settings["xvar"] || free[0] || "x",
       settings["yvar"] || free.find((u) => u !== (settings["xvar"] || free[0])) || "y",
     ];
-    const { xs, ys } = fieldAxes(String(held[0]), settings);
-    return fieldBoxOfGrid(
-      String(held[0]),
+    const { xs, ys } = fieldAxes(head, settings);
+    const gridOf = (item: Sampler, params: readonly (readonly [string, string])[] = []): number[][] =>
+      ys.map((y) =>
+        xs.map((x) =>
+          item({ [vx]: x, [vy]: y, ...Object.fromEntries(params.map(([name, of]) => [name, of === vx ? x : y])) }),
+        ),
+      );
+    // The `RegionFunction` as written, read as the page's settings read it: its margin, compiled.
+    const written = optionsOf(held as never).options["RegionFunction"];
+    const region = written === undefined ? undefined : regionFunctionOf(written);
+    const inside = region && gridOf(samplers(ce, region.margin).items[0]!, regionFunctionVars(settings, vx, vy));
+    return fieldBoxOfGrids(
+      head,
       settings,
-      ys.map((y) => xs.map((x) => items[0]!({ [vx]: x, [vy]: y }))),
+      items.map((item) => gridOf(item)),
       xs,
       ys,
+      inside,
     );
   }
   if (held[0] === "VectorPlot" || held[0] === "StreamPlot") {

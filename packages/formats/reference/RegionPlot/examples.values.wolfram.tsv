@@ -1,0 +1,6 @@
+id	in
+disk	RegionPlot[Less[Plus[Power[x, 2], Power[y, 2]], 4], List[x, -3, 3], List[y, -3, 3]]
+conjunction	RegionPlot[And[Less[Plus[Power[x, 2], Power[y, 2]], 4], Less[Sin[x], y]], List[x, -3, 3], List[y, -3, 3]]
+annulus	RegionPlot[Less[1, Plus[Power[x, 2], Power[y, 2]], 4], List[x, -3, 3], List[y, -3, 3]]
+two-regions	RegionPlot[List[Less[Plus[Power[Plus[x, 1], 2], Power[y, 2]], 3], Less[Plus[Power[Plus[x, -1], 2], Power[y, 2]], 3]], List[x, -3, 3], List[y, -3, 3]]
+no-boundary	RegionPlot[Less[Plus[Power[x, 2], Power[y, 2]], 4], List[x, -3, 3], List[y, -3, 3], Rule[BoundaryStyle, enumeratio`None]]

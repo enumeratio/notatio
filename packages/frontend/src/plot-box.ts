@@ -654,7 +654,8 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
     }
   };
   for (const { role, prim, look } of items) if (role === "Prolog") mark(prim, look, false);
-  for (const { role, prim, look } of items) if (role === "Raster") mark(prim, look, true);
+  // A region's fill is a raster too, under the frame; its boundary is drawn with the series.
+  for (const { role, prim, look } of items) if (role === "Raster" || role === "Region") mark(prim, look, true);
 
   const framed = o.Frame === true;
   if (o.Axes !== false || framed) {
@@ -680,7 +681,7 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
   }
 
   for (const { role, prim, look } of items) if (role === "Fill") mark(prim, look, true);
-  for (const { role, prim, look } of items) if (role === "Series") mark(prim, look, true);
+  for (const { role, prim, look } of items) if (role === "Series" || role === "Boundary") mark(prim, look, true);
   for (const { role, prim, look } of items) if (role === "Epilog") mark(prim, look, false);
 
   if (bar) {

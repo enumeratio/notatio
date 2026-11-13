@@ -12,4 +12,4 @@ signatures:
     type: (any*) -> any
 ---
 
-Draws as a `GraphicsBox` holding a `RasterBox`: one cell per sample, colored along the gradient by value (`ColorFunction`, `Reverse`). `PlotLegends -> True` adds a color bar, and `PlotRange -> (zmin, zmax)` pins the scale so several plots compare on one. `N` is the samples per side.
+Draws as a `GraphicsBox` holding a `RasterBox`: one cell per sample, colored along the gradient by value (`ColorFunction`, `Reverse`). `PlotLegends -> True` adds a color bar, and `PlotRange -> (zmin, zmax)` pins the scale so several plots compare on one. `PlotPoints` is the samples per side, and `RegionFunction -> pred` leaves clear whatever lies outside the predicate.

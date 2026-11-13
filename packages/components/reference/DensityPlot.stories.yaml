@@ -18,9 +18,16 @@
 - id: interference
   caption: Interference
   category: Function densities
-  notes: "`n` raises the sampling resolution -- the ramp is quantised by the cell grid, so a finer grid reads as a smoother image."
+  notes: "`PlotPoints` raises the sampling resolution -- the ramp is quantised by the cell grid, so a finer grid reads as a smoother image."
   expr:
-    [DensityPlot, [Sin, [Multiply, x, y]], [Tuple, x, -4, 4], [Tuple, y, -4, 4], [Tuple, N, 80], [Tuple, Legend, True]]
+    [
+      DensityPlot,
+      [Sin, [Multiply, x, y]],
+      [Tuple, x, -4, 4],
+      [Tuple, y, -4, 4],
+      [Rule, PlotPoints, 80],
+      [Tuple, Legend, True],
+    ]
 - id: pinned-colour-scale
   caption: A pinned colour scale
   category: Function densities
@@ -33,8 +40,7 @@
       [Tuple, y, -3, 3],
       [Tuple, ZRange, "'0,30'"],
       [Tuple, Legend, True],
-      [Tuple, XLabel, "'x'"],
-      [Tuple, YLabel, "'y'"],
+      [Rule, FrameLabel, [List, "'x'", "'y'"]],
     ]
 - id: pre-sampled-grid
   caption: A pre-sampled grid

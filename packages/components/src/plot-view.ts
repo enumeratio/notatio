@@ -18,7 +18,7 @@ import {
   FIELD_PLOT_HEADS,
   fieldAxes,
   fieldBoxOfData,
-  fieldBoxOfGrid,
+  fieldBoxOfGrids,
   diagramBoxOf,
   followsClock,
   gestureHandlingOf,
@@ -37,6 +37,7 @@ import {
   polarPlotBoxSvg,
   polarPointsOf,
   primitivesOf,
+  regionFunctionVars,
   type Primitive,
   renderChart,
   renderDiagram,
@@ -450,27 +451,38 @@ export class PlotView {
       this.#field = true;
       return this.#draw();
     }
+    // A predicate with no margin has no region to draw.
+    if (settings["declined"] !== undefined) log("no margin for", settings["declined"], this.host.value);
     const raw = settings["expr"]?.trim();
-    if (!raw) return this.#clear();
-    const loaded = await plotFunctions(raw);
+    if (!raw || settings["declined"] !== undefined) return this.#clear();
+    // A list of sources (a margin per region, a function per implicit curve) is sampled item by item.
+    const [loaded, region] = await Promise.all([
+      plotFunctions(raw, settings["field"] === undefined ? {} : { each: true }),
+      settings["region-function"] ? plotFunctions(settings["region-function"]) : undefined,
+    ]);
     if (generation !== this.#generation) return;
-    const sampler = loaded.samplers[0];
-    if (!sampler) return this.#clear();
-    const scope = loaded.scope();
-    Object.assign(scope, this.host.bindings);
+    if (loaded.samplers.length === 0) return this.#clear();
     const free = loaded.plot.unknowns.filter((u) => !u.startsWith("_"));
     const vx = settings["xvar"] || free[0] || "x";
     const vy = settings["yvar"] || free.find((u) => u !== vx) || "y";
     const { xs, ys } = fieldAxes(head, settings);
+    const params = regionFunctionVars(settings, vx, vy);
     // Each sample is code the kernel compiled, read from the scope.
-    const grid = ys.map((y) =>
-      xs.map((x) => {
-        scope[vx] = x;
-        scope[vy] = y;
-        return sampler(scope);
-      }),
-    );
-    this.#box = fieldBoxOfGrid(head, settings, grid, xs, ys) as BoxNode;
+    const sampled = (plot: typeof loaded, sampler: (typeof loaded.samplers)[number]): number[][] => {
+      const scope = plot.scope();
+      Object.assign(scope, this.host.bindings);
+      return ys.map((y) =>
+        xs.map((x) => {
+          scope[vx] = x;
+          scope[vy] = y;
+          for (const [name, of] of params) scope[name] = of === vx ? x : y;
+          return sampler(scope);
+        }),
+      );
+    };
+    const grids = loaded.samplers.map((sampler) => sampled(loaded, sampler));
+    const inside = region?.samplers[0] && sampled(region, region.samplers[0]);
+    this.#box = fieldBoxOfGrids(head, settings, grids, xs, ys, inside) as BoxNode;
     this.#field = true;
     this.#draw();
   }

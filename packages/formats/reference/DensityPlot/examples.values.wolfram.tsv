@@ -1,3 +1,4 @@
 id	in
 trig-field	DensityPlot[Times[Sin[x], Cos[y]], List[x, -3.14, 3.14], List[y, -3.14, 3.14]]
 color-bar-pinned-scale	DensityPlot[Plus[Power[x, 2], Power[y, 2]], List[x, -3, 3], List[y, -3, 3], List[PlotLegends, True], List[PlotRange, List[0, 30]]]
+region-function	DensityPlot[Times[Sin[x], Cos[y]], List[x, -3, 3], List[y, -3, 3], Rule[RegionFunction, Less[Plus[Power[x, 2], Power[y, 2]], 4]]]

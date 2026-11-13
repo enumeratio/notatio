@@ -179,10 +179,12 @@ interface Override {
  *
  * So is a field plot: `<graphics-box value="ContourPlot(x^2 - y^2, (x, -3, 3), (y, -3, 3))">`, and
  * `DensityPlot` and the `List` forms (`ListContourPlot`, `ListDensityPlot` of a grid). The page's kernel samples
- * the expression on a grid (`N` per side); a contour is a `LineBox` per level (`Levels`: a count or a list),
- * or with `Filled -> True` a `RasterBox` of the bands, and a density plot is a `RasterBox` of cells colored
+ * the expression on a grid (`PlotPoints` per side); a contour is a `LineBox` per level (`Contours`: a count or a list),
+ * or with `ContourShading -> True` a `RasterBox` of the bands, and a density plot is a `RasterBox` of cells colored
  * by value (`ColorFunction`, `Reverse`), with `PlotLegends -> True` adding a color bar and
- * `PlotRange -> (zmin, zmax)` pinning its scale.
+ * `PlotRange -> (zmin, zmax)` pinning its scale. `ContourPlot(f == g, …)` is the implicit curve, and
+ * `RegionPlot(pred, …)` fills where a predicate holds (a `RasterBox`, and a `LineBox` along its boundary);
+ * `RegionFunction -> pred` keeps any of them to a region.
  */
 export class GraphicsBoxElement extends LitElement {
   static properties = {
