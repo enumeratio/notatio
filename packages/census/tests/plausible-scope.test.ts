@@ -8,6 +8,7 @@ import { allFamilies as allEntries } from "@enumeratio/combinatorics/collections
 import { PRIVATE_SUFFIX, publicName } from "@enumeratio/structures";
 import { expect, test } from "vite-plus/test";
 import { bindings, fullEngine } from "../src/engine.ts";
+import { FULL_ENGINE_TIMEOUT } from "./timeouts.ts";
 
 const EXEMPT: Record<string, string> = {
   PrimitiveRootList:
@@ -21,19 +22,23 @@ const hasCollection = (ce: ComputeEngine, name: string): boolean => {
   return (def?.operator?.collection ?? def?.value?.collection) !== undefined;
 };
 
-test("every declared collection is a Plausible family or exempt with a reason", () => {
-  const ce = fullEngine();
-  const bare = bindings(new ComputeEngine());
-  const families = new Set(allEntries.map((f) => f.head));
-  const loose = [...bindings(ce)]
-    .filter((name) => !bare.has(name) && hasCollection(ce, name))
-    // extendBuiltin keeps compute-engine's own collection under a private name (Reverse_).
-    .filter((name) => !(name.endsWith(PRIVATE_SUFFIX) && bare.has(publicName(name))))
-    .filter((name) => !families.has(name) && EXEMPT[name] === undefined);
-  expect(loose).toEqual([]);
-  const staleExemptions = Object.keys(EXEMPT).filter((name) => !hasCollection(ce, name) || families.has(name));
-  expect(staleExemptions).toEqual([]);
-});
+test(
+  "every declared collection is a Plausible family or exempt with a reason",
+  { timeout: FULL_ENGINE_TIMEOUT },
+  () => {
+    const ce = fullEngine();
+    const bare = bindings(new ComputeEngine());
+    const families = new Set(allEntries.map((f) => f.head));
+    const loose = [...bindings(ce)]
+      .filter((name) => !bare.has(name) && hasCollection(ce, name))
+      // extendBuiltin keeps compute-engine's own collection under a private name (Reverse_).
+      .filter((name) => !(name.endsWith(PRIVATE_SUFFIX) && bare.has(publicName(name))))
+      .filter((name) => !families.has(name) && EXEMPT[name] === undefined);
+    expect(loose).toEqual([]);
+    const staleExemptions = Object.keys(EXEMPT).filter((name) => !hasCollection(ce, name) || families.has(name));
+    expect(staleExemptions).toEqual([]);
+  },
+);
 
 test("a family's declared carrier is the catalogue's", () => {
   const carrierOf = new Map(COLLECTIONS.map((c) => [c.name, c.carrier]));

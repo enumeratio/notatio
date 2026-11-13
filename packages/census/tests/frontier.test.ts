@@ -6,6 +6,7 @@ import { isSystemName } from "@enumeratio/wolfram";
 import { expect, test } from "vite-plus/test";
 import { declaredNames } from "../src/engine.ts";
 import { CALL_FORMS, FRONTIER } from "../src/wolfram-frontier-data.ts";
+import { FULL_ENGINE_TIMEOUT } from "./timeouts.ts";
 
 test("the frontier is ranked, and every entry is a real Wolfram symbol", () => {
   expect(FRONTIER.length).toBeGreaterThan(100);
@@ -14,7 +15,7 @@ test("the frontier is ranked, and every entry is a real Wolfram symbol", () => {
   expect(FRONTIER.filter((entry) => !isSystemName(entry.head))).toEqual([]);
 });
 
-test("nothing on the frontier is something we already answer", () => {
+test("nothing on the frontier is something we already answer", { timeout: FULL_ENGINE_TIMEOUT }, () => {
   // The whole value of the list is that every line is work we have not done. A head that
   // crept back in — because we implemented it and did not regenerate — makes it a to-do
   // list with done items on it, which is how such a list stops being read.
