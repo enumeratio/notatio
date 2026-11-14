@@ -6,6 +6,8 @@ order-1-5-at-3-2	enumeratio_ball(exp_integral_e, enumeratio_decimal("1.5"), enum
 series-expintegrale-n-x-x-0-4			
 series-expintegrale-1-x-x-0-4			
 normal-series-expintegrale-n-x-x			
+order-2-over-3-at-negative-real-z	(enumeratio_ball(exp_integral_e, (2 // 3), enumeratio_decimal("-2.2")))		
+order-5-over-3-at-negative-real-z	(enumeratio_ball(exp_integral_e, (5 // 3), enumeratio_decimal("-2.2")))		
 large-integer-order-500000	enumeratio_ball(exp_integral_e, 500000, enumeratio_decimal("2.5"))	1.641695047376416840083551465799195328832687110793942584475245283827082781101806e-7	
 large-order-beside-an-underflowing-power	(enumeratio_ball(exp_integral_e, 170, 100))	1.381017556962270725482837380563474095864365157533973041448018703867603636425999e-46	
 large-order-at-a-negative-argument	(enumeratio_ball(exp_integral_e, 170, -100))	(3.984990810411850154620385396125239824431180629005906134246685054914263090926149e41-7.358966048241117731535496696427458429119553128286929752278021336807699734544766e33j)	

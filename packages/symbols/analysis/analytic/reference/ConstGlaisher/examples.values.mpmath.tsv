@@ -1,5 +1,7 @@
 id	in	out
 const-glaisher-numeric-value	(glaisher)	
 n-constglaisher-50	enumeratio_n(lambda: (glaisher), 50)	1.2824271291006226368753425688697917277676889273250
+n-constglaisher-100	enumeratio_n(lambda: (glaisher), 100)	1.282427129100622636875342568869791727767688927325001192063740021740406308858826461129736491958202374
+n-constglaisher-51	enumeratio_n(lambda: (glaisher), 51)	1.28242712910062263687534256886979172776768892732500
 round-constglaisher-pow-100	nint(enumeratio_pow(glaisher, 100))	63572555914.0
 1-lt-constglaisher-lt-2		

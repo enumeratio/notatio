@@ -75,6 +75,7 @@ order-one-half-at-1-is-zeta-one-half	(polylog((mpf(1)/2), 1))	-1.460354508809586
 n-polylog-30-neg-4	(polylog(30, -4))	-3.99999998509914942907737761076	
 n-polylog-250-neg-4-a-large-order-past-z-1	(polylog(250, -4))	-4.0	
 n-polylog-250-4-a-large-order-on-the-cut	(polylog(250, 4))	(4.0 - 1.019863859497598374311260677e-454j)	
+li-neg-1-2-1-zeta-neg-1-2-non-integer-order	(polylog((mpf(-1)/2), 1))	-0.207886224977354566017306725397	
 n-polylog-2500000-4-a-huge-order-returns	(polylog(2500000, 4))	(3.99999999999999999999999999971 - 1.91009646958618531905136366582e-14554472j)	
 n-polylog-40p5-2-plus-3i-a-large-complex-point	(polylog(40.5, mpc(2, 3)))	(1.99999999999678444846009173589 + 3.00000000000771731888027005127j)	
 normal-series-polylog-2-x-x-positiveinfinity-6			

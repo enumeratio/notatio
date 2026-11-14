@@ -75,6 +75,7 @@ order-one-half-at-1-is-zeta-one-half	N(polylog(Rational(1, 2), 1), 30)	-1.460354
 n-polylog-30-neg-4	N(polylog(30, -4), 30)	-3.99999998509914942907737761076	
 n-polylog-250-neg-4-a-large-order-past-z-1	N(polylog(250, -4), 30)	-4.00000000000000000000000000000	
 n-polylog-250-4-a-large-order-on-the-cut	N(polylog(250, 4), 30)	4.0 - 1.019863859497598374311260677e-454*I	
+li-neg-1-2-1-zeta-neg-1-2-non-integer-order	N(polylog(Rational(-1, 2), 1), 30)	-0.207886224977354566017306725397	
 n-polylog-2500000-4-a-huge-order-returns	N(polylog(2500000, 4), 30)	4.00000000000000000000000000003 - 1.91009646958618531905136366578e-14554472*I	
 n-polylog-40p5-2-plus-3i-a-large-complex-point	N(polylog(40.5, (2 + 3*I)), 30)	1.99999999999678444846009173589 + 3.00000000000771731888027005127*I	
 normal-series-polylog-2-x-x-positiveinfinity-6	(series(polylog(2, Symbol("x")), Symbol("x"), oo, 6 + 1)).removeO()	None	inconclusive
