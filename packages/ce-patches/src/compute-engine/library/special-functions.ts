@@ -205,7 +205,7 @@ const MAX_EXACT_SHIFT = 64;
 /**
  * Zeta(s, −n) = ζ(s) + Σ_{j=1}^n j^(−s): the (k+a)=0 slot is dropped and the terms before it are
  * |k+a|^(−s) (Wolfram's Zeta[s, a], the ((k+a)²)^(−s/2) form; DLMF 25.11.1 excludes a ≤ 0). Wolfram
- * agrees for every s ≠ 0 (s = 0 is the jump `evaluateZetaAtZero` keeps), checked against its kernel.
+ * agrees for every s ≠ 0 (s = 0 is the jump 1/2 − a, native's), checked against its kernel.
  * Exact where it can say more than a ζ(s) call: an integer s ≥ 2 (Zeta(2, −1) = 1 + π²/6), up to a
  * cap, and any other concrete exact s at n = 1 (1 + ζ(s)), which is where Wolfram stops too; a
  * longer sum with a non-closed ζ(s) stays symbolic. Elsewhere undefined, so it stays symbolic.
@@ -379,23 +379,6 @@ let zetaKernel: ZetaKernel = "bignum";
 export const setZetaKernel = (kernel: ZetaKernel): void => {
   zetaKernel = kernel;
 };
-
-/** Zeta(0, a) = 1/2 − a for every a (DLMF 25.11.13): at s = 0 the (n+a)=0 term is 0⁰ = 1, kept.
- * Native Zeta drops it, so Zeta(0, 0) = −1/2 and Zeta(0, −1) = 1/2 where the formula gives
- * 1/2 and 3/2. Every other s still drops the 0^(−s) term. */
-export function evaluateZetaAtZero(ce: ComputeEngine): void {
-  // compile builtin up to 1 operand: this changes only the two-operand Zeta(s, a); Zeta(s) keeps the lowering.
-  wrapOperator(
-    ce,
-    ["Zeta"],
-    (ops) => ops.length === 2 && ops[0]?.re === 0 && ops[0]?.im === 0,
-    () => (ops, options) => {
-      const value = ce.box(["Subtract", ["Rational", 1, 2], ops[1]!.json as never]);
-      return options.numericApproximation ? value.N() : value.evaluate();
-    },
-    { arity: 2, compile: { upTo: 1 } },
-  );
-}
 
 /** Exact Zeta(s, −n) (`zetaAtNonpositiveShift`), which native leaves unevaluated; a numeric request still reaches the native kernel. */
 export function evaluateZetaAtNonpositiveShift(ce: ComputeEngine): void {

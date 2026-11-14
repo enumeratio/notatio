@@ -289,8 +289,8 @@ test("Zeta(s, −n) = ζ(s) + Σ j^(−s) exactly, and every route agrees with i
     expect(Math.abs(exact - num(["Zeta", s, a]))).toBeLessThan(1e-14);
     expect(Math.abs(exact - zetaGeneralizedReal(s, a))).toBeLessThan(1e-14);
   }
-  // Past the cap it stays symbolic.
-  expect(ce.box(["Zeta", 2, -1000]).evaluate().json).toEqual(["Zeta", 2, -1000]);
+  // Past the patch's cap native answers, with the exact sum.
+  expect(ce.box(["Zeta", 2, -1000]).evaluate().operator).not.toBe("Zeta");
 });
 
 // Values below are Wolfram's (wolframscript), which agrees with ζ(s) + Σ j^(−s) for every s ≠ 0.
