@@ -1,4 +1,4 @@
-import { doublesForFloats, evaluateHurwitz, exceedsDoublePrecision, wantsNumber } from "@notatio/ce-patches";
+import { asDouble, doublesForFloats, evaluateHurwitz, wantsBigDigits, wantsNumber } from "@notatio/ce-patches";
 import { type Engine, type Expr, wrapOperator } from "@notatio/engine";
 
 // A float operand gets a float answer. These heads reach compute-engine's bignum arithmetic
@@ -64,11 +64,34 @@ export function declineHurwitzIndeterminate(ce: Engine): void {
 }
 
 /**
+ * Numeric ζ through `compute` (the bignum kernel): at the engine's digits where it wants a
+ * bignum, else as the double a float operand asks for, with the kernel at machine precision so
+ * it reads each operand as the exact double it is. Where the kernel declines the call stays
+ * unevaluated: compute-engine's own complex kernel is 10^-9 off at |Im s| = 10^7, and a double
+ * past a double's digits is no answer.
+ */
+function bigOrDouble(
+  ce: Engine,
+  ops: readonly Expr[],
+  options: { readonly numericApproximation?: boolean },
+  compute: () => Expr | undefined,
+): Expr | undefined {
+  if (wantsBigDigits(ce, options, ops)) return compute();
+  const precision = ce.precision;
+  ce.precision = "machine";
+  try {
+    const answer = compute();
+    return answer === undefined ? undefined : asDouble(ce, answer);
+  } finally {
+    ce.precision = precision;
+  }
+}
+
+/**
  * ζ(s) and ζ(s, a) at a complex s or a, on the bignum Euler–Maclaurin kernel
- * (hurwitz-zeta-big.ts) rounded once to the double pair a complex number is. compute-engine's
- * own complex kernel runs in doubles and measured 6e-13 relative off mpmath at |Im s| = 400
- * (5e-14 at ζ(1/2 + 14i)). An explicit digit count past a double's leaves the native
- * handler's answer alone.
+ * (hurwitz-zeta-big.ts), rounded once: to the double pair at machine precision, else to the
+ * engine's digits in each part. compute-engine's own complex kernel runs in doubles and
+ * measured 6e-13 relative off mpmath at |Im s| = 400 (5e-14 at ζ(1/2 + 14i)).
  */
 export function declareComplexZeta(ce: Engine): void {
   const complex = (x: Expr | undefined): boolean =>
@@ -79,9 +102,9 @@ export function declareComplexZeta(ce: Engine): void {
     ["Zeta", 1],
     (ops) => complex(ops[0]),
     (native) => (ops, options) =>
-      !wantsNumber(ops, options) || exceedsDoublePrecision(ce, options.numericApproximation)
+      !wantsNumber(ops, options)
         ? native?.(ops, options)
-        : (evaluateHurwitz(ce, [ops[0], ce.One], true) ?? native?.(ops, options)),
+        : bigOrDouble(ce, ops, options, () => evaluateHurwitz(ce, [ops[0], ce.One], true)),
     { arity: 1, compile: "builtin" },
   );
   // compile builtin: rounds a float operand's answer to a double, and leaves a NaN unevaluated: no number differs
@@ -90,9 +113,9 @@ export function declareComplexZeta(ce: Engine): void {
     ["HurwitzZeta", 2],
     (ops) => complex(ops[0]) || complex(ops[1]),
     (native) => (ops, options) =>
-      !wantsNumber(ops, options) || exceedsDoublePrecision(ce, options.numericApproximation)
+      !wantsNumber(ops, options)
         ? native?.(ops, options)
-        : (evaluateHurwitz(ce, ops, true) ?? native?.(ops, options)),
+        : bigOrDouble(ce, ops, options, () => evaluateHurwitz(ce, ops, true)),
     { arity: 2, compile: "builtin" },
   );
 }
