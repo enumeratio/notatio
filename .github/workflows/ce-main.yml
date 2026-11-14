@@ -108,7 +108,7 @@ jobs:
   dist:
     needs: compute-engine
     runs-on: ubuntu-latest
-    timeout-minutes: 150 # cold: nothing restores, and combinatorics alone takes about 90 minutes
+    timeout-minutes: 210 # cold: nothing restores (the swapped-in engine rewrites the lockfile, in every unit key), and combinatorics alone takes about 90 minutes
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
