@@ -1,6 +1,7 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	enumeratio_n(jacobi_ns(RealField(200)("0.3"), 0.5))	3.40816838179233	
 jacobins-0-4-0-5i-0-3	enumeratio_n(jacobi_ns((RealField(200)("0.4") + -0.5*I), RealField(200)("0.3")))	1.06156238940686 + 1.11102973440805*I	
+a-real-value-near-the-pole-stays-real	jacobi_ns(0.000001, 0.7)		
 m-less-than-0-via-the-imaginary-modulus	enumeratio_n(jacobi_ns(RealField(200)("0.3"), -2))	3.28922068375263	
 d-jacobins-u-m-m	diff(jacobi_ns(SR.var("u"), SR.var("m")), SR.var("m"))	-1/2*((u + elliptic_e(arcsin(jacobi_sn(u, m)), m)/(m - 1))*jacobi_cn(u, m)*jacobi_dn(u, m)/m - jacobi_cn(u, m)^2*jacobi_sn(u, m)/(m - 1))/jacobi_sn(u, m)^2	disagree
 series-jacobins-u-m-u-0-4	SR(jacobi_ns(SR.var("u"), SR.var("m"))).series(SR.var("u") == 0, 4 + 1)	None	inconclusive
