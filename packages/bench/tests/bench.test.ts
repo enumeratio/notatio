@@ -66,6 +66,26 @@ describe("protocol", () => {
     expect(timed.samplesNs).toHaveLength(PROTOCOL.minSamples);
     expect(timed.timedOut).toBe(false);
   });
+  test("clear is told how many calls the coming sample makes, so each can have its own input", () => {
+    const { now, call } = clocked(1000n);
+    let ready = 0;
+    let used = 0;
+    measure(
+      () => {
+        expect(used++).toBeLessThan(ready);
+        return call();
+      },
+      {
+        budgetMs: 1000,
+        now,
+        clear: (k) => {
+          ready = k;
+          used = 0;
+        },
+      },
+    );
+    expect(ready).toBeGreaterThan(1);
+  });
 });
 
 describe("judge", () => {
