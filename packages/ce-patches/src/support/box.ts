@@ -22,12 +22,37 @@ export const isFiniteNum = (x: Expression): boolean => Number.isFinite(x.re) && 
 export const inexactComplex = (ce: ComputeEngine, re: number, im: number): Expression =>
   ce.number(ce.complex(re, im)).N();
 
-/** Box a complex result, collapsing to a real number when the imaginary part vanishes. */
-export const numberResult = (ce: ComputeEngine, r: Cx): Expression => {
-  if (!Number.isFinite(r.re) || !Number.isFinite(r.im)) return ce.symbol("ComplexInfinity");
-  // Real inputs with a positive real base stay on the Math.pow path (im exactly 0);
-  // a negative real a gives a genuinely complex value.
-  if (isReal(r, 1e-14 * (1 + Math.abs(r.re)))) return ce.number(r.re);
+/**
+ * An imaginary part this small next to the real part it rides on is rounding noise. It is
+ * relative to the result: a floor that is absolute near zero drops the true imaginary part
+ * of a tiny value (`MeijerG` at -1e-12 is 1.9e-55 + 1.4e-55i).
+ */
+export const REAL_COLLAPSE_RELATIVE = 1e-14;
+
+export interface NumberResultOptions {
+  /**
+   * Absolute size of the noise in `im`, from the kernel's own scale (about its epsilon times
+   * the terms it summed): an `im` within it is dropped even when the value is smaller, as at a
+   * zero of a real function computed through complex arithmetic. A kernel that cannot bound
+   * its noise leaves it unset and `im` collapses only when relatively small.
+   */
+  noise?: number;
+  /**
+   * The kernel knows a non-finite result is a pole of the function at these operands. Without
+   * it a non-finite result is a double overflowing or a point outside the kernel's domain
+   * (NaN), and no answer is given.
+   */
+  pole?: boolean;
+}
+
+/**
+ * Box a complex result, collapsing to a real number when the imaginary part is noise
+ * (exactly 0, within `REAL_COLLAPSE_RELATIVE` of the real part, or within `options.noise`).
+ * Undefined, so the call stays symbolic, for a non-finite result unless `options.pole`.
+ */
+export const numberResult = (ce: ComputeEngine, r: Cx, options: NumberResultOptions = {}): Expression | undefined => {
+  if (!Number.isFinite(r.re) || !Number.isFinite(r.im)) return options.pole ? ce.symbol("ComplexInfinity") : undefined;
+  if (isReal(r, Math.max(options.noise ?? 0, REAL_COLLAPSE_RELATIVE * Math.abs(r.re)))) return ce.number(r.re);
   return inexactComplex(ce, r.re, r.im);
 };
 
