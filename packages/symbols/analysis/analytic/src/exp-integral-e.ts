@@ -1,4 +1,4 @@
-import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
+import { isNumber, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
 import {
   atDigits,
   bigRealOperand,
@@ -160,7 +160,10 @@ export function declareExpIntegralE(ce: ComputeEngine): void {
           : ce.function("Power", [z, exponent]),
         ce.function("Gamma", [ce.function("Subtract", [ce.One, n]), z]),
       ]);
-      return expr.N();
+      // Where Γ(1−n, z) declines (E_n(−2200) is e^2200, past a double) the product keeps its
+      // Gamma call; the call itself stays unevaluated rather than a half-evaluated form of it.
+      const value = expr.N();
+      return isNumber(value) ? value : undefined;
     },
   });
 }
