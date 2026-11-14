@@ -170,6 +170,11 @@ export function imageOverArg(
     return { lo: point, hi: point };
   }
 
+  // A head with no value at an end (PolyLog(−1500000, z) declines) has no image: the samples
+  // below would each pay for a call that declines, 26 of them, to reach the same answer.
+  if (!Number.isFinite(numAt(ce, head, ops, argIndex, lNum)) || !Number.isFinite(numAt(ce, head, ops, argIndex, hNum)))
+    return undefined;
+
   // One reusable derivative evaluator for every sample below — see makeDerivativeEvaluator's
   // own doc for why this matters: a fresh `derivativeAt` per sample would re-run symbolic `D`
   // itself SIGN_SAMPLES+2 times per `Interval` call, for no benefit (the expression it builds

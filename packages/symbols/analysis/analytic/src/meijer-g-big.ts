@@ -39,9 +39,15 @@ const bmag = (x: BigCx): number => Math.hypot(x.re.toNumber(), x.im.toNumber());
 
 const isNonPosIntBig = (z: BigCx): boolean => z.im.isZero() && !z.re.isPositive() && z.re.isInteger();
 
-/** Γ(z) in BigDecimal, `undefined` at the poles (matching `gammaC` in meijer-g.ts). */
+/**
+ * The most negative Re z that Γ is evaluated at: `logGammaBig` shifts z up by one `ln` per unit,
+ * so Γ(−3.1e6 + 3.2) (G with an upper parameter 3100000) takes minutes. Past it the kernel declines.
+ */
+const GAMMA_SHIFT_LIMIT = 10_000;
+
+/** Γ(z) in BigDecimal, `undefined` at the poles (matching `gammaC` in meijer-g.ts) and past `GAMMA_SHIFT_LIMIT`. */
 function gammaBig(z: BigCx, digits: number): BigCx | undefined {
-  if (isNonPosIntBig(z)) return undefined;
+  if (isNonPosIntBig(z) || z.re.toNumber() < -GAMMA_SHIFT_LIMIT) return undefined;
   return bexp(logGammaBig(z, digits));
 }
 
