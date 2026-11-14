@@ -6,6 +6,7 @@
   "license": "WTFPL",
   "files": [
     "dist",
+    "docs",
     "reference",
     "src"
   ],
