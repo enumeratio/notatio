@@ -40,7 +40,6 @@
     "vite-plus": "catalog:"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "tooling",
     "extends": [],
     "reads": [

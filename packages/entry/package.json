@@ -42,7 +42,6 @@
     "vite-plus": "catalog:"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "infra",
     "extends": []
   }
