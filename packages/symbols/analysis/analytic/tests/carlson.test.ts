@@ -245,3 +245,13 @@ test("CarlsonRJ still evaluates numerically right next to a declined region", ()
   expect(c.re).toBeCloseTo(0.9825362099800544, 10);
   expect(c.im).toBeCloseTo(1.5502940430834804, 10);
 });
+
+test("CarlsonRJ with a pole 1e-12 from the integration path stays unevaluated, quickly", () => {
+  // The adaptive integral halves its tolerance below double rounding at every level; its
+  // segment budget declines it where it used to visit 2^40 segments.
+  const started = performance.now();
+  expect(ce.box(["N", ["CarlsonRJ", ["Complex", -8, 0], 2, 2, ["Complex", 0, -1e-12]]]).evaluate().operator).toBe(
+    "CarlsonRJ",
+  );
+  expect(performance.now() - started).toBeLessThan(5000);
+});
