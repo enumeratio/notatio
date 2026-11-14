@@ -6,6 +6,7 @@ i-x-1-1-x-the-uniform-distribution-s-own-cdf	enumeratio_ball((z, a, b) -> _betai
 non-integer-parameters	enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), enumeratio_decimal("0.4"), enumeratio_decimal("2.5"), enumeratio_decimal("3.5"))	0.4869041915261173552540327312627582424339945138607593675003368288627519969853095	
 i-1-2-2-3-11-16-exactly	enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), (1 // 2), 2, 3)	0.6875	
 i-0-5-1-0-a-zero-b-has-the-limit-0	enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), enumeratio_decimal("0.5"), 1, 0)	ball not finite	error
+negative-x-is-a-principal-power	enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), -1, enumeratio_decimal("2.552"), 1)		
 threads-element-wise-over-a-list-as-wolfram-s	Any[enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), enumeratio_decimal("0.5"), 1, 1), enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), enumeratio_decimal("0.5"), 2, 1)]	[0.5, 0.25]	
 x-outside-0-1-by-continuation-real-here-as-b-5	enumeratio_ball((z, a, b) -> _betainc(z, a, b) / _beta(a, b), 2, enumeratio_decimal("0.5"), 5)	1.182194149796259142357661667894044487554335083322917529921130718476627931214421	
 four-arguments-the-generalized-i-z-1-a-b-i-z-0-a			

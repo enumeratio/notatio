@@ -13,6 +13,7 @@ a-huge-10-80-plus-1-over-3-argument	N[Tan[Divide[Plus[Power[10, 80], 1], 3]]]	-0
 tan-100-under-n	N[Tan[100]]	-0.5872139151569291		N[\tan (100)]	-0.587214	
 series-tan-x-x-0-10	Series[Tan[x], List[x, 0, 10]]	SeriesData[x, 0, {1, 0, 1/3, 0, 2/15, 0, 17/315, 0, 62/2835}, 1, 11, 1]		\text{Series}[\tan (x),\{x,0,10\}]	x+\frac{x^3}{3}+\frac{2 x^5}{15}+\frac{17 x^7}{315}+\frac{62 x^9}{2835}+O\left(x^{11}\right)	
 series-tan-x-x-1-over-2-times-pi-5	Series[Tan[x], List[x, Times[Rational[1, 2], Pi], 5]]	SeriesData[x, Pi/2, {-1, 0, 1/3, 0, 1/45, 0, 2/945}, -1, 6, 1]		\text{Series}\left[\tan (x),\left\{x,\frac{1}{2} \pi ,5\right\}\right]	-\frac{1}{x-\frac{\pi }{2}}+\frac{1}{3} \left(x-\frac{\pi }{2}\right)+\frac{1}{45} \left(x-\frac{\pi }{2}\right)^3+\frac{2}{945} \left(x-\frac{\pi }{2}\right)^5+O\left(\left(x-\frac{\pi }{2}\right)^6\right)	
+threads-over-a-list-at-a-negative-pi	Tan[List[0, Divide[Pi, -1]]]					
 n-of-an-exact-argument-gives-an-arbitrary	N[Tan[Rational[6, 5]]]	2.5721516221263183		N\left[\tan \left(\frac{6}{5}\right)\right]	2.57215	
 evaluates-at-a-complex-argument	Tan[Complex[2.5, 1]]	-0.23701383091627057 + 0.8964379171278616*I		\tan (2.5\, +i)	-0.237014+0.896438 i	
 threads-element-wise-over-a-matrix	Tan[List[List[Times[5, Divide[Pi, 6]], Pi], List[Divide[Pi, 3], Minus[Pi]]]]	{{-(1/Sqrt[3]), 0}, {Sqrt[3], 0}}		\tan \left(\left( \begin{array}{cc}  5 \frac{\pi }{6} & \pi  \\  \frac{\pi }{3} & -\pi  \\ \end{array} \right)\right)	\left( \begin{array}{cc}  -\frac{1}{\sqrt{3}} & 0 \\  \sqrt{3} & 0 \\ \end{array} \right)	

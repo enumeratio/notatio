@@ -1,6 +1,7 @@
 id	in	out	verdict
 arcsec-1	acos(n(1) / n(1))	0.0	
 arcsec-2	acos(n(1) / n(2))	1.0471975511965976	
+arcsec-of-one-half-is-imaginary	acos(n(1) / rational(n(1), n(2)))	panic: NaN	error
 arcsec-sqrt-2-pi-4	acos(n(1) / sqrt(n(2)))	0.7853981633974484	
 arcsec-neg-1	acos(n(1) / n(-1))	3.141592653589793	
 arcsec-2-2-pi-3	acos(n(1) / n(-2))	2.0943951023931957	

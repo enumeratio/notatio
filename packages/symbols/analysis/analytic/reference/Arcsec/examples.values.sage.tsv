@@ -1,6 +1,7 @@
 id	in	out	verdict
 arcsec-1	arcsec(1)	0	
 arcsec-2	arcsec(2)	arcsec(2)	
+arcsec-of-one-half-is-imaginary	arcsec((1/2))		
 arcsec-sqrt-2-pi-4	arcsec(sqrt(2))	arcsec(sqrt(2))	
 arcsec-neg-1	arcsec(-1)	pi	
 arcsec-2-2-pi-3	arcsec(-2)	arcsec(-2)	
