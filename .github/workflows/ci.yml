@@ -256,6 +256,64 @@ jobs:
           [ "$SHARDS" = "skipped" ] && echo "::notice::no package changes — test shards skipped"
           exit 0
 
+  # Main only, once `check + site build` and `tests` are green: publishes the dist job's verdict memos as the
+  # `ce-downstream` prerelease (one release, updated in place). compute-engine's nightly downstream run
+  # (tools/ce-downstream/run.ts --memos) starts from them, so combinatorics and its readers fit its budget.
+  #   ce-downstream.json: the commit, the node version, this run and the time.
+  #   verdicts.tar.gz:    every verdicts-<id>.json of the dist cache, flat.
+  # The memos come from the `dist-cache` artifact when `dist` ran, else from the exact cache entry that
+  # made `dist` skip.
+  publish-memos:
+    name: publish verdict memos
+    needs: [changes, dist, build, tests]
+    if: ${{ !cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.build.result == 'success' && needs.tests.result == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write # create or edit the release, move its tag
+    concurrency:
+      group: ce-downstream-publish
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+      - if: needs.dist.result == 'success'
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-cache
+          path: ${{ runner.temp }}/dist-cache
+      - if: needs.dist.result != 'success'
+        uses: actions/cache/restore@v4
+        with:
+          path: ${{ runner.temp }}/dist-cache
+          key: dist-${{ runner.os }}-${{ needs.changes.outputs.dist_key }}
+          fail-on-cache-miss: true
+      - name: publish the ce-downstream release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          SHA: ${{ github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          CACHE: ${{ runner.temp }}/dist-cache
+        run: |
+          set -euo pipefail
+          out="$RUNNER_TEMP/ce-downstream"
+          mkdir -p "$out"
+          node_version=$(sed -n 's/^ *node-version: *//p' .github/actions/setup/action.yml | head -n1)
+          ls "$CACHE"/verdicts-*.json > /dev/null # no memos is a failure, not an empty release
+          (cd "$CACHE" && tar -czf "$out/verdicts.tar.gz" verdicts-*.json)
+          printf '{"sha":"%s","node":"%s","run":"%s","created":"%s"}\n' \
+            "$SHA" "$node_version" "$RUN_URL" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$out/ce-downstream.json"
+          cat "$out/ce-downstream.json"
+          if gh release view ce-downstream > /dev/null 2>&1; then
+            gh release edit ce-downstream --prerelease --target "$SHA" --notes "Verdict memos from main at $SHA, for compute-engine's downstream run."
+          else
+            gh release create ce-downstream --prerelease --target "$SHA" --title ce-downstream \
+              --notes "Verdict memos from main at $SHA, for compute-engine's downstream run."
+          fi
+          gh release upload ce-downstream "$out/ce-downstream.json" "$out/verdicts.tar.gz" --clobber
+          # An existing tag stays where it was unless moved.
+          gh api -X PATCH "repos/$GH_REPO/git/refs/tags/ce-downstream" -f sha="$SHA" -F force=true > /dev/null
+
   # The nightly's red/green: one rolling issue, opened when the full sweep fails and closed when it passes.
   nightly-report:
     if: github.event_name == 'schedule' && always()
