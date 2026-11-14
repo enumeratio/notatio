@@ -25,14 +25,14 @@ export interface Timed {
 }
 
 /**
- * Run the protocol against `call`, in this process. `clear` runs before each sample, outside
+ * Run the protocol against `call`, in this process. `clear(k)` runs before each sample of `k` calls, outside
  * the timing. `now` is injectable for tests; the default is the monotonic hrtime clock.
  */
 export function measure(
   call: () => unknown,
   options: {
     readonly budgetMs: number;
-    readonly clear?: () => void;
+    readonly clear?: (k: number) => void;
     readonly now?: () => bigint;
     readonly protocol?: Protocol;
   },
@@ -43,7 +43,7 @@ export function measure(
   const start = now();
   const spent = (): number => Number(now() - start) / 1e6;
   const time = (k: number): number => {
-    clear();
+    clear(k);
     const t0 = now();
     for (let i = 0; i < k; i++) call();
     return Number(now() - t0) / k;
