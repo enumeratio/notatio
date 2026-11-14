@@ -28,7 +28,7 @@
     "check": "vp check"
   },
   "dependencies": {
-    "@cortex-js/compute-engine": "^0.187.1",
+    "@cortex-js/compute-engine": "^0.189.0",
     "@notatio/analytic": "workspace:*",
     "@notatio/boxes": "workspace:*",
     "@notatio/braid": "workspace:*",
