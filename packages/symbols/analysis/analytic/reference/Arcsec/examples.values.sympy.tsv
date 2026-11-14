@@ -1,6 +1,7 @@
 id	in	out	verdict
 arcsec-1	asec(1)	0	
 arcsec-2	asec(2)	pi/3	
+arcsec-of-one-half-is-imaginary	asec(Rational(1, 2))	asec(1/2)	
 arcsec-sqrt-2-pi-4	asec(sqrt(2))	pi/4	
 arcsec-neg-1	asec(-1)	pi	
 arcsec-2-2-pi-3	asec(-2)	2*pi/3	

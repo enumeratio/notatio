@@ -1,6 +1,7 @@
 id	in	out	shown	tex.in	tex.out
 arcsec-1	ArcSec[1]	0		\sec ^{-1}(1)	0
 arcsec-2	ArcSec[2]	Pi/3		\sec ^{-1}(2)	\frac{\pi }{3}
+arcsec-of-one-half-is-imaginary	ArcSec[Rational[1, 2]]				
 arcsec-sqrt-2-pi-4	ArcSec[Sqrt[2]]	Pi/4		\sec ^{-1}\left(\sqrt{2}\right)	\frac{\pi }{4}
 arcsec-neg-1	ArcSec[-1]	Pi		\sec ^{-1}(-1)	\pi
 arcsec-2-2-pi-3	ArcSec[-2]	(2*Pi)/3		\sec ^{-1}(-2)	\frac{2 \pi }{3}

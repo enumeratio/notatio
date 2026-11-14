@@ -179,12 +179,35 @@ export function declareSpecialFunctionsRemaining(ce: ComputeEngine): void {
     () => (ops, options) => finish(ops[0], options),
     { arity: 3, compile: "builtin" },
   );
+  // x^a at a negative real x and a non-integer real a is the principal value |x|^a e^(iπa);
+  // Power reads it as the real root when a is a float or an odd-denominator rational
+  // ((−1)^2.552 = −1, where mpmath's value is −0.1626 + 0.9867i).
+  const negativeBasePower = (x: Expression, a: Expression, options: EvalOptions): Expression | undefined | null => {
+    const real = (v: Expression): boolean => Number.isFinite(v.re) && v.im === 0;
+    if (!real(x) || x.re >= 0 || !real(a) || Number.isInteger(a.re)) return null;
+    const inexact = (v: Expression): boolean => (v as Partial<{ isExact: boolean }>).isExact === false;
+    if (inexact(x) || inexact(a) || options.numericApproximation) {
+      const phase = ce.function("Multiply", [ce.symbol("Pi"), a]);
+      const direction = ce.function("Add", [
+        ce.function("Cos", [phase]),
+        ce.function("Multiply", [ce.symbol("ImaginaryUnit"), ce.function("Sin", [phase])]),
+      ]);
+      return ce.function("Multiply", [ce.function("Power", [ce.function("Negate", [x]), a]), direction]).N();
+    }
+    // Exact: an even denominator is the principal value already; anything else stays unevaluated.
+    const ratio = bigRationalAt(a);
+    return ratio !== undefined && ratio[1] % 2n === 0n ? null : undefined;
+  };
   // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
   wrapOperator(
     ce,
     ["BetaRegularized", 3],
     (ops) => plainX(ops[0]) && bigIntegerAt(ops[2]) === 1n && bigIntegerAt(ops[1]) !== 1n,
-    () => (ops, options) => finish(ce.function("Power", [ops[0], ops[1]]), options),
+    () => (ops, options) => {
+      const principal = negativeBasePower(ops[0], ops[1], options);
+      if (principal !== null) return principal;
+      return finish(ce.function("Power", [ops[0], ops[1]]), options);
+    },
     { arity: 3, compile: "builtin" },
   );
   // compile builtin: limits at +oo, exact closed forms and symbolic identities at the native call shape
