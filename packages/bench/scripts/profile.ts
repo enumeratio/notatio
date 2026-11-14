@@ -51,7 +51,10 @@ function trailing(runDir: string, top: number): string[] {
 const names = new Set(positionals);
 if (values.from !== undefined) for (const n of trailing(values.from, Number(values.top))) names.add(n);
 if (values.drift !== undefined && existsSync(values.drift)) {
-  for (const d of JSON.parse(readFileSync(values.drift, "utf8")) as { name: string }[]) names.add(d.name);
+  // A case that lost its `ok` has no timing worth profiling.
+  for (const d of JSON.parse(readFileSync(values.drift, "utf8")) as { name: string; status?: string }[]) {
+    if (d.status === undefined) names.add(d.name);
+  }
 }
 
 const harness = fileURLToPath(new URL("../src/harness-ts.ts", import.meta.url));

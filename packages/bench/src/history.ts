@@ -5,7 +5,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { quantile } from "./stats.ts";
-import type { BenchIndex, CaseResult, Report } from "./types.ts";
+import type { BenchIndex, CaseResult, Report, Status } from "./types.ts";
 
 export type RunMeta = BenchIndex["runs"][number];
 
@@ -114,4 +114,30 @@ export function detectDrift(current: Report, prior: readonly Report[], options: 
     }
   }
   return drifted.toSorted((a, b) => b.ratio - a.ratio);
+}
+
+/** A case that measured `ok` in the report before and no longer does: a lost measurement, not a slowdown. */
+export interface StatusDrift {
+  readonly name: string;
+  readonly from: "ok";
+  readonly status: Exclude<Status, "ok">;
+  readonly reason?: string;
+}
+
+/**
+ * Cases in `current` whose status moved away from `ok`, against the latest earlier report that
+ * holds the same case with the same formula (`prior`, oldest first). A case that
+ * reports `too-fast` was timing a lookup, not the work; it is drift whatever the clock says.
+ * Only our side's reports are compared, so another system's gaps never land here.
+ */
+export function detectStatusDrift(current: Report, prior: readonly Report[]): StatusDrift[] {
+  const key = (r: CaseResult): string => `${r.name}#${r.formula ?? ""}`;
+  const last = new Map<string, Status>();
+  for (const report of prior) for (const r of report.results) last.set(key(r), r.status);
+  const lost: StatusDrift[] = [];
+  for (const r of current.results) {
+    if (r.status === "ok" || last.get(key(r)) !== "ok") continue;
+    lost.push({ name: r.name, from: "ok", status: r.status, ...(r.reason === undefined ? {} : { reason: r.reason }) });
+  }
+  return lost.toSorted((a, b) => a.name.localeCompare(b.name));
 }
