@@ -1,6 +1,7 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	(enumeratio_jacobi(:ns, enumeratio_decimal("0.3"), enumeratio_decimal("0.5")))	3.408168381792332350303850085473000953610277607283089201512948075205278057230668	
 jacobins-0-4-0-5i-0-3	(enumeratio_jacobi(:ns, enumeratio_complex(enumeratio_decimal("0.4"), enumeratio_decimal("-0.5")), enumeratio_decimal("0.3")))	(1.06156238940685598427820620584172899167656153360799391775406520737893138664999+1.111029734408047392649786025744488887926776428370550757683376215498596908239514j)	
+a-real-value-near-the-pole-stays-real	enumeratio_jacobi(:ns, enumeratio_decimal("0.000001"), enumeratio_decimal("0.7"))		
 m-less-than-0-via-the-imaginary-modulus	(enumeratio_jacobi(:ns, enumeratio_decimal("0.3"), -2))	3.289220683752634704944075691358253492201426440769047486688095167825118612609385	
 d-jacobins-u-m-m			
 series-jacobins-u-m-u-0-4			

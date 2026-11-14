@@ -1,5 +1,6 @@
 id	in	out	tex.in	tex.out
 a-floating-point-argument-evaluates-directly-to	N[JacobiDS[1.1, 0.9]]	0.7887544023075438	N[\text{ds}(1.1|0.9)]	0.788754
+a-real-value-near-the-pole-stays-real	JacobiDS[0.000001, 0.7]			
 m-less-than-0-via-the-imaginary-modulus	N[JacobiDS[0.3, -0.7]]	3.4531637136188116	N[\text{ds}(0.3|-0.7)]	3.45316
 d-jacobids-u-m-m	D[JacobiDS[u, m], m]	(JacobiCS[u, m]*JacobiNS[u, m]*((-1 + m)*u + JacobiEpsilon[u, m] - m*JacobiDN[u, m]*JacobiSC[u, m]))/(2*(1 - m)*m)	\frac{\partial \text{ds}(u|m)}{\partial m}	\frac{\text{cs}(u|m) \text{ns}(u|m) (-m \text{dn}(u|m) \text{sc}(u|m)+\mathcal{E}(u|m)+(m-1) u)}{2 (1-m) m}
 series-jacobids-u-m-u-0-4	Series[JacobiDS[u, m], List[u, 0, 4]]	SeriesData[u, 0, {1, 0, (1 - 2*m)/6, 0, (7 + 8*m - 8*m^2)/360}, -1, 5, 1]	\text{Series}[\text{ds}(u|m),\{u,0,4\}]	\frac{1}{u}+\frac{1}{6} (1-2 m) u+\frac{1}{360} \left(-8 m^2+8 m+7\right) u^3+O\left(u^5\right)
