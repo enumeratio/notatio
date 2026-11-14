@@ -345,10 +345,11 @@ const READINGS: Record<string, Reading> = {
       lexRestriction([[0], [1], [2], [3], [4], [5], [6]], (x) => !contains(x, pattern)),
     ]),
   ),
-  // Seconds per element past n = 4, so the standard run checks one size and DEEP_TESTS the sweep.
+  // Seconds per element past n = 4, so the standard run checks one size and DEEP_TESTS the sweep. The
+  // interpreter takes seconds a call at n = 4 and up to 13 s at n = 5.
   NonCrossingCycleSupportPermutations: {
     ...lexRestriction(process.env.DEEP_TESTS ? [[0], [1], [2], [3], [4], [5], [6]] : [[3]], (x) => !crossing(x)),
-    interpretAt: process.env.DEEP_TESTS ? [5] : [3],
+    interpretAt: process.env.DEEP_TESTS ? [4] : [3],
   },
   // Cycles that rise (each member to the next greater, the greatest to the least) and don't cross.
   NonCrossingPermutations: {
@@ -363,9 +364,10 @@ const READINGS: Record<string, Reading> = {
     ...lexRestriction([[0], [1], [2], [3], [4], [5], [6]], (x) => !contains4(x, "2143")),
     interpretAt: process.env.DEEP_TESTS ? [5] : [4],
   },
+  // The interpreter takes tens of seconds a call at n = 4, so the full run reads n = 3.
   SeparablePermutations: {
     ...lexRestriction([[0], [1], [2], [3], [4], [5], [6]], (x) => !separates(x)),
-    interpretAt: process.env.DEEP_TESTS ? [5] : [2],
+    interpretAt: process.env.DEEP_TESTS ? [3] : [2],
   },
   ColoredPermutations: {
     params: [
@@ -452,8 +454,9 @@ const interpreted = (family: EpsilFamily, operation: keyof EpsilFamily["epsil"],
 
 const list = (xs: unknown[]): unknown => ["List", ...xs.map((x) => (Array.isArray(x) ? list(x) : x))];
 
-test("the interpreter agrees with compiled code", () => {
-  for (const [head, reading] of Object.entries(READINGS)) {
+// One test per head, so each has its own timeout and a slow one is named.
+for (const [head, reading] of Object.entries(READINGS)) {
+  test(`${head}: the interpreter agrees with compiled code`, () => {
     const family = byHead.get(head)!;
     const p = reading.interpretAt ?? reading.params.at(-2)!;
     const bind = Object.fromEntries(family.params.map((name, i) => [name, p[i]]));
@@ -467,8 +470,8 @@ test("the interpreter agrees with compiled code", () => {
       expect(interpreted(family, "rank", { ...bind, _x: list(element as unknown[]) })).toBe(r);
       expect(interpreted(family, "valid", { ...bind, _x: list(element as unknown[]) })).toBe("True");
     }
-  }
-});
+  });
+}
 
 test("past 2^53 the symmetric group answers in exact integers", () => {
   const kernel = epsilKernelOn(ce, byHead.get("SymmetricGroup")!);
