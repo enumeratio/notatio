@@ -29,9 +29,10 @@ const twos = (x: bigint): bigint => {
 };
 
 /**
- * Stein's binary GCD: shifts and subtractions only, no division. ~2x faster than plain
- * Euclid (`x, y = y, x % y`) on balanced, large bigints in measurements at 10000 bits
- * (issue #205) — division of two same-size bigints is expensive relative to a shift.
+ * Stein's binary GCD: shifts and subtractions only, no division. Faster than plain Euclid
+ * (`x, y = y, x % y`) only above about 4000 bits (10000 bits: 2.6 ms against 6.2 ms), and
+ * `lehmerGcd` beats it at every size from 128 bits up; the engine's GCD uses Euclid below
+ * 128 bits and `lehmerGcd` above (issue #205).
  */
 export function gcd(a: bigint, b: bigint): bigint {
   let x = a < 0n ? -a : a;
@@ -51,60 +52,77 @@ export function gcd(a: bigint, b: bigint): bigint {
   return x << shift;
 }
 
-// Leading-digit window for Lehmer's algorithm: two ~26-bit numbers multiply to ~52 bits,
-// safely inside float64's 53-bit mantissa, with room left for the small (A, B, C, D)
-// cofactors added in.
-const LEHMER_WORD_BITS = 26n;
-// Below this, x and y already fit comfortably in a machine word — a plain bigint `%` is as
-// fast as simulating one, so Lehmer only kicks in once division itself gets expensive.
-const LEHMER_SMALL = 1n << 32n;
+// Leading-digit window for Lehmer's algorithm. Cofactors are bigints, so a 60-bit window has
+// no float rounding to guard; it measured faster than a 52-bit double window (the widest whose
+// sums stay exact) at every size from 128 to 65536 bits.
+const LEHMER_WINDOW_BITS = 60;
+// At or below this x and y fit a machine word, and a plain bigint `%` is as fast as simulating.
+const LEHMER_SMALL = 1n << 64n;
+// A Euclidean step shrinks the window by at least log₂ φ ≈ 0.69 bits, so 60 bits take under
+// 87 steps; the cap is a backstop, and stopping early leaves a valid matrix.
+const LEHMER_INNER_CAP = 128;
+
+/**
+ * The bit length of x > 0 given x < 2ⁿ: n walks down in 64-bit chunks while the top chunk is
+ * empty, then the top 64 bits give the exact count. The caller carries n from step to step, so
+ * a full-width conversion never repeats.
+ */
+function bitLength(x: bigint, n: number): number {
+  while (n > 64 && x >> BigInt(n - 64) === 0n) n -= 64;
+  const top = n > 64 ? x >> BigInt(n - 64) : x;
+  const high = Number(top >> 32n);
+  const topBits = high !== 0 ? 64 - Math.clz32(high) : 32 - Math.clz32(Number(top & 0xffffffffn));
+  return (n > 64 ? n - 64 : 0) + topBits;
+}
 
 /**
  * Lehmer's GCD (HAC Algorithm 14.4): simulates many Euclidean steps at once over the leading
- * ~26 bits of x and y using plain (non-bigint) arithmetic, then applies the accumulated 2×2
- * cofactor matrix to the full bigints in one shot — trading most of the O(log n) bigint
- * divisions Euclid needs for a handful of full-width reductions. When the single-precision
- * simulation can't agree on a quotient (small y relative to x, or it exhausts its digits) it
- * falls back to one ordinary `x mod y` step, so it is always at least as correct as Euclid,
- * and degrades to it gracefully for small inputs (issue #205: measured faster than Stein's
- * binary `gcd` above on 10000-bit pairs, where full-width division dominates the cost).
+ * 60 bits of x and y, then applies the accumulated 2×2 cofactor matrix to the full bigints in
+ * one shot — trading most of the O(log n) full-width divisions Euclid needs for a few
+ * multiplications. The matrix is unimodular, so the GCD is preserved whatever the window
+ * decides; a window that cannot pin down a shared quotient (y far smaller than x) makes one
+ * ordinary `x mod y` step instead, and the outer loop is capped so a window that stops making
+ * progress finishes by plain Euclid (issue #205). Measured against Euclid, Stein's binary
+ * `gcd` and a 52-bit double window: faster than all of them from 128 bits up (10000 bits:
+ * Euclid 6.2 ms, Stein 2.6 ms, Lehmer 0.42 ms per pair).
  */
 export function lehmerGcd(a: bigint, b: bigint): bigint {
   let x = a < 0n ? -a : a;
   let y = b < 0n ? -b : b;
   if (x < y) [x, y] = [y, x];
-  while (y > 0n) {
-    if (y < LEHMER_SMALL) {
-      [x, y] = [y, x % y];
-      continue;
-    }
-    const totalBits = BigInt(x.toString(2).length);
-    const shift = totalBits > LEHMER_WORD_BITS ? totalBits - LEHMER_WORD_BITS : 0n;
-    let xHat = Number(x >> shift);
-    let yHat = Number(y >> shift);
-    let A = 1;
-    let B = 0;
-    let C = 0;
-    let D = 1;
-    for (;;) {
+  let bits = y >= LEHMER_SMALL ? x.toString(2).length : 0;
+  // Euclid needs at most about 1.44 steps per bit and a window step does at least as well, so
+  // twice the bit length is a cap that only a stalled loop reaches.
+  let steps = 2 * bits + 64;
+  while (y >= LEHMER_SMALL && steps-- > 0) {
+    bits = bitLength(x, bits);
+    const shift = BigInt(bits - LEHMER_WINDOW_BITS);
+    let xHat = x >> shift;
+    let yHat = y >> shift;
+    let A = 1n;
+    let B = 0n;
+    let C = 0n;
+    let D = 1n;
+    for (let i = 0; i < LEHMER_INNER_CAP; i++) {
       const yC = yHat + C;
       const yD = yHat + D;
-      if (yC === 0 || yD === 0) break;
-      const q = Math.floor((xHat + A) / yC);
-      if (q !== Math.floor((xHat + B) / yD)) break;
+      if (yC === 0n || yD === 0n) break;
+      const q = (xHat + A) / yC;
+      if (q !== (xHat + B) / yD) break;
       [A, B, xHat, C, D, yHat] = [C, D, yHat, A - q * C, B - q * D, xHat - q * yHat];
     }
-    if (B === 0) {
-      // The simulation made no progress (y too small relative to x's leading digits to pin
-      // down a shared quotient) — fall back to one full-precision step.
+    if (B === 0n) {
+      // No progress from the window: one full-precision step.
       [x, y] = [y, x % y];
     } else {
-      const nx = BigInt(A) * x + BigInt(B) * y;
-      const ny = BigInt(C) * x + BigInt(D) * y;
+      const nx = A * x + B * y;
+      const ny = C * x + D * y;
       x = nx < 0n ? -nx : nx;
       y = ny < 0n ? -ny : ny;
+      if (x < y) [x, y] = [y, x];
     }
   }
+  while (y > 0n) [x, y] = [y, x % y];
   return x;
 }
 

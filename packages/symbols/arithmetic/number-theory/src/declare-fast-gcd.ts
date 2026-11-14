@@ -3,20 +3,29 @@
 // operands. `declare-gaussian.ts` already carries GCD into ℤ[i] when an operand is genuinely
 // complex, but a call where every operand is a real integer — the common case, and the
 // bench's 10000-bit pair — still falls through to that native Euclid. Below
-// `LEHMER_THRESHOLD_BITS` this uses @notatio/residues' Stein binary `gcd` (shifts and
-// subtraction beat a bigint division at these sizes too, and it's already well exercised);
-// above it, Lehmer's algorithm (leading-digit simulation, HAC 14.4) wins by turning most of
-// Euclid's O(log n) full-width divisions into a handful of them.
+// `LEHMER_THRESHOLD_BITS` this runs Euclid with bigint `%`; at and above it, Lehmer's
+// algorithm (HAC 14.4) from @notatio/residues.
 import { bigIntegerAt, wrapOperator, type Engine, type Expr } from "@notatio/engine";
-import { gcd, lehmerGcd } from "@notatio/residues";
+import { lehmerGcd } from "@notatio/residues";
 
-// Chosen well above Lehmer's own internal small-number cutoff (2^32) so the hybrid only
-// pays for the leading-digit simulation once operands are large enough for it to pay off.
-const LEHMER_THRESHOLD_BITS = 512;
+// Measured per pair on random balanced operands, with and without a shared factor of half the
+// width: Lehmer ties Euclid near 64-96 bits and is ahead from 128 (128 bits: 0.002 ms against
+// 0.005 ms; 1024: 0.02 against 0.06; 10000: 0.42 against 6.2). Stein's binary GCD loses to
+// both until about 4000 bits and to Lehmer at every size, so it is not used here.
+const LEHMER_THRESHOLD_BITS = 128n;
+const LEHMER_THRESHOLD = 1n << (LEHMER_THRESHOLD_BITS - 1n);
+
+function euclidGcd(a: bigint, b: bigint): bigint {
+  let x = a < 0n ? -a : a;
+  let y = b < 0n ? -b : b;
+  while (y > 0n) [x, y] = [y, x % y];
+  return x;
+}
 
 function hybridGcd(a: bigint, b: bigint): bigint {
-  const bits = (n: bigint): number => (n < 0n ? -n : n).toString(2).length;
-  return Math.max(bits(a), bits(b)) >= LEHMER_THRESHOLD_BITS ? lehmerGcd(a, b) : gcd(a, b);
+  // The larger operand has at least LEHMER_THRESHOLD_BITS bits when it reaches 2^(bits - 1).
+  const big = (a < 0n ? -a : a) >= LEHMER_THRESHOLD || (b < 0n ? -b : b) >= LEHMER_THRESHOLD;
+  return big ? lehmerGcd(a, b) : euclidGcd(a, b);
 }
 
 export function declareFastGcd(ce: Engine): void {
