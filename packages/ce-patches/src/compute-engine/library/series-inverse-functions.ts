@@ -1,5 +1,5 @@
 import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
-import { integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
+import { declareCompile, integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
 
 type Evaluate = (ops: readonly Expression[], options: { numericApproximation?: boolean }) => unknown;
 
@@ -115,4 +115,6 @@ export function seriesIntegratesDerivatives(ce: ComputeEngine): void {
     const result = integratedSeries(ce, ops, options.numericApproximation);
     return result?.isValid ? result : native(ops, options);
   }) as never;
+  // compile builtin: the same series by another route, and Series has no numeric lowering
+  declareCompile(ce, "Series", "builtin");
 }
