@@ -1,4 +1,4 @@
-// The sweep behind distribution-crosscheck.test.ts and graph-crosscheck.test.ts; see the first for what is compared.
+// The sweep behind distribution-crosscheck.test.ts, graph-crosscheck.test.ts and poset-crosscheck.test.ts; see the first for what is compared.
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { bareEngine } from "@notatio/engine/testing";
@@ -54,13 +54,14 @@ const LEVELLED = (carrier: string): boolean =>
   COLLECTIONS[carrier] !== undefined || EXACT_MAXIMUM[carrier] !== undefined;
 
 /**
- * Carriers whose FindStat collection is not one of ours by size: graphs are listed up to isomorphism, ours by labeling, so a
- * per-size distribution would not match. Each object of the crawl is read, the statistic evaluated on it, and the value held
+ * Carriers whose FindStat collection is not one of ours by size: graphs and posets are listed up to isomorphism, ours by
+ * labeling, so a per-size distribution would not match. Each object of the crawl is read, the statistic evaluated on it, and the value held
  * to the object's row, which says more than a distribution. The largest size read, in the standard run and in a deep one;
  * a size the crawl covers only in part is compared as far as it goes.
  */
 export const OBJECT_WISE: Readonly<Record<string, { standard: number; deep: number }>> = {
   LabeledGraph: { standard: 5, deep: Number(process.env.DEEP_OBJECT_SIZE ?? 7) },
+  Poset: { standard: 5, deep: 7 },
 };
 const objectCap = (carrier: string): number => OBJECT_WISE[carrier]![DEEP ? "deep" : "standard"];
 type Kind = "unclassified" | "emit" | "convention" | "ours";
