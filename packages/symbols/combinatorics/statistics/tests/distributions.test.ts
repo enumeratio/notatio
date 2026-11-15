@@ -18,7 +18,9 @@ const N = (expr: unknown) => evalOf(["N", expr as never]).re;
 
 describe("UniformDistribution: call-shape fix", () => {
   test("the {min, max} form (Wolfram's own) now works", () => {
-    expect(evalOf(["PDF", ["UniformDistribution", ["List", 0, 1]], 0.5]).json).toEqual(1);
+    // A float point gives a float: the density 1 comes back as 1.0.
+    expect(evalOf(["PDF", ["UniformDistribution", ["List", 0, 1]], 0.5]).re).toBe(1);
+    expect(evalOf(["PDF", ["UniformDistribution", ["List", 0, 1]], ["Rational", 1, 2]]).json).toEqual(1);
     expect(evalOf(["CDF", ["UniformDistribution", ["List", 0, 1]], 0.5]).json).toEqual(0.5);
     expect(evalOf(["Mean", ["UniformDistribution", ["List", 0, 1]]]).json).toEqual(["Rational", 1, 2]);
   });

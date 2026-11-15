@@ -37,7 +37,7 @@ const seededPath = (seed: number, proc: unknown, spec: unknown): number[][] => {
   const out = evalOf([
     "Block",
     ["SeedRandom", seed],
-    ["Assign", "path", ["RandomFunction", proc, spec]],
+    ["Declare", "path", "'unknown'", ["RandomFunction", proc, spec]],
     ["SeedRandom", 42],
     "path",
   ]);
