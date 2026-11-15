@@ -13,14 +13,28 @@ import { FLAT_BY_NAME, subjectToJs } from "../flat.ts";
 import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 
 /** Where a cross-check's verdict comes from (the build's snapshot: see scripts/verdict-snapshot.ts).
- *  `parts` is what the check reads, `label` names the item, and `declined` is the verdict when there
- *  is no fresh one: the item stays interpreted. */
+ *  `parts` is what the check reads (the compiled code among it), `source` the part of it that needs no
+ *  compiler (the definition and the subjects), `label` names the item, and `declined` is the verdict
+ *  when there is no fresh one: the item stays interpreted. A `sourceOnly` run compiles nothing:
+ *  an item `note`s its source and goes no further. */
 export interface Verdicts {
-  remember<T extends boolean | readonly string[]>(parts: unknown, compute: () => T, label: string, declined: T): T;
+  readonly sourceOnly: boolean;
+  remember<T extends boolean | readonly string[]>(
+    parts: unknown,
+    source: unknown,
+    compute: () => T,
+    label: string,
+    declined: T,
+  ): T;
+  note(source: unknown, label: string): void;
 }
 
 /** Every check runs. */
-export const noVerdicts: Verdicts = { remember: (_parts, compute) => compute() };
+export const noVerdicts: Verdicts = {
+  sourceOnly: false,
+  remember: (_parts, _source, compute) => compute(),
+  note: () => {},
+};
 
 export interface CompiledDefinition {
   readonly signature: string;
@@ -51,6 +65,15 @@ export function compiledDefinitionsFor(
     const checked = subjects.get(definition.on)!.filter((s) => weightOf(s) <= (definition.checkWeight ?? Infinity));
     // The flat alternative first, where the carrier has a flat reading; the nested definition after it.
     const codec = definition.flat === undefined ? undefined : FLAT_BY_NAME[definition.on];
+    if (verdicts.sourceOnly) {
+      if (codec !== undefined)
+        verdicts.note(
+          { expr: definition.expr, flat: definition.flat, subjects: checked },
+          `${signatureOf(definition)} (flat)`,
+        );
+      verdicts.note({ expr: definition.expr, flat: undefined, subjects: checked }, signatureOf(definition));
+      continue;
+    }
     const flat = codec === undefined ? undefined : compileTyped(ce, definition.flat, { [SUBJECT]: codec.shape });
     const nested = compileTyped(ce, definition.expr, { [SUBJECT]: shape });
     let wrong = false;
@@ -60,9 +83,10 @@ export function compiledDefinitionsFor(
     ] as const) {
       if (code === undefined) continue;
       const parts = { expr: definition.expr, flat: reading && definition.flat, code: code.code, subjects: checked };
+      const source = { expr: definition.expr, flat: reading && definition.flat, subjects: checked };
       const check = () => agrees(ce, definition, code.run, checked, reading);
       const label = reading === undefined ? signatureOf(definition) : `${signatureOf(definition)} (flat)`;
-      if (verdicts.remember(parts, check, label, false)) {
+      if (verdicts.remember(parts, source, check, label, false)) {
         compiled.push({ signature: signatureOf(definition), hash, code: code.code });
         wrong = false;
         break;

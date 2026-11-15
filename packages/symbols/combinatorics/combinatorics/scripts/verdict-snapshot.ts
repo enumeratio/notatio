@@ -1,22 +1,33 @@
 // The committed snapshot of the compile steps' interpreter cross-checks (verdicts.tsv), the one
 // expensive sweep of this package's build. A row is one checked item: its step, its signature,
-// a key over what was checked, and its verdict. The build reads the snapshot and never runs the
-// interpreter; `scripts/collect-verdicts.ts` writes it.
+// a key over what was checked, a source hash, its verdict, and the seconds its check took when it
+// was collected (`-` when unknown; the deep job balances its parts by it). The build reads the
+// snapshot and never runs the interpreter; `scripts/collect-verdicts.ts` writes it.
 //
 // The key hashes the item's `parts` (the definition, its compiled code, the subjects) and the
-// checker code's identity (`checkers`, scripts/verdicts.ts). The engine is not in it, so a
-// compute-engine bump keeps every row; the deep test re-checks every row on the current engine.
+// checker code's identity (`checkers`, scripts/verdicts.ts). The source hash covers what needs no
+// compiler: the item's `source` (the definition and the subjects, or what they are built from)
+// and the same checker identity, so a step in `source` mode finds a stale row without compiling.
+// The engine is in neither, so a compute-engine bump keeps every row; the deep test re-checks
+// every row on the current engine.
 //
 // VERDICT_MODE picks what an item without a fresh row does:
 //   build    (default) stays interpreted; the step counts them in one summary line
 //   check    as build, writes no generated file, and fails when any row is missing or stale
 //   collect  is checked, and the step's rows are rewritten (VERDICT_ALL=1: every item, even a fresh row)
 //   verify   every item is checked and held to its row; nothing is written, and any difference fails
+//   source   nothing is compiled or checked: each item's source hash is held to its row's, and a row
+//            whose item is gone or whose source changed fails (an item with no row is not known to
+//            be compilable, so only the build and `check` report a missing row)
+//
+// VERDICT_PART=i/n (verify): only the items of part i of n are checked, the parts balanced by the
+// rows' recorded seconds (`partOf`); the others are taken as their rows say.
 
 import { createHash } from "node:crypto";
 import { appendFileSync, readFileSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import type { Verdicts } from "../src/statistics/generate-compiled.ts";
+import { assignShards, hashShard } from "./balance.ts";
 
 const at = (path: string): string => fileURLToPath(new URL(`../${path}`, import.meta.url));
 
@@ -28,14 +39,18 @@ export interface Row {
   /** The item: a definition's signature, a map's key, a family's head, with the check where one item has several. */
   readonly signature: string;
   readonly key: string;
+  /** Over the item's source and the checker identity: what needs no compiler. */
+  readonly source: string;
   /** `agrees`, or `disagrees` with the operations it disagrees on after a colon. */
   readonly verdict: string;
+  /** How long the check took when it was collected; absent for a row nobody has timed. */
+  readonly seconds?: number;
 }
 
 /** The rows a collect has made so far, one JSON row a line, so an interrupted run resumes (gitignored). */
 export const journalOf = (file = SNAPSHOT): string => `${file}.journal`;
 
-const HEADER = "step\tsignature\tkey\tverdict";
+const HEADER = "step\tsignature\tkey\tsource\tverdict\tseconds";
 
 // A cell that can't sit in a row as written is a JSON string.
 const cell = (text: string): string => (/[\t\n\r]|^"|^$/.test(text) ? JSON.stringify(text) : text);
@@ -57,15 +72,26 @@ export function readSnapshot(file = SNAPSHOT): Row[] {
     .slice(1)
     .filter((line) => line !== "")
     .map((line) => {
-      const [step, signature, key, verdict] = line.split("\t").map(uncell);
-      return { step: step!, signature: signature!, key: key!, verdict: verdict! };
+      const [step, signature, key, source, verdict, seconds] = line.split("\t").map(uncell);
+      return {
+        step: step!,
+        signature: signature!,
+        key: key!,
+        source: source!,
+        verdict: verdict!,
+        ...(seconds === undefined || seconds === "-" ? {} : { seconds: Number(seconds) }),
+      };
     });
 }
 
 /** Writes `rows` sorted by step then signature, whole (a rename), so equal rows give equal bytes. */
 export function writeSnapshot(rows: readonly Row[], file = SNAPSHOT): void {
   const sorted = rows.toSorted((a, b) => order(a.step, b.step) || order(a.signature, b.signature));
-  const lines = sorted.map((r) => [r.step, r.signature, r.key, r.verdict].map(cell).join("\t"));
+  const lines = sorted.map((r) =>
+    [r.step, r.signature, r.key, r.source, r.verdict, r.seconds === undefined ? "-" : String(r.seconds)]
+      .map(cell)
+      .join("\t"),
+  );
   const tmp = `${file}.${process.pid}.tmp`;
   try {
     writeFileSync(tmp, `${[HEADER, ...lines].join("\n")}\n`);
@@ -75,14 +101,40 @@ export function writeSnapshot(rows: readonly Row[], file = SNAPSHOT): void {
   }
 }
 
-export type Mode = "build" | "check" | "collect" | "verify";
+export type Mode = "build" | "check" | "collect" | "verify" | "source";
 
 export const modeOf = (): Mode => {
   const mode = process.env.VERDICT_MODE ?? "build";
-  if (mode !== "build" && mode !== "check" && mode !== "collect" && mode !== "verify")
-    throw new Error(`VERDICT_MODE ${mode}: expected build, check, collect or verify`);
+  if (mode !== "build" && mode !== "check" && mode !== "collect" && mode !== "verify" && mode !== "source")
+    throw new Error(`VERDICT_MODE ${mode}: expected build, check, collect, verify or source`);
   return mode;
 };
+
+/** The deep job's part, 1-based: `i/n` of VERDICT_PART, or undefined for the whole snapshot. */
+export const partOfRun = (text = process.env.VERDICT_PART): { index: number; of: number } | undefined => {
+  if (text === undefined || text === "") return undefined;
+  const [index, of] = text.split("/").map(Number);
+  if (!Number.isInteger(index) || !Number.isInteger(of) || index! < 1 || index! > of!)
+    throw new Error(`VERDICT_PART ${text}: expected i/n with 1 <= i <= n`);
+  return { index: index!, of: of! };
+};
+
+const itemKey = (step: string, signature: string): string => `${step}\0${signature}`;
+
+/**
+ * Each row's part (0-based) of `of`, the parts balanced by the rows' recorded seconds (a row
+ * nobody has timed counts the median), so a heavy row can't pile into one part. Keyed by
+ * `step\0signature`; an item with no row is not in it (`partOfItem` hashes it).
+ */
+export function partsOf(rows: readonly Row[], of: number): Map<string, number> {
+  const costs: Record<string, number> = {};
+  for (const r of rows) if (r.seconds !== undefined) costs[itemKey(r.step, r.signature)] = r.seconds;
+  return assignShards(
+    rows.map((r) => itemKey(r.step, r.signature)),
+    of,
+    costs,
+  );
+}
 
 /** Whether a mode runs the interpreter. */
 export const checks = (mode: Mode = modeOf()): boolean => mode === "collect" || mode === "verify";
@@ -166,11 +218,47 @@ export class Snapshot implements Verdicts {
     }
   }
 
-  remember<T extends boolean | readonly string[]>(parts: unknown, compute: () => T, label: string, declined: T): T {
-    const key = hashOf(this.id, JSON.stringify(parts)).slice(0, 24);
+  /** Whether the step reads source hashes only: its items are not compiled, and `note` takes the place of `remember`. */
+  get sourceOnly(): boolean {
+    return this.mode === "source";
+  }
+
+  private sourceHash(source: unknown): string {
+    return hashOf(this.id, JSON.stringify(source)).slice(0, 24);
+  }
+
+  /** Whether the part of this run (VERDICT_PART) takes the item; every item when there is no part. */
+  private takes(label: string): boolean {
+    const part = partOfRun();
+    if (part === undefined) return true;
+    this.parts ??= partsOf(readSnapshot(this.file), part.of);
+    const at = itemKey(this.step, label);
+    return (this.parts.get(at) ?? hashShard(at, part.of)) === part.index - 1;
+  }
+
+  private parts: Map<string, number> | undefined;
+
+  /** In `source` mode: the item `label` is looked at with this `source`, and a row whose source differs is stale. */
+  note(source: unknown, label: string): void {
     this.seen.add(label);
     const had = this.old.get(label);
-    const isFresh = had?.key === key;
+    if (had !== undefined && had.source !== this.sourceHash(source)) this.unfresh.push(`${label} (stale)`);
+  }
+
+  /** `parts` is everything the verdict reads (the key); `source` is the part of it that needs no compiler. */
+  remember<T extends boolean | readonly string[]>(
+    parts: unknown,
+    source: unknown,
+    compute: () => T,
+    label: string,
+    declined: T,
+  ): T {
+    const key = hashOf(this.id, JSON.stringify(parts)).slice(0, 24);
+    const sourceKey = this.sourceHash(source);
+    this.seen.add(label);
+    const had = this.old.get(label);
+    const sameKey = had?.key === key;
+    const isFresh = sameKey && had.source === sourceKey;
     if (!checks(this.mode)) {
       if (!isFresh) {
         this.unfresh.push(`${label} (${had === undefined ? "missing" : "stale"})`);
@@ -180,15 +268,23 @@ export class Snapshot implements Verdicts {
       this.rows.set(label, had!);
       return decode(had!.verdict, declined);
     }
-    if (isFresh && !this.all && this.mode === "collect") {
+    // A part checks only its own items; the rest are taken as their rows say, and not reported.
+    if (this.mode === "verify" && !this.takes(label))
+      return had === undefined ? declined : decode(had.verdict, declined);
+    if (sameKey && !this.all && this.mode === "collect") {
       this.fresh++;
-      this.rows.set(label, had!);
+      this.rows.set(label, { ...had!, source: sourceKey });
       return decode(had!.verdict, declined);
     }
     // A row an interrupted collect already made (it is not kept past a finished run).
     const made = this.mode === "collect" ? this.journal.get(label) : undefined;
-    const answer = made?.key === key ? decode(made.verdict, declined) : compute();
-    const row: Row = made?.key === key ? made : { step: this.step, signature: label, key, verdict: encode(answer) };
+    const reused = made?.key === key && made.source === sourceKey;
+    const started = performance.now();
+    const answer = reused ? decode(made.verdict, declined) : compute();
+    const seconds = Math.round((performance.now() - started) / 10) / 100;
+    const row: Row = reused
+      ? made
+      : { step: this.step, signature: label, key, source: sourceKey, verdict: encode(answer), seconds };
     if (this.mode === "collect" && row !== made) appendFileSync(journalOf(this.file), `${JSON.stringify(row)}\n`);
     this.rows.set(label, row);
     if (had === undefined) this.unfresh.push(`${label} (missing)`);
@@ -230,7 +326,19 @@ export class Snapshot implements Verdicts {
       );
       return;
     }
-    const gone = [...this.old.keys()].filter((label) => !this.seen.has(label));
+    // Every part sees every item, so one part reports the rows whose item is gone.
+    const gone = (partOfRun()?.index ?? 1) === 1 ? [...this.old.keys()].filter((label) => !this.seen.has(label)) : [];
+    if (mode === "source") {
+      const problems = [...this.unfresh, ...gone.map((g) => `${g} (no such item)`)];
+      for (const problem of problems.slice(0, 40)) console.log(`verdicts ${step}: ${problem}`);
+      if (problems.length > 40) console.log(`verdicts ${step}: and ${problems.length - 40} more`);
+      if (problems.length > 0)
+        throw new Error(
+          `verdicts ${step}: ${problems.length} rows stale or without an item; run \`pnpm run collect-verdicts\``,
+        );
+      console.log(`verdicts ${step}: every row's source holds`);
+      return;
+    }
     if (mode === "verify") {
       const problems = [
         ...this.unfresh,

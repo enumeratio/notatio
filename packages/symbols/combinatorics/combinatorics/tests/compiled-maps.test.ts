@@ -21,6 +21,7 @@ import { declareMaps, evaluateDefinition, MAPS } from "../src/maps.ts";
 import { rightRotationFlat } from "../trees/src/flat.ts";
 import { evaluateTable, partSubjects } from "../scripts/compile-maps.ts";
 import { allElements, smallElements } from "../scripts/samples.ts";
+import { readSnapshot } from "../scripts/verdict-snapshot.ts";
 
 // The interpreter is the slow side of the comparison: a small sample in the standard run, more
 // under DEEP_TESTS.
@@ -38,6 +39,25 @@ const ce = bareEngine();
 
 test("the build compiled maps", () => {
   expect(Object.keys(COMPILED_MAPS).length).toBeGreaterThan(0);
+});
+
+// The standard run's comparison below is a small sample; the build only compiles a map whose row in the
+// snapshot says its code agrees with the interpreter over the build's whole sample, so each compiled map
+// (and each composition) has such a row.
+test("every compiled map has an agreeing verdict in the snapshot", () => {
+  const verdicts = new Map(
+    readSnapshot()
+      .filter((row) => row.step === "compile-maps")
+      .map((row) => [row.signature, row.verdict]),
+  );
+  const compiled = MAPS.filter((m) => COMPILED_MAPS[mapKey(m)]?.run !== undefined);
+  expect(compiled.length).toBeGreaterThan(0);
+  const without = compiled.filter((m) => {
+    const key = mapKey(m);
+    const labels = m.composedOf === undefined ? [key, `${key} (flat)`] : [`${key} (composition)`];
+    return !labels.some((label) => verdicts.get(label) === "agrees");
+  });
+  expect(without.map(mapKey)).toEqual([]);
 });
 
 // Maps whose Epsil the compiler can't take, left to the interpreter on purpose: each is pinned here with its
@@ -158,6 +178,14 @@ const DEFAULT_ALLOWANCE = 1500;
  *  size up to 3 whole in a one-parameter family. */
 const MIN_PER_MAP = 12;
 
+/** The standard run takes this fraction of a map's share, and at least `MIN_PER_MAP_STANDARD`: the smallest
+ *  half stays whole and the largest is taken, so the generated code still runs through `fastDefinition` against
+ *  the interpreter on a few of each size. The snapshot (verdicts.tsv) holds every compiled map to the
+ *  interpreter over the build's whole sample, and the test below reads it; `DEEP_TESTS=1` runs the full share
+ *  (the file took about 13 minutes at it). */
+const STANDARD_DIVISOR = 6;
+const MIN_PER_MAP_STANDARD = 4;
+
 /** Maps whose interpretation grows steeply with the element: the most cells (the sum of its numbers) a
  *  subject may have. A family's sample reaches shapes of 36 cells at its largest sizes; RskRecording, which
  *  ReadingTableau applies to the reading word, takes about a second at 3 cells, 3 at 6 and 9 at 10, so past
@@ -192,7 +220,10 @@ function budgeted(carrier: string, subjects: unknown[], most?: number): unknown[
     MIN_PER_MAP,
     Math.floor((CARRIER_ALLOWANCE[carrier] ?? DEFAULT_ALLOWANCE) / Math.max(1, maps.length)),
   );
-  const cap = Math.min(share, most ?? Infinity);
+  const cap = Math.min(
+    DEEP ? share : Math.max(MIN_PER_MAP_STANDARD, Math.floor(share / STANDARD_DIVISOR)),
+    most ?? Infinity,
+  );
   if (subjects.length <= cap) return subjects;
   const bySize = subjects
     .map((s) => [JSON.stringify(s).length, s] as const)
@@ -258,7 +289,7 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
         : budgeted(
             from.name,
             subjectsOf(from.name).filter((contents) => cellsOf(contents) <= largest),
-            slow?.most,
+            slow === undefined ? undefined : DEEP ? slow.most : Math.ceil(slow.most / 4),
           );
   const title = `${map.name} from ${map.from}: compiled agrees with interpreted`;
   const chunk = slow?.chunk ?? CHUNK;

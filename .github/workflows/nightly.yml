@@ -249,15 +249,28 @@ jobs:
 
   # The compile steps' interpreter cross-checks, every item, held to the committed snapshot
   # (packages/symbols/combinatorics/combinatorics/verdicts.tsv): a verdict that differs on the current
-  # engine fails, and `collect-verdicts --all` rewrites the snapshot.
+  # engine fails, and `collect-verdicts --all` rewrites the snapshot. A full re-check is about nine
+  # hours of one core, so it runs in 16 parts (VERDICT_PART=i/16), each re-checking its share of
+  # the rows, balanced by the seconds each row recorded when it was collected (`partsOf`,
+  # scripts/verdict-snapshot.ts): about 34 minutes of checks a part, the dearest single row 36.
+  # A part is one process (a part's items are not split again), and every part compiles every
+  # item first, about 4 minutes. Raise the count (and keep each part to one dear row) when the
+  # snapshot grows.
   deep-crosschecks:
-    name: deep compile cross-checks
+    name: deep compile cross-checks ${{ matrix.part }}/16
     needs: [changes, dist]
     if: ${{ !cancelled() && needs.changes.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.dist.result) && ((github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-crosschecks')) }}
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 100
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
     env:
       DEEP_TESTS: "1"
+      VERDICT_PART: ${{ matrix.part }}/16
+      COMPILE_SHARDS: "1"
+      FAMILY_SHARDS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
