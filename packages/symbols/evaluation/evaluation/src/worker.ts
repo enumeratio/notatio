@@ -57,8 +57,8 @@ async function engineFor(setup: string | undefined): Promise<ComputeEngine> {
   // The worker's engine must mean the same things the caller's does.
   declareEvaluation(ce);
   if (setup !== undefined) {
-    const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void };
-    mod.configure(ce);
+    const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void | Promise<void> };
+    await mod.configure(ce);
   }
   engines.set(setup, ce);
   return ce;

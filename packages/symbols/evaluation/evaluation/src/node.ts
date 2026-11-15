@@ -86,7 +86,7 @@ export interface EvaluateIsolatedOptions {
    * `COOPERATIVE_GRACE_MS` past this if that didn't stop it — see
    * `./cooperative-evaluate.ts`. */
   readonly timeMs?: number;
-  /** Module URL whose `configure(ce)` declares the libraries the host engine has. */
+  /** Module URL whose `configure(ce)` (sync or async) declares the libraries the host engine has. */
   readonly setup?: string;
   /** Expand a finite lazy collection in the result into its elements (compute-engine's
    * `materialization` evaluate option). */

@@ -41,8 +41,8 @@ async function main(): Promise<void> {
   const ce = new ComputeEngine();
   declareEvaluation(ce);
   if (setup !== undefined) {
-    const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void };
-    mod.configure(ce);
+    const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void | Promise<void> };
+    await mod.configure(ce);
   }
   // Messages sent before this listener attaches (the caller can `postMessage` right after
   // spawning) are queued by the port, not lost — safe to configure asynchronously above.
