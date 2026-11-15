@@ -16,8 +16,8 @@ just use notatio in an app.
 - `./symbols` — `renderingOf`: the pure map from a MathJSON head to a `Rendering` (tag +
   attributes + children). No DOM; the docs build, `<notatio-out>`, and anything else
   holding an expression read it the same way.
-- `./vdom` — `structuralOf` (an expression written out verbatim as a vdom: every head a
-  tag, every argument a child, a run of atoms as text) and `vdomOf` (`renderingOf` with a
+- `./vdom` — `treeOf` (a host's tree for an environment: `reduce`, `scopeOf`, then `structuralOf`), `structuralOf` (an expression written out verbatim as a vdom: every head a
+  tag, every argument a child, a run of atoms as text) and `vdomOf` (reduced for the page, then `renderingOf` with a
   typeset fallback); `toVNode` hands either to any framework's `h`.
 - `./declare-carriers` — `declareFrontendCarriers(ce)`: this package's own carrier
   (`GlyphKind`), for a host assembling every carrier it ships.
@@ -32,10 +32,11 @@ discriminating attribute unset and lets the component choose among the members i
 draws.
 
 ```ts
-import { structuralOf, tagOf, toVNode } from "@notatio/frontend/vdom";
+import { WEB } from "@notatio/frontend";
+import { tagOf, toVNode, treeOf } from "@notatio/frontend/vdom";
 
 tagOf("Plot3D"); // "notatio-plot-3d"
-toVNode(structuralOf(["Add", "x", 1]), h); // { tag: "notatio-add", attributes: {}, children: [...] }
+toVNode(treeOf(["Add", "x", 1], WEB), h); // { tag: "notatio-add", attributes: {}, children: [...] }
 ```
 
 ## Rendering environments
@@ -43,8 +44,10 @@ toVNode(structuralOf(["Add", "x", 1]), h); // { tag: "notatio-add", attributes: 
 `reduce(expr, env)` closes the gap between what an expression asks for (a live slider, a
 GPU plot) and what the place it lands can do: a control with nothing to drive it is
 pinned or sampled into small multiples, a GPU-only plot rasterizes on a surface without
-one, a `Row` in a narrow column stacks. It runs before `structuralOf`/`vdomOf`, so every
-backend downstream — Vue, React, the plain elements — sees the same reduced tree. See
+one, a `Row` in a narrow column stacks. A host's tree is three steps in that order: `reduce`, then
+`scopeOf` (controls become a `DynamicModule`, their variables wildcards), then `structuralOf`;
+`treeOf(expr, env)` is the three. Every backend downstream — Vue, React, the plain elements —
+sees the same tree. See
 [Rendering Environments](https://github.com/enumeratio/notatio/wiki/Rendering-Environments).
 
 ## Where to go next

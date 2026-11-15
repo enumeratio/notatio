@@ -18,6 +18,8 @@ export { renderBox } from "./box-render.ts";
 export { type LayoutLeaves, layoutMarkup, layoutMarkupEverywhere } from "./layout-markup.ts";
 export * from "./tracked-symbols.ts";
 export * from "./vdom.ts";
+// `./graph.ts` already owns the root name; the host tree is `treeOf` from `@notatio/frontend/vdom`.
+export { treeOf } from "./graph.ts";
 export * from "./head-names.ts";
 export * from "./reduce.ts";
 export { splitColumns } from "./collection-table.ts";
