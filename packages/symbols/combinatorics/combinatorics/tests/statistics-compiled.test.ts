@@ -13,6 +13,7 @@ import { ALL_STATISTICS } from "../src/statistics/all.ts";
 import { compiledStatistic } from "../src/statistics/compiled.ts";
 import { interpretDefinition } from "../src/statistics/declare.ts";
 import { signatureOf } from "../src/statistics/types.ts";
+import { readSnapshot } from "../scripts/verdict-snapshot.ts";
 import { COMPILED as PERMUTATIONS_COMPILED } from "../permutations/src/statistics.compiled.generated.js";
 import { COMPILED as PARTITIONS_COMPILED } from "../partitions/src/statistics.compiled.generated.js";
 import { COMPILED as COMPOSITIONS_COMPILED } from "../compositions/src/statistics.compiled.generated.js";
@@ -48,6 +49,21 @@ for (const area of AREAS) {
     expect(Object.keys(area.compiled).length).toBeGreaterThan(0);
   });
 }
+
+// The comparison below is a bounded sample in the standard run; the build compiles a definition only when its
+// row in the snapshot says the code agrees with the interpreter over the build's whole sample.
+test("every compiled definition has an agreeing verdict in the snapshot", () => {
+  const verdicts = new Map(readSnapshot().map((row) => [`${row.step}\0${row.signature}`, row.verdict]));
+  const without = AREAS.flatMap((area) =>
+    Object.keys(area.compiled).filter(
+      (signature) =>
+        ![signature, `${signature} (flat)`].some(
+          (label) => verdicts.get(`compile-${area.name}\0${label}`) === "agrees",
+        ),
+    ),
+  );
+  expect(without).toEqual([]);
+});
 
 /** Every signature ANY area's compiled table has an entry for. */
 const COMPILED_SIGNATURES = new Set(
@@ -378,6 +394,13 @@ const CARRIER_ALLOWANCE: Readonly<Record<string, number>> = {
  *  Dyck path's 3 whole, and a few of the next size up. */
 const MIN_PER_HEAD = 12;
 
+/** The standard run takes this fraction of a head's subjects, and at least `MIN_PER_HEAD_STANDARD`: each
+ *  size is still represented, with the smallest whole and the largest of every size taken. The build's own
+ *  cross-check of these heads over the families' samples is the snapshot (verdicts.tsv); `DEEP_TESTS=1`
+ *  runs the full share, which the interpreter makes the file's cost (about half an hour a run). */
+const STANDARD_DIVISOR = 10;
+const MIN_PER_HEAD_STANDARD = 5;
+
 /** Which of a carrier's subjects (grouped by size, smallest first) a head interprets, at most `cap`.
  *  The smallest sizes stay whole while they fit in half the cap; the rest is shared equally by the
  *  larger sizes, each spread evenly with its last subject taken, so every size is represented and so is
@@ -422,7 +445,8 @@ for (const definition of compiledDefinitions) {
     const run = compiledStatistic(ce, definition);
     expect(run).toBeDefined();
     let compared = 0;
-    const cap = Math.max(MIN_PER_HEAD, Math.floor((CARRIER_ALLOWANCE[definition.on] ?? 0) / headsOn(definition.on)));
+    const full = Math.max(MIN_PER_HEAD, Math.floor((CARRIER_ALLOWANCE[definition.on] ?? 0) / headsOn(definition.on)));
+    const cap = DEEP ? full : Math.max(MIN_PER_HEAD_STANDARD, Math.floor(full / STANDARD_DIVISOR));
     // A definition that is slow to interpret names the largest subject (the sum of its numbers) it is held to.
     const groups = (SUBJECTS[definition.on] ?? []).map((group) =>
       group.filter((contents) => weightOf(contents) <= (definition.checkWeight ?? Infinity)),
