@@ -6,4 +6,6 @@ another-point-checked-against-mpmath-s-hyperu		test	[HypergeometricUStar, 0.2, 0
 a-third-point-checked-against-mpmath-s-hyperu		test	[HypergeometricUStar, 2, 4.5, 5]	1.680941114165958				
 a-negative-a-checked-against-mpmath-s-hyperu		test	[HypergeometricUStar, -0.5, 1.5, 2]	0.75				
 a-tiny-value-keeps-its-imaginary-part		test	[HypergeometricUStar, 3, [Complex, 1e-12, -3], 1e-12]	[Complex, -2.0512820512827545e-38, -2.564102564108002e-39]	[Complex, {num: "-2.0512820512827614e-38"}, {num: "-2.564102564107934e-39"}]	1e-12	mpmath 1.3.0 hyperu	
+a-value-below-the-double-range-stays-unevaluated		test	[HypergeometricUStar, 100, 1.5, [Complex, 1e-8, 1e-8]]	[HypergeometricUStar, 100, 1.5, [Complex, 1e-8, 1e-8]]				$U^*(100, 3/2, z)$ at $10^{-8}(1 + i)$ is about $-1.7 \times 10^{-937}$ (mpmath 1.3.0 `hyperu`), below the double range, not 0
+a-small-value-inside-the-double-range		test	[HypergeometricUStar, 20, 1.5, [Complex, 1e-8, 1e-8]]	[Complex, -1.1578372657634705e-170, 4.801337048928601e-171]	[Complex, {num: "-1.157837265763532e-170"}, {num: "4.8013370489288465e-171"}]	1e-12	mpmath 1.3.0 hyperu	
 integer-b-stays-symbolic-the-connection-formula	Possible issues		[HypergeometricUStar, 1, 2, 3]	[HypergeometricUStar, 1, 2, 3]				integer $b$ stays symbolic — the connection formula's log-case limit is not implemented

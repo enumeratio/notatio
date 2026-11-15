@@ -134,6 +134,8 @@ export {
   numberResult,
   type NumberResultOptions,
   REAL_COLLAPSE_RELATIVE,
+  MIN_NORMAL,
+  underflows,
   inexactComplex,
   wantsNumber,
   declined,

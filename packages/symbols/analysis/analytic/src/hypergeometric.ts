@@ -3,6 +3,7 @@ import {
   type EvalOptions,
   isFiniteNum,
   numberResult,
+  underflows,
   wantsNumber,
   add,
   cexp,
@@ -83,6 +84,15 @@ const isNonPositiveInt = (z: Cx): boolean => z.im === 0 && z.re <= 0 && Number.i
 
 /** 1/Γ(z), entire (zero at the non-positive integers, rather than the NaN a naive 1/Γ gets there). */
 const invGamma = (z: Cx): Cx => (isNonPositiveInt(z) ? cx(0) : cexp(scale(logGamma(z), -1)));
+
+/**
+ * Does ∏ 1/Γ(zᵢ) leave the double range (a z past about 171.6: 1/Γ(200) is 8e-373; two at 100 give
+ * 1e-312)? Every regularized series starts from it, so an underflowed factor zeroes every term and
+ * the series sums to an exact 0 where the value is tiny but not 0. The head declines instead. A
+ * pole among the zᵢ makes the product a true 0, which is not an underflow.
+ */
+export const invGammaUnderflows = (...zs: readonly Cx[]): boolean =>
+  !zs.some(isNonPositiveInt) && underflows(-zs.reduce((sum, z) => sum + logGamma(z).re, 0));
 
 const mag = (z: Cx): number => Math.hypot(z.re, z.im);
 
@@ -481,6 +491,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       // Past a double's digits only the bignum series answers; it declines rather than pad.
       if (exceedsDoublePrecision(ce, options.numericApproximation))
         return regularizedPastDouble(ce, [], ops[0], ops[1]);
+      if (invGammaUnderflows(b)) return undefined;
       const r = pfqRegularizedSeries([], [b], z);
       return r === undefined ? undefined : numberResult(ce, r);
     },
@@ -501,6 +512,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       if (cs === undefined || !wantsNumber(ops, options)) return undefined;
       const [a, b, z] = cs;
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return regularized1F1PastDouble(ce, ops);
+      if (invGammaUnderflows(b)) return undefined;
       if (isMinusOneShift(a, b)) return numberResult(ce, regularizedMinusOne(a, z));
       if (isDiagonal(a, b)) return numberResult(ce, regularizedDiagonal(a, z));
       const r = regularizedRaise(a, b, z) ?? regularizedKummer(a, b, z) ?? pfqRegularizedSeries([a], [b], z);
@@ -531,7 +543,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       const [a, b, c, z] = cs;
       // Past a double's digits only the bignum kernel answers (real operands, z < 1).
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return regularized2F1PastDouble(ce, ops);
-      if (mag(z) >= 1) return undefined;
+      if (mag(z) >= 1 || invGammaUnderflows(c)) return undefined;
       const r = pfqRegularizedSeries([a, b], [c], z);
       return r === undefined ? undefined : numberResult(ce, r);
     },
@@ -547,7 +559,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       const [a1, a2, a3, b1, b2, z] = cs;
       // Past a double's digits only the bignum series answers (real operands, |z| < 1).
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return regularized3F2PastDouble(ce, ops);
-      if (mag(z) >= 1) return undefined;
+      if (mag(z) >= 1 || invGammaUnderflows(b1, b2)) return undefined;
       // Real operands: the terms carry factorial-sized factors whose rounding costs a double more
       // than its last bit (1, 2, 3; 4, −1; 1/3 came out 2 ulp off), so the bignum series answers at
       // `DOUBLE_GUARD_DIGITS` and rounds once; if it can't settle, neither can the double one.

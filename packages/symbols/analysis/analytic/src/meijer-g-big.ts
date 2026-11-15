@@ -10,6 +10,7 @@ import {
   bigMul as bmul,
   bigPow as bpow,
   logGammaBig,
+  MIN_NORMAL,
 } from "@notatio/ce-patches";
 
 // The BigDecimal twin of meijer-g.ts's `meijerGSeries` — same DLMF 16.17.2 sum, same term
@@ -137,6 +138,11 @@ export function meijerGSeriesBig(a: readonly Cx[], b: readonly Cx[], m: number, 
       const term = bmul(bmul(pref, zPow), series);
       total = badd(total, term);
     }
-    return { re: total.re.toNumber(), im: total.im.toNumber() };
+    // A nonzero total past the double range would round to 0 (or a subnormal): decline.
+    const re = total.re.toNumber();
+    const im = total.im.toNumber();
+    if (Math.max(Math.abs(re), Math.abs(im)) < MIN_NORMAL && !(total.re.isZero() && total.im.isZero()))
+      return undefined;
+    return { re, im };
   });
 }
