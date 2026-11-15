@@ -39,7 +39,6 @@ export function evaluateCooperatively(
   timeMs: number | undefined,
   materialize = false,
 ): CooperativeResult {
-  const boxed: Expression = ce.box(json as never);
   // A lazy collection (`Range`, `Tabulate`, …) stays lazy unless asked: its `.json` is then
   // still the call, not the elements. Asked, a result with a known count up to
   // MATERIALIZE_LIMIT is expanded in full. Past that (count unknown -- a `Select`/`Filter`
@@ -47,7 +46,7 @@ export function evaluateCooperatively(
   // `materialize: false` would leave it: a caller can tell a lazy expression
   // (`isLazyCollection`) from data, but not a truncated list from a whole one.
   const run = (): Expression => {
-    const result = boxed.evaluate();
+    const result = ce.box(json as never).evaluate();
     if (!materialize || !result.isLazyCollection) return result;
     const count = result.count;
     if (count === undefined || !Number.isFinite(count) || count > MATERIALIZE_LIMIT) return result;

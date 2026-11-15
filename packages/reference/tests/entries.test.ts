@@ -220,6 +220,9 @@ async function runGroup(group: ReturnType<typeof named>, setup: string): Promise
         if (result.outcome === "Error") {
           throw new Error(`evaluation raised: ${result.reason}`);
         }
+        if (result.outcome === "Aborted" && result.reason !== undefined) {
+          throw new Error(`the evaluation worker died: ${result.reason}`);
+        }
         if (result.outcome === "Aborted" || (isAborted(result.value) && !isAborted(example.expected))) {
           throw new Error(`exceeded the ${TIME_MS}ms/${MEMORY_BYTES}-byte cap — tighten the example or raise the cap`);
         }
