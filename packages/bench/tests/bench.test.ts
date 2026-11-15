@@ -67,12 +67,14 @@ describe("protocol", () => {
     expect(timed.timedOut).toBe(false);
   });
   test("clear is told how many calls the coming sample makes, so each can have its own input", () => {
-    const { now, call } = clocked(1000n);
+    // 100 µs a call keeps a sample to a few hundred calls; an `expect` per call would cost the test seconds.
+    const { now, call } = clocked(100_000n);
     let ready = 0;
     let used = 0;
+    let overruns = 0;
     measure(
       () => {
-        expect(used++).toBeLessThan(ready);
+        if (used++ >= ready) overruns++;
         return call();
       },
       {
@@ -84,6 +86,7 @@ describe("protocol", () => {
         },
       },
     );
+    expect(overruns).toBe(0);
     expect(ready).toBeGreaterThan(1);
   });
 });
