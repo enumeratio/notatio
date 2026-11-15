@@ -49,6 +49,7 @@ export {
   type BigCx,
   bigCx,
   atDigits,
+  exactDouble,
   hurwitzZetaBig,
   zetaGeneralizedBig,
   add as bigAdd,
