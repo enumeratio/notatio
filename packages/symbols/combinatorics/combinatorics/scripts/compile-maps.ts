@@ -168,6 +168,14 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const given = map.argumentParts === undefined ? subjectsOf(from.name) : undefined;
     const subjects = given ?? partsKey(map);
     const subjectsNow = (): unknown[] => given ?? partsOf(map);
+    if (verdicts.sourceOnly) {
+      if (map.flat !== undefined) {
+        const shapes = [from.flat?.shape, to.flat?.shape];
+        verdicts.note({ body: map.body, flat: map.flat, shapes, subjects }, `${key} (flat)`);
+      }
+      verdicts.note({ body: map.body, guard: map.guard, subjects }, key);
+      return undefined;
+    }
     // The flat body first, where the map has one; the nested body after it.
     let wrong = false;
     if (map.flat !== undefined) {
@@ -178,7 +186,8 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
         const shapes = [from.flat?.shape, to.flat?.shape];
         const parts = { body: map.body, flat: map.flat, code: flat.code, shapes, subjects };
         const check = () => agrees(ce, map, flat.run, undefined, subjectsNow(), codecs);
-        if (verdicts.remember(parts, check, `${key} (flat)`, false))
+        const source = { body: map.body, flat: map.flat, shapes, subjects };
+        if (verdicts.remember(parts, source, check, `${key} (flat)`, false))
           return {
             key,
             hash: flatHash(map),
@@ -199,7 +208,8 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const hash = bodyHash(map);
     const parts = { body: map.body, guard: map.guard, code: body.code, guardCode: guard?.code, subjects };
     const check = () => agrees(ce, map, body.run, guard?.run, subjectsNow());
-    if (!verdicts.remember(parts, check, key, false)) return { key, hash };
+    const source = { body: map.body, guard: map.guard, subjects };
+    if (!verdicts.remember(parts, source, check, key, false)) return { key, hash };
     return { key, hash, body: body.code, ...(guard === undefined ? {} : { guard: guard.code }) };
   };
 
@@ -213,6 +223,17 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     // A chain reads its argument and hands back its image whole, with no constructors to take off or put on.
     if (steps[0]!.argumentParts !== undefined || steps.at(-1)!.imageParts !== undefined)
       return skip("the chain starts or ends at a tuple carrier whose parts are constructed");
+    const subjects = subjectsOf(from.name);
+    const stepSources = steps.map((step) => ({
+      key: mapKey(step),
+      body: step.body,
+      guard: step.guard,
+      flat: step.flat,
+    }));
+    if (verdicts.sourceOnly) {
+      verdicts.note({ steps: stepSources, subjects }, `${key} (composition)`);
+      return { key, hash: "" };
+    }
     const entries = steps.map(entryOf);
     const missing = steps.filter((_, i) => entries[i]?.body === undefined).map(mapKey);
     if (missing.length > 0) return skip(`no compiled code: ${missing.join(", ")}`);
@@ -222,7 +243,6 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const generated = evaluateTable([...used.values()]);
     const sys = runtimeHelpers(ce);
     const run: Run = (vars) => generated[key]!.run(sys, vars);
-    const subjects = subjectsOf(from.name);
     // What the answer depends on, besides the subjects: the steps' definitions and their compiled code.
     const parts = {
       steps: steps.map((step, i) => ({
@@ -237,7 +257,13 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
       })),
       subjects,
     };
-    return verdicts.remember(parts, () => agreesComposed(ce, steps, run, subjects), `${key} (composition)`, false)
+    return verdicts.remember(
+      parts,
+      { steps: stepSources, subjects },
+      () => agreesComposed(ce, steps, run, subjects),
+      `${key} (composition)`,
+      false,
+    )
       ? chain
       : { key, hash: chain.hash };
   };

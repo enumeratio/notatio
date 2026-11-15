@@ -5,44 +5,17 @@
 // whatever the shard count, so a run with another count (local 1, CI 3) gives the same rows.
 
 import { type ChildProcess, spawn } from "node:child_process";
-import { createHash } from "node:crypto";
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { type Share, Snapshot } from "./verdict-snapshot.ts";
+import { assignShards } from "./balance.ts";
+import { readSnapshot, type Share, Snapshot } from "./verdict-snapshot.ts";
 
 /** Shards per step: COMPILE_SHARDS, else 3 on CI and 1 elsewhere. */
 export const SHARDS = Number(process.env.COMPILE_SHARDS) || (process.env.CI ? 3 : 1);
 
-/** A key's shard when no costs are known: stable across runs and unrelated to listing order. */
-const hashShard = (key: string, shards: number): number =>
-  createHash("sha256").update(key).digest().readUInt32BE(0) % shards;
-
-/**
- * Each key's shard. With recorded costs (ms per key): longest first, each to the
- * least loaded shard, so the dear definitions can't pile into one (a key with no record counts
- * the median). With none recorded (a cold first run) the hash split. Equal inputs give an equal
- * split, which every process of a run computes for itself.
- */
-export function assignShards(
-  keys: readonly string[],
-  shards: number,
-  costs: Readonly<Record<string, number>>,
-): Map<string, number> {
-  const known = keys.map((k) => costs[k]).filter((c): c is number => c !== undefined);
-  if (known.length === 0) return new Map(keys.map((k) => [k, hashShard(k, shards)]));
-  const median = known.toSorted((a, b) => a - b)[known.length >> 1]!;
-  const cost = (key: string): number => costs[key] ?? median;
-  const load = Array.from({ length: shards }, () => 0);
-  const out = new Map<string, number>();
-  for (const key of keys.toSorted((a, b) => cost(b) - cost(a) || (a < b ? -1 : a > b ? 1 : 0))) {
-    const shard = load.indexOf(Math.min(...load));
-    load[shard]! += cost(key);
-    out.set(key, shard);
-  }
-  return out;
-}
+export { assignShards };
 
 interface Shard<T> {
   readonly result: T;
@@ -62,7 +35,14 @@ export async function sharded<T>(
   work: (verdicts: Snapshot, mine: (key: string) => boolean) => T,
 ): Promise<{ results: T[]; verdicts: Snapshot } | undefined> {
   const verdicts = new Snapshot(step, checks);
-  const split = (shards: number) => assignShards(keys, shards, {});
+  // The recorded seconds of an item's rows (a flat and a nested row, or a composition, share its key).
+  const costs: Record<string, number> = {};
+  for (const row of readSnapshot())
+    if (row.step === step && row.seconds !== undefined) {
+      const key = row.signature.replace(/ \((flat|composition)\)$/, "");
+      costs[key] = (costs[key] ?? 0) + row.seconds;
+    }
+  const split = (shards: number) => assignShards(keys, shards, costs);
   if (process.argv[2] === "--shard") {
     const [, , , shard, shards, out] = process.argv;
     const assigned = split(Number(shards));

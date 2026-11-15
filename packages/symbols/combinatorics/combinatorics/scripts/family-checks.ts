@@ -340,18 +340,25 @@ export function compiledFamilies(
   const ce = bareEngine();
   const out: Entry[] = [];
   for (const family of (allFamilies.filter(isEpsilFamily) as EpsilFamily[]).filter((f) => only(f.head))) {
-    const { code, runs, big, bigRuns } = compileFamily(ce, family);
     // disagreements reads a family only through these fields, and `early.unrank`/`early.rank`,
     // whose closures may reach any family source: a family with either keys on all of it.
     const { early } = family;
     const data = { ...family, early: undefined, fast: undefined, fastCount: undefined };
     const reachesSource = early?.unrank !== undefined || early?.rank !== undefined;
+    const source = { data, source: reachesSource ? familySourceHash() : undefined };
+    if (verdicts.sourceOnly) {
+      verdicts.note(source, family.head);
+      if (family.bigSamples !== undefined) verdicts.note(source, `${family.head} (BigInt)`);
+      continue;
+    }
+    const { code, runs, big, bigRuns } = compileFamily(ce, family);
     const interpreted = verdicts.remember(
       {
         data,
         code,
         source: reachesSource ? familySourceHash() : undefined,
       },
+      source,
       () => disagreements(ce, family, runs),
       family.head,
       Object.keys(code) as Operation[],
@@ -362,6 +369,7 @@ export function compiledFamilies(
         ? []
         : verdicts.remember(
             { data, big, source: reachesSource ? familySourceHash() : undefined },
+            source,
             () => bigDisagreements(ce, family, bigRuns),
             `${family.head} (BigInt)`,
             Object.keys(big) as Operation[],
