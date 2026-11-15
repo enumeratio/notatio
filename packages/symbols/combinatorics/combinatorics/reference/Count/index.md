@@ -14,7 +14,7 @@ signatures:
   - call: Count(collection, value, level)
     description: matches counted down to `level` (levels 1 through `level`), or — with `level` written as $\{level\}$ — at that level only.
     library: enumeratio-combinatorics
-    type: (collection<any>, any?) -> infinity | integer
+    type: (collection<any>, any?, any?) -> infinity | integer
     overrides: compute-engine
 seeAlso:
   - Length

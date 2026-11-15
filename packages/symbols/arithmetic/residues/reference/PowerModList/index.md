@@ -11,12 +11,12 @@ signatures:
   - call: PowerModList(a, -1, m)
     description: the modular inverse $\{a^{-1}\}$, or $\{\}$ when $\gcd(a, m) \ne 1$
     library: enumeratio-residues
-    type: (number, number, number) -> list<number>
+    type: (list<rational> | number | rational, list<rational> | number | rational, integer | list<integer> | number) -> list<integer> | list<list<integer>> | list<number>
     overrides: compute-engine
   - call: PowerModList(a, s/r, m)
     description: Every $x$ in $[0, m)$ with $x^r \equiv a^s \pmod m$ — all the values $a^{s/r}$ can take modulo $m$.
     library: enumeratio-number-theory
-    type: (number, number, number) -> list<number>
+    type: (list<rational> | number | rational, list<rational> | number | rational, integer | list<integer> | number) -> list<integer> | list<list<integer>> | list<number>
     overrides: enumeratio-residues
 seeAlso:
   - PowerMod

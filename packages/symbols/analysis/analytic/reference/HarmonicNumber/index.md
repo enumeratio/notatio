@@ -8,6 +8,7 @@ signatures:
     description: the harmonic number $H_n = \sum_{k=1}^n 1/k$.
     library: "@notatio/analytic"
     type: (number, number?) -> number
+    overrides: compute-engine
   - call: HarmonicNumber(n, r)
     description: the generalized harmonic number $H_n^{(r)} = \sum_{k=1}^n k^{-r}$.
     library: "@notatio/analytic"

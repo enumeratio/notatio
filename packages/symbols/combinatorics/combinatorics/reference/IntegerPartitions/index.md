@@ -9,6 +9,7 @@ signatures:
     description: every way to write $n$ as a sum of positive parts, order-insensitive.
     library: enumeratio-combinatorics
     type: (integer, any?, any?) -> indexed_collection<integer_partition>
+    overrides: compute-engine
   - call: IntegerPartitions(n, k)
     description: the partitions of $n$ into at most $k$ parts.
     library: enumeratio-combinatorics
