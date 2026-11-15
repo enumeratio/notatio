@@ -131,6 +131,8 @@ jobs:
       # While branches that predate a codemod are open, a stale one fails here with the script to run.
       - name: codemods applied
         run: node tools/codemods/notatio-scope.ts --check
+      - name: packed tarballs are statically sound
+        run: node tools/tarball-check/run.ts --only static
       - name: example ids aren't renamed silently
         if: github.event_name == 'pull_request'
         env:
