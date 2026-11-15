@@ -126,6 +126,6 @@ polylog-3-exponentiale-pow-2-over-3-times-i	polylog(3, enumeratio_pow(e, (mpc(0,
 functionexpand-polylog-2-exponentiale-pow-1-over			
 neg-polylog-2-neg-1-plus-polylog-2-1-over-2	((-polylog(2, -1)) + polylog(2, (mpf(1)/2)))	1.40470755988912572413886390348	
 neg-1-over-2-times-polylog-2-neg-1-over-3-plus	(((mpf(-1)/2) * polylog(2, (mpf(-1)/3))) + polylog(2, -1) + polylog(2, (mpf(1)/3)))	-0.301737240203145494460944780962	
-neg-2-times-polylog-2-neg-1-over-2-plus-polylog	((-2 * (polylog(2, (mpf(-1)/2)) + polylog(2, (mpf(1)/2)))) + polylog(2, (mpf(1)/4)))		
+neg-2-times-polylog-2-neg-1-over-2-plus-polylog	((-2 * (polylog(2, (mpf(-1)/2)) + polylog(2, (mpf(1)/2)))) + polylog(2, (mpf(1)/4)))	-4.93038065763132378382330353302e-32	
 polylog-2-neg-1-plus-polylog-2-0-plus-polylog-2	(polylog(2, -1) + polylog(2, 0) + polylog(2, (mpf(1)/2)))	-0.240226506959100712333551263163	
 an-exact-argument-stays-symbolic-under-plain	polylog(2, (mpf(1)/2))	0.58224052646501250590265632016	
