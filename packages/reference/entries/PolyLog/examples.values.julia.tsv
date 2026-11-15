@@ -110,6 +110,7 @@ polylog-1-0	enumeratio_ball(polylog, 1, 0)	0.0
 d-polylog-n-z-z			
 matrixfunction-function-polylog-2-1-1-list-list			
 fullsimplify-series-polylog-n-x-x-x0-2			
+an-exact-argument-stays-symbolic-under-plain	enumeratio_ball(polylog, 2, (1 // 2))	0.5822405264650125059026563201596801087441984748061264254343470478731710440716808	
 li-1-2-1-zeta-1-2-a-non-integer-order-from	enumeratio_ball(polylog, enumeratio_decimal("0.5"), 1)	ball not finite	error
 li-1-2-1-2-0-80612672-via-the-lerch-series	enumeratio_ball(polylog, enumeratio_decimal("0.5"), enumeratio_decimal("0.5"))	0.8061267230428522613247578132154185232619146545083196780295787480193098234476262	
 li-5-2-1-2-0-46229778-the-alternating-side-euler	enumeratio_ball(polylog, enumeratio_decimal("2.5"), enumeratio_decimal("-0.5"))	-0.4622977821900634381891643232745464898869395902698162924524601235418487584483382	
@@ -128,4 +129,3 @@ neg-polylog-2-neg-1-plus-polylog-2-1-over-2	((-(enumeratio_ball(polylog, 2, -1))
 neg-1-over-2-times-polylog-2-neg-1-over-3-plus	(((-1 // 2) * enumeratio_ball(polylog, 2, (-1 // 3))) + enumeratio_ball(polylog, 2, -1) + enumeratio_ball(polylog, 2, (1 // 3)))	-0.3017372402031454944609447809623414784046158366573054962041817100145538787019915	
 neg-2-times-polylog-2-neg-1-over-2-plus-polylog	((-2 * (enumeratio_ball(polylog, 2, (-1 // 2)) + enumeratio_ball(polylog, 2, (1 // 2)))) + enumeratio_ball(polylog, 2, (1 // 4)))	-4.318084277547222312693175931400199785558000182218140692511851735084295901581214e-78	
 polylog-2-neg-1-plus-polylog-2-0-plus-polylog-2	(enumeratio_ball(polylog, 2, -1) + enumeratio_ball(polylog, 2, 0) + enumeratio_ball(polylog, 2, (1 // 2)))	-0.2402265069591007123335512631633324858652764757972727934334320668118326911299117	
-an-exact-argument-stays-symbolic-under-plain	enumeratio_ball(polylog, 2, (1 // 2))	0.5822405264650125059026563201596801087441984748061264254343470478731710440716808	

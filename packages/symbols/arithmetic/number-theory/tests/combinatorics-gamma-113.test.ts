@@ -90,20 +90,11 @@ test("Multinomial through Gamma reduces to Binomial's Gamma form at two real par
 
 // #113 §7 follow-up: Binomial(n, n) -> 1, Multinomial() -> 1, and Pochhammer at a
 // rational order through Gamma, exactly. (Pinned as reference examples instead of here,
-// except the Pochhammer case below, which this package's engine answers differently from
-// the full reference engine.)
+// except the Pochhammer case below, which pins that the call is evaluated, not approximated.)
 test("Pochhammer at a rational order routes through Gamma via evaluate, not N", () => {
-  // (3/2)_(1/2) = Gamma(2)/Gamma(3/2) = 1/Gamma(3/2), left as the Gamma ratio here -- this file
-  // declares only @notatio/number-theory, and the ratio's further exact reduction to
-  // 2/sqrt(pi) is @notatio/analytic's Gamma simplification (see the full reference
-  // engine's equivalent example, which pins that exact form end to end). The point this
-  // test pins is narrower: the call reaches `.evaluate()`, not `.N()` -- so it stays
-  // exact wherever the engine CAN simplify it further, instead of a decimal.
-  expect(json(["Pochhammer", ["Rational", 3, 2], ["Rational", 1, 2]])).toEqual([
-    "Divide",
-    1,
-    ["Gamma", ["Rational", 3, 2]],
-  ]);
+  // (3/2)_(1/2) = Gamma(2)/Gamma(3/2) = 2/sqrt(pi) (mpmath: 1.1283791670955126). The call reaches
+  // `.evaluate()`, not `.N()`, so it stays exact: compute-engine reduces the Gamma ratio itself.
+  expect(json(["Pochhammer", ["Rational", 3, 2], ["Rational", 1, 2]])).toEqual(["Divide", 2, ["Sqrt", "Pi"]]);
 });
 test("Pochhammer at a complex base and an integer order stays native's exact product", () => {
   // (2+5i)_3 = -201+5i; the Gamma ratio in doubles gives -201.00000000000003.

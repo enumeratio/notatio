@@ -6,11 +6,13 @@ summary: The Euler numbers $E_n$ and Euler polynomials $E_n(x)$.
 signatures:
   - call: EulerE(n)
     description: the $n$th Euler number
-    library: enumeratio-number-theory
-    type: (value, expression?) -> expression | list<number> | number
   - call: EulerE(n, x)
-    description: the $n$th Euler polynomial, evaluated at $x$
+    description: the $n$th Euler polynomial, evaluated at $x$; a complex $x$ evaluates exactly here, where compute-engine leaves it unevaluated
+  - call: EulerE(n, x?)
+    description: The Euler numbers $E_n$ and Euler polynomials $E_n(x)$.
     library: enumeratio-number-theory
+    type: (integer, number?) -> number
+    overrides: compute-engine
 seeAlso:
   - BernoulliB
 names:

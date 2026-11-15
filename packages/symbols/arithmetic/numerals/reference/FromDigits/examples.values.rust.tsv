@@ -26,11 +26,11 @@ a-negative-base-minus-4-3-2-1	from_digits(list(vec![n(3), n(2), n(1)]), n(-4))	p
 a-digits-exponent-pair-exponent-3-is-an-exact			
 a-digits-exponent-pair-exponent-5-is-12-300			
 fromdigits-list-3-2-5-mixedradixnumerals-list-3			
+an-empty-digit-list-is-left-unevaluated-rather			
 a-lehmer-code-back-to-its-rank			
 fromdigits-inverts-integerdigits			
 the-round-trip-holds-in-any-base	from_digits(integer_digits(n(58127), n(2)), n(2))	58127	
 fromdigits-list-1-3-22-14-mixedradixnumerals			
-an-empty-digit-list-is-left-unevaluated-rather			
 two-adjacent-ones-is-not-a-numeral-so-it-denotes			
 ostrowski-declines-a-string-past-its-ceiling			
 non-coprime-residues-an-inconsistent-string			

@@ -3,6 +3,7 @@ import {
   bigRationalAt,
   type Engine,
   type Expr,
+  isSymbol,
   operandsOf,
   symbolNameOf,
   wrapOperator,
@@ -61,6 +62,78 @@ function ellipticKDerivativeAtZero(ce: Engine, n: number): Expr {
   return ce.function("Multiply", [ce.number([num / a, den / a] as unknown as [number, number]), ce.symbol("Pi")]);
 }
 
+/** The most terms of a closed-form Taylor series the `Series` wrappers below build. */
+const MAX_SERIES_ORDER = 40n;
+
+/** `Series(EllipticK(x), x, 0, n)` or `Series(EllipticE(x), x, 0, n)`: the order n and the first parameter a of the
+ *  ₂F₁(a, ½; 1; x) they are (K = (π/2) ₂F₁(½, ½; 1; x), E = (π/2) ₂F₁(−½, ½; 1; x)), else undefined. */
+function completeEllipticSeries(ops: readonly Expr[]): { order: number; a: [number, number] } | undefined {
+  const [f, x, point, order] = ops;
+  const a: [number, number] | undefined =
+    f?.operator === "EllipticK" ? [1, 2] : f?.operator === "EllipticE" ? [-1, 2] : undefined;
+  const argument = a !== undefined && f !== undefined ? operandsOf(f)[0] : undefined;
+  const n = bigIntegerAt(order);
+  return a !== undefined &&
+    argument !== undefined &&
+    x !== undefined &&
+    isSymbol(x) &&
+    argument.isSame(x) &&
+    isInteger(point, 0n) &&
+    n !== undefined &&
+    n >= 0n &&
+    n <= MAX_SERIES_ORDER
+    ? { order: Number(n), a }
+    : undefined;
+}
+
+/** (π/2) ₂F₁(a, ½; 1; x) to O(xⁿ⁺¹), by the exact ratio (a+k−1)(k−½)/k² of its coefficients (DLMF 19.5.1). */
+function completeEllipticTaylor(ce: Engine, x: Expr, n: number, a: [number, number]): Expr {
+  const half = ce.number([1, 2] as unknown as [number, number]);
+  const first = ce.number(a as unknown as [number, number]);
+  let coefficient: Expr = ce.function("Multiply", [half, ce.symbol("Pi")]);
+  const coefficients: Expr[] = [coefficient];
+  for (let k = 1; k <= n; k++) {
+    const shift = (p: Expr): Expr => ce.function("Add", [p, ce.number(k - 1)]);
+    const ratio = ce.function("Divide", [ce.function("Multiply", [shift(first), shift(half)]), ce.number(k * k)]);
+    coefficient = ce.function("Multiply", [coefficient, ratio]).evaluate();
+    coefficients.push(coefficient);
+  }
+  // Highest power first, then the remainder, then the constant: compute-engine's order for a series.
+  const terms: Expr[] = [];
+  for (let k = n; k >= 1; k--)
+    terms.push(ce.function("Multiply", [coefficients[k]!, ce.function("Power", [x, ce.number(k)])]));
+  terms.push(ce.function("BigO", [ce.function("Power", [x, ce.number(n + 1)])]));
+  terms.push(coefficients[0]!);
+  return ce.function("Add", terms);
+}
+
+/** ₂F₁(a, b; c; x) as the polynomial it is when a or b is a nonpositive integer, else undefined. */
+function terminating2F1(ce: Engine, ops: readonly Expr[]): Expr | undefined {
+  const [f, x] = ops;
+  if (f?.operator !== "Hypergeometric2F1" || x === undefined || !isSymbol(x)) return undefined;
+  const [a, b, c, z] = operandsOf(f);
+  if (a === undefined || b === undefined || c === undefined || z === undefined || !z.isSame(x)) return undefined;
+  const [na, nb] = [bigIntegerAt(a), bigIntegerAt(b)];
+  const degree = na !== undefined && na <= 0n ? -na : nb !== undefined && nb <= 0n ? -nb : undefined;
+  if (degree === undefined || degree > MAX_SERIES_ORDER) return undefined;
+  const nc = bigIntegerAt(c);
+  if ([a, b, c].some((p) => bigRationalAt(p) === undefined) || (nc !== undefined && nc <= 0n)) return undefined;
+  const terms: Expr[] = [];
+  let coefficient: Expr = ce.One;
+  for (let k = 0; k <= Number(degree); k++) {
+    if (k > 0) {
+      const shift = (p: Expr): Expr => ce.function("Add", [p, ce.number(k - 1)]);
+      const ratio = ce.function("Divide", [
+        ce.function("Multiply", [shift(a), shift(b)]),
+        ce.function("Multiply", [shift(c), ce.number(k)]),
+      ]);
+      coefficient = ce.function("Multiply", [coefficient, ratio]).evaluate();
+    }
+    terms.push(ce.function("Multiply", [coefficient, ce.function("Power", [x, ce.number(k)])]));
+  }
+  return ce.function("Add", terms);
+}
+
 export function declareSpecialValues(ce: Engine): void {
   for (const [head, value] of Object.entries(AIRY_AT_ZERO)) {
     // compile builtin: the closed form at an exact 0; every other operand reaches the numeric kernel
@@ -80,6 +153,43 @@ export function declareSpecialValues(ce: Engine): void {
     (ops) => ellipticKDerivativeOrder(ops[0]) !== undefined && isInteger(ops[1], 0n),
     () => (ops, options) => finish(ellipticKDerivativeAtZero(ce, ellipticKDerivativeOrder(ops[0])!), options),
     { arity: 2, compile: "builtin" },
+  );
+
+  // compute-engine's `Derivative(EllipticK, n)` is the closed form of K⁽ⁿ⁾(m), which is 0/0 at the
+  // removable singularity m = 0 (NaN there) and a symbolic n-th derivative that costs seconds at n = 4;
+  // it stays the inert call, which the rule above gives its exact value at 0.
+  // compile builtin: an inert call compiles as compute-engine's lowering does
+  wrapOperator(
+    ce,
+    ["Derivative", "EllipticK", 1],
+    (ops) => {
+      const n = symbolNameOf(ops[0]) === "EllipticK" ? bigIntegerAt(ops[1]) : undefined;
+      return n !== undefined && n >= 1n && n <= 10_000n;
+    },
+    () => () => undefined,
+    { arity: 2, compile: "builtin" },
+  );
+
+  // compute-engine leaves a `Series` unevaluated where it cannot differentiate at the point. The
+  // Taylor coefficients of K and E at 0 are exact, and a terminating ₂F₁ is a polynomial.
+  // compile builtin: Series has no lowering of ours
+  wrapOperator(
+    ce,
+    ["Series", 1, 1, 1],
+    (ops) => completeEllipticSeries(ops) !== undefined,
+    () => (ops) => {
+      const { order, a } = completeEllipticSeries(ops)!;
+      return completeEllipticTaylor(ce, ops[1]!, order, a);
+    },
+    { arity: 4, compile: "builtin" },
+  );
+  // compile builtin: Series has no lowering of ours
+  wrapOperator(
+    ce,
+    ["Series", 1, 1, 1],
+    (ops) => terminating2F1(ce, ops) !== undefined,
+    () => (ops, options) => finish(ce.function("Series", [terminating2F1(ce, ops)!, ...ops.slice(1)]), options),
+    { arity: 4, compile: "builtin" },
   );
 
   // compile builtin: the reduction at matching exact parameters; the numeric kernel answers the rest

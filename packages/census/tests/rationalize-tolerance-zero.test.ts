@@ -1,10 +1,6 @@
-// #113: `Rationalize(x, 0)` (packages/symbols/combinatorics/combinatorics/collections/src/arith-heads.ts) and
 // `Rationalize(x, dx)` for a concrete positive dx (packages/symbols/analysis/analytic/src/precision-113.ts,
-// PR #146) are two separate `wrapOperator` attachments on the same head, with disjoint
-// `applies` gates (dx === 0 vs dx > 0). `wrapOperator` chains by capture order -- whichever
-// attaches second sees the other as its `native` fallback -- so this checks both heads
-// answer correctly regardless of which package declares first, not just in `fullEngine`'s
-// own declaration order (analytic, then collections).
+// PR #146) is ours; `Rationalize(x, 0)` is compute-engine's, which reads a literal as the decimal
+// written. This checks both answer in either declaration order.
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { declareAnalytic } from "@notatio/analytic";
 import { declareCollections } from "@notatio/combinatorics/collections";
@@ -20,18 +16,14 @@ for (const [label, order] of [
   ["analytic then collections", [declareAnalytic, declareCollections]],
   ["collections then analytic", [declareCollections, declareAnalytic]],
 ] as const) {
-  test(`Rationalize(x, dx) and Rationalize(x, 0) both answer, declared ${label}`, () => {
+  test(`Rationalize(x, dx) answers and Rationalize(x, 0) is native's, declared ${label}`, () => {
     const ce = engineWith(order);
 
     const tolerance = ce.box(["Rationalize", "Pi", 0.01] as never).evaluate().json;
     expect(tolerance).toEqual(["Rational", 22, 7]);
 
-    const exact = ce.box(["Rationalize", 0.1, 0] as never).evaluate().json;
-    expect(Array.isArray(exact) && exact[0] === "Rational", JSON.stringify(exact)).toBe(true);
-    // The denominator 2^55 is past 2^53, so it serialises as {num: "…"}.
-    const int = (j: unknown): number => Number(typeof j === "object" && j !== null ? (j as { num: string }).num : j);
-    const [, p, q] = exact as [string, unknown, unknown];
-    expect(int(p) / int(q)).toBe(0.1);
+    // A zero tolerance is native's: the decimal as written (0.1 is 1/10), not the double's dyadic value.
+    expect(ce.box(["Rationalize", 0.1, 0] as never).evaluate().json).toEqual(["Rational", 1, 10]);
 
     // An already-exact x is returned unchanged at dx = 0, same as at dx > 0.
     expect(ce.box(["Rationalize", 2, 0] as never).evaluate().json).toBe(2);

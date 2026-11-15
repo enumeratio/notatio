@@ -11,12 +11,12 @@ signatures:
   - call: PowerMod(u/v, b, m)
     description: a rational base, read in $\mathbb{Z}/m$ as $u \cdot v^{-1}$, a list of bases, and an exponent of 0 at any modulus
     library: enumeratio-residues
-    type: (number, number, number) -> number
+    type: (list<rational> | number | rational, list<rational> | number | rational, integer | list<integer> | number) -> integer | list<integer> | number
     overrides: compute-engine
   - call: PowerMod(a, b, m)
     description: "Modular exponentiation: a^b mod m, computed without forming a^b directly."
     library: enumeratio-number-theory
-    type: (number, number, number) -> number
+    type: (list<rational> | number | rational, list<rational> | number | rational, integer | list<integer> | number) -> integer | list<integer> | number
     overrides: enumeratio-residues
 seeAlso:
   - Mod

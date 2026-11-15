@@ -1,10 +1,22 @@
-import { applyFunction, bigIntegerAt, operandsOf, symbolNameOf, type Engine, type Expr } from "@notatio/engine";
+import {
+  applyFunction,
+  bigIntegerAt,
+  isNumber,
+  operandsOf,
+  symbolNameOf,
+  type Engine,
+  type Expr,
+  wrapOperator,
+} from "@notatio/engine";
 import { factorInteger, gcd as gcdBig, isqrt } from "@notatio/residues";
 import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 
 // Heads new to compute-engine, from the Wolfram-sweep backlog (https://github.com/enumeratio/notatio/wiki/Symbols §4, issue
 // #113). Every one stays unevaluated — never approximate — when it cannot answer: a
 // non-integer, an out-of-range table lookup, or a search past what its guard allows.
+
+/** The largest Euler index `EulerE` evaluates at a complex point. */
+const MAX_EULER_INDEX = 2000n;
 
 /** An exact rational as [numerator, denominator], denominator > 0. */
 type Q = readonly [bigint, bigint];
@@ -224,17 +236,6 @@ function ramanujanTau(n: bigint): bigint | undefined {
   return poly[degree]!;
 }
 
-/** The number q(n) of partitions of n into distinct parts, by the standard 0/1-knapsack DP
- *  over parts 1..n (Euler: as many as partitions into odd parts). */
-function partitionsIntoDistinctParts(n: number): bigint {
-  const dp = Array.from<bigint>({ length: n + 1 }).fill(0n);
-  dp[0] = 1n;
-  for (let part = 1; part <= n; part++) {
-    for (let s = n; s >= part; s--) dp[s]! += dp[s - part]!;
-  }
-  return dp[n]!;
-}
-
 // The first 20 known Mersenne prime exponents, in order — proven complete this far since the
 // 1950s, long before GIMPS. PerfectNumber and MersennePrimeExponent stay unevaluated past
 // this table rather than searching for the next one.
@@ -380,17 +381,6 @@ export function declareBacklog(ce: Engine): void {
     },
   });
 
-  ce.declare("PartitionsQ", {
-    description: SUMMARIES.PartitionsQ,
-    signature: "(integer) -> integer",
-    broadcastable: true,
-    evaluate: (ops: readonly Expr[]) => {
-      const n = bigIntegerAt(ops[0]);
-      if (n === undefined || n < 0n || n > 10_000n) return undefined;
-      return ce.number(partitionsIntoDistinctParts(Number(n)));
-    },
-  });
-
   ce.declare("PowersRepresentations", {
     description: SUMMARIES.PowersRepresentations,
     signature: "(integer, integer, integer) -> list",
@@ -438,30 +428,21 @@ export function declareBacklog(ce: Engine): void {
     },
   });
 
-  ce.declare("EulerE", {
-    description: SUMMARIES.EulerE,
-    // ops[0] a List (and no ops[1]) threads to a list of numbers; ops[1] present evaluates
-    // the Euler polynomial at it, which stays an unreduced expression for a symbolic point.
-    signature: "(value, expression?) -> number | list<number> | expression",
-    evaluate: (ops: readonly Expr[]) => {
-      if (ops[1] === undefined && ops[0]?.operator === "List") {
-        const ns = operandsOf(ops[0]).map(bigIntegerAt);
-        if (ns.some((v) => v === undefined || v < 0n)) return undefined;
-        const values = ns as bigint[];
-        const maxN = Number(values.reduce((a, b) => (a > b ? a : b)));
-        const E = eulerNumbers(maxN);
-        return ce.function(
-          "List",
-          values.map((v) => ce.number(E[Number(v)]!)),
-        );
-      }
+  // compute-engine answers EulerE(n) and EulerE(n, x); a complex point it leaves unevaluated, and is ours.
+  wrapOperator(
+    ce,
+    ["EulerE", 2],
+    (ops) => {
       const n = bigIntegerAt(ops[0]);
-      if (n === undefined || n < 0n || n > 2000n) return undefined;
-      const E = eulerNumbers(Number(n));
-      if (ops[1] === undefined) return ce.number(E[Number(n)]!);
-      return polynomialExpr(ce, eulerPolynomialCoeffs(Number(n), E), ops[1]);
+      const x = ops[1]?.evaluate();
+      return n !== undefined && n >= 0n && n <= MAX_EULER_INDEX && x !== undefined && isNumber(x) && x.im !== 0;
     },
-  });
+    () => (ops) => {
+      const n = Number(bigIntegerAt(ops[0]));
+      return polynomialExpr(ce, eulerPolynomialCoeffs(n, eulerNumbers(n)), ops[1]!.evaluate());
+    },
+    { arity: 2, compile: "builtin" },
+  );
 
   ce.declare("FrobeniusSolve", {
     description: SUMMARIES.FrobeniusSolve,

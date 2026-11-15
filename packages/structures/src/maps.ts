@@ -12,7 +12,7 @@
 // each area's own data; this only declares whatever table of them a host hands over.
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf } from "@notatio/engine";
+import { isNumber, operandsOf } from "@notatio/engine";
 import { attachConversion } from "./carriers.ts";
 import { applyComposition } from "./compose.ts";
 import { extendBuiltin } from "./extend.ts";
@@ -196,13 +196,34 @@ function applyBound(ce: ComputeEngine, expression: unknown, bindings: Readonly<R
   return ce.function("Apply", [fn, ...values]).evaluate();
 }
 
+/** Rounds of re-evaluation `settled` allows a result. */
+const MAX_SETTLES = 3;
+
+/**
+ * `value` evaluated again until it stops changing. `evaluate()` of an `Apply` whose body closes over a
+ * typed parameter can return the substituted body unevaluated, with no free symbol, where one more
+ * `evaluate()` gives the value (`Max(0, Sum(Reduce(…)))` of a Dyck path's weak-above count). A
+ * number or a concrete List or Tuple is already settled.
+ */
+function settled(value: Expression): Expression {
+  let current = value;
+  for (let round = 0; round < MAX_SETTLES; round++) {
+    if (current.operator === "List" || current.operator === "Tuple" || isNumber(current)) return current;
+    const next = current.evaluate();
+    if (next.isSame(current)) return current;
+    current = next;
+  }
+  return current;
+}
+
 /** Force a lazy result into a concrete List.
  *
  *  `Map` and `Filter` over a `Range` stay lazy — `Range(1, 3)` does not even evaluate to a
  *  list on its own — which is right for a collection and wrong for a carrier VALUE. A
  *  permutation is a list of numbers, not a promise of one, so a map materialises before
  *  wrapping. */
-function materialise(ce: ComputeEngine, value: Expression): Expression {
+function materialise(ce: ComputeEngine, expression: Expression): Expression {
+  const value = settled(expression);
   // A Tuple is already a concrete value — and materialising one would flatten it into a
   // List, which is exactly wrong for a composite carrier like `standard_tableau_pair`.
   const concrete = value.operator === "List" || value.operator === "Tuple";

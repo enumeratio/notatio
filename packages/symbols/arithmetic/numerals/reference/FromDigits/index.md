@@ -9,7 +9,7 @@ signatures:
   - call: FromDigits(string, base?)
     description: integer formed from a digit string, 0-9 then a-z.
     library: enumeratio-numerals
-    type: (collection<any>, any?) -> integer
+    type: (collection<any>, any?) -> number
     overrides: compute-engine
   - call: FromDigits([d1, d2, …], base)
     description: integer formed from a digit list in the given base.

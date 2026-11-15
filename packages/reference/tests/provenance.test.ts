@@ -272,6 +272,9 @@ const OVERRIDDEN = [
   "Gamma",
   "GammaLn",
   "GammaRegularized",
+  // compute-engine's own HarmonicNumber answers integers, floats and large arguments; ours adds the
+  // exact closed forms (H(1/2) = 2 - 2 ln 2), a complex argument and the exact two-argument form.
+  "HarmonicNumber",
   "Histogram",
   "Hypergeometric1F1",
   // #340: HurwitzZeta/Zeta's own declarations landed in compute-engine 0.139, but only in
@@ -2492,7 +2495,6 @@ test("every head we invented is either novel or known to exist elsewhere", () =>
       "EllipticTheta",
       "EllipticThetaPrime",
       "ErrorBox",
-      "EulerE",
       "ExpIntegralE",
       "ExpToTrig",
       "ExponentialGeneratingFunction",
@@ -2564,7 +2566,6 @@ test("every head we invented is either novel or known to exist elsewhere", () =>
       "HankelTransform",
       "HararyGraph",
       "HarmonicMean",
-      "HarmonicNumber",
       "HeavisideLambda",
       "HeavisidePi",
       "HeavisideTheta",
@@ -2590,7 +2591,6 @@ test("every head we invented is either novel or known to exist elsewhere", () =>
       "IntegerExponent",
       "IntegerLength",
       "IntegerPart",
-      "IntegerPartitions",
       "IntegerReverse",
       "InterpretationBox",
       "InverseBetaRegularized",
@@ -2699,7 +2699,6 @@ test("every head we invented is either novel or known to exist elsewhere", () =>
       "PaneBox",
       "PaneSelectorBox",
       "PanelBox",
-      "PartitionsQ",
       "PascalBinomial",
       "PathGraph",
       "PerfectNumber",
