@@ -6,6 +6,7 @@ import { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 import { steppedIterator } from "./patches/stepped-iterator.ts";
 import { agmComplex } from "./patches/agm-complex.ts";
 import { betaAtPole } from "./patches/beta-at-pole.ts";
+import { ellipticOverflow } from "./patches/elliptic-overflow.ts";
 import { shapeOfUnknownElements } from "./patches/shape-of-unknown-elements.ts";
 import { matrixRankCompiles } from "./patches/matrix-rank-compiles.ts";
 import { solveDeclines } from "./patches/solve-declines.ts";
@@ -98,6 +99,7 @@ export { dictionaryOf, entriesOf } from "./compute-engine/library/core.ts";
 export { matrixRankCompiles, compileMatrixRank, matrixRank } from "./patches/matrix-rank-compiles.ts";
 export { valuesAtZero } from "./patches/values-at-zero.ts";
 export { betaAtPole };
+export { ellipticOverflow };
 export { clausen } from "./compute-engine/numerics/clausen.ts";
 export { stieltjesGamma, stieltjesGammaReal, STIELTJES_MAX_ORDER } from "./compute-engine/numerics/stieltjes.ts";
 export { stieltjesGammaBall, stieltjesGammaBig } from "./compute-engine/numerics/stieltjes-big.ts";
@@ -210,6 +212,7 @@ export function applyNativeHeadPatches(ce: ComputeEngine): void {
   for (const patch of [
     agmComplex,
     betaAtPole,
+    ellipticOverflow,
     solveDeclines,
     solveDomains,
     iteratorUpperBound,
