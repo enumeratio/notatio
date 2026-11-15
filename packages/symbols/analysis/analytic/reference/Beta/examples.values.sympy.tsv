@@ -21,6 +21,11 @@ partial-a-b-a-b-b-a-b-psi-a-psi-a-b-today-the	diff(beta(Symbol("a"), Symbol("b")
 a-nonpositive-integer-argument-is-a-pole-of-the	beta(-1, 2)	beta(-1, 2)	disagree
 beta-at-two-poles-compares-equal	enumeratio_equal(beta(-2, -1), beta(0, 2))	True	disagree
 a-pole-of-gamma-over-a-finite-denominator	beta(-2, (0.3 + 0.4*I))		
+gamma-pole-in-the-denominator	beta(-2.5, 0.5)		
+gamma-pole-in-the-denominator-zero-sum	beta(0.5, -0.5)		
+gamma-pole-in-the-denominator-minus-one	beta(1.5, -2.5)		
+gamma-pole-in-the-denominator-rationals	N(beta(Rational(-5, 2), Rational(1, 2)), 30)		
+a-negative-operand-off-the-poles	beta(-2.5, 0.75)		
 beta-1-over-2-1-over-2-times-beta-1-1-over-2	(beta(Rational(1, 2), Rational(1, 2)) * beta(1, Rational(1, 2)))	2*beta(1/2, 1/2)	
 beta-1-over-2-1-over-2-times-beta-1-2	(beta(Rational(1, 2), Rational(1, 2)) * beta(1, 2))	beta(1/2, 1/2)/2	
 beta-of-positive-infinity-0-is-indeterminate	beta(oo, 0)	zoo	

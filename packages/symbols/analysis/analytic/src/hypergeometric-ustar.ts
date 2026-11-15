@@ -3,6 +3,7 @@ import {
   type EvalOptions,
   isFiniteNum,
   numberResult,
+  underflows,
   wantsNumber,
   add,
   cexp,
@@ -15,6 +16,7 @@ import {
   sub,
   logGamma,
 } from "@notatio/ce-patches";
+import { invGammaUnderflows } from "./hypergeometric.ts";
 
 // HypergeometricUStar(a, b, z) — Fungrim's regularized Tricomi confluent
 // hypergeometric function, U*(a, b, z) = z^a U(a, b, z) (fungrim:c8fcc7 is exactly
@@ -90,6 +92,8 @@ const norm = (z: Cx): number => Math.hypot(z.re, z.im);
 function tricomiU(a: Cx, b: Cx, z: Cx): Cx | undefined {
   if (b.im === 0 && Math.abs(b.re - Math.round(b.re)) < NEAR_INT_EPS) return undefined;
   const aMinusB1 = add(sub(a, b), cx(1)); // a − b + 1, the second M's first argument
+  // A 1/Γ that underflows drops its term from the sum, and the noise bound below cannot see it.
+  if (invGammaUnderflows(a) || invGammaUnderflows(aMinusB1)) return undefined;
   const coeff1 = mul(cGamma(sub(cx(1), b)), invGamma(aMinusB1));
   const m1 = kummerM(a, b, z);
   const zTo1MinusB = cpow(z, sub(cx(1), b));
@@ -106,6 +110,10 @@ function tricomiU(a: Cx, b: Cx, z: Cx): Cx | undefined {
 export function hypergeometricUStar(a: Cx, b: Cx, z: Cx): Cx | undefined {
   const u = tricomiU(a, b, z);
   if (u === undefined) return undefined;
+  // |z^a| = exp(Re a · ln|z| − Im a · arg z); past the double range cpow flushes to 0 (a = 100,
+  // z = 1e-8 + 1e-8i is 1e-800) and the product would answer 0.
+  const logMagnitude = a.re * Math.log(norm(z)) - a.im * Math.atan2(z.im, z.re) + Math.log(norm(u));
+  if (underflows(logMagnitude)) return undefined;
   return mul(cpow(z, a), u);
 }
 

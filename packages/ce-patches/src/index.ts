@@ -5,6 +5,7 @@ import { seriesInverseFunctions } from "./patches/series-inverse-functions.ts";
 import { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 import { steppedIterator } from "./patches/stepped-iterator.ts";
 import { agmComplex } from "./patches/agm-complex.ts";
+import { betaAtPole } from "./patches/beta-at-pole.ts";
 import { shapeOfUnknownElements } from "./patches/shape-of-unknown-elements.ts";
 import { matrixRankCompiles } from "./patches/matrix-rank-compiles.ts";
 import { solveDeclines } from "./patches/solve-declines.ts";
@@ -96,6 +97,7 @@ export { shapeOfUnknownElements, evaluateShapeOfUnknownElements } from "./patche
 export { dictionaryOf, entriesOf } from "./compute-engine/library/core.ts";
 export { matrixRankCompiles, compileMatrixRank, matrixRank } from "./patches/matrix-rank-compiles.ts";
 export { valuesAtZero } from "./patches/values-at-zero.ts";
+export { betaAtPole };
 export { clausen } from "./compute-engine/numerics/clausen.ts";
 export { stieltjesGamma, stieltjesGammaReal, STIELTJES_MAX_ORDER } from "./compute-engine/numerics/stieltjes.ts";
 export { stieltjesGammaBall, stieltjesGammaBig } from "./compute-engine/numerics/stieltjes-big.ts";
@@ -135,6 +137,8 @@ export {
   numberResult,
   type NumberResultOptions,
   REAL_COLLAPSE_RELATIVE,
+  MIN_NORMAL,
+  underflows,
   inexactComplex,
   wantsNumber,
   declined,
@@ -205,6 +209,7 @@ export function symbols(): readonly string[] {
 export function applyNativeHeadPatches(ce: ComputeEngine): void {
   for (const patch of [
     agmComplex,
+    betaAtPole,
     solveDeclines,
     solveDomains,
     iteratorUpperBound,
