@@ -17,6 +17,7 @@ import { COMPILED as SET_PARTITIONS_COMPILED } from "../../set-partitions/src/st
 import { COMPILED as TABLEAUX_COMPILED } from "../../tableaux/src/statistics.compiled.generated.js";
 import { COMPILED as TREES_COMPILED } from "../../trees/src/statistics.compiled.generated.js";
 import { COMPILED as GRAPHS_COMPILED } from "../../graphs/src/statistics.compiled.generated.js";
+import { COMPILED as POSETS_COMPILED } from "../../posets/src/statistics.compiled.generated.js";
 import { COMPILED as CARTAN_COMPILED } from "../../cartan/src/statistics.compiled.generated.js";
 import { COMPILED as WORDS_COMPILED } from "../../words/src/statistics.compiled.generated.js";
 import { FLAT_BY_NAME as FLAT, subjectToJs } from "../flat.ts";
@@ -34,6 +35,7 @@ const COMPILED = {
   ...TREES_COMPILED,
   ...WORDS_COMPILED,
   ...GRAPHS_COMPILED,
+  ...POSETS_COMPILED,
   ...CARTAN_COMPILED,
 };
 

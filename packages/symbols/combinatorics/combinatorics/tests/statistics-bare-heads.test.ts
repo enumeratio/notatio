@@ -25,6 +25,8 @@ const SAMPLE: Record<string, unknown> = {
   SemistandardTableau: ["SemistandardTableau", ["At", ["SemistandardTableaux", 5, 3], 20]],
   GelfandTsetlinPattern: ["GelfandTsetlinPattern", ["At", ["GelfandTsetlin", 4, 2], 30]],
   LabeledGraph: ["At", ["LabeledGraphs", 4], 37],
+  // The poset with 1 < 3, 1 < 4 and 2 < 4.
+  Poset: ["Poset", ["List", ["List"], ["List"], ["List", 1], ["List", 1, 2]]],
   CartanType: ["At", ["FiniteCartanTypes", 4], 5],
 };
 

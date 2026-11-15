@@ -6,6 +6,7 @@ import { CARTAN_CARRIERS } from "../cartan/src/carrier-data.ts";
 import { COMPOSITIONS_CARRIERS } from "../compositions/src/carrier-data.ts";
 import { FINDSTAT_CARRIERS } from "../findstat/src/carrier-data.ts";
 import { GRAPHS_CARRIERS } from "../graphs/src/carrier-data.ts";
+import { POSETS_CARRIERS } from "../posets/src/carrier-data.ts";
 import { LATTICE_PATHS_CARRIERS } from "../lattice-paths/src/carrier-data.ts";
 import { PARTITIONS_CARRIERS } from "../partitions/src/carrier-data.ts";
 import { PERMUTATIONS_CARRIERS } from "../permutations/src/carrier-data.ts";
@@ -30,6 +31,7 @@ export const CARRIERS: readonly Carrier[] = [
   ...SET_PARTITIONS_CARRIERS,
   ...TABLEAUX_CARRIERS,
   ...GRAPHS_CARRIERS,
+  ...POSETS_CARRIERS,
   ...CARTAN_CARRIERS,
   ...FINDSTAT_CARRIERS,
   ...LEFTOVER_CARRIERS,

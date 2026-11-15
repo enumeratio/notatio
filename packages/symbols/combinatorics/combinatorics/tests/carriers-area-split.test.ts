@@ -6,6 +6,7 @@ import { CARTAN_CARRIERS } from "../cartan/src/carrier-data.ts";
 import { COMPOSITIONS_CARRIERS } from "../compositions/src/carrier-data.ts";
 import { FINDSTAT_CARRIERS } from "../findstat/src/carrier-data.ts";
 import { GRAPHS_CARRIERS } from "../graphs/src/carrier-data.ts";
+import { POSETS_CARRIERS } from "../posets/src/carrier-data.ts";
 import { LATTICE_PATHS_CARRIERS } from "../lattice-paths/src/carrier-data.ts";
 import { PARTITIONS_CARRIERS } from "../partitions/src/carrier-data.ts";
 import { PERMUTATIONS_CARRIERS } from "../permutations/src/carrier-data.ts";
@@ -25,6 +26,7 @@ const AREAS = {
   "set-partitions": SET_PARTITIONS_CARRIERS,
   tableaux: TABLEAUX_CARRIERS,
   graphs: GRAPHS_CARRIERS,
+  posets: POSETS_CARRIERS,
   cartan: CARTAN_CARRIERS,
   findstat: FINDSTAT_CARRIERS,
 } as const;

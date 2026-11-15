@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-poset-on-4-elements-with-1-3-1-4-and-2-4			[PrincipalFilterSizeProduct, [Poset, [List, [List], [List], [List, 1], [List, 1, 2]]]]	6			the poset on 4 elements with 1 < 3, 1 < 4 and 2 < 4
+findstat-st001813-1	Properties		[CombinatorialStat, [Poset, [List, [List]]], "'PrincipalFilterSizeProduct'"]	1	1	FindStat St001813	FindStat's value for ([],1)
+findstat-st001813-2	Properties		[CombinatorialStat, [Poset, [List, [List], [List]]], "'PrincipalFilterSizeProduct'"]	1	1	FindStat St001813	FindStat's value for ([],2)
+findstat-st001813-3	Properties		[CombinatorialStat, [Poset, [List, [List], [List], [List]]], "'PrincipalFilterSizeProduct'"]	1	1	FindStat St001813	FindStat's value for ([],3)
