@@ -70,6 +70,7 @@ export {
   type Graded,
   type Law,
   type MapDeclaration,
+  settled,
 } from "./maps.ts";
 export { isLeaf, recurse, self } from "./recursion.ts";
 

@@ -311,13 +311,13 @@ export function declareRestrictions(ce: ComputeEngine, restrictions: readonly Re
         // defined. `_raw` is its CONTENTS: for a carrier-typed element that is always
         // `Carrier(contents)` (one operand — see collections' `declareFamilies`/`handlersOf`),
         // so `First` reads it back out; untyped, the element already IS its own contents.
-        // Bound via `Assign` rather than substituted inline: `First(_e)` substituted directly
+        // Declared with its value rather than substituted inline: `First(_e)` substituted directly
         // into the predicate tree doesn't get re-reduced once `Function` binds `_e` (a
         // compute-engine quirk with a call nested under another lazy head, `All` here) --
-        // `Block`+`Assign` forces it to a concrete value before the predicate ever sees it.
+        // a `Block` local forces it to a concrete value before the predicate ever sees it.
         const rawInit = carrier === undefined ? "_e" : ["First", "_e"];
         const filled = fillPredicate(restriction.predicate, "_e", "_raw");
-        const body = ["Block", ["Assign", "_raw", rawInit], filled];
+        const body = ["Block", ["Declare", "_raw", "'list<integer>'", rawInit], filled];
         return ce
           .function("Filter", [
             ce.function(restriction.base, [size]),

@@ -205,7 +205,7 @@ const MAX_SETTLES = 3;
  * `evaluate()` gives the value (`Max(0, Sum(Reduce(…)))` of a Dyck path's weak-above count). A
  * number or a concrete List or Tuple is already settled.
  */
-function settled(value: Expression): Expression {
+export function settled(value: Expression): Expression {
   let current = value;
   for (let round = 0; round < MAX_SETTLES; round++) {
     if (current.operator === "List" || current.operator === "Tuple" || isNumber(current)) return current;

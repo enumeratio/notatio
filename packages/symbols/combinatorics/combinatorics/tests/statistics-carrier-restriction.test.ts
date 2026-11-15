@@ -22,17 +22,21 @@ declareCombinatorics(ce);
 declareRestricted(ce);
 declareRestrictions(ce, RESTRICTIONS);
 
+// A restriction's filter costs milliseconds an element, so the standard run reads small sizes and the deep run
+// (`DEEP_TESTS=1`) the full ones.
+const DEEP = process.env.DEEP_TESTS === "1";
+
 const count = (expr: unknown): number => ce.box(["Count", expr] as never).evaluate().re;
 
 /** `_x` is the bound (possibly carrier-typed) element; `_raw` is its CONTENTS -- for a
  *  carrier-typed element that is always `Carrier(contents)` (one operand), so `First` reads
- *  it back out. Bound via `Assign` rather than substituted inline, same fix (and same reason)
+ *  it back out. Declared as a `Block` local rather than substituted inline, same fix (and same reason)
  *  as `declareRestrictions` itself now applies (A-94 typed every carrier-bearing family,
  *  which this differential test exercises directly -- see that function's own comment). */
 const fillRestriction = (restriction: Restriction): unknown => {
   const carrier = carrierNameForType(ce, restriction.on);
   const rawInit = carrier === undefined ? "_e" : ["First", "_e"];
-  return ["Block", ["Assign", "_raw", rawInit], fillPredicate(restriction.predicate, "_e", "_raw")];
+  return ["Block", ["Declare", "_raw", "'list<integer>'", rawInit], fillPredicate(restriction.predicate, "_e", "_raw")];
 };
 
 test("an anonymous restriction is a lazy sub-collection", () => {
@@ -83,7 +87,7 @@ test("the specification agrees with the fast kernel, element by element", () => 
   // reproduce it element by element.
   for (const restriction of RESTRICTIONS) {
     if (!ce.lookupDefinition(restriction.name)) continue;
-    for (let n = 0; n <= 5; n++) {
+    for (let n = 0; n <= (DEEP ? 5 : 2); n++) {
       const specified = ["Restricted", [restriction.base, n], ["Function", fillRestriction(restriction), "_e"]];
       const kernel = [restriction.name, n];
       expect(count(specified), `${restriction.name}(${n}) count`).toBe(count(kernel));
@@ -108,11 +112,11 @@ const COMPOSITION_RESTRICTION_NAMES = new Set([
 
 test("composition restrictions agree with their kernels for n = 0..8", () => {
   // Same recipe as the differential above, but out to n = 8 (composition counts
-  // grow like 2^n, so this stays cheap while covering more of each family's shape than n ≤ 5).
+  // grow like 2^n, so this covers more of each family's shape than n ≤ 5); n ≤ 3 without `DEEP_TESTS`.
   for (const restriction of RESTRICTIONS) {
     if (!COMPOSITION_RESTRICTION_NAMES.has(restriction.name)) continue;
     if (!ce.lookupDefinition(restriction.name)) continue;
-    for (let n = 0; n <= 8; n++) {
+    for (let n = 0; n <= (DEEP ? 8 : 3); n++) {
       const specified = ["Restricted", [restriction.base, n], ["Function", fillRestriction(restriction), "_e"]];
       const kernel = [restriction.name, n];
       expect(count(specified), `${restriction.name}(${n}) count`).toBe(count(kernel));
@@ -130,11 +134,11 @@ const PARTITION_RESTRICTION_NAMES = new Set([
 
 test("partition restrictions agree with their kernels for n = 0..8", () => {
   // Same recipe as the differential above, but out to n = 8: the kernel's elements, in order,
-  // must be Filter(IntegerPartitions(n), predicate).
+  // must be Filter(IntegerPartitions(n), predicate); n ≤ 5 without `DEEP_TESTS`.
   for (const restriction of RESTRICTIONS) {
     if (!PARTITION_RESTRICTION_NAMES.has(restriction.name)) continue;
     if (!ce.lookupDefinition(restriction.name)) continue;
-    for (let n = 0; n <= 8; n++) {
+    for (let n = 0; n <= (DEEP ? 8 : 5); n++) {
       const specified = ["Restricted", [restriction.base, n], ["Function", fillRestriction(restriction), "_e"]];
       const kernel = [restriction.name, n];
       expect(count(specified), `${restriction.name}(${n}) count`).toBe(count(kernel));

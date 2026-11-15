@@ -114,7 +114,7 @@ jobs:
       - run: pnpm -r --filter @notatio/analytic run test
       # Hand-written kernels against the interpreter, and each family's Epsil counts past 2^53.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
-        run: pnpm --filter @notatio/combinatorics exec vp test run tests/fast-kernels.test.ts tests/map-kernels.test.ts
+        run: pnpm --filter @notatio/combinatorics exec vp test run tests/fast-kernels.test.ts tests/map-kernels.test.ts tests/statistics-carrier-restriction.test.ts
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @notatio/combinatorics exec vp test run tests/lattice-orders.test.ts
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
