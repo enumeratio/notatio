@@ -2,10 +2,10 @@
 // interval that tightly encloses the known one, or numerically within a tolerance.
 
 import { BigDecimal, ComputeEngine } from "@cortex-js/compute-engine";
-import { type MathJSON, solutionSet } from "@notatio/oracle";
+import { agreementBound, type MathJSON, solutionSet } from "@notatio/oracle";
 
 const ce = new ComputeEngine();
-// Relative above magnitude 1, absolute below it, so a value near 0 has a sensible bound.
+// Relative to the value's own size (`agreementBound`), so a tiny value is held to its own digits.
 export const DEFAULT_TOLERANCE = 1e-12;
 
 /** A MathJSON number's exact decimal: a double's shortest digits, or a `{num}`'s own. */
@@ -57,8 +57,15 @@ export function measuredTolerance(expected: unknown): number | undefined {
 
 /** Why `expected` doesn't agree with `known`, or `undefined` when it does. `call` is the
  * example's expression: a `Solve`'s answers are compared as a set, and a known value in
- * Wolfram's rules (`{{x -> 1}}`, `{{}}` for an identity) reads as ours does. */
-export function disagreement(expected: unknown, known: unknown, tolerance: number, call?: unknown): string | undefined {
+ * Wolfram's rules (`{{x -> 1}}`, `{{}}` for an identity) reads as ours does. `absolute` reads
+ * `tolerance` as an absolute bound, for a row at a zero of the function. */
+export function disagreement(
+  expected: unknown,
+  known: unknown,
+  tolerance: number,
+  call?: unknown,
+  absolute = false,
+): string | undefined {
   if (Array.isArray(call) && call[0] === "Solve") {
     const solutions = (json: unknown): unknown => solutionSet(json as MathJSON, call as MathJSON);
     [expected, known] = [solutions(expected), solutions(known)];
@@ -86,7 +93,7 @@ export function disagreement(expected: unknown, known: unknown, tolerance: numbe
   if (Array.isArray(p) && Array.isArray(q) && p[0] === "List" && q[0] === "List") {
     if (p.length !== q.length) return `${p.length - 1} elements, known ${q.length - 1}`;
     for (let i = 1; i < p.length; i++) {
-      const why = disagreement(p[i], q[i], tolerance);
+      const why = disagreement(p[i], q[i], tolerance, undefined, absolute);
       if (why !== undefined) return `element ${i}: ${why}`;
     }
     return undefined;
@@ -96,7 +103,9 @@ export function disagreement(expected: unknown, known: unknown, tolerance: numbe
     if (p.length !== q.length) return `${p.length - 1} elements, known ${q.length - 1}`;
     const unmatched: unknown[] = (q as unknown[]).slice(1);
     for (const element of (p as unknown[]).slice(1)) {
-      const i = unmatched.findIndex((other) => disagreement(element, other, tolerance) === undefined);
+      const i = unmatched.findIndex(
+        (other) => disagreement(element, other, tolerance, undefined, absolute) === undefined,
+      );
       if (i < 0) return `${JSON.stringify(element)} is not among ${JSON.stringify(unmatched)}`;
       unmatched.splice(i, 1);
     }
@@ -108,6 +117,6 @@ export function disagreement(expected: unknown, known: unknown, tolerance: numbe
   // large other one would otherwise be held to an absolute bound.
   const size = (re: number, im: number): number => Math.hypot(re, im || 0);
   const gap = size(x.re - y.re, (x.im || 0) - (y.im || 0));
-  const bound = tolerance * Math.max(size(x.re, x.im), size(y.re, y.im), 1);
+  const bound = absolute ? tolerance : agreementBound(tolerance, size(x.re, x.im), size(y.re, y.im));
   return gap <= bound ? undefined : `${x.toString()}, known ${y.toString()}`;
 }

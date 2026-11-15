@@ -60,9 +60,14 @@ export interface ReferenceExample {
    * and holds in compute-engine's own model too. The note says what is missing.
    */
   readonly knownGap?: string;
-  /** Tolerance for comparing `expected` with a numeric `known`: relative above magnitude 1,
-   * absolute below it (default 1e-12). */
+  /** Tolerance for comparing `expected` with a numeric `known`: relative to the larger of the two
+   * (default 1e-12), with a floor of magnitude 1 only where `known` is exactly 0. */
   readonly tolerance?: number;
+  /** An absolute bound in place of `tolerance`, for a row at a zero of the function, where both
+   * sides are rounding noise and no relative bound means anything. Sized from the measured noise. */
+  readonly absoluteTolerance?: number;
+  /** Why `known` is read as it is: what the row's tolerance rests on, or what to know of its source. */
+  readonly knownNote?: string;
   /** Where `known` comes from: `DLMF 25.6.E1`, `OEIS A000110`, `Fungrim 2f8a1c`, `FindStat
    * St000001`, `mpmath 1.3 zeta`, … Required with `known`. */
   readonly source?: string;

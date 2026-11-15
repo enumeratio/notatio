@@ -38,6 +38,7 @@ export {
   symbolicAgreementSource,
 } from "./symbolic.ts";
 export {
+  agreementBound,
   asNumber,
   compare,
   compareCombination,

@@ -17,8 +17,14 @@ const known = referenceData().heads.flatMap(({ head, entry }) =>
 // a row that agrees, which would be stale.
 test("every example's expected agrees with its known value, or says why not", { timeout: 60_000 }, () => {
   const off = known.flatMap(
-    ({ head, example: { id, expr, expected, known: value, tolerance, source, knownConvention, knownGap } }) => {
-      const why = disagreement(expected, value, tolerance ?? DEFAULT_TOLERANCE, expr);
+    ({
+      head,
+      example: { id, expr, expected, known: value, tolerance, absoluteTolerance, source, knownConvention, knownGap },
+    }) => {
+      const why =
+        absoluteTolerance === undefined
+          ? disagreement(expected, value, tolerance ?? DEFAULT_TOLERANCE, expr)
+          : disagreement(expected, value, absoluteTolerance, expr, true);
       const marked = knownConvention !== undefined || knownGap !== undefined;
       if (why !== undefined && !marked) return [`${head}/${id} (${source}): ${why}`];
       if (why === undefined && marked) return [`${head}/${id}: marked as parting from known, but agrees with it`];
@@ -66,4 +72,15 @@ test("a Solve's fresh parameter is Wolfram's unconstrained solution", () => {
   const square = ["Solve", ["Equal", ["Power", "x", 2], 1], "x"];
   const rules = ["List", ["List", ["Rule", "x", -1]], ["List", ["Rule", "x", 1]]];
   expect(disagreement(["List", 1, -1], rules, 1e-12, square)).toBeUndefined();
+});
+
+test("a tiny value is held to its own digits, and only a known 0 keeps the floor of 1", () => {
+  const known = ["Complex", 1.9e-55, 1.4e-55];
+  expect(disagreement(1.9e-55, known, 1e-12)).toBeDefined();
+  expect(disagreement(["Complex", 1.9e-55, 1.4e-55], known, 1e-12)).toBeUndefined();
+  expect(disagreement(4.8e-16, 0, 1e-12)).toBeUndefined(); // noise at an identity's scale
+  expect(disagreement(1e-3, 0, 1e-12)).toBeDefined();
+  expect(disagreement(1e-16, 0, 1e-20, undefined, true)).toBeDefined(); // an absolute bound
+  expect(disagreement(1e-16, 0, 1e-15, undefined, true)).toBeUndefined();
+  expect(disagreement(1e-16, 2e-16, 1e-15, undefined, true)).toBeUndefined();
 });
