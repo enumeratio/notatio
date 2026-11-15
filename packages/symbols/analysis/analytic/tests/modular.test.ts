@@ -76,3 +76,16 @@ test("ModularJ keeps its digits far up the imaginary axis (Heegner 163)", () => 
   const j = ce.box(["ModularJ", tau] as never).N().re;
   expect(Math.abs(j / -(640320 ** 3) - 1)).toBeLessThan(1e-12);
 });
+
+test("EisensteinG at a high weight is periodic and tends to 2ζ(k) up the imaginary axis", () => {
+  // The q-series terms rise until n = (k − 1)/(2π Im τ); a sum that stops on |q|^n alone is off here.
+  const at = (x: number, y: number) => ce.box(["EisensteinG", 100, ["Complex", x, y]] as never).N();
+  const [a, b] = [at(0.3, 0.9), at(1.3, 0.9)];
+  expect(Math.abs(a.re - b.re) / Math.abs(a.re)).toBeLessThan(1e-14);
+  expect(Math.abs((a.im ?? 0) - (b.im ?? 0)) / Math.abs(a.re)).toBeLessThan(1e-14);
+  expect(at(0.1, 3).re).toBeCloseTo(2, 12); // 2ζ(100) = 2 + 2^-99 + …
+});
+
+test("EisensteinG declines a weight past its cap rather than answering", () => {
+  expect(ce.box(["EisensteinG", 402, ["Complex", 0.3, 0.9]] as never).N().operator).toBe("EisensteinG");
+});
