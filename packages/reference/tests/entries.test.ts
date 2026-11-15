@@ -1,7 +1,9 @@
 // Buildless src subpath: the reference tests must run without a prior `vp pack` of
 // @notatio/analytic (CI runs tests before builds).
 import { runCases } from "@notatio/evaluation/node";
+import { assembleDeclarers, packagesNeeded } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
+import { LIBRARIES } from "../scripts/engines.ts";
 import { OWN_ENGINE, referenceData } from "../src/node.ts";
 
 // Every head the reference engine declares, from every package's YAML, and every OWN_ENGINE
@@ -90,11 +92,45 @@ const masked = (node: unknown, keys: ReadonlySet<string>): unknown => {
   return node.map((child) => masked(child, keys));
 };
 
-// `@notatio/evaluation/node`'s `runCases` `setup` modules: the reference engine's (declares
-// every library the reference engine declares; see scripts/engines.ts's own comment on why it's
-// not `DECLARATIONS` verbatim: the worker's engine already has `@notatio/evaluation`), and the
-// own engines' (scripts/own-engines.ts).
-const referenceSetup = new URL("../scripts/engines.ts", import.meta.url).href;
+// `@notatio/evaluation/node`'s `runCases` `setup` modules: the reference engine's lazy setup
+// (scripts/lazy-engines.ts: only the packages a group of heads needs, so a worker imports and
+// declares those and not every library), and the own engines' (scripts/own-engines.ts).
+const TABLES = assembleDeclarers(LIBRARIES);
+// `hypercomplex` and `numerals` overload `Add`, `Multiply` and `Power`, which numeric kernels
+// reach: without them an `N` answer can differ from the full engine's in its last digits. No
+// example names them, so every group declares them.
+const ARITHMETIC = ["hypercomplex", "numerals"];
+const lazySetup = (packages: string): string =>
+  new URL(`../scripts/lazy-engines.ts?packages=${packages}`, import.meta.url).href;
+
+/**
+ * `group`'s heads by the packages their examples need, as `lazySetup`'s query names them. A
+ * head whose packages are among another head's goes with it: each set costs a worker its
+ * engine, and a cold worker is most of what a small head's examples take.
+ */
+function byPackages(group: ReturnType<typeof named>): Map<string, ReturnType<typeof named>> {
+  const needs = group.map((entry) => {
+    const needed = new Set(ARITHMETIC);
+    for (const example of entry.examples) {
+      if (example.role === "triage") continue;
+      for (const name of packagesNeeded(example.expr, LIBRARIES, undefined, TABLES)) needed.add(name);
+    }
+    return { entry, needed };
+  });
+  const within = (a: Set<string>, b: Set<string>): boolean => [...a].every((name) => b.has(name));
+  const maximal = needs.filter(({ needed: a }) => !needs.some(({ needed: b }) => b.size > a.size && within(a, b)));
+  const groups = new Map<string, ReturnType<typeof named>>();
+  for (const { entry, needed } of needs) {
+    const [home] = maximal
+      .filter(({ needed: b }) => within(needed, b))
+      .map(({ needed: b }) => [...b].toSorted())
+      .toSorted((a, b) => a.length - b.length || a.join().localeCompare(b.join()));
+    const key = home!.join(",");
+    groups.set(key, [...(groups.get(key) ?? []), entry]);
+  }
+  return groups;
+}
+
 const ownSetup = new URL("../scripts/own-engines.ts", import.meta.url).href;
 
 /** Per-example caps: generous for a real reference example, tight enough that a runaway
@@ -205,5 +241,5 @@ async function runGroup(group: ReturnType<typeof named>, setup: string): Promise
   }
 }
 
-await runGroup(entries, referenceSetup);
+for (const [packages, group] of byPackages(entries)) await runGroup(group, lazySetup(packages));
 await runGroup(ownEntries, ownSetup);
