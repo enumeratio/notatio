@@ -5,6 +5,7 @@ import {
   isFiniteNum,
   isRealInt,
   numberResult,
+  REAL_COLLAPSE_RELATIVE,
   periodsExceedDouble,
   tauTooCloseToRealAxis,
   wantsNumber,
@@ -126,12 +127,16 @@ function eisensteinE(ce: ComputeEngine, k: number, tau0: Cx): Cx {
 }
 
 /** j(τ) = E4³/Δ with Δ = η²⁴ — SL2(Z)-invariant, so the reduced point IS the answer. Δ from
- * η rather than (E4³ − E6²)/1728, which cancels to |q| and loses every digit as Im τ grows. */
-function modularJ(ce: ComputeEngine, tau0: Cx): Cx {
+ * η rather than (E4³ − E6²)/1728, which cancels to |q| and loses every digit as Im τ grows.
+ * `noise` is the rounding error in `value`: E4 carries about REAL_COLLAPSE_RELATIVE, which E4³
+ * turns into 3|E4|² of it over |Δ|. At the zero of j (τ = ρ) E4 is itself that noise, so
+ * the value there is all noise and an `im` within `noise` is dropped with the rest. */
+function modularJ(ce: ComputeEngine, tau0: Cx): { value: Cx; noise: number } {
   const { tau } = reduceToFundamentalDomain(tau0);
-  const e4cubed = cube(callNative(ce, "EisensteinE", [4, tau]));
+  const e4 = callNative(ce, "EisensteinE", [4, tau]);
   const delta = intPow(callNative(ce, "DedekindEta", [tau]), 24);
-  return div(e4cubed, delta);
+  const noise = (REAL_COLLAPSE_RELATIVE * (3 * abs(e4) ** 2 + REAL_COLLAPSE_RELATIVE ** 2)) / abs(delta);
+  return { value: div(cube(e4), delta), noise };
 }
 
 const hT = (x: Cx): Cx => div(x, sub(x, cx(1))); // λ(τ+1) = λ/(λ−1), an involution
@@ -149,10 +154,15 @@ function modularLambda(ce: ComputeEngine, tau0: Cx): Cx {
 }
 
 /** G_k(τ) = 2ζ(k)·E_k(τ), for even k ≥ 4 — the un-normalized Eisenstein series (DLMF
- * 23.16, Fungrim's convention), delegating entirely to the normalized E_k above. */
-function eisensteinG(ce: ComputeEngine, k: number, tau0: Cx): Cx {
+ * 23.16, Fungrim's convention), delegating entirely to the normalized E_k above. `noise` is
+ * the size of the rounding error in `value`: about epsilon times 2ζ(k) at the reduced point,
+ * which each S step then divides by pre^k. At a zero of G_k (E_4 at ρ) the value is that noise. */
+function eisensteinG(ce: ComputeEngine, k: number, tau0: Cx): { value: Cx; noise: number } {
   const zetaK = ce.box(["Zeta", k] as never).N();
-  return scale(mul(cx(zetaK.re, zetaK.im), eisensteinE(ce, k, tau0)), 2);
+  const value = scale(mul(cx(zetaK.re, zetaK.im), eisensteinE(ce, k, tau0)), 2);
+  let noise = REAL_COLLAPSE_RELATIVE * 2 * zetaK.re;
+  for (const step of reduceToFundamentalDomain(tau0).steps) if (step.kind === "S") noise /= abs(step.pre) ** k;
+  return { value, noise };
 }
 
 /**
@@ -175,7 +185,8 @@ function declareKleinInvariantJ(ce: ComputeEngine): void {
       // double carries would otherwise silently hand back ~17 correct digits as if they were d.
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (tauTooFarForDouble(cx(tau.re, tau.im))) return undefined;
-      return numberResult(ce, scale(modularJ(ce, cx(tau.re, tau.im)), 1 / 1728));
+      const { value, noise } = modularJ(ce, cx(tau.re, tau.im));
+      return numberResult(ce, scale(value, 1 / 1728), { noise: noise / 1728 });
     },
   });
 }
@@ -196,7 +207,8 @@ export function declareModular(ce: ComputeEngine): void {
       if (tau === undefined || !wantsNumber(ops, options) || !isFiniteNum(tau)) return undefined;
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (tauTooFarForDouble(cx(tau.re, tau.im))) return undefined;
-      return numberResult(ce, modularJ(ce, cx(tau.re, tau.im)));
+      const { value, noise } = modularJ(ce, cx(tau.re, tau.im));
+      return numberResult(ce, value, { noise });
     },
   });
 
@@ -222,7 +234,8 @@ export function declareModular(ce: ComputeEngine): void {
       if (!wantsNumber(ops, options) || !isFiniteNum(tau)) return undefined;
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (tauTooFarForDouble(cx(tau.re, tau.im))) return undefined;
-      return numberResult(ce, eisensteinG(ce, k.re, cx(tau.re, tau.im)));
+      const { value, noise } = eisensteinG(ce, k.re, cx(tau.re, tau.im));
+      return numberResult(ce, value, { noise });
     },
   });
 }

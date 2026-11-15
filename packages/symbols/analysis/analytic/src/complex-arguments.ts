@@ -33,7 +33,12 @@ export function declareComplexArguments(ce: ComputeEngine): void {
         { re: a.re, im: a.im },
         { re: b.re, im: b.im },
       ];
-      return numberResult(ce, cexp(sub(add(logGamma(x), logGamma(y)), logGamma(add(x, y)))));
+      // Γ(a)Γ(b)/Γ(a+b): one operand a nonpositive integer and the other off the real axis
+      // (the handler runs only when one is) is a pole of Γ(a) over a finite Γ(a+b), and the
+      // log-gamma sum there is NaN. Any other non-finite value is an overflow.
+      const nonpositiveInteger = (w: Expression) => w.im === 0 && Number.isInteger(w.re) && w.re <= 0;
+      const pole = ops.some(nonpositiveInteger);
+      return numberResult(ce, cexp(sub(add(logGamma(x), logGamma(y)), logGamma(add(x, y)))), { pole });
     },
     { arity: 2, compile: "builtin" },
   );

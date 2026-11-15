@@ -13,6 +13,7 @@ at-t4-2-3i	(enumeratio_chebyshev_t(4, enumeratio_complex(2, 3)))	complex argumen
 chebyshevt-2-3	enumeratio_chebyshev_t(2, 3)	17.0	
 chebyshevt-10-x			
 series-chebyshevt-5-x-x-0-5			
+a-value-past-the-double-range-stays-unevaluated	enumeratio_chebyshev_t(100000, enumeratio_decimal("2.5"))		
 at-a-rational	enumeratio_chebyshev_t(5, (1 // 3))	0.9917695473251028806584362139917695473251028806584362139917695473251028806584326	
 at-a-complex-argument	enumeratio_chebyshev_t(4, enumeratio_complex(2, 3))	complex argument	error
 a-symbolic-order-stays-unevaluated			

@@ -132,6 +132,8 @@ export {
   isRealInt,
   isFiniteNum,
   numberResult,
+  type NumberResultOptions,
+  REAL_COLLAPSE_RELATIVE,
   inexactComplex,
   wantsNumber,
   declined,
