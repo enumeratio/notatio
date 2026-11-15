@@ -4,8 +4,10 @@
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import {
+  agreesWithZeroLeaf,
   alignFunctions,
   type Approximate,
+  asNumber,
   CARRIER_NAMES,
   compare,
   compareCombination,
@@ -20,6 +22,7 @@ import {
   leavesCall,
   lookThroughConditions,
   type MathJSON,
+  parsePython,
   reduce,
   rootsAsPowers,
   scaled,
@@ -240,6 +243,22 @@ function iteratorsAsLimits(expr: MathJSON): MathJSON {
   ] as MathJSON;
 }
 
+/** A row whose `known` is 0: ours and theirs each agree with 0 (the known check's floor of 1), and the
+ * verdict is agree when both do. `undefined` when either side is no number, for the ordinary comparison. */
+function againstZero(system: System, expected: MathJSON, result: Answer, tolerance = 1e-9): Verdict | undefined {
+  const theirs = result.value ?? "";
+  const trees: (Tree | undefined)[] = isWolframFamily(system)
+    ? [
+        theirTree(theirs, symbolic),
+        result.numeric === undefined ? undefined : theirTree(result.numeric, valuesOnly(leaf)),
+      ]
+    : [asNumber(theirs) ?? parsePython(theirs)];
+  const theirsAtZero = trees.map((tree) => (tree === undefined ? undefined : agreesWithZeroLeaf(tree, tolerance)));
+  const oursAtZero = agreesWithZeroLeaf(leaf(expected), tolerance);
+  if (oursAtZero === undefined || theirsAtZero.every((zero) => zero === undefined)) return undefined;
+  return oursAtZero && theirsAtZero.includes(true) ? "agree" : "disagree";
+}
+
 export function verdictOf(...args: Parameters<typeof judge>): Verdict {
   ce.pushScope();
   try {
@@ -262,7 +281,11 @@ function judge(
   asksForDigits = false,
   /** The example's expression: a `Solve` answers rules in Wolfram and values here, compared as a set. */
   call?: MathJSON,
+  /** The example's `known`: exactly 0 makes it the reference for both sides. */
+  known?: MathJSON,
 ): Verdict {
+  const atZero = known === 0 ? againstZero(system, expected, result, tolerance) : undefined;
+  if (atZero !== undefined) return atZero;
   // A measurement agrees with a value its error bar holds.
   const measurement = measured(expected);
   if (measurement !== undefined) {

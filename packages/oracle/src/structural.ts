@@ -15,7 +15,7 @@ import { CARRIER_NAMES, CARRIER_PARAMS } from "./carrier-names-data.ts";
 import { DEFINED_NAMES } from "./defined-names-data.ts";
 import type { MathJSON } from "./emit.ts";
 import type { Verdict } from "./compare.ts";
-import { agreementBound } from "./bound.ts";
+import { agreementBound, agreesWithZero } from "./bound.ts";
 
 /**
  * A real as `mantissa × 10^exponent` (1 <= |mantissa| < 10, or 0), for one a double cannot hold
@@ -406,4 +406,16 @@ export function compareTrees(ours: Tree, theirs: Tree, tolerance = 1e-9): Verdic
   // A value on one side and a symbol on the other IS a finding — one system evaluated
   // where the other declined — so it is a disagreement to classify, not a shrug.
   return a === b ? "agree" : "disagree";
+}
+
+/** Whether a numeric leaf agrees with 0 (`agreesWithZero`); `undefined` for a leaf that is no number. */
+export function agreesWithZeroLeaf(leaf: Tree, tolerance = 1e-9): boolean | undefined {
+  if (typeof leaf === "number") return agreesWithZero(tolerance, Math.abs(leaf));
+  if (typeof leaf !== "object" || Array.isArray(leaf)) return undefined;
+  if ("re" in leaf) return agreesWithZero(tolerance, Math.hypot(leaf.re, leaf.im));
+  if (isApproximate(leaf as Leaf)) {
+    const { mantissa, exponent } = leaf as Approximate;
+    return agreesWithZero(tolerance, Math.abs(mantissa * 10 ** exponent));
+  }
+  return undefined;
 }
