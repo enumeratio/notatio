@@ -10,6 +10,11 @@ signatures:
     description: π/2 at an exact 0 (the values-at-zero patch).
     library: enumeratio-analytic
     type: (complex | infinity, (complex | infinity)?) -> number
+    overrides: enumeratio-evaluation
+  - call: EllipticE(complex | infinity, (complex | infinity)?) -> number
+    description: "Elliptic integral of the second kind: complete E(m) with one argument, incomplete E(φ|m) with two (amplitude first, parameter convention m = k², as in Mathematica)."
+    library: enumeratio-evaluation
+    type: (complex | infinity, (complex | infinity)?) -> number
     overrides: compute-engine
 references:
   - system: wikipedia

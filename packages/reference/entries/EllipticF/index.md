@@ -10,6 +10,11 @@ signatures:
     description: Incomplete elliptic integral of the first kind F(φ|m) (amplitude first, parameter convention m = k², as in Mathematica). F(π/2|m) = K(m).
     library: enumeratio-analytic
     type: (complex | infinity, complex | infinity) -> number
+    overrides: enumeratio-evaluation
+  - call: EllipticF(complex | infinity, complex | infinity) -> number
+    description: Incomplete elliptic integral of the first kind F(φ|m) (amplitude first, parameter convention m = k², as in Mathematica). F(π/2|m) = K(m).
+    library: enumeratio-evaluation
+    type: (complex | infinity, complex | infinity) -> number
     overrides: compute-engine
 names:
   wolfram: EllipticF

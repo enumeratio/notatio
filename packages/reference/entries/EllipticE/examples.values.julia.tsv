@@ -1,6 +1,11 @@
 id	in	out
 series-elliptice-m-m-0-6		
 normal-series-elliptice-x-x-positiveinfinity-2		
+elliptice-300i-overflowed-to-infinity		
+elliptice-400i-parameter-neg-2		
+elliptice-neg-700i-near-the-double-range		
+elliptice-200i-complex-parameter		
+elliptice-355i-parameter-1p5-minus-0p2i		
 n-elliptice-1-over-3-50	enumeratio_nshow(enumeratio_ball(elliptic_e, (1 // 3)), 50)	1.4303152571722197239225284145322837302944509074089e+00
 elliptice-list-list-1-0-list-0-1	Any[Any[enumeratio_ball(elliptic_e, 1), enumeratio_ball(elliptic_e, 0)], Any[enumeratio_ball(elliptic_e, 0), enumeratio_ball(elliptic_e, 1)]]	[[1.0, 1.570796326794896619231321691639751442098584699687552910487472296153908203143099], [1.570796326794896619231321691639751442098584699687552910487472296153908203143099, 1.0]]
 matrixfunction-elliptice-list-list-1-0-list-0-1		
