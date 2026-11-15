@@ -50,7 +50,7 @@ const byValue = (a: Tree, b: Tree): number =>
   typeof a === "number" && typeof b === "number" ? a - b : JSON.stringify(a).localeCompare(JSON.stringify(b));
 
 /** An unknown left free. Wolfram's empty rule list (`Solve[x == x, x]` is `{{}}`) and our
- * fresh parameter (`[t]`, compute-engine #397) say the same thing, so both read as this. */
+ * free parameter (`ArbitraryConstant(1)`, compute-engine's) say the same thing, so both read as this. */
 export const UNCONSTRAINED = "Unconstrained";
 
 /** Whether `node` mentions the symbol `name` anywhere. */
@@ -63,8 +63,9 @@ const mentions = (node: MathJSON, name: string): boolean =>
  * unknowns. The two say the same thing once the rules are read as their right-hand sides and
  * the solutions as a set. Anything that is not a list of rule lists is left alone.
  *
- * Given the `Solve` call, a solution that is a fresh parameter (a symbol compute-engine has
- * no definition for, absent from the call) reads as `UNCONSTRAINED`, as Wolfram's `{}` does.
+ * A solution that is `ArbitraryConstant(k)`, or (given the `Solve` call) a fresh symbol that
+ * compute-engine has no definition for and the call lacks, reads as `UNCONSTRAINED`, as Wolfram's
+ * `{}` does.
  * `[Pi]` for `Solve(cos x = -1, x)` stays `Pi`: it has a definition.
  */
 export function solutionSet(expr: MathJSON, call?: MathJSON): MathJSON {
@@ -73,7 +74,8 @@ export function solutionSet(expr: MathJSON, call?: MathJSON): MathJSON {
   const isRule = (e: MathJSON): boolean => Array.isArray(e) && PAIR_HEADS.has(e[0] as string) && e.length === 3;
   const isRuleList = (e: MathJSON): boolean => Array.isArray(e) && e[0] === "List" && e.slice(1).every(isRule);
   const fresh = (e: MathJSON): boolean =>
-    call !== undefined && typeof e === "string" && !DEFINED_NAMES.has(e) && !mentions(call, e);
+    (Array.isArray(e) && e[0] === "ArbitraryConstant") ||
+    (call !== undefined && typeof e === "string" && !DEFINED_NAMES.has(e) && !mentions(call, e));
   if (!solutions.every(isRuleList))
     return ["Set", ...solutions.map((solution) => (fresh(solution) ? UNCONSTRAINED : solution))] as MathJSON;
   return [
