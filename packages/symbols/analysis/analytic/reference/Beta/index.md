@@ -14,7 +14,7 @@ signatures:
   - call: Beta(a, b)
     description: Euler's beta function $B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, a bridge between [[Gamma]] and [[Binomial]] and the normalizing constant behind the beta distribution.
     library: enumeratio-evaluation
-    type: (complex | infinity, complex | infinity) -> number
+    type: (complex | infinity, complex | infinity, (complex | infinity)?, (complex | infinity)?) -> number
     overrides: compute-engine
 seeAlso:
   - Gamma
