@@ -6,8 +6,6 @@ summary: The number $q(n)$ of partitions of $n$ into distinct parts.
 signatures:
   - call: PartitionsQ(n)
     description: $q(n)$, distinct-part partitions of $n$
-    library: enumeratio-number-theory
-    type: (integer) -> integer
 seeAlso:
   - DistinctPartitions
   - IntegerPartitions

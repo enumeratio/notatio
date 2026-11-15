@@ -5,6 +5,7 @@ listable-odd-indices-vanish	EulerE[List[0, 1, 2, 3, 4]]	{1, 0, -1, 0, 5}	E_{\{0,
 the-euler-polynomial-e-2-x-x-2-x	EulerE[2, x]	-x + x^2	E_2(x)	x^2-x
 e-4-x-x-4-2x-3-x	EulerE[4, x]	x - 2*x^3 + x^4	E_4(x)	x^4-2 x^3+x
 eulere-list-2-4-6	EulerE[List[2, 4, 6]]	{-1, 5, -61}	E_{\{2,4,6\}}	\{-1,5,-61\}
+at-a-complex-point	EulerE[3, Plus[1, Times[2, I]]]			
 e-n-2-n-e-n-frac-12-and-e-3-0	EulerE[3, Rational[1, 2]]	0	E_3\left(\frac{1}{2}\right)	0
 eulere-0	EulerE[0]	1	E_0	1
 eulere-1	EulerE[1]	0	E_1	0

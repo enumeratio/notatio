@@ -5,6 +5,7 @@ listable-odd-indices-vanish	[eulernum(0), eulernum(1), eulernum(2), eulernum(3),
 the-euler-polynomial-e-2-x-x-2-x		
 e-4-x-x-4-2x-3-x		
 eulere-list-2-4-6	[eulernum(2), eulernum(4), eulernum(6)]	[mpf('-1.0'), mpf('5.0'), mpf('-61.0')]
+at-a-complex-point	eulerpoly(3, (1 + (2 * mpc(0,1))))	
 e-n-2-n-e-n-frac-12-and-e-3-0	eulerpoly(3, (mpf(1)/2))	0.0
 eulere-0	eulernum(0)	1.0
 eulere-1	eulernum(1)	0.0
