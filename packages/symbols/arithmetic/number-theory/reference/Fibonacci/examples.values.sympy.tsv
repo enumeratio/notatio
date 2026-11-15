@@ -12,8 +12,8 @@ special-value-of-the-fibonacci-polynomial-f-1-0	fibonacci(1, 0)	1
 special-value-of-the-fibonacci-polynomial-f-0-0	fibonacci(0, 0)	ValueError: Fibonacci polynomials are defined only for positive integer indices.	error
 f-3-x-x-2-1-threads-element-wise-over-a-matrix	[[fibonacci(3, -1), fibonacci(3, 0)], [fibonacci(3, 0), fibonacci(3, 5)]]	[[2, 1], [1, 26]]	
 threads-element-wise-over-a-list-as-wolfram-s	[fibonacci(1), fibonacci(2), fibonacci(3), fibonacci(4)]	[1, 1, 2, 3]	
-fibonacci-n-x-symbolic-order-stays-exact	fibonacci(Symbol("n"), Symbol("x"))	None	inconclusive
-fibonacci-half-x-exact-closed-form	fibonacci(Rational(1, 2), Symbol("x"))	None	inconclusive
+fibonacci-n-x-symbolic-order-stays-exact	fibonacci(Symbol("n"), Symbol("x"))	fibonacci(n, x)	inconclusive
+fibonacci-half-x-exact-closed-form	fibonacci(Rational(1, 2), Symbol("x"))	fibonacci(1/2, x)	inconclusive
 n-fibonacci-15-over-17-50	N(fibonacci(Rational(15, 17)), 30)	0.956519913924311225085822634277	
 n-fibonacci-5-8-minus-i	N(fibonacci(5, (8 + -1*I)), 30)	3903.0 - 2064.0*I	
 functionexpand-fibonacci-n-x	expand_func(fibonacci(Symbol("n"), Symbol("x")))	fibonacci(n, x)	inconclusive
