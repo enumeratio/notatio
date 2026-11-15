@@ -1,6 +1,7 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { applyPatch, applyPatches, symbols as symbolsOf } from "./patch.ts";
 import { integratePolynomialPowers } from "./patches/integrate-polynomial-powers.ts";
+import { seriesInverseFunctions } from "./patches/series-inverse-functions.ts";
 import { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 import { steppedIterator } from "./patches/stepped-iterator.ts";
 import { agmComplex } from "./patches/agm-complex.ts";
@@ -211,6 +212,7 @@ export function applyNativeHeadPatches(ce: ComputeEngine): void {
     shapeOfUnknownElements,
     matrixRankCompiles,
     integratePolynomialPowers,
+    seriesInverseFunctions,
   ])
     applyPatch(ce, patch);
 }
