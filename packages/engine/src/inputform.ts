@@ -149,7 +149,7 @@ function rewrite(node: unknown): MathJsonExpression {
 
     // `-1 * x` is how a canonical tree spells a negation. A nested product is flattened: the
     // serializer prints it without parentheses, and `a * (x % 2 * b)` would read back as
-    // `(a * x) % 2 * b`, since `%` and `/` bind like `*`.
+    // `(a * x) % 2 * b`, since `%` and `/` bind like `*` (cortex-js/compute-engine#596).
     case "Multiply": {
       const factors = ops.flatMap((op) => (headOf(op) === "Multiply" ? opsOf(op) : [op])) as MathJsonExpression[];
       const [first, ...rest] = factors;

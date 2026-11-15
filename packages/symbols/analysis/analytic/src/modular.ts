@@ -51,7 +51,7 @@ const MAX_REDUCE_STEPS = 200;
 /**
  * The largest weight `EisensteinG` evaluates. The native E_k sums a q-series whose cost grows
  * steeply with k (k = 2000 takes 5 s, k = 1e5 over a minute), and past k = 300 it already
- * declines at most τ.
+ * declines at most τ (cortex-js/compute-engine#595, the truncation of the native E_k).
  */
 const MAX_EISENSTEIN_WEIGHT = 400;
 const REDUCE_EPS = 1e-12;

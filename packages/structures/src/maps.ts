@@ -203,7 +203,7 @@ const MAX_SETTLES = 3;
  * `value` evaluated again until it stops changing. `evaluate()` of an `Apply` whose body closes over a
  * typed parameter can return the substituted body unevaluated, with no free symbol, where one more
  * `evaluate()` gives the value (`Max(0, Sum(Reduce(…)))` of a Dyck path's weak-above count). A
- * number or a concrete List or Tuple is already settled.
+ * number or a concrete List or Tuple is already settled (cortex-js/compute-engine#592).
  */
 export function settled(value: Expression): Expression {
   let current = value;

@@ -157,7 +157,8 @@ export function declareSpecialValues(ce: Engine): void {
 
   // compute-engine's `Derivative(EllipticK, n)` is the closed form of K⁽ⁿ⁾(m), which is 0/0 at the
   // removable singularity m = 0 (NaN there) and a symbolic n-th derivative that costs seconds at n = 4;
-  // it stays the inert call, which the rule above gives its exact value at 0.
+  // it stays the inert call, which the rule above gives its exact value at 0
+  // (cortex-js/compute-engine#591).
   // compile builtin: an inert call compiles as compute-engine's lowering does
   wrapOperator(
     ce,
@@ -171,7 +172,8 @@ export function declareSpecialValues(ce: Engine): void {
   );
 
   // compute-engine leaves a `Series` unevaluated where it cannot differentiate at the point. The
-  // Taylor coefficients of K and E at 0 are exact, and a terminating ₂F₁ is a polynomial.
+  // Taylor coefficients of K and E at 0 are exact, and a terminating ₂F₁ is a polynomial
+  // (cortex-js/compute-engine#597).
   // compile builtin: Series has no lowering of ours
   wrapOperator(
     ce,
