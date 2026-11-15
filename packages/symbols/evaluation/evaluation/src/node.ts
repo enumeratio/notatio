@@ -101,7 +101,8 @@ export interface EvaluateDetail {
   readonly outcome: "Evaluated" | "Aborted" | "Error";
   /** Present when `outcome` is `"Evaluated"`. */
   readonly value?: unknown;
-  /** Present when `outcome` is `"Error"`: the worker's exception message. */
+  /** Present when `outcome` is `"Error"`: the worker's exception message; when `"Aborted"` by a
+   * worker that crashed or exited, what it died of (absent for a deadline kill). */
   readonly reason?: string;
   /** Wall-clock milliseconds from this call's start (including any queue wait for a free
    * worker) to its result. */
@@ -120,6 +121,10 @@ export interface EvaluatorPool {
   close(): void;
   /** Alias for `close`. */
   terminateAll(): void;
+}
+
+function errorText(error: unknown): string {
+  return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
 }
 
 function memoryKeyOf(memoryBytes: number | undefined): string {
@@ -224,8 +229,10 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
           };
           // Covers ERR_WORKER_OUT_OF_MEMORY and any other in-worker crash — the worker is
           // gone, not merely slow, so this is always an abort, never a reportable "Error".
-          const onError = (): void => finish({ outcome: "Aborted", ms: ms() }, "replace");
-          const onExit = (): void => finish({ outcome: "Aborted", ms: ms() }, "replace");
+          const onError = (error: unknown): void =>
+            finish({ outcome: "Aborted", reason: `worker failed: ${errorText(error)}`, ms: ms() }, "replace");
+          const onExit = (code?: unknown): void =>
+            finish({ outcome: "Aborted", reason: `worker exited with code ${String(code)}`, ms: ms() }, "replace");
 
           worker.on("message", onMessage);
           worker.once("error", onError);

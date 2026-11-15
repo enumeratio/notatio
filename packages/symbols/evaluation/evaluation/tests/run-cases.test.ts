@@ -124,6 +124,13 @@ test("an evaluation error comes back as its own outcome, distinct from Aborted",
   expect(results[0]!.reason).toContain("Boom");
 });
 
+test("a setup that fails to configure comes back as an Error naming it, not as an abort", async () => {
+  const setup = new URL("./fixtures/broken-setup.ts", import.meta.url).href;
+  const results = await runCases([{ id: "any", input: ["Add", 1, 1] }], { setup, timeMs: 10_000 });
+  expect(results[0]!.outcome).toBe("Error");
+  expect(results[0]!.reason).toContain("setup could not declare its heads");
+});
+
 test("runCases reuses workers from a pool passed in rather than closing it", async () => {
   const pool = createEvaluatorPool({ size: 2 });
   try {
