@@ -40,7 +40,7 @@ import { ellipticPiBig, incompleteEllipticEBig, incompleteEllipticFBig } from ".
  * native head, which would rename the caller's call, so the caller stays unevaluated instead.
  * Both integrals are finite at every complex operand (F and E diverge only at real m = 1,
  * φ = π/2 + kπ), so a ComplexInfinity there is native's overflow (`EllipticF(0.3 + 400i, 0.5)`
- * is 1.854i, not ∞) and is declined the same way. Non-finite operands keep native's own form.
+ * is 1.854i, not ∞) and is declined the same way (cortex-js/compute-engine#605, fixed by #606). Non-finite operands keep native's own form.
  */
 function delegate(
   ce: ComputeEngine,

@@ -428,7 +428,7 @@ export function declareBacklog(ce: Engine): void {
     },
   });
 
-  // compute-engine answers EulerE(n) and EulerE(n, x); a complex point it leaves unevaluated (cortex-js/compute-engine#598), and is ours.
+  // compute-engine answers EulerE(n) and EulerE(n, x); a complex point it leaves unevaluated (cortex-js/compute-engine#598, fixed by #604), and is ours.
   wrapOperator(
     ce,
     ["EulerE", 2],
