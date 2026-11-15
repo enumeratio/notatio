@@ -5,6 +5,7 @@
 
 import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
+import { workerEnv } from "./compile-cache.ts";
 import { createPool } from "./pool.ts";
 
 /** MathJSON for `declareEvaluation`'s `Aborted` symbol (Wolfram's `$Aborted`, written only at the Wolfram boundary — see declare.ts). */
@@ -65,7 +66,8 @@ export type NodeWorkerFactory = (
   options: { resourceLimits?: { maxOldGenerationSizeMb: number } },
 ) => NodeWorkerLike;
 
-const defaultWorkerFactory: NodeWorkerFactory = (url, options) => new Worker(url, options) as unknown as NodeWorkerLike;
+const defaultWorkerFactory: NodeWorkerFactory = (url, options) =>
+  new Worker(url, { ...options, env: workerEnv() }) as unknown as NodeWorkerLike;
 
 export interface EvaluatorPoolOptions {
   /** Max concurrent workers, across every memory-limit key combined. Default
@@ -334,7 +336,7 @@ export function openSession(options: SessionOptions = {}): Session {
   const spawnTimeoutMs = options.spawnTimeoutMs ?? SPAWN_TIMEOUT_MS;
   const url = workerUrl("session-worker");
   const createWorker: NodeSessionWorkerFactory =
-    options.createWorker ?? ((u, o) => new Worker(u, o) as unknown as NodeWorkerLike);
+    options.createWorker ?? ((u, o) => new Worker(u, { ...o, env: workerEnv() }) as unknown as NodeWorkerLike);
   const spawn = (): NodeWorkerLike => createWorker(url, { workerData: { setup } });
   let worker: NodeWorkerLike = spawn();
   let nextId = 0;

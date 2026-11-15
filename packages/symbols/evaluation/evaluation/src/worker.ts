@@ -14,6 +14,7 @@
 // is destroyed outright and the pool spawns a fresh process for the next call, so there is
 // never a stale cache to worry about — this only ever caches within one worker's own life.
 
+import { saveCompileCache } from "./compile-cache.ts";
 import { parentPort } from "node:worker_threads";
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { evaluateCooperatively } from "./cooperative-evaluate.ts";
@@ -61,6 +62,7 @@ async function engineFor(setup: string | undefined): Promise<ComputeEngine> {
     await mod.configure(ce);
   }
   engines.set(setup, ce);
+  saveCompileCache();
   return ce;
 }
 

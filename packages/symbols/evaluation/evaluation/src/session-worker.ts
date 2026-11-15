@@ -3,6 +3,7 @@
 // persist for the next one — that's the whole point of a session. Node-only
 // (`node:worker_threads`) — its own build entry, never imported by `./index.ts`.
 
+import { saveCompileCache } from "./compile-cache.ts";
 import { parentPort, workerData } from "node:worker_threads";
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { evaluateCooperatively } from "./cooperative-evaluate.ts";
@@ -44,6 +45,7 @@ async function main(): Promise<void> {
     const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void | Promise<void> };
     await mod.configure(ce);
   }
+  saveCompileCache();
   // Messages sent before this listener attaches (the caller can `postMessage` right after
   // spawning) are queued by the port, not lost — safe to configure asynchronously above.
   parentPort?.on("message", (request: EvaluateRequest) => {
