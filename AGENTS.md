@@ -173,6 +173,11 @@ so a page reads the same on GitHub and on the site.
   `evaluate()`, `.N()`, the parse route and the compiled code, and agree.
 - **Patches in `packages/ce-patches/` test the way their upstream does**, snapshots included, so
   a test can go upstream with its code.
+- **Combinatorics' interpreter cross-checks are a committed snapshot** (`verdicts.tsv`), and its build only reads it,
+  leaving an item without a fresh row interpreted. After a change to a definition, a map, a family or a checker, run
+  `pnpm --filter @notatio/combinatorics run collect-verdicts` and commit the file; the standard test fails on a row whose
+  source hash (the definition and subjects, no compiler) is stale. A change that only alters the compiled code shows in
+  the build's summary line, so check it there. Each row also records its seconds, which balance the nightly's parts.
 - **Long sweeps run nightly; the standard run stays fast.** A test that samples or enumerates
   takes a small budget by default and its full one under `DEEP_TESTS=1`, which `nightly.yml`'s
   `deep-tests-*` jobs set (give the package a filter in one of them). Keep the important cases in the

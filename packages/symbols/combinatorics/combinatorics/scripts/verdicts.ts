@@ -1,66 +1,18 @@
-// The memo of the compile steps' interpreter cross-checks (their one slow part), shared by
-// the generators so an edit to one definition re-checks only that one. An answer is keyed by what
-// it checked (the definition, its compiled code, the subjects), and trusted while the code doing
-// the checking (`checkers`: a step's comparison, not its coordination) is unchanged. When only
-// the dists the interpreter runs on moved, most answers are carried and a sample re-checked
-// (manifest's `verdictCache`). Naming only the checkers keeps an edit to a driver, the
-// shard split say, from re-running every check.
+// What the compile steps' verdicts are keyed on (see verdict-snapshot.ts): the code doing the
+// checking, by kind (`checkers`: a step's comparison, not its coordination, so an edit to a
+// driver, the shard split say, keeps every row), and the family source an `early` callback can reach.
 
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import type { Verdicts } from "../src/statistics/generate-compiled.ts";
-
-/** The memo manifest keeps (its `Verdicts`): it also plans a step's items, hands its answers across
- *  a process boundary (see shards.ts) and re-checks everything after a sampled divergence. */
-export type SharedVerdicts = Verdicts & {
-  plan(labels: readonly string[]): void;
-  costs(): Readonly<Record<string, number>>;
-  settle<T>(work: () => T): T;
-  escalate(): void;
-  save(): void;
-  share(): Share;
-  adopt(share: Share): void;
-};
-
-/** What one process learned (manifest's `VerdictShare`), for the process that saves the memo. */
-interface Share {
-  answers: Record<string, unknown>;
-  verified: Record<string, string>;
-  costs: Record<string, number>;
-  hits: number;
-  misses: number;
-  carried: number;
-  diverged: boolean;
-}
-
-// Imported by URL: a file outside the package in the program makes `vp pack` write its
-// declarations beside it.
-const { verdictCache, recheckAll } = (await import(
-  new URL("../../../../manifest/scripts/stamp.ts", import.meta.url).href
-)) as {
-  verdictCache: (
-    step: string,
-    inputs: {
-      dir: string;
-      roots: string[];
-      skip: (path: string) => boolean;
-      omitDists: string[];
-      imports?: string[];
-    },
-  ) => SharedVerdicts;
-  recheckAll: () => boolean;
-};
-
-export { recheckAll };
 
 const at = (path: string): string => fileURLToPath(new URL(`../${path}`, import.meta.url));
 
-/** Where each kind of cross-check lives, for `verdictsFor`. */
+/** Where each kind of cross-check lives. */
 export const checkers = {
-  /** compile-maps.ts's `agrees`. Its oracle, `evaluateDefinition`, is structures' (a dist, hashed
-   *  anyway); src/maps.ts only re-exports it, so it stays out. */
+  /** compile-maps.ts's `agrees`. Its oracle, `evaluateDefinition`, is structures' (the engine's side of
+   *  a verdict, which the deep test holds to the snapshot); src/maps.ts only re-exports it. */
   maps: ["scripts/compile-maps.ts"],
   /** The statistics areas' shared `agrees`. */
   statistics: ["src/statistics/generate-compiled.ts"],
@@ -75,24 +27,6 @@ export const checkers = {
     "collections/src/families/work.ts",
   ],
 } as const;
-
-/** The workspace packages the checks load (and so the dists, with what those import, that a
- *  verdict depends on); a dependency of this package outside them, such as plausible, cannot
- *  change one. tests/verdict-inputs.test.ts holds the checks' module graph to it. */
-export const CHECKED_ON = ["@notatio/engine", "@notatio/structures", "@notatio/residues"];
-
-// Manifest's dist is built from every package's records, so any record edit would void every
-// verdict. The checks run on a bare engine and structures' interpreter, which read none of that
-// data; only manifest's code (src, minus what the build generates) reaches them, through boxes.
-export const verdictsFor = (step: string, roots: readonly string[]) =>
-  verdictCache(step, {
-    dir: at(""),
-    roots: [...roots.map(at), at("../../../manifest/src")],
-    // Generated outputs are what the steps write, not what the checks read.
-    skip: (path) => path.endsWith("/manifest/src/generated") || /\.generated\.(js|ts)$/.test(path),
-    omitDists: ["@notatio/manifest"],
-    imports: CHECKED_ON,
-  });
 
 let familySource: string | undefined;
 

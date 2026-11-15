@@ -205,20 +205,36 @@ function expLogGamma(ce: ComputeEngine, json: unknown): unknown {
   return [head, ...children];
 }
 
-const denestSqrt = (ce: ComputeEngine, e: Expression): Expression => ce.box(denestSqrtJson(e.json) as never).evaluate();
+/** `e` with every denestable `Sqrt` rewritten, or `e` itself when none is. */
+const denestSqrt = (ce: ComputeEngine, e: Expression): Expression => {
+  const json = e.json;
+  const denested = denestSqrtJson(json);
+  return JSON.stringify(denested) === JSON.stringify(json) ? e : ce.box(denested as never).evaluate();
+};
 
+/**
+ * A `simplify()` of a large expression takes about half a second, so each pass simplifies only
+ * what it changed: `simplified` says `e` is already a `simplify()` result.
+ */
 export function fullSimplify(ce: ComputeEngine, expr: Expression): Expression {
   let e = expr.simplify();
-  e = gammaRatio(ce, e).simplify();
-  e = hyperbolicPythagoras(e, ce);
-  e = arctanSum(ce, e);
-  e = denestSqrt(ce, e).simplify();
+  let simplified = true;
+  const pass = (next: Expression, simplifies: boolean): void => {
+    if (next === e) return;
+    e = simplifies ? next.simplify() : next;
+    simplified = simplifies;
+  };
+  pass(gammaRatio(ce, e), true);
+  pass(hyperbolicPythagoras(e, ce), false);
+  pass(arctanSum(ce, e), false);
+  pass(denestSqrt(ce, e), true);
   // Re-boxed only when the rewrite fired: boxing again would renormalize an untouched tree.
   const rewritten = expLogGamma(ce, e.json);
-  if (JSON.stringify(rewritten) !== JSON.stringify(e.json)) e = ce.box(rewritten as never).evaluate();
-  // ExpToTrig only where it shortens: e^x alone is no simpler as cosh x + sinh x.
-  const trig = (evaluateExpToTrig(ce, [e]) ?? e).simplify();
-  return leafCount(trig.json) <= leafCount(e.json) ? trig : e.simplify();
+  if (JSON.stringify(rewritten) !== JSON.stringify(e.json)) pass(ce.box(rewritten as never).evaluate(), false);
+  // ExpToTrig (which simplifies) only where it shortens: e^x alone is no simpler as cosh x + sinh x.
+  const trig = evaluateExpToTrig(ce, [e]);
+  if (trig !== undefined && leafCount(trig.json) <= leafCount(e.json)) return trig;
+  return simplified ? e : e.simplify();
 }
 
 export function declareFullSimplify(ce: ComputeEngine): void {

@@ -36,5 +36,5 @@ export async function compileArea(
   run.verdicts.save();
   console.log(`${entries.length} of ${definitions.length} definitions compiled`);
   for (const signature of disagreed)
-    console.log(`${signature}: compiled code disagreed with the interpreter; left interpreted`);
+    console.log(`${signature}: no fresh verdict that the compiled code agrees; left interpreted`);
 }

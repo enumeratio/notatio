@@ -5,6 +5,7 @@ qpochhammer-2-3-3	N[QPochhammer[2, 3, 3]]	-85.	N\left[(2;3)_3\right]	-85.
 qpochhammer-1-2-1-2-3	N[QPochhammer[Rational[1, 2], Rational[1, 2], 3]]	0.328125	N\left[\left(\frac{1}{2};\frac{1}{2}\right)_3\right]	0.328125	
 qpochhammer-3-2-4	N[QPochhammer[3, 2, 4]]	2530.	N\left[(3;2)_4\right]	2530.	
 qpochhammer-1-3-2	N[QPochhammer[-1, 3, 2]]	8.	N\left[(-1;3)_2\right]	8.	
+a-finite-order-of-1e5-stays-unevaluated	QPochhammer[0.5, 0.9, 100000]				
 the-infinite-product-euler-s-function-at-q-frac	QPochhammer[0.5, 0.5, Infinity]	0.2887880950866024	(0.5;0.5)_{\infty }	0.288788	
 qpochhammer-3-5-9	QPochhammer[3, 5, 9]	-175258163137268414822846915072	(3;5)_9	-175258163137268414822846915072	
 functionexpand-qpochhammer-a-2-1	FunctionExpand[QPochhammer[a, 2, 1]]	1 - a	\text{FunctionExpand}\left[(a;2)_1\right]	1-a	
