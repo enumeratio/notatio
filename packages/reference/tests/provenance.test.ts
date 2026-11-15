@@ -18,6 +18,15 @@ const bare = new ComputeEngine();
 const ours = declaredEngine();
 const ledger = provenanceLedger(bare, ours, entries);
 
+/**
+ * Heads compute-engine answers on every call form of their own that we redeclare on purpose, and which no
+ * call of theirs tells apart: the call stays inert on both engines and the difference shows only when
+ * another head reads it. `IntegerPartitions` is the typed, lazy family (the `integer_partition` carrier,
+ * fast counts, the FindStat statistics other heads build on); `At(IntegerPartitions(6), 1)` is
+ * `IntegerPartition({6})` here and `{6}` in compute-engine.
+ */
+const KEPT_FOR_THEIR_TYPES = ["IntegerPartitions"];
+
 test("every documented head's provenance matches what its entry claims", () => {
   // The claim is the `library` field; the answer is what a bare engine actually does with
   // the head. `StirlingS1` sat documented as ours long after it was compute-engine's, and
@@ -27,7 +36,7 @@ test("every documented head's provenance matches what its entry claims", () => {
     row.provenance === "compute-engine" && row.declared !== undefined
       ? `compute-engine now ships ${row.name}: delete our redeclaration in ${row.declared}`
       : `${row.name}: computed ${row.provenance}, declared ${row.declared ?? "compute-engine"}`;
-  expect(ledger.filter((row) => !row.agrees).map(why)).toEqual([]);
+  expect(ledger.filter((row) => !row.agrees && !KEPT_FOR_THEIR_TYPES.includes(row.name)).map(why)).toEqual([]);
 });
 
 test("the catalogue is mostly compute-engine's, and we know which part is not", () => {
