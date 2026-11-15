@@ -1,9 +1,8 @@
 // Runs one compile step's cross-checks across processes. The checks are the cost and need no
-// shared state, so a step splits its items by key into shards (balanced by what each cost last
-// time), each a child of the step's own
+// shared state, so a step splits its items by key into shards, each a child of the step's own
 // script (`node script --shard i n out`) that hands back its result and the verdicts it
-// learned; the parent folds them into the one memo and saves it. The memo is a single file
-// whatever the shard count, so a run with another count (local 1, CI 3) reuses the same answers.
+// learned; the parent folds them together and saves them. The snapshot is a single file
+// whatever the shard count, so a run with another count (local 1, CI 3) gives the same rows.
 
 import { type ChildProcess, spawn } from "node:child_process";
 import { createHash } from "node:crypto";
@@ -11,7 +10,7 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { recheckAll, type SharedVerdicts, verdictsFor } from "./verdicts.ts";
+import { type Share, Snapshot } from "./verdict-snapshot.ts";
 
 /** Shards per step: COMPILE_SHARDS, else 3 on CI and 1 elsewhere. */
 export const SHARDS = Number(process.env.COMPILE_SHARDS) || (process.env.CI ? 3 : 1);
@@ -21,7 +20,7 @@ const hashShard = (key: string, shards: number): number =>
   createHash("sha256").update(key).digest().readUInt32BE(0) % shards;
 
 /**
- * Each key's shard. With recorded costs (ms per key, from the memo): longest first, each to the
+ * Each key's shard. With recorded costs (ms per key): longest first, each to the
  * least loaded shard, so the dear definitions can't pile into one (a key with no record counts
  * the median). With none recorded (a cold first run) the hash split. Equal inputs give an equal
  * split, which every process of a run computes for itself.
@@ -47,7 +46,7 @@ export function assignShards(
 
 interface Shard<T> {
   readonly result: T;
-  readonly share: ReturnType<SharedVerdicts["share"]>;
+  readonly share: Share;
 }
 
 /**
@@ -60,11 +59,10 @@ export async function sharded<T>(
   step: string,
   checks: readonly string[],
   keys: readonly string[],
-  work: (verdicts: SharedVerdicts, mine: (key: string) => boolean) => T,
-): Promise<{ results: T[]; verdicts: SharedVerdicts } | undefined> {
-  const verdicts = verdictsFor(step, checks);
-  verdicts.plan(keys);
-  const split = (shards: number) => assignShards(keys, shards, verdicts.costs());
+  work: (verdicts: Snapshot, mine: (key: string) => boolean) => T,
+): Promise<{ results: T[]; verdicts: Snapshot } | undefined> {
+  const verdicts = new Snapshot(step, checks);
+  const split = (shards: number) => assignShards(keys, shards, {});
   if (process.argv[2] === "--shard") {
     const [, , , shard, shards, out] = process.argv;
     const assigned = split(Number(shards));
@@ -72,7 +70,7 @@ export async function sharded<T>(
     writeFileSync(out!, JSON.stringify({ result, share: verdicts.share() } satisfies Shard<T>));
     return undefined;
   }
-  if (SHARDS === 1) return { results: [verdicts.settle(() => work(verdicts, () => true))], verdicts };
+  if (SHARDS === 1) return { results: [work(verdicts, () => true)], verdicts };
 
   const children = new Set<ChildProcess>();
   const scratch = mkdtempSync(join(tmpdir(), "compile-shards-"));
@@ -94,14 +92,7 @@ export async function sharded<T>(
     });
   const runAll = () => Promise.all(Array.from({ length: SHARDS }, (_, i) => run(i)));
   try {
-    let shards = await runAll();
-    // A sampled re-check differed: the whole step is checked again, in every shard.
-    if (shards.some((s) => s.share.diverged) && !recheckAll()) {
-      console.log(`${step}: a sampled re-check differed; re-checking everything`);
-      process.env.RECHECK_ALL = "1";
-      verdicts.escalate();
-      shards = await runAll();
-    }
+    const shards = await runAll();
     for (const { share } of shards) verdicts.adopt(share);
     return { results: shards.map((s) => s.result), verdicts };
   } finally {

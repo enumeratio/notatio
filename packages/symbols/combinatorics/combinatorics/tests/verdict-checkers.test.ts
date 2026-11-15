@@ -1,5 +1,5 @@
-// The verdict cache leaves manifest's record-derived dist out of its key (scripts/verdicts.ts),
-// which holds only while the cross-checks run on a bare engine with nothing declared.
+// A verdict in the snapshot (scripts/verdict-snapshot.ts) is reproducible only while the
+// cross-checks run on a bare engine with nothing declared, so no record or declaration reaches it.
 
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vite-plus/test";
