@@ -35,7 +35,7 @@ pythagorean-identity-1-tan-2-x-sec-2-x	enumeratio_equal((1 + (S(tan((S(pi) / 6))
 sec-1-over-10-times-pi	sec((Rational(1, 10) * pi))	1/sqrt(sqrt(5)/8 + 5/8)	
 sec-3-over-10-times-pi	sec((Rational(3, 10) * pi))	1/sqrt(5/8 - sqrt(5)/8)	
 n-2-minus-sec-1-over-2-pow-2-times-sec-1	N(((2 + (-(S(sec(Rational(1, 2)))**2))) * sec(1)), 30)	1.29844641040952483688376649885	
-n-2-times-sec-1-times-sec-1-over-2-pow-2-plus	N(((2 * sec(1) * (S(sec(Rational(1, 2)))**2)) + (((-2 * (S(sec(Rational(1, 2)))**2)) + (S(sec(Rational(1, 2)))**4)) * (S(sec(1))**2)) + (-(S(sec(Rational(1, 2)))**4))), 30)	0.e-165	
+n-2-times-sec-1-times-sec-1-over-2-pow-2-plus	N(((2 * sec(1) * (S(sec(Rational(1, 2)))**2)) + (((-2 * (S(sec(Rational(1, 2)))**2)) + (S(sec(Rational(1, 2)))**4)) * (S(sec(1))**2)) + (-(S(sec(Rational(1, 2)))**4))), 30)		
 n-sec-1-over-2-plus-1-over-2-times-pi-pow-2	N((S(sec((Rational(1, 2) + (Rational(1, 2) * pi))))**2), 30)	4.35068529934004282155357351931	
 n-2-minus-sec-2-pow-2-times-sec-4	N(((2 + (-(S(sec(2))**2))) * sec(4)), 30)	5.77439920404191761241276760432	
 a-pole-cos-pi-2-0	sec((S(pi) / 2))	zoo	

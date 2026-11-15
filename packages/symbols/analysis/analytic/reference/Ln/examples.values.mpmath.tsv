@@ -13,7 +13,7 @@ a-negative-float-gives-the-principal-complex	log(-2.5)	(0.9162907318741550651835
 threads-element-wise-over-a-list	[log(1), log(2.1), log(3.1), log(4.1)]	[mpf('0.0'), mpf('0.741937344729377354776816987592111'), mpf('1.13140211149110059056208963437813'), mpf('1.41098697371026203319721877687743')]	
 an-integer-power-is-pulled-out-ln-1000-3-ln-10	log(1000)	6.90775527898213705205397436405	
 ln-exponentiale-pow-3	log(enumeratio_pow(e, 3))	3.0	
-ln-positiveinfinity	log(inf)		
+ln-positiveinfinity	log(inf)	+inf	
 ln-z-to-infty-and-its-real-part-goes-to-infty-ln			
 ln-i-i-pi-2-exactly	log(mpc(0,1))	(0.0 + 1.57079632679489661923132169164j)	
 a-unit-fraction-becomes-a-negated-logarithm-ln	log((mpf(1)/2))	-0.693147180559945309417232121458	

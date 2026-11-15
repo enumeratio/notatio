@@ -14,8 +14,8 @@ exp-ln-2	exp(log(2))	2.0
 exp-ln-neg-1	exp(log(-1))	(-1.0 + 1.69568553207377992879174029388e-31j)
 inverse-of-ln-symbolically		
 exp-ln-of-a-complex-argument-is-that-argument	exp(log(mpc(1, 2)))	(1.0 + 2.0j)
-exp-negativeinfinity	exp(-inf)	
-exp-positiveinfinity	exp(inf)	
+exp-negativeinfinity	exp(-inf)	0.0
+exp-positiveinfinity	exp(inf)	+inf
 element-wise-over-a-matrix-not-the-matrix	[[exp(1), exp((mpc(0,1) * (mpmathify(pi) / 2)))], [exp(0), exp(1)]]	[[mpf('2.71828182845904523536028747135281'), mpc(real='8.47842766036889964395870146938683e-32', imag='1.0')], [mpf('1.0'), mpf('2.71828182845904523536028747135281')]]
 interval-arithmetic-exp-1-ln-2-e-1-2		
 uncertainty-propagation-e-2-pm-0-01-approx-7-389		

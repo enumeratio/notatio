@@ -32,7 +32,7 @@ functionmeromorphic-csc-x-x
 reciprocal-of-sin-csc-x-frac-1-sin-x	enumeratio_equal(csc((S(pi) / 6)), (S(1) / sin((S(pi) / 6))))	True	
 csc-1-over-8-times-pi	csc((Rational(1, 8) * pi))	1/sqrt(1/2 - sqrt(2)/4)	
 csc-3-over-10-times-pi	csc((Rational(3, 10) * pi))	1/(1/4 + sqrt(5)/4)	
-neg-2-times-neg-2-plus-2-times-csc-1-over-2-pow	((-2 * (-2 + (2 * (S(csc(Rational(1, 2)))**2))) * (S(csc(1))**2) * (S(csc(Rational(1, 2)))**4)) + (S(csc(Rational(1, 2)))**8))	(4 - 4*csc(1/2)**2)*csc(1/2)**4*csc(1)**2 + csc(1/2)**8	
+neg-2-times-neg-2-plus-2-times-csc-1-over-2-pow	((-2 * (-2 + (2 * (S(csc(Rational(1, 2)))**2))) * (S(csc(1))**2) * (S(csc(Rational(1, 2)))**4)) + (S(csc(Rational(1, 2)))**8))		
 n-4-times-neg-1-plus-csc-1-over-2-pow-2-times	N((4 * (-1 + (S(csc(Rational(1, 2)))**2)) * (S(csc(1))**2)), 30)	18.9284625738935580106428544233	
 n-csc-1-over-2-plus-1-over-2-times-pi-pow-2	N((S(csc((Rational(1, 2) + (Rational(1, 2) * pi))))**2), 30)	1.29844641040952483688376649885	
 n-4-times-neg-1-plus-csc-2-pow-2-times-csc-4-pow	N((4 * (-1 + (S(csc(2))**2)) * (S(csc(4))**2)), 30)	1.46277035971197344609670179082	

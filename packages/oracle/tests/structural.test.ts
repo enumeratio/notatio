@@ -305,3 +305,12 @@ test("a complex answer is compared by its whole size, not part by part", () => {
   expect(compareTrees({ re: 1, im: 2 }, { re: 1, im: 2.0001 })).toBe("disagree");
   expect(compareTrees(1, { re: 1, im: 1e-5 })).toBe("disagree");
 });
+
+test("a tiny value is held to its own digits; only a reference of exactly 0 keeps the floor of 1", () => {
+  expect(compare("2.15e-48", "1.94e-48")).toBe("disagree");
+  expect(compare("0", "1.7e-31")).toBe("disagree"); // a sentinel 0 is not a tiny value
+  expect(compare("4.8e-16", "0")).toBe("agree"); // noise beside an exact 0
+  expect(compareTrees({ re: 1.9e-55, im: 0 }, { re: 1.9e-55, im: 1.4e-55 })).toBe("disagree");
+  expect(compareTrees(1e-16, 0)).toBe("agree");
+  expect(compareTrees(0, 1e-16)).toBe("disagree");
+});

@@ -37,8 +37,8 @@ export {
   Undecided,
   symbolicAgreementSource,
 } from "./symbolic.ts";
+export { agreementBound } from "./bound.ts";
 export {
-  agreementBound,
   asNumber,
   compare,
   compareCombination,

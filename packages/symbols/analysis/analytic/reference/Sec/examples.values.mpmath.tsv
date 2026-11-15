@@ -35,7 +35,7 @@ pythagorean-identity-1-tan-2-x-sec-2-x	almosteq((1 + enumeratio_pow(tan((mpmathi
 sec-1-over-10-times-pi	sec(((mpf(1)/10) * pi))	1.0514622242382672120513381697	
 sec-3-over-10-times-pi	sec(((mpf(3)/10) * pi))	1.70130161670407986436308099413	
 n-2-minus-sec-1-over-2-pow-2-times-sec-1	(((2 + (-enumeratio_pow(sec((mpf(1)/2)), 2))) * sec(1)))	1.29844641040952483688376649885	
-n-2-times-sec-1-times-sec-1-over-2-pow-2-plus	(((2 * sec(1) * enumeratio_pow(sec((mpf(1)/2)), 2)) + (((-2 * enumeratio_pow(sec((mpf(1)/2)), 2)) + enumeratio_pow(sec((mpf(1)/2)), 4)) * enumeratio_pow(sec(1), 2)) + (-enumeratio_pow(sec((mpf(1)/2)), 4))))	5.91645678915758854058796423962e-31	
+n-2-times-sec-1-times-sec-1-over-2-pow-2-plus	(((2 * sec(1) * enumeratio_pow(sec((mpf(1)/2)), 2)) + (((-2 * enumeratio_pow(sec((mpf(1)/2)), 2)) + enumeratio_pow(sec((mpf(1)/2)), 4)) * enumeratio_pow(sec(1), 2)) + (-enumeratio_pow(sec((mpf(1)/2)), 4))))		
 n-sec-1-over-2-plus-1-over-2-times-pi-pow-2	(enumeratio_pow(sec(((mpf(1)/2) + ((mpf(1)/2) * pi))), 2))	4.35068529934004282155357351931	
 n-2-minus-sec-2-pow-2-times-sec-4	(((2 + (-enumeratio_pow(sec(2), 2))) * sec(4)))	5.77439920404191761241276760432	
 a-pole-cos-pi-2-0	sec((mpmathify(pi) / 2))	1.17946397617372560788321902958e+31	inconclusive

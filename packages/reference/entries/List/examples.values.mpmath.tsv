@@ -1,5 +1,5 @@
 id	in	out
-2-times-list-1-2-3	enumeratio_broadcast(lambda _a0, _a1: (_a0 * _a1), 2, [1, 2, 3])	
+2-times-list-1-2-3	enumeratio_broadcast(lambda _a0, _a1: (_a0 * _a1), 2, [1, 2, 3])	[2, 4, 6]
 a-times-list-list-1-2-list-3-4		
 outer-f-list-1-2-list-a-b-c		
 prepend-list-1-2-3-list-a-b-c		

@@ -1,3 +1,3 @@
-id	section	role	expr	expected	known	tolerance	source	caption	rust.kind	rust.note
-sin-of-pi	Basic		[Sin, Pi]	0				$\sin\pi = 0$	precision	The double π is not π: the function of it is about 1e-16 (or a huge finite number at a pole), not the exact value; the lane compares relative to the answer's size, so a zero can't agree.
-pi-to-20-digits	Basic		[N, Pi, 20]	{num: "3.1415926535897932385"}	{num: "3.141592653589793238462643"}	1e-18	mpmath 1.3.0 pi	To 20 digits		
+id	section	role	expr	expected	known	tolerance	source	caption	mpmath.kind	mpmath.note	rust.kind	rust.note
+sin-of-pi	Basic		[Sin, Pi]	0				$\sin\pi = 0$	precision	The exact value is 0 and ours answers 0 (so does every other entry of a list). mpmath computes at 30 digits, so its π, its Bernoulli numbers or its terms are rounded and the result is noise of order 1e-31 (scaled by the argument): the same input at 60 digits gives order 1e-61. Noise against an exact 0 is not a value, and the comparison is relative to the answer's size, so a 0 can't agree with it.	precision	The double π is not π: the function of it is about 1e-16 (or a huge finite number at a pole), not the exact value; the lane compares relative to the answer's size, so a zero can't agree.
+pi-to-20-digits	Basic		[N, Pi, 20]	{num: "3.1415926535897932385"}	{num: "3.141592653589793238462643"}	1e-18	mpmath 1.3.0 pi	To 20 digits				

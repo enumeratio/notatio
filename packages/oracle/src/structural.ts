@@ -15,6 +15,7 @@ import { CARRIER_NAMES, CARRIER_PARAMS } from "./carrier-names-data.ts";
 import { DEFINED_NAMES } from "./defined-names-data.ts";
 import type { MathJSON } from "./emit.ts";
 import type { Verdict } from "./compare.ts";
+import { agreementBound } from "./bound.ts";
 
 /**
  * A real as `mantissa × 10^exponent` (1 <= |mantissa| < 10, or 0), for one a double cannot hold
@@ -329,7 +330,7 @@ function reduceGraph(vertices: MathJSON, edgeSpec: MathJSON, evaluate: (expr: Ma
 }
 
 const close = (a: number, b: number, tolerance: number): boolean =>
-  Number.isNaN(a) && Number.isNaN(b) ? true : Math.abs(a - b) <= tolerance * Math.max(1, Math.abs(a), Math.abs(b));
+  Number.isNaN(a) && Number.isNaN(b) ? true : Math.abs(a - b) <= agreementBound(tolerance, Math.abs(a), Math.abs(b));
 
 const isComplex = (leaf: Leaf): leaf is { re: number; im: number } =>
   typeof leaf === "object" && leaf !== null && "re" in leaf;
@@ -354,7 +355,7 @@ function approximatelyEqual(a: Approximate | number, b: Approximate | number, to
   const absolute = Math.max(x.absolute ?? 0, y.absolute ?? 0);
   const [dx, dy] = [toDouble(x), toDouble(y)];
   if (Number.isFinite(dx) && Number.isFinite(dy)) {
-    return Math.abs(dx - dy) <= Math.max(absolute, relative * Math.max(1, Math.abs(dx), Math.abs(dy)));
+    return Math.abs(dx - dy) <= Math.max(absolute, agreementBound(relative, Math.abs(dx), Math.abs(dy)));
   }
   if (x.mantissa * y.mantissa <= 0 || Math.abs(x.exponent - y.exponent) > 1) return false;
   const shift = 10 ** (x.exponent - y.exponent);
@@ -396,9 +397,9 @@ export function compareTrees(ours: Tree, theirs: Tree, tolerance = 1e-9): Verdic
     // By the size of the whole number: a real answer printed with roundoff noise in the
     // imaginary part (4.2e22 + 4e-7i) is that real.
     const finite = [ca.re, ca.im, cb.re, cb.im].every(Number.isFinite);
-    const size = Math.max(1, Math.hypot(ca.re, ca.im), Math.hypot(cb.re, cb.im));
     const same = finite
-      ? Math.hypot(ca.re - cb.re, ca.im - cb.im) <= tolerance * size
+      ? Math.hypot(ca.re - cb.re, ca.im - cb.im) <=
+        agreementBound(tolerance, Math.hypot(ca.re, ca.im), Math.hypot(cb.re, cb.im))
       : close(ca.re, cb.re, tolerance) && close(ca.im, cb.im, tolerance);
     return same ? "agree" : "disagree";
   }
