@@ -18,6 +18,8 @@ n-hypergeometric0f1regularized-4-0-50	N[Hypergeometric0F1Regularized[-4, 0], 50]
 n-hypergeometric0f1regularized-0-0-2	N[Hypergeometric0F1Regularized[0, 0], 2]	0		N[\, _0\tilde{F}_1(;0;0),2]	0	
 n-hypergeometric0f1regularized-0-1-pole-of-b	N[Hypergeometric0F1Regularized[0, 1]]					
 a-tiny-value-keeps-its-imaginary-part	Hypergeometric0F1Regularized[100, Complex[1*^-8, 1*^-8]]					
+a-value-below-the-double-range-stays-unevaluated	Hypergeometric0F1Regularized[200, 1.5]					
+a-small-value-inside-the-double-range	Hypergeometric0F1Regularized[150, 1.5]					
 n-hypergeometric0f1regularized-0-neg-48-50	N[Hypergeometric0F1Regularized[0, -48], 50]	-0.75356407978144308380327864211537660841009027837077692848127362590882490312817`50.	-0.75356407978144308380327864211537660841009027837078	N[\, _0\tilde{F}_1(;0;-48),50]	-0.75356407978144308380327864211537660841009027837078	
 n-hypergeometric0f1regularized-4-0-25	N[Hypergeometric0F1Regularized[4, 0], 25]	0.16666666666666666666666666666666666667`25.	0.1666666666666666666666667	N[\, _0\tilde{F}_1(;4;0),25]	0.1666666666666666666666667	
 matrixfunction-function	MatrixFunction[Function[Hypergeometric0F1Regularized[Rational[1, 2], Slot[1]]], List[List[Rational[1, 2], 0], List[0, Rational[1, 2]]]]	{{BesselI[-1/2, Sqrt[2]]/2^(1/4), 0}, {0, BesselI[-1/2, Sqrt[2]]/2^(1/4)}}		\text{MatrixFunction}\left[\, _0\tilde{F}_1\left(;\frac{1}{2};\text{$\#$1}\right)\&,\left( \begin{array}{cc}  \frac{1}{2} & 0 \\  0 & \frac{1}{2} \\ \end{array} \right)\right]	\left( \begin{array}{cc}  \frac{I_{-\frac{1}{2}}\left(\sqrt{2}\right)}{\sqrt[4]{2}} & 0 \\  0 & \frac{I_{-\frac{1}{2}}\left(\sqrt{2}\right)}{\sqrt[4]{2}} \\ \end{array} \right)	

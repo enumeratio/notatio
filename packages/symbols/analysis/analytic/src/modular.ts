@@ -47,6 +47,13 @@ import {
 // before trusting them on points where direct evaluation is imprecise.
 
 const MAX_REDUCE_STEPS = 200;
+
+/**
+ * The largest weight `EisensteinG` evaluates. The native E_k sums a q-series whose cost grows
+ * steeply with k (k = 2000 takes 5 s, k = 1e5 over a minute), and past k = 300 it already
+ * declines at most τ.
+ */
+const MAX_EISENSTEIN_WEIGHT = 400;
 const REDUCE_EPS = 1e-12;
 
 /**
@@ -230,7 +237,7 @@ export function declareModular(ce: ComputeEngine): void {
     evaluate: (ops: readonly Expression[], options: EvalOptions) => {
       const [k, tau] = ops;
       if (k === undefined || tau === undefined) return undefined;
-      if (!isRealInt(k) || k.re < 4 || k.re % 2 !== 0) return undefined;
+      if (!isRealInt(k) || k.re < 4 || k.re % 2 !== 0 || k.re > MAX_EISENSTEIN_WEIGHT) return undefined;
       if (!wantsNumber(ops, options) || !isFiniteNum(tau)) return undefined;
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (tauTooFarForDouble(cx(tau.re, tau.im))) return undefined;

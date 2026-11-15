@@ -21,6 +21,11 @@ partial-a-b-a-b-b-a-b-psi-a-psi-a-b-today-the	D[Beta[a, b], a]	Beta[a, b]*(PolyG
 a-nonpositive-integer-argument-is-a-pole-of-the	Beta[-1, 2]	ComplexInfinity		B(-1,2)	\text{ComplexInfinity}
 beta-at-two-poles-compares-equal	(Beta[-2, -1] == Beta[0, 2])				
 a-pole-of-gamma-over-a-finite-denominator	Beta[-2, Complex[0.3, 0.4]]				
+gamma-pole-in-the-denominator	Beta[-2.5, 0.5]				
+gamma-pole-in-the-denominator-zero-sum	Beta[0.5, -0.5]				
+gamma-pole-in-the-denominator-minus-one	Beta[1.5, -2.5]				
+gamma-pole-in-the-denominator-rationals	N[Beta[Rational[-5, 2], Rational[1, 2]]]				
+a-negative-operand-off-the-poles	Beta[-2.5, 0.75]				
 beta-1-over-2-1-over-2-times-beta-1-1-over-2	Times[Beta[Rational[1, 2], Rational[1, 2]], Beta[1, Rational[1, 2]]]	2*Pi		B\left(\frac{1}{2},\frac{1}{2}\right) B\left(1,\frac{1}{2}\right)	2 \pi
 beta-1-over-2-1-over-2-times-beta-1-2	Times[Beta[Rational[1, 2], Rational[1, 2]], Beta[1, 2]]	Pi/2		B\left(\frac{1}{2},\frac{1}{2}\right) B(1,2)	\frac{\pi }{2}
 beta-of-positive-infinity-0-is-indeterminate	Beta[Infinity, 0]	ComplexInfinity		B(\infty ,0)	\text{ComplexInfinity}
