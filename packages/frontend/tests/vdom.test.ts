@@ -1,7 +1,8 @@
 import { parseExpression } from "@notatio/formats/expression";
 import { expect, test } from "vite-plus/test";
 import { renderingOf, scopeOf } from "../src/symbols.ts";
-import { type StructuralNode, structuralOf, tagOf, toVNode, vdomOf } from "../src/vdom.ts";
+import { COMPACT, ENVIRONMENTS, PRINT } from "../src/environment.ts";
+import { type StructuralNode, structuralOf, tagOf, toVNode, treeOf, vdomOf } from "../src/vdom.ts";
 
 /** A vnode factory that keeps everything, for looking at. */
 const h = (tag: string, props: Readonly<Record<string, string>>, children: readonly unknown[]) => ({
@@ -139,4 +140,69 @@ test("a Cell's and a Show's options reach the attributes on both routes", () => 
   expect(cell["in-form"]).toBe("input");
   expect(cell.expect).toBe("2");
   expect(cell.expected).toBeUndefined();
+});
+
+// `treeOf`: reduce for the environment, scope the controls, write verbatim ------------
+
+const walk = (node: StructuralNode | string, visit: (n: StructuralNode) => void): void => {
+  if (typeof node === "string") return;
+  visit(node);
+  for (const c of node.children ?? []) walk(c, visit);
+};
+const tagsOf = (node: StructuralNode): string[] => {
+  const tags: string[] = [];
+  walk(node, (n) => tags.push(n.tag));
+  return tags;
+};
+
+const PLOT_AND_SLIDER = "Row([Plot(Sin(k * x), (x, 0, 10)), Slider((k, 1), (1, 5))])";
+
+test("treeOf under a compact environment scopes the controls: a dynamic module over a column (a grid box), the plot reading _k", () => {
+  const tree = treeOf(parseExpression(PLOT_AND_SLIDER).json, COMPACT);
+  expect(tree.tag).toBe(tagOf("DynamicModule"));
+  const [child] = tree.children ?? [];
+  expect(typeof child === "string" ? child : child?.tag).toBe("grid-box");
+  let plot: StructuralNode | undefined;
+  walk(tree, (n) => {
+    if (n.tag === "notatio-plot") plot = n;
+  });
+  expect(JSON.stringify(plot)).toContain("_k");
+});
+
+test("treeOf under print leaves no dynamic module and no control", () => {
+  const tags = tagsOf(treeOf(parseExpression(PLOT_AND_SLIDER).json, PRINT));
+  expect(tags).not.toContain(tagOf("DynamicModule"));
+  expect(tags.filter((t) => /slider|control|dynamic/.test(t))).toEqual([]);
+});
+
+test("treeOf stops at a Cell under every environment: its value is the source as written", () => {
+  const source = parseExpression("Cell(Row([Slider((k, 2), (0, 5)), Dynamic(k^2)]))").json;
+  const written = structuralOf(source);
+  expect(written.tag).toBe("notatio-cell");
+  for (const env of ENVIRONMENTS) {
+    const tree = treeOf(source, env);
+    expect(tree.tag).toBe("notatio-cell");
+    expect(tree.attributes.value).toBe(written.attributes.value);
+    expect(tagsOf(tree)).not.toContain(tagOf("DynamicModule"));
+  }
+});
+
+test("vdomOf reduces for its environment: a dynamic module under compact, no control under print", () => {
+  const json = parseExpression(PLOT_AND_SLIDER).json;
+  const compact = vdomOf(json, COMPACT);
+  expect(compact.tag).toBe(tagOf("DynamicModule"));
+  expect(JSON.stringify(compact)).toContain("slider-box");
+  const printed = JSON.stringify(vdomOf(json, PRINT));
+  expect(printed).not.toContain("dynamic-module-box");
+  expect(printed).not.toContain("slider-box");
+});
+
+test("vdomOf under a Cell stops at it, as treeOf does", () => {
+  const source = parseExpression("Cell(Row([Slider((k, 2), (0, 5)), Dynamic(k^2)]))").json;
+  for (const env of ENVIRONMENTS) expect(vdomOf(source, env).tag).toBe("notatio-cell");
+});
+
+test("treeOf of an expression with no control is structuralOf", () => {
+  const json = parseExpression("Sin(x)^2 + Binomial(n, 2)").json;
+  for (const env of ENVIRONMENTS) expect(treeOf(json, env)).toEqual(structuralOf(json));
 });
