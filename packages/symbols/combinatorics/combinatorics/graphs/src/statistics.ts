@@ -213,7 +213,11 @@ const isClique = (mask: MathJSON): MathJSON =>
 const overMasks = (body: MathJSON): MathJSON => floored(sumOver(masks, body, "m"));
 const largestMask = (member: MathJSON): MathJSON => ["Max", forEach(masks, times(one(member), total("m")), "m")];
 
-/** Each subset's connection, by mask + 1: 1 where the vertices induce a connected subgraph. */
+/**
+ * Each subset's connection, by mask + 1: 1 where the vertices induce a connected subgraph. The fold reads
+ * the vertex count as the subject's first entry, not as the bound `n`: a lazy `Range` over a bound
+ * parameter stays unevaluated inside the fold under the bindings of `withMasks` in compute-engine's interpreter.
+ */
 const connectedMasks: MathJSON = typedFolding(
   [
     "Join",
@@ -229,7 +233,7 @@ const connectedMasks: MathJSON = typedFolding(
           1,
           floored(
             sumOver(
-              vertices,
+              ["Range", 1, at(1)],
               [
                 "If",
                 hasBit("b", "v"),
@@ -249,7 +253,7 @@ const connectedMasks: MathJSON = typedFolding(
   "a",
   "b",
   ["List", 0],
-  ["Range", 1, subtract(["Power", 2, "n"], 1)],
+  ["Range", 1, subtract(["Power", 2, at(1)], 1)],
 );
 /** The lowest vertex of the subset `mask`. */
 const lowest = (mask: MathJSON): MathJSON => [

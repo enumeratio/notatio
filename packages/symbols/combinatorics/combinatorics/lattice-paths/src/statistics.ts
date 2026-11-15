@@ -1790,28 +1790,21 @@ const socleQuotientInjectiveDimension: MathJSON = bindList(
     "Max",
     [
       "Join",
+      // The lambda's own parameter is `vertex`: an alias `Apply` of it in a `Map` leaves a lazy collection over `socleVertices` unevaluated.
       forEach(
         vertexIndices,
-        bindList(
-          "vertex",
-          "v",
-          [
-            "If",
-            equals(count("socleVertices", equals("y", "vertex"), "y"), 0),
-            bindList(
-              "reach",
-              [
-                "Min",
-                ["Join", where("socleVertices", atLeastValue("y", "vertex"), "y"), ["List", add(vertexCount, 1)]],
-              ],
-              injectiveDimension(subtract("vertex", 1), ["Min", at("vertex", "series"), subtract("reach", "vertex")]),
-              "integer",
-            ),
-            0,
-          ],
-          "integer",
-        ),
-        "v",
+        [
+          "If",
+          equals(count("socleVertices", equals("y", "vertex"), "y"), 0),
+          bindList(
+            "reach",
+            ["Min", ["Join", where("socleVertices", atLeastValue("y", "vertex"), "y"), ["List", add(vertexCount, 1)]]],
+            injectiveDimension(subtract("vertex", 1), ["Min", at("vertex", "series"), subtract("reach", "vertex")]),
+            "integer",
+          ),
+          0,
+        ],
+        "vertex",
       ),
       ["List", 0],
     ],
@@ -3358,20 +3351,16 @@ export const DYCK_STATISTICS: readonly Definition[] = [
         vertexIndices,
         [
           "Max",
+          // The lambda's own parameter is `size`: an alias `Apply` of it in a `Map` leaves the fold's lazy collections over `series` unevaluated.
           forEach(
             moduleLengths,
             bindList(
-              "size",
-              "y",
-              bindList(
-                "dominant",
-                dominantDimensionOfModule(subtract("v", 1), "size"),
-                ["If", less("dominant", vertexCount), "dominant", 0],
-                "integer",
-              ),
+              "dominant",
+              dominantDimensionOfModule(subtract("v", 1), "size"),
+              ["If", less("dominant", vertexCount), "dominant", 0],
               "integer",
             ),
-            "y",
+            "size",
           ),
         ],
         "v",
