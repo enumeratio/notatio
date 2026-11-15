@@ -43,16 +43,10 @@ test("closed form: Li3(1/2) and Li2(2)", () => {
 });
 
 // The plain-symbols case (a/b/c building the nested fraction) is now the
-// `symbolic-terms-build-the-nested-fraction-left` example on ContinuedFraction. What's left is
-// scope-dependent: with only analytic declared (no modular extension), a periodic tail (nested
-// List) isn't a recognized shape, so FromContinuedFraction leaves it untouched rather than
-// rebuilding the quadratic irrational the way the full reference environment's modular
-// extension does (see ContinuedFraction's `a-periodic-tail-rebuilds-the-quadratic` example).
-test("closed form: FromContinuedFraction leaves a periodic tail untouched without modular's extension", () => {
-  expect(evalOf(["FromContinuedFraction", ["List", 1, ["List", 2]]])).toEqual([
-    "FromContinuedFraction",
-    ["List", 1, ["List", 2]],
-  ]);
+// `symbolic-terms-build-the-nested-fraction-left` example on ContinuedFraction. A periodic tail
+// (nested List) is compute-engine's own: [1; 2, 2, ...] = sqrt(2) = 1.41421356... (mpmath).
+test("closed form: FromContinuedFraction reads a periodic tail natively", () => {
+  expect(evalOf(["FromContinuedFraction", ["List", 1, ["List", 2]]])).toEqual(["Sqrt", 2]);
 });
 
 // Lane B-35 regression: notatio's editor flagged `Binomial([2,3,5,7,11], 3)` as a type
