@@ -9,7 +9,7 @@ signatures:
   - call: ContinuedFraction(x)
     description: for a quadratic irrational, the exact eventually-periodic expansion $[a_0, \overline{a_1,\dots,a_k}]$, the period written as a nested list
     library: enumeratio-modular
-    type: (real, integer?) -> list<integer>
+    type: (real, integer?) -> list<integer | list<integer>>
     overrides: compute-engine
   - call: ContinuedFraction(x, n)
     description: the first $n$ terms — exact for a quadratic irrational, certified-precision otherwise (compute-engine's own signature, extended)
@@ -27,7 +27,7 @@ signatures:
   - call: ContinuedFraction(x)
     description: The regular continued fraction $[a_0; a_1, a_2, \dots]$ of $p/q$. Its partial quotients are the run lengths of the rational's Stern–Brocot path, and the $T$-exponents of its matrix — one object under three names.
     library: enumeratio-number-theory
-    type: ((list<integer>) -> continued_fraction) & ((real, integer?) -> list<integer>)
+    type: ((list<integer>) -> continued_fraction) & ((real, integer?) -> list<integer | list<integer>>)
     overrides: enumeratio-modular
 seeAlso:
   - ModularWord
