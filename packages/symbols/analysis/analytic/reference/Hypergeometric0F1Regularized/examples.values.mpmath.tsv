@@ -17,7 +17,7 @@ fullsimplify-normal-series
 n-hypergeometric0f1regularized-4-0-50	enumeratio_n(lambda: (enumeratio_hyperreg([], [-4], 0)), 50)	0.0	
 n-hypergeometric0f1regularized-0-0-2	enumeratio_n(lambda: (enumeratio_hyperreg([], [0], 0)), 2)	0.0	
 n-hypergeometric0f1regularized-0-1-pole-of-b	(enumeratio_hyperreg([], [0], 1))	1.590636854637329063382254425	
-a-tiny-value-keeps-its-imaginary-part	enumeratio_hyperreg([], [100], mpc(1e-8, 1e-8))		
+a-tiny-value-keeps-its-imaginary-part	enumeratio_hyperreg([], [100], mpc(1e-8, 1e-8))	(1.07151028823261795199609345408e-156 + 1.07151028823155707314292788789e-166j)	
 a-value-below-the-double-range-stays-unevaluated	enumeratio_hyperreg([], [200], 1.5)	2.55504470611395232628820947263e-373	inconclusive
 a-small-value-inside-the-double-range	enumeratio_hyperreg([], [150], 1.5)	2.65179928487123462656909360876e-261	
 n-hypergeometric0f1regularized-0-neg-48-50	enumeratio_n(lambda: (enumeratio_hyperreg([], [0], -48)), 50)	-0.75356407978144308380327864211537660841009027837078	

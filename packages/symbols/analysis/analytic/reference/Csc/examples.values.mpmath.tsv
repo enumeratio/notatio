@@ -32,7 +32,7 @@ functionmeromorphic-csc-x-x
 reciprocal-of-sin-csc-x-frac-1-sin-x	almosteq(csc((mpmathify(pi) / 6)), (mpmathify(1) / sin((mpmathify(pi) / 6))), 1e-20)	True	
 csc-1-over-8-times-pi	csc(((mpf(1)/8) * pi))	2.61312592975275305571328634685	
 csc-3-over-10-times-pi	csc(((mpf(3)/10) * pi))	1.23606797749978969640917366873	
-neg-2-times-neg-2-plus-2-times-csc-1-over-2-pow	((-2 * (-2 + (2 * enumeratio_pow(csc((mpf(1)/2)), 2))) * enumeratio_pow(csc(1), 2) * enumeratio_pow(csc((mpf(1)/2)), 4)) + enumeratio_pow(csc((mpf(1)/2)), 8))	1.00974195868289511092701256356e-28	
+neg-2-times-neg-2-plus-2-times-csc-1-over-2-pow	((-2 * (-2 + (2 * enumeratio_pow(csc((mpf(1)/2)), 2))) * enumeratio_pow(csc(1), 2) * enumeratio_pow(csc((mpf(1)/2)), 4)) + enumeratio_pow(csc((mpf(1)/2)), 8))		
 n-4-times-neg-1-plus-csc-1-over-2-pow-2-times	((4 * (-1 + enumeratio_pow(csc((mpf(1)/2)), 2)) * enumeratio_pow(csc(1), 2)))	18.9284625738935580106428544233	
 n-csc-1-over-2-plus-1-over-2-times-pi-pow-2	(enumeratio_pow(csc(((mpf(1)/2) + ((mpf(1)/2) * pi))), 2))	1.29844641040952483688376649885	
 n-4-times-neg-1-plus-csc-2-pow-2-times-csc-4-pow	((4 * (-1 + enumeratio_pow(csc(2), 2)) * enumeratio_pow(csc(4), 2)))	1.46277035971197344609670179082	

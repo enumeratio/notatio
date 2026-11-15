@@ -13,6 +13,6 @@ matrixfunction-function-hypergeometric0f1-1-over	Matrix([[1, 0], [0, 1]]).analyt
 series-hypergeometric0f1-a-x-x-0-3	series(N(hyper([], [Symbol("a")], Symbol("x"))), Symbol("x"), 0, 3 + 1)	x/a + x**2/(2*a*(a + 1)) + x**3/(6*a*(a + 1)*(a + 2)) + 1 + O(x**4)	
 n-neg-1-over-4-times-hypergeometric0f1-1-over-2	N(((Rational(-1, 4) * N(hyper([], [Rational(1, 2)], Rational(1, 2)))) + (Rational(1, 4) * N(hyper([], [Rational(-1, 2)], Rational(1, 2)))) + (Rational(1, 2) * N(hyper([], [Rational(3, 2)], Rational(1, 2))))), 30)	0	
 n-neg-1-over-4-times-hypergeometric0f1-1-over-3	N(((Rational(-1, 4) * (S(N(hyper([], [Rational(1, 2)], Rational(1, 2))))**2)) + (Rational(1, 2) * (S(N(hyper([], [Rational(3, 2)], Rational(1, 2))))**2))), 30)	-0.250000000000000111022302462516	
-n-2-times-hypergeometric0f1-3-over-2-2-plus-neg	N(((2 * N(hyper([], [Rational(3, 2)], 2))) + (Rational(-1, 4) * N(hyper([], [Rational(1, 2)], 2))) + (Rational(1, 4) * N(hyper([], [Rational(-1, 2)], 2)))), 30)	4.44089209850062616169452667236e-16	
+n-2-times-hypergeometric0f1-3-over-2-2-plus-neg	N(((2 * N(hyper([], [Rational(3, 2)], 2))) + (Rational(-1, 4) * N(hyper([], [Rational(1, 2)], 2))) + (Rational(1, 4) * N(hyper([], [Rational(-1, 2)], 2)))), 30)		
 n-2-times-hypergeometric0f1-3-over-2-2-pow-2	N(((2 * (S(N(hyper([], [Rational(3, 2)], 2)))**2)) + (Rational(-1, 4) * (S(N(hyper([], [Rational(1, 2)], 2)))**2))), 30)	-0.249999999999996447286321199499	
 b-0-is-a-pole-stays-symbolic	N(hyper([], [0], 0.5))	ZeroDivisionError: pole in hypergeometric series	error
