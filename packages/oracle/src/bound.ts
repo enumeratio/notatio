@@ -4,3 +4,7 @@
  * The one rule for the known check (`@notatio/reference`) and the oracle comparers. */
 export const agreementBound = (tolerance: number, size: number, referenceSize: number): number =>
   tolerance * (referenceSize === 0 ? Math.max(size, 1) : Math.max(size, referenceSize));
+
+/** Whether a value of this size agrees with a reference of exactly 0: `agreementBound`'s floor of 1 applies,
+ * so `tolerance` is absolute below 1. The oracle side of a row whose `known` is 0, as the known check holds it. */
+export const agreesWithZero = (tolerance: number, size: number): boolean => size <= agreementBound(tolerance, size, 0);

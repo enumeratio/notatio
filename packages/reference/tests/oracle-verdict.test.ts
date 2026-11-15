@@ -307,3 +307,17 @@ test("a held integral or limit is compared as its unevaluated form, never sample
   expect(performance.now() - start).toBeLessThan(300);
   expect(leaf(["Add", 1, 2])).toBe(3);
 });
+
+test("a row whose known is 0 holds ours and theirs each to 0, the known check's floor of 1", () => {
+  const judged = (ours: number, theirs: string, system: "mpmath" | "wolfram" = "mpmath", known = 0) =>
+    verdictOf(system, ours, { value: theirs, numeric: theirs }, undefined, false, undefined, known);
+  expect(judged(-2.5e-16, "1.3e-16")).toBe("agree");
+  expect(judged(0, "-4.2e-20")).toBe("agree");
+  expect(judged(0, "(3e-20+1e-21j)")).toBe("agree");
+  expect(judged(1e-16, "0.5")).toBe("disagree");
+  expect(judged(0.5, "1e-16")).toBe("disagree");
+  expect(judged(-2.5e-16, "1.3*^-16", "wolfram")).toBe("agree");
+  expect(judged(1e-16, "0.5", "wolfram")).toBe("disagree");
+  // A known other than 0 compares the values relative to their own size.
+  expect(judged(-2.5e-16, "1.3e-16", "mpmath", 1)).toBe("disagree");
+});
