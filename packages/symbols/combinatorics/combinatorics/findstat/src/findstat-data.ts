@@ -8888,7 +8888,7 @@ export const findstat: readonly FindStatMatch[] = [
     values: 902,
   },
   {
-    head: "ShortestMaximalChainLength",
+    head: "ShortestMaximalChainSize",
     on: "Poset",
     findstat: ["St000906"],
     values: 1200,

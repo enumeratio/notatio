@@ -465,7 +465,7 @@ export const POSET_STATISTICS: readonly Definition[] = [
     `FindStat's St000071. ${NO_ELEMENTS("1, the empty chain")}`,
   ),
   stat(
-    "ShortestMaximalChainLength",
+    "ShortestMaximalChainSize",
     "The fewest elements in a maximal chain.",
     withPoset(
       bind(

@@ -54,7 +54,7 @@
     "Returns on ColoredMotzkinPath",
     "Returns on KDyckPath",
     "RootDegree on PlaneTree",
-    "ShortestMaximalChainLength on Poset",
+    "ShortestMaximalChainSize on Poset",
     "Traits on Text",
     "VSubsetCount on Poset",
     "WeakExcedances on DecoratedPermutation"

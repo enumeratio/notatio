@@ -1,7 +1,7 @@
 ---
-name: ShortestMaximalChainLength
+name: ShortestMaximalChainSize
 domain: Poset statistics
-signature: ShortestMaximalChainLength(poset)
+signature: ShortestMaximalChainSize(poset)
 summary: The fewest elements in a maximal chain.
 catalog:
   - system: findstat
@@ -11,7 +11,7 @@ catalog:
 statOn:
   - Poset
 signatures:
-  - call: ShortestMaximalChainLength(poset)
+  - call: ShortestMaximalChainSize(poset)
     description: The fewest elements in a maximal chain.
     library: enumeratio-combinatorics
     type: (poset) -> number

@@ -224,7 +224,7 @@ export const POSET_READINGS: Readonly<Record<string, (covers: Poset) => number>>
     const o = orderOf(p);
     return chains(o).filter((c) => o.elements.every((x) => c.includes(x) || !c.every((y) => o.related(x, y)))).length;
   },
-  ShortestMaximalChainLength: (p) => {
+  ShortestMaximalChainSize: (p) => {
     const o = orderOf(p);
     const maximal = chains(o).filter((c) => o.elements.every((x) => c.includes(x) || !c.every((y) => o.related(x, y))));
     return maximal.length === 0 ? 0 : Math.min(...maximal.map((c) => c.length));

@@ -5541,7 +5541,7 @@ statistic	/reference/statistic/Poset/PosetWidth
 statistic	/reference/statistic/Poset/PotentialCoverCount
 statistic	/reference/statistic/Poset/PrincipalFilterSizeProduct
 statistic	/reference/statistic/Poset/RelationCount
-statistic	/reference/statistic/Poset/ShortestMaximalChainLength
+statistic	/reference/statistic/Poset/ShortestMaximalChainSize
 statistic	/reference/statistic/Poset/VSubsetCount
 symbol	/reference/symbol/AntichainCount
 symbol	/reference/symbol/ChainCount
@@ -5571,5 +5571,5 @@ symbol	/reference/symbol/Posets
 symbol	/reference/symbol/PotentialCoverCount
 symbol	/reference/symbol/PrincipalFilterSizeProduct
 symbol	/reference/symbol/RelationCount
-symbol	/reference/symbol/ShortestMaximalChainLength
+symbol	/reference/symbol/ShortestMaximalChainSize
 symbol	/reference/symbol/VSubsetCount

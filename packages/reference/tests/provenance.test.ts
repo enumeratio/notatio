@@ -2410,7 +2410,7 @@ const NOVEL = [
   "ChainCount",
   "AntichainCount",
   "MaximalChainCount",
-  "ShortestMaximalChainLength",
+  "ShortestMaximalChainSize",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because
