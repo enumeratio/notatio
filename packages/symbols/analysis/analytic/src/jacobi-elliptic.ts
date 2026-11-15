@@ -7,6 +7,7 @@ import {
   exceedsDoublePrecision,
   isFiniteNum,
   numberResult,
+  REAL_COLLAPSE_RELATIVE,
   periodsExceedDouble,
   wantsNumber,
   add,
@@ -258,6 +259,17 @@ function exactSCDN(ce: ComputeEngine, u: Expression, m: Expression): SCDN<Expres
 const cxOf = (x: Expression): Cx => cx(x.re, x.im);
 
 /**
+ * The kernels run in complex arithmetic, so a real answer on real operands (the Jacobi
+ * functions, am and Z are all real there) carries noise of order epsilon in `im`: sn, cn and
+ * dn are O(1), am sums terms of size |value| and Z of size |u|, and a quotient n/d inherits
+ * the numerator's noise over |d| (ns at u = 1e-6 is 1e6 with noise 8e-5 in im, measured).
+ * On a complex operand `im` is data and only the relative floor applies, which keeps a tiny
+ * complex value complex.
+ */
+const realOperandNoise = (ops: readonly Expression[], termScale: number, denominator = 1): number =>
+  ops.every((o) => o.im === 0) ? (REAL_COLLAPSE_RELATIVE * (1 + Math.abs(termScale))) / denominator : 0;
+
+/**
  * `u` is far enough out that its own double rounding already exceeds a period, so the AGM
  * kernel's reduced position within it is noise (`periodsExceedDouble`, ce-patches — see
  * MAX_PERIODS_FOR_DOUBLE's doc for the measured case). Checked against BOTH real periods
@@ -329,7 +341,9 @@ function declarePQ(ce: ComputeEngine, head: string, p: PQLetter, q: PQLetter): v
       if (argumentTooFarForDouble(ce, u, m)) return undefined;
       const result = sncndn(cxOf(u), cxOf(m));
       if (result === undefined) return undefined;
-      return numberResult(ce, div(result[p], result[q]));
+      const value = div(result[p], result[q]);
+      const denominator = Math.hypot(result[q].re, result[q].im);
+      return numberResult(ce, value, { noise: realOperandNoise([u, m], value.re, denominator) });
     },
   });
 }
@@ -351,7 +365,7 @@ function declareJacobiAmplitude(ce: ComputeEngine): void {
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (argumentTooFarForDouble(ce, u, m)) return undefined;
       const phi = amplitude(cxOf(u), cxOf(m));
-      return phi === undefined ? undefined : numberResult(ce, phi);
+      return phi === undefined ? undefined : numberResult(ce, phi, { noise: realOperandNoise([u, m], phi.re) });
     },
   });
 }
@@ -395,13 +409,15 @@ function declareJacobiZN(ce: ComputeEngine): void {
       // file) keeps JacobiZN's own output a plain double, matching the rest of this head
       // family instead of leaking the sub-calls' internal precision.
       const phi = agmAmplitude(cxOf(u), m.re);
-      const phiExpr = numberResult(ce, phi);
+      const phiExpr = numberResult(ce, phi, { noise: realOperandNoise([u, m], phi.re) });
+      if (phiExpr === undefined) return undefined;
       const eIncomplete = ce.box(["IncompleteEllipticE", phiExpr, m]).N();
       const eComplete = ce.box(["EllipticE", m]).N();
       const kComplete = ce.box(["EllipticK", m]).N();
       const ratio = div(cx(eComplete.re, eComplete.im), cx(kComplete.re, kComplete.im));
       const term = mul(ratio, cxOf(u));
-      return numberResult(ce, sub(cx(eIncomplete.re, eIncomplete.im), term));
+      const zeta = sub(cx(eIncomplete.re, eIncomplete.im), term);
+      return numberResult(ce, zeta, { noise: realOperandNoise([u, m], u.re) });
     },
   });
 }

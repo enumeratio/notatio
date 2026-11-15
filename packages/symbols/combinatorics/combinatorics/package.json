@@ -7,7 +7,8 @@
   "files": [
     "dist",
     "reference",
-    "docs"
+    "docs",
+    "findstat/data"
   ],
   "type": "module",
   "exports": {
@@ -32,10 +33,12 @@
       "import": "./dist/notation.mjs"
     },
     "./declares.json": "./dist/declares.json",
+    "./findstat/data/*": "./findstat/data/*",
     "./package.json": "./package.json"
   },
   "scripts": {
     "build": "node scripts/build-generated.ts && node ../../../manifest/scripts/cached.ts pack dist -- vp pack && enumeratio-collect-declares .",
+    "collect-verdicts": "node scripts/collect-verdicts.ts",
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check"
@@ -67,7 +70,6 @@
     "@cortex-js/compute-engine": "^0.189.0"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "extension",
     "area": "combinatorics",
     "extends": [

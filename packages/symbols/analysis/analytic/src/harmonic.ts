@@ -52,6 +52,13 @@ function harmonicRational(n: number, r: number): Rat {
   return sum;
 }
 
+/**
+ * Largest integer z whose H_z^(r) is summed as one exact fraction: the reduced sum costs about
+ * z³ (z = 3000 takes 1 s, z = 6000 takes 11 s), so a larger z is left to the continuation below,
+ * which answers a number and leaves the exact form unevaluated.
+ */
+const EXACT_SUM_MAX = 1000;
+
 /** Largest z summed term by term at a non-integer order -- Wolfram's own cut-off. */
 const FINITE_SUM_MAX = 4;
 
@@ -106,7 +113,7 @@ export function evaluateHarmonicNumber(
 
   if (isRealInt(z) && z.re === 0) return finish(box(0)); // empty sum, any r
 
-  if (isRealInt(z) && z.re > 0 && (r === undefined || isRealInt(r))) {
+  if (isRealInt(z) && z.re > 0 && z.re <= EXACT_SUM_MAX && (r === undefined || isRealInt(r))) {
     return finish(box(ratNode(harmonicRational(z.re, r === undefined ? 1 : r.re))));
   }
 

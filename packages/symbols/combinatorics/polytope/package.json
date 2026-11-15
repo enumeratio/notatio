@@ -5,7 +5,8 @@
   "description": "Polytopes as face posets: the permutahedron, simplex and cross-polytope, with each face's dimension, barycentre and containment — and a projection into scene space.",
   "license": "WTFPL",
   "files": [
-    "dist"
+    "dist",
+    "docs"
   ],
   "type": "module",
   "exports": {
@@ -36,7 +37,6 @@
     "@cortex-js/compute-engine": "^0.189.0"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "extension",
     "area": "combinatorics",
     "extends": [],

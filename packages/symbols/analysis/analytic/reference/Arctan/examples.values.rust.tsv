@@ -4,6 +4,7 @@ arctan-1	atan(n(1))	0.7853981633974483
 arctan-sqrt-3	atan(sqrt(n(3)))	1.0471975511965979
 a-machine-precision-argument-evaluates	atan(x(0.5))	0.46364760900080615
 series-arctan-x-x-positiveinfinity-5		
+the-imaginary-unit-is-a-logarithmic-singularity	atan(sqrt(n(-1)))	
 arbitrary-precision-via-n	nf(atan(rational(n(1), n(2))))	0.46364760900080615
 evaluates-at-a-complex-argument		
 wolfram-s-two-argument-arctan-x-y-is-compute	atan2(n(-1), n(-1))	-2.356194490192345

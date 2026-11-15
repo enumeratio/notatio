@@ -9,6 +9,13 @@ import { logBarnesG, cx, logGamma, wantsNumber, type EvalOptions } from "@notati
 // otherwise, real domain only (no reference example calls for a complex or negative
 // argument — BarnesG's zeros at the nonpositive integers give it poles there anyway).
 
+/**
+ * The largest integer n whose exact H(n) is built: it has about n²·ln n / (2 ln 10) digits
+ * (n = 1000 takes 2 s, n = 10⁴ never ends), so a larger n stays unevaluated. A double holds
+ * H(n) only to n = 22, so no numeric route answers past it either.
+ */
+const EXACT_MAX = 300n;
+
 function hyperfactorialExact(n: bigint): bigint {
   let h = 1n;
   for (let k = 1n; k <= n; k++) h *= k ** k;
@@ -30,7 +37,7 @@ function evaluateHyperfactorial(
 ): Expression | undefined {
   if (x === undefined) return undefined;
   const n = bigIntegerAt(x);
-  if (n !== undefined && n >= 0n) return ce.number(hyperfactorialExact(n));
+  if (n !== undefined && n >= 0n) return n <= EXACT_MAX ? ce.number(hyperfactorialExact(n)) : undefined;
   // A non-integer real: only a numeric request (N(), or a float operand) gets the log-form
   // float — an exact operand like 1/2 stays symbolic, same as PolyLog(2, 1/2) declining.
   if (x.im === 0 && Number.isFinite(x.re) && x.re >= 0 && wantsNumber(ops, options)) {

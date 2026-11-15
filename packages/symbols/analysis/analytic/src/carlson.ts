@@ -215,6 +215,16 @@ export function carlsonRJ(x0: Cx, y0: Cx, z0: Cx, p0: Cx): Cx {
   return integral;
 }
 
+/** `carlsonRJ`, or `undefined` where its integral route runs past its segment budget. */
+export function carlsonRJOrDecline(x: Cx, y: Cx, z: Cx, p: Cx): Cx | undefined {
+  try {
+    return carlsonRJ(x, y, z, p);
+  } catch (error) {
+    if (error instanceof RJDeclined) return undefined;
+    throw error;
+  }
+}
+
 /** Are any of x, y, z, p past Re < 0 with the others not all real (the all-real cases have their own forms)? */
 function branchRisk(x: Cx, y: Cx, z: Cx, p: Cx): boolean {
   return [x, y, z, p].some((v) => v.re < 0) && [x, y, z, p].some((v) => v.im !== 0);
@@ -233,8 +243,26 @@ const GK_WEIGHTS = [
 ];
 const G_WEIGHTS = [0.1294849661688697, 0.27970539148927664, 0.3818300505051189, 0.4179591836734694];
 
-/** ∫ f over the straight segment a → b, adaptive Gauss-Kronrod 7-15. */
-function segmentIntegral(f: (t: Cx) => Cx, a: Cx, b: Cx, tol: number, depth = 0): Cx {
+/**
+ * Most Gauss-Kronrod segments one integral may use. A smooth path needs a few dozen; a pole
+ * 10⁻¹² from the path (RJ(−8, 2, 2, −10⁻¹²i)) halves its tolerance below double rounding at
+ * every level and would visit 2⁴⁰ segments, so past the cap `carlsonRJOrDecline` declines.
+ */
+const MAX_SEGMENTS = 20_000;
+
+/** The integral's segment budget ran out: no answer the kernel can vouch for. */
+class RJDeclined extends Error {}
+
+/** ∫ f over the straight segment a → b, adaptive Gauss-Kronrod 7-15, within `budget` segments. */
+function segmentIntegral(
+  f: (t: Cx) => Cx,
+  a: Cx,
+  b: Cx,
+  tol: number,
+  budget: { left: number } = { left: MAX_SEGMENTS },
+  depth = 0,
+): Cx {
+  if (--budget.left < 0) throw new RJDeclined();
   const half = scale(sub(b, a), 0.5);
   const mid = scale(add(a, b), 0.5);
   let kronrod = cx(0);
@@ -250,7 +278,10 @@ function segmentIntegral(f: (t: Cx) => Cx, a: Cx, b: Cx, tol: number, depth = 0)
   const k = mul(kronrod, half);
   const g = mul(gauss, half);
   if (depth >= 40 || abs(sub(k, g)) <= tol) return k;
-  return add(segmentIntegral(f, a, mid, tol / 2, depth + 1), segmentIntegral(f, mid, b, tol / 2, depth + 1));
+  return add(
+    segmentIntegral(f, a, mid, tol / 2, budget, depth + 1),
+    segmentIntegral(f, mid, b, tol / 2, budget, depth + 1),
+  );
 }
 
 /**
@@ -509,7 +540,8 @@ export function declareCarlson(ce: ComputeEngine): void {
       if (carlsonRJDeclines(xc, yc, zc, pc)) return undefined; // stays symbolic — see there
       const past = pastDouble(ce, ops, options, ([a, b, c, d], digits) => carlsonRJBig(a!, b!, c!, d!, digits));
       if (past !== undefined) return past.value;
-      return numberResult(ce, carlsonRJ(xc, yc, zc, pc));
+      const value = carlsonRJOrDecline(xc, yc, zc, pc);
+      return value === undefined ? undefined : numberResult(ce, value);
     },
   });
 

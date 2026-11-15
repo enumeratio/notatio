@@ -40,7 +40,6 @@
     "@cortex-js/compute-engine": "^0.189.0"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "tooling",
     "extends": [],
     "reads": [

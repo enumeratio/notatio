@@ -18,8 +18,10 @@
   "publishConfig": {
     "access": "public"
   },
+  "peerDependencies": {
+    "vite-plus": "catalog:"
+  },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "tooling",
     "extends": []
   }

@@ -13,6 +13,7 @@ a-huge-10-80-plus-1-over-3-argument	nf(tan(((power(n(10), n(80)) + n(1)) / n(3))
 tan-100-under-n	nf(tan(n(100)))	-0.5872139151569291	
 series-tan-x-x-0-10			
 series-tan-x-x-1-over-2-times-pi-5			
+threads-over-a-list-at-a-negative-pi	list(vec![tan(n(0)), tan((x(std::f64::consts::PI) / n(-1)))])	[0.0, 1.2246467991473532e-16]	disagree
 n-of-an-exact-argument-gives-an-arbitrary	nf(tan(rational(n(6), n(5))))	2.5721516221263183	
 evaluates-at-a-complex-argument			
 threads-element-wise-over-a-matrix	list(vec![list(vec![tan((n(5) * (x(std::f64::consts::PI) / n(6)))), tan(x(std::f64::consts::PI))]), list(vec![tan((x(std::f64::consts::PI) / n(3))), tan((-(x(std::f64::consts::PI))))])])	[[-0.5773502691896263, -1.2246467991473532e-16], [1.7320508075688767, 1.2246467991473532e-16]]	disagree

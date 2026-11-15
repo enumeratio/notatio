@@ -31,7 +31,6 @@
     "vite-plus": "catalog:"
   },
   "enumeratio": {
-    "site": "notatio",
     "layer": "presentation",
     "extends": []
   }

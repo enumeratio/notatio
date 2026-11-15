@@ -18,7 +18,5 @@
     "vite": "catalog:",
     "vite-plus": "catalog:"
   },
-  "enumeratio": {
-    "site": "enumeratio"
-  }
+  "enumeratio": {}
 }

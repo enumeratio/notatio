@@ -6,7 +6,7 @@ name: Bench
 # interleaved, so every ratio in a run comes from one machine and one time window. Reports go
 # to the orphan `bench-data` branch (runs/<id>/, index.json), which the site's /bench/ viewer
 # reads. Our own side's drift against the job's trailing median files/reopens one rolling
-# issue, `bench drift`, labelled `nightly-fixup`. Advisory: never a required check.
+# issue, `bench drift`, labelled `nightly-fixup`, as does any case that stops measuring `ok`. Advisory: never a required check.
 
 on:
   schedule:
@@ -83,16 +83,32 @@ jobs:
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             const drift = JSON.parse(fs.readFileSync('drift.json', 'utf8'))
             const ms = (ns) => (ns / 1e6).toFixed(2)
-            const rows = drift.slice(0, 30).map(d =>
-              `| [${d.name}](https://enumeratio.dev/reference/symbol/${d.name.replace('/', '#example/')}) | ${ms(d.medianNs)} | ${ms(d.trailingNs)} | ×${d.ratio.toFixed(2)} | ${d.priorRuns} (${d.basis}) |`
+            const link = (n) => `[${n}](https://enumeratio.dev/reference/symbol/${n.replace('/', '#example/')})`
+            const lost = drift.filter(d => d.status !== undefined)
+            const slower = drift.filter(d => d.status === undefined)
+            const lostRows = lost.slice(0, 30).map(d =>
+              `| ${link(d.name)} | ${d.from} | ${d.status} | ${d.reason ?? ''} |`
+            ).join('\n')
+            const rows = slower.slice(0, 30).map(d =>
+              `| ${link(d.name)} | ${ms(d.medianNs)} | ${ms(d.trailingNs)} | ×${d.ratio.toFixed(2)} | ${d.priorRuns} (${d.basis}) |`
             ).join('\n')
             const body = [
-              `The nightly bench found ${drift.length} case(s) on our side past their trailing median (≥1.5× and ≥1 ms) on the same runner fingerprint, or across all runners when fewer than 3 runs share it, after dividing out the run's own median slowdown. Run: ${runUrl}. CPU profiles of them are in the run's \`bench-profiles-${context.runId}\` artifact.`,
+              `The nightly bench found ${slower.length} case(s) on our side past their trailing median (≥1.5× and ≥1 ms) on the same runner fingerprint, or across all runners when fewer than 3 runs share it, after dividing out the run's own median slowdown, and ${lost.length} case(s) that no longer measure \`ok\`. Run: ${runUrl}. CPU profiles of the slower ones are in the run's \`bench-profiles-${context.runId}\` artifact.`,
               ``,
-              `| case | median (ms) | trailing (ms) | ratio (runner-normalized) | prior runs |`,
-              `|---|---|---|---|---|`,
-              rows,
-              ``,
+              ...(lost.length === 0 ? [] : [
+                `A case that reports \`too-fast\` times a cache or a lookup, not the work; \`error\`, \`wrong\` and \`timeout\` are lost measurements too.`,
+                ``,
+                `| case | was | now | reason |`,
+                `|---|---|---|---|`,
+                lostRows,
+                ``,
+              ]),
+              ...(slower.length === 0 ? [] : [
+                `| case | median (ms) | trailing (ms) | ratio (runner-normalized) | prior runs |`,
+                `|---|---|---|---|---|`,
+                rows,
+                ``,
+              ]),
               `Hosted runners wobble; check the trend at https://enumeratio.dev/bench/ before treating one run as a regression.`,
             ].join('\n')
             try {

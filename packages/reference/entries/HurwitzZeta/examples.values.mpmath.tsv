@@ -174,6 +174,7 @@ n-hurwitzzeta-neg-0p5-plus-i-2-plus-neg-0p5	(zeta(mpc(-0.5, 1), mpc(2, -0.5)))	(
 n-hurwitzzeta-neg-0p5-plus-i-neg-0p5	(zeta(mpc(-0.5, 1), -0.5))	(-10.3541255703876195123811711928 + 12.6883763809252597090705000207j)	
 n-hurwitzzeta-neg-0p5-plus-i-neg-1p5	(zeta(mpc(-0.5, 1), -1.5))	(0.825049555351030160086372374979 + 38.7318693646863540979116822452j)	
 normal-series-hurwitzzeta-2-x-x-positiveinfinity			
+n-hurwitzzeta-neg-2-neg-1-over-2-1-digit	enumeratio_n(lambda: (zeta(-2, (mpf(-1)/2))), 1)	0.3	disagree
 n-hurwitzzeta-neg-27-2-over-5-1-digit	enumeratio_n(lambda: (zeta(-27, (mpf(2)/5))), 1)	-8.e+5	
 n-hurwitzzeta-3-neg-2p5	(zeta(3, -2.5))	0.0541020258208637015018708342839	
 n-hurwitzzeta-2p5-neg-2p5	(zeta(2.5, -2.5))	(6.24711063456881148528999055737 - 6.12093450391897990393402083466j)	

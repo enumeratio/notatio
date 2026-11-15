@@ -102,3 +102,18 @@ test("InputForm: a negated PositiveInfinity is NegativeInfinity", () => {
   expect(toInputForm(["Add", "x", ["Negate", "PositiveInfinity"]])).toBe("x + NegativeInfinity");
   expect(reparse("NegativeInfinity")).toEqual(ce.box(["Negate", "PositiveInfinity"]).json);
 });
+
+// `%` and `/` bind like `*`, so a product nested in a product prints flat, and its first factor keeps
+// its parentheses: `a * (x % 2) * b`, never `a * x % 2 * b`.
+test("InputForm: a product nested in a product keeps its Mod and Divide factors grouped", () => {
+  const inners: MathJsonExpression[] = [
+    ["Mod", "x", 2],
+    ["Divide", "x", "c"],
+  ];
+  for (const inner of inners) {
+    const tree: MathJsonExpression = ["Multiply", "a", ["Multiply", inner, "b"]];
+    const printed = toInputForm(tree);
+    expect(printed).toMatch(/^a \* \(x [%/] \w+\) \* b$/);
+    expect(reparse(printed)).toEqual(ce.box(tree as Parameters<ComputeEngine["box"]>[0]).json);
+  }
+});

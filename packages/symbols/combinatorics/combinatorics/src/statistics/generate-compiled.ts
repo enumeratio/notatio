@@ -12,9 +12,11 @@ import { evaluateEpsil, evaluateEpsilRepeatedly, type FlatCodec } from "@notatio
 import { FLAT_BY_NAME, subjectToJs } from "../flat.ts";
 import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
 
-/** A memo of the slow, pure cross-check (the build's own: see scripts/verdicts.ts). */
+/** Where a cross-check's verdict comes from (the build's snapshot: see scripts/verdict-snapshot.ts).
+ *  `parts` is what the check reads, `label` names the item, and `declined` is the verdict when there
+ *  is no fresh one: the item stays interpreted. */
 export interface Verdicts {
-  remember<T>(parts: unknown, compute: () => T, label?: string): T;
+  remember<T extends boolean | readonly string[]>(parts: unknown, compute: () => T, label: string, declined: T): T;
 }
 
 /** Every check runs. */
@@ -59,7 +61,8 @@ export function compiledDefinitionsFor(
       if (code === undefined) continue;
       const parts = { expr: definition.expr, flat: reading && definition.flat, code: code.code, subjects: checked };
       const check = () => agrees(ce, definition, code.run, checked, reading);
-      if (verdicts.remember(parts, check, signatureOf(definition))) {
+      const label = reading === undefined ? signatureOf(definition) : `${signatureOf(definition)} (flat)`;
+      if (verdicts.remember(parts, check, label, false)) {
         compiled.push({ signature: signatureOf(definition), hash, code: code.code });
         wrong = false;
         break;

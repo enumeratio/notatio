@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { expect, test } from "vite-plus/test";
-import { buildIndex, detectDrift } from "../src/history.ts";
+import { buildIndex, detectDrift, detectStatusDrift } from "../src/history.ts";
 import type { CaseResult, Report } from "../src/types.ts";
 
 const report = (results: CaseResult[], fingerprint?: string): Report =>
@@ -64,4 +64,36 @@ test("the index is rebuilt from each run's run.json, oldest first", () => {
   }
   mkdirSync(join(dir, "runs", "partial"));
   expect(buildIndex(dir).runs.map((r) => r.id)).toEqual(["a", "b"]);
+});
+
+test("a case that measured ok and no longer does is drift, whatever its time", () => {
+  const row = (name: string, status: CaseResult["status"], formula = "f1"): CaseResult => ({
+    name,
+    status,
+    formula,
+    ...(status === "ok" ? { median: 5e6 } : {}),
+  });
+  const prior = [
+    report([
+      row("A/one", "ok"),
+      row("A/two", "ok"),
+      row("A/three", "too-fast"),
+      row("A/four", "ok"),
+      row("A/five", "ok"),
+    ]),
+  ];
+  const current = report([
+    row("A/one", "too-fast"),
+    row("A/two", "ok"),
+    row("A/three", "ok"),
+    row("A/four", "error"),
+    row("A/five", "too-fast", "f2"), // another formula: another benchmark
+    row("A/new", "too-fast"), // no history
+  ]);
+  expect(detectStatusDrift(current, prior).map((d) => [d.name, d.status])).toEqual([
+    ["A/four", "error"],
+    ["A/one", "too-fast"],
+  ]);
+  // only the latest earlier report counts: ok, then too-fast, then too-fast again is not new
+  expect(detectStatusDrift(current, [...prior, report([row("A/one", "too-fast")])])).toHaveLength(1);
 });

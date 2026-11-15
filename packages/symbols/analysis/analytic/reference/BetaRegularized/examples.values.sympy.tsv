@@ -6,6 +6,7 @@ i-x-1-1-x-the-uniform-distribution-s-own-cdf	betainc_regularized(1, 1, 0, 0.5)	b
 non-integer-parameters	betainc_regularized(2.5, 3.5, 0, 0.4)	betainc_regularized(2.5, 3.5, 0, 0.4)	
 i-1-2-2-3-11-16-exactly	betainc_regularized(2, 3, 0, Rational(1, 2))	betainc_regularized(2, 3, 0, 1/2)	
 i-0-5-1-0-a-zero-b-has-the-limit-0	betainc_regularized(1, 0, 0, 0.5)	betainc_regularized(1, 0, 0, 0.5)	
+negative-x-is-a-principal-power	betainc_regularized(2.552, 1, 0, -1)	betainc_regularized(2.552, 1, 0, -1)	
 threads-element-wise-over-a-list-as-wolfram-s	[betainc_regularized(1, 1, 0, 0.5), betainc_regularized(2, 1, 0, 0.5)]	[betainc_regularized(1, 1, 0, 0.5), betainc_regularized(2, 1, 0, 0.5)]	
 x-outside-0-1-by-continuation-real-here-as-b-5	betainc_regularized(0.5, 5, 0, 2)	betainc_regularized(0.5, 5, 0, 2)	
 four-arguments-the-generalized-i-z-1-a-b-i-z-0-a			

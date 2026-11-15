@@ -75,6 +75,7 @@ order-one-half-at-1-is-zeta-one-half	N(polylog(Rational(1, 2), 1), 30)	-1.460354
 n-polylog-30-neg-4	N(polylog(30, -4), 30)	-3.99999998509914942907737761076	
 n-polylog-250-neg-4-a-large-order-past-z-1	N(polylog(250, -4), 30)	-4.00000000000000000000000000000	
 n-polylog-250-4-a-large-order-on-the-cut	N(polylog(250, 4), 30)	4.0 - 1.019863859497598374311260677e-454*I	
+li-neg-1-2-1-zeta-neg-1-2-non-integer-order	N(polylog(Rational(-1, 2), 1), 30)	-0.207886224977354566017306725397	
 n-polylog-2500000-4-a-huge-order-returns	N(polylog(2500000, 4), 30)	4.00000000000000000000000000003 - 1.91009646958618531905136366578e-14554472*I	
 n-polylog-40p5-2-plus-3i-a-large-complex-point	N(polylog(40.5, (2 + 3*I)), 30)	1.99999999999678444846009173589 + 3.00000000000771731888027005127*I	
 normal-series-polylog-2-x-x-positiveinfinity-6	(series(polylog(2, Symbol("x")), Symbol("x"), oo, 6 + 1)).removeO()	None	inconclusive
@@ -82,6 +83,7 @@ polylog-s-tiny-negative-rim	N(polylog(-1e-12, (-0.12884449429552464 + 0.99166481
 polylog-neg-2-at-the-pole-z-1	polylog(-2, Rational(2, 2))	0	inconclusive
 polylog-neg-2-over-a-list-holding-the-pole	[polylog(-2, Rational(2, 2)), polylog(-2, -6)]	[0, polylog(-2, -6)]	disagree
 n-polylog-neg-4p038-1	N(polylog(-4.038, 1), 30)	-0.000299145282473099987773784702583	
+image-order-neg-1500000-over-a-wide-interval	polylog(-1500000, AccumBounds(-0.3, 0.5))	polylog(-1500000, AccumBounds(-0.3, 0.5))	disagree
 threads-over-a-list-of-arguments	[polylog(2, 0.5), polylog(2, 0.25)]	[polylog(2, 0.5), polylog(2, 0.25)]	
 a-non-integer-order-past-z-1-is-left-unevaluated	polylog(2.5, 2)	polylog(2.5, 2)	
 complex-order-and-argument	polylog((0.2 + 1*I), (0.5 + -0.5*I))	0.0703265205505161 - 0.563293262539874*I	

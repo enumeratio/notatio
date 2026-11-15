@@ -288,6 +288,11 @@ function staticChecks(result: Result): void {
         detail: `${targets.length} of the exports, e.g. ${targets.slice(0, 3).join(", ")}; "files" is ${JSON.stringify(manifest.files ?? null)}`,
       });
 
+    // The site serves a package's docs from the installed package, so `docs/` must be in the tarball.
+    const docs = readdirSync(pkg.dir).includes("docs");
+    if (docs && ![...files].some((f) => f.startsWith("docs/")))
+      found({ kind: "docs/ is not in the tarball", detail: `"files" is ${JSON.stringify(manifest.files ?? null)}` });
+
     // Every import in shipped code is a declared dependency.
     const declared = new Set([
       ...Object.keys(manifest.dependencies ?? {}),
@@ -444,7 +449,7 @@ function census(result: Result): void {
     ["test", "run", "--maxWorkers=2", "--reporter=json", `--outputFile=${json}`],
     {
       cwd: dir,
-      env: { CI: "1" },
+      env: { CI: "1", TARBALL_APP: "1" },
     },
   );
   if (!existsSync(json)) {

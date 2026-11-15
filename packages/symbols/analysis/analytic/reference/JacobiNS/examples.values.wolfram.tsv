@@ -1,6 +1,7 @@
 id	in	out	tex.in	tex.out	verdict
 a-floating-point-argument-evaluates-directly-to	N[JacobiNS[0.3, 0.5]]	3.4081683817923327	N[\text{ns}(0.3|0.5)]	3.40817	
 jacobins-0-4-0-5i-0-3	N[JacobiNS[Complex[0.4, -0.5], 0.3]]	1.0615623894068558 + 1.111029734408047*I	N[\text{ns}(0.4\, -0.5 i|0.3)]	1.06156\, +1.11103 i	
+a-real-value-near-the-pole-stays-real	JacobiNS[0.000001, 0.7]				
 m-less-than-0-via-the-imaginary-modulus	N[JacobiNS[0.3, -2]]	3.2892206837526343	N[\text{ns}(0.3|-2)]	3.28922	
 d-jacobins-u-m-m	D[JacobiNS[u, m], m]	(JacobiCS[u, m]*JacobiDS[u, m]*((-1 + m)*u + JacobiEpsilon[u, m] - m*JacobiCD[u, m]*JacobiSN[u, m]))/(2*(1 - m)*m)	\frac{\partial \text{ns}(u|m)}{\partial m}	\frac{\text{cs}(u|m) \text{ds}(u|m) (-m \text{cd}(u|m) \text{sn}(u|m)+\mathcal{E}(u|m)+(m-1) u)}{2 (1-m) m}	
 series-jacobins-u-m-u-0-4	Series[JacobiNS[u, m], List[u, 0, 4]]	SeriesData[u, 0, {1, 0, (1 + m)/6, 0, (7 - 22*m + 7*m^2)/360}, -1, 5, 1]	\text{Series}[\text{ns}(u|m),\{u,0,4\}]	\frac{1}{u}+\frac{1}{6} (m+1) u+\frac{1}{360} \left(7 m^2-22 m+7\right) u^3+O\left(u^5\right)	

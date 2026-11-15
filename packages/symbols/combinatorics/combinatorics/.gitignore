@@ -2,3 +2,5 @@
 src/statistics/naming-data.ts
 src/maps-laws.generated.ts
 *.generated.js
+# An interrupted `collect-verdicts` resumes from it.
+verdicts.tsv.journal

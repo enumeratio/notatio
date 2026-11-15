@@ -8,7 +8,7 @@
 import { cpSync, existsSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { basename, join } from "node:path";
 import { parseArgs } from "node:util";
-import { buildIndex, detectDrift, type RunMeta } from "../src/history.ts";
+import { buildIndex, detectDrift, detectStatusDrift, type RunMeta } from "../src/history.ts";
 import type { BenchSystem, Report } from "../src/types.ts";
 
 const { values } = parseArgs({
@@ -58,7 +58,8 @@ if (current !== undefined && values["drift-report"] !== undefined) {
     .map((r) => join(values.data!, "runs", r.id, "ts.json"))
     .filter(existsSync)
     .map((file) => read<Report>(file));
-  const drift = detectDrift(current, prior);
+  // One list: slower cases (with `ratio`) and cases that lost their `ok` (with `status`).
+  const drift = [...detectStatusDrift(current, prior), ...detectDrift(current, prior)];
   writeFileSync(values["drift-report"], `${JSON.stringify(drift, null, 2)}\n`);
   console.log(`${drift.length} case(s) drifted`);
 }

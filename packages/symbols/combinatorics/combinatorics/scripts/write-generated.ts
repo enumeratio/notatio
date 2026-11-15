@@ -5,8 +5,11 @@
 import { execFileSync } from "node:child_process";
 import { renameSync, rmSync, writeFileSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
+import { writes } from "./verdict-snapshot.ts";
 
 export function writeGenerated(target: string, text: string): void {
+  // A check of the snapshot (VERDICT_MODE check, verify) changes no file the build made.
+  if (!writes()) return;
   // Still named `*.generated.js`, so a step hashing the package meanwhile skips it, as it skips the target.
   const tmp = join(dirname(target), `tmp-${process.pid}-${basename(target)}`);
   try {

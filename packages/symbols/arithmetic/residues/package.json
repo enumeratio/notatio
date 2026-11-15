@@ -50,7 +50,6 @@
     "@cortex-js/compute-engine": "^0.189.0"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "extension",
     "area": "arithmetic",
     "extends": [

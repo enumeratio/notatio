@@ -144,21 +144,20 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     return samples.get(carrier)!;
   };
 
-  // The interpreter's pass over every small permutation is the dearest step of a run that checks
-  // nothing. It reads only the maker's body and the permutations, both in the key, and the engine
-  // (the memo's own condition), so an answer made on this engine stands.
+  // The tuple carriers' subjects take an interpreter pass over every small permutation, so they are
+  // made only when a check runs. They read only the maker's body and the permutations, so those
+  // stand for them in a key.
   const parted = new Map<string, unknown[]>();
   const partsOf = (map: MapDef): unknown[] => {
-    if (!parted.has(map.from)) {
-      const maker = makerOf(map);
-      const permutations = subjectsOf("Permutation");
-      const parts = { maker: maker && { body: maker.body, imageParts: maker.imageParts }, permutations };
-      parted.set(
-        map.from,
-        verdicts.remember(parts, () => partSubjects(ce, map, permutations)),
-      );
-    }
+    if (!parted.has(map.from)) parted.set(map.from, partSubjects(ce, map, subjectsOf("Permutation")));
     return parted.get(map.from)!;
+  };
+  const partsKey = (map: MapDef): unknown => {
+    const maker = makerOf(map);
+    return {
+      maker: maker && { body: maker.body, imageParts: maker.imageParts },
+      permutations: subjectsOf("Permutation"),
+    };
   };
 
   const single = (map: MapDef): Entry | undefined => {
@@ -166,7 +165,9 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     const to = carrierOf.get(map.to);
     if (from === undefined || to === undefined) return undefined;
     const key = mapKey(map);
-    const subjects = map.argumentParts === undefined ? subjectsOf(from.name) : partsOf(map);
+    const given = map.argumentParts === undefined ? subjectsOf(from.name) : undefined;
+    const subjects = given ?? partsKey(map);
+    const subjectsNow = (): unknown[] => given ?? partsOf(map);
     // The flat body first, where the map has one; the nested body after it.
     let wrong = false;
     if (map.flat !== undefined) {
@@ -176,7 +177,8 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
       if (flat !== undefined) {
         const shapes = [from.flat?.shape, to.flat?.shape];
         const parts = { body: map.body, flat: map.flat, code: flat.code, shapes, subjects };
-        if (verdicts.remember(parts, () => agrees(ce, map, flat.run, undefined, subjects, codecs), key))
+        const check = () => agrees(ce, map, flat.run, undefined, subjectsNow(), codecs);
+        if (verdicts.remember(parts, check, `${key} (flat)`, false))
           return {
             key,
             hash: flatHash(map),
@@ -196,7 +198,8 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
     if (map.guard !== undefined && guard === undefined) return undefined;
     const hash = bodyHash(map);
     const parts = { body: map.body, guard: map.guard, code: body.code, guardCode: guard?.code, subjects };
-    if (!verdicts.remember(parts, () => agrees(ce, map, body.run, guard?.run, subjects), key)) return { key, hash };
+    const check = () => agrees(ce, map, body.run, guard?.run, subjectsNow());
+    if (!verdicts.remember(parts, check, key, false)) return { key, hash };
     return { key, hash, body: body.code, ...(guard === undefined ? {} : { guard: guard.code }) };
   };
 
@@ -234,7 +237,7 @@ export function compiledMaps(verdicts: Verdicts = noVerdicts, mine: (key: string
       })),
       subjects,
     };
-    return verdicts.remember(parts, () => agreesComposed(ce, steps, run, subjects), key)
+    return verdicts.remember(parts, () => agreesComposed(ce, steps, run, subjects), `${key} (composition)`, false)
       ? chain
       : { key, hash: chain.hash };
   };

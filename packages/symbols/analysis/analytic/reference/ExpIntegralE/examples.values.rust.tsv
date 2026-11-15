@@ -6,6 +6,8 @@ order-1-5-at-3-2	exp_integral_e(x(1.5), x(3.2))	panic: an integer, not 1.5	error
 series-expintegrale-n-x-x-0-4			
 series-expintegrale-1-x-x-0-4			
 normal-series-expintegrale-n-x-x			
+order-2-over-3-at-negative-real-z	nf(exp_integral_e(rational(n(2), n(3)), x(-2.2)))		
+order-5-over-3-at-negative-real-z	nf(exp_integral_e(rational(n(5), n(3)), x(-2.2)))		
 large-integer-order-500000	exp_integral_e(n(500000), x(2.5))	1.6416950473764144e-7	
 large-order-beside-an-underflowing-power	nf(exp_integral_e(n(170), n(100)))	1.3810175569622713e-46	
 large-order-at-a-negative-argument	nf(exp_integral_e(n(170), n(-100)))	panic: no value: x < 0, or no convergence	error

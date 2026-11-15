@@ -66,6 +66,29 @@ describe("protocol", () => {
     expect(timed.samplesNs).toHaveLength(PROTOCOL.minSamples);
     expect(timed.timedOut).toBe(false);
   });
+  test("clear is told how many calls the coming sample makes, so each can have its own input", () => {
+    // 100 µs a call keeps a sample to a few hundred calls; an `expect` per call would cost the test seconds.
+    const { now, call } = clocked(100_000n);
+    let ready = 0;
+    let used = 0;
+    let overruns = 0;
+    measure(
+      () => {
+        if (used++ >= ready) overruns++;
+        return call();
+      },
+      {
+        budgetMs: 1000,
+        now,
+        clear: (k) => {
+          ready = k;
+          used = 0;
+        },
+      },
+    );
+    expect(overruns).toBe(0);
+    expect(ready).toBeGreaterThan(1);
+  });
 });
 
 describe("judge", () => {

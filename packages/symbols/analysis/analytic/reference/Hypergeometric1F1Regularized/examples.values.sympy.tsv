@@ -11,6 +11,8 @@ simplify-normal-series	simplify((series(hyper([(1 * (S(2)**-1))], [3], Symbol("x
 n-hypergeometric1f1regularized-1-0-neg-1	N(hyper([-1], [0], -1) / gamma(0), 30)	0	disagree
 n-hypergeometric1f1regularized-1-0-0	N(hyper([-1], [0], 0) / gamma(0), 30)	0	
 n-hyp1f1regularized-neg-12-neg-1-neg-1	N(hyper([-12], [-1], -1) / gamma(-1), 30)	0	disagree
+a-tiny-value-keeps-its-imaginary-part	hyper([31], [31], (-1.2 + 0.7*I)) / gamma(31)		
+a-value-below-the-double-range-stays-unevaluated	hyper([1], [200], (1e-8 + 1e-8*I)) / gamma(200)		
 n-hypergeometric1f1regularized-2-neg-4-2-50	N(hyper([2], [-4], 2) / gamma(-4), 30)	0	disagree
 n-hypergeometric1f1regularized-1-0-1-30	N(hyper([1], [0], 1) / gamma(0), 30)	0	disagree
 matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analytic_func(hyper([Rational(1, 2)], [1], Symbol("_mf")) / gamma(1), Symbol("_mf")).applyfunc(simplify).tolist()	[[exp(1/4)*besseli(0, 1/4), 0], [0, exp(1/4)*besseli(0, 1/4)]]	
