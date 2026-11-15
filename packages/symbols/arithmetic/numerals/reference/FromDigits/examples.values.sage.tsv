@@ -26,7 +26,7 @@ a-negative-base-minus-4-3-2-1	sum(d * (-4)^k for k, d in enumerate(reversed([3, 
 a-digits-exponent-pair-exponent-3-is-an-exact	sum(d * 10^k for k, d in enumerate(reversed([[1, 2, 3], 3])))	TypeError: unsupported operand parent(s) for +: 'Integer Ring' and '<class 'list'>'	error
 a-digits-exponent-pair-exponent-5-is-12-300	sum(d * 10^k for k, d in enumerate(reversed([[1, 2, 3], 5])))	TypeError: unsupported operand parent(s) for +: 'Integer Ring' and '<class 'list'>'	error
 fromdigits-list-3-2-5-mixedradixnumerals-list-3			
-an-empty-digit-list-is-left-unevaluated-rather	sum(d * 10^k for k, d in enumerate(reversed([])))	0	inconclusive
+an-empty-digit-list-is-left-unevaluated-rather	sum(d * 10^k for k, d in enumerate(reversed([])))	0	
 a-lehmer-code-back-to-its-rank			
 fromdigits-inverts-integerdigits	enumeratio_equal(sum(d * 10^k for k, d in enumerate(reversed((Integer(abs(58127)).digits(10) or [0])[::-1]))), 58127)	True	
 the-round-trip-holds-in-any-base	sum(d * (2)^k for k, d in enumerate(reversed((Integer(abs(58127)).digits(2) or [0])[::-1])))	58127	

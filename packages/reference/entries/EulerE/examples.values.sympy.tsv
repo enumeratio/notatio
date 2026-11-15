@@ -5,7 +5,7 @@ listable-odd-indices-vanish	[euler(0), euler(1), euler(2), euler(3), euler(4)]	[
 the-euler-polynomial-e-2-x-x-2-x	euler(2, Symbol("x"))	x**2 - x
 e-4-x-x-4-2x-3-x	euler(4, Symbol("x"))	x**4 - 2*x**3 + x
 eulere-list-2-4-6	[euler(2), euler(4), euler(6)]	[-1, 5, -61]
-at-a-complex-point	euler(3, (1 + (2 * I)))	
+at-a-complex-point	euler(3, (1 + (2 * I)))	1/4 - 3*(1 + 2*I)**2/2 + (1 + 2*I)**3
 e-n-2-n-e-n-frac-12-and-e-3-0	euler(3, Rational(1, 2))	0
 eulere-0	euler(0)	1
 eulere-1	euler(1)	0
