@@ -15,18 +15,19 @@ const decimalOf = (json: unknown): BigDecimal =>
 /**
  * An interval answer is a guaranteed enclosure, so it agrees with a known interval (the true
  * image) when it holds it -- no slack at all, in exact decimals -- and is tight: each end
- * within `tolerance` of the true one, relative above magnitude 1 and absolute below.
+ * within `agreementBound` of the true one, relative to that end's own size.
  */
 function enclosure(ours: readonly unknown[], truth: readonly unknown[], tolerance: number): string | undefined {
   const [lo, hi] = ours.map(decimalOf) as [BigDecimal, BigDecimal];
   const [tlo, thi] = truth.map(decimalOf) as [BigDecimal, BigDecimal];
   if (!(lo.lte(tlo) && thi.lte(hi)))
     return `[${lo.toString()}, ${hi.toString()}] doesn't hold [${tlo.toString()}, ${thi.toString()}]`;
-  const one = new BigDecimal("1");
-  const size = [tlo.abs(), thi.abs(), one].reduce((m, x) => (x.gt(m) ? x : m));
-  const slack = size.mul(new BigDecimal(String(tolerance)));
-  if (tlo.sub(lo).gt(slack) || hi.sub(thi).gt(slack))
-    return `[${lo.toString()}, ${hi.toString()}] isn't tight to ${tolerance}`;
+  const loose = (ours: BigDecimal, truth: BigDecimal): boolean =>
+    ours
+      .sub(truth)
+      .abs()
+      .gt(new BigDecimal(String(agreementBound(tolerance, ours.abs().toNumber(), truth.abs().toNumber()))));
+  if (loose(lo, tlo) || loose(hi, thi)) return `[${lo.toString()}, ${hi.toString()}] isn't tight to ${tolerance}`;
   return undefined;
 }
 
@@ -34,11 +35,11 @@ function enclosure(ours: readonly unknown[], truth: readonly unknown[], toleranc
  * value. Not one in our own heads (`JacobiCN(2, 1/2)`), which this module never runs. */
 export const comparable = (json: unknown): boolean => !Number.isNaN(ce.box(json as never).N().re);
 
-/** The widest error bar, relative above magnitude 1, a measured `expected`
+/** The widest error bar, relative to the value's size, a measured `expected`
  * (`Measurement(value, error)`, a numeric integral) is read at. Past it (a Monte Carlo
  * ±0.018) the measurement is too rough to stand for the value. */
 const MAX_MEASURED_TOLERANCE = 1e-6;
-/** A few units in the last place of a double, relative above magnitude 1. */
+/** A few units in the last place of a double, relative to the value's size. */
 const DOUBLE_ROUNDING = 4 * Number.EPSILON;
 
 /** The tolerance a measured `expected` needs to be tight, or `undefined` for one that isn't
@@ -49,7 +50,8 @@ export function measuredTolerance(expected: unknown): number | undefined {
   if (!Array.isArray(expected) || expected[0] !== "Measurement") return undefined;
   const [value, error] = (expected as unknown[]).slice(1).map((x) => ce.box(x as never).N());
   if (value === undefined || error === undefined) return undefined;
-  const relative = error.re / Math.max(1, Math.hypot(value.re, value.im || 0));
+  const valueSize = Math.hypot(value.re, value.im || 0);
+  const relative = error.re / (valueSize === 0 ? 1 : valueSize);
   if (!(relative >= 0)) return undefined;
   const tolerance = relative === 0 ? DEFAULT_TOLERANCE : 10 ** Math.ceil(Math.log10(relative));
   return tolerance <= MAX_MEASURED_TOLERANCE ? Math.max(tolerance, DEFAULT_TOLERANCE) : undefined;
@@ -81,11 +83,11 @@ export function disagreement(
     const truth = b.N();
     if (value === undefined || error === undefined || Number.isNaN(truth.re))
       return `${a.toString()} is not ${b.toString()}`;
-    const size = Math.max(1, Math.hypot(value.re, value.im || 0));
+    const [size, truthSize] = [Math.hypot(value.re, value.im || 0), Math.hypot(truth.re, truth.im || 0)];
     const gap = Math.hypot(value.re - truth.re, (value.im || 0) - (truth.im || 0));
-    if (gap > Math.max(error.re, DOUBLE_ROUNDING * size)) return `${a.toString()} doesn't hold ${truth.toString()}`;
-    if (error.re > tolerance * Math.max(1, Math.hypot(truth.re, truth.im || 0)))
-      return `${a.toString()} isn't tight to ${tolerance}`;
+    if (gap > Math.max(error.re, agreementBound(DOUBLE_ROUNDING, size, truthSize)))
+      return `${a.toString()} doesn't hold ${truth.toString()}`;
+    if (error.re > agreementBound(tolerance, size, truthSize)) return `${a.toString()} isn't tight to ${tolerance}`;
     return undefined;
   }
   if (Array.isArray(p) && Array.isArray(q) && p[0] === "Interval" && q[0] === "Interval")
