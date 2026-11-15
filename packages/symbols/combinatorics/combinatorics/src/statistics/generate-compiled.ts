@@ -99,12 +99,16 @@ function agrees(
     }
     if (answer === undefined) continue;
     const same = (expected: unknown) => JSON.stringify(answer) === JSON.stringify(expected);
-    // The repeated route is the cheap one; the interpreter's own answer settles a difference.
-    if (
-      !same(evaluateEpsilRepeatedly(ce, definition.expr, { [SUBJECT]: subject })) &&
-      !same(evaluateEpsil(ce, definition.expr, { [SUBJECT]: subject }))
-    )
-      return false;
+    // The repeated route is the cheap one; the interpreter's own answer settles a difference, and
+    // a raise (a predicate that binds a parameter and isn't a Boolean there) is a difference.
+    const repeated = (): boolean => {
+      try {
+        return same(evaluateEpsilRepeatedly(ce, definition.expr, { [SUBJECT]: subject }));
+      } catch {
+        return false;
+      }
+    };
+    if (!repeated() && !same(evaluateEpsil(ce, definition.expr, { [SUBJECT]: subject }))) return false;
   }
   return true;
 }
