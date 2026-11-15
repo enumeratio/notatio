@@ -11,13 +11,19 @@ import { cx } from "../compute-engine/numerics/complex-arithmetic.ts";
 // BernoulliPolynomial(n, x) — Fungrim's name for Bernoulli polynomials B_n(x),
 // evaluated exactly for symbolic x and by Horner's rule for a numeric one.
 
+/**
+ * The largest degree evaluated. The exact coefficients come from the tangent numbers, whose
+ * recurrence costs n² big-integer steps (n = 1000 takes 0.1 s, n = 5000 over 15 s).
+ */
+const MAX_BERNOULLI_ORDER = 1000;
+
 export function evaluateBernoulliPolynomial(
   ce: ComputeEngine,
   n: Expression,
   x: Expression,
   numeric: boolean,
 ): Expression | undefined {
-  if (!isRealInt(n) || n.re < 0) return undefined;
+  if (!isRealInt(n) || n.re < 0 || n.re > MAX_BERNOULLI_ORDER) return undefined;
 
   if (numeric && isFiniteNum(x)) {
     if (x.im === 0) return numberResult(ce, cx(bernoulliPolyAt(n.re, x.re)));

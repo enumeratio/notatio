@@ -43,8 +43,18 @@ import { qFactorialBig } from "./q-factorial-big.ts";
 // limit — it has no exact closed form in general, so it's numeric-only and requires
 // |q| < 1 for convergence.
 
-/** The longest finite product `N(QBinomial)` multiplies out. */
+/**
+ * The longest finite product multiplied out: `N(QBinomial)` for an integer k, and
+ * `QPochhammer(a, q, n)` for an integer n (n = 1e5 ran past 90 s; 2000 factors take about 1 s).
+ */
 const MAX_PRODUCT = 2000;
+
+/**
+ * The largest n whose `QFactorial(n, q)` or `QBinomial(n, k, q)` is expanded in boxed arithmetic
+ * at box time. Both build a polynomial in q row by row, so the cost grows with n² (n = 100 takes
+ * about 1 s, n = 400 about 12 s); past it the call stays held.
+ */
+const MAX_EXPANDED_ORDER = 100;
 
 /** [k]_q = 1 + q + ... + q^(k-1), k ≥ 1. */
 function qInteger(ce: ComputeEngine, k: number, q: Expression): Expression {
@@ -162,7 +172,7 @@ export function declareQSeries(ce: ComputeEngine): void {
       const q = ops[1];
       const n = ops[2];
       if (a === undefined || q === undefined || n === undefined) return undefined;
-      if (isRealInt(n) && n.re >= 0) return qPochhammerFinite(ce, a, q, n.re);
+      if (isRealInt(n) && n.re >= 0) return n.re <= MAX_PRODUCT ? qPochhammerFinite(ce, a, q, n.re) : undefined;
       // The infinite product: numeric-only, and only where it converges (|q| < 1).
       if (n.isInfinity && n.re > 0) {
         if (!wantsNumber(ops, options) || !isFiniteNum(a) || !isFiniteNum(q)) return undefined;
@@ -186,7 +196,7 @@ export function declareQSeries(ce: ComputeEngine): void {
       const n = ops[0];
       const q = ops[1];
       if (n === undefined || q === undefined) return null;
-      if (isRealInt(n) && n.re >= 0) return qFactorialExpr(ce, n.re, q);
+      if (isRealInt(n) && n.re >= 0 && n.re <= MAX_EXPANDED_ORDER) return qFactorialExpr(ce, n.re, q);
       // Any other n (non-integer, negative, symbolic) is a held canonical call: `evaluate` below
       // can reach it, and a symbolic k no longer leaves the call non-canonical.
       return ce._fn("QFactorial", [n.canonical, q.canonical]);
@@ -208,7 +218,10 @@ export function declareQSeries(ce: ComputeEngine): void {
       const value = atDigits(DOUBLE_DIGITS + 5, () =>
         qFactorialBig(ce.bignum(n.re), ce.bignum(q.re), DOUBLE_DIGITS + 5),
       );
-      return value === undefined ? undefined : ce.number(value.toNumber());
+      if (value === undefined) return undefined;
+      // Past the double range toNumber() is ±Infinity or 0: no value, so the call stays held.
+      const double = value.toNumber();
+      return Number.isFinite(double) && (double !== 0 || value.isZero()) ? ce.number(double) : undefined;
     },
   });
 
@@ -219,7 +232,8 @@ export function declareQSeries(ce: ComputeEngine): void {
       const k = ops[1];
       const q = ops[2];
       if (n === undefined || k === undefined || q === undefined) return null;
-      if (isRealInt(n) && n.re >= 0 && isRealInt(k)) return qBinomialExpr(ce, n.re, k.re, q);
+      if (isRealInt(n) && n.re >= 0 && n.re <= MAX_EXPANDED_ORDER && isRealInt(k))
+        return qBinomialExpr(ce, n.re, k.re, q);
       // Held but canonical for any other (n, k): symbolic, non-integer or negative.
       return ce._fn("QBinomial", [n.canonical, k.canonical, q.canonical]);
     },
