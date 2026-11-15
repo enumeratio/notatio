@@ -468,6 +468,17 @@ test.describe("environments", () => {
     await expect(cell.locator("notatio-out")).not.toContainText("expected");
   });
 
+  test("a story card's control is a slider on screen and none when printed", async ({ page }) => {
+    await page.goto("/reference/component/Plot");
+    const canvas = page
+      .locator(".story .story-canvas")
+      .filter({ has: page.locator("input[type=range]") })
+      .first();
+    await expect(canvas.locator("input[type=range]").first()).toBeVisible({ timeout: 120_000 });
+    await page.emulateMedia({ media: "print" });
+    await expect(canvas.locator("input[type=range]")).toHaveCount(0);
+  });
+
   test("a narrow column's plot follows its slider", async ({ page }) => {
     await page.goto("/docs/components/environments");
     const out = story(page, "a-narrow-column").locator(".env-out");

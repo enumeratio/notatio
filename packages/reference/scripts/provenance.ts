@@ -256,8 +256,15 @@ export const collect = (
   wolframHeads: Readonly<Record<string, string>>,
   /** The committed kernel snapshot (`coverage-data.ts`): head → systems that have it. */
   coverage: Readonly<Record<string, readonly string[]>> = {},
+): HeadRecord[] => recordsOf(provenanceLedger(bare, ours, catalogue), wolframHeads, coverage);
+
+/** The records `collect` writes, from a ledger already built (the ledger is the slow part). */
+export const recordsOf = (
+  ledger: ReturnType<typeof provenanceLedger>,
+  wolframHeads: Readonly<Record<string, string>>,
+  coverage: Readonly<Record<string, readonly string[]>> = {},
 ): HeadRecord[] =>
-  provenanceLedger(bare, ours, catalogue).map((row) => ({
+  ledger.map((row) => ({
     name: row.name,
     provenance: row.provenance,
     declared: row.declared ?? null,

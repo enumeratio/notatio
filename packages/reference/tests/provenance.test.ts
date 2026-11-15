@@ -7,7 +7,7 @@ const entries = referenceEntries();
 import { coverage } from "../src/coverage-data.ts";
 import { provenance } from "../src/provenance-data.ts";
 import { declaredEngine } from "../scripts/engines.ts";
-import { classify, collect, divergences, divergingHeads, headOf, provenanceLedger } from "../scripts/provenance.ts";
+import { classify, divergences, divergingHeads, headOf, provenanceLedger, recordsOf } from "../scripts/provenance.ts";
 import type { MathJSON, ReferenceEntry } from "../src/types.ts";
 
 // One shared pair for the whole file — `divergences`/`provenanceLedger` isolate each
@@ -427,12 +427,8 @@ test("the built provenance data is what the engines say", () => {
   // here checks the build ran against these records and engines. A change in the diff of a
   // rebuild means a head moved between compute-engine's and ours, which is worth noticing.
   // `elsewhere` is the committed kernel snapshot (`coverage-data.ts`), folded in by `collect`.
-  // Fresh engines, as the collector uses: not because reusing `bare`/`ours` from the ledger
-  // above would be wrong (it wouldn't -- see `isolateFreeSymbols`), just to check `collect`
-  // does the same thing collect-provenance.ts does, starting from the same blank state.
-  expect(collect(new ComputeEngine(), declaredEngine(), entries, HEADS, coverage)).toEqual(
-    provenance.map((record) => ({ ...record })),
-  );
+  // Built from the file's one ledger: building a second costs as much as the first.
+  expect(recordsOf(ledger, HEADS, coverage)).toEqual(provenance.map((record) => ({ ...record })));
 });
 
 test("the coverage snapshot names no retired head", () => {
