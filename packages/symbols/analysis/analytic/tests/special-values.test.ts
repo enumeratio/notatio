@@ -111,13 +111,13 @@ test("EllipticK derivatives at 0 are exact, and agree with mpmath", () => {
     expect(derivative.toString(), `K^(${i + 1})(0)`).not.toContain("Derivative");
     expect(Math.abs(derivative.N().re - value), `K^(${i + 1})(0)`).toBeLessThan(1e-14);
   });
-  // any other point stays the inert call
-  expect(
-    ce
-      .box(["Apply", ["Derivative", "EllipticK", 1], "m"])
-      .evaluate()
-      .toString(),
-  ).toContain("Derivative");
+  // any other point is compute-engine's closed form, K′(m) = (E(m) − (1−m)K(m)) / (2m(1−m))
+  const away = ce
+    .box(["Apply", ["Derivative", "EllipticK", 1], "m"])
+    .evaluate()
+    .toString();
+  expect(away).not.toContain("Derivative");
+  expect(away).toContain("EllipticE");
 });
 
 test("Series of EllipticK at 0 carries the closed-form coefficients", () => {

@@ -82,6 +82,24 @@ export function declareSpecialValues(ce: Engine): void {
     { arity: 2, compile: "builtin" },
   );
 
+  // compute-engine's `Derivative(EllipticK, n)` is the closed form of K⁽ⁿ⁾(m), which is 0/0 at the
+  // removable singularity m = 0 and so gives NaN there; the function takes the exact value at 0.
+  // compile builtin: the same function away from 0
+  wrapOperator(
+    ce,
+    ["Derivative", "EllipticK", 1],
+    (ops) =>
+      symbolNameOf(ops[0]) === "EllipticK" && bigIntegerAt(ops[1]) !== undefined && Number(bigIntegerAt(ops[1])) >= 1,
+    (native) => (ops, options) => {
+      const derivative = native?.(ops, options);
+      const json = derivative?.json as unknown[] | undefined;
+      if (json?.[0] !== "Function" || typeof json[2] !== "string") return derivative;
+      const atZero = ellipticKDerivativeAtZero(ce, Number(bigIntegerAt(ops[1]))).json;
+      return ce.box(["Function", ["If", ["Equal", json[2], 0], atZero, json[1]], json[2]] as never);
+    },
+    { arity: 2, compile: "builtin" },
+  );
+
   // compile builtin: the reduction at matching exact parameters; the numeric kernel answers the rest
   wrapOperator(
     ce,
