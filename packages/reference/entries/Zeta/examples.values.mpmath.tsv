@@ -39,9 +39,15 @@ n-zeta-2p5-plus-i-neg-2p5	(zeta(mpc(2.5, 1), -2.5))	(83.204683006331172744954206
 zeta-3-133-at-a-negative-integer-a	zeta(3.133, -2)	NoConvergence: zeta: too much cancellation	error
 n-zeta-1-3-0-drops-the-zero-term	(zeta((mpf(1)/3), 0))	NoConvergence: zeta: too much cancellation	error
 n-zeta-i-0-to-ten-digits	enumeratio_n(lambda: (zeta(mpc(0, 1), mpc(0, 0))), 10)	(1.003300224-0.4181554491j)	disagree
-n-zeta-complex-2-plus-i-25-declines	enumeratio_n(lambda: (zeta(mpc(2, 1))), 25)	(1.150355703254902671742850-0.4375308659196078811175279j)	disagree
-n-zeta-complex-1-plus-3i-25-declines	enumeratio_n(lambda: (zeta(mpc(1, 3))), 25)	(0.6288517339518255341899268-0.1074757601505864404311041j)	disagree
-n-zeta-complex-2-plus-i-16-declines	enumeratio_n(lambda: (zeta(mpc(2, 1))), 16)	(1.150355703254903-0.4375308659196079j)	disagree
+n-zeta-complex-2-plus-i-to-25-digits	enumeratio_n(lambda: (zeta(mpc(2, 1))), 25)	(1.150355703254902671742850-0.4375308659196078811175279j)	
+n-zeta-complex-1-plus-3i-to-25-digits	enumeratio_n(lambda: (zeta(mpc(1, 3))), 25)	(0.6288517339518255341899268-0.1074757601505864404311041j)	
+n-zeta-complex-2-plus-i-to-16-digits	enumeratio_n(lambda: (zeta(mpc(2, 1))), 16)	(1.150355703254903-0.4375308659196079j)	
+zeta-critical-line-1055-at-the-exact-double	zeta(mpc(0.5, 1055.0729513168335))	(-0.0490583746895581013916320973616 + 0.0638414785169873112422327032886j)	
+n-zeta-critical-line-10055-to-machine-precision	(zeta(mpc(0.5, 10055.072951316833)))	(-0.338041071040780229419806501326 - 0.938415000332282494302071251072j)	
+n-zeta-critical-line-past-the-term-cap-declines	(zeta(mpc(0.5, 10000055.072951317)))	(4.41268273905993877345249588132 - 10.5358891212316459116123036215j)	disagree
+n-zeta-1-2-plus-135i-to-30-digits	enumeratio_n(lambda: (zeta(((mpf(1)/2) + mpc(0, 135)))), 30)	(-0.474946180758882777849970440425+0.632508600458115522621725529914j)	
+n-zeta-9-10-plus-191i-to-30-digits	enumeratio_n(lambda: (zeta(((mpf(9)/10) + mpc(0, 191)))), 30)	(1.76079401087835538042786325771-1.16526388297386637019490483070j)	
+n-zeta-1-2-plus-3000i-to-40-digits	enumeratio_n(lambda: (zeta(((mpf(1)/2) + mpc(0, 3000)))), 40)	(1.590473014640815435801482698477309542532+3.184612407390822327170750884117281014623j)	
 on-the-critical-line-zeta-1-2-14i-0-02224-0	(zeta(mpc(0.5, 14)))	(0.022241142609993589246213199204 - 0.103258123266450057902363095553j)	
 two-argument-zeta-s-a-via-enumeratio-analytic	zeta(2, 1)	1.64493406684822643647241516665	
 zeta-2-2-zeta-2-1-pi-2-6-1	zeta(2, 2)	0.644934066848226436472415166646	

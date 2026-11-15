@@ -1,4 +1,4 @@
-import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
+import { isNumber, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
 import {
   atDigits,
   bigRealOperand,
@@ -149,11 +149,21 @@ export function declareExpIntegralE(ce: ComputeEngine): void {
         if (value !== undefined) return ce.number(value);
       }
 
+      // z^(n−1) on the principal branch: `Power` takes the real root of a negative base at an
+      // exact rational exponent (z = −2.2, n = 2/3 reads (−2.2)^(−1/3) as −0.769), so a
+      // negative real z goes through Exp((n−1)·Ln z) unless n is an integer.
+      const exponent = ce.function("Subtract", [n, ce.One]);
+      const principal = z.im === 0 && z.re < 0 && !(n.im === 0 && Number.isInteger(n.re));
       const expr = ce.function("Multiply", [
-        ce.function("Power", [z, ce.function("Subtract", [n, ce.One])]),
+        principal
+          ? ce.function("Exp", [ce.function("Multiply", [exponent, ce.function("Ln", [z])])])
+          : ce.function("Power", [z, exponent]),
         ce.function("Gamma", [ce.function("Subtract", [ce.One, n]), z]),
       ]);
-      return expr.N();
+      // Where Γ(1−n, z) declines (E_n(−2200) is e^2200, past a double) the product keeps its
+      // Gamma call; the call itself stays unevaluated rather than a half-evaluated form of it.
+      const value = expr.N();
+      return isNumber(value) ? value : undefined;
     },
   });
 }

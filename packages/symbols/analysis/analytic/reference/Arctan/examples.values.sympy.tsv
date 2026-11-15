@@ -4,6 +4,7 @@ arctan-1	atan(1)	pi/4
 arctan-sqrt-3	atan(sqrt(3))	pi/3	
 a-machine-precision-argument-evaluates	atan(0.5)	0.463647609000806	
 series-arctan-x-x-positiveinfinity-5	series(atan(Symbol("x")), Symbol("x"), oo, 5 + 1)	-1/(5*x**5) + 1/(3*x**3) - 1/x + pi/2 + O(x**(-6), (x, oo))	
+the-imaginary-unit-is-a-logarithmic-singularity	atan(sqrt(-1))	oo*I	disagree
 arbitrary-precision-via-n	N(atan(Rational(1, 2)), 30)	0.463647609000806116214256231461	
 evaluates-at-a-complex-argument	atan((2.5 + 1*I))	1.23342585568312 + 0.123674060459027*I	
 wolfram-s-two-argument-arctan-x-y-is-compute			

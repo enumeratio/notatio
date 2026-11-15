@@ -4,7 +4,7 @@
 // all draw from here, so nothing is written twice.
 
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { createRequire } from "node:module";
 import {
   ALL_STATISTICS,
   CARRIERS,
@@ -17,9 +17,9 @@ import {
 } from "@notatio/combinatorics";
 import { allFamilies } from "@notatio/combinatorics/collections";
 import { crosswalkForMap, crosswalkForStatistic } from "@notatio/reference";
-import { repoRoot } from "./repo-docs.ts";
 
-const DATA = join(repoRoot, "packages/symbols/combinatorics/combinatorics/findstat/data");
+// The FindStat snapshots are package data, read through combinatorics' exports (the tree's or an installed copy).
+const require = createRequire(import.meta.url);
 
 interface Snapshot<T> {
   readonly source: string;
@@ -40,7 +40,8 @@ export interface FindStatMap {
   readonly sample: readonly [string, string][];
 }
 
-const read = <T>(file: string): Snapshot<T> => JSON.parse(readFileSync(join(DATA, file), "utf8")) as Snapshot<T>;
+const read = <T>(file: string): Snapshot<T> =>
+  JSON.parse(readFileSync(require.resolve(`@notatio/combinatorics/findstat/data/${file}`), "utf8")) as Snapshot<T>;
 const statistics = read<FindStatStatistic>("statistics.json").items;
 const maps = read<FindStatMap>("maps.json").items;
 

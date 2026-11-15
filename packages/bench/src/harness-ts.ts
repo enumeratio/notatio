@@ -1,7 +1,8 @@
 // Our side of the benchmark, as a harness like every generated one (https://github.com/enumeratio/notatio/wiki/Benchmarking
 // §4.2): reads case names on stdin, answers `<<name>>{json}` on stdout. The engine is
-// configured once; each case is boxed once, outside the timing, and only `evaluate()` (or
-// `N()` for a numeric precision) is timed.
+// configured once; every timed call gets a freshly boxed expression, boxed before the
+// sample starts and outside the timing, and only `evaluate()` (or `N()` for a numeric precision)
+// is timed. A boxed `List` keeps its evaluated elements, so evaluating one object twice times a lookup.
 //
 //   node packages/bench/src/harness-ts.ts
 
@@ -25,15 +26,23 @@ function run(name: string): object {
   const cell = c.systems.ts;
   if (cell === undefined || !("sources" in cell)) return { error: "not planned for ts" };
   ce.precision = typeof c.precision === "number" ? c.precision : "machine";
-  const boxed = cell.sources.map((source) => ce.box(JSON.parse(source)));
+  const inputs = cell.sources.map((source) => JSON.parse(source));
+  const boxed = inputs.map((input) => ce.box(input));
   const numeric = c.precision !== "exact";
-  const once = (i: number): unknown => (numeric ? boxed[i]!.N() : boxed[i]!.evaluate());
-  const first = once(0) as { json: unknown; isSame: (other: unknown) => boolean };
+  const once = (expr: (typeof boxed)[number]): unknown => (numeric ? expr.N() : expr.evaluate());
+  const first = once(boxed[0]!) as { json: unknown; isSame: (other: unknown) => boolean };
   // An expression left as it was is no answer; timing it would only time the lookup.
   if (first.isSame(boxed[0])) return { error: "stays unevaluated" };
   const value = answerText(first.json);
+  // One fresh box per call of the coming sample, the inputs taken in turn.
+  let pool: typeof boxed = [];
+  let taken = 0;
   let next = 0;
-  const timed = measure(() => once(next++ % boxed.length), { budgetMs: c.budget * 1000 });
+  const prepare = (k: number): void => {
+    pool = Array.from({ length: k }, () => ce.box(inputs[next++ % inputs.length]));
+    taken = 0;
+  };
+  const timed = measure(() => once(pool[taken++]!), { budgetMs: c.budget * 1000, clear: prepare });
   return { value, ...timed };
 }
 

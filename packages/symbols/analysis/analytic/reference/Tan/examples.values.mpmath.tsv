@@ -13,6 +13,7 @@ a-huge-10-80-plus-1-over-3-argument	(tan((mpmathify((enumeratio_pow(10, 80) + 1)
 tan-100-under-n	(tan(100))		
 series-tan-x-x-0-10			
 series-tan-x-x-1-over-2-times-pi-5			
+threads-over-a-list-at-a-negative-pi	[tan(0), tan((mpmathify(pi) / -1))]	[mpf('0.0'), mpf('1.69568553207377992879174029387737e-31')]	
 n-of-an-exact-argument-gives-an-arbitrary	(tan((mpf(6)/5)))	2.57215162212631893540999423603	
 evaluates-at-a-complex-argument	tan(mpc(2.5, 1))	(-0.237013830916270580522716158056 + 0.896437917127861752050952735755j)	
 threads-element-wise-over-a-matrix	[[tan((5 * (mpmathify(pi) / 6))), tan(pi)], [tan((mpmathify(pi) / 3)), tan((-pi))]]	[[mpf('-0.577350269189625764509148780502472'), mpf('-1.69568553207377992879174029387737e-31')], [mpf('1.73205080756887729352744634150544'), mpf('1.69568553207377992879174029387737e-31')]]	

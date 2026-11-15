@@ -21,6 +21,9 @@ const over = (a: Rational, b: Rational): Rational => reduced([a[0] * b[1], a[1] 
 const plus = (a: Rational, b: Rational): Rational => reduced([a[0] * b[1] + b[0] * a[1], a[1] * b[1]]);
 const minus = (a: Rational, b: Rational): Rational => plus(a, [-b[0], b[1]]);
 
+/** The largest integer at which Digamma sums H_{n−1} exactly (about 70 ms here, so a few hundred on a slow runner). */
+const DIGAMMA_EXACT_LIMIT = 1000n;
+
 const factorial = (n: bigint): bigint => (n <= 1n ? 1n : n * factorial(n - 1n));
 
 /**
@@ -178,7 +181,9 @@ export function declareWidened(ce: ComputeEngine): void {
     { arity: 2, compile: "builtin" },
   );
 
-  // ψ(n) = H_{n−1} − γ, the standard digamma identity, exact at every positive integer n.
+  // ψ(n) = H_{n−1} − γ, the standard digamma identity, exact at every positive integer n up to
+  // DIGAMMA_EXACT_LIMIT: H_{n−1} as one exact fraction costs about n³ (n = 3000 takes 1 s, n = 6000
+  // takes 11 s), so a larger n stays unevaluated.
   // Digamma already threads over a list natively; wrapping the scalar case is enough.
   // `finish` follows the caller: N() wants a decimal (EulerGamma has no exact value to stop
   // at), plain evaluate() keeps the exact symbolic form.
@@ -192,6 +197,9 @@ export function declareWidened(ce: ComputeEngine): void {
     },
     () => (ops, options) => {
       const n = bigIntegerAt(ops[0])!;
+      // A number past the limit is native PolyGamma's (its Digamma call above declines first).
+      if (n > DIGAMMA_EXACT_LIMIT)
+        return options.numericApproximation ? ce.function("PolyGamma", [0, ops[0]]).N() : undefined;
       const expr = ce.function("Subtract", [
         ce.function("HarmonicNumber", [ce.number(n - 1n)]),
         ce.symbol("EulerGamma"),

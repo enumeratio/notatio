@@ -18,7 +18,7 @@ import {
   sub,
   inexactComplex,
 } from "@notatio/ce-patches";
-import { carlsonRF, carlsonRJ, carlsonRJDeclines } from "./carlson.ts";
+import { carlsonRF, carlsonRJOrDecline, carlsonRJDeclines } from "./carlson.ts";
 import { ellipticPiBig, incompleteEllipticEBig, incompleteEllipticFBig } from "./elliptic-pi-big.ts";
 
 // The incomplete Legendre elliptic integrals, and one precision fix for the native
@@ -33,6 +33,30 @@ import { ellipticPiBig, incompleteEllipticEBig, incompleteEllipticFBig } from ".
 // φ = π/2 near m = 1 special case, all inside compute-engine's own Carlson code, not
 // duplicated here) -- the elliptic-e-complex patch that used to apply it here was
 // retired.
+
+/**
+ * Native `head(φ, m)` for the incomplete head that delegates to it, at finite operands. Where
+ * native declines (`EllipticE(400000i, 0.5)` is past the double range) its call comes back as the
+ * native head, which would rename the caller's call, so the caller stays unevaluated instead.
+ * Both integrals are finite at every complex operand (F and E diverge only at real m = 1,
+ * φ = π/2 + kπ), so a ComplexInfinity there is native's overflow (`EllipticF(0.3 + 400i, 0.5)`
+ * is 1.854i, not ∞) and is declined the same way. Non-finite operands keep native's own form.
+ */
+function delegate(
+  ce: ComputeEngine,
+  head: "EllipticE" | "EllipticF",
+  phi: Expression,
+  m: Expression,
+  options: EvalOptions,
+): Expression | undefined {
+  const value = ce.box([head, phi, m]).evaluate(options);
+  if (!isFiniteNum(phi) || !isFiniteNum(m)) return value;
+  return isDeclined(value, head, phi.im !== 0 || m.im !== 0) ? undefined : value;
+}
+
+/** Native's answer is its own call left unevaluated, or (at a complex operand) an overflowed ∞. */
+const isDeclined = (value: Expression, head: string, complex: boolean): boolean =>
+  value.operator === head || (complex && value.isFinite === false);
 
 /**
  * Declare `IncompleteEllipticF(φ, m)` — Fungrim's name for the incomplete Legendre
@@ -56,7 +80,7 @@ function declareIncompleteF(ce: ComputeEngine): void {
       // every other head here — only delegate once a numeric answer is actually wanted,
       // so this head's own name survives an unevaluated call.
       if (!wantsNumber(ops, options)) return undefined;
-      return ce.box(["EllipticF", phi, m]).evaluate(options);
+      return delegate(ce, "EllipticF", phi, m, options);
     },
   });
 }
@@ -90,11 +114,12 @@ function declareIncompleteE(ce: ComputeEngine): void {
       if (!isFiniteNum(phi) || !isFiniteNum(m)) return ce.box(["EllipticE", phi, m]).evaluate(options);
 
       const k = m.im !== 0 ? Math.round(phi.re / Math.PI) : 0;
-      if (k === 0) return ce.box(["EllipticE", phi, m]).evaluate(options);
+      if (k === 0) return delegate(ce, "EllipticE", phi, m, options);
 
       const phi0 = phi.im === 0 ? ce.number(phi.re - k * Math.PI) : inexactComplex(ce, phi.re - k * Math.PI, phi.im);
       const eComplete = ce.box(["EllipticE", m]).evaluate(options); // the patched complete form
       const eIncomplete = ce.box(["EllipticE", phi0, m]).evaluate(options); // φ0 is back in range
+      if (isDeclined(eComplete, "EllipticE", true) || isDeclined(eIncomplete, "EllipticE", true)) return undefined;
       return ce.box(["Add", ["Multiply", 2 * k, eComplete], eIncomplete]).evaluate(options);
     },
   });
@@ -114,7 +139,8 @@ function ellipticPiComplete(n: Cx, m: Cx): Cx | undefined {
   const oneMinusN = sub(one, n);
   if (carlsonRJDeclines(cx(0), oneMinusM, one, oneMinusN)) return undefined;
   const rf = carlsonRF(cx(0), oneMinusM, one);
-  const rj = carlsonRJ(cx(0), oneMinusM, one, oneMinusN);
+  const rj = carlsonRJOrDecline(cx(0), oneMinusM, one, oneMinusN);
+  if (rj === undefined) return undefined;
   return add(rf, scale(mul(n, rj), 1 / 3));
 }
 
@@ -135,7 +161,8 @@ function incompleteEllipticPiBase(n: Cx, phi: Cx, m: Cx): Cx | undefined {
   const p = sub(one, mul(n, s2));
   if (carlsonRJDeclines(x, y, one, p)) return undefined;
   const rf = carlsonRF(x, y, one);
-  const rj = carlsonRJ(x, y, one, p);
+  const rj = carlsonRJOrDecline(x, y, one, p);
+  if (rj === undefined) return undefined;
   return add(mul(s, rf), scale(mul(n, mul(s3, rj)), 1 / 3));
 }
 

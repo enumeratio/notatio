@@ -7,7 +7,8 @@
   "files": [
     "dist",
     "reference",
-    "docs"
+    "docs",
+    "findstat/data"
   ],
   "type": "module",
   "exports": {
@@ -32,6 +33,7 @@
       "import": "./dist/notation.mjs"
     },
     "./declares.json": "./dist/declares.json",
+    "./findstat/data/*": "./findstat/data/*",
     "./package.json": "./package.json"
   },
   "scripts": {
@@ -67,7 +69,6 @@
     "@cortex-js/compute-engine": "^0.187.1"
   },
   "enumeratio": {
-    "site": "enumeratio",
     "layer": "extension",
     "area": "combinatorics",
     "extends": [

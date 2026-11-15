@@ -26,6 +26,23 @@ test("IncompleteEllipticF/E delegate to native EllipticF/E — same value, not j
   expect(ce.box(["IncompleteEllipticE", phi, m]).N().re).toBe(ce.box(["EllipticE", phi, m]).N().re);
 });
 
+test("a call native declines or overflows stays the caller's own call, not ComplexInfinity or EllipticE", () => {
+  // mpmath: ellipf(400000i, 0.5) = 1.854i and ellipe(400000i, 0.5) ≈ 2.2e173717i, past a double.
+  for (const head of ["IncompleteEllipticF", "IncompleteEllipticE"]) {
+    for (const y of [300, 400, 400000]) {
+      for (const m of [0.5, ["Complex", 0.3, 0.2]] as const) {
+        const value = ce.box(["N", [head, ["Complex", 0.3, y], m]] as never).evaluate();
+        // Within a double's reach it is the answer; past it, the call itself.
+        if (value.operator === head) continue;
+        expect(value.isFinite).toBe(true);
+      }
+    }
+  }
+  expect(ce.box(["N", ["IncompleteEllipticE", ["Complex", 0, 400000], 0.500000001]]).evaluate().operator).toBe(
+    "IncompleteEllipticE",
+  );
+});
+
 test("IncompleteEllipticF(0, m) = 0 and IncompleteEllipticE(0, m) = 0", () => {
   for (const m of [0.2, 0.7, 1.5]) {
     expect(ce.box(["IncompleteEllipticF", 0, m]).N().re).toBeCloseTo(0, 13);

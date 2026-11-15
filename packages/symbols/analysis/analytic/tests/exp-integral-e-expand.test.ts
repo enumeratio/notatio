@@ -47,3 +47,11 @@ test("a list expands element by element", () => {
   expect(result.operator).toBe("List");
   expect(JSON.stringify(result.json)).not.toContain('"ExpIntegralE"');
 });
+
+test("past a double's range at a negative z the call stays unevaluated, not a product holding Gamma", () => {
+  // mpmath: expint(5/3, −2.2e6) ≈ −3.29e955441.
+  for (const n of [["Rational", 5, 3], 2, 0.5]) {
+    const value = ce.box(["N", ["ExpIntegralE", n, -2200000]] as never).evaluate();
+    expect(value.operator).toBe("ExpIntegralE");
+  }
+});

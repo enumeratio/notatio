@@ -100,12 +100,26 @@ test(
       const key = [...packages].toSorted().join(",");
       groups.set(key, [...(groups.get(key) ?? []), ...cases.filter((c) => c.id.startsWith(`${h.package}/${h.head}/`))]);
     }
+    type Result = Awaited<ReturnType<typeof runCases>>[number];
+    const differs = (a: Result, b: Result | undefined): boolean =>
+      b === undefined || a.outcome !== b.outcome || !agree(a.value, b.value);
     const differ: string[] = [];
     for (const [key, group] of groups) {
-      for (const r of await runCases(group, { ...options, setup: setup(`?packages=${key}`) })) {
-        const f = full.get(r.id)!;
-        if (r.outcome !== f.outcome || !agree(r.value, f.value)) differ.push(`${r.id} [${key}]`);
-      }
+      const lazy = await runCases(group, { ...options, setup: setup(`?packages=${key}`) });
+      // A worker that doesn't finish building its engine within the pool's spawn guard answers
+      // `Aborted` for the case it was handed first, on either engine, when three build at once on a
+      // loaded runner. A case that differs is run again alone, and reported only if it still does.
+      const suspect = lazy.filter((r) => differs(r, full.get(r.id)));
+      if (suspect.length === 0) continue;
+      const again = suspect.map((r) => ({ id: r.id, input: group.find((c) => c.id === r.id)!.input }));
+      const solo = { ...options, concurrency: 1 };
+      const [fullAgain, lazyAgain] = [
+        await runCases(again, { ...solo, setup: setup() }),
+        await runCases(again, { ...solo, setup: setup(`?packages=${key}`) }),
+      ];
+      lazyAgain.forEach((r, i) => {
+        if (differs(r, fullAgain[i])) differ.push(`${r.id} [${key}]`);
+      });
     }
     expect(differ).toEqual([]);
   },

@@ -12,7 +12,7 @@
 // kernels below stay: @notatio/analytic still calls them directly for certified-
 // precision evaluation, and DirichletBeta/DirichletL still need HurwitzZeta/Zeta correct
 // beyond a double's digits.
-import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
+import type { BigDecimal, Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { wrapOperator } from "@notatio/engine";
 import type { LibraryRecord } from "../../patch.ts";
 import { atEnginePrecision, bigRealOperand, bigResult, DOUBLE_DIGITS } from "../../support/precise.ts";
@@ -33,7 +33,14 @@ import { lerchPhiChecked } from "../numerics/lerch-phi.ts";
 import { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 import { lerchPhiBig } from "../numerics/lerch-phi-big.ts";
 import { hurwitzZetaChecked, zetaGeneralizedChecked } from "../numerics/hurwitz-zeta.ts";
-import { hurwitzZetaBig, zetaGeneralizedBig, type BigCx, bigCx } from "../numerics/hurwitz-zeta-big.ts";
+import {
+  hurwitzZetaBig,
+  zetaGeneralizedBig,
+  type BigCx,
+  bigCx,
+  beyondTermCap,
+  exactDouble,
+} from "../numerics/hurwitz-zeta-big.ts";
 import { digamma, polygamma, polygammaCoefficient } from "../numerics/polygamma.ts";
 import { bernoulliPolyExpr } from "../numerics/bernoulli-rational.ts";
 
@@ -193,7 +200,7 @@ export function evaluateHurwitz(
 
   // Numeric Euler–Maclaurin for everything else — only when a number is asked for.
   if (numeric && isFiniteNum(s) && isFiniteNum(a)) {
-    return bigZetaResult(ce, hurwitzZetaBig, s, a) ?? checkedResult(ce, hurwitzZetaChecked, s, a);
+    return numericZeta(ce, hurwitzZetaBig, hurwitzZetaChecked, s, a);
   }
 
   return undefined; // stay symbolic
@@ -250,7 +257,7 @@ export function evaluateZeta(ce: ComputeEngine, ops: readonly Expression[], nume
 
   // a concrete with Re(a) ≤ 0: generalized-zeta convention, numeric only.
   if (numeric && isFiniteNum(s)) {
-    return bigZetaResult(ce, zetaGeneralizedBig, s, a) ?? checkedResult(ce, zetaGeneralizedChecked, s, a);
+    return numericZeta(ce, zetaGeneralizedBig, zetaGeneralizedChecked, s, a);
   }
 
   return undefined; // stay symbolic
@@ -268,17 +275,40 @@ function checkedResult(
 }
 
 /**
- * A numeric operand as BigDecimals. Above machine precision the real part is the engine's
- * bignum (1/3 to every digit asked for); at machine precision it is the double, which is
- * closer than the 15-digit bignum compute-engine would give.
+ * A numeric operand as BigDecimals. Above machine precision each part is the engine's bignum
+ * (1/3 to every digit asked for); at machine precision it is the double's exact binary value,
+ * which is what a machine number means and closer than the 15-digit bignum compute-engine
+ * would give.
  */
 const bigOperand = (ce: ComputeEngine, x: Expression): BigCx =>
-  bigCx(ce.precision > DOUBLE_DIGITS ? (x.bignumRe ?? x.re) : x.re, x.im);
+  ce.precision > DOUBLE_DIGITS
+    ? bigCx(x.bignumRe ?? x.re, x.bignumIm ?? x.im)
+    : bigCx(exactDouble(x.re), exactDouble(x.im));
 
 /**
- * ζ on the bignum kernel, boxed; undefined to fall back to the double one. A real result
- * keeps the engine's precision. A complex one can't: compute-engine holds a complex number
- * as a pair of doubles, so each part is the double nearest the bignum value.
+ * ζ on the bignum kernel, else on the double one. Where the bignum kernel is out of reach
+ * because the sum is too long (|Im s| near 10^7), the double kernel's 10^-8 would pass for the
+ * digits asked for, so the call stays unevaluated.
+ */
+function numericZeta(
+  ce: ComputeEngine,
+  big: (s: BigCx, a: BigCx, digits: number) => BigCx | undefined,
+  double: (s: Cx, a: Cx) => Cx | undefined,
+  s: Expression,
+  a: Expression,
+): Expression | undefined {
+  const answer = bigZetaResult(ce, big, s, a);
+  if (answer !== undefined) return answer;
+  if (zetaKernel === "bignum" && beyondTermCap(bigOperand(ce, s), bigOperand(ce, a), Math.max(ce.precision, 17))) {
+    return undefined;
+  }
+  return checkedResult(ce, double, s, a);
+}
+
+/**
+ * ζ on the bignum kernel, boxed; undefined to fall back to the double one. Past machine
+ * precision each part keeps the engine's digits; at machine precision a complex value is the
+ * pair of doubles nearest the bignum one.
  */
 function bigZetaResult(
   ce: ComputeEngine,
@@ -289,8 +319,13 @@ function bigZetaResult(
   if (zetaKernel !== "bignum") return undefined;
   const r = kernel(bigOperand(ce, s), bigOperand(ce, a), Math.max(ce.precision, 17));
   if (r === undefined) return undefined;
-  if (!r.im.isZero()) return inexactComplex(ce, r.re.toNumber(), r.im.toNumber());
-  return ce.number(ce.precision > DOUBLE_DIGITS ? r.re.toPrecision(ce.precision) : r.re.toNumber());
+  const wide = ce.precision > DOUBLE_DIGITS;
+  if (!r.im.isZero()) {
+    if (!wide) return inexactComplex(ce, r.re.toNumber(), r.im.toNumber());
+    const digits = (x: BigDecimal): Json => ({ num: x.toPrecision(ce.precision).toString() });
+    return ce.box(["Complex", digits(r.re), digits(r.im)] as never);
+  }
+  return ce.number(wide ? r.re.toPrecision(ce.precision) : r.re.toNumber());
 }
 
 // --- PolyGamma widened to a complex z -------------------------------------------------

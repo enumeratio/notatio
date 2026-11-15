@@ -24,6 +24,9 @@ export interface BigCx {
 /** Digits carried past the ones asked for, so a final rounding is (almost always) correct. */
 const GUARD_DIGITS = 8;
 
+/** The most direct terms a plan may sum: a cap on the work, past which the kernel declines. */
+const MAX_TERMS = 1e6;
+
 /** Past this many working digits the cancellation left of the strip is too costly to carry. */
 const MAX_WORKING_DIGITS = 1200;
 
@@ -86,6 +89,25 @@ export const pow = (z: BigCx, w: BigCx): BigCx => {
 
 const big = (x: number | BigDecimal): BigDecimal => (typeof x === "number" ? new BigDecimal(x) : x);
 
+/**
+ * The double `x` as the exact decimal it is (1055.0729513168335 is 1055.07295131683349609375).
+ * A double's shortest decimal moves it by up to half an ulp, which near t = 10^5 on the critical
+ * line is already 10^-11 of ζ; every other system reads the binary value, so the answer is ζ at it.
+ */
+export function exactDouble(x: number): BigDecimal {
+  if (!Number.isFinite(x) || Number.isInteger(x) || Math.abs(x) < 1e-290) return new BigDecimal(x);
+  const view = new DataView(new ArrayBuffer(8));
+  view.setFloat64(0, x);
+  const bits = view.getBigUint64(0);
+  const biased = Number((bits >> 52n) & 0x7ffn);
+  const fraction = bits & ((1n << 52n) - 1n);
+  const mantissa = biased === 0 ? fraction : fraction | (1n << 52n);
+  // x = ±mantissa · 2^(exponent), with exponent < 0 here; 2^−k = 5^k / 10^k.
+  const k = 1075 - Math.max(biased, 1);
+  const digits = (mantissa * 5n ** BigInt(k)).toString();
+  return new BigDecimal(`${x < 0 ? "-" : ""}${digits}e-${k}`);
+}
+
 /** A BigCx from doubles (each taken at its shortest decimal, as compute-engine reads floats). */
 export const bigCx = (re: number | BigDecimal, im: number | BigDecimal = 0): BigCx => ({
   re: big(re),
@@ -135,9 +157,10 @@ const lnAbsPow = (wr: number, wi: number, s: Cx): number =>
 /**
  * Choose N (direct terms) and M (Bernoulli pairs) so the first omitted tail term is below
  * 10^(−digits). A direct term costs a log, an exp and a sin/cos; a pair costs a few
- * multiplies — so of the N that work, take the one that minimises N + M/8.
+ * multiplies — so of the N that work, take the one that minimises N + M/8. Undefined where no N
+ * within `MAX_TERMS` of the start works (|Im s| near 10^7): the caller declines.
  */
-export function plan(s: Cx, a: Cx, digits: number): Plan {
+export function plan(s: Cx, a: Cx, digits: number): Plan | undefined {
   const target = -digits * LN10 - LN10;
   const n0 = Math.max(0, Math.ceil(1 - a.re)); // Re z ≥ 1
   const maxPairs = 4 * digits + 50;
@@ -145,7 +168,7 @@ export function plan(s: Cx, a: Cx, digits: number): Plan {
   let bestCost = Infinity;
   let firstN = -1;
   for (let n = n0; firstN < 0 || n <= 2 * firstN + 8; n += Math.max(1, Math.ceil((n - n0) / 16))) {
-    if (n > n0 + 1e6) break;
+    if (n > n0 + MAX_TERMS) break;
     const zr = a.re + n;
     const zi = a.im;
     const lnZ = 0.5 * Math.log(zr * zr + zi * zi);
@@ -182,9 +205,16 @@ export function plan(s: Cx, a: Cx, digits: number): Plan {
       best = { terms: n, pairs, largest: largest / LN10 };
     }
   }
-  if (!best) throw new Error("bigzeta: no Euler–Maclaurin truncation found");
   return best;
 }
+
+/** Whether ζ(s, a) at `digits` needs more direct terms than `MAX_TERMS`, so the kernel declines it. */
+export const beyondTermCap = (s: BigCx, a: BigCx, digits: number): boolean =>
+  plan(
+    { re: s.re.toNumber(), im: s.im.toNumber() },
+    { re: a.re.toNumber(), im: a.im.toNumber() },
+    digits + GUARD_DIGITS,
+  ) === undefined;
 
 /** Euler–Maclaurin at the working precision, for a plan made for it. */
 function eulerMaclaurin(s: BigCx, a: BigCx, { terms, pairs }: Plan): BigCx {
@@ -234,6 +264,7 @@ export function hurwitzZetaBig(s: BigCx, a: BigCx, digits: number): BigCx | unde
   let absolute = digits + GUARD_DIGITS;
   for (let attempt = 0; attempt < 2; attempt++) {
     const p = plan(sd, ad, absolute);
+    if (p === undefined) return undefined;
     const working = absolute + Math.max(0, Math.ceil(p.largest)) + 4;
     if (working > MAX_WORKING_DIGITS) return undefined;
     const r = atDigits(working, () => eulerMaclaurin(s, a, p));

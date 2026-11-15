@@ -44,10 +44,10 @@ test("the finest reading is kept beside the answer", () => {
 });
 
 test("a head that answers in doubles is rounded up to a double's digits, and declines past them", () => {
-  // Complex ζ boxes its value as a pair of doubles, so it is a double reading.
-  expect(n(["Zeta", ["Complex", 2, 1]], 10).json).toEqual(["Complex", 1.150355703, -0.4375308659]);
-  // Past them a double would pose as the digits asked for: the call declines, Zeta left unevaluated.
-  for (const digits of [16, 25, 30]) expect(n(["Zeta", ["Complex", 2, 1]], digits).operator).toBe("Zeta");
+  // Complex Γ boxes its value as a pair of doubles, so it is a double reading.
+  expect(n(["Gamma", ["Complex", 2, 1]], 10).json).toEqual(["Complex", 0.6529654964, 0.3430658398]);
+  // Past them a double would pose as the digits asked for: the call declines, Gamma left unevaluated.
+  for (const digits of [16, 25, 30]) expect(n(["Gamma", ["Complex", 2, 1]], digits).operator).toBe("Gamma");
 });
 
 test("an exact value or an input literal answers past a double's digits", () => {

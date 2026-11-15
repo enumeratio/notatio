@@ -18,6 +18,9 @@ import { fileURLToPath } from "node:url";
 import { minifySync } from "vite";
 
 const here = dirname(fileURLToPath(import.meta.url));
+// katex and mathlive are dependencies of components, so they resolve from its installed directory
+// (the workspace's package or a tarball's), not from a path in the repository.
+const components = dirname(createRequire(resolve(here, "package.json")).resolve("@notatio/components/package.json"));
 
 interface VendorPackage {
   readonly name: string;
@@ -36,13 +39,13 @@ const PACKAGES: readonly VendorPackage[] = [
   { name: "@cortex-js/compute-engine", from: here, entry: (exports, sub) => esm(exports[sub]) },
   {
     name: "katex",
-    from: resolve(here, "../../packages/components"),
+    from: components,
     minify: true,
     entry: (exports, sub) => (exports[sub] as { import?: { default?: string } } | undefined)?.import?.default,
   },
   {
     name: "mathlive",
-    from: resolve(here, "../../packages/components"),
+    from: components,
     // The production browser build, minified.
     entry: (exports, sub) =>
       sub === "." ? esm((exports["."] as { browser: { production: unknown } }).browser.production) : undefined,

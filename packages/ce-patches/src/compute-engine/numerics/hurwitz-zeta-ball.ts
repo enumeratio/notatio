@@ -35,6 +35,7 @@ export function hurwitzZetaBall(s: Ball, a: Ball, digits: number): Ball | undefi
   let absolute = digits + GUARD_DIGITS;
   for (let attempt = 0; attempt < 2; attempt++) {
     const p = plan(sd, ad, absolute);
+    if (p === undefined) return undefined;
     const working = absolute + Math.max(0, Math.ceil(p.largest)) + 4;
     if (working > MAX_WORKING_DIGITS) return undefined;
     const r = atDigits(working, () => certify(() => eulerMaclaurin(s, a, p)));
