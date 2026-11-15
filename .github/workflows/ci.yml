@@ -152,7 +152,18 @@ jobs:
         with:
           dist-key: ${{ needs.changes.outputs.dist_key }}
           artifact: "true"
+      # The route loaders' output (web/.vitepress/data/loader-cache.ts) is stored under the dist cache
+      # directory, keyed by everything they read; an unchanged key restores it and the build skips them.
+      - id: loaders
+        run: echo "key=$(node tools/ci/site-loaders.ts key)" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.temp }}/dist-cache/site-loaders
+          key: site-loaders-${{ runner.os }}-${{ steps.loaders.outputs.key }}
       - run: pnpm --filter @notatio/web run build
+        env:
+          SITE_TIMINGS: "1"
+          DIST_CACHE_DIR: ${{ runner.temp }}/dist-cache
       # Every URL the site has published still answers (web/ledger.tsv), against this build.
       - run: pnpm --filter @notatio/web exec vp test run .vitepress/ledger.test.ts
         env:

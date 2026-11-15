@@ -6,7 +6,15 @@ import { entries } from "../../.vitepress/data/reference-node.ts";
 import { fieldsOf } from "../../.vitepress/data/carrier-fields.ts";
 import { definitionsOf } from "../../.vitepress/data/definitions.ts";
 import { functionViewFor } from "../../.vitepress/data/function-view.ts";
-import { explorerProbes, PREVIEW, prerenderExamples } from "../../.vitepress/data/prerender.ts";
+import { cachedLoader } from "../../.vitepress/data/loader-cache.ts";
+import {
+  explorerProbes,
+  PREVIEW,
+  prerenderedHtml,
+  prerenderExamples,
+  restorePrerenderedHtml,
+} from "../../.vitepress/data/prerender.ts";
+import { timed } from "../../.vitepress/data/timings.ts";
 
 /** The table a collection's page shows: its `enumerate:` filled in from what the record implies (the statistics on offer as names only). */
 async function explorerFor(entry: ReferenceEntry, catalog: ExplorerCatalog) {
@@ -48,29 +56,40 @@ function clampOutputs(entry: ReferenceEntry): ReferenceEntry {
 // data a build ships is slim (reference-data.ts), so this is where a page's examples come from.
 // Each example comes answered (data/prerender.ts), so the page shows it before its scripts run.
 // `overloads` are the manifest's typed call forms with the package behind each.
+async function symbolPages() {
+  const catalog = { ...catalogOf(entries), ...(await explorerProbes()) };
+  const pages = [];
+  for (const entry of entries) {
+    const parameters = describeNow(entry.name).parameters ?? [];
+    pages.push({
+      params: {
+        name: entry.name,
+        entry: clampOutputs(entry),
+        prerendered: await prerenderExamples(entry),
+        fields: fieldsOf(entry.name),
+        explorer: await explorerFor(entry, catalog),
+        definitions: PREVIEW ? [] : definitionsOf(entry.name),
+        overloads: describeNow(entry.name).overloads ?? [],
+        parameters,
+        carrierSlot: await carrierSlotOf(parameters, carrierNames, entries, catalog),
+        maxSize: describeNow(entry.name).maxSize,
+        optionValues: describeNow(entry.name).optionValues,
+        functionView: functionViewFor(entry.name),
+      },
+    });
+  }
+  return pages;
+}
+
+// The typeset HTML `prerenderExamples` writes beside the pages is stored with them.
 export default {
-  async paths() {
-    const catalog = { ...catalogOf(entries), ...(await explorerProbes()) };
-    const pages = [];
-    for (const entry of entries) {
-      const parameters = describeNow(entry.name).parameters ?? [];
-      pages.push({
-        params: {
-          name: entry.name,
-          entry: clampOutputs(entry),
-          prerendered: await prerenderExamples(entry),
-          fields: fieldsOf(entry.name),
-          explorer: await explorerFor(entry, catalog),
-          definitions: PREVIEW ? [] : definitionsOf(entry.name),
-          overloads: describeNow(entry.name).overloads ?? [],
-          parameters,
-          carrierSlot: await carrierSlotOf(parameters, carrierNames, entries, catalog),
-          maxSize: describeNow(entry.name).maxSize,
-          optionValues: describeNow(entry.name).optionValues,
-          functionView: functionViewFor(entry.name),
-        },
-      });
-    }
-    return pages;
-  },
+  paths: () =>
+    timed("symbol-paths", async () => {
+      const { pages } = await cachedLoader(
+        "symbol",
+        async () => ({ pages: await symbolPages(), html: prerenderedHtml() }),
+        ({ html }) => restorePrerenderedHtml(html),
+      );
+      return pages;
+    }),
 };

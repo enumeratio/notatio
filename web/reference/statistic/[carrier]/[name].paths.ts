@@ -1,5 +1,7 @@
 import { type CarrierPicker, hasPicker, pickerOf } from "@notatio/frontend/core";
 import { catalogOf, type DistributionSource, distributionSourceOf } from "@notatio/frontend/explorer";
+import { cachedLoader } from "../../../.vitepress/data/loader-cache.ts";
+import { timed } from "../../../.vitepress/data/timings.ts";
 import { entries } from "../../../.vitepress/data/reference-node.ts";
 import { liveExpression, siblingsOf, statisticPages } from "../../../.vitepress/data/carrier-fields.ts";
 
@@ -24,28 +26,30 @@ const pickerFor = (carrier: string): Promise<CarrierPicker | undefined> => {
 
 // One page per statistic and carrier: a name on two carriers is two implementations. Names only
 // travel with a page: the distributions are computed in the browser, on demand.
+async function statisticRoutes() {
+  const all = statisticPages();
+  const pages = [];
+  for (const field of all) {
+    const distribution = await sourceOf(field.carrier);
+    pages.push({
+      params: {
+        carrier: field.carrier,
+        name: field.name,
+        title: `${field.name} on ${field.carrier}`,
+        field,
+        live: liveExpression(field),
+        siblings: siblingsOf(field),
+        distribution,
+        picker: await pickerFor(field.carrier),
+        carrierStatistics: distribution
+          ? all.filter((f) => f.carrier === field.carrier && f.name !== field.name).map((f) => f.name)
+          : undefined,
+      },
+    });
+  }
+  return pages;
+}
+
 export default {
-  async paths() {
-    const all = statisticPages();
-    const pages = [];
-    for (const field of all) {
-      const distribution = await sourceOf(field.carrier);
-      pages.push({
-        params: {
-          carrier: field.carrier,
-          name: field.name,
-          title: `${field.name} on ${field.carrier}`,
-          field,
-          live: liveExpression(field),
-          siblings: siblingsOf(field),
-          distribution,
-          picker: await pickerFor(field.carrier),
-          carrierStatistics: distribution
-            ? all.filter((f) => f.carrier === field.carrier && f.name !== field.name).map((f) => f.name)
-            : undefined,
-        },
-      });
-    }
-    return pages;
-  },
+  paths: () => timed("statistic-paths", () => cachedLoader("statistic", statisticRoutes)),
 };

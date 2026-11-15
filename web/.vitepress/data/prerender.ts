@@ -29,6 +29,22 @@ export const PREVIEW = process.argv.includes("preview");
 const HTML_DIR = resolve(dirname(fileURLToPath(import.meta.url)), "../cache/prerender");
 const htmlFile = (page: string): string => resolve(HTML_DIR, `${encodeURIComponent(page)}.json`);
 
+const written = new Map<string, Record<string, string>>();
+
+/** Writes `page`'s typeset HTML where `fillPrerendered` reads it. */
+function writeHtml(page: string, parts: Record<string, string>): void {
+  mkdirSync(HTML_DIR, { recursive: true });
+  writeFileSync(htmlFile(page), JSON.stringify(parts));
+  written.set(page, parts);
+}
+
+/** The HTML `prerenderExamples` wrote this run, by page: what a cached run writes back with `restorePrerenderedHtml`. */
+export const prerenderedHtml = (): Record<string, Record<string, string>> => Object.fromEntries(written);
+
+export function restorePrerenderedHtml(pages: Record<string, Record<string, string>>): void {
+  for (const [page, parts] of Object.entries(pages)) writeHtml(page, parts);
+}
+
 /** `page`'s HTML, written into its placeholders (`<span data-prerender="3:in"></span>`). */
 export function fillPrerendered(html: string, page: string): string {
   let parts: Record<string, string>;
@@ -103,8 +119,7 @@ export async function prerenderExamples(entry: ReferenceEntry): Promise<(Prerend
     // The seed is the markup `<notatio-out>` draws: a closed layout's grid, else the standard form's leaf.
     parts[`${i}:out`] = outMarkup({ ...a, html: a.html });
   });
-  mkdirSync(HTML_DIR, { recursive: true });
-  writeFileSync(htmlFile(entry.name), JSON.stringify(parts));
+  writeHtml(entry.name, parts);
   return answers.map((a) => (a === undefined ? undefined : { ...a, html: undefined }));
 }
 

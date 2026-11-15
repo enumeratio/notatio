@@ -22,6 +22,7 @@ import { writeServiceWorker } from "./host/service-worker.ts";
 import { referenceDataPlugin } from "./reference-data.ts";
 import { CATALOGUE } from "./theme/worker-catalogue.ts";
 import { reviewModePlugin } from "./review/plugin.ts";
+import { reached } from "./data/timings.ts";
 import { vendorExternals, vendorHref, writeVendor } from "./vendor.ts";
 
 // Resolve every @notatio/* import (bare and subpaths) to its source, so the docs
@@ -411,5 +412,8 @@ const config = defineConfig({
     socialLinks: [{ icon: "github", link: "https://github.com/enumeratio/notatio" }],
   },
 });
+
+// Milliseconds since the process started, as the config finishes loading.
+reached("config-loaded");
 
 export default config;
