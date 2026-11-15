@@ -46,10 +46,17 @@ test("pqaExpansion: every case's pre+period reassembles (via doubles) to the sou
     [0n, 1n, 1n, 2n, Math.sqrt(2)],
     [3n, 1n, 2n, 7n, (3 + Math.sqrt(7)) / 2],
     [1n, 1n, 1n, 2n, 1 + Math.sqrt(2)],
+    [0n, 2n, 1n, 3n, 2 * Math.sqrt(3)],
+    [1n, 3n, 4n, 5n, (1 + 3 * Math.sqrt(5)) / 4],
+    [1n, -2n, 3n, 7n, (1 - 2 * Math.sqrt(7)) / 3],
   ];
   for (const [a, b, c, d, expected] of cases) {
     const { pre, period } = pqaExpansion(a, b, c, d);
     const cycles = Array.from({ length: 20 }, () => period).flat();
     expect(reassemble([...pre, ...cycles])).toBeCloseTo(expected, 6);
   }
+});
+
+test("pqaExpansion: 2*sqrt(3) = [3; 2,6,2,6,...] (mpmath), a radical coefficient other than 1", () => {
+  expect(pqaExpansion(0n, 2n, 1n, 3n)).toEqual({ pre: [3n], period: [2n, 6n] });
 });

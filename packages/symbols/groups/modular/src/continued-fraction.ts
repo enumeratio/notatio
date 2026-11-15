@@ -60,11 +60,11 @@ export function pqaExpansion(a: bigint, b: bigint, c: bigint, d: bigint): PqaExp
   if (b === 0n || c === 0n) throw new Error("pqaExpansion: b and c must be nonzero");
   const absB = b < 0n ? -b : b;
   let D = absB * absB * d;
-  // (a + b√d)/c = (a|b| + b|b|√d)/(c|b|) = (a|b| ± √D)/(c|b|), sign = sign(b). A minus sign
-  // on √D is folded away by negating both P0 and Q0 (see the module's design notes): dividing
-  // (P − √D)/Q is the same real number as (−P + √D)/(−Q).
-  let P0 = a * absB;
-  let Q0 = c * absB;
+  // b√d = ±√D with D = b²d, sign = sign(b), so (a + b√d)/c = (a ± √D)/c. A minus sign on √D
+  // is folded away by negating both P0 and Q0: (P − √D)/Q is the same real number as
+  // (−P + √D)/(−Q). (2√3 is (0 + √12)/1, not √3.)
+  let P0 = a;
+  let Q0 = c;
   if (b < 0n) {
     P0 = -P0;
     Q0 = -Q0;
