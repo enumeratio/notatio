@@ -3,7 +3,7 @@
 // where a fake stands in for an uncooperative worker (see the last test) — small deadlines
 // and cases keep this fast.
 import { expect, test } from "vite-plus/test";
-import { createEvaluatorPool, runCases, type NodeWorkerLike } from "../src/node.ts";
+import { createEvaluatorPool, runCases, type EvaluatorPool, type NodeWorkerLike } from "../src/node.ts";
 
 // One of compute-engine's own cooperative loops (https://github.com/enumeratio/notatio/wiki/Computation §5.2): it checks a
 // `timeMs` deadline itself and answers `"Aborted"` as an ordinary VALUE well inside the
@@ -13,20 +13,28 @@ import { createEvaluatorPool, runCases, type NodeWorkerLike } from "../src/node.
 const SLOW = ["Sum", ["Mod", "k", 97], ["Tuple", "k", 1, 2_000_000_000]];
 
 test("runCases returns results in the same order as the input, regardless of completion order", async () => {
-  // The slow case is listed first but finishes last — order in the result must still
-  // follow `cases`, not completion order.
-  const results = await runCases(
+  // The pool is a stand-in whose answers the test releases itself, last case first, so the
+  // completion order is the reverse of the input order without any clock.
+  const settle: Array<() => void> = [];
+  const pool = {
+    evaluateDetailed: (input: unknown) =>
+      new Promise((resolve) => {
+        settle.push(() => resolve({ outcome: "Evaluated", value: input, ms: 0 }));
+      }),
+  } as unknown as EvaluatorPool;
+  const pending = runCases(
     [
-      { id: "slow", input: SLOW, timeMs: 150 },
-      { id: "fast-1", input: ["Add", 1, 1] },
-      { id: "fast-2", input: ["Add", 2, 2] },
+      { id: "first", input: 1 },
+      { id: "second", input: 2 },
+      { id: "third", input: 3 },
     ],
-    { concurrency: 3 },
+    { pool },
   );
-  expect(results.map((r) => r.id)).toEqual(["slow", "fast-1", "fast-2"]);
-  expect(results[0]).toMatchObject({ id: "slow", outcome: "Evaluated", value: "Aborted" });
-  expect(results[1]).toMatchObject({ id: "fast-1", outcome: "Evaluated", value: 2 });
-  expect(results[2]).toMatchObject({ id: "fast-2", outcome: "Evaluated", value: 4 });
+  expect(settle).toHaveLength(3);
+  for (const release of settle.toReversed()) release();
+  const results = await pending;
+  expect(results.map((r) => r.id)).toEqual(["first", "second", "third"]);
+  expect(results.map((r) => r.value)).toEqual([1, 2, 3]);
 });
 
 test("materialize expands a lazy collection into its elements; without it the call stays", async () => {
