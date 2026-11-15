@@ -219,7 +219,7 @@ test("a Try it panel: typed tuples and a body over slots", () => {
   const signature = { head: "IntegerPartitions", parameters: [{ name: "n", type: "integer" }] };
   expect(tryItOf(parseExpression("IntegerPartitions(8)").json, signature)).toEqual({
     params: "{{n, 8}, 0, 8, 1, Slider}",
-    value: "IntegerPartitions(_n)",
+    value: "integerPartitions(_n)",
   });
   expect(tryItOf(parseExpression("IntegerPartitions(8)").json, { head: "IntegerPartitions", parameters: [] })).toBe(
     undefined,

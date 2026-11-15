@@ -214,6 +214,42 @@
     ],
     "reason": "the complex plot cannot lower AppellF1"
   },
+  "ArbitraryConstant": {
+    "axis": {
+      "name": "n",
+      "position": 0
+    },
+    "axisDomain": "integer",
+    "window": [-10, 10],
+    "body": "ArbitraryConstant(n)",
+    "params": "",
+    "views": [
+      {
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "ArbitraryConstant(n)"
+      }
+    ]
+  },
+  "ArbitraryInteger": {
+    "axis": {
+      "name": "n",
+      "position": 0
+    },
+    "axisDomain": "integer",
+    "window": [-10, 10],
+    "body": "ArbitraryInteger(n)",
+    "params": "",
+    "views": [
+      {
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "ArbitraryInteger(n)"
+      }
+    ]
+  },
   "Arctan2": {
     "axis": {
       "name": "x",
@@ -1566,6 +1602,24 @@
         "window": "{x, -4, 4}",
         "body": "Re(Erfi(x))",
         "note": "real slice"
+      }
+    ]
+  },
+  "EulerE": {
+    "axis": {
+      "name": "n",
+      "position": 0
+    },
+    "axisDomain": "integer",
+    "window": [-10, 10],
+    "body": "EulerE(n)",
+    "params": "",
+    "views": [
+      {
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "EulerE(n)"
       }
     ]
   },
@@ -4142,24 +4196,6 @@
         "window": "{x, -4, 4}",
         "body": "Re(Power(p1, x))",
         "note": "real slice"
-      }
-    ]
-  },
-  "PowerMod": {
-    "axis": {
-      "name": "x",
-      "position": 2
-    },
-    "axisDomain": "real",
-    "window": [-10, 10],
-    "body": "PowerMod(a, b, x)",
-    "params": "{{a, 1}, -10, 10, 0.05, Slider}; {{b, 1}, -10, 10, 0.05, Slider}",
-    "views": [
-      {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "PowerMod(a, b, x)"
       }
     ]
   },
