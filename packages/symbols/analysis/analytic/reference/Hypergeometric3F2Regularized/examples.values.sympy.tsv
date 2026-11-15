@@ -9,6 +9,7 @@ n-hypergeometric3f2regularized-1-over-2-1-3-over	N(hyper([Rational(1, 2), 1, Rat
 n-hypergeometric3f2regularized-1-1-1-neg-1-2-3	N(hyper([1, 1, 1], [-1, 2], Rational(3, 10)) / (gamma(-1) * gamma(2)), 30)	0	disagree
 n-hypergeometric3f2regularized-1-2-3-4-5-neg-99	N(hyper([1, 2, 3], [4, 5], Rational(-99, 100)) / (gamma(4) * gamma(5)), 30)	0.00544431107561067145112642371579	
 n-hypergeometric3f2regularized-1-2-3-4-5-99-over	N(hyper([1, 2, 3], [4, 5], Rational(99, 100)) / (gamma(4) * gamma(5)), 30)	0.0107777425880661929498982568182	
+a-value-below-the-double-range-stays-unevaluated	hyper([1, 2, 3], [400, 5], 0.5) / (gamma(400) * gamma(5))		
 n-hypergeometric3f2regularized-1-1-1-2-3-1-over	N(hyper([1, 1, 1], [2, 3], Rational(1, 2)) / (gamma(2) * gamma(3)), 30)	0.550775414049915630639776883236	
 z-ge-1-stays-symbolic-no-continuation-past-the	hyper([1, 1, 1], [2, 3], 1.2) / (gamma(2) * gamma(3))	hyper((1, 1, 1), (2, 3), 1.2)/2	disagree
 n-hypergeometric3f2regularized-1-1-1-2-3-6-over	N(hyper([1, 1, 1], [2, 3], Rational(6, 5)) / (gamma(2) * gamma(3)), 30)	0.71744148192634133084237140079 - 0.0409844065138693640567038329041*I	disagree

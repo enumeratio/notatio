@@ -2,7 +2,7 @@ import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { applyDefinition, declareStatistics } from "../../src/statistics/declare.ts";
 import { PARTITION_STATISTICS } from "../src/statistics.ts";
-import { PARTITION_READINGS } from "./partition-findstat-readings.ts";
+import { DEEP_MAXIMUM_SIZE, PARTITION_READINGS } from "./partition-findstat-readings.ts";
 
 const ce = bareEngine();
 // Declared, not just indexed: StandardTableauCount is defined in terms of the
@@ -152,15 +152,17 @@ for (const definition of PARTITION_STATISTICS) {
   });
 }
 
-// Larger partitions run nightly (DEEP_TESTS=1).
+// Larger partitions run nightly (DEEP_TESTS=1). A reading that walks every object, such as the
+// rooted trees on n colored vertices (n^(n-1) of them), stops at its `DEEP_MAXIMUM_SIZE`.
 test.skipIf(!process.env.DEEP_TESTS)(
   "every partition definition agrees over every partition of 9..12",
   () => {
     for (const l of [9, 10, 11, 12].flatMap((n) => partitions(n)))
       for (const definition of PARTITION_STATISTICS)
-        expect(evaluate(definition.head, l), `${definition.head} [${l.join(", ")}]`).toBe(
-          EXPECTED[definition.head]!(l),
-        );
+        if (sum(l) <= (DEEP_MAXIMUM_SIZE[definition.head] ?? Infinity))
+          expect(evaluate(definition.head, l), `${definition.head} [${l.join(", ")}]`).toBe(
+            EXPECTED[definition.head]!(l),
+          );
   },
   1_800_000,
 );

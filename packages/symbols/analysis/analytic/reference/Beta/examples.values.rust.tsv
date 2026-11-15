@@ -21,6 +21,11 @@ partial-a-b-a-b-b-a-b-psi-a-psi-a-b-today-the
 a-nonpositive-integer-argument-is-a-pole-of-the	beta(n(-1), n(2))	panic: statrs: ANotGreaterThanZero	error
 beta-at-two-poles-compares-equal	equal(beta(n(-2), n(-1)), beta(n(0), n(2)))	panic: statrs: ANotGreaterThanZero	error
 a-pole-of-gamma-over-a-finite-denominator			
+gamma-pole-in-the-denominator	beta(x(-2.5), x(0.5))		
+gamma-pole-in-the-denominator-zero-sum	beta(x(0.5), x(-0.5))		
+gamma-pole-in-the-denominator-minus-one	beta(x(1.5), x(-2.5))		
+gamma-pole-in-the-denominator-rationals	nf(beta(rational(n(-5), n(2)), rational(n(1), n(2))))		
+a-negative-operand-off-the-poles	beta(x(-2.5), x(0.75))		
 beta-1-over-2-1-over-2-times-beta-1-1-over-2	(beta(rational(n(1), n(2)), rational(n(1), n(2))) * beta(n(1), rational(n(1), n(2))))	6.283185307179572	
 beta-1-over-2-1-over-2-times-beta-1-2	(beta(rational(n(1), n(2)), rational(n(1), n(2))) * beta(n(1), n(2)))	1.5707963267948912	
 beta-of-positive-infinity-0-is-indeterminate			

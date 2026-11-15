@@ -183,15 +183,16 @@ const cellsOf = (contents: unknown): number =>
 /** The subjects a map of `carrier` interprets, at most its share of the carrier's allowance. The
  *  smallest (by length of their MathJSON) half stay whole and the rest are spread evenly through the
  *  larger ones, the largest taken last, so every size is represented. The same subjects every run. */
-function budgeted(carrier: string, subjects: unknown[]): unknown[] {
+function budgeted(carrier: string, subjects: unknown[], most?: number): unknown[] {
   const type = carrierByName.get(carrier)?.type;
   const maps = MAPS.filter(
     (m) => m.from === type && (m.composedOf !== undefined || COMPILED_MAPS[mapKey(m)]?.run !== undefined),
   );
-  const cap = Math.max(
+  const share = Math.max(
     MIN_PER_MAP,
     Math.floor((CARRIER_ALLOWANCE[carrier] ?? DEFAULT_ALLOWANCE) / Math.max(1, maps.length)),
   );
+  const cap = Math.min(share, most ?? Infinity);
   if (subjects.length <= cap) return subjects;
   const bySize = subjects
     .map((s) => [JSON.stringify(s).length, s] as const)
@@ -209,6 +210,14 @@ function budgeted(carrier: string, subjects: unknown[]): unknown[] {
 // A map's subjects run in chunks of one test each, so the file's total grows with the sample
 // but no test comes near `testTimeout`.
 const CHUNK = 40;
+
+/** Maps whose interpreter takes about ten seconds a subject: the most subjects they interpret (spread
+ *  over every size the sample reaches) and the subjects per test. Gyration of an alternating sign matrix
+ *  takes 1 s at order 0, 7 s at 3, 13 s at 4 and 30 s at 5 and 6, so the deep sample of 150 took 40
+ *  minutes and its chunks of 40 outran `testTimeout`. */
+const SLOW_SAMPLE: ReadonlyMap<string, { most: number; chunk: number }> = new Map([
+  ["Gyration@alternating_sign_matrix", { most: 24, chunk: 4 }],
+]);
 
 // Every map compiled ahead of time, run from its generated code, against the interpreter. A map
 // the generator left interpreted (its compiled code disagreed) has no code to run.
@@ -240,6 +249,7 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
   // three letters in the standard run: the interpreter's inverse RSK is slow).
   const small = (words: unknown[]): unknown[] => words.filter((word) => DEEP || (word as unknown[]).length <= 4);
   const largest = SLOW_TO_INTERPRET.get(mapKey(map)) ?? Infinity;
+  const slow = SLOW_SAMPLE.get(mapKey(map));
   const subjects =
     map.argumentParts !== undefined
       ? partSubjects(ce, map, budgeted("Permutation", small(subjectsOf("Permutation"))))
@@ -248,11 +258,13 @@ for (const map of MAPS.filter((m) => m.composedOf === undefined && COMPILED_MAPS
         : budgeted(
             from.name,
             subjectsOf(from.name).filter((contents) => cellsOf(contents) <= largest),
+            slow?.most,
           );
   const title = `${map.name} from ${map.from}: compiled agrees with interpreted`;
-  for (let start = 0; start < subjects.length; start += CHUNK) {
-    test(subjects.length > CHUNK ? `${title} (${start / CHUNK + 1})` : title, () => {
-      for (const contents of subjects.slice(start, start + CHUNK))
+  const chunk = slow?.chunk ?? CHUNK;
+  for (let start = 0; start < subjects.length; start += chunk) {
+    test(subjects.length > chunk ? `${title} (${start / chunk + 1})` : title, () => {
+      for (const contents of subjects.slice(start, start + chunk))
         expect(run(contents), JSON.stringify(contents)).toEqual(
           wrapParts(map.imageParts, evaluateDefinition(ce, map, bareParts(map.argumentParts, contents))),
         );

@@ -29,6 +29,15 @@ export const inexactComplex = (ce: ComputeEngine, re: number, im: number): Expre
  */
 export const REAL_COLLAPSE_RELATIVE = 1e-14;
 
+/** The smallest normal double. Below it a double keeps fewer than 53 digits and then flushes to 0. */
+export const MIN_NORMAL = 2.2250738585072014e-308;
+
+/**
+ * Is a nonzero value, given by its log-magnitude, below the double range? A kernel that finds this
+ * true declines: the double it would box is subnormal or an exact 0, which is no value.
+ */
+export const underflows = (logMagnitude: number): boolean => logMagnitude < Math.log(MIN_NORMAL);
+
 export interface NumberResultOptions {
   /**
    * Absolute size of the noise in `im`, from the kernel's own scale (about its epsilon times

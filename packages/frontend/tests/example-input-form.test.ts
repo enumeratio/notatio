@@ -298,7 +298,7 @@ test.each(REMAINING.map((c) => [c.name, c] as const))("remaining: %s", (_, { men
 // Every example, the sweep's total, counted by the per-head test at the top (which reads each
 // example in a deep run): the spellings left alone are most of it. A count that moves is a loss
 // to look at, or a fix to lower it by.
-const TOTAL = 1040;
+const TOTAL = 1035;
 test.skipIf(!deep)("the sweep's total loss count holds", () => {
   expect(changed).toBe(TOTAL);
 });
