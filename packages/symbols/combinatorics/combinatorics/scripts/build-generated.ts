@@ -2,14 +2,17 @@
 // (see .gitignore). Run by `build`; the stubs come first because the sources the later scripts
 // load import the compiled caches.
 //
-// The compile steps take minutes between them and read only this package, the statistics
-// records and the dists of what it depends on, so each is skipped while its inputs hash the
-// same as at its last run (../../../manifest/scripts/stamp.ts) and the independent ones run
-// in parallel. `BUILD_JOBS` caps how many.
+// The compile steps read only this package (verdicts.tsv, the committed snapshot of their
+// interpreter cross-checks, with it: see verdict-snapshot.ts), the statistics records and the
+// dists of what it depends on, so each is skipped while its inputs hash the same as at its last
+// run (../../../manifest/scripts/stamp.ts) and the independent ones run in parallel.
+// `BUILD_JOBS` caps how many. No step runs the interpreter: an item without a fresh row stays
+// interpreted, and `pnpm run collect-verdicts` makes the row.
 
 import { execFileSync, spawn } from "node:child_process";
 import { availableParallelism } from "node:os";
 import { fileURLToPath } from "node:url";
+import { compiles } from "./steps.ts";
 
 // Imported by URL: a file outside the package in the program makes `vp pack` write its
 // declarations beside it.
@@ -27,22 +30,6 @@ const at = (path: string): string => fileURLToPath(new URL(`../${path}`, import.
 
 const quick = ["scripts/collect-statistics-naming.ts", "scripts/generate-map-laws.ts"];
 
-/** Each compile step and the one file it writes. */
-const compiles: ReadonlyArray<readonly [script: string, output: string]> = [
-  ["scripts/compile-maps.ts", "src/compiled-maps.generated.js"],
-  ["scripts/compile-families.ts", "collections/src/families/compiled-families.generated.js"],
-  ["compositions/scripts/compile-definitions.ts", "compositions/src/statistics.compiled.generated.js"],
-  ["lattice-paths/scripts/compile-definitions.ts", "lattice-paths/src/statistics.compiled.generated.js"],
-  ["partitions/scripts/compile-definitions.ts", "partitions/src/statistics.compiled.generated.js"],
-  ["permutations/scripts/compile-definitions.ts", "permutations/src/statistics.compiled.generated.js"],
-  ["tableaux/scripts/compile-definitions.ts", "tableaux/src/statistics.compiled.generated.js"],
-  ["trees/scripts/compile-definitions.ts", "trees/src/statistics.compiled.generated.js"],
-  ["set-partitions/scripts/compile-definitions.ts", "set-partitions/src/statistics.compiled.generated.js"],
-  ["words/scripts/compile-definitions.ts", "words/src/statistics.compiled.generated.js"],
-  ["graphs/scripts/compile-definitions.ts", "graphs/src/statistics.compiled.generated.js"],
-  ["cartan/scripts/compile-definitions.ts", "cartan/src/statistics.compiled.generated.js"],
-];
-
 const jobs = Number(process.env.BUILD_JOBS) || Math.max(1, Math.min(3, Math.floor(availableParallelism() / 3)));
 
 const run = (script: string): Promise<void> =>
@@ -53,7 +40,7 @@ const run = (script: string): Promise<void> =>
   });
 
 // What the steps write is not what they read; the records they generate from are.
-const generated = /(naming-data\.ts|\.generated\.(js|ts))$|\/(tests|docs)(\/|$)/;
+const generated = /(naming-data\.ts|\.generated\.(js|ts)|verdicts\.tsv\.journal)$|\/(tests|docs)(\/|$)/;
 const inputs = {
   dir,
   roots: [dir, at("../statistics/reference")],
@@ -89,9 +76,7 @@ await Promise.all(
       const [script, output] = step;
       const started = Date.now();
       try {
-        // RECHECK_ALL runs every step whatever its stamp says (the nightly cross-check).
-        if (process.env.RECHECK_ALL === "1") await run(script);
-        else if (!(await cached(script, compileInputs, [at(output)], () => run(script))))
+        if (!(await cached(script, compileInputs, [at(output)], () => run(script))))
           console.log(`${script}: up to date`);
         console.log(`${script}: ${seconds(started)}`);
       } catch (error) {

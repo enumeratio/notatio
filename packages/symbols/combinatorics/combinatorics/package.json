@@ -38,6 +38,7 @@
   },
   "scripts": {
     "build": "node scripts/build-generated.ts && node ../../../manifest/scripts/cached.ts pack dist -- vp pack && enumeratio-collect-declares .",
+    "collect-verdicts": "node scripts/collect-verdicts.ts",
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check"

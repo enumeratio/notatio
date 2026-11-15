@@ -354,6 +354,7 @@ export function compiledFamilies(
       },
       () => disagreements(ce, family, runs),
       family.head,
+      Object.keys(code) as Operation[],
     );
     for (const operation of interpreted) delete code[operation];
     const bigInterpreted =
@@ -363,6 +364,7 @@ export function compiledFamilies(
             { data, big, source: reachesSource ? familySourceHash() : undefined },
             () => bigDisagreements(ce, family, bigRuns),
             `${family.head} (BigInt)`,
+            Object.keys(big) as Operation[],
           );
     for (const operation of bigInterpreted) delete big[operation];
     out.push({ head: family.head, hash: familyHash(family), code, interpreted, big, bigInterpreted });

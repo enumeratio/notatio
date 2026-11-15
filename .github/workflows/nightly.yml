@@ -247,27 +247,24 @@ jobs:
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @notatio/residues exec vp test run tests/prime-count.test.ts
 
-  # The compile steps' interpreter cross-checks, every definition (a PR run re-checks only a sample
-  # when just the engine's dists moved). The generated files must come out as the build made them:
-  # one that differs means a carried verdict was stale.
+  # The compile steps' interpreter cross-checks, every item, held to the committed snapshot
+  # (packages/symbols/combinatorics/combinatorics/verdicts.tsv): a verdict that differs on the current
+  # engine fails, and `collect-verdicts --all` rewrites the snapshot.
   deep-crosschecks:
     name: deep compile cross-checks
     needs: [changes, dist]
     if: ${{ !cancelled() && needs.changes.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.dist.result) && ((github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-crosschecks')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 120
+    env:
+      DEEP_TESTS: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/setup
         with:
           dist-key: ${{ needs.changes.outputs.dist_key }}
           artifact: "true"
-      - working-directory: packages/symbols/combinatorics/combinatorics
-        run: |
-          outputs="src/compiled-maps.generated.js collections/src/families/compiled-families.generated.js lattice-paths/src/statistics.compiled.generated.js partitions/src/statistics.compiled.generated.js permutations/src/statistics.compiled.generated.js set-partitions/src/statistics.compiled.generated.js"
-          sha256sum $outputs > "$RUNNER_TEMP/before.sha"
-          RECHECK_ALL=1 BUILD_JOBS=3 node scripts/build-generated.ts
-          sha256sum --check "$RUNNER_TEMP/before.sha"
+      - run: pnpm --filter @notatio/combinatorics exec vp test run tests/verdict-snapshot.test.ts
 
   # The review backlog's machine-checkable claims (`expect:` bullets exported to
   # packages/reference/review-claims.tsv), evaluated against the current engine. A claim that stops
