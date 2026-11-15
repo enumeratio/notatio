@@ -147,13 +147,16 @@ function rewrite(node: unknown): MathJsonExpression {
     case "Negate":
       return ops[0] === "PositiveInfinity" ? ("NegativeInfinity" as MathJsonExpression) : ["Negate", ...ops];
 
-    // `-1 * x` is how a canonical tree spells a negation.
+    // `-1 * x` is how a canonical tree spells a negation. A nested product is flattened: the
+    // serializer prints it without parentheses, and `a * (x % 2 * b)` would read back as
+    // `(a * x) % 2 * b`, since `%` and `/` bind like `*`.
     case "Multiply": {
-      const [first, ...rest] = ops;
+      const factors = ops.flatMap((op) => (headOf(op) === "Multiply" ? opsOf(op) : [op])) as MathJsonExpression[];
+      const [first, ...rest] = factors;
       if (negativeLiteral(first) === -1 && rest.length > 0) {
         return ["Negate", rest.length === 1 ? rest[0] : ["Multiply", ...rest]];
       }
-      return ["Multiply", ...ops];
+      return ["Multiply", ...factors];
     }
 
     // `i` and `e` both parse back to these, and both are what a person types.
