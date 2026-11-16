@@ -44,7 +44,7 @@ bindings:
       on: 2026-10-16
   - origin: mapped
     form: sympy
-    template: hyper([$1, $2], [$3], $4) / gamma($3)
+    template: N(hyper([$1, $2], [$3], $4) / gamma($3))
     arity: 4
     threadArgOnly:
       - 1

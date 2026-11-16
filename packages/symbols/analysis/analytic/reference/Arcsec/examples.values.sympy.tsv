@@ -8,7 +8,7 @@ arcsec-2-2-pi-3	asec(-2)	2*pi/3
 inside-1-1-the-value-is-purely-imaginary	asec(0.5)	1.31695789692482*I	
 arcsec-positiveinfinity	asec(oo)	pi/2	
 a-pole-arcsec-0-is-complex-infinity	asec(0)	zoo	
-derivative-for-real-x-1	diff(asec(Symbol("x")), Symbol("x"))	None	inconclusive
+derivative-for-real-x-1	diff(asec(Symbol("x")), Symbol("x"))	1/(x**2*sqrt(1 - 1/x**2))	inconclusive
 n-arcsec-5-50	N(asec(5), 30)	1.36943840600456582777619613942	
 arcsec-list-list-sqrt-2-neg-sqrt-2-list-0-neg	[[asec(sqrt(2)), asec((-sqrt(2)))], [asec(0), asec((-sqrt(2)))]]	[[pi/4, 3*pi/4], [zoo, 3*pi/4]]	
 arcsec-2-over-3-times-sqrt-3	asec((Rational(2, 3) * sqrt(3)))	pi/6	
