@@ -1,6 +1,0 @@
-id	in
-count-posets-6-318-a000112	Length[Posets[6]]
-the-fourth-poset-on-3-elements	Part[Posets[3], 4]
-every-element-of-posets-4	Take[Posets[4], 16]
-a-poset-that-is-its-own-canonical-form	Element[List[List[], List[], List[1, 2]], Posets[3]]
-a-poset-whose-labeling-is-not-the-least	Element[List[List[], List[], List[2]], Posets[3]]

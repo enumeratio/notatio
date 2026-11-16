@@ -1,4 +1,0 @@
-id	in
-a-relabeled-pair-is-isomorphic	IsIsomorphicPoset[List[List[], List[], List[2]], List[List[], List[1], List[]]]
-a-chain-and-an-antichain	IsIsomorphicPoset[List[List[], List[1], List[2]], List[List[], List[], List[]]]
-two-labelings-of-the-same-poset	IsIsomorphicPoset[List[List[], List[], List[1], List[2], List[3, 4]], List[List[], List[], List[2], List[1], List[3, 4]]]
