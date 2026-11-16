@@ -7,24 +7,24 @@ import { adjacencyOf, canonicalBlocks, edgesOfBlocks, SEARCH_VERTEX_LIMIT } from
 import { canonicalGraphBody } from "./families/epsil.ts";
 import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
 
-const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
-const vertices: MathJSON = upTo("gm_n");
-const one = (test: MathJSON): MathJSON => ["If", test, 1, 0];
-const total = (over: MathJSON, body: MathJSON, variable: string): MathJSON => [
+export const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
+export const vertices: MathJSON = upTo("gm_n");
+export const one = (test: MathJSON): MathJSON => ["If", test, 1, 0];
+export const total = (over: MathJSON, body: MathJSON, variable: string): MathJSON => [
   "Max",
   ["Sum", forEach(over, body, variable)],
   0,
 ];
-const cell = (matrix: string, row: MathJSON, column: MathJSON): MathJSON => at(column, at(row, matrix));
-const lower = (edge: MathJSON): MathJSON => at(1, edge);
-const upper = (edge: MathJSON): MathJSON => at(2, edge);
+export const cell = (matrix: string, row: MathJSON, column: MathJSON): MathJSON => at(column, at(row, matrix));
+export const lower = (edge: MathJSON): MathJSON => at(1, edge);
+export const upper = (edge: MathJSON): MathJSON => at(2, edge);
 
 /** `body` with `gm_n` the vertex count, `gm_edges` the edge list and `gm_adjacent` the adjacency matrix; the graph with
- *  no vertices has no components and no cliques. */
-const withGraph = (body: MathJSON): MathJSON => [
+ *  no vertices has no components and no cliques, so `whenEmpty` (the empty list) answers it. */
+export const withGraph = (body: MathJSON, whenEmpty: MathJSON = ["List"]): MathJSON => [
   "If",
   ["Equal", at(1), 0],
-  ["List"],
+  whenEmpty,
   lets(
     [
       ["gm_n", at(1), "integer"],
@@ -67,23 +67,23 @@ const partOf = (values: string): MathJSON => [
   ),
 ];
 
-/** The vertices reachable from each vertex, row by row: the transitive closure of the adjacency matrix with the
- *  diagonal, by Warshall's algorithm. */
-const reach: MathJSON = typedFold(
-  forEach(
+/** The vertices reachable from each vertex, row by row: the transitive closure, by Warshall's algorithm, of the
+ *  matrix that is 1 on the diagonal and where `joined(i, j)` holds. */
+export const closureOf = (joined: (i: MathJSON, j: MathJSON) => MathJSON): MathJSON =>
+  typedFold(
+    forEach(
+      vertices,
+      forEach(vertices, ["Max", cell("a", "i", "j"), ["Min", cell("a", "i", "k"), cell("a", "k", "j")]], "j"),
+      "i",
+    ),
+    "a",
+    "k",
+    forEach(vertices, forEach(vertices, one(["Or", ["Equal", "i", "j"], joined("i", "j")]), "j"), "i"),
     vertices,
-    forEach(vertices, ["Max", cell("a", "i", "j"), ["Min", cell("a", "i", "k"), cell("a", "k", "j")]], "j"),
-    "i",
-  ),
-  "a",
-  "k",
-  forEach(
-    vertices,
-    forEach(vertices, one(["Or", ["Equal", "i", "j"], ["Equal", cell("gm_adjacent", "i", "j"), 1]]), "j"),
-    "i",
-  ),
-  vertices,
-) as MathJSON;
+  ) as MathJSON;
+
+/** The vertices reachable from each vertex of the graph, with the diagonal. */
+export const reach: MathJSON = closureOf((i, j) => ["Equal", cell("gm_adjacent", i, j), 1]);
 
 /** The partition of `value(v)` over the vertices v that are the least of their component, the others counting 0. */
 const perComponent = (value: (leader: MathJSON) => MathJSON): MathJSON =>

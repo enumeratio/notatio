@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+the-graph-on-5-vertices-with-the-edges-12-23-and			[DeduplicatedGraph, [LabeledGraph, [Tuple, 5, [List, [List, 1, 2], [List, 2, 3], [List, 4, 5]]]]]	[LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 3, 4]]]]	the graph on 5 vertices with the edges 12, 23 and 45
+a-star-with-three-leaves			[DeduplicatedGraph, [LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 1, 3], [List, 1, 4]]]]]	[LabeledGraph, [Tuple, 2, [List, [List, 1, 2]]]]	a star with three leaves

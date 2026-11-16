@@ -5,6 +5,7 @@
 // `byIndex`/`orbitLeast`/…, `set-partitions/src/maps.ts`'s `growthStringOf`/`blocksOf`.
 
 import type { MapDeclaration } from "@notatio/structures";
+import { fold as typedFold } from "../collections/src/families/tables.ts";
 
 /** A MathJSON expression, structurally — declared locally so this package stays packable
  *  (a bundled package cannot import types from the src-only reference package). */
@@ -159,6 +160,34 @@ export const sortedRuns = (runKey: (first: MathJSON, last: MathJSON) => MathJSON
     ),
     "list<integer>",
   ),
+];
+
+/** The graph on 1..`m` whose edges are the pairs `[u, v]`, u < v in lex order, for which `joined(u, v)` holds, as
+ *  Tuple(m, edges); a graph on fewer than two vertices has no pair (and `Range(u + 1, m)` would count down there). */
+export const graphWhere = (m: MathJSON, joined: (u: MathJSON, v: MathJSON) => MathJSON): MathJSON => [
+  "If",
+  ["Less", m, 2],
+  ["Tuple", m, ["List"]],
+  [
+    "Tuple",
+    m,
+    typedFold(
+      [
+        "Join",
+        "gw_edges",
+        [
+          "Map",
+          ["Function", ["List", "gw_u", "gw_v"], "gw_v"],
+          ["Filter", ["Range", ["Add", "gw_u", 1], m, 1], ["Function", joined("gw_u", "gw_v"), "gw_v"]],
+        ],
+      ],
+      "gw_edges",
+      "gw_u",
+      ["List"],
+      ["Range", 1, ["Subtract", m, 1], 1],
+      "list<list<integer>>",
+    ) as MathJSON,
+  ],
 ];
 
 /** The lengths of the maximal runs of equal entries of `_raw`, left to right. */

@@ -2408,6 +2408,20 @@ const NOVEL = [
   "AntichainCount",
   "MaximalChainCount",
   "ShortestMaximalChainSize",
+  "GraphComplement",
+  "GraphSquare",
+  "GraphCone",
+  "IsolatedVertexAddition",
+  "ConnectedComplement",
+  "OreClosure",
+  "DeduplicatedGraph",
+  "CliqueGraph",
+  "EndpointDeletion",
+  "BlockCutTree",
+  "ChromaticDifferenceSequence",
+  "InversionGraph",
+  "ThresholdGraph",
+  "UnderlyingGraph",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because

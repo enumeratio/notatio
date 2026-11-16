@@ -30,6 +30,7 @@ import {
   type FindStatAgreement,
   type FindStatMapMatch,
 } from "../../symbols/combinatorics/combinatorics/findstat/src/findstat-maps-data.ts";
+import { isoClass } from "../../symbols/combinatorics/combinatorics/findstat/tests/iso-class.ts";
 import { declaredEngine } from "./engines.ts";
 import { assemble, parseHeads, parseRename, renamed, selected } from "./findstat-incremental.ts";
 
@@ -78,7 +79,13 @@ const theirs = readdirSync(folder)
 
 const ce = declaredEngine();
 /** Whether our map sends `x` to FindStat's image `y`. A map that throws on an object doesn't agree on it. */
-const agrees = (ours: string, x: unknown, y: unknown): boolean => image(ours, x) === JSON.stringify(y);
+const agrees = (ours: string, x: unknown, y: unknown, to: string): boolean => {
+  const got = image(ours, x);
+  // A graph image is compared up to isomorphism: FindStat lists one spelling per class.
+  if (to === "LabeledGraph" && got !== undefined)
+    return JSON.stringify(isoClass(to, JSON.parse(got))) === JSON.stringify(isoClass(to, y));
+  return got === JSON.stringify(y);
+};
 /** Evaluations run, and our maps' images by object: FindStat tables over the same collections share objects. */
 let evaluations = 0;
 const images = new Map<string, string | undefined>();
@@ -126,7 +133,7 @@ function matchMap(ours: (typeof MAPS)[number]): FindStatMapMatch | undefined {
         continue;
       }
       compared++;
-      if (!agrees(ours.name, x, y)) {
+      if (!agrees(ours.name, x, y, to)) {
         disagrees = true;
         break;
       }

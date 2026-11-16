@@ -10,7 +10,9 @@ import { BATCH_EIGHTEEN_IDS } from "./map-findstat-readings-18.ts";
 import { BATCH_NINETEEN_IDS } from "./map-findstat-readings-19.ts";
 import { BATCH_TWENTY_IDS } from "./map-findstat-readings-20.ts";
 import { BATCH_TWENTYONE_IDS } from "./map-findstat-readings-21.ts";
+import { BATCH_TWENTYTWO_IDS } from "./map-findstat-readings-22.ts";
 import { BATCH_FIFTEEN_IDS } from "./map-findstat-readings-15.ts";
+import { isoClass } from "./iso-class.ts";
 
 // Each FindStat map we declare is read twice independently (a JS reading of FindStat's description, and
 // our Epsil definition) and the two are held to each other over every small object of the source carrier,
@@ -294,6 +296,12 @@ const SLOW: Readonly<Record<string, number>> = {
   "WeakOrderRowmotion@Permutation": 3,
   "CliqueSizePartition@LabeledGraph": 4,
   "HorizontalStripSizes@StandardTableau": 4,
+  "ConnectedComplement@LabeledGraph": 3,
+  "OreClosure@LabeledGraph": 3,
+  "CliqueGraph@LabeledGraph": 3,
+  "EndpointDeletion@LabeledGraph": 3,
+  "BlockCutTree@LabeledGraph": 3,
+  "ChromaticDifferenceSequence@LabeledGraph": 3,
 };
 
 for (const [key, reading] of Object.entries(MAP_READINGS)) {
@@ -310,7 +318,9 @@ for (const [key, reading] of Object.entries(MAP_READINGS)) {
         continue; // a reading undefined here (e.g. the descent word of the empty permutation).
       }
       const ours = ce.box([head, readObject(from, object)] as never).evaluate().json;
-      expect(JSON.stringify(ours), `${head} ${object}`).toBe(JSON.stringify(readObject(to, image)));
+      expect(JSON.stringify(isoClass(to, ours)), `${head} ${object}`).toBe(
+        JSON.stringify(isoClass(to, readObject(to, image))),
+      );
     }
   });
 }
@@ -536,6 +546,7 @@ const IDS: Readonly<Record<string, string>> = {
   ...BATCH_NINETEEN_IDS,
   ...BATCH_TWENTY_IDS,
   ...BATCH_TWENTYONE_IDS,
+  ...BATCH_TWENTYTWO_IDS,
 };
 
 test("every reading names the FindStat map it is", () => {
@@ -547,6 +558,10 @@ for (const [key, id] of Object.entries(IDS)) {
   test(`${key} reproduces ${id}'s snapshot rows`, () => {
     const sample = snapshot.items[id]?.sample;
     if (sample === undefined) return; // not in the committed slice; the crawl check covers it.
-    for (const [object, image] of sample) expect(normalize(reading(object)), object).toBe(normalize(image));
+    const { to } = mapFor(key);
+    for (const [object, image] of sample)
+      if (to === "LabeledGraph")
+        expect(isoClass(to, readObject(to, reading(object))), object).toEqual(isoClass(to, readObject(to, image)));
+      else expect(normalize(reading(object)), object).toBe(normalize(image));
   });
 }

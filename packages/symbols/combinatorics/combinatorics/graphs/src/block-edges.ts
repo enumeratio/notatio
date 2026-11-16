@@ -33,112 +33,107 @@ const entry = (list: string, row: MathJSON, column: MathJSON): MathJSON =>
  *  is deleted, an end of the first that is not x is joined to an end of the second that is not x in the graph less x
  *  (components by label propagation, n rounds; `labels` holds row x of labels for the graph less x). Each edge then
  *  has its block's edge count, and a block of s edges is s edges of count s. */
-export const blockEdgePartitionBody: MathJSON = lets(
+export const blockBindings: readonly (readonly [string, MathJSON, string?])[] = [
+  [n, item("_raw", 1), "integer"],
+  ["bl_edges", item("_raw", 2), "list<list<integer>>"],
+  [m, ["Length", "bl_edges"], "integer"],
+  ["bl_a", eachOf("bl_edges", item("bl_e", 1), "bl_e"), LIST],
+  ["bl_b", eachOf("bl_edges", item("bl_e", 2), "bl_e"), LIST],
   [
-    [n, item("_raw", 1), "integer"],
-    ["bl_edges", item("_raw", 2), "list<list<integer>>"],
-    [m, ["Length", "bl_edges"], "integer"],
-    ["bl_a", eachOf("bl_edges", item("bl_e", 1), "bl_e"), LIST],
-    ["bl_b", eachOf("bl_edges", item("bl_e", 2), "bl_e"), LIST],
-    [
-      "bl_adj",
-      eachOf(
-        upTo(times(n, n)),
-        lets(
-          [
-            ["bl_r", plus(["Floor", ["Divide", minus("bl_t", 1), n]], 1), "integer"],
-            ["bl_c", minus("bl_t", times(["Floor", ["Divide", minus("bl_t", 1), n]], n)), "integer"],
-          ],
-          tally(
-            upTo(m),
-            [
-              "Or",
-              ["And", ["Equal", item("bl_a", "bl_f"), "bl_r"], ["Equal", item("bl_b", "bl_f"), "bl_c"]],
-              ["And", ["Equal", item("bl_a", "bl_f"), "bl_c"], ["Equal", item("bl_b", "bl_f"), "bl_r"]],
-            ],
-            "bl_f",
-            "bl_g",
-          ),
-        ),
-        "bl_t",
-      ),
-      LIST,
-    ],
-    [
-      "bl_labels",
-      fold(
-        eachOf(
-          upTo(times(n, n)),
-          lets(
-            [
-              ["bl_x", plus(["Floor", ["Divide", minus("bl_t", 1), n]], 1), "integer"],
-              ["bl_v", minus("bl_t", times(["Floor", ["Divide", minus("bl_t", 1), n]], n)), "integer"],
-            ],
-            [
-              "Fold",
-              [
-                "Function",
-                when(
-                  ["Equal", entry("bl_adj", "bl_v", "bl_u"), 1],
-                  when(["Equal", "bl_u", "bl_x"], "bl_h", ["Min", "bl_h", entry("bl_s", "bl_x", "bl_u")]),
-                  "bl_h",
-                ),
-                "bl_h",
-                "bl_u",
-              ],
-              item("bl_s", "bl_t"),
-              upTo(n),
-            ],
-          ),
-          "bl_t",
-        ),
-        "bl_s",
-        "bl_round",
-        eachOf(upTo(times(n, n)), minus("bl_t", times(["Floor", ["Divide", minus("bl_t", 1), n]], n)), "bl_t"),
-        upTo(n),
-        LIST,
-      ) as MathJSON,
-      LIST,
-    ],
-    [
-      "bl_sizes",
-      eachOf(
-        upTo(m),
+    "bl_adj",
+    eachOf(
+      upTo(times(n, n)),
+      lets(
+        [
+          ["bl_r", plus(["Floor", ["Divide", minus("bl_t", 1), n]], 1), "integer"],
+          ["bl_c", minus("bl_t", times(["Floor", ["Divide", minus("bl_t", 1), n]], n)), "integer"],
+        ],
         tally(
           upTo(m),
           [
-            "Equal",
-            tally(
-              upTo(n),
-              [
-                "Not",
-                [
-                  "Or",
-                  ...[
-                    [item("bl_a", "bl_e"), item("bl_a", "bl_f")],
-                    [item("bl_a", "bl_e"), item("bl_b", "bl_f")],
-                    [item("bl_b", "bl_e"), item("bl_a", "bl_f")],
-                    [item("bl_b", "bl_e"), item("bl_b", "bl_f")],
-                  ].map(([p, q]) => [
-                    "And",
-                    ["NotEqual", p, "bl_x"],
-                    ["NotEqual", q, "bl_x"],
-                    ["Equal", entry("bl_labels", "bl_x", p!), entry("bl_labels", "bl_x", q!)],
-                  ]),
-                ],
-              ],
-              "bl_x",
-              "bl_k",
-            ),
-            0,
+            "Or",
+            ["And", ["Equal", item("bl_a", "bl_f"), "bl_r"], ["Equal", item("bl_b", "bl_f"), "bl_c"]],
+            ["And", ["Equal", item("bl_a", "bl_f"), "bl_c"], ["Equal", item("bl_b", "bl_f"), "bl_r"]],
           ],
           "bl_f",
           "bl_g",
         ),
-        "bl_e",
       ),
+      "bl_t",
+    ),
+    LIST,
+  ],
+  [
+    "bl_labels",
+    fold(
+      eachOf(
+        upTo(times(n, n)),
+        lets(
+          [
+            ["bl_x", plus(["Floor", ["Divide", minus("bl_t", 1), n]], 1), "integer"],
+            ["bl_v", minus("bl_t", times(["Floor", ["Divide", minus("bl_t", 1), n]], n)), "integer"],
+          ],
+          [
+            "Fold",
+            [
+              "Function",
+              when(
+                ["Equal", entry("bl_adj", "bl_v", "bl_u"), 1],
+                when(["Equal", "bl_u", "bl_x"], "bl_h", ["Min", "bl_h", entry("bl_s", "bl_x", "bl_u")]),
+                "bl_h",
+              ),
+              "bl_h",
+              "bl_u",
+            ],
+            item("bl_s", "bl_t"),
+            upTo(n),
+          ],
+        ),
+        "bl_t",
+      ),
+      "bl_s",
+      "bl_round",
+      eachOf(upTo(times(n, n)), minus("bl_t", times(["Floor", ["Divide", minus("bl_t", 1), n]], n)), "bl_t"),
+      upTo(n),
       LIST,
+    ) as MathJSON,
+    LIST,
+  ],
+];
+
+/** Whether edges number `e` and `f` (indices into `bl_edges`) lie in one block: whichever vertex x is deleted, an end of
+ *  one that is not x is joined to an end of the other that is not x. */
+export const sameBlock = (e: MathJSON, f: MathJSON): MathJSON => [
+  "Equal",
+  tally(
+    upTo(n),
+    [
+      "Not",
+      [
+        "Or",
+        ...[
+          [item("bl_a", e), item("bl_a", f)],
+          [item("bl_a", e), item("bl_b", f)],
+          [item("bl_b", e), item("bl_a", f)],
+          [item("bl_b", e), item("bl_b", f)],
+        ].map(([p, q]) => [
+          "And",
+          ["NotEqual", p, "bl_x"],
+          ["NotEqual", q, "bl_x"],
+          ["Equal", entry("bl_labels", "bl_x", p!), entry("bl_labels", "bl_x", q!)],
+        ]),
+      ],
     ],
+    "bl_x",
+    "bl_k",
+  ),
+  0,
+];
+
+export const blockEdgePartitionBody: MathJSON = lets(
+  [
+    ...blockBindings,
+    ["bl_sizes", eachOf(upTo(m), tally(upTo(m), sameBlock("bl_e", "bl_f"), "bl_f", "bl_g"), "bl_e"), LIST],
   ],
   when(
     ["Equal", m, 0],

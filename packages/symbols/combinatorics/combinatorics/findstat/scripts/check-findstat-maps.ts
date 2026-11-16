@@ -10,7 +10,9 @@
 //
 // Each row is read three ways: FindStat's image text, the independent JS reading
 // (`../tests/map-findstat-readings.ts`, which must reproduce the image text exactly), and the
-// declared head applied to the object, whose result must be the carrier value of the image.
+// declared head applied to the object, whose result must be the carrier value of the image. A graph
+// image is the exception: FindStat lists a graph up to isomorphism under one spelling, so the reading
+// and the head are each compared with it after CanonicalGraph (`isoClass`, `../tests/iso-class.ts`).
 //
 // With no pairs, checks every match in `findstat-maps-data.ts`. Exits 1 on any disagreement.
 
@@ -20,6 +22,7 @@ import { bareEngine } from "@notatio/engine/testing";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
 import { COLLECTION_CARRIER, objectSize, readObject } from "../src/objects.ts";
 import { findstatMaps } from "../src/findstat-maps-data.ts";
+import { isoClass } from "../tests/iso-class.ts";
 import { MAP_READINGS } from "../tests/map-findstat-readings.ts";
 
 const { values, positionals } = parseArgs({
@@ -76,15 +79,22 @@ for (const [head, from, id] of targets) {
       unreadable++;
       continue;
     }
-    if (reading !== undefined && normalize(reading(object)) !== normalize(image))
-      bad.push(`${object}: reading ${reading(object)}, FindStat ${image}`);
+    // A graph image is compared up to isomorphism (the reading's labeling is its own); any other text exactly.
+    if (reading !== undefined) {
+      const text = reading(object);
+      const same =
+        to === "LabeledGraph"
+          ? JSON.stringify(isoClass(to, readable(to, text))) === JSON.stringify(isoClass(to, y))
+          : normalize(text) === normalize(image);
+      if (!same) bad.push(`${object}: reading ${text}, FindStat ${image}`);
+    }
     let ours: unknown;
     try {
       ours = ce.box([head, x] as never).evaluate().json;
     } catch (error) {
       ours = `threw ${String(error)}`;
     }
-    if (JSON.stringify(ours) !== JSON.stringify(y))
+    if (JSON.stringify(isoClass(to, ours)) !== JSON.stringify(isoClass(to, y)))
       bad.push(`${object}: ours ${JSON.stringify(ours)}, FindStat ${image}`);
   }
   failed ||= bad.length > 0;

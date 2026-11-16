@@ -718,6 +718,7 @@ compile-maps	BinaryWord@dyck_path	efde8bd711ea186887629129	ff3c1c0ecea2ad03eda36
 compile-maps	BinaryWord@finset	336b1630140f901906adf79d	b5a84adac2ef9f8a094402cd	agrees	0.31
 compile-maps	BinaryWord@integer_partition	5f02ae751545e606bc386f68	652d3a4ea961897df4283fb9	agrees	0.91
 compile-maps	BlockConcatenation@set_composition	74b3e1e4d9e864d92c0a27e9	8a24adadf3f05b4792157442	agrees	0.07
+compile-maps	BlockCutTree@labeled_graph	6078d00d11130b08ebf32ef5	703e66ac1c42e5b0af78aa85	agrees	174.88
 compile-maps	BlockEdgePartition@labeled_graph	7ca299d06d50ab0ab8d17875	216ffef4c9d55498ce671933	agrees	180.64
 compile-maps	BlockSizeComposition@set_composition	eb02034ae58f23565288169e	27f5f68b8bce2f1b77e798bd	agrees	0.09
 compile-maps	BlockSizeComposition@set_partition	101a22ca09f5fd54faac74d7	7856fbb382ff3ca898f982be	agrees	0.47
@@ -731,6 +732,8 @@ compile-maps	CarPermutation@parking_function	40ad0270be5fc4a44ef245df	5cf500772b
 compile-maps	Catabolism@semistandard_tableau	56cded70fdba740e71e9a2f1	c3a844833085081bca334381	agrees	25.24
 compile-maps	Catabolism@standard_tableau	5a94d08111e40c6d64421e78	d4ec9eb009c52e0c91eab2e4	agrees	16.76
 compile-maps	Catalanization@permutation	499e733649a9a843a0688951	9cff556d671a3ec7567981d5	agrees	2.33
+compile-maps	ChromaticDifferenceSequence@labeled_graph	c40e9b07cbe9c8dc522cecff	c5aabedc8331738f4121c4a7	agrees	108.8
+compile-maps	CliqueGraph@labeled_graph	ac72cd0f2a7d6aaca945fef7	6807b5ede1f5298b9af30fae	agrees	45.93
 compile-maps	CliqueSizePartition@labeled_graph	74e2b06c8721c4853af3ea79	89a4b328968f8ae6e7b12903	agrees	27.31
 compile-maps	ClockwiseRotation@alternating_sign_matrix	c2a0dcfbde64a08c68093832	39355e201ba48d6fa264a72e	agrees	0.68
 compile-maps	ClockwiseTriangulationRotation@dyck_path	8f17845d2581c7fa80f7a7a5	a8cab83ae969a0b50a5c88a8	agrees	1.24
@@ -748,6 +751,7 @@ compile-maps	ComponentSizePartition@labeled_graph	355817d0a912fe1aa6daae56	bb94c
 compile-maps	CompositionBouncePath@composition	42052ae855426afba4749896	950b85c04c979e86e79270ab	agrees	0.24
 compile-maps	ConjugacyClassRepresentative@permutation	285406c9ee881e3d1a7886ed	e225f9c6b4725726831d97e8	agrees	10.35
 compile-maps	ConjugateAfterCycleType@permutation	c28e7318c8b7538f8cc6ea1c	fb6d46edbd02b5f3e7a1fd34	agrees	44.21
+compile-maps	ConnectedComplement@labeled_graph	f56815c30036ef506d6d85b0	e32fd687e4404ad930036646	agrees	52.68
 compile-maps	ConnectivityWord@permutation	0d6371162a846e1d959dc069	c1fe9060caecaa33c38c480b	agrees	1
 compile-maps	CoriLeBorgne@dyck_path	47bebed6d317ca2b9b5549e2	46291e4065a66ae92f587706	agrees	3.91
 compile-maps	CounterclockwiseRotation@alternating_sign_matrix	ba5d9281b18162e6da142293	b2b3380b12cb7d49cac326d5	agrees	0.84
@@ -765,6 +769,7 @@ compile-maps	CyclicShift@set_composition	eaaeb4fecec8e3f93bc4b4b9	b18517adf95364
 compile-maps	DeBruijnMorselt@ordered_tree (composition)	8e1bfeccb31c457b24bb2a04	309ce8160937f7c63024efff	agrees	0.53
 compile-maps	DecompositionReverse@dyck_path	920a971a8cf68eeaf6cff140	9fa1474ba57e2b1f3829ba55	agrees	8.13
 compile-maps	DecreasingRotation@set_partition	218ab51f8a9e7bad9b33b16a	d6aef129446e3485a22db700	agrees	6.95
+compile-maps	DeduplicatedGraph@labeled_graph	6855ee07f32264c0290ce0d6	9c18362e6cd12d3b102b7083	agrees	13.37
 compile-maps	DelestViennot@dyck_path	95594782bd6dddb705c8fcd5	2d9c4e7ba74e7d7c7b3ba850	agrees	5.06
 compile-maps	DeltaMorphism@composition	b12237fb280bb1ce030fb54c	9a504d5e319dd4eaea8781bf	agrees	0.25
 compile-maps	DemazureProductWithInverse@permutation	6293235ed32385e6c3b3096a	14624bbab60880b37eb8d999	agrees	9.3
@@ -782,6 +787,7 @@ compile-maps	DyckPath@alternating_sign_matrix	9d065dd89051cef9eb6a7c57	e477cd687
 compile-maps	DyckPath@ordered_tree (flat)	86100fb7d7678ab1cd563120	86108f1eb150e6465b2626fb	agrees	0.35
 compile-maps	DyckPath@perfect_matching	807ce1f9d1c24dde22ce8336	a68895db33085eecdbc32494	agrees	1.22
 compile-maps	ElizaldeDeutsch@dyck_path	14e0cc00a653ed43fa3363e7	19f55fe467376d1dfe88379f	agrees	15.01
+compile-maps	EndpointDeletion@labeled_graph	70b7490e417dbfafc25b450a	1918b30172879e1fa52c5281	agrees	72.44
 compile-maps	Evacuation@standard_tableau	fe3262d49a07c38f79247557	b78b94540ff05dc36a519408	agrees	15.87
 compile-maps	Finset@binary_word	6b186ee6351c98f6805e4ae6	373e8bdc7c591cecb7e043a9	agrees	0.02
 compile-maps	FlagNegativesToNegatives@signed_permutation	d833750f8aa1615ad7ca69d8	3681e1590c4c06e9182bfbe2	agrees	1.81
@@ -799,6 +805,9 @@ compile-maps	GelfandTsetlinPattern@semistandard_tableau	f6470f77e01133337617f301
 compile-maps	GelfandTsetlinPattern@standard_tableau	cd32d80cdfd8da1ff89589a5	c1b5cdb296726207ce7cc9d4	agrees	1.43
 compile-maps	GelfandTsetlinPromotion@gelfand_tsetlin_pattern	4a4efcbff95c19baab56f212	ee9136bf8987ff1372f28113	agrees	5.33
 compile-maps	GlaisherFranklin@integer_partition	80816b9af2a46df54bcadd88	0e55a8d364a7773455d2625e	agrees	2.55
+compile-maps	GraphComplement@labeled_graph	8635623aa9102e64ec350774	0099f2ecb96aa792648a231c	agrees	7.06
+compile-maps	GraphCone@labeled_graph	41c50a3177a29ff99aaff7aa	17c80ec86f3b3bb14d939b5b	agrees	9.11
+compile-maps	GraphSquare@labeled_graph	73b0744640724b52a39f571d	b95525dfc03661e5602b5958	agrees	14.25
 compile-maps	GrayNext@binary_word	09b5386455809f61a9be8985	6f2dfc27e88e25f8dc8d2f89	agrees	0.71
 compile-maps	GrayPrevious@binary_word	6ac3ff52d6396b511ef9dd12	4cdfb5471f5b63e50a7bb0e7	agrees	0.62
 compile-maps	Gyration@alternating_sign_matrix	604b0607418e88f2722683f7	9dc2c228c324df7082fcda95	agrees	241.62
@@ -835,6 +844,8 @@ compile-maps	InverseToricPromotion@permutation	b53cfc4f133f7a618147294a	b37f6203
 compile-maps	InverseWachsWhite@set_partition	dd4fdfb4a40139e809742baa	80b6d006c6e40f4520b8a894	agrees	12.04
 compile-maps	InverseWachsWhiteRho@set_partition	84b87e47620321fdaa114a19	e37daa87e09a00d5a8ba29ef	agrees	12.7
 compile-maps	InverseZetaMap@dyck_path	ca19da428e3da15e67db218d	9239d5bddbec1a8de5816859	agrees	3.99
+compile-maps	InversionGraph@permutation	c59e5d87c9ff1dc660f56372	d5742602456504cc000e6dbd	agrees	3.27
+compile-maps	IsolatedVertexAddition@labeled_graph	64128022da8b125d49e701d2	21cead6c0f576d8b976512a8	agrees	0.52
 compile-maps	KasraouiZeng@perfect_matching	3f8d6b9821a1a4477b88114c	933bb765111965fa494d2db1	agrees	6.8
 compile-maps	KasraouiZeng@set_partition	f88a731afa1add9d515d9686	aab645db879c66871799152f	agrees	25.63
 compile-maps	KnuthClassRepresentative@permutation	3515c4227d5acdf8b31c137b	7e03e0738825bec9fb20faca	agrees	51.74
@@ -852,6 +863,7 @@ compile-maps	LeftToRightMaximaDyckPath@permutation	3b5893220d0d5845bdcb4e61	4a9d
 compile-maps	LehmerCodeRotation@permutation	1b82090057d0ac8c37e5007d	c7de2668ee68fef58fd7588e	agrees	3.46
 compile-maps	LehmerCodeToMajorCode@permutation	4207505ae7df60be7e17ace0	613e6e3a793fb036bfc1b1dc	agrees	5.16
 compile-maps	LewisLyuPylyavskyySenShape@permutation	43064d8bec7204f7436be1cd	0a395f23de16f0887f6819c6	agrees	64.96
+compile-maps	LineGraph@labeled_graph	5df255185ea4f65f7d7d1463	2b91171f9e3d477b422c1e32	agrees	2.63
 compile-maps	LinkPatternDyckPath@alternating_sign_matrix	6feb8ec4e5aad54687868628	d3471ca06fccf75bb3e366fa	agrees	61.21
 compile-maps	LongCycleConjugation@permutation	16a31d30748ce341d0a051f1	9d6fa2d093bc5a70b6cd2098	agrees	1.06
 compile-maps	MajorCodeToLehmerCode@permutation	653e9ea2ae2670eed27f3cd7	e9a9f41f6ae09ec91aa1f685	agrees	7.76
@@ -871,6 +883,7 @@ compile-maps	OnesToLeading@permutation	8458a1887b8c94ad39e797f2	576e5653a0cc845e
 compile-maps	OrderedTree@binary_tree (flat)	c74c080bc9b15b3a0433689b	1ab0d326e8b8b447a40a21b3	agrees	0.28
 compile-maps	OrderedTree@dyck_path	6ccad020a046ce2b5570358d	8fa896e361f693671d965cca	agrees	2.07
 compile-maps	OrderedTree@parking_function	5d7ecbad20b5cdd94aeea162	94eeb75291f666d28d646da4	agrees	41.78
+compile-maps	OreClosure@labeled_graph	45a33be54b2b010fc45e559e	fd691ec7abd4692f660b4bf1	agrees	93.86
 compile-maps	OuterShape@skew_partition	d30000b343460433325582e2	06499a2f7bd36bf31d40e05a	agrees	0.01
 compile-maps	ParallelogramPolyominoDyckPath@integer_partition	29360b1291e2118283e351b7	7b8792f4b648df41f13af8df	agrees	1.88
 compile-maps	ParkingFunction@permutation	1c952112d37357bbdb838788	ed88d1e6a5fcf03babb1c480	agrees	0.02
@@ -952,6 +965,7 @@ compile-maps	TableauPromotion@standard_tableau	7a13ed56b78bac7e5a2372bd	742a7b89
 compile-maps	TableauShape@standard_tableau	c6b3d91ad95cecfca674d126	60c783e60d869d455b0b544b	agrees	0.15
 compile-maps	TableauWeight@semistandard_tableau	a137efe63c24a51bb5b5cfba	34b3cf8df4fbf3b67c8ccb7c	agrees	6.04
 compile-maps	Tanimoto@permutation	d7edc627bde3f658976e7f35	6b69a683df008ad88d4aee56	agrees	0.47
+compile-maps	ThresholdGraph@composition	b4c6fd861b14f96561cafef9	643028e6c5a03265432ae7ba	agrees	5.06
 compile-maps	ToLehmerCode@permutation	80c71aa7756f486173cbc26d	fbdce8c096a177c14058d9e7	agrees	1.42
 compile-maps	ToPermutation@standard_tableau_pair	422d098ae03f6ff610c27a08	be6bd315e96f9c42307b8f18	agrees	224.63
 compile-maps	ToricPromotion@permutation	588fa432271ab5a7cb321ebb	54ec7062b33d272445ff5ffb	agrees	0.99
@@ -964,6 +978,8 @@ compile-maps	TransposeTableau@standard_tableau	43e30b8c656a56dd3750c1c9	60b0b065
 compile-maps	Twist@binary_word	aa347c780b695657e25cf29d	b9311688b42671f5f9eaf964	agrees	0.3
 compile-maps	TwoConjugate@integer_partition	eba6e7aecf4d128c33c10619	d1e476ce202e37e1af6c596b	agrees	223.6
 compile-maps	TwoRowTableau@dyck_path	cf021bfbbfd492f30e97b518	715b557494311c354aa58a8d	agrees	0.62
+compile-maps	UnderlyingGraph@binary_tree (flat)	a4ca3e4981727ce4eeff43c1	222dee2f5b8d13f674ba9fed	agrees	2.16
+compile-maps	UnderlyingGraph@ordered_tree (flat)	a5965d737c9107bbaea91021	18deb6cab9ce3593d5e94d0a	agrees	5.03
 compile-maps	UnderlyingPermutation@signed_permutation	52ce225db27d68c61611d86b	8232c852a76e21f2e16d0848	agrees	0.16
 compile-maps	UnderlyingSetPartition@set_composition	26016d0246fd1ea78fb00a9d	bb401f87c7a55a09cf53476f	agrees	0.96
 compile-maps	ValleyComposition@standard_tableau	1f8d162cffb1bad3deb1f214	372c4820206295dba1d678f3	agrees	0.64
