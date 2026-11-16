@@ -12,4 +12,4 @@ n-jacobicd-sqrt-2-times-i-2	(enumeratio_jacobi(:cd, enumeratio_complex(0, enumer
 n-jacobicd-2-times-1-plus-sqrt-2-over-2-1-minus	(enumeratio_jacobi(:cd, (2 * (1 + enumeratio_div(enumeratio_ball(sqrt, 2), 2))), (enumeratio_pow((1 + (-(enumeratio_div(enumeratio_ball(sqrt, 2), 2)))), 2) * enumeratio_pow((1 + enumeratio_div(enumeratio_ball(sqrt, 2), 2)), -2))))	-0.9700183578238587778274751564682809074754498498963155312209383444637718972922304	
 symbolic-arguments-are-left-unevaluated-rather			
 u-1e16-declines-rather-than-answering-wrong	(enumeratio_jacobi(:cd, enumeratio_pow(10, 16), (2 // 7)))	0.2240475235745040987375805187592931046132146336206719408689767169113289293266581	inconclusive
-u-1e16-mpmath-true-value	(enumeratio_jacobi(:cd, enumeratio_pow(10, 16), (2 // 7)))		
+u-1e16-mpmath-true-value			
