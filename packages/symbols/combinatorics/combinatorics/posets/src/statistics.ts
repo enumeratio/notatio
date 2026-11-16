@@ -53,24 +53,18 @@ export const withPoset = (body: MathJSON, otherwise: MathJSON = 0): MathJSON => 
  * poset, which is when j is a lower cover of i or lies below one of them (those rows are already built).
  */
 const lowerEntry: MathJSON = ["At", "acc", ["Add", ["Multiply", ["Subtract", "c", 1], "n"], "j"]];
-const relationCell: MathJSON = [
-  "If",
-  [
-    "Or",
-    ["Contains", lowerCovers("i"), "j"],
-    ["Greater", ["Max", ["Sum", map(lowerEntry, "c", lowerCovers("i"))], 0], 0],
-  ],
-  1,
-  0,
-];
-const strictOrder: MathJSON = fold(
-  ["Join", "acc", map(relationCell, "j", elements)],
-  "acc",
-  "i",
-  ["List"],
-  elements,
-  "list<integer>",
-);
+/** The strict order of the poset held in `of`, read with `n` its element count. */
+export const strictOrderOf = (of: MathJSON): MathJSON => {
+  const covers = (element: MathJSON): MathJSON => ["At", of, element];
+  const relationCell: MathJSON = [
+    "If",
+    ["Or", ["Contains", covers("i"), "j"], ["Greater", ["Max", ["Sum", map(lowerEntry, "c", covers("i"))], 0], 0]],
+    1,
+    0,
+  ];
+  return fold(["Join", "acc", map(relationCell, "j", elements)], "acc", "i", ["List"], elements, "list<integer>");
+};
+const strictOrder: MathJSON = strictOrderOf(subject);
 /** `body` with `below` the strict order; read inside `withPoset`. */
 export const withRelation = (body: MathJSON): MathJSON => bind("below", strictOrder, body, "list<integer>");
 

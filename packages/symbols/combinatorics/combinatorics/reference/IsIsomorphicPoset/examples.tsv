@@ -1,0 +1,4 @@
+id	section	role	expr	expected	caption
+a-relabeled-pair-is-isomorphic	Basic		[IsIsomorphicPoset, [Poset, [List, [List], [List], [List, 2]]], [Poset, [List, [List], [List, 1], [List]]]]	True	$2 < 3$ with 1 alone, and $1 < 2$ with 3 alone
+a-chain-and-an-antichain	Basic		[IsIsomorphicPoset, [Poset, [List, [List], [List, 1], [List, 2]]], [Poset, [List, [List], [List], [List]]]]	False
+two-labelings-of-the-same-poset	Scope		[IsIsomorphicPoset, [Poset, [List, [List], [List], [List, 1], [List, 2], [List, 3, 4]]], [Poset, [List, [List], [List], [List, 2], [List, 1], [List, 3, 4]]]]	True
