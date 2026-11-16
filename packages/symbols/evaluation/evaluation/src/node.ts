@@ -37,6 +37,57 @@ const COOPERATIVE_GRACE_MS = 200;
  */
 const SPAWN_TIMEOUT_MS = 10_000;
 
+/**
+ * The hard kill is wall-clock past `timeMs + COOPERATIVE_GRACE_MS`, but a worker on a
+ * loaded host can be descheduled for longer than that and answer cooperatively right
+ * after. So the kill counts the worker's CPU time since `"started"` against that budget,
+ * and a worker that has used less is re-armed for the rest. This wall-clock cap
+ * (`max(KILL_WALL_FLOOR_MS, KILL_WALL_FACTOR * budget)`) still kills a worker that is hung
+ * but not spinning, which accrues no CPU time: 10x covers a starved runner, and the floor
+ * covers a tiny `timeMs`.
+ */
+const KILL_WALL_FACTOR = 10;
+const KILL_WALL_FLOOR_MS = 5_000;
+
+type CpuReading = { user: number; system: number };
+
+/** The worker's CPU milliseconds, or `undefined` where it can't say (a fake, an older Node). */
+async function cpuMsOf(worker: NodeWorkerLike): Promise<number | undefined> {
+  try {
+    const usage: CpuReading | undefined = await worker.cpuUsage?.();
+    return usage === undefined ? undefined : (usage.user + usage.system) / 1000;
+  } catch {
+    return undefined;
+  }
+}
+
+/** Calls `kill` once the worker has used `timeMs + COOPERATIVE_GRACE_MS` of CPU since now,
+ * or the wall-clock cap passes; without CPU readings, at the wall-clock budget as before.
+ * Returns the cancel. */
+function armKillTimer(worker: NodeWorkerLike, timeMs: number, kill: () => void): () => void {
+  const budget = timeMs + COOPERATIVE_GRACE_MS;
+  const cap = Math.max(KILL_WALL_FLOOR_MS, KILL_WALL_FACTOR * budget);
+  const start = performance.now();
+  const baseline = cpuMsOf(worker);
+  let cancelled = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
+  const check = async (): Promise<void> => {
+    if (cancelled) return;
+    const elapsed = performance.now() - start;
+    const base = await baseline;
+    const now = base === undefined ? undefined : await cpuMsOf(worker);
+    if (cancelled) return;
+    if (base === undefined || now === undefined || now - base >= budget || elapsed >= cap) return kill();
+    timer = setTimeout(() => void check(), Math.max(1, Math.min(budget - (now - base), cap - elapsed)));
+  };
+  timer = setTimeout(() => void check(), budget);
+  return () => {
+    cancelled = true;
+    if (timer !== undefined) clearTimeout(timer);
+  };
+}
+
 function workerUrl(name: string): URL {
   // Loading `./<name>.ts` when this module is still its TypeScript source (tests run
   // against `../src/node.ts` before a build) and `./<name>.mjs` once packed — the built
@@ -59,6 +110,8 @@ export interface NodeWorkerLike {
   on(event: "message", listener: (message: unknown) => void): void;
   once(event: "error" | "exit", listener: (...args: unknown[]) => void): void;
   off(event: string, listener: (...args: unknown[]) => void): void;
+  /** The worker thread's CPU time in microseconds; a fake may omit it. */
+  cpuUsage?(): Promise<{ user: number; system: number }> | { user: number; system: number };
 }
 
 export type NodeWorkerFactory = (
@@ -179,11 +232,11 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
           // The real deadline enforcement: armed only once "started" tells us the worker
           // is actually running THIS call, so cold spawn/import time is never counted
           // against it (COOPERATIVE_GRACE_MS's own comment).
-          let killTimer: ReturnType<typeof setTimeout> | undefined;
+          let cancelKill: (() => void) | undefined;
 
           const cleanup = (): void => {
             if (spawnTimer !== undefined) clearTimeout(spawnTimer);
-            if (killTimer !== undefined) clearTimeout(killTimer);
+            cancelKill?.();
             worker.off("message", onMessage);
             worker.off("error", onError);
             worker.off("exit", onExit);
@@ -211,10 +264,7 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
                 spawnTimer = undefined;
               }
               if (timeMs !== undefined) {
-                killTimer = setTimeout(
-                  () => finish({ outcome: "Aborted", ms: ms() }, "replace"),
-                  timeMs + COOPERATIVE_GRACE_MS,
-                );
+                cancelKill = armKillTimer(worker, timeMs, () => finish({ outcome: "Aborted", ms: ms() }, "replace"));
               }
               return;
             }
@@ -240,7 +290,7 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
           if (timeMs !== undefined) {
             // Guards a worker that never reports "started" at all (crashed/hung during
             // its own spin-up or import) -- see SPAWN_TIMEOUT_MS. The real deadline
-            // (`killTimer`) only arms once "started" arrives, above.
+            // (`armKillTimer`) only arms once "started" arrives, above.
             spawnTimer = setTimeout(() => finish({ outcome: "Aborted", ms: ms() }, "replace"), spawnTimeoutMs);
           }
           worker.ref();
@@ -356,11 +406,11 @@ export function openSession(options: SessionOptions = {}): Session {
     return new Promise((resolve, reject) => {
       let settled = false;
       let spawnTimer: ReturnType<typeof setTimeout> | undefined;
-      let killTimer: ReturnType<typeof setTimeout> | undefined;
+      let cancelKill: (() => void) | undefined;
 
       const cleanup = (): void => {
         if (spawnTimer !== undefined) clearTimeout(spawnTimer);
-        if (killTimer !== undefined) clearTimeout(killTimer);
+        cancelKill?.();
         worker.off("message", onMessage);
         signal?.removeEventListener("abort", onAbort);
       };
@@ -391,7 +441,7 @@ export function openSession(options: SessionOptions = {}): Session {
             clearTimeout(spawnTimer);
             spawnTimer = undefined;
           }
-          if (timeMs !== undefined) killTimer = setTimeout(kill, timeMs + COOPERATIVE_GRACE_MS);
+          if (timeMs !== undefined) cancelKill = armKillTimer(worker, timeMs, kill);
           return;
         }
         settled = true;
