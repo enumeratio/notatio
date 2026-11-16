@@ -1409,7 +1409,7 @@
   "Posets": {
     "expr": "Posets(4)",
     "glyph": "hasse",
-    "columns": [],
+    "columns": ["AntichainCount", "ChainCount", "CoverRelationCount", "ElementCountMinusWidth"],
     "derived": false,
     "statistics": 28
   },
