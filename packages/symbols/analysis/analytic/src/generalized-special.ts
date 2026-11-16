@@ -1,6 +1,7 @@
+import { finish } from "./finish.ts";
 import { type Expression, type ComputeEngine, isNumber } from "@cortex-js/compute-engine";
 import { bigRationalAt, operandsOf, refusing, widenSignature, wrapOperator } from "@notatio/engine";
-import { declined, type EvalOptions, isRealInt } from "@notatio/ce-patches";
+import { declined, isRealInt } from "@notatio/ce-patches";
 
 type Q = readonly [bigint, bigint];
 const gcdBig = (a: bigint, b: bigint): bigint => (b === 0n ? (a < 0n ? -a : a) : gcdBig(b, a % b));
@@ -51,9 +52,6 @@ function incompleteBetaExact(z: Q, a: bigint, b: bigint): Q | undefined {
 // Each is either a difference of two calls the head already answers, a direct algebraic
 // identity, or (Nielsen PolyLog) a small numeric kernel of its own. Registered by
 // `declareAnalytic` in hurwitz-zeta.ts.
-
-const finish = (expr: Expression, options: EvalOptions): Expression =>
-  options.numericApproximation ? expr.N() : expr.evaluate();
 
 /** Does `r`'s JSON still mention `head`? (same test `incomplete-gamma.ts` uses for Gamma.) */
 const stillMentions = (r: Expression, head: string): boolean => JSON.stringify(r.json).includes(`"${head}"`);

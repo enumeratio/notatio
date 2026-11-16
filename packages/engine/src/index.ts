@@ -157,7 +157,8 @@ const isWrapOptions = (stated: Arity | WrapOptions | undefined): stated is WrapO
  * `Add` returning `number`; `lazy`, which `Subtract` needs to canonicalise at all.
  *
  * A lazy head (`Add`, `Multiply`) hands its handler the operands as written; `applies`
- * and `handler` get them evaluated so they see values, while the native fallback gets
+ * and `handler` get them evaluated (numerically under `N()`, so a wrapper never changes the
+ * digits the head would have given) so they see values, while the native fallback gets
  * what it expected. That costs a full evaluation of every operand, per wrapper, on every
  * call that fits `arity` — before `applies` has a say, and again in the fallback when it
  * declines. On a hot lazy head keep `applies` O(n) over operator names (`ops.some(op =>
@@ -190,7 +191,7 @@ export function wrapOperator(
     compile,
     evaluate: (ops: readonly Expression[], options: EvaluateOptions) => {
       if (!fitsArity(arity, ops.length)) return native?.(ops, options);
-      const values = lazy ? ops.map((op) => op.evaluate()) : ops;
+      const values = lazy ? ops.map((op) => (options.numericApproximation ? op.N() : op.evaluate())) : ops;
       return applies(values) ? handler(values, options) : native?.(foldsOperands ? values : ops, options);
     },
   });

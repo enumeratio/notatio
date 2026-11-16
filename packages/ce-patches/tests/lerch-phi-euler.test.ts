@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import { applyAllPatches, lerchPhiReal } from "../src/index.ts";
+import { applyPatch, lerchPhiPatch, lerchPhiReal } from "../src/index.ts";
 
 // Real z < 0 goes through the van Wijngaarden Euler transform. For s = -1 the sum has the closed
 // form Φ(z, -1, a) = a/(1-z) + z/(1-z)², which an early stop of the transform used to miss
@@ -21,7 +21,9 @@ test("Φ(z, -1, a) matches its closed form at real z < 0", () => {
 
 test("the evaluate, parse and .N routes agree on Φ(-1/3, -1, 1)", () => {
   const ce = new ComputeEngine();
-  applyAllPatches(ce);
+  // Only this head's patch: applying all of them runs every patch's landed-upstream probe,
+  // about two seconds in all, none of it about LerchPhi.
+  applyPatch(ce, lerchPhiPatch);
   const call = ["LerchPhi", ["Rational", -1, 3], -1, 1];
   expect(ce.box(call as never).N().re).toBeCloseTo(0.5625, 14);
   expect(ce.parse("\\operatorname{LerchPhi}(-\\frac13,-1,1)").N().re).toBeCloseTo(0.5625, 14);

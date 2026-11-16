@@ -37,3 +37,6 @@ chebyshevt-2-positiveinfinity	ChebyshevT[2, Infinity]	Indeterminate			disagree
 chebyshevt-2-negativeinfinity	ChebyshevT[2, -Infinity]	Indeterminate			disagree
 sum-chebyshevt-k-1-over-2-times-chebyshevt-k-2-k	Sum[Times[ChebyshevT[k, Rational[1, 2]], ChebyshevT[k, 2]], List[k, 0, 2]]	-3/2	\sum _{k=0}^2 T_k\left(\frac{1}{2}\right) T_k(2)	-\frac{3}{2}	
 sum-chebyshevt-k-1-over-2-times-chebyshevt-k-2-2	Sum[Times[ChebyshevT[k, Rational[1, 2]], ChebyshevT[k, 2]], List[k, 0, 3]]	-55/2	\sum _{k=0}^3 T_k\left(\frac{1}{2}\right) T_k(2)	-\frac{55}{2}	
+a-large-degree-at-a-small-argument	ChebyshevT[100000, 0.0000025]				
+a-huge-order-at-minus-1	ChebyshevT[100000, -1]				
+a-huge-order-at-an-exact-point-stays-unevaluated	ChebyshevT[100000, 3]				

@@ -26,3 +26,4 @@ matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analy
 n-neg-1-over-2-times	N(((Rational(-1, 2) * (S(hyper([], [Rational(3, 2)], Rational(1, 2)) / gamma(Rational(3, 2)))**2)) + (S(hyper([], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))**2)), 30)	0.318309886183790671537767526745	
 n-neg-2-times-hypergeometric0f1regularized-3	N(((-2 * (S(hyper([], [Rational(3, 2)], 2) / gamma(Rational(3, 2)))**2)) + (S(hyper([], [Rational(1, 2)], 2) / gamma(Rational(1, 2)))**2)), 30)	0.318309886183790671537767526745	
 exact-arguments-stay-unevaluated-n-gives-the	hyper([], [-1], 2) / gamma(-1)	0	inconclusive
+a-value-past-the-double-range-stays-unevaluated	hyper([], [-65], (1e-8 + 1e-8*I)) / gamma(-65)	0	inconclusive

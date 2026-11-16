@@ -90,7 +90,7 @@ const digitsOf = (x: BigDecimal): number => (x.significand < 0n ? -x.significand
 /** `json` with every inexact number leaf -- a real, or either part of a `Complex` -- rounded to
  * `d` significant digits, ties to even. A list or a symbolic result (`x + 3.14159…`) is
  * rounded leaf by leaf. */
-function roundedTree(ce: ComputeEngine, json: unknown, d: number): unknown {
+export function roundedTree(ce: ComputeEngine, json: unknown, d: number): unknown {
   if (Array.isArray(json)) return json.map((node) => roundedTree(ce, node, d));
   const leaf = leafOf(ce, json);
   return leaf === undefined ? json : { num: leaf.toPrecision(d).toString() };

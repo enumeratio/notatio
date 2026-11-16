@@ -16,3 +16,4 @@ all-zero-arguments-still-give-the-empty-product	enumeratio_multinomial(0, 0, 0)	
 a-single-argument-is-always-1-there-s-only-one	enumeratio_multinomial(5)	1	
 a-single-symbolic-argument-is-also-1			
 with-no-arguments-it-is-the-empty-product-1	enumeratio_multinomial()	1	
+a-single-negative-argument	enumeratio_multinomial(-2)	0	disagree
