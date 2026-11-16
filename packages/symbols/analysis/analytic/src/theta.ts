@@ -4,6 +4,7 @@ import {
   exceedsDoublePrecision,
   isFiniteNum,
   numberResult,
+  vouchesWhenComplex,
   periodsExceedDouble,
   wantsNumber,
   abs,
@@ -133,7 +134,7 @@ function declareOne(ce: ComputeEngine, head: string, derivative: boolean): void 
       if (periodsExceedDouble(u.re, Math.PI)) return undefined;
       if (!isValidOrder(a)) return undefined; // a must be a concrete integer 1..4
       const result = theta(a.re as 1 | 2 | 3 | 4, cxOf(u), cxOf(q), derivative);
-      return result === undefined ? undefined : numberResult(ce, result);
+      return result === undefined ? undefined : numberResult(ce, result, vouchesWhenComplex([u, q]));
     },
   });
 }

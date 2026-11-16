@@ -7,6 +7,7 @@ the-derivative	D[HermiteH[n, x], x]	2*n*HermiteH[-1 + n, x]	\frac{\partial H_n(x
 at-t5-0-7	N[HermiteH[5, 0.7]]	34.49824	N[H_5(0.7)]	34.4982
 at-t10-1-3	N[HermiteH[10, 1.3]]	-66123.4130330624	N[H_{10}(1.3)]	-66123.4
 at-t4-2-3i	N[HermiteH[4, Complex[2, 3]]]	-1652. - 2496.*I	N[H_4(2+3 i)]	-1652.-2496. i
+a-small-imaginary-part-is-kept	HermiteH[5, Complex[1.7, 1*^-15]]			
 at-a-rational	HermiteH[5, Rational[1, 3]]	8312/243	H_5\left(\frac{1}{3}\right)	\frac{8312}{243}
 at-a-complex-argument	HermiteH[4, Complex[2, 3]]	-1652 - 2496*I	H_4(2+3 i)	-1652-2496 i
 a-symbolic-order-stays-unevaluated	HermiteH[n, x]	HermiteH[n, x]	H_n(x)	H_n(x)

@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import { numberResult } from "../src/index.ts";
+import { numberResult, vouchesWhenComplex } from "../src/index.ts";
 
 const ce = new ComputeEngine();
 
@@ -24,6 +24,21 @@ test("a kernel's own noise scale drops an imaginary part the value cannot carry"
   expect(numberResult(ce, { re: 1e-20, im: 3e-17 }, { noise: 1e-14 })?.im).toBe(0);
   // A genuine imaginary part above the stated noise stays.
   expect(numberResult(ce, { re: 1e-20, im: 3e-12 }, { noise: 1e-14 })?.im).toBe(3e-12);
+});
+
+test("a kernel that vouches for its imaginary part keeps it beside a large real part", () => {
+  // Digamma(2.5 + 1e-15i): the imaginary part is 4.9e-16, below 1e-14 of the real part.
+  const value = { re: 0.703156640645243, im: 4.903577561002349e-16 };
+  expect(numberResult(ce, value)?.im).toBe(0);
+  expect(numberResult(ce, value, { vouchesImaginary: true })?.im).toBe(4.903577561002349e-16);
+  // Exactly 0 is real, and a vouching kernel's own noise still drops what it cannot carry.
+  expect(numberResult(ce, { re: 3, im: 0 }, { vouchesImaginary: true })?.im).toBe(0);
+  expect(numberResult(ce, value, { vouchesImaginary: true, noise: 1e-15 })?.im).toBe(0);
+});
+
+test("a kernel vouches only when an operand is complex", () => {
+  expect(vouchesWhenComplex([{ im: 0 }, undefined]).vouchesImaginary).toBe(false);
+  expect(vouchesWhenComplex([{ im: 0 }, { im: 1e-15 }]).vouchesImaginary).toBe(true);
 });
 
 test("a non-finite result declines unless the caller says it is a pole", () => {
