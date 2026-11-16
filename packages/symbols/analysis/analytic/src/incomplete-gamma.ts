@@ -13,6 +13,7 @@ import {
   wantsBigDigits,
   wantsNumber,
 } from "@notatio/ce-patches";
+import { numerically } from "./finish.ts";
 import { gammaExactValue } from "./widened.ts";
 
 // The three-argument generalized incomplete gamma, Wolfram's Gamma[s, z₀, z₁] =
@@ -50,7 +51,7 @@ const rewrite = (
   const difference: BoxInput = ["Subtract", ["Gamma", s, z0], ["Gamma", s, z1]] as BoxInput;
   const expr = ce.box(head === "Gamma" ? difference : (["Divide", difference, ["Gamma", s]] as BoxInput));
   // A complex operand runs the incomplete Gamma in doubles.
-  return options.numericApproximation ? inDoublesIfComplex(ce, ops, options, () => expr.N()) : expr.evaluate();
+  return options.numericApproximation ? inDoublesIfComplex(ce, ops, options, () => numerically(expr)) : expr.evaluate();
 };
 
 /** sin(πa) and cos(πa) for a in [0, 1], exact at the multiples of 1/2 (cos(π/2) is 0, not 6e-17). */

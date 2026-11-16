@@ -1,6 +1,7 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigIntegerAt, bigRationalAt, operandsOf, symbolNameOf, wrapOperator } from "@notatio/engine";
-import { declined, type EvalOptions } from "@notatio/ce-patches";
+import { declined } from "@notatio/ce-patches";
+import { finish } from "./finish.ts";
 import { gammaExactValue, type Rational } from "./widened.ts";
 
 /**
@@ -10,10 +11,8 @@ import { gammaExactValue, type Rational } from "./widened.ts";
  * HarmonicNumber's continuation calling PolyGamma). If a wrapper always hands back an
  * exact symbolic expression, one of those recursive numeric calls gets a symbol instead
  * of the plain number it expects, and the caller's own `.re` turns into NaN. Respecting
- * `options.numericApproximation` here is what keeps every such nested call intact.
+ * `options.numericApproximation` here (`finish`) is what keeps every such nested call intact.
  */
-const finish = (expr: Expression, options: EvalOptions): Expression =>
-  options.numericApproximation ? expr.N() : expr.evaluate();
 
 // #113 exact closed forms: heads that already evaluate numerically but leave an
 // exact argument symbolic, where Wolfram's `FunctionExpand` (or, for a couple of

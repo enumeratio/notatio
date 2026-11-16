@@ -1,6 +1,7 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigIntegerAt, bigRationalAt, operandsOf, symbolNameOf, wrapOperator } from "@notatio/engine";
 import type { EvalOptions } from "@notatio/ce-patches";
+import { finish } from "./finish.ts";
 
 /** A concrete +oo operand -- `PositiveInfinity` boxes as an infinite NUMBER in
  * compute-engine 0.128 (its `.symbol` is undefined), not a symbol; matches q-series.ts's
@@ -19,9 +20,6 @@ const isImaginaryUnit = (x: Expression): boolean => x.re === 0 && x.im === 1;
 // very end of `declareAnalytic`), so it composes with closed-forms-113.ts's own wrappers
 // rather than replacing them. Each `wrapOperator` call's own `arity` argument filters the
 // call before the predicate runs, per #141 -- predicates below don't re-check ops.length.
-
-const finish = (expr: Expression, options: EvalOptions): Expression =>
-  options.numericApproximation ? expr.N() : expr.evaluate();
 
 export function declareSpecialFunctionsRemaining(ce: ComputeEngine): void {
   // --- The limit at +oo: HarmonicNumber grows without bound, so its value at the single
