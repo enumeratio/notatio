@@ -14,9 +14,10 @@
 // is destroyed outright and the pool spawns a fresh process for the next call, so there is
 // never a stale cache to worry about — this only ever caches within one worker's own life.
 
+import { saveCompileCache } from "./compile-cache.ts";
 import { parentPort } from "node:worker_threads";
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { evaluateCooperatively } from "./cooperative-evaluate.ts";
+import { evaluateCooperatively, type CooperativeResult } from "./cooperative-evaluate.ts";
 import { declareEvaluation } from "./declare.ts";
 import { isolateFreeSymbols } from "./isolate.ts";
 
@@ -57,16 +58,28 @@ async function engineFor(setup: string | undefined): Promise<ComputeEngine> {
   // The worker's engine must mean the same things the caller's does.
   declareEvaluation(ce);
   if (setup !== undefined) {
-    const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void };
-    mod.configure(ce);
+    const mod = (await import(setup)) as { configure: (ce: ComputeEngine) => void | Promise<void> };
+    await mod.configure(ce);
   }
   engines.set(setup, ce);
+  saveCompileCache();
   return ce;
 }
 
+const describe = (e: unknown): string => (e instanceof Error ? e.message : String(e));
+
 async function handle(request: WorkerRequest): Promise<void> {
   const { id, json, setup, timeMs, materialize } = request;
-  const ce = await engineFor(setup);
+  // A throw here (a `setup` module that fails to load or configure, a declare that raises) is
+  // this call's error, answered as one: left to escape, it kills the worker and the host reads
+  // a crash as a cap abort.
+  let ce: ComputeEngine;
+  try {
+    ce = await engineFor(setup);
+  } catch (e) {
+    parentPort?.postMessage({ id, kind: "result", ok: false, error: describe(e) } satisfies WorkerResponse);
+    return;
+  }
   parentPort?.postMessage({ id, kind: "started" } satisfies WorkerResponse);
   // A fresh scope for THIS call only: any `:=`/`Assign` (or other binding) it makes lands
   // there, never in the engine's shared base scope where `engineFor`'s declarations live,
@@ -74,7 +87,12 @@ async function handle(request: WorkerRequest): Promise<void> {
   // Both are restored in a `finally` whether the call succeeds, fails, or is cooperatively
   // aborted, so the next call on this (reused) worker starts clean regardless of how this
   // one ended.
-  const answer = isolateFreeSymbols(ce, () => evaluateCooperatively(ce, json, timeMs, materialize));
+  let answer: CooperativeResult;
+  try {
+    answer = isolateFreeSymbols(ce, () => evaluateCooperatively(ce, json, timeMs, materialize));
+  } catch (e) {
+    answer = { ok: false, error: describe(e) };
+  }
   parentPort?.postMessage({ id, kind: "result", ...answer } satisfies WorkerResponse);
 }
 

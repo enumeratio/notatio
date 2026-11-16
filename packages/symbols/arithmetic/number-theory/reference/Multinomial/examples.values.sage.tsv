@@ -16,3 +16,4 @@ all-zero-arguments-still-give-the-empty-product	multinomial(0, 0, 0)	1
 a-single-argument-is-always-1-there-s-only-one	multinomial(5)	1	
 a-single-symbolic-argument-is-also-1	multinomial(SR.var("n"))	1	
 with-no-arguments-it-is-the-empty-product-1	multinomial()	IndexError: tuple index out of range	error
+a-single-negative-argument	multinomial(-2)	0	disagree

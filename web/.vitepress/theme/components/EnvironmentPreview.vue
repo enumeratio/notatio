@@ -16,10 +16,9 @@ import {
   mediaSignals,
   pageEnvironment,
   reduce,
-  scopeOf,
   watchPageEnvironment,
 } from "@notatio/frontend";
-import { type StructuralNode, structuralOf, toVNode } from "@notatio/frontend/vdom";
+import { type StructuralNode, toVNode, treeOf } from "@notatio/frontend/vdom";
 import { parseExpression, serializeExpression } from "@notatio/formats/expression";
 import { computed, onMounted, onUnmounted, ref, shallowRef, watch } from "vue";
 import { fragment, setFragment } from "../fragment.ts";
@@ -55,7 +54,7 @@ const json = computed(() => (reduced.value === undefined ? "" : JSON.stringify(r
 const page = shallowRef<Environment>(pageEnvironment());
 const tree = computed(() => {
   const expr = reduced.value;
-  return expr === undefined ? undefined : structuralOf(scopeOf(reduce(expr, page.value)));
+  return expr === undefined ? undefined : treeOf(expr, page.value);
 });
 // One component for every tree, so the engine arriving (a new `reduced`, the same `json`) patches
 // the elements in place instead of mounting new ones.

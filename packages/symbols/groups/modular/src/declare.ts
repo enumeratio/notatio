@@ -16,6 +16,7 @@ import {
 import { continuedFractionKOf, convergentsOf } from "./convergents.ts";
 import { MODULAR_NOTATION } from "./notation.ts";
 import { pqaExpansion } from "./continued-fraction.ts";
+import { isqrt } from "@notatio/residues";
 import { kroneckerSymbol } from "./kronecker.ts";
 import {
   areFareyNeighbours,
@@ -660,24 +661,36 @@ export function declareModular(ce: Engine): void {
       // the convergent formula for that gives y = (y·h_k + h_{k-1})/(y·k_k + k_{k-1}) —
       // h_i/k_i the convergent of the first i period terms, h_0/k_0 := 1/0 by convention.
       // Clearing denominators: k_k·y² + (k_{k-1} − h_k)·y − h_{k-1} = 0, i.e. A y² + B y +
-      // C = 0 with A = k_k, B = k_{k-1} − h_k, C = −h_{k-1}; y = (−B + √disc)/(2A), disc =
-      // B² − 4AC (the positive root, since a purely periodic tail is always > 1).
+      // C = 0 with A = k_k, B = k_{k-1} − h_k, C = −h_{k-1}.
       const A = kk;
       const B = kk1 - hk;
       const C = -hk1;
       const D = B * B - 4n * A * C;
-      // y is (p + q√D)/r with p=-B, q=1, r=2A. Every step of folding in a leading term —
+      // The value is the limit of the convergents: the root that attracts, where
+      // |k_k·y + k_{k-1}| = |h_k + k_{k-1} ± √D|/2 exceeds 1 (the period's determinant is ±1,
+      // so the other root's factor is its reciprocal). Equal factors (trace 0), a complex or
+      // degenerate pair, or a start that sits on the repelling root leave it unevaluated.
+      const trace = hk + kk1;
+      if (A === 0n || D <= 0n || trace === 0n) return undefined;
+      const sign = trace > 0n ? 1n : -1n;
+      const root = isqrt(D);
+      if (root * root === D) {
+        const repelling = -B - sign * root;
+        if (full.some(([h, k]) => repelling * k === 2n * A * h)) return undefined;
+      }
+      // y is (p + q√D)/r with p=-B, q=±1, r=2A. Every step of folding in a leading term —
       // a_i + 1/(p+q√D)/r — keeps the SAME radicand D (the reciprocal of (p+q√D)/r
       // rationalizes to r(p−q√D)/(p²−q²D), still over √D), so the whole pre-period folds in
       // pure bigint arithmetic and only the final value touches compute-engine, as one
       // `Sqrt` compute-engine's own folding can reduce — never a reciprocal-of-a-surd it
       // won't rationalize on its own.
       let p = -B;
-      let q = 1n;
+      let q = sign;
       let r = 2n * A;
       for (let i = pre.length - 1; i >= 0; i--) {
         // 1/((p+q√D)/r) = r(p−q√D)/(p²−q²D); then a_i + that.
         const denom = p * p - q * q * D;
+        if (denom === 0n) return undefined;
         const rp = r * p;
         const rq = r * q;
         p = pre[i]! * denom + rp;

@@ -263,4 +263,4 @@ kernel, the network or hand curation stays committed.
   pnpm override written in the job (`.github/scripts/compute-engine-tarball.ts`; nothing committed changes),
   then builds and runs every package's tests as the nightly does. It keeps one rolling issue labelled
   `ce-main`: the commit, the range since the last green run, the failing tests; closed when green. The
-  engine's version-pin test (`tests/ce-internals.test.ts`) fails there whenever main's version differs from the pin.
+  engine's version-pin test (`tests/ce-internals.test.ts`) skips there (`COMPUTE_ENGINE_MAIN=1`); the rule tests in it still run.

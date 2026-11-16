@@ -30,7 +30,7 @@ bindings:
       on: 2026-10-14
   - origin: mapped
     form: mpmath
-    template: chebyu($1, $2)
+    template: enumeratio_chebyu($1, $2)
     arity: 2
     threadArgOnly:
       - 1

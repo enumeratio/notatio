@@ -267,6 +267,7 @@ export function outsideCrateDomain(sample: MathJSON): boolean {
     case "Arcosh":
       return bad(0, (x) => x < 1);
     case "Arctanh":
+    case "Artanh":
       return bad(0, (x) => Math.abs(x) >= 1);
     case "Arcoth":
       return bad(0, (x) => Math.abs(x) <= 1);
@@ -274,6 +275,8 @@ export function outsideCrateDomain(sample: MathJSON): boolean {
       return bad(0, (x) => x <= 0 || x > 1);
     case "InverseErfc":
       return bad(0, (x) => x < 0 || x > 2);
+    case "ErfInv":
+      return bad(0, (x) => Math.abs(x) >= 1);
     case "LogGamma":
     case "GammaLn":
       return bad(0, (x) => x <= 0);

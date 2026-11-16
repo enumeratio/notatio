@@ -6,3 +6,4 @@ agm-1-neg-1p5-plus-3p5i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_comp
 agm-1-neg-10-plus-tiny-i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_complex(-10, enumeratio_decimal("1e-12"))), 20)	(-2.4621818911004281824e+00+2.0983173530438719791e+00j)	
 agm-1-neg-10-minus-tiny-i	enumeratio_nshow(enumeratio_ball(agm, 1, enumeratio_complex(-10, enumeratio_decimal("-1e-12"))), 20)	(-2.4621818911004281824e+00-2.0983173530438719791e+00j)	
 agm-1-neg-10-20	enumeratio_nshow(enumeratio_ball(agm, 1, -10), 20)	(-2.4621818911005727936e+00-2.0983173530436351629e+00j)	disagree
+agm-neg-8-neg-10-20	enumeratio_nshow(enumeratio_ball(agm, -8, -10), 20)	-8.9721143211504102805e+00	
