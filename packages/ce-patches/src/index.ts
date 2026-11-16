@@ -136,6 +136,7 @@ export {
   isRealInt,
   isFiniteNum,
   numberResult,
+  vouchesWhenComplex,
   type NumberResultOptions,
   REAL_COLLAPSE_RELATIVE,
   MIN_NORMAL,
