@@ -40,10 +40,10 @@ function smallest(data: Record<string, unknown>, n: number): [string, unknown][]
 
 /**
  * The collections FindStat lists up to isomorphism and the crosscheck holds to their rows object by object: every row up to
- * a size (the count of elements, the last number of the object's spelling) is kept, not a few, so a statistic is checked on
+ * a size (the count of elements or vertices, the last number of the object's spelling) is kept, not a few, so a statistic is checked on
  * more than the antichains.
  */
-const OBJECT_WISE_THROUGH: Readonly<Record<string, number>> = { Posets: 5, Lattices: 6 };
+const OBJECT_WISE_THROUGH: Readonly<Record<string, number>> = { Graphs: 5, Posets: 5, Lattices: 6 };
 
 /** The rows of `data` a statistic of `collection` keeps: all rows up to the collection's size where it is held object by object, else the smallest few. */
 function sampleOf(collection: string, data: Record<string, unknown>): [string, unknown][] {
