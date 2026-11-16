@@ -129,3 +129,5 @@ neg-1-over-2-times-polylog-2-neg-1-over-3-plus	(((mpf(-1)/2) * polylog(2, (mpf(-
 neg-2-times-polylog-2-neg-1-over-2-plus-polylog	((-2 * (polylog(2, (mpf(-1)/2)) + polylog(2, (mpf(1)/2)))) + polylog(2, (mpf(1)/4)))		
 polylog-2-neg-1-plus-polylog-2-0-plus-polylog-2	(polylog(2, -1) + polylog(2, 0) + polylog(2, (mpf(1)/2)))		
 an-exact-argument-stays-symbolic-under-plain	polylog(2, (mpf(1)/2))	0.58224052646501250590265632016	
+n-polylog-neg-70-neg-4-a-large-cancellation	(polylog(-70, -4))	-2.05735303230818120862142733495e+62	disagree
+threads-over-a-list-with-the-pole-at-1	[polylog(-2, 500000), polylog(-2, 1)]	[mpf('-0.0000020000160000720002560008000023041'), mpf('0.0')]	disagree

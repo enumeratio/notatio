@@ -328,6 +328,10 @@ function declarePQ(ce: ComputeEngine, head: string, p: PQLetter, q: PQLetter): v
       const exact = exactSCDN(ce, u, m);
       if (exact !== undefined) return finish(ce.function("Divide", [exact[p], exact[q]]), options);
 
+      // sn, cn and dn are periodic for 0 < m < 1, so at an infinite argument (u = EllipticK(1) + …) they have no
+      // limit: NaN, not a call left standing for Multiply to fold away beside a 0.
+      if (Math.abs(u.re) === Infinity && u.im === 0 && m.im === 0 && m.re > 0 && m.re < 1) return ce.NaN;
+
       if (!wantsNumber(ops, options) || !isFiniteNum(u) || !isFiniteNum(m)) return undefined;
       // The AGM kernel below is plain-double: N(…, d) for d past what a double carries
       // would otherwise silently hand back ~17 correct digits dressed as d of them. Real u and

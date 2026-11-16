@@ -10,3 +10,4 @@ n-pi-20-eq-pi-times-1-plus-256-times-10-pow-neg	enumeratio_equal(enumeratio_n(co
 list-x-eq-x-x-eq-y-sqrt-2-plus-sqrt-3-eq-sqrt-5		
 solve-a-times-x-pow-2-plus-b-times-x-plus-c-eq-0		
 fullsimplify-p-q-eq-q-p		
+n-pi-10-eq-pi	enumeratio_equal(enumeratio_n(const_pi(RR), 10), const_pi(RR))	false

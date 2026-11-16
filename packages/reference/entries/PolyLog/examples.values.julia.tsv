@@ -129,3 +129,5 @@ neg-1-over-2-times-polylog-2-neg-1-over-3-plus	(((-1 // 2) * enumeratio_ball(pol
 neg-2-times-polylog-2-neg-1-over-2-plus-polylog	((-2 * (enumeratio_ball(polylog, 2, (-1 // 2)) + enumeratio_ball(polylog, 2, (1 // 2)))) + enumeratio_ball(polylog, 2, (1 // 4)))	-4.318084277547222312693175931400199785558000182218140692511851735084295901581214e-78	
 polylog-2-neg-1-plus-polylog-2-0-plus-polylog-2	(enumeratio_ball(polylog, 2, -1) + enumeratio_ball(polylog, 2, 0) + enumeratio_ball(polylog, 2, (1 // 2)))	-0.2402265069591007123335512631633324858652764757972727934334320668118326911299117	
 an-exact-argument-stays-symbolic-under-plain	enumeratio_ball(polylog, 2, (1 // 2))	0.5822405264650125059026563201596801087441984748061264254343470478731710440716808	
+n-polylog-neg-70-neg-4-a-large-cancellation	(enumeratio_ball(polylog, -70, -4))	-2.057352910509084182839371714896339280466701337921060077504318580867059940641113e62	
+threads-over-a-list-with-the-pole-at-1	Any[enumeratio_ball(polylog, -2, 500000), enumeratio_ball(polylog, -2, 1)]	ball not finite	error
