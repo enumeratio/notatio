@@ -2408,6 +2408,10 @@ const NOVEL = [
   "AntichainCount",
   "MaximalChainCount",
   "ShortestMaximalChainSize",
+  // Sage spells these `canonical_label` and `is_isomorphic` on a poset; no kernel here asked by those names.
+  "CanonicalPoset",
+  "IsIsomorphicPoset",
+  "Posets",
 ];
 
 // What formats holds inert that is Wolfram's own (`Plot`, `Slider`, `Cell`): known elsewhere because
