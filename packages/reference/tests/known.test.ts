@@ -84,3 +84,12 @@ test("a tiny value is held to its own digits, and only a known 0 keeps the floor
   expect(disagreement(1e-16, 0, 1e-15, undefined, true)).toBeUndefined();
   expect(disagreement(1e-16, 2e-16, 1e-15, undefined, true)).toBeUndefined();
 });
+
+test("an interval's ends and a measurement's value are held to their own digits", () => {
+  const truth = ["Interval", { num: "1.9e-55" }, { num: "2.9e-55" }];
+  expect(disagreement(["Interval", { num: "1.9e-55" }, { num: "2.9e-55" }], truth, 1e-9)).toBeUndefined();
+  expect(disagreement(["Interval", { num: "1.8e-55" }, { num: "2.9e-55" }], truth, 1e-9)).toBeDefined(); // loose
+  expect(disagreement(["Interval", -1e-20, 1e-20], ["Interval", 0, 0], 1e-9)).toBeUndefined(); // a known 0 keeps the floor
+  expect(disagreement(["Measurement", 1.9e-55, 1e-66], 1.9e-55, 1e-9)).toBeUndefined();
+  expect(disagreement(["Measurement", 1.9e-55, 1e-50], 1.9e-55, 1e-9)).toBeDefined(); // the bar swamps the value
+});
