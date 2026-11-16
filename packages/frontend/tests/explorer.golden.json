@@ -2058,6 +2058,17 @@
     "derived": false,
     "statistics": 0
   },
+  "UnlabeledGraphs": {
+    "expr": "UnlabeledGraphs(4)",
+    "columns": [
+      "AboveAverageDegreeVertexCount",
+      "AbsoluteAdjacencyDeterminant",
+      "AcyclicOrientationCount",
+      "AdjacencyDeterminant"
+    ],
+    "derived": false,
+    "statistics": 159
+  },
   "UntouchableNumbers": {
     "expr": "Take(UntouchableNumbers, 15)",
     "columns": ["DigitCount", "DigitSum", "DivisorSum"],

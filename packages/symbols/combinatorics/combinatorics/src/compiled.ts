@@ -66,11 +66,12 @@ export function bareParts(parts: readonly string[] | undefined, contents: unknow
 }
 
 /** A tuple image (a `Tuple` or the `List` compiled code hands back) with each part in its constructor, the inverse of
- *  `bareParts`. An image of another size is left as it is, for the carrier's own check to refuse. */
+ *  `bareParts`. A part named "" is no carrier (an integer or a list): it stays as it is. An image of another size
+ *  is left as it is, for the carrier's own check to refuse. */
 export function wrapParts(parts: readonly string[] | undefined, image: unknown): unknown {
   if (parts === undefined || !Array.isArray(image) || (image[0] !== "Tuple" && image[0] !== "List")) return image;
   if (image.length - 1 !== parts.length) return image;
-  return ["Tuple", ...image.slice(1).map((part, i) => [parts[i], part])];
+  return ["Tuple", ...image.slice(1).map((part, i) => (parts[i] === "" ? part : [parts[i], part]))];
 }
 
 /** The key a map is compiled under. */
