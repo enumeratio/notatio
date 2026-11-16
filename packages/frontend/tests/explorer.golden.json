@@ -829,7 +829,7 @@
       "AdjacencyDeterminant"
     ],
     "derived": true,
-    "statistics": 159
+    "statistics": 166
   },
   "LabeledGraphsByEdges": {
     "expr": "LabeledGraphsByEdges(4, 2)",
@@ -847,7 +847,7 @@
       "AdjacencyNegativeEigenvalueCount"
     ],
     "derived": true,
-    "statistics": 159
+    "statistics": 166
   },
   "LabeledTrees": {
     "expr": "LabeledTrees(4)",
@@ -2067,7 +2067,7 @@
       "AdjacencyDeterminant"
     ],
     "derived": false,
-    "statistics": 159
+    "statistics": 166
   },
   "UntouchableNumbers": {
     "expr": "Take(UntouchableNumbers, 15)",

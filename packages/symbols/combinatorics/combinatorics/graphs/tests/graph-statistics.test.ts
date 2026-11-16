@@ -103,10 +103,27 @@ const BATCH_TWO = new Set([
   "LongestTrailLength",
   "TriangleFreeEdgeDeletionNumber",
   "RegularEdgeEditNumber",
+  "MaximalSpanningForestCount",
+  "StronglyConnectedOrientationCount",
+  "StronglyConnectedOutdegreeSequenceCount",
+  "ChromaticDiscriminant",
+  "MinimumProperColoringCount",
+  "TutteMonomialCount",
+  "TutteMinusOneSpanningTreeQuotient",
 ]);
 // Heads that build the subsets of all the pairs of vertices take about a second a graph on 4 vertices and ten on 5, so the
 // standard run reads fewer of them still.
-const PAIR_SUBSETS = new Set(["RegularEdgeEditNumber"]);
+const PAIR_SUBSETS = new Set(["RegularEdgeEditNumber", "MinimumProperColoringCount"]);
+// The Tutte group runs compiled in milliseconds a graph on 5 vertices, so the deep run reads all of them.
+const FULL_ON_FIVE = new Set([
+  "MaximalSpanningForestCount",
+  "StronglyConnectedOrientationCount",
+  "StronglyConnectedOutdegreeSequenceCount",
+  "ChromaticDiscriminant",
+  "MinimumProperColoringCount",
+  "TutteMonomialCount",
+  "TutteMinusOneSpanningTreeQuotient",
+]);
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 const thinnest = (head: string): boolean => PAIR_SUBSETS.has(head) && !DEEP;
 
@@ -197,7 +214,7 @@ test.skipIf(!DEEP)(
   () => {
     // The second batch's heads: every sixteenth graph on 5 vertices and every 256th on 6.
     for (const [head, expected] of Object.entries(GRAPH_READINGS)) {
-      const slow = BATCH_TWO.has(head);
+      const slow = BATCH_TWO.has(head) && !FULL_ON_FIVE.has(head);
       const all = [
         ...graphs(5).filter((_, i) => !slow || i % 16 === 0),
         ...graphs(6).filter((_, i) => i % (slow ? 256 : 8) === 0),

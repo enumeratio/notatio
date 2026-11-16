@@ -1488,6 +1488,11 @@ const power = (base: number, exponent: MathJSON): MathJSON =>
 const tutteAt = (x: number, y: number, wrap?: (sum: MathJSON, full: MathJSON) => MathJSON): MathJSON =>
   overEdgeSubsets((size, rank, corank) => times(power(x - 1, corank), power(y - 1, subtract(size, rank))), 1, wrap);
 
+/** The pairs (corank a, nullity b) of the edge subsets as keys a * width + b, `width` the edges plus one: the keys 0 .. n * width - 1. */
+const keyRange: MathJSON = ["Range", 0, subtract(times("n", "width"), 1)];
+const corankOfKey: MathJSON = ["Divide", subtract("t", ["Mod", "t", "width"]), "width"];
+const nullityOfKey: MathJSON = ["Mod", "t", "width"];
+
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
   stat(
@@ -3167,5 +3172,173 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
       ),
     ),
     `FindStat's St001574: the fewest differences between the edges and those of a regular graph on the same vertices; the graph with no edges is regular. ${NO_VERTICES}`,
+  ),
+  stat(
+    "MaximalSpanningForestCount",
+    "The spanning forests with as many edges as the graph's rank: the Tutte polynomial at x = 1, y = 1.",
+    tutteAt(1, 1),
+    `FindStat's St000267: one spanning tree for each connected component, chosen independently. The graph with no vertices has one, the empty forest, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "StronglyConnectedOrientationCount",
+    "The ways to direct every edge so that the result is strongly connected: the Tutte polynomial at x = 0, y = 2.",
+    tutteAt(0, 2),
+    `FindStat's St000268. The graph with no vertices has one, the empty orientation, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "StronglyConnectedOutdegreeSequenceCount",
+    "The outdegree sequences of the strongly connected orientations: the Tutte polynomial at x = 0, y = 1.",
+    tutteAt(0, 1),
+    `FindStat's St000344. The graph with no vertices has one, the empty sequence, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "ChromaticDiscriminant",
+    "The absolute value of the coefficient of q in the chromatic polynomial.",
+    overEdgeSubsets(
+      (size, rank) => times(["Power", -1, size], one(equals(rank, subtract("n", 1)))),
+      0,
+      (sum) => ["Abs", sum],
+    ),
+    `FindStat's St000948: the chromatic polynomial is the sum over sets of edges A of (-1)^|A| q^components(A), and its coefficient of q is the sum over the sets of rank n - 1, those that leave one component; a disconnected graph has none and gives 0. A single vertex gives 1. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+  ),
+  stat(
+    "MinimumProperColoringCount",
+    "The proper colorings of the vertices in the fewest colors the graph allows.",
+    withMasks(
+      bind(
+        "k",
+        chromaticNumber,
+        overEdgeSubsets((size, rank) => times(["Power", -1, size], ["Power", "k", subtract("n", rank)])),
+        "integer",
+      ),
+      1,
+    ),
+    `FindStat's St001109: the chromatic polynomial, the sum over sets of edges A of (-1)^|A| k^components(A), at k the chromatic number. The graph with no vertices has one coloring, the empty one, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "TutteMonomialCount",
+    "The monomials of the Tutte polynomial.",
+    withGraph(
+      bind(
+        "width",
+        add(length("edges"), 1),
+        summarizeSubsetRows(
+          RANK_COLUMNS,
+          (row) =>
+            bind(
+              "rank",
+              rankOfRow(row),
+              add(times(subtract("full", "rank"), "width"), subtract(at(1, row), "rank")),
+              "integer",
+            ),
+          (keys, last) =>
+            bind(
+              "full",
+              rankOfRow(last),
+              bindList(
+                "tally",
+                typedFolding(
+                  forEach(
+                    keyRange,
+                    ["If", equals("t", "key"), add(at(add("t", 1), "tally"), 1), at(add("t", 1), "tally")],
+                    "t",
+                  ),
+                  "tally",
+                  "key",
+                  forEach(keyRange, 0, "t"),
+                  keys,
+                  "list<integer>",
+                ),
+                floored(
+                  sumOver(
+                    ["Range", 0, subtract("n", 1)],
+                    floored(
+                      sumOver(
+                        ["Range", 0, subtract("width", 1)],
+                        one([
+                          "NotEqual",
+                          floored(
+                            sumOver(
+                              keyRange,
+                              [
+                                "If",
+                                atLeastValue(corankOfKey, "i"),
+                                [
+                                  "If",
+                                  atLeastValue(nullityOfKey, "j"),
+                                  times(
+                                    times(at(add("t", 1), "tally"), ["Binomial", corankOfKey, "i"]),
+                                    times(
+                                      ["Binomial", nullityOfKey, "j"],
+                                      ["Power", -1, add(subtract(corankOfKey, "i"), subtract(nullityOfKey, "j"))],
+                                    ),
+                                  ),
+                                  0,
+                                ],
+                                0,
+                              ],
+                              "t",
+                            ),
+                          ),
+                          0,
+                        ]),
+                        "j",
+                      ),
+                    ),
+                    "i",
+                  ),
+                ),
+                "list<integer>",
+              ),
+              "integer",
+            ),
+        ),
+        "integer",
+      ),
+      1,
+    ),
+    `FindStat's St001546. With N(a, b) the sets of edges of corank a and nullity b, the coefficient of x^i y^j is the sum over a >= i, b >= j of N(a, b) C(a, i) C(b, j) (-1)^(a - i + b - j), and the nonzero ones are counted. The graph with no vertices has the Tutte polynomial 1, one monomial, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "TutteMinusOneSpanningTreeQuotient",
+    "The spanning trees divided, rounded down, by the absolute value of the Tutte polynomial at x = -1, y = -1.",
+    withGraph(
+      summarizeSubsetRows(
+        RANK_COLUMNS,
+        (row) =>
+          bind(
+            "rank",
+            rankOfRow(row),
+            times(["Power", -2, subtract("full", "rank")], ["Power", -2, subtract(at(1, row), "rank")]),
+            "integer",
+          ),
+        (bodies, last) =>
+          bind(
+            "full",
+            rankOfRow(last),
+            [
+              "Floor",
+              [
+                "Divide",
+                floored(
+                  sumOver(
+                    "table",
+                    bind(
+                      "rank",
+                      rankOfRow("row"),
+                      times(one(equals(at(1, "row"), "rank")), one(equals("rank", subtract("n", 1)))),
+                      "integer",
+                    ),
+                    "row",
+                  ),
+                ),
+                ["Abs", ["Sum", bodies]],
+              ],
+            ],
+            "integer",
+          ),
+      ),
+    ),
+    `FindStat's St001796: SpanningTreeCount over the absolute value of the Tutte polynomial at (-1, -1), which is never 0; the sets of edges with size = rank = n - 1 are the spanning trees, so a disconnected graph has none and gives 0. The graph with no vertices has no spanning-tree count, as SpanningTreeCount: 0.`,
   ),
 ];

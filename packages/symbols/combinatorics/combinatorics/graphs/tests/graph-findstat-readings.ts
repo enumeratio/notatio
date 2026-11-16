@@ -579,6 +579,23 @@ function longestTrailFrom(edges: readonly Edge[], at: number, used: ReadonlySet<
 const degreesIn = (n: number, edges: readonly Edge[]): number[] =>
   range(1, n).map((v) => edges.filter(([a, b]) => a === v || b === v).length);
 
+/** The orientations of the edges (each edge as a directed pair) in which every edge lies on a directed cycle, which is every component strongly connected. */
+function stronglyConnectedOrientations(g: Graph): (readonly Edge[])[] {
+  return Array.from({ length: 2 ** g.edges.length }, (_, mask) =>
+    g.edges.map(([u, v], k): Edge => (((mask >> k) & 1) === 1 ? [v, u] : [u, v])),
+  ).filter((directed) => {
+    const reaches = (from: number, to: number, seen = new Set<number>()): boolean => {
+      if (from === to) return true;
+      seen.add(from);
+      return directed.some(([a, b]) => a === from && !seen.has(b) && reaches(b, to, seen));
+    };
+    return directed.every(([u, v]) => reaches(v, u));
+  });
+}
+/** The spanning trees: the sets of n - 1 edges that join all the vertices. */
+const spanningTrees = (g: Graph): number =>
+  g.n === 0 ? 0 : edgeSets(g.edges).filter((set) => set.length === g.n - 1 && componentTotal(g.n, set) === 1).length;
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -1109,6 +1126,32 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
         );
       }),
     )!,
+  // St000267 counts the spanning forests of the graph's rank, the sets of edges with no cycle and as many components as the graph.
+  MaximalSpanningForestCount: (g) =>
+    edgeSets(g.edges).filter((set) => isForest(g.n, set) && componentTotal(g.n, set) === componentTotal(g.n, g.edges))
+      .length,
+  StronglyConnectedOrientationCount: (g) => stronglyConnectedOrientations(g).length,
+  // The distinct lists of how many edges leave each vertex.
+  StronglyConnectedOutdegreeSequenceCount: (g) =>
+    new Set(
+      stronglyConnectedOrientations(g).map((directed) =>
+        range(1, g.n)
+          .map((v) => directed.filter(([a]) => a === v).length)
+          .join(","),
+      ),
+    ).size,
+  // The chromatic polynomial's coefficient of q, from its coefficients by deletion and contraction.
+  ChromaticDiscriminant: (g) => Math.abs(chromaticPolynomial(g.n, g.edges)[1] ?? 0),
+  // The proper colorings in the chromatic number of colors, each assignment of colors to vertices tried.
+  MinimumProperColoringCount: (g) => {
+    const k = chromaticNumber(g);
+    const m = matrix(g);
+    return Array.from({ length: k ** g.n }, (_, code) =>
+      range(0, g.n - 1).map((v) => Math.floor(code / k ** v) % k),
+    ).filter((colors) => colors.every((c, u) => colors.every((d, v) => u >= v || !m[u]![v] || c !== d))).length;
+  },
+  TutteMonomialCount: (g) => [...tuttePolynomial(g.edges).values()].filter((c) => c !== 0).length,
+  TutteMinusOneSpanningTreeQuotient: (g) => Math.floor(spanningTrees(g) / Math.abs(tutteAt(g, -1, -1))),
   // Every graph on the same vertices that is regular, by the number of pairs where it differs from this one.
   RegularEdgeEditNumber: (g) => {
     const pairs = pairsOf(range(1, g.n)).filter(([u, v]) => u < v);

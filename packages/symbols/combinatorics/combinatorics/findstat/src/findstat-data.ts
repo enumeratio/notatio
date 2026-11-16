@@ -8462,6 +8462,48 @@ export const findstat: readonly FindStatMatch[] = [
     values: 230,
   },
   {
+    head: "MaximalSpanningForestCount",
+    on: "LabeledGraph",
+    findstat: ["St000267"],
+    values: 1200,
+  },
+  {
+    head: "StronglyConnectedOrientationCount",
+    on: "LabeledGraph",
+    findstat: ["St000268"],
+    values: 1200,
+  },
+  {
+    head: "StronglyConnectedOutdegreeSequenceCount",
+    on: "LabeledGraph",
+    findstat: ["St000344"],
+    values: 1200,
+  },
+  {
+    head: "ChromaticDiscriminant",
+    on: "LabeledGraph",
+    findstat: ["St000948"],
+    values: 1200,
+  },
+  {
+    head: "MinimumProperColoringCount",
+    on: "LabeledGraph",
+    findstat: ["St001109"],
+    values: 1200,
+  },
+  {
+    head: "TutteMonomialCount",
+    on: "LabeledGraph",
+    findstat: ["St001546"],
+    values: 1200,
+  },
+  {
+    head: "TutteMinusOneSpanningTreeQuotient",
+    on: "LabeledGraph",
+    findstat: ["St001796"],
+    values: 1200,
+  },
+  {
     head: "WeylGroupOrder",
     on: "CartanType",
     findstat: ["St000106"],
