@@ -1,6 +1,11 @@
 id	in	out	shown	tex.in	tex.out	verdict
 series-elliptice-m-m-0-6	Series[EllipticE[m], List[m, 0, 6]]	SeriesData[m, 0, {Pi/2, -1/8*Pi, (-3*Pi)/128, (-5*Pi)/512, (-175*Pi)/32768, (-441*Pi)/131072, (-4851*Pi)/2097152}, 0, 7, 1]		\text{Series}[E(m),\{m,0,6\}]	\frac{\pi }{2}-\frac{\pi  m}{8}-\frac{3 \pi  m^2}{128}-\frac{5 \pi  m^3}{512}-\frac{175 \pi  m^4}{32768}-\frac{441 \pi  m^5}{131072}-\frac{4851 \pi  m^6}{2097152}+O\left(m^7\right)	
 normal-series-elliptice-x-x-positiveinfinity-2	Normal[Series[EllipticE[x], List[x, Infinity, 2]]]	I*Sqrt[x] + (-I + Pi - (4*I)*Log[2] - I*Log[x])/(4*Sqrt[x]) + (3*I + 2*Pi - I*Log[256] - (2*I)*Log[x])/(64*x^(3/2))		\text{Normal}[\text{Series}[E(x),\{x,\infty ,2\}]]	\frac{-2 i \log (x)+2 \pi +3 i-i \log (256)}{64 x^{3/2}}+i \sqrt{x}+\frac{-i \log (x)+\pi -i-4 i \log (2)}{4 \sqrt{x}}	inconclusive
+elliptice-300i-overflowed-to-infinity	N[EllipticE[Complex[0.3, 300], 0.5]]					
+elliptice-400i-parameter-neg-2	N[EllipticE[Complex[2, 400], -2]]					
+elliptice-neg-700i-near-the-double-range	N[EllipticE[Complex[10, -700], 0.9]]					
+elliptice-200i-complex-parameter	N[EllipticE[Complex[1.2, 200], Complex[0.5, 0.3]]]					
+elliptice-355i-parameter-1p5-minus-0p2i	N[EllipticE[Complex[3.5, 355], Complex[1.5, -0.2]]]					
 n-elliptice-1-over-3-50	N[EllipticE[Rational[1, 3]], 50]	1.4303152571722197239225284145322837302944509074088866093345557119790060848674`50.	1.4303152571722197239225284145322837302944509074089	N\left[E\left(\frac{1}{3}\right),50\right]	1.4303152571722197239225284145322837302944509074089	
 elliptice-list-list-1-0-list-0-1	EllipticE[List[List[1, 0], List[0, 1]]]	{{1, Pi/2}, {Pi/2, 1}}		E\left(\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)\right)	\left( \begin{array}{cc}  1 & \frac{\pi }{2} \\  \frac{\pi }{2} & 1 \\ \end{array} \right)	
 matrixfunction-elliptice-list-list-1-0-list-0-1	MatrixFunction[EllipticE, List[List[1, 0], List[0, 1]]]	{{1, 0}, {0, 1}}		\text{MatrixFunction}\left[\text{EllipticE},\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)\right]	\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)	

@@ -1,4 +1,9 @@
 id	in	out	shown	tex.in	tex.out	verdict
+ellipticf-400i-overflowed-to-infinity	N[EllipticF[Complex[0.3, 400], 0.5]]					
+ellipticf-355i-parameter-2-was-zero	N[EllipticF[Complex[0, 355], 2]]					
+ellipticf-neg-1000i-parameter-neg-2	N[EllipticF[Complex[0.3, -1000], -2]]					
+ellipticf-700i-complex-parameter	N[EllipticF[Complex[10, 700], Complex[0.5, 0.3]]]					
+ellipticf-1e4i-with-a-shift-by-pi	N[EllipticF[Complex[2, 10000], 0.9]]					
 ellipticf-list-list-1-0-list-0-1-0	EllipticF[List[List[1, 0], List[0, 1]], 0]	{{1, 0}, {0, 1}}		F\left(\left.\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)\right|0\right)	\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)	
 matrixfunction-function-ellipticf-1-0-1-list	MatrixFunction[Function[EllipticF[Slot[1], 0]], List[List[1, 0], List[0, 1]]]	{{1, 0}, {0, 1}}		\text{MatrixFunction}\left[F(\text{$\#$1}|0)\&,\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)\right]	\left( \begin{array}{cc}  1 & 0 \\  0 & 1 \\ \end{array} \right)	disagree
 n-ellipticf-12-over-5-3-50	N[EllipticF[Rational[12, 5], 3], 50]	1.00107738045610623607965958638383589314971359045852999453144654186283042232509`49.81490026476788 - 1.9231661895046253531841444093352781715706878703093774491875072560861571279077`50.09844943146751*I	1.0010773804561062360796595863838358931497135904585 - 1.9231661895046253531841444093352781715706878703094 I	N\left[F\left(\left.\frac{12}{5}\right|3\right),50\right]	1.0010773804561062360796595863838358931497135904585-1.9231661895046253531841444093352781715706878703094 i	

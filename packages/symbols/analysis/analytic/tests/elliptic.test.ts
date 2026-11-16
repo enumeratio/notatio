@@ -43,6 +43,13 @@ test("a call native declines or overflows stays the caller's own call, not Compl
   );
 });
 
+test("IncompleteEllipticF/E answer far from the real axis, where native used to overflow", () => {
+  const f = ce.box(["N", ["IncompleteEllipticF", ["Complex", 0.3, 400], 0.5]] as never).evaluate();
+  expect(f.im).toBeCloseTo(1.8540746773013719, 12);
+  const e = ce.box(["N", ["IncompleteEllipticE", ["Complex", 0.3, 300], 0.5]] as never).evaluate();
+  expect(e.re / 2.0294892688728802e129).toBeCloseTo(1, 12);
+});
+
 test("IncompleteEllipticF(0, m) = 0 and IncompleteEllipticE(0, m) = 0", () => {
   for (const m of [0.2, 0.7, 1.5]) {
     expect(ce.box(["IncompleteEllipticF", 0, m]).N().re).toBeCloseTo(0, 13);
