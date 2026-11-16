@@ -1,3 +1,4 @@
+import { numerically } from "./finish.ts";
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigIntegerAt, bigRationalAt, mayBeInteger, widenSignature, wrapOperator } from "@notatio/engine";
 
@@ -265,7 +266,7 @@ export function declareInverseOutsideDomain(ce: ComputeEngine): void {
   /** ½ ln((a+b)/(a−b)) for the rational t = a/b > 1, the real part of Artanh(t). */
   const artanhOf = ([p, q]: Rational): Expression => half(fn("Ln", num([p + q, p - q])));
   const signed = (x: Rational, e: Expression): Expression => (x[0] < 0n ? fn("Negate", e) : e);
-  const finish = (e: Expression, numeric: boolean | undefined): Expression => (numeric ? e.N() : e.evaluate());
+  const finish = (e: Expression, numeric: boolean | undefined): Expression => (numeric ? numerically(e) : e.evaluate());
   const outside = (x: Rational): boolean => abs(x)[0] > x[1]; // |x| > 1
   const inside = (x: Rational): boolean => x[0] !== 0n && abs(x)[0] < x[1]; // 0 < |x| < 1
 

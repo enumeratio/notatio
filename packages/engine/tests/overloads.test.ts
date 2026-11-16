@@ -1,6 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import { defineOverload, type Overload } from "../src/index.ts";
+import { defineOverload, type Overload, wrapOperator } from "../src/index.ts";
 
 // Two packages extending one native head: a carrier row and a general one.
 const carrier = (ce: ComputeEngine): Overload => ({
@@ -69,4 +69,63 @@ test("overrides puts a row ahead of another package's", () => {
   defineOverload(ce, "Fibonacci", row("a"));
   defineOverload(ce, "Fibonacci", row("b", ["a"]));
   expect(ce.box(["Fibonacci", 1.5]).evaluate().json).toBe("'b'");
+});
+
+// A row on a lazy head (`Add`, `Multiply`) sees its operands as the call would have evaluated
+// them: numerically under `N()`, exactly otherwise. Evaluating them exactly under `N()` changed
+// the digits a sum or product printed (the exact operand was approximated later, at another
+// precision), so a package's row, even one that never answers, changed the number.
+test("a row on a lazy head sees its operands numerically under N and exactly otherwise", () => {
+  const seen: string[] = [];
+  const spy = (): Overload => ({
+    package: "spy",
+    signature: "(number, number) -> number",
+    gate: () => true,
+    compile: "builtin",
+    evaluate: (ops, options) => {
+      seen.push(`${options.numericApproximation === true ? "N" : "exact"} ${JSON.stringify(ops.map((op) => op.json))}`);
+      return undefined;
+    },
+  });
+  const ce = new ComputeEngine();
+  // A head that stays a call until it is asked for a number, as a kernel's closed form does.
+  ce.declare("Half", {
+    signature: "(number) -> number",
+    evaluate: (_ops, options) => (options.numericApproximation === true ? ce.number(0.5) : undefined),
+  });
+  // `Add` and `Multiply` are lazy once a library that needs `Subtract` to canonicalize declares them so.
+  for (const head of ["Add", "Multiply"]) {
+    (ce.lookupDefinition(head) as { operator: { lazy?: boolean } }).operator.lazy = true;
+  }
+  for (const head of ["Add", "Multiply"]) defineOverload(ce, head, spy());
+  ce.box(["Add", ["Half", 1], 1] as never).N();
+  expect(seen).toEqual(["N [1,0.5]"]);
+  seen.length = 0;
+  ce.box(["Add", ["Half", 1], "x"] as never).evaluate();
+  expect(seen).toEqual(['exact ["x",["Half",1]]']);
+});
+
+test("a wrapper on a lazy head sees its operands numerically under N and exactly otherwise", () => {
+  const seen: string[] = [];
+  const ce = new ComputeEngine();
+  ce.declare("Half", {
+    signature: "(number) -> number",
+    evaluate: (_ops, options) => (options.numericApproximation === true ? ce.number(0.5) : undefined),
+  });
+  (ce.lookupDefinition("Multiply") as { operator: { lazy?: boolean } }).operator.lazy = true;
+  wrapOperator(
+    ce,
+    ["Multiply"],
+    (ops) => {
+      seen.push(JSON.stringify(ops.map((op) => op.json)));
+      return false;
+    },
+    () => () => undefined,
+    { compile: "builtin" },
+  );
+  ce.box(["Multiply", ["Half", 1], 3] as never).N();
+  expect(seen).toEqual(["[3,0.5]"]);
+  seen.length = 0;
+  ce.box(["Multiply", ["Half", 1], "x"] as never).evaluate();
+  expect(seen).toEqual(['["x",["Half",1]]']);
 });

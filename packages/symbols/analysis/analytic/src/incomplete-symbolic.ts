@@ -1,6 +1,7 @@
+import { finish } from "./finish.ts";
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigRationalAt, wrapOperator } from "@notatio/engine";
-import { declined, type EvalOptions, isRealInt } from "@notatio/ce-patches";
+import { declined, isRealInt } from "@notatio/ce-patches";
 
 // A handful of exact symbolic reductions the Wolfram page documents for the incomplete
 // gamma, the Hurwitz zeta and the Lerch transcendent, added as `wrapOperator` layers on
@@ -9,9 +10,6 @@ import { declined, type EvalOptions, isRealInt } from "@notatio/ce-patches";
 // approximation, so it applies to a symbolic operand exactly as well as a numeric one.
 
 /** `expr`, `.N()`'d if the caller asked for a numeric approximation, `.evaluate()`'d otherwise. */
-const finish = (expr: Expression, options: EvalOptions): Expression =>
-  options.numericApproximation ? expr.N() : expr.evaluate();
-
 /**
  * Γ(2, z) = (1 + z)e^{−z} and Γ(1/2, z) = √π·erfc(√z): the two-argument incomplete gamma
  * closed forms Wolfram's `FunctionExpand[Gamma[2, z]]` / `FunctionExpand[Gamma[1/2, z]]`
