@@ -12,6 +12,8 @@ import { serializeExpression } from "@notatio/formats/expression";
 import { stripMetadata, tokenOf } from "@notatio/formats/markup";
 import { LAYOUT_HEADS, PROSE_HEADS } from "@notatio/boxes";
 import { isBoxTag } from "./box-tags.ts";
+import { type Environment, pageEnvironment } from "./environment.ts";
+import { reduce } from "./reduce.ts";
 import { CHART_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";
 import {
@@ -20,6 +22,7 @@ import {
   optionAttribute,
   type Rendering,
   renderingOf,
+  scopeOf,
   splitHeldOptions,
   visualSymbol,
 } from "./symbols.ts";
@@ -166,15 +169,26 @@ const stringOf = (node: Json): string | undefined => {
 };
 
 /**
+ * A host's structural tree for an environment: reduce the expression for it, scope its
+ * controls, then write it verbatim. The order matters -- a host that calls `structuralOf`
+ * alone gets a control that moves and a readout that never hears it.
+ */
+export function treeOf(expr: Json, env: Environment): StructuralNode {
+  return structuralOf(scopeOf(reduce(expr, env)));
+}
+
+/**
  * The tree that draws: a head with a component has its arguments lowered into that
  * component's props (`renderingOf`); anything else typesets through `<notatio-out>`.
- * Always something -- every expression has a picture, if only of itself.
+ * Always something -- every expression has a picture, if only of itself. The expression is
+ * reduced for `env` first, so a printed page holds no slider; `renderingOf` scopes what is left.
  */
-export function vdomOf(expr: Json): Rendering {
+export function vdomOf(expr: Json, env: Environment = pageEnvironment()): Rendering {
+  const reduced = reduce(expr, env);
   return (
-    renderingOf(expr) ?? {
+    renderingOf(reduced) ?? {
       tag: "notatio-out",
-      attributes: { format: "mathjson", value: JSON.stringify(expr) },
+      attributes: { format: "mathjson", value: JSON.stringify(reduced) },
     }
   );
 }

@@ -31,7 +31,7 @@ const DERIVATIVES: Record<string, (ce: ComputeEngine, u: Expression, du: Express
 const AT_ZERO_IS_HALF_PI = new Set(["Arccos", "Arccot"]);
 
 /** The exponent `k` and the coefficient of `term` read as `c · x^k`, or `undefined`. */
-function monomial(ce: ComputeEngine, term: Expression, x: string): { k: number; c: Expression } | undefined {
+export function monomial(ce: ComputeEngine, term: Expression, x: string): { k: number; c: Expression } | undefined {
   if (!term.has(x)) return { k: 0, c: term };
   if (term.operator === "Negate") {
     const inner = monomial(ce, operandsOf(term)[0]!, x);
@@ -104,17 +104,41 @@ function integratedSeries(
   return numericApproximation ? result.N() : result;
 }
 
-/** `Series` of an inverse function of an expression vanishing at the point 0 is the integral of
- * the series of its derivative; every other call goes to the native handler. */
-export function seriesIntegratesDerivatives(ce: ComputeEngine): void {
+/** A rewrite of `Series` for one class of heads: the series, or `undefined` for the native handler. */
+export type SeriesHandler = (
+  ce: ComputeEngine,
+  ops: readonly Expression[],
+  numericApproximation: boolean | undefined,
+) => Expression | undefined;
+
+const handlers = new WeakMap<ComputeEngine, SeriesHandler[]>();
+
+/** Tries `handler` before the native `Series`; every patch that rewrites `Series` shares the one wrapper. */
+export function addSeriesHandler(ce: ComputeEngine, handler: SeriesHandler): void {
+  const installed = handlers.get(ce);
+  if (installed !== undefined) {
+    if (!installed.includes(handler)) installed.push(handler);
+    return;
+  }
   const definition = ce.lookupDefinition("Series");
   const operator = definition !== undefined && "operator" in definition ? definition.operator : undefined;
   const native = operator?.evaluate as Evaluate | undefined;
   if (operator === undefined || native === undefined) return;
+  const list = [handler];
+  handlers.set(ce, list);
   operator.evaluate = ((ops: readonly Expression[], options: { numericApproximation?: boolean }) => {
-    const result = integratedSeries(ce, ops, options.numericApproximation);
-    return result?.isValid ? result : native(ops, options);
+    for (const handle of list) {
+      const result = handle(ce, ops, options.numericApproximation);
+      if (result?.isValid) return result;
+    }
+    return native(ops, options);
   }) as never;
   // compile builtin: the same series by another route, and Series has no numeric lowering
   declareCompile(ce, "Series", "builtin");
+}
+
+/** `Series` of an inverse function of an expression vanishing at the point 0 is the integral of
+ * the series of its derivative; every other call goes to the native handler. */
+export function seriesIntegratesDerivatives(ce: ComputeEngine): void {
+  addSeriesHandler(ce, integratedSeries);
 }

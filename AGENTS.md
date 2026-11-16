@@ -173,6 +173,11 @@ so a page reads the same on GitHub and on the site.
   `evaluate()`, `.N()`, the parse route and the compiled code, and agree.
 - **Patches in `packages/ce-patches/` test the way their upstream does**, snapshots included, so
   a test can go upstream with its code.
+- **Combinatorics' interpreter cross-checks are a committed snapshot** (`verdicts.tsv`), and its build only reads it,
+  leaving an item without a fresh row interpreted. After a change to a definition, a map, a family or a checker, run
+  `pnpm --filter @notatio/combinatorics run collect-verdicts` and commit the file; the standard test fails on a row whose
+  source hash (the definition and subjects, no compiler) is stale. A change that only alters the compiled code shows in
+  the build's summary line, so check it there. Each row also records its seconds, which balance the nightly's parts.
 - **Long sweeps run nightly; the standard run stays fast.** A test that samples or enumerates
   takes a small budget by default and its full one under `DEEP_TESTS=1`, which `nightly.yml`'s
   `deep-tests-*` jobs set (give the package a filter in one of them). Keep the important cases in the
@@ -258,4 +263,4 @@ kernel, the network or hand curation stays committed.
   pnpm override written in the job (`.github/scripts/compute-engine-tarball.ts`; nothing committed changes),
   then builds and runs every package's tests as the nightly does. It keeps one rolling issue labelled
   `ce-main`: the commit, the range since the last green run, the failing tests; closed when green. The
-  engine's version-pin test (`tests/ce-internals.test.ts`) fails there whenever main's version differs from the pin.
+  engine's version-pin test (`tests/ce-internals.test.ts`) skips there (`COMPUTE_ENGINE_MAIN=1`); the rule tests in it still run.

@@ -426,14 +426,14 @@ const isId = (v: unknown): v is string | number => typeof v === "string" || type
  * (or an object whose `children` isn't a list) still reads as a valid (possibly childless) node
  * rather than throwing.
  */
-export function treeOf(data: unknown): TreeNode | undefined {
+export function treeNodeOf(data: unknown): TreeNode | undefined {
   if (!data || typeof data !== "object" || Array.isArray(data)) return undefined;
   const obj = data as Record<string, unknown>;
   const node: TreeNode = {};
   if (typeof obj.label === "string") node.label = obj.label;
   if (typeof obj.height === "number" && Number.isFinite(obj.height)) node.height = obj.height;
   if (Array.isArray(obj.children)) {
-    const kids = obj.children.map(treeOf).filter((k): k is TreeNode => k !== undefined);
+    const kids = obj.children.map(treeNodeOf).filter((k): k is TreeNode => k !== undefined);
     if (kids.length > 0) node.children = kids;
   }
   return node;

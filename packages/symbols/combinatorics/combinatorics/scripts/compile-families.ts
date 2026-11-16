@@ -7,8 +7,8 @@
 // interpreter on a sample, which are listed so they are never compiled on first use either.
 //
 // The cross-checks are most of the cost, so on CI the families split by head across processes
-// (FAMILY_SHARDS, default 3 there and 1 elsewhere), each keeping its own verdict memo. This file
-// only coordinates; family-checks.ts, which loads the families, runs in the children.
+// (FAMILY_SHARDS, default 3 there and 1 elsewhere), each handing its verdicts up to be saved with the
+// rest (verdict-snapshot.ts). This file only coordinates; family-checks.ts, which loads the families, runs in the children.
 //
 //   vp node packages/symbols/combinatorics/combinatorics/scripts/compile-families.ts
 
@@ -17,7 +17,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { checkers, verdictsFor } from "./verdicts.ts";
+import { type Share, Snapshot } from "./verdict-snapshot.ts";
+import { checkers } from "./verdicts.ts";
 import { writeGenerated } from "./write-generated.ts";
 
 const SHARDS = Number(process.env.FAMILY_SHARDS) || (process.env.CI ? 3 : 1);
@@ -72,29 +73,26 @@ interface Rendered {
 interface Result {
   readonly entries: Rendered[];
   readonly defined: number;
+  readonly share: Share;
 }
 
 if (process.argv[2] === "--shard") {
   const [, , , shard, shards, out] = process.argv;
   const { compiledFamilies, definedOperations, familyHeads, renderEntry } = await import("./family-checks.ts");
   const mine = assignShards(familyHeads(), Number(shards));
-  const verdicts = verdictsFor(
-    Number(shards) === 1 ? "compile-families" : `compile-families-${shard}of${shards}`,
-    checkers.families,
-  );
+  const verdicts = new Snapshot("compile-families", checkers.families);
   const takes = (head: string): boolean => mine.get(head) === Number(shard);
-  verdicts.plan(familyHeads().filter(takes));
-  const entries = verdicts
-    .settle(() => compiledFamilies(verdicts, takes))
-    .map((e) => ({
-      head: e.head,
-      text: renderEntry(e),
-      compiled: Object.keys(e.code).length,
-      interpreted: e.interpreted,
-      bigInterpreted: e.bigInterpreted,
-    }));
-  writeFileSync(out!, JSON.stringify({ entries, defined: definedOperations() } satisfies Result));
-  verdicts.save();
+  const entries = compiledFamilies(verdicts, takes).map((e) => ({
+    head: e.head,
+    text: renderEntry(e),
+    compiled: Object.keys(e.code).length,
+    interpreted: e.interpreted,
+    bigInterpreted: e.bigInterpreted,
+  }));
+  writeFileSync(
+    out!,
+    JSON.stringify({ entries, defined: definedOperations(), share: verdicts.share() } satisfies Result),
+  );
 } else {
   const children = new Set<ChildProcess>();
   const runShard = (shard: number, out: string): Promise<Result> =>
@@ -130,6 +128,8 @@ if (process.argv[2] === "--shard") {
   const entries = results
     .flatMap((r) => r.entries)
     .toSorted((a, b) => (a.head < b.head ? -1 : a.head > b.head ? 1 : 0));
+  const verdicts = new Snapshot("compile-families", checkers.families);
+  for (const r of results) verdicts.adopt(r.share);
   const target = fileURLToPath(new URL("../collections/src/families/compiled-families.generated.js", import.meta.url));
   writeGenerated(
     target,
@@ -146,12 +146,13 @@ ${entries.map((e) => e.text).join("\n")}
 };
 `,
   );
+  verdicts.save();
   const operations = entries.reduce((sum, e) => sum + e.compiled, 0);
   console.log(`${operations} of ${results[0]!.defined} family operations compiled`);
   for (const e of entries.filter((entry) => entry.interpreted.length > 0))
-    console.log(`${e.head}: compiled ${e.interpreted.join(", ")} disagreed with the interpreter; left interpreted`);
+    console.log(`${e.head}: compiled ${e.interpreted.join(", ")} has no fresh agreeing verdict; left interpreted`);
   for (const e of entries.filter((entry) => entry.bigInterpreted.length > 0))
     console.log(
-      `${e.head}: BigInt-compiled ${e.bigInterpreted.join(", ")} disagreed with the interpreter; left interpreted`,
+      `${e.head}: BigInt-compiled ${e.bigInterpreted.join(", ")} has no fresh agreeing verdict; left interpreted`,
     );
 }

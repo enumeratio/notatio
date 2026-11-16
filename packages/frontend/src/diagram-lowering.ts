@@ -5,7 +5,7 @@
 // that is the page clock's (`phase`), not a different box.
 
 import type { Box } from "@notatio/boxes";
-import { dendrogramBox, graphOf, graphPlotBox, layeredGraphPlotBox, treeOf, treePlotBox } from "./graph.ts";
+import { dendrogramBox, graphOf, graphPlotBox, layeredGraphPlotBox, treeNodeOf, treePlotBox } from "./graph.ts";
 import { torusSquareBox } from "./torussquare.ts";
 
 /** The heads whose figures are diagram `GraphicsBox`es, drawn by `<graphics-box>`. */
@@ -50,9 +50,9 @@ export function diagramBoxOf(settings: DiagramSettings, phase = 0): Box | undefi
   const title = settings["label"] || undefined;
   switch (settings["layout"]) {
     case "tree":
-      return treePlotBox(treeOf(jsonOf(settings["data"])), { title });
+      return treePlotBox(treeNodeOf(jsonOf(settings["data"])), { title });
     case "dendrogram":
-      return dendrogramBox(treeOf(jsonOf(settings["data"])), { title });
+      return dendrogramBox(treeNodeOf(jsonOf(settings["data"])), { title });
     case "graph":
       return graphPlotBox(graphOf(jsonOf(settings["data"])), { title, directed: truthy(settings["directed"]) });
     case "layered":
