@@ -13,18 +13,18 @@ order-neg-2-at-0-7	N(hyper([], [-2], 0.7) / gamma(-2))	0	disagree
 order-0-at-a-complex-argument	N(N(hyper([], [0], (0.3 + 0.4*I)) / gamma(0)), 30)	0	inconclusive
 order-neg-1-at-a-complex-argument	N(N(hyper([], [-1], (-0.5 + 0.2*I)) / gamma(-1)), 30)	0	inconclusive
 series-hypergeometric0f1regularized-2-x-x-0-6	series(N(hyper([], [2], Symbol("x")) / gamma(2)), Symbol("x"), 0, 6 + 1)	1 + x/2 + x**2/12 + x**3/144 + x**4/2880 + x**5/86400 + x**6/3628800 + O(x**7)	
-fullsimplify-normal-series	simplify((series(hyper([], [2], Symbol("x")) / gamma(2), Symbol("x"), oo, 3 + 1)).removeO())		
+fullsimplify-normal-series	simplify((series(N(hyper([], [2], Symbol("x")) / gamma(2)), Symbol("x"), oo, 3 + 1)).removeO())		
 n-hypergeometric0f1regularized-4-0-50	N(N(hyper([], [-4], 0) / gamma(-4)), 30)	0	
 n-hypergeometric0f1regularized-0-0-2	N(N(hyper([], [0], 0) / gamma(0)), 30)	0	
 n-hypergeometric0f1regularized-0-1-pole-of-b	N(N(hyper([], [0], 1) / gamma(0)), 30)	0	disagree
 a-tiny-value-keeps-its-imaginary-part	N(hyper([], [100], (1e-8 + 1e-8*I)) / gamma(100))	1.07151028823262e-156 + 1.07151028823156e-166*I	
 a-value-below-the-double-range-stays-unevaluated	N(hyper([], [200], 1.5) / gamma(200))	2.55504470611395e-373	inconclusive
 a-small-value-inside-the-double-range	N(hyper([], [150], 1.5) / gamma(150))	2.65179928487123e-261	
-a-small-imaginary-part-is-kept	hyper([], [2.7], (0.5 + 1e-15*I)) / gamma(2.7)		
+a-small-imaginary-part-is-kept	N(hyper([], [2.7], (0.5 + 1e-15*I)) / gamma(2.7))	0.775660166917146 + 2.73946947064706e-16*I	
 n-hypergeometric0f1regularized-0-neg-48-50	N(N(hyper([], [0], -48) / gamma(0)), 30)	0	disagree
 n-hypergeometric0f1regularized-4-0-25	N(N(hyper([], [4], 0) / gamma(4)), 30)	0.166666666666666657414808128124	
 matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analytic_func(N(hyper([], [Rational(1, 2)], Symbol("_mf")) / gamma(Rational(1, 2))), Symbol("_mf")).applyfunc(simplify).tolist()	[[0.564189583547756*cosh(sqrt(2)), 0], [0, 0.564189583547756*cosh(sqrt(2))]]	disagree
 n-neg-1-over-2-times	N(((Rational(-1, 2) * (S(N(hyper([], [Rational(3, 2)], Rational(1, 2)) / gamma(Rational(3, 2))))**2)) + (S(N(hyper([], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))))**2)), 30)	0.318309886183790746727595433185	
 n-neg-2-times-hypergeometric0f1regularized-3	N(((-2 * (S(N(hyper([], [Rational(3, 2)], 2) / gamma(Rational(3, 2))))**2)) + (S(N(hyper([], [Rational(1, 2)], 2) / gamma(Rational(1, 2))))**2)), 30)	0.318309886183786971969311707653	
 exact-arguments-stay-unevaluated-n-gives-the	N(hyper([], [-1], 2) / gamma(-1))	0	inconclusive
-a-value-past-the-double-range-stays-unevaluated	hyper([], [-65], (1e-8 + 1e-8*I)) / gamma(-65)	0	inconclusive
+a-value-past-the-double-range-stays-unevaluated	N(hyper([], [-65], (1e-8 + 1e-8*I)) / gamma(-65))	0	inconclusive

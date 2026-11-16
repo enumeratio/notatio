@@ -15,7 +15,7 @@ sinh-ln-2-frac-2-1-2-2-frac-34	sinh(ln(n(2)))	0.75
 a-real-symbolic-argument-is-untouched			
 oddness-pulls-the-sign-out-of-a-symbolic			
 sinh-arsinh-x-x-for-every-x			
-sinh-arsinh-2-2-for-every-x	sinh(asinh(n(2)))	2.0	
+sinh-arsinh-2-2-for-every-x	sinh(asinh(n(2)))	1.9999999999999998	
 derivative-cosh-x			
 antiderivative			
 taylor-series-about-0			

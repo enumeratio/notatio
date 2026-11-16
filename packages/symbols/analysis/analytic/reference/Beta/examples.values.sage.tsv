@@ -20,12 +20,12 @@ b-2-b-frac-1-b-b-1-not-yet	beta(2, SR.var("b"))	beta(2, b)
 partial-a-b-a-b-b-a-b-psi-a-psi-a-b-today-the	diff(beta(SR.var("a"), SR.var("b")), SR.var("a"))	-(psi(a + b) - psi(a))*beta(a, b)	
 a-nonpositive-integer-argument-is-a-pole-of-the	beta(-1, 2)	ValueError: beta_eval(): simple pole	error
 beta-at-two-poles-compares-equal	enumeratio_equal(beta(-2, -1), beta(0, 2))	ValueError: beta_eval(): simple pole	error
-a-pole-of-gamma-over-a-finite-denominator	beta(-2, (0.3 + 0.4*I))		
-gamma-pole-in-the-denominator	beta(-2.5, 0.5)		
-gamma-pole-in-the-denominator-zero-sum	beta(0.5, -0.5)		
-gamma-pole-in-the-denominator-minus-one	beta(1.5, -2.5)		
-gamma-pole-in-the-denominator-rationals	enumeratio_n(beta((-5/2), (1/2)))		
-a-negative-operand-off-the-poles	beta(-2.5, 0.75)		
+a-pole-of-gamma-over-a-finite-denominator	beta(-2, (0.3 + 0.4*I))	NaN + NaN*I	disagree
+gamma-pole-in-the-denominator	beta(-2.5, 0.5)	-0.000000000000000	
+gamma-pole-in-the-denominator-zero-sum	beta(0.5, -0.5)	-0.000000000000000	
+gamma-pole-in-the-denominator-minus-one	beta(1.5, -2.5)	-0.000000000000000	
+gamma-pole-in-the-denominator-rationals	enumeratio_n(beta((-5/2), (1/2)))	0.000000000000000	
+a-negative-operand-off-the-poles	beta(-2.5, 0.75)	-0.419349082157457	
 beta-1-over-2-1-over-2-times-beta-1-1-over-2	(beta((1/2), (1/2)) * beta(1, (1/2)))	2*beta(1/2, 1/2)	
 beta-1-over-2-1-over-2-times-beta-1-2	(beta((1/2), (1/2)) * beta(1, 2))	1/2*beta(1/2, 1/2)	
 beta-of-positive-infinity-0-is-indeterminate	beta(oo, 0)	NaN	disagree

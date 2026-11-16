@@ -20,12 +20,12 @@ b-2-b-frac-1-b-b-1-not-yet
 partial-a-b-a-b-b-a-b-psi-a-psi-a-b-today-the			
 a-nonpositive-integer-argument-is-a-pole-of-the	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), -1, 2)	ball not finite	error
 beta-at-two-poles-compares-equal	enumeratio_equal(enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), -2, -1), enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), 0, 2))	false	
-a-pole-of-gamma-over-a-finite-denominator	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), -2, enumeratio_complex(enumeratio_decimal("0.3"), enumeratio_decimal("0.4")))		
-gamma-pole-in-the-denominator	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("-2.5"), enumeratio_decimal("0.5"))		
-gamma-pole-in-the-denominator-zero-sum	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("0.5"), enumeratio_decimal("-0.5"))		
-gamma-pole-in-the-denominator-minus-one	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("1.5"), enumeratio_decimal("-2.5"))		
-gamma-pole-in-the-denominator-rationals	(enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), (-5 // 2), (1 // 2)))		
-a-negative-operand-off-the-poles	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("-2.5"), enumeratio_decimal("0.75"))		
+a-pole-of-gamma-over-a-finite-denominator	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), -2, enumeratio_complex(enumeratio_decimal("0.3"), enumeratio_decimal("0.4")))	ball not finite	error
+gamma-pole-in-the-denominator	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("-2.5"), enumeratio_decimal("0.5"))	0.0	
+gamma-pole-in-the-denominator-zero-sum	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("0.5"), enumeratio_decimal("-0.5"))	0.0	
+gamma-pole-in-the-denominator-minus-one	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("1.5"), enumeratio_decimal("-2.5"))	0.0	
+gamma-pole-in-the-denominator-rationals	(enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), (-5 // 2), (1 // 2)))	0.0	
+a-negative-operand-off-the-poles	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), enumeratio_decimal("-2.5"), enumeratio_decimal("0.75"))	-0.4193490821574572726039728722981133573795244321254780453922862335312418249503589	
 beta-1-over-2-1-over-2-times-beta-1-1-over-2	(enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), (1 // 2), (1 // 2)) * enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), 1, (1 // 2)))	6.283185307179586476925286766559005768394338798750211641949889184615632812572189	
 beta-1-over-2-1-over-2-times-beta-1-2	(enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), (1 // 2), (1 // 2)) * enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), 1, 2))	1.570796326794896619231321691639751442098584699687552910487472296153908203143082	
 beta-of-positive-infinity-0-is-indeterminate	enumeratio_ball((a, b) -> gamma(a) * gamma(b) * rgamma(a + b), Inf, 0)	non-finite argument	error
