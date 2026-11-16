@@ -12,4 +12,4 @@ n-jacobicd-sqrt-2-times-i-2	enumeratio_n(jacobi_cd((0 + sqrt(2)*I), 2))	0.710861
 n-jacobicd-2-times-1-plus-sqrt-2-over-2-1-minus	enumeratio_n(jacobi_cd((2 * (1 + (sqrt(2) / 2))), ((((1 + (-(sqrt(2) / 2))))^2) * (((1 + (sqrt(2) / 2)))^-2))))	-0.970018357823859	
 symbolic-arguments-are-left-unevaluated-rather	jacobi_cd(SR.var("u"), SR.var("m"))	jacobi_cd(u, m)	
 u-1e16-declines-rather-than-answering-wrong	enumeratio_n(jacobi_cd(((10)^16), (2/7)))	0.224047523574504	inconclusive
-u-1e16-mpmath-true-value	enumeratio_n(jacobi_cd(((10)^16), (2/7)))		
+u-1e16-mpmath-true-value			

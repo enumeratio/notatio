@@ -10,7 +10,7 @@ a-machine-precision-argument-gamma-4-5-11-6317	gamma(4.5)	11.6317283965674
 gamma-5-4-24	gamma(5)	24	
 two-arguments-with-a-complex-second-argument	gamma_inc(2.5, (1.5 + 1*I))	0.914816170324099 - 0.453556013183482*I	
 n-gamma-1-0-2-exponential-cdf-at-a-concrete-z	enumeratio_n((gamma_inc(1, 0) - gamma_inc(1, 2)))	0.864664716763387	
-three-arguments-fully-symbolic-in-both-order-and	(gamma_inc(SR.var("s"), 0) - gamma_inc(SR.var("s"), SR.var("z")))	-gamma(s, z) + gamma(s)	disagree
+three-arguments-fully-symbolic-in-both-order-and	(gamma_inc(SR.var("s"), 0) - gamma_inc(SR.var("s"), SR.var("z")))	gamma(s) - gamma(s, z)	disagree
 gamma-0-5-0-0-25	(gamma_inc(0.5, 0) - gamma_inc(0.5, 0.25))	0.922562012825589	
 gamma-neg1-5-0-1-5	(gamma_inc(-1.5, 0) - gamma_inc(-1.5, 1.5))	2.32843735059126	
 gamma-3-1-7-all-integers	enumeratio_n((gamma_inc(3, 1) - gamma_inc(3, 7)))	1.78012487809617	
