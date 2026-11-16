@@ -15,3 +15,5 @@ simplify-normal-series-besseljzero-n-x-x-0-2
 series-besseljzero-n-x-x-x0-1			
 n-1-over-pi-times-besseljzero-1-1	(((mpmathify(1) / pi) * besseljzero(1, 1)))	1.21966989126650445492653884747	
 tan-j-3-2-1-j-3-2-1-the-sinc-function-s-first			
+j-1-10	(besseljzero(1, 10))	32.1896799109744036266229841045	
+j-0-10	(besseljzero(0, 10))	30.6346064684319751175495789269	

@@ -1796,6 +1796,36 @@ def enumeratio_hyperreg(a, b, z):
         return fprod(rgamma(x) for x in b)
     return hypercomb(lambda *p: [([], [], [], list(p[n:-1]), list(p[:n]), list(p[n:-1]), p[-1])], list(a) + list(b) + [z])
 
+# mpmath's chebyt and chebyu sum a hypergeometric series that does not settle for a high degree (T_100000(2.5e-6),
+# T_100000(2.5)) or at a value that is exactly 0 (U_2(1/2)). On a real x the closed form is exact, taken at digits
+# for the angle's size: T_n = cos(n acos x), U_n = sin((n + 1) acos x) / sqrt(1 - x^2) inside [-1, 1], and
+# T_n = cosh(n acosh x), U_n = sinh((n + 1) acosh x) / sqrt(x^2 - 1) past 1, with T_n(-x) = (-1)^n T_n(x).
+def _enumeratio_chebyshev(second, n, x):
+    try:
+        return chebyu(n, x) if second else chebyt(n, x)
+    except (ValueError, mp.NoConvergence):
+        if n != int(n) or n < 0 or not isinstance(x, (int, float, mpf)) or not isfinite(x):
+            raise
+        n = int(n)
+        with workdps(mp.dps + len(str(n)) + 20):
+            x = mpmathify(x)
+            sign = 1
+            if x < -1:
+                x, sign = -x, (-1) ** n
+            if abs(x) == 1:
+                return +(sign * ((n + 1) * x ** n if second else x ** n))
+            if abs(x) < 1:
+                angle = acos(x)
+                return +(sin((n + 1) * angle) / sqrt(1 - x * x) if second else cos(n * angle))
+            angle = acosh(x)
+            return +(sign * (sinh((n + 1) * angle) / sqrt(x * x - 1) if second else cosh(n * angle)))
+
+def enumeratio_chebyt(n, x):
+    return _enumeratio_chebyshev(False, n, x)
+
+def enumeratio_chebyu(n, x):
+    return _enumeratio_chebyshev(True, n, x)
+
 # mpmath's laguerre fails the same way where the polynomial is exactly zero (L_1(1)): its explicit sum, at extra digits.
 def enumeratio_laguerre(n, a, x):
     try:

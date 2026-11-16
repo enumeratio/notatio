@@ -129,3 +129,5 @@ neg-1-over-2-times-polylog-2-neg-1-over-3-plus	((Rational(-1, 2) * polylog(2, Ra
 neg-2-times-polylog-2-neg-1-over-2-plus-polylog	((-2 * (polylog(2, Rational(-1, 2)) + polylog(2, Rational(1, 2)))) + polylog(2, Rational(1, 4)))	-pi**2/6 + polylog(2, 1/4) + log(2)**2 - 2*polylog(2, -1/2)	
 polylog-2-neg-1-plus-polylog-2-0-plus-polylog-2	(polylog(2, -1) + polylog(2, 0) + polylog(2, Rational(1, 2)))	-log(2)**2/2	
 an-exact-argument-stays-symbolic-under-plain	polylog(2, Rational(1, 2))	-log(2)**2/2 + pi**2/12	
+n-polylog-neg-70-neg-4-a-large-cancellation	N(polylog(-70, -4), 30)	-2.05735291168286330522523755251e+62	
+threads-over-a-list-with-the-pole-at-1	[polylog(-2, 500000), polylog(-2, 1)]	[polylog(-2, 500000), 0]	disagree

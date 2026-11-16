@@ -13,7 +13,7 @@ at-t4-2-3i	(enumeratio_chebyshev_t(4, enumeratio_complex(2, 3)))	complex argumen
 chebyshevt-2-3	enumeratio_chebyshev_t(2, 3)	17.0	
 chebyshevt-10-x			
 series-chebyshevt-5-x-x-0-5			
-a-value-past-the-double-range-stays-unevaluated	enumeratio_chebyshev_t(100000, enumeratio_decimal("2.5"))		
+a-value-past-the-double-range-stays-unevaluated	enumeratio_chebyshev_t(100000, enumeratio_decimal("2.5"))	8.4189269010690713522849788579901425112856574269257685081678465281945380394959e68044	disagree
 at-a-rational	enumeratio_chebyshev_t(5, (1 // 3))	0.9917695473251028806584362139917695473251028806584362139917695473251028806584326	
 at-a-complex-argument	enumeratio_chebyshev_t(4, enumeratio_complex(2, 3))	complex argument	error
 a-symbolic-order-stays-unevaluated			
@@ -37,3 +37,6 @@ chebyshevt-2-positiveinfinity	enumeratio_chebyshev_t(2, Inf)	non-finite argument
 chebyshevt-2-negativeinfinity	enumeratio_chebyshev_t(2, (-Inf))	non-finite argument	error
 sum-chebyshevt-k-1-over-2-times-chebyshevt-k-2-k			
 sum-chebyshevt-k-1-over-2-times-chebyshevt-k-2-2			
+a-large-degree-at-a-small-argument	enumeratio_chebyshev_t(100000, enumeratio_decimal("0.0000025"))	0.9689124217105803560302060367562454934882623920257463094683038983467574860944561	
+a-huge-order-at-minus-1	enumeratio_chebyshev_t(100000, -1)	1.0	
+a-huge-order-at-an-exact-point-stays-unevaluated	enumeratio_chebyshev_t(100000, 3)	6.855475402902496118903012138678045825748014372288668184614789850273010392721971e76554	disagree

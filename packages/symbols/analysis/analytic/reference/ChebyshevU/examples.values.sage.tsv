@@ -40,3 +40,4 @@ sum-chebyshevu-k-1-over-2-times-chebyshevu-k-2-k	sum((chebyshev_U(SR.var("k"), (
 sum-chebyshevu-k-1-over-2-times-chebyshevu-k-2-2	sum((chebyshev_U(SR.var("k"), (1/2)) * chebyshev_U(SR.var("k"), 2)), SR.var("k"), 0, 3)	-51	
 n-integrate-sqrt-neg-t-pow-2-plus-1-times	enumeratio_n(integrate((sqrt(((-((SR.var("t"))^2)) + 1)) * ((chebyshev_U(2, SR.var("t")))^2)), SR.var("t"), -1, 1))	1.57079632679490	
 n-integrate-chebyshevu-2-t-times-chebyshevu-3-t	enumeratio_n(integrate((chebyshev_U(2, SR.var("t")) * chebyshev_U(3, SR.var("t")) * sqrt(((-((SR.var("t"))^2)) + 1))), SR.var("t"), -1, 1))	0.000000000000000	
+a-huge-order-at-1	chebyshev_U(100000, 1)	100001	

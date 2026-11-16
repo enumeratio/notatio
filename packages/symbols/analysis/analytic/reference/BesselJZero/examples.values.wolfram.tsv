@@ -15,3 +15,5 @@ simplify-normal-series-besseljzero-n-x-x-0-2	Simplify[Normal[Series[BesselJZero[
 series-besseljzero-n-x-x-x0-1	Series[BesselJZero[n, x], List[x, x0, 1]]	SeriesData[x, x0, {BesselJZero[n, x0], (Pi^2*BesselJZero[n, x0]*(BesselJ[n, BesselJZero[n, x0]]^2 + BesselY[n, BesselJZero[n, x0]]^2))/2}, 0, 2, 1]		\text{Series}\left[j_{n,x},\{x,\text{x0},1\}\right]	j_{n,\text{x0}}+\frac{1}{2} \pi ^2 (x-\text{x0}) j_{n,\text{x0}} \left(J_n\left(j_{n,\text{x0}}\right){}^2+Y_n\left(j_{n,\text{x0}}\right){}^2\right)+O\left((x-\text{x0})^2\right)
 n-1-over-pi-times-besseljzero-1-1	N[Times[Divide[1, Pi], BesselJZero[1, 1]]]	1.2196698912665045		N\left[\frac{1}{\pi } j_{1,1}\right]	1.21967
 tan-j-3-2-1-j-3-2-1-the-sinc-function-s-first	Chop[Subtract[Tan[N[BesselJZero[Rational[3, 2], 1]]], N[BesselJZero[Rational[3, 2], 1]]]]	0		\text{Chop}\left[\tan \left(N\left[j_{\frac{3}{2},1}\right]\right)-N\left[j_{\frac{3}{2},1}\right]\right]	0
+j-1-10	N[BesselJZero[1, 10]]				
+j-0-10	N[BesselJZero[0, 10]]				

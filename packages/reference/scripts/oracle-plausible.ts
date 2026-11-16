@@ -347,7 +347,7 @@ const POLE =
 const RESOURCE = /TimeoutError|MemoryError|KernelDied|killed|\$Aborted/;
 /** The other system refusing an argument outside its function's domain. */
 const DOMAIN =
-  /DomainError|non-?negative|must be positive|positive integer|not an integer|an integer, not|zero modulus|expected|expecting|MethodError|AssertionError|cannot create mpf|cannot be less than/i;
+  /DomainError|non-?negative|must be positive|positive integer|not an integer|an integer, not|zero modulus|expected|expecting|MethodError|AssertionError|cannot create mpf|cannot be less than|only defined in the upper half-plane/i;
 
 /** The other system declining to order a complex number: mpmath's `<=` raises two ways, SymPy's names the value. */
 const ORDERING = /no ordering relation|non-real|cannot unpack non-iterable mpc/i;
