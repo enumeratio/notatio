@@ -18,8 +18,8 @@ export type Poset = readonly (readonly number[])[];
 /** The most elements a code is carried for: C(10, 2) = 45 bits, the last size a double holds. */
 export const MAX_CODED = 10;
 
-/** The most elements `posetCodes` lists. The first list of 9 takes a few seconds; 10 would be some twenty times that
- *  and four times the memory. */
+/** The most elements `posetCodes` lists. The first list of 9 takes about five seconds, some fourteen times the list of 8;
+ *  10 has 2.5 million classes to find among some hundred million candidates. */
 export const MAX_LISTED = 9;
 
 /** The number of bits below the block of label `a`: the blocks of labels 1..a − 1 hold n − 1, n − 2, … bits. */
