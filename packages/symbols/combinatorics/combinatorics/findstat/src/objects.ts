@@ -172,8 +172,9 @@ const READERS: Readonly<Record<string, Reader>> = {
       return sum(outer) - sum(inner);
     },
   },
-  // A graph up to isomorphism, as the labeled graph FindStat lists it by; the vertex count is the size. We have no collection of
-  // graphs up to isomorphism, so the crosscheck compares object by object.
+  // A graph up to isomorphism, as the labeled graph FindStat lists it by; the vertex count is the size. Our UnlabeledGraphs lists
+  // them through 8 vertices, each in its canonical labeling, which FindStat's spelling need not be: the crosscheck still
+  // compares object by object.
   LabeledGraph: {
     read: (t) => ["LabeledGraph", graph(t)],
     size: (t) => Number(/,(\d+)\)$/.exec(t)?.[1]),
