@@ -2,13 +2,13 @@
 // distributions so a second worker runs them alongside.
 import { expect, test } from "vite-plus/test";
 import { findstat } from "../src/findstat-data.ts";
-import { DEEP, OBJECT_WISE, expectPinned, sweep, updateGolden } from "./crosscheck-sweep.ts";
+import { DEEP, expectPinned, sweep, updateGolden } from "./crosscheck-sweep.ts";
 
-const graphHeads = [...new Set(findstat.filter((m) => OBJECT_WISE[m.on]).map((m) => m.head))];
+const graphHeads = [...new Set(findstat.filter((m) => m.on === "LabeledGraph").map((m) => m.head))];
 
 function check(heads: readonly string[]): void {
   const report = sweep(
-    heads.flatMap((h) => findstat.filter((m) => m.head === h && OBJECT_WISE[m.on]).map((m) => `${h}@${m.on}`)),
+    heads.flatMap((h) => findstat.filter((m) => m.head === h && m.on === "LabeledGraph").map((m) => `${h}@${m.on}`)),
   );
   expect(report.compared.length).toBeGreaterThan(0);
   expect(report.skipped).toEqual([]);

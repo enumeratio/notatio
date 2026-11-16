@@ -34,6 +34,7 @@ import { declareCartan } from "../cartan/src/declare.ts";
 import { declareCompositions } from "../compositions/src/declare.ts";
 import { declareFindStat } from "../findstat/src/declare.ts";
 import { declareGraphsArea } from "../graphs/src/declare.ts";
+import { declarePosetsArea } from "../posets/src/declare.ts";
 import { declareLatticePaths } from "../lattice-paths/src/declare.ts";
 import { declarePartitions } from "../partitions/src/declare.ts";
 import { declarePermutations } from "../permutations/src/declare.ts";
@@ -87,6 +88,7 @@ export { COMPOSITION_STATISTICS } from "../compositions/src/statistics.ts";
 export { CARTAN_STATISTICS } from "../cartan/src/statistics.ts";
 export { WORD_STATISTICS } from "../words/src/statistics.ts";
 export { GRAPH_STATISTICS } from "../graphs/src/statistics.ts";
+export { POSET_STATISTICS } from "../posets/src/statistics.ts";
 export { TABLEAU_STATISTICS } from "../tableaux/src/statistics.ts";
 export { CARDINALITIES, type Cardinality } from "../partitions/src/cardinalities.ts";
 export { NATIVE_TO_ENGINE, type NativeStatistic } from "../partitions/src/native-statistics.ts";
@@ -115,6 +117,7 @@ export function declareCombinatorics(ce: Engine): void {
   declareSetPartitions(ce);
   declareTableaux(ce);
   declareGraphsArea(ce);
+  declarePosetsArea(ce);
   declareCartan(ce);
   declareFindStat(ce);
   // The carrier-less families — permutations' own fast statistic kernels already ran inside

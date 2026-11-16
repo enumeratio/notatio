@@ -16,3 +16,4 @@ all-zero-arguments-still-give-the-empty-product	Multinomial[0, 0, 0]	1	(0;0,0,0)
 a-single-argument-is-always-1-there-s-only-one	Multinomial[5]	1	(5;5)	1	
 a-single-symbolic-argument-is-also-1	Multinomial[n]	1	(+n;n)	1	
 with-no-arguments-it-is-the-empty-product-1	Multinomial[]	1	\text{Multinomial}[]	1	
+a-single-negative-argument	Multinomial[-2]				

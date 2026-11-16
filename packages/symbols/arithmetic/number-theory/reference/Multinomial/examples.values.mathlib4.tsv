@@ -16,3 +16,4 @@ all-zero-arguments-still-give-the-empty-product	(let l : List ℕ := [0, 0, 0]; 
 a-single-argument-is-always-1-there-s-only-one	(let l : List ℕ := [5]; Nat.multinomial (Finset.range l.length) (fun i => l.getD i 0))	1	
 a-single-symbolic-argument-is-also-1			
 with-no-arguments-it-is-the-empty-product-1	(let l : List ℕ := []; Nat.multinomial (Finset.range l.length) (fun i => l.getD i 0))	1	
+a-single-negative-argument	(let l : List ℕ := [(-2)]; Nat.multinomial (Finset.range l.length) (fun i => l.getD i 0))		

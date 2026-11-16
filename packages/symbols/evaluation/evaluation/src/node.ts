@@ -5,6 +5,7 @@
 
 import { availableParallelism } from "node:os";
 import { Worker } from "node:worker_threads";
+import { workerEnv } from "./compile-cache.ts";
 import { createPool } from "./pool.ts";
 
 /** MathJSON for `declareEvaluation`'s `Aborted` symbol (Wolfram's `$Aborted`, written only at the Wolfram boundary — see declare.ts). */
@@ -65,7 +66,8 @@ export type NodeWorkerFactory = (
   options: { resourceLimits?: { maxOldGenerationSizeMb: number } },
 ) => NodeWorkerLike;
 
-const defaultWorkerFactory: NodeWorkerFactory = (url, options) => new Worker(url, options) as unknown as NodeWorkerLike;
+const defaultWorkerFactory: NodeWorkerFactory = (url, options) =>
+  new Worker(url, { ...options, env: workerEnv() }) as unknown as NodeWorkerLike;
 
 export interface EvaluatorPoolOptions {
   /** Max concurrent workers, across every memory-limit key combined. Default
@@ -86,7 +88,7 @@ export interface EvaluateIsolatedOptions {
    * `COOPERATIVE_GRACE_MS` past this if that didn't stop it — see
    * `./cooperative-evaluate.ts`. */
   readonly timeMs?: number;
-  /** Module URL whose `configure(ce)` declares the libraries the host engine has. */
+  /** Module URL whose `configure(ce)` (sync or async) declares the libraries the host engine has. */
   readonly setup?: string;
   /** Expand a finite lazy collection in the result into its elements (compute-engine's
    * `materialization` evaluate option). */
@@ -99,7 +101,8 @@ export interface EvaluateDetail {
   readonly outcome: "Evaluated" | "Aborted" | "Error";
   /** Present when `outcome` is `"Evaluated"`. */
   readonly value?: unknown;
-  /** Present when `outcome` is `"Error"`: the worker's exception message. */
+  /** Present when `outcome` is `"Error"`: the worker's exception message; when `"Aborted"` by a
+   * worker that crashed or exited, what it died of (absent for a deadline kill). */
   readonly reason?: string;
   /** Wall-clock milliseconds from this call's start (including any queue wait for a free
    * worker) to its result. */
@@ -118,6 +121,10 @@ export interface EvaluatorPool {
   close(): void;
   /** Alias for `close`. */
   terminateAll(): void;
+}
+
+function errorText(error: unknown): string {
+  return error instanceof Error ? `${error.name}: ${error.message}` : String(error);
 }
 
 function memoryKeyOf(memoryBytes: number | undefined): string {
@@ -222,8 +229,10 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
           };
           // Covers ERR_WORKER_OUT_OF_MEMORY and any other in-worker crash — the worker is
           // gone, not merely slow, so this is always an abort, never a reportable "Error".
-          const onError = (): void => finish({ outcome: "Aborted", ms: ms() }, "replace");
-          const onExit = (): void => finish({ outcome: "Aborted", ms: ms() }, "replace");
+          const onError = (error: unknown): void =>
+            finish({ outcome: "Aborted", reason: `worker failed: ${errorText(error)}`, ms: ms() }, "replace");
+          const onExit = (code?: unknown): void =>
+            finish({ outcome: "Aborted", reason: `worker exited with code ${String(code)}`, ms: ms() }, "replace");
 
           worker.on("message", onMessage);
           worker.once("error", onError);
@@ -334,7 +343,7 @@ export function openSession(options: SessionOptions = {}): Session {
   const spawnTimeoutMs = options.spawnTimeoutMs ?? SPAWN_TIMEOUT_MS;
   const url = workerUrl("session-worker");
   const createWorker: NodeSessionWorkerFactory =
-    options.createWorker ?? ((u, o) => new Worker(u, o) as unknown as NodeWorkerLike);
+    options.createWorker ?? ((u, o) => new Worker(u, { ...o, env: workerEnv() }) as unknown as NodeWorkerLike);
   const spawn = (): NodeWorkerLike => createWorker(url, { workerData: { setup } });
   let worker: NodeWorkerLike = spawn();
   let nextId = 0;

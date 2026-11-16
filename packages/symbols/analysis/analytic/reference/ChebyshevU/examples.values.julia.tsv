@@ -40,3 +40,4 @@ sum-chebyshevu-k-1-over-2-times-chebyshevu-k-2-k
 sum-chebyshevu-k-1-over-2-times-chebyshevu-k-2-2			
 n-integrate-sqrt-neg-t-pow-2-plus-1-times			
 n-integrate-chebyshevu-2-t-times-chebyshevu-3-t			
+a-huge-order-at-1	enumeratio_chebyshev_u(100000, 1)	100001.0	

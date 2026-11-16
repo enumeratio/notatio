@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // One story card: the live render in a canvas (which can take over the window), and its source
 // as a tab per written form. See Stories.vue for where the data comes from.
+import { type Environment, pageEnvironment, watchPageEnvironment } from "@notatio/frontend";
 import { toVNode, vdomOf } from "@notatio/frontend/vdom";
-import { onMounted, ref, shallowRef } from "vue";
+import { onMounted, onUnmounted, ref, shallowRef } from "vue";
 import { renderInline } from "../../prose.ts";
 import type { StoryData } from "../../data/stories.ts";
 import { vueFactory } from "../vdom-props.ts";
@@ -14,12 +15,19 @@ const props = defineProps<{ story: StoryData }>();
 // A story's caption and notes are prose like an example's caption (prose.ts).
 const prose = (text?: string): string => renderInline(text ?? "");
 
+// The environment the card sits in, followed as the page prints or narrows: `vdomOf` reduces the
+// story for it, so a printed card holds no slider.
+const page = shallowRef<Environment>(pageEnvironment());
+let unwatchPage = () => {};
+
 /** A render-function component for the story: `<component :is="live" />`. */
-const live = () => toVNode(vdomOf(props.story.expr as never), vueFactory, typeset.value);
+const live = () => toVNode(vdomOf(props.story.expr as never, page.value), vueFactory, typeset.value);
 
 // The page's KaTeX, as `notatio-out` typesets; a form-box shows its text until it arrives.
 const typeset = shallowRef<((tex: string) => string) | undefined>();
 onMounted(() => {
+  page.value = pageEnvironment();
+  unwatchPage = watchPageEnvironment((env) => (page.value = env));
   // Imported here, not at the top: the elements package needs `HTMLElement`, which a static import
   // would pull into the server render and fail the whole page chunk there.
   import("@notatio/components")
@@ -27,6 +35,8 @@ onMounted(() => {
     .then((convert) => (typeset.value = convert))
     .catch(() => {});
 });
+
+onUnmounted(() => unwatchPage());
 
 const root = ref<HTMLElement | null>(null);
 const fullWindow = useFullWindow(root);

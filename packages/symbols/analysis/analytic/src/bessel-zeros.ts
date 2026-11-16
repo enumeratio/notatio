@@ -66,11 +66,15 @@ function mcmahonZero(nu: number, k: number): number {
   );
 }
 
+/** The widest step the bracket takes each side of the seed: well under half the spacing of J_ν's zeros. */
+const WIDEN_STEP_MAX = 0.5;
+
 /** The k-th positive zero of J_ν, ν > −1, k ≥ 1: bracket the McMahon seed, then bisect. */
 export function besselJZero(nu: number, k: number): number {
   const seed = Math.max(1e-6, mcmahonZero(nu, k));
-  // Widen outward from the seed until J_ν changes sign, then bisect the bracket.
-  const step = Math.max(0.25, 0.1 * seed);
+  // Widen outward from the seed until J_ν changes sign, then bisect the bracket. A step past half the
+  // zeros' spacing (about π) lets one bracket hold three zeros (j_{1,10}, seed 32.2, found j_{1,9}).
+  const step = Math.min(WIDEN_STEP_MAX, Math.max(0.25, 0.1 * seed));
   let lo = seed;
   let hi = seed;
   let fLo = besselJPair(nu, Math.max(lo, 1e-9)).j;

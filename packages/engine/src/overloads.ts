@@ -206,9 +206,9 @@ function dispatcherOf(table: Table, lazy: boolean, head: string): Evaluate {
       const heads = (): Set<string> => (written ??= writtenHeads(ops));
       const candidates = table.ordered.filter((row) => mayApply(row, ops, heads));
       if (candidates.length > 0) {
-        // A lazy head (`Add`) hands over its operands as written; rows see them evaluated,
-        // once per call however many rows there are.
-        if (lazy) values = ops.map((op) => op.evaluate());
+        // A lazy head (`Add`) hands over its operands as written; rows see them evaluated as the
+        // call is (numerically under `N()`), once per call however many rows there are.
+        if (lazy) values = ops.map((op) => (options.numericApproximation ? op.N() : op.evaluate()));
         for (const row of candidates) {
           if (!matches(row, values)) continue;
           const answer = row.evaluate(values, options);

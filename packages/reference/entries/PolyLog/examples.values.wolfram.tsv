@@ -129,3 +129,5 @@ neg-1-over-2-times-polylog-2-neg-1-over-3-plus	Plus[Times[Rational[-1, 2], PolyL
 neg-2-times-polylog-2-neg-1-over-2-plus-polylog	Plus[Times[-2, Plus[PolyLog[2, Rational[-1, 2]], PolyLog[2, Rational[1, 2]]]], PolyLog[2, Rational[1, 4]]]	-2*(Pi^2/12 - Log[2]^2/2 + PolyLog[2, -1/2]) + PolyLog[2, 1/4]		-2 \left(\text{Li}_2\left(-\frac{1}{2}\right)+\text{Li}_2\left(\frac{1}{2}\right)\right)+\text{Li}_2\left(\frac{1}{4}\right)	\text{Li}_2\left(\frac{1}{4}\right)-2 \left(\text{Li}_2\left(-\frac{1}{2}\right)+\frac{\pi ^2}{12}-\frac{\log ^2(2)}{2}\right)	
 polylog-2-neg-1-plus-polylog-2-0-plus-polylog-2	Plus[PolyLog[2, -1], PolyLog[2, 0], PolyLog[2, Rational[1, 2]]]	-1/2*Log[2]^2		\text{Li}_2(-1)+\text{Li}_2(0)+\text{Li}_2\left(\frac{1}{2}\right)	-\frac{1}{2} \log ^2(2)	disagree
 an-exact-argument-stays-symbolic-under-plain	PolyLog[2, Rational[1, 2]]	Pi^2/12 - Log[2]^2/2		\text{Li}_2\left(\frac{1}{2}\right)	\frac{\pi ^2}{12}-\frac{\log ^2(2)}{2}	disagree
+n-polylog-neg-70-neg-4-a-large-cancellation	N[PolyLog[-70, -4]]					
+threads-over-a-list-with-the-pole-at-1	PolyLog[-2, List[500000, 1]]					

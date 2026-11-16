@@ -25,6 +25,7 @@ import {
 import { OWN_FORMS as OWN_FORMS_LIST } from "@notatio/entry";
 import { EXAMPLES_FILE, headNames, type HeadRecord, INDEX_FILE, readHead, recordDirs } from "@notatio/entry/node";
 import { isCrosswalkSystem } from "./crosswalk/sources.ts";
+import { OWN_ENGINE } from "./own-engine.ts";
 
 export interface LoadedHead {
   /** The workspace package's directory name (`analytic`, `collections`, …). */
@@ -292,12 +293,7 @@ export function oracleAgreementsOf(
   return out;
 }
 
-/** Packages whose heads need their own engine (statistics over the carriers): the bare-vs-ours
- * provenance comparison (scripts/provenance.ts) can't classify a head whose examples take a
- * carrier-typed argument (`Permutation(...)`, `SetPartition(...)`, …) -- a bare engine doesn't
- * understand the constructor, so the comparison never runs and a genuine override reads as
- * unclassified. Each such package's own entries test runs its examples directly instead. */
-export const OWN_ENGINE = new Set(["statistics"]);
+export { OWN_ENGINE };
 
 /** The combinatorics area's maps (originally `@enumeratio/domains`, before it merged into
  * `@notatio/combinatorics` wholesale, and before ITS domains area was retired: https://github.com/enumeratio/notatio/wiki/Speculative-Combinatorics-Layering-and-Plausible's

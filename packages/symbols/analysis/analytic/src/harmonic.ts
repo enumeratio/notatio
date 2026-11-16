@@ -1,6 +1,7 @@
 import { type Expression, type ComputeEngine, isNumber } from "@cortex-js/compute-engine";
 import type { Json } from "@notatio/ce-patches";
 import { bernoulliRational, type BoxInput, doublesForFloats, inDoublesIfComplex, isRealInt } from "@notatio/ce-patches";
+import { numerically } from "./finish.ts";
 
 // HarmonicNumber(n) = Σ_{k=1}^n 1/k and HarmonicNumber(n, r) = Σ_{k=1}^n k^{-r} — exact
 // rationals for a non-negative integer n (r any integer, either arity). Off the integer
@@ -103,7 +104,7 @@ export function evaluateHarmonicNumber(
   const r = ops[1];
   if (z === undefined) return undefined;
   const box = (expr: Json) => ce.box(expr as unknown as BoxInput);
-  const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
+  const finish = (expr: Expression) => (numeric ? numerically(expr) : expr.evaluate());
 
   // An infinite operand reaches ψ(∞), which is NaN for ComplexInfinity; PositiveInfinity is reduced
   // before this kernel, so what is left stays unevaluated.

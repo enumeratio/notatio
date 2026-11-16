@@ -19,6 +19,8 @@ import { PERMUTATIONS_FRONTIER } from "../../permutations/src/statistics.frontie
 import { WORD_STATISTICS } from "../../words/src/statistics.ts";
 import { GRAPH_STATISTICS } from "../../graphs/src/statistics.ts";
 import { GRAPHS_FRONTIER } from "../../graphs/src/statistics.frontier.ts";
+import { POSET_STATISTICS } from "../../posets/src/statistics.ts";
+import { POSETS_FRONTIER } from "../../posets/src/statistics.frontier.ts";
 import { WORDS_FRONTIER } from "../../words/src/statistics.frontier.ts";
 import { CARTAN_STATISTICS } from "../../cartan/src/statistics.ts";
 import { CARTAN_FRONTIER } from "../../cartan/src/statistics.frontier.ts";
@@ -34,6 +36,7 @@ export const ALL_STATISTICS: readonly Definition[] = [
   ...WORD_STATISTICS,
   ...TABLEAU_STATISTICS,
   ...GRAPH_STATISTICS,
+  ...POSET_STATISTICS,
   ...CARTAN_STATISTICS,
 ];
 
@@ -49,5 +52,6 @@ export const ALL_FRONTIER: readonly FrontierEntry[] = [
   ...WORDS_FRONTIER,
   ...TABLEAUX_FRONTIER,
   ...GRAPHS_FRONTIER,
+  ...POSETS_FRONTIER,
   ...CARTAN_FRONTIER,
 ];

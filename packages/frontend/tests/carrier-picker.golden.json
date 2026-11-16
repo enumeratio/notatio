@@ -394,6 +394,10 @@
     "carrier": "PlaneTree",
     "reason": "no collection of sized elements on this carrier"
   },
+  "Poset": {
+    "carrier": "Poset",
+    "reason": "no collection of sized elements on this carrier"
+  },
   "PruferSequence": {
     "carrier": "PruferSequence",
     "collection": "PruferSequences",
