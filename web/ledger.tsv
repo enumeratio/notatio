@@ -5573,3 +5573,6 @@ symbol	/reference/symbol/PrincipalFilterSizeProduct
 symbol	/reference/symbol/RelationCount
 symbol	/reference/symbol/ShortestMaximalChainSize
 symbol	/reference/symbol/VSubsetCount
+map	/reference/map/LabeledGraph/CanonicalGraph
+symbol	/reference/symbol/CanonicalGraph
+symbol	/reference/symbol/UnlabeledGraphs

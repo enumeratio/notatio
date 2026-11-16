@@ -9,7 +9,16 @@
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
 import { Binomial } from "../../../collections/src/families/kernels-combinatorics.ts";
 import { KSubsetCount, KSubsetUnrank, KSubsetRank } from "../../../collections/src/families/kernels-extra.ts";
-import { labeledGraphs, labeledGraphsByEdges, tournaments } from "./epsil.ts";
+import {
+  adjacencyOf,
+  CANONICAL_LIST_LIMIT,
+  canonicalRanks,
+  edgesOfRank,
+  isCanonical,
+  labeledRank,
+  positionOf,
+} from "../canonical.ts";
+import { labeledGraphs, labeledGraphsByEdges, tournaments, unlabeledGraphs } from "./epsil.ts";
 
 // ─── edge indexing shared by LabeledGraphs/LabeledGraphsByEdges/Tournaments: the C(n,2) unordered
 // pairs of [n] in lexicographic order, so "which edges are present/oriented" reduces to an
@@ -101,6 +110,41 @@ export const entries: EpsilFamily[] = [
       unrank: ([n, m], r) => LabeledGraphByEdgesUnrank(n, m, r),
       rank: (e, [n]) => LabeledGraphByEdgesRank(e as number[][], n),
       valid: (e, [n, m]) => IsLabeledGraphByEdgesOf(e, n, m),
+    },
+  },
+  {
+    // The list of canonical ranks (./canonical.ts) answers through CANONICAL_LIST_LIMIT vertices; past it every
+    // operation declines, since the definition tries 2^C(n, 2) ranks of n! relabelings each.
+    ...unlabeledGraphs,
+    declinePastDoubles: "count",
+    // The kernel answers from a table built once (the list of canonical ranks) through 8 vertices and nothing past
+    // it, so each operation is a lookup bounded by `max`; the definition alone would try every relabeling of every graph.
+    declared: {
+      carrier: "LabeledGraph",
+      params: [{ name: "n", role: "axis", min: 0, max: CANONICAL_LIST_LIMIT }],
+      cost: { count: "polynomial", unrank: "polynomial", rank: "polynomial", valid: "polynomial" },
+    },
+    early: {
+      pastDoubles: ([n]) => n > CANONICAL_LIST_LIMIT,
+      member: (_e, [n]) => (n > CANONICAL_LIST_LIMIT ? "decline" : undefined),
+    },
+    fast: {
+      count: ([n]) => canonicalRanks(n)?.length,
+      unrank: ([n], r) => {
+        const ranks = canonicalRanks(n);
+        if (ranks === undefined) return undefined;
+        if (!(r >= 0 && r < ranks.length))
+          throw new RangeError(`UnlabeledGraphs(${n}): rank ${r} is outside the fiber`);
+        return edgesOfRank(n, ranks[r]);
+      },
+      rank: (e, [n]) => {
+        const rank = n > CANONICAL_LIST_LIMIT ? undefined : labeledRank(n, e as number[][]);
+        return rank === undefined ? undefined : positionOf(n, rank);
+      },
+      valid: (e, [n]) =>
+        n > CANONICAL_LIST_LIMIT
+          ? undefined
+          : IsLabeledGraphOf(e, n) && isCanonical(adjacencyOf(n, e as number[][])) === true,
     },
   },
 ];
