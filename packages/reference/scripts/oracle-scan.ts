@@ -72,6 +72,7 @@ interface Case {
   readonly key: string;
   readonly expr: MathJSON;
   readonly expected: MathJSON;
+  readonly known?: MathJSON;
 }
 
 /** Keep a table cell readable, and never let a backtick break the markdown. */
@@ -144,6 +145,7 @@ const allCases: Case[] = scannedEntries.flatMap((entry) =>
       key: example.id,
       expr: example.expr as MathJSON,
       expected: example.expected as MathJSON,
+      known: example.known as MathJSON | undefined,
     })),
 );
 // A row named by `--ids` is scanned whatever its role (a triage or aspirational row included), so
@@ -157,6 +159,7 @@ const named: Case[] = scannedEntries.flatMap((entry) =>
       key: example.id,
       expr: example.expr as MathJSON,
       expected: example.expected as MathJSON,
+      known: example.known as MathJSON | undefined,
     })),
 );
 const cases: Case[] = [...allCases, ...named]
@@ -356,6 +359,7 @@ for (const system of systems) {
         tolerance,
         asksForDigits(row.item.expr),
         row.item.expr,
+        row.item.known,
       );
       if (judged === "timeout") {
         const reason = "TimeoutError: comparison exceeded its cap";

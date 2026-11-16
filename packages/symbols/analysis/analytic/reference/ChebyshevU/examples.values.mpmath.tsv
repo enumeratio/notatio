@@ -27,7 +27,7 @@ chebyshevu-2-neg-x-eq-chebyshevu-2-x
 matrixfunction-function-chebyshevu-2-1-1-list			
 at-1	enumeratio_chebyu(5, 1)	6.0	
 at-minus-1	enumeratio_chebyu(5, -1)	-6.0	
-recurrence	(enumeratio_chebyu(4, (mpf(1)/3)) - (((mpf(2)/3) * enumeratio_chebyu(3, (mpf(1)/3))) - enumeratio_chebyu(2, (mpf(1)/3))))	-2.46519032881566189191165176651e-32	
+recurrence	(enumeratio_chebyu(4, (mpf(1)/3)) - (((mpf(2)/3) * enumeratio_chebyu(3, (mpf(1)/3))) - enumeratio_chebyu(2, (mpf(1)/3))))	-2.46519032881566189191165176651e-32	disagree
 order-minus-1			
 negative-order			
 chebyshevu-0-1	enumeratio_chebyu(0, 1)	1.0	
