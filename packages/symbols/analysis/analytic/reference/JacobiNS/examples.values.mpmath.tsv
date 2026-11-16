@@ -1,7 +1,7 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	(ellipfun('ns', 0.3, m=0.5))	3.40816838179233247090443839949	
 jacobins-0-4-0-5i-0-3	(ellipfun('ns', mpc(0.4, -0.5), m=0.3))	(1.06156238940685600006201191388 + 1.11102973440804734061491334293j)	
-a-real-value-near-the-pole-stays-real	ellipfun('ns', 0.000001, m=0.7)		
+a-real-value-near-the-pole-stays-real	ellipfun('ns', 0.000001, m=0.7)	1000000.00000028337858522149362	
 m-less-than-0-via-the-imaginary-modulus	(ellipfun('ns', 0.3, m=-2))	(3.28922068375263482950157131837 + 0.0j)	
 d-jacobins-u-m-m			
 series-jacobins-u-m-u-0-4			

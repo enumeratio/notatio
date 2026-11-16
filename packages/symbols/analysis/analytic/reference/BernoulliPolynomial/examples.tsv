@@ -1,6 +1,6 @@
-id	section	role	expr	expected	caption	mpmath.kind	mpmath.note
-b-0-x-1			[BernoulliPolynomial, 0, x]	1	$B_0(x) = 1$		
-b-1-x-x-1-2			[BernoulliPolynomial, 1, x]	[Add, x, [Rational, -1, 2]]	$B_1(x) = x - 1/2$		
-a-degree-of-1e5-stays-unevaluated		test	[BernoulliPolynomial, 100000, 0.3]	[BernoulliPolynomial, 100000, 0.3]	The degree is capped at 1000; the exact coefficients cost $n^2$ big-integer steps	domain	mpmath answers 1.8e376755; ours declines a degree past 1000 (the exact coefficients cost n squared big-integer steps), and the value is past the double range.
-b-2-0-1-6	Scope		[N, [BernoulliPolynomial, 2, 0]]	0.16666666666666666	$B_2(0) = 1/6$		
-b-2-1-1-6	Scope		[N, [BernoulliPolynomial, 2, 1]]	0.16666666666666666	$B_2(1) = 1/6$		
+id	section	role	expr	expected	caption	mpmath.kind	mpmath.note	julia.kind	julia.note
+b-0-x-1			[BernoulliPolynomial, 0, x]	1	$B_0(x) = 1$				
+b-1-x-x-1-2			[BernoulliPolynomial, 1, x]	[Add, x, [Rational, -1, 2]]	$B_1(x) = x - 1/2$				
+a-degree-of-1e5-stays-unevaluated		test	[BernoulliPolynomial, 100000, 0.3]	[BernoulliPolynomial, 100000, 0.3]	The degree is capped at 1000; the exact coefficients cost $n^2$ big-integer steps	unevaluated	mpmath answers 1.8e376755; ours declines a degree past 1000 (the exact coefficients cost n squared big-integer steps), and the value is past the double range.	resource	Ours stays unevaluated past its degree cap by design; the Julia helper did not finish degree 1e5 in the 60 s cap.
+b-2-0-1-6	Scope		[N, [BernoulliPolynomial, 2, 0]]	0.16666666666666666	$B_2(0) = 1/6$				
+b-2-1-1-6	Scope		[N, [BernoulliPolynomial, 2, 1]]	0.16666666666666666	$B_2(1) = 1/6$				

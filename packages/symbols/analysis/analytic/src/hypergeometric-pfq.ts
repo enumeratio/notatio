@@ -1,6 +1,14 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { operandsOf } from "@notatio/engine";
-import { type EvalOptions, isFiniteNum, numberResult, wantsNumber, cx, type Cx } from "@notatio/ce-patches";
+import {
+  type EvalOptions,
+  isFiniteNum,
+  numberResult,
+  vouchesWhenComplex,
+  wantsNumber,
+  cx,
+  type Cx,
+} from "@notatio/ce-patches";
 import { pfqSeries } from "./hypergeometric.ts";
 
 // HypergeometricPFQ(upper, lower, z) = pFq(upper; lower; z), the general series — built
@@ -46,7 +54,7 @@ export function declareHypergeometricPFQ(ce: ComputeEngine): void {
       if (upperCx.length > lowerCx.length + 1) return undefined; // divergent series in general
       if (upperCx.length === lowerCx.length + 1 && mag(zCx) >= 1) return undefined; // outside the disc
       const r = pfqSeries(upperCx, lowerCx, zCx);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([...upper, ...lower, z]));
     },
   });
 }

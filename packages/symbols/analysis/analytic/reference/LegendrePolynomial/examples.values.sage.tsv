@@ -10,6 +10,7 @@ at-p5-0-7	enumeratio_n(legendre_P(5, RealField(200)("0.7")))	-0.365198750000000
 at-p-1-0-7	enumeratio_n(legendre_P(-1, RealField(200)("0.7")))	1.00000000000000
 at-p-4-0-7	enumeratio_n(legendre_P(-4, RealField(200)("0.7")))	-0.192500000000000
 at-p4-2-3i	enumeratio_n(legendre_P(4, (2 + 3*I)))	-501.500000000000 - 570.000000000000*I
+a-small-imaginary-part-is-kept	legendre_P(4, (2.5 + 1e-15*I))	
 at-a-rational	legendre_P(3, (1/2))	-7/16
 at-a-complex-argument	legendre_P(3, (2 + 3*I))	18*I - 118
 a-symbolic-order-stays-unevaluated	legendre_P(SR.var("n"), SR.var("x"))	legendre_P(n, x)

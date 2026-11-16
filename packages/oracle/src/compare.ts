@@ -6,6 +6,7 @@
 // brackets and the several ways these systems spell a list.
 
 import type { MathJSON } from "./emit.ts";
+import { agreementBound } from "./bound.ts";
 import { compareTrees, type Tree } from "./structural.ts";
 
 /** A number if the text denotes one — including Python complex and Wolfram real syntax, and
@@ -74,8 +75,7 @@ export function compare(ours: string, theirs: string, tolerance = 1e-9): Verdict
   }
   const [a, b] = [asNumber(ours), asNumber(theirs)];
   if (a !== undefined && b !== undefined) {
-    const scale = Math.max(1, Math.abs(a), Math.abs(b));
-    return Math.abs(a - b) <= tolerance * scale ? "agree" : "disagree";
+    return Math.abs(a - b) <= agreementBound(tolerance, Math.abs(a), Math.abs(b)) ? "agree" : "disagree";
   }
   // Past the double range (Gamma(200.5)) both still read as decimals: compare their digits.
   const exact = decimalsAgree(ours, theirs, tolerance);

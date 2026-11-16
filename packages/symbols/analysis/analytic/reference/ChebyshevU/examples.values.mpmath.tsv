@@ -14,6 +14,7 @@ chebyshevu-10-x
 series-chebyshevu-5-x-x-0-5			
 u-of-a-negative-order-at-a-rational	enumeratio_chebyu(-7, (mpf(1)/2))	ValueError: hypsum() failed to converge to the requested 113 bits of accuracy	error
 at-an-exact-zero	enumeratio_chebyu(5, -0.5)	-1.50428205032877202066176782988e-51	
+a-small-imaginary-part-is-kept	enumeratio_chebyu(6, mpc(2.5, 1e-15))	(12649.0 + 3.26200000000000025347501439767e-11j)	
 at-a-rational	enumeratio_chebyu(3, (mpf(1)/2))	-1.0	
 at-a-complex-argument	enumeratio_chebyu(4, mpc(2, 3))	(-1843.0 - 2064.0j)	
 a-symbolic-order-stays-unevaluated			
@@ -26,7 +27,7 @@ chebyshevu-2-neg-x-eq-chebyshevu-2-x
 matrixfunction-function-chebyshevu-2-1-1-list			
 at-1	enumeratio_chebyu(5, 1)	6.0	
 at-minus-1	enumeratio_chebyu(5, -1)	-6.0	
-recurrence	(enumeratio_chebyu(4, (mpf(1)/3)) - (((mpf(2)/3) * enumeratio_chebyu(3, (mpf(1)/3))) - enumeratio_chebyu(2, (mpf(1)/3))))	-2.46519032881566189191165176651e-32	
+recurrence	(enumeratio_chebyu(4, (mpf(1)/3)) - (((mpf(2)/3) * enumeratio_chebyu(3, (mpf(1)/3))) - enumeratio_chebyu(2, (mpf(1)/3))))	-2.46519032881566189191165176651e-32	disagree
 order-minus-1			
 negative-order			
 chebyshevu-0-1	enumeratio_chebyu(0, 1)	1.0	

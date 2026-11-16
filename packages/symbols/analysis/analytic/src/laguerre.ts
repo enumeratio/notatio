@@ -6,6 +6,7 @@ import {
   isFiniteNum,
   isRealInt,
   numberResult,
+  vouchesWhenComplex,
   add,
   cx,
   mul,
@@ -74,7 +75,7 @@ export function evaluateLaguerreL(
     if (order > MAX_NUMERIC_ORDER) return undefined;
     const v = laguerreAt(order, a === undefined ? cx(0) : cx(a.re, a.im), cx(x.re, x.im));
     // The recurrence overflowing is not a value.
-    return Number.isFinite(v.re) && Number.isFinite(v.im) ? numberResult(ce, v) : undefined;
+    return Number.isFinite(v.re) && Number.isFinite(v.im) ? numberResult(ce, v, vouchesWhenComplex([a, x])) : undefined;
   }
   if (order > MAX_EXACT_ORDER) return undefined;
   const expr = ce.box(sumJson(order, (a?.json ?? 0) as Json, x.json as Json) as unknown as BoxInput);

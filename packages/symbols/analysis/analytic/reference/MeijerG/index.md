@@ -16,7 +16,7 @@ bindings:
     source: packages/symbols/analysis/analytic/src/meijer-g.ts
   - origin: mapped
     form: sympy
-    template: meijerg($1, $2, $3)
+    template: N(meijerg($1, $2, $3))
     arity: 3
     checked:
       version: 1.14.0

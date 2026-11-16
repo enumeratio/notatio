@@ -21,7 +21,7 @@ series-erfinv-x-x-0-8	SR(erfinv(SR.var("x"))).series(SR.var("x") == 0, 8 + 1)	(1
 series-erfinv-z0-s-z0-0-2			
 the-normal-quantile-sqrt-2-erfinv-2p-1-at-p-0	(sqrt(2) * erfinv(0.95))	1.38590382434968*sqrt(2)	
 inverse-of-erf-erf-erfinv-x-x-see-erf	enumeratio_equal(erf(erfinv(0.5)), 0.5)	True	
-odd-erfinv-x-erfinv-x-applied-symbolically	erfinv((-SR.var("x")))	None	inconclusive
+odd-erfinv-x-erfinv-x-applied-symbolically	erfinv((-SR.var("x")))	erfinv(-x)	inconclusive
 frac-d-dx-erfinv-x-frac-sqrt-pi-2-e-erfinv-x-2	diff(erfinv(SR.var("x")), SR.var("x"))	1/2*sqrt(pi)*e^(erfinv(x)^2)	
 isnumeric-erfinv-1-over-pi-1-over-2			
 erfinv-0-0			

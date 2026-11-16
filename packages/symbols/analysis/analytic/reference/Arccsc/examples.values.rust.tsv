@@ -1,8 +1,8 @@
 id	in	out	verdict
 arccsc-1	asin(n(1) / n(1))	1.5707963267948966	
-arccsc-2	asin(n(1) / n(2))	0.5235987755982988	
+arccsc-2	asin(n(1) / n(2))	0.5235987755982989	
 arccsc-sqrt-2-pi-4	asin(n(1) / sqrt(n(2)))	0.7853981633974482	
-an-odd-function	asin(n(1) / n(-2))	-0.5235987755982988	
+an-odd-function	asin(n(1) / n(-2))	-0.5235987755982989	
 inside-1-1-the-value-is-complex	asin(n(1) / x(0.5))	panic: non-finite result: NaN	error
 arccsc-positiveinfinity			
 a-pole-arccsc-0-is-complex-infinity	asin(n(1) / n(0))	panic: denominator == 0	error

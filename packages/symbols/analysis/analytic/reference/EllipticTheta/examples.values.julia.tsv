@@ -22,6 +22,7 @@ theta1-0-4-0-85	(enumeratio_theta(1, enumeratio_decimal("0.4"), enumeratio_decim
 theta2-0-4-0-85	(enumeratio_theta(2, enumeratio_decimal("0.4"), enumeratio_decimal("0.85")))	1.642705601370083379018219614150621631053129929993330368460643574122960417329048	
 theta3-0-4-0-85	(enumeratio_theta(3, enumeratio_decimal("0.4"), enumeratio_decimal("0.85")))	1.642705601370083379090411438576618153882855671110793061547207526823521857922214	
 theta4-0-4-0-85	(enumeratio_theta(4, enumeratio_decimal("0.4"), enumeratio_decimal("0.85")))	0.0009551492483435765928106195441190453564172395194627425179516094833019315881922525	
+a-small-imaginary-part-is-kept	enumeratio_theta(3, enumeratio_complex(enumeratio_decimal("0.5"), enumeratio_decimal("1e-15")), enumeratio_decimal("0.2"))		
 each-of-the-four-theta-functions-a-1	(enumeratio_theta(1, enumeratio_decimal("0.3"), enumeratio_decimal("0.2")))	0.353430543747624543590205774614847451968547052657328479959979920124063722558704	
 a-complex-argument-u	(enumeratio_theta(3, enumeratio_complex(enumeratio_decimal("0.3"), enumeratio_decimal("0.1")), enumeratio_decimal("0.2")))	(1.338012245244520242753339606040015443273122614205436123621309051830256559472162-0.04669885738620094777947745626016228415899549784732335061300181807029538041640206j)	
 a-negative-real-nome-q	(enumeratio_theta(3, 1, enumeratio_decimal("-0.3")))	1.239061275954272956105765621649055317395397618021517290146350194624002717599952	

@@ -52,18 +52,36 @@ export interface NumberResultOptions {
    * (NaN), and no answer is given.
    */
   pole?: boolean;
+  /**
+   * The kernel computes `im` to a relative accuracy of itself, not of the result, so a small
+   * `im` beside a large real part is a value, as the Eisenstein series of weight 100 at
+   * 0.7 + 0.3i is real part 3.4e37 and imaginary part 3.2e23. Only `noise` then drops it.
+   * A kernel whose `im` carries an absolute error leaves it unset.
+   */
+  vouchesImaginary?: boolean;
 }
 
 /**
  * Box a complex result, collapsing to a real number when the imaginary part is noise
- * (exactly 0, within `REAL_COLLAPSE_RELATIVE` of the real part, or within `options.noise`).
+ * (exactly 0, within `REAL_COLLAPSE_RELATIVE` of the real part unless the kernel
+ * `vouchesImaginary`, or within `options.noise`).
  * Undefined, so the call stays symbolic, for a non-finite result unless `options.pole`.
  */
 export const numberResult = (ce: ComputeEngine, r: Cx, options: NumberResultOptions = {}): Expression | undefined => {
   if (!Number.isFinite(r.re) || !Number.isFinite(r.im)) return options.pole ? ce.symbol("ComplexInfinity") : undefined;
-  if (isReal(r, Math.max(options.noise ?? 0, REAL_COLLAPSE_RELATIVE * Math.abs(r.re)))) return ce.number(r.re);
+  const floor = options.vouchesImaginary ? 0 : REAL_COLLAPSE_RELATIVE * Math.abs(r.re);
+  if (isReal(r, Math.max(options.noise ?? 0, floor))) return ce.number(r.re);
   return inexactComplex(ce, r.re, r.im);
 };
+
+/**
+ * `vouchesImaginary` for a kernel whose imaginary part is accurate to itself, when an operand is
+ * complex. Real operands give a real function value, and an imaginary part beside it (a
+ * negative `q` in a theta series, a negative real base to a real power) is rounding noise.
+ */
+export const vouchesWhenComplex = (ops: readonly ({ readonly im: number } | undefined)[]): NumberResultOptions => ({
+  vouchesImaginary: ops.some((o) => o !== undefined && o.im !== 0),
+});
 
 /**
  * Should this call produce a number? Either N() asked for one, or an operand is

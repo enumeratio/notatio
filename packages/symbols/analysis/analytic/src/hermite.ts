@@ -1,7 +1,18 @@
 // unstable: the Expression and ComputeEngine types, which the nucleus facade doesn't re-export
 import type { Expression, ComputeEngine } from "@notatio/engine/unstable";
 import type { Json } from "@notatio/ce-patches";
-import { type BoxInput, isFiniteNum, isRealInt, numberResult, cx, mul, scale, sub, type Cx } from "@notatio/ce-patches";
+import {
+  type BoxInput,
+  isFiniteNum,
+  isRealInt,
+  numberResult,
+  vouchesWhenComplex,
+  cx,
+  mul,
+  scale,
+  sub,
+  type Cx,
+} from "@notatio/ce-patches";
 import { coeffsExpr } from "./chebyshev.ts";
 
 // HermiteH(n, x): the physicists' Hermite polynomial, H_0 = 1, H_1 = 2x,
@@ -60,7 +71,7 @@ export function evaluateHermiteH(
     if (order > MAX_NUMERIC_ORDER) return undefined;
     const v = hermiteAt(order, cx(x.re, x.im));
     // The recurrence overflowing is not a value.
-    return Number.isFinite(v.re) && Number.isFinite(v.im) ? numberResult(ce, v) : undefined;
+    return Number.isFinite(v.re) && Number.isFinite(v.im) ? numberResult(ce, v, vouchesWhenComplex([x])) : undefined;
   }
   if (order > MAX_EXACT_ORDER) return undefined;
   const expr = ce.box(coeffsExpr(coeffs(order), x.json as unknown as Json) as unknown as BoxInput);

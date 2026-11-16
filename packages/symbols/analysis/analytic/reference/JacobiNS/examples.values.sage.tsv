@@ -1,10 +1,10 @@
 id	in	out	verdict
 a-floating-point-argument-evaluates-directly-to	enumeratio_n(jacobi_ns(RealField(200)("0.3"), 0.5))	3.40816838179233	
 jacobins-0-4-0-5i-0-3	enumeratio_n(jacobi_ns((RealField(200)("0.4") + -0.5*I), RealField(200)("0.3")))	1.06156238940686 + 1.11102973440805*I	
-a-real-value-near-the-pole-stays-real	jacobi_ns(0.000001, 0.7)		
+a-real-value-near-the-pole-stays-real	jacobi_ns(0.000001, 0.7)	1.00000000000028e6	
 m-less-than-0-via-the-imaginary-modulus	enumeratio_n(jacobi_ns(RealField(200)("0.3"), -2))	3.28922068375263	
 d-jacobins-u-m-m	diff(jacobi_ns(SR.var("u"), SR.var("m")), SR.var("m"))	-1/2*((u + elliptic_e(arcsin(jacobi_sn(u, m)), m)/(m - 1))*jacobi_cn(u, m)*jacobi_dn(u, m)/m - jacobi_cn(u, m)^2*jacobi_sn(u, m)/(m - 1))/jacobi_sn(u, m)^2	disagree
-series-jacobins-u-m-u-0-4	SR(jacobi_ns(SR.var("u"), SR.var("m"))).series(SR.var("u") == 0, 4 + 1)	None	inconclusive
+series-jacobins-u-m-u-0-4	SR(jacobi_ns(SR.var("u"), SR.var("m"))).series(SR.var("u") == 0, 4 + 1)	(jacobi_ns(0, m)) + (-jacobi_cs(0, m)*jacobi_ds(0, m))*u + (1/2*jacobi_cs(0, m)^2*jacobi_ns(0, m) + 1/2*jacobi_ds(0, m)^2*jacobi_ns(0, m))*u^2 + (-1/6*jacobi_cs(0, m)^3*jacobi_ds(0, m) - 1/6*jacobi_cs(0, m)*jacobi_ds(0, m)^3 - 2/3*jacobi_cs(0, m)*jacobi_ds(0, m)*jacobi_ns(0, m)^2)*u^3 + (1/24*jacobi_cs(0, m)^4*jacobi_ns(0, m) + 7/12*jacobi_cs(0, m)^2*jacobi_ds(0, m)^2*jacobi_ns(0, m) + 1/24*jacobi_ds(0, m)^4*jacobi_ns(0, m) + 1/6*jacobi_cs(0, m)^2*jacobi_ns(0, m)^3 + 1/6*jacobi_ds(0, m)^2*jacobi_ns(0, m)^3)*u^4 + Order(u^5)	inconclusive
 series-jacobins-z-m-m-0-2	SR(jacobi_ns(SR.var("z"), SR.var("m"))).series(SR.var("m") == 0, 2 + 1)	ValueError: power::eval(): division by zero	error
 u-0-is-a-pole-for-any-m	jacobi_ns(0, SR.var("m"))	jacobi_ns(0, m)	disagree
 n-jacobins-sqrt-2-over-4-times-i-neg-1	enumeratio_n(jacobi_ns((0 + (sqrt(2) / 4)*I), -1))	2.98264962106928e-184 - 2.83284769343367*I	

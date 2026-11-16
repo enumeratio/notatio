@@ -1,6 +1,6 @@
 id	in	out	verdict
 arcsin-0	asin(n(0))	0.0	
-arcsin-1-over-2	asin(rational(n(1), n(2)))	0.5235987755982988	
+arcsin-1-over-2	asin(rational(n(1), n(2)))	0.5235987755982989	
 the-top-of-the-principal-range	asin(n(1))	1.5707963267948966	
 arcsin-neg-1	asin(n(-1))	-1.5707963267948966	
 a-machine-precision-argument-evaluates	asin(x(0.4))	0.41151684606748806	
@@ -33,7 +33,7 @@ arcsin-neg-sqrt-2-over-4-times-neg-1-plus-sqrt-3	asin(((-((sqrt(n(2)) / n(4)))) 
 arcsin-1-over-4-times-1-minus-sqrt-5	asin((rational(n(1), n(4)) * (n(1) + (-(sqrt(n(5)))))))	-0.31415926535897937	
 arcsin-1-over-2-times-sqrt-2-minus-sqrt-2	asin((rational(n(1), n(2)) * sqrt((n(2) + (-(sqrt(n(2))))))))	0.3926990816987241	
 arcsin-neg-1-over-2-times-sqrt-2-minus-sqrt-2	asin((rational(n(-1), n(2)) * sqrt((n(2) + (-(sqrt(n(2))))))))	-0.3926990816987241	
-arcsin-neg-1-over-2	asin(rational(n(-1), n(2)))	-0.5235987755982988	
+arcsin-neg-1-over-2	asin(rational(n(-1), n(2)))	-0.5235987755982989	
 arcsin-1-over-2-times-sqrt-1-over-2-times-5	asin((rational(n(1), n(2)) * sqrt((rational(n(1), n(2)) * (n(5) + (-(sqrt(n(5)))))))))	0.6283185307179586	
 arcsin-neg-1-over-2-times-sqrt-1-over-2-times-5	asin((rational(n(-1), n(2)) * sqrt((rational(n(1), n(2)) * (n(5) + (-(sqrt(n(5)))))))))	-0.6283185307179586	
 arcsin-neg-sqrt-2-over-2	asin((-((sqrt(n(2)) / n(2)))))	-0.7853981633974484	

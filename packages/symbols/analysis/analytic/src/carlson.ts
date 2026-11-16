@@ -6,6 +6,7 @@ import {
   exceedsDoublePrecision,
   isFiniteNum,
   numberResult,
+  vouchesWhenComplex,
   wantsNumber,
   abs,
   add,
@@ -459,6 +460,8 @@ function evaluate3(
   options: EvalOptions,
   big: (args: BigDecimal[], digits: number) => BigDecimal | undefined,
   declines?: (x: Cx, y: Cx, z: Cx) => boolean,
+  /** The kernel's imaginary part is accurate relative to itself (see `numberResult`). */
+  vouchesImaginary = false,
 ): Expression | undefined {
   const [x, y, z] = ops;
   if (x === undefined || y === undefined || z === undefined) return undefined;
@@ -468,7 +471,9 @@ function evaluate3(
   if (declines?.(cx(x.re, x.im), cx(y.re, y.im), cx(z.re, z.im))) return undefined;
   const past = pastDouble(ce, ops, options, big);
   if (past !== undefined) return past.value;
-  return numberResult(ce, kernel(cx(x.re, x.im), cx(y.re, y.im), cx(z.re, z.im)));
+  return numberResult(ce, kernel(cx(x.re, x.im), cx(y.re, y.im), cx(z.re, z.im)), {
+    vouchesImaginary: vouchesImaginary && vouchesWhenComplex(ops).vouchesImaginary,
+  });
 }
 
 /**
@@ -502,7 +507,7 @@ export function declareCarlson(ce: ComputeEngine): void {
     signature: "(number, number, number) -> number",
     evaluate: (ops, options) =>
       equalArguments(ce, ops, options, [-1, 2]) ??
-      evaluate3(ce, ops, carlsonRF, options, ([x, y, z], d) => carlsonRFBig(x!, y!, z!, d)),
+      evaluate3(ce, ops, carlsonRF, options, ([x, y, z], d) => carlsonRFBig(x!, y!, z!, d), undefined, true),
   });
 
   ce.declare("CarlsonRC", {
@@ -523,7 +528,7 @@ export function declareCarlson(ce: ComputeEngine): void {
     signature: "(number, number, number) -> number",
     evaluate: (ops, options) =>
       equalArguments(ce, ops, options, [-3, 2]) ??
-      evaluate3(ce, ops, carlsonRD, options, ([x, y, z], d) => carlsonRDBig(x!, y!, z!, d)),
+      evaluate3(ce, ops, carlsonRD, options, ([x, y, z], d) => carlsonRDBig(x!, y!, z!, d), undefined, true),
   });
 
   ce.declare("CarlsonRJ", {

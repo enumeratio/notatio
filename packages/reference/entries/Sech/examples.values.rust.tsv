@@ -1,6 +1,6 @@
 id	in	out	verdict
 series-sech-x-x-0-10			
-n-sech-9-over-5-50	nf((n(1) / cosh(rational(n(9), n(5)))))	0.3218048695065879	
+n-sech-9-over-5-50	nf((n(1) / cosh(rational(n(9), n(5)))))	0.3218048695065878	
 sech-list-list-1-over-3-times-i-times-pi-neg-1			
 sech-positiveinfinity			
 sech-0	(n(1) / cosh(n(0)))	1.0	

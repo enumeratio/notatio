@@ -639,10 +639,11 @@ def enumeratio_symbolic_agree(a, b, trials):
         try:
             # Each side alone: evalf of the difference chases cancellation to its own digits (about 7 s a
             # trial for LerchPhi vs PolyLog at s < 0), which put the item over its cap on slower machines.
-            delta = complex(N(ta, 30) - N(tb, 30))
+            va, vb = complex(N(ta, 30)), complex(N(tb, 30))
         except (TypeError, ValueError, AttributeError):
             continue
-        results.append(abs(delta) < 1e-9)
+        # Relative to the larger value, as agreementBound reads it, so a tiny value is held to its own digits.
+        results.append(abs(va - vb) <= 1e-9 * max(abs(va), abs(vb)))
     return all(results) if results else None
 
 # Whether a coefficient (or the derivative of a difference) is zero: True or False when it is decided (by
@@ -1677,10 +1678,11 @@ def enumeratio_symbolic_agree(a, b, trials):
             continue
         ta, tb = trial
         try:
-            delta = CC(ta - tb)
+            va, vb = CC(ta), CC(tb)
         except (TypeError, ValueError):
             continue
-        results.append(abs(delta) < 1e-9)
+        # Relative to the larger value, as agreementBound reads it, so a tiny value is held to its own digits.
+        results.append(abs(va - vb) <= 1e-9 * max(abs(va), abs(vb)))
     return all(results) if results else None
 `;
 

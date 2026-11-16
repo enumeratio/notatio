@@ -1,6 +1,6 @@
 id	in	out
 a-floating-point-argument-evaluates-directly-to	(ellipfun('ds', 1.1, m=0.9))	0.788754402307543639887768845232
-a-real-value-near-the-pole-stays-real	ellipfun('ds', 0.000001, m=0.7)	
+a-real-value-near-the-pole-stays-real	ellipfun('ds', 0.000001, m=0.7)	999999.999999933378585221531576
 m-less-than-0-via-the-imaginary-modulus	(ellipfun('ds', 0.3, m=-0.7))	(3.45316371361881111276981106016 + 0.0j)
 d-jacobids-u-m-m		
 series-jacobids-u-m-u-0-4		

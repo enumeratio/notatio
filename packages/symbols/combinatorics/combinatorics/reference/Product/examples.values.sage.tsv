@@ -8,7 +8,7 @@ product-k-pow-2-k-1-n	product(((SR.var("k"))^2), SR.var("k"), 1, SR.var("n"))	fa
 product-neg-k-pow-neg-4-plus-1-k-2	product(((-((SR.var("k"))^-4)) + 1), SR.var("k"), 2, oo)	RuntimeError: indeterminate expression: 0 * infinity encountered.	error
 product-2-pow-j-plus-k-k-1-p-j-1-k			
 a-symbolic-upper-limit-prod-k-1-n-k-n-see	product(SR.var("k"), SR.var("k"), 1, SR.var("n"))	factorial(n)	
-exponents-add-prod-k-1-n-x-k-x-n-n-1-2	product(((SR.var("x"))^SR.var("k")), SR.var("k"), 1, SR.var("n"))	None	inconclusive
+exponents-add-prod-k-1-n-x-k-x-n-n-1-2	product(((SR.var("x"))^SR.var("k")), SR.var("k"), 1, SR.var("n"))	product(x^k, k, 1, n)	inconclusive
 a-telescoping-product-prod-k-1-n-frac-k-1-k-n-1	product(((SR.var("k") + 1) / SR.var("k")), SR.var("k"), 1, SR.var("n"))	n + 1	
 an-undefined-function-expanded-term-by-term			
 a-step-of-2-takes-every-other-index			
@@ -22,7 +22,7 @@ an-infinite-telescoping-product-prod-k-2-infty-1	product((1 - (1 / ((SR.var("k")
 prod-i-2-infty-1-1-i-4-frac-sinh-pi-4-pi-not-yet			
 exact-rationals-in-a-collection			
 symbolic-elements			
-product-a-pow-k-k-nothing-n	product(((SR.var("a"))^SR.var("k")), SR.var("k"), 1, SR.var("n"))	None	inconclusive
+product-a-pow-k-k-nothing-n	product(((SR.var("a"))^SR.var("k")), SR.var("k"), 1, SR.var("n"))	product(a^k, k, 1, n)	inconclusive
 product-a-pow-k-j-nothing-m-k-nothing-j			
 product-j-times-k-k-nothing-nothing-j-nothing			
 product-j-times-k-k-1-n-j-nothing-nothing			

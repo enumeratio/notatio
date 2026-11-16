@@ -35,6 +35,6 @@ csc-3-over-10-times-pi	(n(1) / sin((rational(n(3), n(10)) * x(std::f64::consts::
 neg-2-times-neg-2-plus-2-times-csc-1-over-2-pow	((n(-2) * (n(-2) + (n(2) * power((n(1) / sin(rational(n(1), n(2)))), n(2)))) * power((n(1) / sin(n(1))), n(2)) * power((n(1) / sin(rational(n(1), n(2)))), n(4))) + power((n(1) / sin(rational(n(1), n(2)))), n(8)))	-1.1368683772161603e-13	disagree
 n-4-times-neg-1-plus-csc-1-over-2-pow-2-times	nf((n(4) * (n(-1) + power((n(1) / sin(rational(n(1), n(2)))), n(2))) * power((n(1) / sin(n(1))), n(2))))	18.92846257389356	
 n-csc-1-over-2-plus-1-over-2-times-pi-pow-2	nf(power((n(1) / sin((rational(n(1), n(2)) + (rational(n(1), n(2)) * x(std::f64::consts::PI))))), n(2)))	1.2984464104095246	
-n-4-times-neg-1-plus-csc-2-pow-2-times-csc-4-pow	nf((n(4) * (n(-1) + power((n(1) / sin(n(2))), n(2))) * power((n(1) / sin(n(4))), n(2))))	1.4627703597119728	
+n-4-times-neg-1-plus-csc-2-pow-2-times-csc-4-pow	nf((n(4) * (n(-1) + power((n(1) / sin(n(2))), n(2))) * power((n(1) / sin(n(4))), n(2))))	1.4627703597119734	
 a-pole-sin-0-0	(n(1) / sin(n(0)))	panic: non-finite result: inf	error
 csc-complexinfinity-is-indeterminate-for-the			

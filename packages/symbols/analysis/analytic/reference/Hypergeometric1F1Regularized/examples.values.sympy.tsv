@@ -1,22 +1,23 @@
 id	in	out	verdict
-matches-hypergeometric1f1-1-2-0-5-gamma-2	hyper([1], [2], 0.5) / gamma(2)	hyper((1,), (2,), 0.5)	inconclusive
-b-1-is-a-pole-of-gamma-but-the-regularized-form	hyper([1], [-1], 0.7) / gamma(-1)	0	disagree
-a-0-5-b-1-5-at-neg-1	hyper([0.5], [1.5], -1) / gamma(1.5)	1.12837916709551*hyper((0.5,), (1.5,), -1)	inconclusive
-complex-a-at-0-5	N(hyper([(1 + 0.5*I)], [2], 0.5) / gamma(2), 30)	1.29072175734512541360978703738 + 0.161480563558252108209614523387*I	
-b-0-at-0-5	hyper([1], [0], 0.5) / gamma(0)	0	disagree
-a-2-b-neg-2-at-0-4	hyper([2], [-2], 0.4) / gamma(-2)	0	disagree
-a-complex-argument-at-b-2	N(hyper([1], [2], (0.5 + 0.5*I)) / gamma(2), 30)	1.2373281197977840698948458431 + 0.343550046629445753791679290996*I	
-a-complex-argument-at-a-nonpositive-integer-b	N(hyper([1], [-1], (0.3 + -0.4*I)) / gamma(-1), 30)	0	inconclusive
-simplify-normal-series	simplify((series(hyper([(1 * (S(2)**-1))], [3], Symbol("x")) / gamma(3), Symbol("x"), oo, 3 + 1)).removeO())		
-n-hypergeometric1f1regularized-1-0-neg-1	N(hyper([-1], [0], -1) / gamma(0), 30)	0	disagree
-n-hypergeometric1f1regularized-1-0-0	N(hyper([-1], [0], 0) / gamma(0), 30)	0	
-n-hyp1f1regularized-neg-12-neg-1-neg-1	N(hyper([-12], [-1], -1) / gamma(-1), 30)	0	disagree
-a-tiny-value-keeps-its-imaginary-part	hyper([31], [31], (-1.2 + 0.7*I)) / gamma(31)		
-a-value-below-the-double-range-stays-unevaluated	hyper([1], [200], (1e-8 + 1e-8*I)) / gamma(200)		
-n-hypergeometric1f1regularized-2-neg-4-2-50	N(hyper([2], [-4], 2) / gamma(-4), 30)	0	disagree
-n-hypergeometric1f1regularized-1-0-1-30	N(hyper([1], [0], 1) / gamma(0), 30)	0	disagree
-matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analytic_func(hyper([Rational(1, 2)], [1], Symbol("_mf")) / gamma(1), Symbol("_mf")).applyfunc(simplify).tolist()	[[exp(1/4)*besseli(0, 1/4), 0], [0, exp(1/4)*besseli(0, 1/4)]]	
-n-1-over-2-times-hypergeometric1f1regularized-3	N(((Rational(1, 2) * hyper([Rational(3, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))) + (-hyper([Rational(1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))), 30)	0.e-165	
-n-neg-hypergeometric1f1regularized-1-over-2-neg	N((-hyper([Rational(1, 2)], [Rational(-1, 2)], Rational(1, 2)) / gamma(Rational(-1, 2))), 30)	ValueError: hypsum() failed to converge to the requested 107 bits of accuracy	error
-n-neg-1-over-2-times	N(((Rational(-1, 2) * hyper([Rational(1, 2)], [Rational(3, 2)], Rational(1, 2)) / gamma(Rational(3, 2))) + (-hyper([Rational(-1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))) + hyper([Rational(1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))), 30)	-0.e-165	
-n-neg-1-over-2-times-2	N(((Rational(-1, 2) * hyper([Rational(3, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))) + hyper([Rational(1, 2)], [Rational(-1, 2)], Rational(1, 2)) / gamma(Rational(-1, 2)) + hyper([Rational(1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))), 30)	ValueError: hypsum() failed to converge to the requested 117 bits of accuracy	error
+matches-hypergeometric1f1-1-2-0-5-gamma-2	N(hyper([1], [2], 0.5) / gamma(2))	1.29744254140026	
+b-1-is-a-pole-of-gamma-but-the-regularized-form	N(hyper([1], [-1], 0.7) / gamma(-1))	0	disagree
+a-0-5-b-1-5-at-neg-1	N(hyper([0.5], [1.5], -1) / gamma(1.5))	0.842700792949715	
+complex-a-at-0-5	N(N(hyper([(1 + 0.5*I)], [2], 0.5) / gamma(2)), 30)	1.29072175734512550882016057585 + 0.161480563558252104838786067376*I	
+b-0-at-0-5	N(hyper([1], [0], 0.5) / gamma(0))	0	disagree
+a-2-b-neg-2-at-0-4	N(hyper([2], [-2], 0.4) / gamma(-2))	0	disagree
+a-complex-argument-at-b-2	N(N(hyper([1], [2], (0.5 + 0.5*I)) / gamma(2)), 30)	1.23732811979778412059260972455 + 0.343550046629445771095845429954*I	
+a-complex-argument-at-a-nonpositive-integer-b	N(N(hyper([1], [-1], (0.3 + -0.4*I)) / gamma(-1)), 30)	0	inconclusive
+simplify-normal-series	simplify((series(N(hyper([(1 * (S(2)**-1))], [3], Symbol("x")) / gamma(3)), Symbol("x"), oo, 3 + 1)).removeO())		
+n-hypergeometric1f1regularized-1-0-neg-1	N(N(hyper([-1], [0], -1) / gamma(0)), 30)	0	disagree
+n-hypergeometric1f1regularized-1-0-0	N(N(hyper([-1], [0], 0) / gamma(0)), 30)	0	
+n-hyp1f1regularized-neg-12-neg-1-neg-1	N(N(hyper([-12], [-1], -1) / gamma(-1)), 30)	0	disagree
+a-tiny-value-keeps-its-imaginary-part	N(hyper([31], [31], (-1.2 + 0.7*I)) / gamma(31))	8.68477120282376e-34 + 7.31508187111881e-34*I	
+a-value-below-the-double-range-stays-unevaluated	N(hyper([1], [200], (1e-8 + 1e-8*I)) / gamma(200))	2.53595390708872e-373 + 1.26797695360713e-383*I	inconclusive
+a-small-imaginary-part-is-kept	N(hyper([1.3], [2.7], (1.7 + 1e-15*I)) / gamma(2.7))		
+n-hypergeometric1f1regularized-2-neg-4-2-50	N(N(hyper([2], [-4], 2) / gamma(-4)), 30)	0	disagree
+n-hypergeometric1f1regularized-1-0-1-30	N(N(hyper([1], [0], 1) / gamma(0)), 30)	0	disagree
+matrixfunction-function	Matrix([[Rational(1, 2), 0], [0, Rational(1, 2)]]).analytic_func(N(hyper([Rational(1, 2)], [1], Symbol("_mf")) / gamma(1)), Symbol("_mf")).applyfunc(simplify).tolist()	[[exp(1/4)*besseli(0, 1/4), 0], [0, exp(1/4)*besseli(0, 1/4)]]	
+n-1-over-2-times-hypergeometric1f1regularized-3	N(((Rational(1, 2) * N(hyper([Rational(3, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))) + (-N(hyper([Rational(1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2))))), 30)	0	disagree
+n-neg-hypergeometric1f1regularized-1-over-2-neg	N((-N(hyper([Rational(1, 2)], [Rational(-1, 2)], Rational(1, 2)) / gamma(Rational(-1, 2)))), 30)	ValueError: hypsum() failed to converge to the requested 57 bits of accuracy	error
+n-neg-1-over-2-times	N(((Rational(-1, 2) * N(hyper([Rational(1, 2)], [Rational(3, 2)], Rational(1, 2)) / gamma(Rational(3, 2)))) + (-N(hyper([Rational(-1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))) + N(hyper([Rational(1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))), 30)	-1.11022302462515654042363166809e-16	disagree
+n-neg-1-over-2-times-2	N(((Rational(-1, 2) * N(hyper([Rational(3, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))) + N(hyper([Rational(1, 2)], [Rational(-1, 2)], Rational(1, 2)) / gamma(Rational(-1, 2))) + N(hyper([Rational(1, 2)], [Rational(1, 2)], Rational(1, 2)) / gamma(Rational(1, 2)))), 30)	ValueError: hypsum() failed to converge to the requested 57 bits of accuracy	error

@@ -3,6 +3,7 @@ import {
   type EvalOptions,
   isFiniteNum,
   numberResult,
+  vouchesWhenComplex,
   underflows,
   wantsNumber,
   add,
@@ -499,7 +500,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
         return regularizedPastDouble(ce, [], ops[0], ops[1]);
       if (invGammaUnderflows(b)) return undefined;
       const r = pfqRegularizedSeries([], [b], z);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([b, z]));
     },
   });
 
@@ -522,7 +523,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       if (isMinusOneShift(a, b)) return numberResult(ce, regularizedMinusOne(a, z));
       if (isDiagonal(a, b)) return numberResult(ce, regularizedDiagonal(a, z));
       const r = regularizedRaise(a, b, z) ?? regularizedKummer(a, b, z) ?? pfqRegularizedSeries([a], [b], z);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([a, b, z]));
     },
   });
 
@@ -551,7 +552,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return regularized2F1PastDouble(ce, ops);
       if (mag(z) >= 1 || invGammaUnderflows(c)) return undefined;
       const r = pfqRegularizedSeries([a, b], [c], z);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([a, b, c, z]));
     },
   });
 
