@@ -26,6 +26,8 @@ const ABORTED = "Aborted";
  * running -- spawn and `@cortex-js/compute-engine` import time is excluded, since the
  * hard-kill timer isn't armed until `"started"` arrives. See `SPAWN_TIMEOUT_MS` for the
  * (separate, much larger) guard against a worker that never gets that far at all.
+ *
+ * Wall-clock only: a browser Worker has no CPU-time API (node.ts counts CPU time instead).
  */
 const COOPERATIVE_GRACE_MS = 200;
 

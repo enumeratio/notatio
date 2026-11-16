@@ -215,3 +215,50 @@ test("a hard-killed case (no cooperative answer) reports outcome Aborted, not a 
     pool.close();
   }
 });
+
+/** A fake worker that reports "started", then answers `2` after `answerAfterMs` (never, if
+ * omitted). `cpu()` is its `cpuUsage` clock, in microseconds. */
+function fakeCpuWorker(cpu: () => number, answerAfterMs?: number): NodeWorkerLike {
+  const listeners = new Set<(message: unknown) => void>();
+  return {
+    postMessage: (message) => {
+      const { id } = message as { id: number };
+      for (const l of listeners) l({ id, kind: "started" });
+      if (answerAfterMs === undefined) return;
+      setTimeout(() => {
+        for (const l of listeners) l({ id, kind: "result", ok: true, json: 2 });
+      }, answerAfterMs);
+    },
+    terminate: () => {},
+    unref: () => {},
+    ref: () => {},
+    on: (event, listener) => {
+      if (event === "message") listeners.add(listener);
+    },
+    once: () => {},
+    off: (_event, listener) => listeners.delete(listener as (message: unknown) => void),
+    cpuUsage: () => ({ user: cpu(), system: 0 }),
+  };
+}
+
+test("a worker that got little CPU time past the wall-clock budget is not killed", async () => {
+  // timeMs 1 gives a 201 ms budget; the starved worker (CPU time frozen) answers at 350 ms.
+  const pool = createEvaluatorPool({ size: 1, createWorker: () => fakeCpuWorker(() => 1_000, 350) });
+  try {
+    expect(await pool.evaluateDetailed(["Add", 1, 1], { timeMs: 1 })).toMatchObject({
+      outcome: "Evaluated",
+      value: 2,
+    });
+  } finally {
+    pool.close();
+  }
+});
+
+test("a worker whose CPU time tracks the wall clock is killed at its budget", async () => {
+  const pool = createEvaluatorPool({ size: 1, createWorker: () => fakeCpuWorker(() => performance.now() * 1000) });
+  try {
+    expect((await pool.evaluateDetailed(["Add", 1, 1], { timeMs: 1 })).outcome).toBe("Aborted");
+  } finally {
+    pool.close();
+  }
+});
