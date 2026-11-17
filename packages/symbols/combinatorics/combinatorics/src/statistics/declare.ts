@@ -18,49 +18,76 @@ import {
   registerOperation,
 } from "@notatio/structures";
 import { findstat } from "../../findstat/src/findstat-data.ts";
-import { bySignature, type Definition, signatureOf, SUBJECT } from "./types.ts";
+import { bySignature, type Definition, isTrue, signatureOf, SUBJECT } from "./types.ts";
 
 type BoxInput = Parameters<Engine["box"]>[0];
 
-/**
- * Evaluate `definition` at `subject` — substitute the wildcard and evaluate. Exported
- * because it is also how the tests and the reduction analysis reach a definition.
- */
-const compiledCache = new WeakMap<Definition, ReturnType<typeof compiledStatistic> | null>();
-const purity = new WeakMap<Definition, boolean>();
+const compiledCache = {
+  expr: new WeakMap<Definition, ReturnType<typeof compiledStatistic> | null>(),
+  where: new WeakMap<Definition, ReturnType<typeof compiledStatistic> | null>(),
+};
+const purity = { expr: new WeakMap<Definition, boolean>(), where: new WeakMap<Definition, boolean>() };
 
-export function applyDefinition(ce: Engine, definition: Definition, subject: Expr): Expr {
+/** `expr` or `where` of `definition` at `subject`: compiled where it compiles, the interpreter
+ *  otherwise, and shared by every engine when the expression is pure. */
+function evaluateAt(ce: Engine, definition: Definition, part: "expr" | "where", subject: Expr): MathJSON | undefined {
+  const expr = part === "expr" ? definition.expr : definition.where!;
   const compute = (): MathJSON | undefined => {
     // Compiled ahead of time where it could be; the interpreter is the definition itself.
-    let compiled = compiledCache.get(definition);
-    if (compiled === undefined) compiledCache.set(definition, (compiled = compiledStatistic(ce, definition) ?? null));
-    return compiled?.(subject.json) ?? (interpretDefinition(ce, definition, subject).json as MathJSON);
+    let compiled = compiledCache[part].get(definition);
+    if (compiled === undefined)
+      compiledCache[part].set(definition, (compiled = compiledStatistic(ce, definition, part) ?? null));
+    return compiled?.(subject.json) ?? (interpretExpression(ce, expr, subject).json as MathJSON);
   };
-  // A pure definition's answer depends only on the definition and the subject, so it is shared
-  // by every engine.
-  let pure = purity.get(definition);
-  if (pure === undefined)
-    purity.set(definition, (pure = isCacheableDefinition(ce, definition.expr, { [SUBJECT]: "any" })));
-  const answer = pure ? pureResult(definitionHash(definition.expr), subject.json, compute) : compute();
-  return ce.box((answer ?? "Nothing") as never);
+  // A pure definition's answer depends only on the definition and the subject.
+  let pure = purity[part].get(definition);
+  if (pure === undefined) purity[part].set(definition, (pure = isCacheableDefinition(ce, expr, { [SUBJECT]: "any" })));
+  return pure ? pureResult(definitionHash(part === "expr" ? expr : { where: expr }), subject.json, compute) : compute();
+}
+
+/**
+ * Evaluate `definition` at `subject` — substitute the wildcard and evaluate. Exported
+ * because it is also how the tests and the reduction analysis reach a definition. The subject is
+ * the caller's to choose in the definition's domain (`inDomain`): off it the value is not the statistic's.
+ */
+export function applyDefinition(ce: Engine, definition: Definition, subject: Expr): Expr {
+  return ce.box((evaluateAt(ce, definition, "expr", subject) ?? "Nothing") as never);
+}
+
+/**
+ * Whether `subject` is in the definition's domain: always without a `where`, else only when `where`
+ * evaluates to `True` there. `False`, an expression left unevaluated and an error all leave it out,
+ * so a definition declines wherever its `where` cannot vouch for it.
+ */
+export function inDomain(ce: Engine, definition: Definition, subject: Expr): boolean {
+  if (definition.where === undefined) return true;
+  try {
+    return isTrue(evaluateAt(ce, definition, "where", subject));
+  } catch {
+    return false;
+  }
 }
 
 /** The definition evaluated by the interpreter alone: what the compiled code is held to. */
 export function interpretDefinition(ce: Engine, definition: Definition, subject: Expr): Expr {
+  return interpretExpression(ce, definition.expr, subject);
+}
+
+function interpretExpression(ce: Engine, expression: MathJSON, subject: Expr): Expr {
   // In a scope of its own: boxing declares the free `_x`, and a definition that fixes its
   // type (Depth's `Abs(At(_x, i) - i)` makes it a number) would otherwise pin that type on
   // the global `_x` for every later definition, whose `Length(_x)` then never reduces.
   ce.pushScope();
   try {
     const direct = ce
-      .box(definition.expr as BoxInput)
+      .box(expression as BoxInput)
       .subs({ [SUBJECT]: subject })
       .evaluate();
     // A literal empty list under `At` types as `missing` and the definition fails to type-check;
     // filled in as JSON before boxing (structures' `fill`) it reads as it should. Tried second:
     // a definition that maps over the subject (trees) only reduces with the literal.
     if (!JSON.stringify(direct.json).includes('"Error"')) return direct;
-    return ce.box(fill(definition.expr, subject.json, SUBJECT) as BoxInput).evaluate();
+    return ce.box(fill(expression, subject.json, SUBJECT) as BoxInput).evaluate();
   } finally {
     ce.popScope();
   }
@@ -159,8 +186,9 @@ function extendHead(ce: Engine, definition: Definition, type: string | undefined
   const nativeEvaluate = operator.evaluate;
   operator.evaluate = (ops, options) => {
     const subject = ops[0];
-    if (subject?.operator === definition.on) return applyDefinition(ce, definition, operandsOf(subject)[0] ?? subject);
-    return nativeEvaluate?.(ops, options);
+    if (subject?.operator !== definition.on) return nativeEvaluate?.(ops, options);
+    const inner = operandsOf(subject)[0] ?? subject;
+    return inDomain(ce, definition, inner) ? applyDefinition(ce, definition, inner) : undefined;
   };
   // compile builtin: answers only for the carrier it is declared on
   declareCompile(ce, definition.head, "builtin");
@@ -200,12 +228,11 @@ export function declareStatistics(
       name: definition.head,
       findstat: findstatIds(definition),
       epsil: { expression: definition.expr, subject: SUBJECT },
-      definition: (subject) =>
-        applyDefinition(
-          ce,
-          definition,
-          subject.operator === definition.on ? (operandsOf(subject)[0] ?? subject) : subject,
-        ),
+      // Off the domain there is no value: the operation's contract is `undefined`, and the call stays.
+      definition: (subject) => {
+        const inner = subject.operator === definition.on ? (operandsOf(subject)[0] ?? subject) : subject;
+        return inDomain(ce, definition, inner) ? applyDefinition(ce, definition, inner) : undefined;
+      },
     });
 
     if (isNativeHead(ce, definition.head)) {
@@ -232,7 +259,7 @@ export function declareStatistics(
         // so this is what tells a `Permutation([3,1,2])` from the bare `[3,1,2]` that the
         // `alsoOnList` arm of the union lets through.
         const inner = subject.operator === definition.on ? (operandsOf(subject)[0] ?? subject) : subject;
-        return applyDefinition(ce, definition, inner);
+        return inDomain(ce, definition, inner) ? applyDefinition(ce, definition, inner) : undefined;
       },
     });
   }
