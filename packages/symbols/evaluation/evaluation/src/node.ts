@@ -29,9 +29,9 @@ const COOPERATIVE_GRACE_MS = 200;
 /**
  * Guards a worker that never reports `"started"` at all -- crashed or hung during its own
  * spin-up or `@cortex-js/compute-engine`/`setup` import, before it could even begin timing
- * `timeMs`. Generous (measured cold start is ~150-200ms locally; a loaded CI runner can be
- * much slower) because firing it early would replace a worker that was simply slow to
- * start, not stuck. Treated the same as a hard kill once it does fire (`Aborted` /
+ * `timeMs`. Counted in the worker's own CPU time (see `armSpawnTimer`), not wall clock: a worker
+ * that waits for a core on a starved host is slow to start, not stuck, and replacing it
+ * fails the case it was to run. Treated the same as a hard kill once it does fire (`Aborted` /
  * `reset: true`) -- from the caller's side, a worker that never came up and one that ran
  * too long are equally "no real answer, and now a fresh worker is backing this".
  */
@@ -47,6 +47,9 @@ const SPAWN_TIMEOUT_MS = 10_000;
  * covers a tiny `timeMs`.
  */
 const KILL_WALL_FACTOR = 10;
+/** A worker that is hung before `"started"` accrues no CPU, so the spawn guard also stops at
+ * this multiple of `SPAWN_TIMEOUT_MS` in wall clock. */
+const SPAWN_WALL_FACTOR = 3;
 const KILL_WALL_FLOOR_MS = 5_000;
 
 type CpuReading = { user: number; system: number };
@@ -66,9 +69,22 @@ async function cpuMsOf(worker: NodeWorkerLike): Promise<number | undefined> {
  * Returns the cancel. */
 function armKillTimer(worker: NodeWorkerLike, timeMs: number, kill: () => void): () => void {
   const budget = timeMs + COOPERATIVE_GRACE_MS;
-  const cap = Math.max(KILL_WALL_FLOOR_MS, KILL_WALL_FACTOR * budget);
+  return armCpuTimer(worker, budget, Math.max(KILL_WALL_FLOOR_MS, KILL_WALL_FACTOR * budget), kill);
+}
+
+/** Calls `kill` once the worker has not reported `"started"` after `spawnTimeoutMs` of its own
+ * CPU, or `SPAWN_WALL_FACTOR` times that in wall clock. Cold start is a fixed amount of CPU
+ * (about 1.4 s for a worker's engine here); on a starved host its wall time is several times
+ * longer, and a wall-clock guard would replace a worker that was only waiting for a core. */
+function armSpawnTimer(worker: NodeWorkerLike, spawnTimeoutMs: number, kill: () => void): () => void {
+  return armCpuTimer(worker, spawnTimeoutMs, SPAWN_WALL_FACTOR * spawnTimeoutMs, kill);
+}
+
+function armCpuTimer(worker: NodeWorkerLike, budget: number, cap: number, kill: () => void): () => void {
   const start = performance.now();
-  const baseline = cpuMsOf(worker);
+  // A worker spawned for this call has no thread yet, so its first reading is refused: it has used
+  // no CPU, and its baseline is 0.
+  const baseline = cpuMsOf(worker).then((v) => (v === undefined && worker.cpuUsage !== undefined ? 0 : v));
   let cancelled = false;
   let timer: ReturnType<typeof setTimeout> | undefined;
 
@@ -228,14 +244,14 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
           // Guards a worker that never reports "started" (see SPAWN_TIMEOUT_MS). Armed
           // immediately, cleared once "started" arrives -- only ever set when `timeMs` is,
           // since without a deadline there's nothing for either timer to race against.
-          let spawnTimer: ReturnType<typeof setTimeout> | undefined;
+          let cancelSpawn: (() => void) | undefined;
           // The real deadline enforcement: armed only once "started" tells us the worker
           // is actually running THIS call, so cold spawn/import time is never counted
           // against it (COOPERATIVE_GRACE_MS's own comment).
           let cancelKill: (() => void) | undefined;
 
           const cleanup = (): void => {
-            if (spawnTimer !== undefined) clearTimeout(spawnTimer);
+            cancelSpawn?.();
             cancelKill?.();
             worker.off("message", onMessage);
             worker.off("error", onError);
@@ -259,10 +275,8 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
             };
             if (m.id !== id) return; // a stale reply from a request this call gave up on
             if (m.kind === "started") {
-              if (spawnTimer !== undefined) {
-                clearTimeout(spawnTimer);
-                spawnTimer = undefined;
-              }
+              cancelSpawn?.();
+              cancelSpawn = undefined;
               if (timeMs !== undefined) {
                 cancelKill = armKillTimer(worker, timeMs, () => finish({ outcome: "Aborted", ms: ms() }, "replace"));
               }
@@ -291,7 +305,9 @@ export function createEvaluatorPool(options: EvaluatorPoolOptions = {}): Evaluat
             // Guards a worker that never reports "started" at all (crashed/hung during
             // its own spin-up or import) -- see SPAWN_TIMEOUT_MS. The real deadline
             // (`armKillTimer`) only arms once "started" arrives, above.
-            spawnTimer = setTimeout(() => finish({ outcome: "Aborted", ms: ms() }, "replace"), spawnTimeoutMs);
+            cancelSpawn = armSpawnTimer(worker, spawnTimeoutMs, () =>
+              finish({ outcome: "Aborted", ms: ms() }, "replace"),
+            );
           }
           worker.ref();
           worker.postMessage({ id, json, setup, timeMs, materialize });
@@ -405,11 +421,11 @@ export function openSession(options: SessionOptions = {}): Session {
     const id = nextId++;
     return new Promise((resolve, reject) => {
       let settled = false;
-      let spawnTimer: ReturnType<typeof setTimeout> | undefined;
+      let cancelSpawn: (() => void) | undefined;
       let cancelKill: (() => void) | undefined;
 
       const cleanup = (): void => {
-        if (spawnTimer !== undefined) clearTimeout(spawnTimer);
+        cancelSpawn?.();
         cancelKill?.();
         worker.off("message", onMessage);
         signal?.removeEventListener("abort", onAbort);
@@ -437,10 +453,8 @@ export function openSession(options: SessionOptions = {}): Session {
         };
         if (m.id !== id || settled) return;
         if (m.kind === "started") {
-          if (spawnTimer !== undefined) {
-            clearTimeout(spawnTimer);
-            spawnTimer = undefined;
-          }
+          cancelSpawn?.();
+          cancelSpawn = undefined;
           if (timeMs !== undefined) cancelKill = armKillTimer(worker, timeMs, kill);
           return;
         }
@@ -457,7 +471,7 @@ export function openSession(options: SessionOptions = {}): Session {
       signal?.addEventListener("abort", onAbort);
 
       // Guards a worker that never reports "started" at all -- see SPAWN_TIMEOUT_MS.
-      if (timeMs !== undefined) spawnTimer = setTimeout(kill, spawnTimeoutMs);
+      if (timeMs !== undefined) cancelSpawn = armSpawnTimer(worker, spawnTimeoutMs, kill);
 
       worker.postMessage({ id, json, timeMs });
     });
