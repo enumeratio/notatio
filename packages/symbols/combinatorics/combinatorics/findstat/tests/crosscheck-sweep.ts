@@ -67,7 +67,15 @@ export const OBJECT_WISE: Readonly<Record<string, { standard: number; deep: numb
   LabeledGraph: { standard: 5, deep: Number(process.env.DEEP_OBJECT_SIZE ?? 7) },
   Poset: { standard: 5, deep: 7 },
 };
-const objectCap = (carrier: string): number => OBJECT_WISE[carrier]![DEEP ? "deep" : "standard"];
+/**
+ * A FindStat collection read further than its carrier's cap: the lattices are few (78 through 7 elements, against 14,000 posets
+ * of up to 5), and on those of at most 5 elements some statistics are constant or equal to another.
+ */
+const COLLECTION_WISE: Readonly<Record<string, { standard: number; deep: number }>> = {
+  Lattices: { standard: 7, deep: 7 },
+};
+const objectCap = (carrier: string, collection: string): number =>
+  (COLLECTION_WISE[collection] ?? OBJECT_WISE[carrier]!)[DEEP ? "deep" : "standard"];
 type Kind = "unclassified" | "emit" | "convention" | "ours";
 interface Disagreement {
   readonly kind: Kind;
@@ -186,7 +194,7 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
       if (!entry || COLLECTION_CARRIER[entry.collection] !== match.on) continue;
       for (const [object, v] of pairsOf(id)) {
         const size = objectSize(match.on, object);
-        const cap = OBJECT_WISE[match.on] ? objectCap(match.on) : MAX_SIZE;
+        const cap = OBJECT_WISE[match.on] ? objectCap(match.on, entry.collection) : MAX_SIZE;
         if (size === undefined || size > cap || typeof v !== "number") continue;
         const level = objectLevel(match.on, object) ?? [size];
         const group = bySize.get(level.join(",")) ?? { level, objects: new Map<string, number>() };
