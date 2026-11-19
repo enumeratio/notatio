@@ -123,6 +123,8 @@ test("glyphValue reads the shape each glyph kind takes", () => {
   expect(glyphValue("tableau", ["StandardTableau", rows] as never)).toEqual([[1, 3], [2]]);
   expect(glyphValue("set-composition", rows as never)).toEqual([[1, 3], [2]]);
   expect(glyphValue("set-composition", ["List", 1, 2])).toBeUndefined();
+  // A poset's lower covers, with an empty list for an element that covers nothing.
+  expect(glyphValue("hasse", ["Poset", ["List", ["List"], ["List", 1]]] as never)).toEqual([[], [1]]);
   // One block is a list holding one list, not a carrier wrapper around a flat list.
   expect(glyphValue("set-composition", ["List", ["List", 1, 2]] as never)).toEqual([[1, 2]]);
   expect(flatInts(["List", ["List", 1, 2]] as never)).toBeUndefined();

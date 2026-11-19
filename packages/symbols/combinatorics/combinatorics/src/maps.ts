@@ -27,6 +27,7 @@ import { DYCK_MAPS } from "../lattice-paths/src/dyck-maps.ts";
 import { LATTICE_PATHS_MAPS } from "../lattice-paths/src/maps.ts";
 import { GRAPHS_MAPS } from "../graphs/src/maps.ts";
 import { PARTITIONS_MAPS } from "../partitions/src/maps.ts";
+import { POSETS_MAPS } from "../posets/src/maps.ts";
 import { declareCycleConversions } from "../permutations/src/cycles-conversion.ts";
 import { PERMUTATIONS_MAPS } from "../permutations/src/maps.ts";
 import { SIGNED_PERMUTATIONS_ALGORITHM_MAPS } from "../permutations/src/signed-algorithms.ts";
@@ -78,6 +79,7 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...COMPOSITIONS_MAPS,
   ...WORDS_MAPS,
   ...GRAPHS_MAPS,
+  ...POSETS_MAPS,
   ...ALTERNATING_SIGN_MAPS,
   ...DYCK_ALTERNATING_SIGN_MAPS,
   ...GELFAND_TSETLIN_MAPS,

@@ -1406,6 +1406,13 @@
     "derived": false,
     "statistics": 3
   },
+  "Posets": {
+    "expr": "Posets(4)",
+    "glyph": "hasse",
+    "columns": ["AntichainCount", "ChainCount", "CoverRelationCount", "ElementCountMinusWidth"],
+    "derived": false,
+    "statistics": 28
+  },
   "PowerSet": null,
   "PowerfulNumbers": {
     "expr": "Take(PowerfulNumbers, 20)",

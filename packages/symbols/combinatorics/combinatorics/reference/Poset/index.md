@@ -4,6 +4,7 @@ domain: Combinatorics
 signature: Poset(...)
 summary: Catalogued in the enumeratio database; not yet written up here.
 catalogCarrier: true
+glyph: hasse
 stub: carrier
 signatures:
   - call: Poset(...)
