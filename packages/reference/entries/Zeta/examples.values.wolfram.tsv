@@ -50,6 +50,7 @@ n-zeta-9-10-plus-191i-to-30-digits	N[Zeta[Plus[Rational[9, 10], Complex[0, 191]]
 n-zeta-1-2-plus-3000i-to-40-digits	N[Zeta[Plus[Rational[1, 2], Complex[0, 3000]]], 40]					
 n-zeta-1e-12-plus-1-74e6-i-past-the-term-budget	N[Zeta[Complex[1*^-12, 1740000]]]					
 n-zeta-neg-2-minus-1e-16-d30	N[Zeta[-2.0000000000000001], 30]					
+n-zeta-2-a-1e-400-d30	N[Zeta[2, 1*^-400], 30]					
 on-the-critical-line-zeta-1-2-14i-0-02224-0	N[Zeta[Complex[0.5, 14]]]	0.022241142609994033 - 0.10325812326645277*I		N[\zeta (0.5\, +14 i)]	0.0222411\, -0.103258 i	
 two-argument-zeta-s-a-via-enumeratio-analytic	Zeta[2, 1]	Pi^2/6		\zeta (2,1)	\frac{\pi ^2}{6}	
 zeta-2-2-zeta-2-1-pi-2-6-1	Zeta[2, 2]	-1 + Pi^2/6		\zeta (2,2)	\frac{\pi ^2}{6}-1	

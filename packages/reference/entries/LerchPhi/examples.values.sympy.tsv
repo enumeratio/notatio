@@ -388,6 +388,8 @@ n-lerchphi-neg-900000-neg-1e-12-neg-3	N(lerchphi(-900000, -1e-12, -3), 30)	Value
 n-lerchphi-6-2-neg-1-over-2-on-the-branch-cut	N(lerchphi(6, 2, Rational(-1, 2)), 30)	24.0965553627918734614516042102 - 13.7881248176961221906505268094*I	
 n-lerchphi-neg-1e-12-3-2-a-tiny-argument	N(lerchphi((-1e-12 + 0*I), -3, 2), 30)	8.00000001613234351056022152776 + 0.00000000322578036537494088486979693635*I	inconclusive
 outside-the-unit-disk-with-a-large-s	lerchphi((-1.2 + 0.7*I), 100, 3)	lerchphi(-1.2 + 0.7*I, 100, 3)	disagree
+n-lerch-phi-1-minus-1e-20-1-1-d30	N(lerchphi(Float("0.99999999999999999999", 50), 1, 1), 30)		
+n-lerch-phi-0-2-plus-1e-20-neg-half-d30	N(lerchphi(0, Float("2.00000000000000000001", 50), Rational(-1, 2)), 30)		
 past-the-unit-disk-by-the-integral	N(lerchphi((1 + 2*I), (3 + -1*I), (4 + 2*I)), 30)	0.00202500995700990860053946871764 + 0.00332789753681355880743808908022*I	
 inexact-arguments-should-evaluate-numerically	lerchphi(0.5, 2, 3.5)	lerchphi(0.5, 2, 3.5)	
 s-0-far-outside-the-unit-disk-1-1-49-5	lerchphi(49.5, 0, 2)	lerchphi(49.5, 0, 2)	

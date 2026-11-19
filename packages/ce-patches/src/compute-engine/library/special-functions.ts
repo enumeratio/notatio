@@ -15,12 +15,22 @@
 import type { BigDecimal, Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { wrapOperator } from "@notatio/engine";
 import type { LibraryRecord } from "../../patch.ts";
-import { atEnginePrecision, bigRealOperand, bigResult, DOUBLE_DIGITS } from "../../support/precise.ts";
+import {
+  atEnginePrecision,
+  bigRealOperand,
+  bigResult,
+  DEFAULT_PRECISION,
+  DOUBLE_DIGITS,
+} from "../../support/precise.ts";
 import {
   declined,
   isFiniteNum,
   isExactInt,
   isRealInt,
+  isExactReal,
+  isExactZero,
+  isExactlyReal,
+  reSign,
   inexactComplex,
   numberResult,
   realCompile,
@@ -41,6 +51,7 @@ import {
   bigCx,
   beyondTermCap,
   exactDouble,
+  principalPower,
 } from "../numerics/hurwitz-zeta-big.ts";
 import { digamma, polygamma, polygammaCoefficient } from "../numerics/polygamma.ts";
 import { bernoulliPolyExpr } from "../numerics/bernoulli-rational.ts";
@@ -66,8 +77,8 @@ export function principalAtZero(ops: readonly Expression[], numeric: boolean): b
     z.is(0) &&
     isFiniteNum(s) &&
     isFiniteNum(a) &&
-    (a.re < 0 || a.im !== 0) &&
-    !(s.im === 0 && Number.isInteger(s.re))
+    (reSign(a) < 0 || !isExactReal(a)) &&
+    !isRealInt(s)
   );
 }
 
@@ -75,6 +86,61 @@ export function principalAtZero(ops: readonly Expression[], numeric: boolean): b
 function checkedLerch(ce: ComputeEngine, z: Expression, s: Expression, a: Expression): Expression | undefined {
   const r = lerchPhiChecked({ re: z.re, im: z.im }, { re: s.re, im: s.im }, { re: a.re, im: a.im });
   return r === undefined ? undefined : numberResult(ce, r);
+}
+
+/**
+ * How near 1 a z may be before a double kernel refuses to read it. Φ(z, s, a) is singular at z = 1
+ * (Φ(z, 1, 1) = −ln(1 − z)/z), so a z that is not its double moves the value by about 1e-16/|1 − z| relative: 1e-7
+ * at 1e-9. 1 − 1e-20 is the double 1, which is the pole where the value is 46.05.
+ */
+const NEAR_ONE = 1e-9;
+
+/** How far a z's double may sit from its exact distance to 1 (relative) and still be read as the z. */
+const SAME_DISTANCE = 1e-9;
+
+/**
+ * A z within `NEAR_ONE` of 1 whose double is not at its distance from 1: 1 − 1e-20 reads as 1 and 1 − 1e-14 as
+ * 1 − 9.99200722162641e-15. A double kernel would answer for the double, so the call declines. A z that is a double
+ * (1 − 2⁻⁵⁰) reads as itself.
+ */
+export function unreadableNearOne(z: Expression): boolean {
+  const approx = Math.hypot(z.re - 1, z.im);
+  if (!isFiniteNum(z) || approx >= NEAR_ONE) return false;
+  const exact = Math.hypot(
+    (z.bignumRe ?? exactDouble(z.re)).sub(1).toNumber(),
+    (z.bignumIm ?? exactDouble(z.im)).toNumber(),
+  );
+  return exact > 0 && Math.abs(exact - approx) > SAME_DISTANCE * exact;
+}
+
+/** An operand with more digits than a double holds (2 + 1e-20, 1/3 widened to the engine's digits), not 2.976. */
+const carriesMoreThanDouble = (x: Expression): boolean =>
+  [x.bignumRe, x.bignumIm].some((part) => part !== undefined && !part.toPrecision(DOUBLE_DIGITS + 2).eq(part));
+
+/** A big complex value boxed at the engine's digits; undefined where machine precision cannot hold it. */
+function boxBig(ce: ComputeEngine, r: BigCx): Expression | undefined {
+  const wide = ce.precision > DOUBLE_DIGITS;
+  if (!wide && ![r.re, r.im].every((x) => Number.isFinite(x.toNumber()) && (x.isZero() || x.toNumber() !== 0))) {
+    return undefined;
+  }
+  if (!r.im.isZero()) {
+    if (!wide) return inexactComplex(ce, r.re.toNumber(), r.im.toNumber());
+    const digits = (x: BigDecimal): Json => ({ num: x.toPrecision(ce.precision).toString() });
+    return ce.box(["Complex", digits(r.re), digits(r.im)] as never);
+  }
+  return ce.number(wide ? r.re.toPrecision(ce.precision) : r.re.toNumber());
+}
+
+/**
+ * Φ(0, s, a) = a^(−s) on the principal branch from the exact s and a, where a double would read s = 2 + 1e-20 as 2
+ * and answer the real 4 for the complex (−½)^(−2 − 1e-20). Machine precision keeps the double kernel, which reads
+ * its operands as the doubles they are.
+ */
+function principalAtZeroBig(ce: ComputeEngine, s: Expression, a: Expression): Expression | undefined {
+  const digits = Math.max(ce.precision, 17);
+  const negS = bigOperand(ce, s);
+  const r = principalPower(bigOperand(ce, a), { re: negS.re.neg(), im: negS.im.neg() }, digits);
+  return r === undefined ? undefined : boxBig(ce, r);
 }
 
 export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], numeric: boolean): Expression | undefined {
@@ -86,19 +152,24 @@ export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], num
   const done = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
 
   // Φ(1, s, a) = ζ(s, a) — flows into the HurwitzZeta closed forms.
-  if (z.im === 0 && z.re === 1) return done(boxed(["HurwitzZeta", s.json, a.json]));
+  if (isExactlyReal(z, 1)) return done(boxed(["HurwitzZeta", s.json, a.json]));
   // Φ(0, s, a) = a^(−s): only the n = 0 term survives (0⁰ = 1).
   if (z.is(0)) {
-    if (principalAtZero(ops, numeric)) return checkedLerch(ce, z, s, a);
+    if (principalAtZero(ops, numeric)) {
+      // The double kernel reads each operand as the double it is, which is the operand only for a machine float.
+      const wide = ce.precision > DEFAULT_PRECISION || [s, a].some(carriesMoreThanDouble);
+      return wide ? principalAtZeroBig(ce, s, a) : checkedLerch(ce, z, s, a);
+    }
     return done(boxed(["Power", a.json, ["Negate", s.json]]));
   }
   // Φ(z, 0, a) = 1/(1 − z), independent of a (the geometric series and its continuation).
-  if (s.im === 0 && Number.isInteger(s.re) && s.re === 0) return done(boxed(["Divide", 1, ["Subtract", 1, z.json]]));
+  if (isExactZero(s)) return done(boxed(["Divide", 1, ["Subtract", 1, z.json]]));
+  if (numeric && unreadableNearOne(z)) return undefined;
   // Past |z| = 1 the series stops converging: continue by the integral representation
   // (lerch-phi-continuation.ts), with compute-engine's own upper incomplete Γ. See
   // lerch-phi-continuation.ts for how the rim (|z| = 1) is handled the same way.
   const absZ = Math.hypot(z.re, z.im);
-  const onRim = z.im !== 0 && Math.abs(absZ - 1) < 1e-9;
+  const onRim = !isExactReal(z) && Math.abs(absZ - 1) < 1e-9;
   if (numeric && isFiniteNum(z) && isFiniteNum(s) && isFiniteNum(a) && (absZ > 1 || onRim)) {
     const upperGamma = (sigma: Cx, x: Cx): Cx | undefined => {
       const v = ce.box(["Gamma", ["Complex", sigma.re, sigma.im], ["Complex", x.re, x.im]]).N();
@@ -149,6 +220,10 @@ export const lerchPhiLibrary: LibraryRecord = {
  */
 const NEAR_INTEGER_S = 1e-6;
 
+/** An a that is not zero but whose double is (1e-400): the double drops the k = 0 term a^(−s), the largest. */
+export const belowDoubleShift = (a: Expression | undefined): boolean =>
+  a !== undefined && a.re === 0 && a.im === 0 && !isExactZero(a);
+
 /** A real s within `NEAR_INTEGER_S` of an integer that it is not exactly (−2 − 1e-16 is the double −2 but not −2). */
 export const nearButNotInteger = (s: Expression | undefined): boolean =>
   s !== undefined &&
@@ -182,13 +257,13 @@ export function evaluateHurwitz(
   // ζ(s, a) for a a nonpositive integer: the (n+a) = 0 term is 0^{−s}. Re(s) > 0: a genuine
   // pole (0^{−s} diverges) — not the generalized-zeta convention (`Zeta(s, a)`, below) that
   // drops it and stays finite. Matches Wolfram, mpmath and SymPy, all of which diverge here.
-  if (a.im === 0 && isExactInt(a) && a.re <= 0 && isFiniteNum(s) && s.re > 0) {
+  if (a.im === 0 && isExactInt(a) && a.re <= 0 && isFiniteNum(s) && reSign(s) > 0) {
     return ce.symbol("ComplexInfinity");
   }
   // Re(s) = 0, s ≠ 0: 0^{−s} = 0^{−i·Im(s)} doesn't converge to any value (it winds the
   // unit circle) — neither the pole above nor the clean 0 that Re(s) < 0 gets. Declined,
   // not NaN: Wolfram calls it Indeterminate, which no numeric answer stands for.
-  if (a.im === 0 && isExactInt(a) && a.re <= 0 && isFiniteNum(s) && s.re === 0 && s.im !== 0) {
+  if (a.im === 0 && isExactInt(a) && a.re <= 0 && isFiniteNum(s) && reSign(s) === 0 && !isExactReal(s)) {
     return undefined;
   }
 
@@ -207,7 +282,7 @@ export function evaluateHurwitz(
   }
 
   // ζ(n, a) = (−1)ⁿ ψ⁽ⁿ⁻¹⁾(a)/(n−1)! for an integer n ≥ 2 and real a > 0. Numeric path only.
-  if (numeric && isRealInt(s) && s.re >= 2 && a.im === 0 && a.re > 0) {
+  if (numeric && isRealInt(s) && s.re >= 2 && isExactReal(a) && a.re > 0) {
     const n = s.re;
     const sign: Json = n % 2 === 0 ? 1 : -1;
     const viaPolygamma = atEnginePrecision(
@@ -259,10 +334,10 @@ export function evaluateZeta(ce: ComputeEngine, ops: readonly Expression[], nume
 
   // Re(a) > 0, or a symbolic: identical to HurwitzZeta (exact reductions + EM).
   // ζ(0, a) = 1/2 − a for every a (DLMF 25.11.13); no term is dropped at s = 0.
-  if (!isFiniteNum(a) || a.re > 0 || (isRealInt(s) && s.re === 0)) return evaluateHurwitz(ce, ops, numeric);
+  if (!isFiniteNum(a) || reSign(a) > 0 || (isRealInt(s) && s.re === 0)) return evaluateHurwitz(ce, ops, numeric);
 
   // Zeta(s, 0) = ζ(s): the (k+a)=0 term is dropped, leaving the Riemann sum. Exact.
-  if (a.re === 0 && a.im === 0) {
+  if (isExactZero(a)) {
     const expr = ce.box(["Zeta", s.json as unknown as never]);
     return numeric ? expr.N() : expr.evaluate();
   }
@@ -301,7 +376,11 @@ function checkedResult(
 const bigOperand = (ce: ComputeEngine, x: Expression): BigCx =>
   ce.precision > DOUBLE_DIGITS
     ? bigCx(x.bignumRe ?? x.re, x.bignumIm ?? x.im)
-    : bigCx(exactDouble(x.re), exactDouble(x.im));
+    : bigCx(machinePart(x.re, x.bignumRe), machinePart(x.im, x.bignumIm));
+
+/** The double's exact value, except a part below the double's range (1e-400, the double 0), which has no double to read. */
+const machinePart = (double: number, big: BigDecimal | undefined): BigDecimal =>
+  double === 0 && big !== undefined ? big : exactDouble(double);
 
 /**
  * ζ on the bignum kernel, else on the double one. Where the bignum kernel is out of reach
@@ -317,6 +396,8 @@ function numericZeta(
 ): Expression | undefined {
   const answer = bigZetaResult(ce, big, s, a);
   if (answer !== undefined) return answer;
+  // The double kernel reads an a below its range as 0 and drops the k = 0 term a^(−s), the largest.
+  if (belowDoubleShift(a)) return undefined;
   if (zetaKernel === "bignum" && beyondTermCap(bigOperand(ce, s), bigOperand(ce, a), Math.max(ce.precision, 17))) {
     return undefined;
   }
@@ -340,13 +421,7 @@ function bigZetaResult(
   if (zetaKernel !== "bignum") return undefined;
   const r = kernel(bigOperand(ce, s), bigOperand(ce, a), Math.max(ce.precision, 17));
   if (r === undefined) return undefined;
-  const wide = ce.precision > DOUBLE_DIGITS;
-  if (!r.im.isZero()) {
-    if (!wide) return inexactComplex(ce, r.re.toNumber(), r.im.toNumber());
-    const digits = (x: BigDecimal): Json => ({ num: x.toPrecision(ce.precision).toString() });
-    return ce.box(["Complex", digits(r.re), digits(r.im)] as never);
-  }
-  return ce.number(wide ? r.re.toPrecision(ce.precision) : r.re.toNumber());
+  return boxBig(ce, r);
 }
 
 // --- PolyGamma widened to a complex z -------------------------------------------------
@@ -384,6 +459,12 @@ export function evaluatePolygamma(
   if (!wantsNumber(ops, options)) return r;
   if (!isRealInt(m) || m.re < -1 || m.re > 170) return r;
   if (!isFiniteNum(z)) return r;
+  // A z below the double's range reads as the pole 0 in the double kernels, and ψ⁽ᵐ⁾ there (1e800 at m = 1) is past a
+  // double: only the bignum kernel reads it, and its answer must fit one.
+  if (belowDoubleShift(z)) {
+    const big = m.re >= 1 ? bigPolygamma(ce, m.re, z) : undefined;
+    return big !== undefined && Number.isFinite(big.re) && Number.isFinite(big.im) ? numberResult(ce, big) : r;
+  }
 
   const v =
     m.re === -1
@@ -444,7 +525,7 @@ export function evaluateZetaAtZero(ce: ComputeEngine): void {
   wrapOperator(
     ce,
     ["Zeta"],
-    (ops) => ops.length === 2 && ops[0]?.re === 0 && ops[0]?.im === 0,
+    (ops) => ops.length === 2 && ops[0] !== undefined && isExactZero(ops[0]),
     () => (ops, options) => {
       const value = ce.box(["Subtract", ["Rational", 1, 2], ops[1]!.json as never]);
       return options.numericApproximation ? value.N() : value.evaluate();
