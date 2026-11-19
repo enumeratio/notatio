@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { isFiniteNum, type NativeEval, numberResult, realCompile } from "@notatio/ce-patches";
+import { isFiniteNum, type NativeEval, numberResult } from "@notatio/ce-patches";
 import type { Cx } from "@notatio/ce-patches";
 
 // Iterated quadratic maps -- the Mandelbrot and Julia sets, as expressions.
@@ -16,14 +16,14 @@ import type { Cx } from "@notatio/ce-patches";
 
 /** The n-th iterate of z ↦ z² + c, stopping early once it has clearly escaped. */
 export function iterateQuadratic(z0: Cx, c: Cx, n: number): Cx {
-  const steps = Math.min(512, Math.max(1, Math.round(n)));
+  const steps = Math.min(MAX_STEPS, Math.max(1, Math.round(n)));
   let re = z0.re;
   let im = z0.im;
   for (let i = 0; i < steps; i++) {
     const nextRe = re * re - im * im + c.re;
     im = 2 * re * im + c.im;
     re = nextRe;
-    if (re * re + im * im > 1e12) break;
+    if (re * re + im * im > ESCAPE_SQUARED) break;
   }
   return { re, im };
 }
@@ -38,6 +38,42 @@ export const julia = (z: Cx, c: Cx, n: number): Cx => iterateQuadratic(z, c, n);
 export const mandelbrotReal = (c: number, n: number): number => mandelbrot({ re: c, im: 0 }, n).re;
 export const juliaReal = (z: number, cRe: number, n: number): number =>
   julia({ re: z, im: 0 }, { re: cRe, im: 0 }, n).re;
+
+/** The iteration cap and the default count of `iterateQuadratic`, which the compiled loop shares. */
+const MAX_STEPS = 512;
+const DEFAULT_STEPS = 64;
+/** The squared modulus past which an orbit has escaped and the loop stops. */
+const ESCAPE_SQUARED = 1e12;
+
+/**
+ * The compiled form of the real-valued iterate: z ↦ z² + c from `z0`, `n` steps (rounded, at least 1,
+ * at most `MAX_STEPS`), stopping once z² passes `ESCAPE_SQUARED`, as `iterateQuadratic` does on the
+ * real line. An expression the compiler lowers in place of the call, on JavaScript and GLSL alike.
+ * The loop names (`_z`, `_k`) are the compiler's own locals, so an operand that names one would
+ * capture it.
+ */
+function compileIterate(
+  ce: ComputeEngine,
+  z0: Expression | number,
+  c: Expression,
+  n: Expression | undefined,
+): Expression {
+  const steps = n === undefined ? DEFAULT_STEPS : ["Min", MAX_STEPS, ["Max", 1, ["Round", n]]];
+  return ce.box([
+    "Block",
+    ["Declare", "_z", ["Dictionary", ["KeyValuePair", "value", z0]]],
+    [
+      "Loop",
+      [
+        "Block",
+        ["Assign", "_z", ["Add", ["Multiply", "_z", "_z"], c]],
+        ["If", ["Greater", ["Multiply", "_z", "_z"], ESCAPE_SQUARED], ["Break"]],
+      ],
+      ["Element", "_k", ["Range", 1, steps]],
+    ],
+    "_z",
+  ] as never);
+}
 
 function evaluateIterate(
   ce: ComputeEngine,
@@ -68,13 +104,13 @@ export function declareFractals(ce: ComputeEngine): void {
     signature: "(number, number?) -> number",
     evaluate: ((ops: readonly Expression[], options: { numericApproximation?: boolean }) =>
       evaluateIterate(ce, ops, options.numericApproximation ?? false, "zero")) as NativeEval,
-    compile: realCompile(2, { js: "__mb", glsl: "mandelbrot" }),
+    compile: ([c, n]) => (c === undefined ? undefined : compileIterate(ce, 0, c, n)),
   });
 
   ce.declare("Julia", {
     signature: "(number, number, number?) -> number",
     evaluate: ((ops: readonly Expression[], options: { numericApproximation?: boolean }) =>
       evaluateIterate(ce, ops, options.numericApproximation ?? false, "point")) as NativeEval,
-    compile: realCompile(3, { js: "__ju", glsl: "julia" }),
+    compile: ([z, c, n]) => (z === undefined || c === undefined ? undefined : compileIterate(ce, z, c, n)),
   });
 }

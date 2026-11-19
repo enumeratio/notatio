@@ -142,7 +142,7 @@ export {
   inexactComplex,
   wantsNumber,
   declined,
-  realCompile,
+  local,
 } from "./support/box.ts";
 export {
   type Rat,

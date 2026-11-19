@@ -1,5 +1,5 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { expect, test } from "vite-plus/test";
 import { applyNativeHeadPatches, applyPatch, steppedIterator } from "../src/index.ts";
 
@@ -55,12 +55,19 @@ test("a body that depends on the index is summed over the stepped members", () =
   expect(ce.box(["Sum", ["Power", "i", 2], ["Limits", "i", 1, 7, 3]] as never).evaluate().json).toBe(66);
 });
 
-// The compile targets decline an `Element` index set: an error, never the unstepped value.
+// The compile targets decline a stepped index set: never the unstepped value. With a fallback the
+// result runs the interpreter, which steps.
 test("the compile targets decline rather than answer the unstepped value", () => {
-  for (const head of ["Sum", "Product"]) {
+  for (const [head, value] of [
+    ["Sum", 4],
+    ["Product", 3],
+  ] as const) {
     const expr = ce.box(stepped(head, 1, 4, 2));
-    expect(() => (new JavaScriptTarget().compile(expr) as { run: () => unknown }).run()).toThrow();
-    expect(() => new GLSLTarget().compileToSource(expr)).toThrow();
+    for (const to of ["javascript", "glsl"])
+      expect(() => compile(expr, { to, fallback: false })).toThrow(/Could not compile/);
+    const fallback = compile(expr) as { success: boolean; run: () => unknown };
+    expect(fallback.success).toBe(false);
+    expect(fallback.run()).toBe(value);
   }
 });
 

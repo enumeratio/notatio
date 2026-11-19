@@ -4,6 +4,7 @@ import {
   type BoxInput,
   isFiniteNum,
   isRealInt,
+  local,
   numberResult,
   vouchesWhenComplex,
   cx,
@@ -133,24 +134,53 @@ function evaluate(
 const MAX_COMPILED_ORDER = 1_000_000;
 
 /**
- * A JavaScript `compile` handler: the three-term recurrence inline, for a real x, with the
- * negative orders folded as in `normalizeOrder`. Without it a compiled integrand falls back
- * to the interpreter and `N(Integrate(…))` to Monte Carlo, whose error bar is too wide to
- * check an orthogonality integral. Other targets aren't lowered (undefined).
+ * A `compile` handler: the three-term recurrence as a block and a loop, for a real x, with the
+ * negative orders folded as in `normalizeOrder`; NaN past `MAX_COMPILED_ORDER`. Without it a compiled
+ * integrand falls back to the interpreter and `N(Integrate(…))` to Monte Carlo, whose error bar is too
+ * wide to check an orthogonality integral. The answer is an expression the compiler lowers in place of
+ * the call (JavaScript and GLSL), since it takes no code text from a handler.
  */
 const compileChebyshev =
   (kind: "T" | "U") =>
-  (args: readonly Expression[], compile: (e: Expression) => string, ctx: { language?: string }): string | undefined => {
-    const [n, x] = args;
-    if (ctx.language !== "javascript" || n === undefined || x === undefined) return undefined;
-    const fold = kind === "T" ? "n = Math.abs(n);" : "if (n === -1) return 0; if (n < 0) { n = -n - 2; sign = -1; }";
-    return (
-      `((n, x) => { if (!Number.isInteger(n) || Math.abs(n) > ${MAX_COMPILED_ORDER}) return NaN; ` +
-      `let sign = 1; ${fold} if (n === 0) return sign; ` +
-      `let p = 1, c = ${kind === "T" ? "x" : "2 * x"}; ` +
-      `for (let k = 2; k <= n; k++) { const t = 2 * x * c - p; p = c; c = t; } ` +
-      `return sign * c; })(${compile(n)}, ${compile(x)})`
-    );
+  (ce: ComputeEngine) =>
+  ([n, x]: readonly Expression[]): Expression | undefined => {
+    if (n === undefined || x === undefined) return undefined;
+    // `_n` is the folded order and `_s` the sign of its fold: T(-n) = T(n); U(-1) = 0, U(-n) = -U(n - 2).
+    const order = kind === "T" ? ["Abs", n] : ["If", ["Less", n, 0], ["Subtract", ["Negate", n], 2], n];
+    const sign = kind === "T" ? 1 : ["If", ["Less", n, 0], -1, 1];
+    const start = kind === "T" ? x : ["Multiply", 2, x];
+    const recurrence = [
+      "Block",
+      local("_n", order),
+      local("_s", sign),
+      [
+        "If",
+        ["Equal", "_n", 0],
+        "_s",
+        [
+          "Block",
+          local("_p", 1),
+          local("_c", start),
+          [
+            "If",
+            ["Greater", "_n", 1],
+            [
+              "Loop",
+              [
+                "Block",
+                local("_t", ["Subtract", ["Multiply", 2, x, "_c"], "_p"]),
+                ["Assign", "_p", "_c"],
+                ["Assign", "_c", "_t"],
+              ],
+              ["Element", "_k", ["Range", 2, "_n"]],
+            ],
+          ],
+          ["Multiply", "_s", "_c"],
+        ],
+      ],
+    ];
+    const guarded = ["If", ["Greater", ["Abs", n], MAX_COMPILED_ORDER], "NaN", recurrence];
+    return ce.box((kind === "U" ? ["If", ["Equal", n, -1], 0, guarded] : guarded) as never);
   };
 
 export const compileChebyshevT = compileChebyshev("T");

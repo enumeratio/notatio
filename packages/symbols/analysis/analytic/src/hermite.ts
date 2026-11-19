@@ -5,6 +5,7 @@ import {
   type BoxInput,
   isFiniteNum,
   isRealInt,
+  local,
   numberResult,
   vouchesWhenComplex,
   cx,
@@ -79,20 +80,39 @@ export function evaluateHermiteH(
 }
 
 /**
- * A JavaScript `compile` handler: the recurrence inline, for a real x, NaN for an order that
- * is negative, non-integer or past `MAX_NUMERIC_ORDER`. Other targets aren't lowered (undefined).
+ * A `compile` handler: the recurrence as a block and a loop, for a real x, NaN for an order that
+ * is negative, non-integer or past `MAX_NUMERIC_ORDER`. The answer is an expression the compiler
+ * lowers in place of the call (JavaScript and GLSL), since it takes no code text from a handler.
  */
-export const compileHermiteH = (
-  args: readonly Expression[],
-  compile: (e: Expression) => string,
-  ctx: { language?: string },
-): string | undefined => {
-  const [n, x] = args;
-  if (ctx.language !== "javascript" || n === undefined || x === undefined) return undefined;
-  return (
-    `((n, x) => { if (!Number.isInteger(n) || n < 0 || n > ${MAX_NUMERIC_ORDER}) return NaN; ` +
-    `if (n === 0) return 1; let p = 1, c = 2 * x; ` +
-    `for (let k = 1; k < n; k++) { const t = 2 * x * c - 2 * k * p; p = c; c = t; } ` +
-    `return c; })(${compile(n)}, ${compile(x)})`
-  );
-};
+export const compileHermiteH =
+  (ce: ComputeEngine) =>
+  ([n, x]: readonly Expression[]): Expression | undefined => {
+    if (n === undefined || x === undefined) return undefined;
+    const outOfRange = ["Or", ["Less", n, 0], ["Greater", n, MAX_NUMERIC_ORDER], ["NotEqual", ["Floor", n], n]];
+    const recurrence = [
+      "If",
+      ["Equal", n, 0],
+      1,
+      [
+        "Block",
+        local("_p", 1),
+        local("_c", ["Multiply", 2, x]),
+        [
+          "If",
+          ["Greater", n, 1],
+          [
+            "Loop",
+            [
+              "Block",
+              local("_t", ["Subtract", ["Multiply", 2, x, "_c"], ["Multiply", 2, "_k", "_p"]]),
+              ["Assign", "_p", "_c"],
+              ["Assign", "_c", "_t"],
+            ],
+            ["Element", "_k", ["Range", 1, ["Subtract", n, 1]]],
+          ],
+        ],
+        "_c",
+      ],
+    ];
+    return ce.box(["If", outOfRange, "NaN", recurrence] as never);
+  };

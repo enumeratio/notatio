@@ -1,14 +1,6 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import { applyAllPatches, lerchPhiReal, realCompile } from "../src/index.ts";
-
-test("the GLSL lowering calls the real wrapper, which yields NaN rather than a real part", () => {
-  const lower = realCompile(3, { glsl: "lerchPhi", glslReal: "lerchPhiReal" });
-  const args = ["z", "s", "a"] as never[];
-  expect(lower(args, (e) => String(e), { language: "glsl" })).toMatchInlineSnapshot(
-    `"lerchPhiReal(vec2(z, 0.0), vec2(s, 0.0), vec2(a, 0.0))"`,
-  );
-});
+import { applyAllPatches, lerchPhiReal } from "../src/index.ts";
 
 // Φ(0, s, a) = a^(−s). A negative base to a non-integer float power is complex on the principal
 // branch (mpmath: −0.05399760899362249 − 0.004079056397704415i); compute-engine's own Power and

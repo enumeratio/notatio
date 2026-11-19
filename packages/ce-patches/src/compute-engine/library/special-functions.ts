@@ -14,7 +14,6 @@
 // beyond a double's digits.
 import type { BigDecimal, Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { wrapOperator } from "@notatio/engine";
-import type { LibraryRecord } from "../../patch.ts";
 import { atEnginePrecision, bigRealOperand, bigResult, DOUBLE_DIGITS } from "../../support/precise.ts";
 import {
   declined,
@@ -22,7 +21,6 @@ import {
   isRealInt,
   inexactComplex,
   numberResult,
-  realCompile,
   wantsNumber,
   type EvalOptions,
   type NativeEval,
@@ -122,16 +120,6 @@ export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], num
   }
   return undefined; // stay symbolic
 }
-
-export const lerchPhiLibrary: LibraryRecord = {
-  LerchPhi: {
-    description: "The Lerch transcendent Φ(z, s, a) = Σ zⁿ(n+a)^(−s).",
-    signature: "(number, number, number) -> number",
-    evaluate: (ops: readonly Expression[], options: EvalOptions) =>
-      evaluateLerch(options.engine, ops, wantsNumber(ops, options)),
-    compile: realCompile(3, { js: "__lp", glsl: "lerchPhi", glslReal: "lerchPhiReal" }),
-  },
-};
 
 // --- HurwitzZeta, and Zeta widened to complex s / two-argument form -------------------
 // cortex-js/compute-engine#340, offered as PR #350: the complex Riemann zeta ζ(s), the
