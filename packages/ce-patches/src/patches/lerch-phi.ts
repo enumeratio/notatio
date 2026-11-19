@@ -3,6 +3,7 @@ import type { Patch } from "../patch.ts";
 import { evaluateLerch, principalAtZero, unreadableNearOne } from "../compute-engine/library/special-functions.ts";
 import type { Expression } from "@cortex-js/compute-engine";
 import { isFiniteNum, wantsNumber } from "../support/box.ts";
+import { declineMachineAnswer } from "../support/precise.ts";
 
 // compute-engine evaluates LerchPhi natively, exactly for rational arguments and to the engine's
 // precision at real ones, but declines a result it can't vouch for relative digits of, which
@@ -62,17 +63,19 @@ export const lerchPhiPatch: Patch = {
       ce,
       ["LerchPhi"],
       () => true,
-      (native) => (ops, options) => {
-        // Native reads a negative base to a float power as a real root.
-        if (principalAtZero(ops, wantsNumber(ops, options))) return evaluateLerch(ce, ops, true);
-        // Native reads z as a double: 1 − 1e-20 is the pole's double, and Φ there is a different number.
-        if (wantsNumber(ops, options) && unreadableNearOne(ops[0]!)) return undefined;
-        const answer = native?.(ops, options);
-        if (answer !== undefined && answer.operator !== "LerchPhi")
-          // Decline rather than answer an imaginary part that is rounding noise.
-          return unresolvableImaginary(ops, answer) ? undefined : answer;
-        return evaluateLerch(ce, ops, wantsNumber(ops, options)) ?? answer;
-      },
+      (native) => (ops, options) =>
+        // Past a double's digits, the double kernels (the continuation past |z| = 1, complex operands) decline.
+        declineMachineAnswer(ce, options.numericApproximation, () => {
+          // Native reads a negative base to a float power as a real root.
+          if (principalAtZero(ops, wantsNumber(ops, options))) return evaluateLerch(ce, ops, true);
+          // Native reads z as a double: 1 − 1e-20 is the pole's double, and Φ there is a different number.
+          if (wantsNumber(ops, options) && unreadableNearOne(ops[0]!)) return undefined;
+          const answer = native?.(ops, options);
+          if (answer !== undefined && answer.operator !== "LerchPhi")
+            // Decline rather than answer an imaginary part that is rounding noise.
+            return unresolvableImaginary(ops, answer) ? undefined : answer;
+          return evaluateLerch(ce, ops, wantsNumber(ops, options)) ?? answer;
+        }),
     ),
 };
 

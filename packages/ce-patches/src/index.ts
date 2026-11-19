@@ -174,6 +174,7 @@ export {
   bigRealOperand,
   bigResult,
   exceedsDoublePrecision,
+  declineMachineAnswer,
   wantsBigDigits,
   asDouble,
   hasComplexOperand,

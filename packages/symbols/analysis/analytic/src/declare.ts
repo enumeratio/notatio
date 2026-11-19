@@ -26,7 +26,12 @@ import { declareSpecialFunctions } from "./special-functions.ts";
 import { declareBesselJZero } from "./bessel-zeros.ts";
 import { declareDigammaFunctionZero } from "./digamma-zero.ts";
 import { declareHyperbolicHalfPeriod } from "./hyperbolic-half-period.ts";
-import { declareComplexZeta, declareFloatInDoubleOut, declineHurwitzIndeterminate } from "./float-in.ts";
+import {
+  declareComplexZeta,
+  declareFloatInDoubleOut,
+  declineHurwitzIndeterminate,
+  declineMachineAnswers,
+} from "./float-in.ts";
 import { declareHypergeometricU, declareHypergeometricUStar } from "./hypergeometric-ustar.ts";
 import { declareHypergeometric } from "./hypergeometric.ts";
 import { declareLambertW } from "./lambert-w.ts";
@@ -267,4 +272,5 @@ export function declareAnalytic(ce: ComputeEngine): void {
   declareHyperbolicHalfPeriod(ce);
   declareComplexZeta(ce);
   declineHurwitzIndeterminate(ce);
+  declineMachineAnswers(ce);
 }
