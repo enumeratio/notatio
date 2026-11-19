@@ -396,7 +396,7 @@ export function declareListHeads(ce: Engine): void {
       const single = result?.operator === "Set" && operandsOf(result).length === 1 ? operandsOf(result)[0] : undefined;
       if (ops.length === 1 && single !== undefined && single.isSame(ops[0]) && operandsOf(single).length > 0) {
         const parts: Expr[] = [];
-        for (const part of operandsOf(single)) if (parts.every((p) => p.isEqual(part) !== true)) parts.push(part);
+        for (const part of operandsOf(single)) if (parts.every((p) => !p.isSame(part))) parts.push(part);
         parts.sort(canonicalCompare);
         return ce.function(single.operator, parts);
       }
@@ -405,7 +405,7 @@ export function declareListHeads(ce: Engine): void {
         const elements: Expr[] = [];
         for (const op of ops) {
           for (const element of operandsOf(op)) {
-            if (elements.every((e) => e.isEqual(element) !== true)) elements.push(element);
+            if (elements.every((e) => !e.isSame(element))) elements.push(element);
           }
         }
         elements.sort(canonicalCompare);
@@ -653,7 +653,7 @@ export function declareListHeads(ce: Engine): void {
       const items = operandsOf(ops[0]);
       const tally: { value: Expr; count: number }[] = [];
       for (const item of items) {
-        const existing = tally.find((entry) => entry.value.isEqual(item) === true);
+        const existing = tally.find((entry) => entry.value.isSame(item));
         if (existing !== undefined) existing.count++;
         else tally.push({ value: item, count: 1 });
       }

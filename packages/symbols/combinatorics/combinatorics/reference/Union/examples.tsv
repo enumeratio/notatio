@@ -3,6 +3,9 @@ union-list-1-2-3-list-3-4			[Union, [List, 1, 2, 3], [List, 3, 4]]	[List, 1, 2, 
 union-list-1-2-list-2-3-list-3-4			[Union, [List, 1, 2], [List, 2, 3], [List, 3, 4]]	[List, 1, 2, 3, 4]						
 union-list-a-b-c-list-b-c-d			[Union, [List, a, b, c], [List, b, c, d]]	[List, a, b, c, d]						
 union-list-a-b-a-c-list-d-a-k-b-list-c-a			[Union, [List, a, b, a, c], [List, d, a, k, b], [List, c, a]]	[List, a, b, c, d, k]						
+union-undecided-pair-stays-two		test	[Union, [List, [Sin, x], [Cos, x], [Sin, x]]]	[List, [Sin, x], [Cos, x]]						
+union-structurally-equal-pair-merges		test	[Union, [List, [Sin, x], [Sin, x]]]	[List, [Sin, x]]						
+union-keeps-numerically-close-values-apart		test	[Union, [List, 1, 1.0000000001]]	[List, 1, 1.0000000001]						
 a-single-list-is-de-duplicated	Scope		[Union, [List, 1, 2, 1, 3, 6, 2, 2]]	[List, 1, 2, 3, 6]	A single list is de-duplicated					
 symbolic-elements-merged-across-three-lists	Scope		[Union, [List, a, b, a, c], [List, d, a, f, b], [List, c, a]]	[List, a, b, c, d, f]	Symbolic elements, merged across three lists					
 elements-can-themselves-be-lists-1-2-and-2-1	Scope		[Union, [List, [List, 1, 2], [List, 1, 2, 3]], [List, [List, 2, 1], [List, 1, 2]], [List, [List, 3, 2, 1], [List, 1, 2, 3]]]	[List, [List, 1, 2], [List, 2, 1], [List, 1, 2, 3], [List, 3, 2, 1]]	Elements can themselves be lists; $\{1, 2\}$ and $\{2, 1\}$ stay distinct					Same four elements, listed in a different order.
