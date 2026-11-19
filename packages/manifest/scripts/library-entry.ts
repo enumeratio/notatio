@@ -122,8 +122,13 @@ export async function entryOf(input: EntryInput): Promise<Entry> {
     if (attributes?.length || (defaults !== undefined && Object.keys(defaults).length > 0)) continue;
     let code: string | undefined;
     try {
-      const result = compile(ce.box(body as never) as never) as { success: boolean; code: string };
-      if (result.success && !/\b_SYS\b|\b_\./.test(result.code)) code = result.code;
+      const result = compile(ce.box(body as never) as never, { fallback: false }) as {
+        success: boolean;
+        code: string;
+        preamble?: string;
+      };
+      // A preamble holds helpers the code reads, which a module of the code alone would lack.
+      if (result.success && !result.preamble && !/\b_SYS\b|\b_\./.test(result.code)) code = result.code;
     } catch {
       code = undefined;
     }

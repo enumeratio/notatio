@@ -5,8 +5,7 @@
 // picture at the starting values of the controls it reads.
 
 import { readFileSync } from "node:fs";
-import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { createJavaScriptRuntime } from "@cortex-js/compute-engine/runtime";
 import { createKernel, type Kernel } from "@notatio/evaluation";
 import { parseExpression } from "@notatio/formats/expression";
 import { plotSettingsOf } from "@notatio/frontend/symbols";
@@ -62,9 +61,8 @@ async function cellPreview(spec: MarkupSpec, session: string): Promise<string | 
   );
 }
 
-// compute-engine's helpers for compiled code, lent by a compiled function (as on the page).
-const systemHelpers = (ce: ComputeEngine): unknown =>
-  (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
+// compute-engine's helpers for compiled code, from its engine-free runtime (as on the page).
+const systemHelpers = (): unknown => createJavaScriptRuntime();
 
 async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
   const a = spec.attributes;
@@ -96,7 +94,7 @@ async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
     });
   }
   for (const params of spec.manipulate) for (const c of parseControls(params)) scope[`_${c.name}`] = c.value;
-  const sys = systemHelpers(k.ce);
+  const sys = systemHelpers();
   type Compiled = (s: unknown, v: unknown) => unknown;
   // oxlint-disable-next-line no-implied-eval -- the kernel's compiled output
   const compiled = (code: string): Compiled => new Function("_SYS", "_", `return (${code});`) as Compiled;

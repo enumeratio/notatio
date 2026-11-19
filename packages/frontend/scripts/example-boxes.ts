@@ -5,7 +5,7 @@
 // to hold to what a record says. Pixels never come into it.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { createJavaScriptRuntime } from "@cortex-js/compute-engine/runtime";
 import { type Box, type BoxNode, graphics3dOf, graphicsOf, makeBoxes, notationOf } from "@notatio/boxes";
 import type { BoxShape, MathJSON } from "@notatio/entry";
 import { graphics3dOptionsOf, gridAxis, gridSide, sampleGrids, surfaceDomains } from "../src/graphics-3d-lowering.ts";
@@ -44,9 +44,8 @@ type Json = Parameters<typeof plainJson>[0];
 
 const on = (v: string | undefined): boolean => v !== undefined && v !== "" && v !== "false";
 
-/** compute-engine's helpers for compiled code, lent by a compiled function (as on the page). */
-const systemHelpers = (ce: ComputeEngine): unknown =>
-  (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
+/** compute-engine's helpers for compiled code, from its engine-free runtime (as on the page). */
+const systemHelpers = (): unknown => createJavaScriptRuntime();
 
 /** What a compiled item reads: the plot's variables by name, and nothing else. */
 type Sampler = (scope: Readonly<Record<string, number>>) => number;
@@ -58,7 +57,7 @@ function samplers(
   vars?: readonly string[],
 ): { compiled: readonly CompiledItem[]; free: readonly string[]; items: readonly Sampler[] } {
   const plot = compilePlot(ce, json, { target: "javascript", each: true, ...(vars === undefined ? {} : { vars }) });
-  const sys = systemHelpers(ce);
+  const sys = systemHelpers();
   const items = plot.items.map((item) => {
     if (item.code === undefined) throw new Error(`not compilable: ${JSON.stringify(item.json)}`);
     // oxlint-disable-next-line no-implied-eval -- the engine's compiled output

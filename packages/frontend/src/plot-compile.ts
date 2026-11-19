@@ -3,7 +3,7 @@
 // runs it with no engine of its own (`@notatio/components`' `plot-kernel.ts`).
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { canCompile, GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { selfContainedCode } from "@notatio/engine/compiled";
 import { withGLSL } from "@notatio/analytic/shader";
 
@@ -62,24 +62,42 @@ const numeric = (e: Expression): number | undefined => {
   return typeof re === "number" && Number.isFinite(re) ? re : undefined;
 };
 
+/** The shader's pass cap on a loop (compute-engine's default); past it the loop stops with NaN. */
+const PASS_CAP = 10_000;
+
+/**
+ * The GLSL `body` (statements ending in their own `return`, or an expression) and helper `preamble` of
+ * `expr`; undefined where the plot takes its CPU path: a form outside the GLSL fragment (`Random`, a
+ * matrix, a head with no shader lowering, a symbol with no numeric type), or a loop the pass cap can
+ * reach, which would give NaN where the CPU path sums on. The cap reaches a loop when the code changes
+ * with the cap: compiled at twice the cap, a loop that stays inside it reads the same (an
+ * `iterationBudget` lift instead would let a large bound hang the GPU). `fallback: false` makes a
+ * decline throw.
+ */
+function shaderOf(expr: Expression): { body: string; preamble: string } | undefined {
+  const at = (iterationBudget: number) =>
+    compile(expr, { to: "glsl", fallback: false, iterationBudget }) as {
+      success?: boolean;
+      code?: string;
+      preamble?: string;
+    };
+  const r = at(PASS_CAP);
+  if (!r?.success || !r.code) return undefined;
+  const wider = at(2 * PASS_CAP);
+  if (wider.code !== r.code || wider.preamble !== r.preamble) return undefined;
+  return { body: /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`, preamble: r.preamble ?? "" };
+}
+
 /**
  * A bivariate expression as a GLSL `plotFn`; the library kernels it reaches come first so its heads resolve,
  * then the target's helper preamble, which defines the `_gpu_*` functions the body calls
- * (`_gpu_sin` for `Sin`).
+ * (`_gpu_ir_gamma` for `Gamma`).
  */
 export function toGlslFn(expr: Expression, vx: string, vy: string): string | undefined {
   try {
-    // A form outside the GLSL fragment (`Random`, a matrix, a symbol with no numeric type) has no shader:
-    // the plot takes its CPU path.
-    if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
-    const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
-    if (!r?.success || !r.code) return undefined;
-    // A loop stops after 10,000 passes with NaN where the CPU path sums on: the plot declines to its
-    // CPU path rather than show NaN (an `iterationBudget` lift would let a large bound hang the GPU).
-    if (r.preamble?.includes("_gpu_passes") || r.code.includes("_gpu_passes")) return undefined;
-    // A block of locals compiles to statements ending in their own `return`.
-    const body = /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`;
-    return withGLSL(`${r.preamble ?? ""}\nfloat plotFn(float ${vx}, float ${vy}) { ${body} }`);
+    const shader = shaderOf(expr);
+    if (shader === undefined) return undefined;
+    return withGLSL(`${shader.preamble}\nfloat plotFn(float ${vx}, float ${vy}) { ${shader.body} }`);
   } catch {
     return undefined;
   }
@@ -108,14 +126,10 @@ export function toGlslFields(
     const fields: string[] = [];
     const signature = [vx, vy, ...params].map((name) => `float ${name}`).join(", ");
     for (const [k, expr] of exprs.entries()) {
-      if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
-      const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
-      if (!r?.success || !r.code) return undefined;
-      // A capped loop yields NaN where the CPU path sums on (`toGlslFn`).
-      if (r.preamble?.includes("_gpu_passes") || r.code.includes("_gpu_passes")) return undefined;
-      for (const definition of definitionsOf(r.preamble ?? "")) helpers.add(definition);
-      const body = /\breturn\b/.test(r.code) ? r.code : `return ${r.code};`;
-      fields.push(`float field${k}(${signature}) { ${body} }`);
+      const shader = shaderOf(expr);
+      if (shader === undefined) return undefined;
+      for (const definition of definitionsOf(shader.preamble)) helpers.add(definition);
+      fields.push(`float field${k}(${signature}) { ${shader.body} }`);
     }
     return withGLSL([...helpers, ...fields].join("\n"));
   } catch {
@@ -140,7 +154,7 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
     return item;
   }
   try {
-    const r = new JavaScriptTarget().compile(e) as { success?: boolean; code?: string; preamble?: string };
+    const r = compile(e, { fallback: false }) as { success?: boolean; code?: string; preamble?: string };
     const code = r?.success ? selfContainedCode(r) : undefined;
     if (code !== undefined) item.code = code;
   } catch {
