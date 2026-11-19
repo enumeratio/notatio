@@ -1,6 +1,7 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { type MathJsonExpression, parseEpsil } from "@cortex-js/compute-engine/epsil";
 import { expect, test } from "vite-plus/test";
+import { withoutProgram } from "../src/expression.ts";
 import { toFullForm } from "../src/fullform.ts";
 
 const ce = new ComputeEngine();
@@ -33,8 +34,8 @@ test.each(CASES)("FullForm of %j", (json, printed) => {
 test.each(CASES.filter(([json]) => !Array.isArray((json as unknown as unknown[])[0])))(
   "%j reads back uncanonicalised",
   (json) => {
-    const [back, errors] = parseEpsil(toFullForm(json, ce));
+    const [program, errors] = parseEpsil(toFullForm(json, ce));
     expect(errors).toEqual([]);
-    expect(uncanonical(strip(back))).toEqual(uncanonical(json));
+    expect(uncanonical(strip(withoutProgram(program)))).toEqual(uncanonical(json));
   },
 );

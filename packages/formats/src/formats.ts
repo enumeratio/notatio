@@ -4,7 +4,7 @@
 // engine is threaded in via opts only where a decoder needs to parse (TeX).
 
 import type { Expression } from "@cortex-js/compute-engine";
-import { compile, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine/compile";
+import { compile, GLSLTarget } from "@cortex-js/compute-engine/compile";
 import { parseEpsil, serializeEpsil } from "@cortex-js/compute-engine/epsil";
 import { MATHJSON_MIME } from "@notatio/boxes/render";
 import { fromWolfram, toWolfram } from "@notatio/wolfram";
@@ -14,7 +14,7 @@ import { makeBoxes } from "@notatio/boxes";
 import { toText } from "@notatio/boxes/render";
 import { fromAsciiMath, toAsciiMath } from "./asciimath.ts";
 import { fromMathML, type MathMLOptions, toMathML } from "./mathml.ts";
-import { parseExpression, ruleAsPair, rulesInCalls } from "./expression.ts";
+import { parseExpression, ruleAsPair, rulesInCalls, withoutProgram } from "./expression.ts";
 import { portableTeX } from "./tex.ts";
 import { type FormatOptions, type ImageValue, registerFileFormat } from "./registry.ts";
 
@@ -44,8 +44,9 @@ const epsilDecode = (d: string | Uint8Array, o?: FormatOptions): unknown => {
   const [expr, diagnostics] = parseEpsil(text(d), undefined, options);
   const errors = diagnostics.filter((x) => x.severity === "error");
   if (errors.length) throw new Error(`Epsil: ${errors.map((e) => diagText(e.message)).join("; ")}`);
-  rulesInCalls(expr);
-  return expr;
+  const json = withoutProgram(expr);
+  rulesInCalls(json);
+  return json;
 };
 
 // InputForm is the default display form: Epsil through the same serializer, with the
@@ -169,7 +170,10 @@ registerFileFormat({
   mimeTypes: ["text/x-python"],
   extensions: ["py"],
   binary: false,
-  encode: (v) => new PythonTarget().compileToSource(asExpr(v)),
+  // compute-engine 0.193 removed its Python target, so no source is written until one is registered.
+  encode: () => {
+    throw new Error("Python: compute-engine no longer compiles to Python");
+  },
 });
 
 registerFileFormat({

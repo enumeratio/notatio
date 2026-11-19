@@ -11,6 +11,8 @@ import {
   serializeEpsil,
 } from "@cortex-js/compute-engine/epsil";
 
+import { withoutProgram } from "./expression.ts";
+
 const IDENTIFIER = /^[\p{L}_][\p{L}\p{N}_]*$/u;
 
 const bareCache = new Map<string, boolean>();
@@ -19,7 +21,7 @@ function readsBare(name: string): boolean {
   let ok = bareCache.get(name);
   if (ok === undefined) {
     const [json, errors] = parseEpsil(name);
-    ok = errors.length === 0 && (json as { sym?: string })?.sym === name;
+    ok = errors.length === 0 && (withoutProgram(json) as { sym?: string })?.sym === name;
     bareCache.set(name, ok);
   }
   return ok;

@@ -1,9 +1,9 @@
-// A value's source in each code form compute-engine compiles to: Python and GLSL
-// through their targets, JavaScript through `compile()`. Each only takes a numeric or
+// A value's source in each code form compute-engine compiles to: GLSL
+// through its target, JavaScript through `compile()`. Each only takes a numeric or
 // function expression, so a list or a comparison simply has no source in that form.
 // GPUShaderForm is the whole shader one of our GPU paths runs for the expression.
 
-import { type ComputeEngine, compile, type Expression, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine";
+import { type ComputeEngine, compile, type Expression, GLSLTarget } from "@cortex-js/compute-engine";
 import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
 import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
@@ -11,7 +11,8 @@ import { toGlslFn } from "./plot-compile.ts";
 
 export type CodeForm = "python" | "glsl" | "javascript" | "gpushader";
 
-const TARGETS = { python: PythonTarget, glsl: GLSLTarget } as const;
+// compute-engine 0.193 removed its Python target, so `python` has no source.
+const TARGETS = { glsl: GLSLTarget } as const;
 
 /** `json`'s source in each code form that can compile it. */
 export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<CodeForm, string>> {

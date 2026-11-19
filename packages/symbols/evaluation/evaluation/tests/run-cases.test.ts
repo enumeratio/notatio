@@ -194,9 +194,10 @@ test("a case's fresh Solve parameter doesn't stay taken for the next case on the
     ],
     { concurrency: 1 },
   );
+  // The parameter of an identity is `ArbitraryConstant(1)` since compute-engine 0.188, in each case.
   expect(results.map((r) => r.value)).toEqual([
-    ["List", "t"],
-    ["List", "t"],
+    ["List", ["ArbitraryConstant", 1]],
+    ["List", ["ArbitraryConstant", 1]],
   ]);
 });
 

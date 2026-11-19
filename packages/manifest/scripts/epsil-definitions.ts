@@ -21,10 +21,13 @@ let engine: ComputeEngine | undefined;
 
 /** Epsil as short-form MathJSON, or an error naming where it came from. */
 function parsed(epsil: string, where: string): unknown {
-  const [json, diagnostics] = parseEpsil(epsil);
+  const [program, diagnostics] = parseEpsil(epsil);
   const errors = diagnostics.filter((d) => d.severity === "error");
   if (errors.length > 0) throw new Error(`${where}: ${errors.map((d) => d.message).join("; ")} in ${epsil}`);
-  resolveLibraryNames(json, epsil, (engine ??= new ComputeEngine()) as never);
+  // Epsil reads every source into a `Program`; a definition is its one statement.
+  const fn = (program as { fn?: unknown[] }).fn;
+  const json = Array.isArray(fn) && fn[0] === "Program" && fn.length === 2 ? fn[1] : program;
+  resolveLibraryNames(json as never, epsil, (engine ??= new ComputeEngine()) as never);
   return shortForm(json);
 }
 

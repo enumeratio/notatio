@@ -148,12 +148,13 @@ export function rulesInCalls(json: MathJsonExpression): void {
 }
 
 /**
- * `json` without the program's own `Block`: Epsil keeps it around a program whose one statement
- * is a `Block`, so `Block(a := 1, a)` would read as `Block(Block(a := 1, a))`.
+ * `json` without the `Program` Epsil reads every source into: a program of one statement is that
+ * statement, so `2x + 1` is the sum and `Block(a := 1, a)` is the block. An empty program or one
+ * of several statements stays a `Program`.
  */
-export function withoutProgramBlock<T>(json: T): T {
+export function withoutProgram<T>(json: T): T {
   const fn = Array.isArray(json) ? json : (json as { fn?: unknown[] } | null)?.fn;
-  return Array.isArray(fn) && fn[0] === "Block" && fn.length === 2 && headOf(fn[1]) === "Block" ? (fn[1] as T) : json;
+  return Array.isArray(fn) && fn[0] === "Program" && fn.length === 2 ? (fn[1] as T) : json;
 }
 
 /**
@@ -162,7 +163,7 @@ export function withoutProgramBlock<T>(json: T): T {
  */
 export function parseExpression(src: string, options?: ParseExpressionOptions): ParseExpressionResult {
   const [parsed, diagnostics] = parseEpsil(src, undefined, options);
-  const json = withoutProgramBlock(parsed);
+  const json = withoutProgram(parsed);
   resolveLibraryNames(json, src, options?.ce ?? libraryEngine());
   resolveRuleKeys(json, src, options?.ce ?? libraryEngine());
   rulesInCalls(json);

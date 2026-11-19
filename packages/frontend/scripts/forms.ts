@@ -25,7 +25,7 @@ import { setEngineDefaults } from "@notatio/engine";
 import { toFullForm } from "@notatio/formats/fullform";
 import { toInputForm } from "@notatio/formats/inputform";
 import { markupOf, readMarkupText, stripMetadata } from "@notatio/formats/markup";
-import { parseExpression, withoutProgramBlock } from "@notatio/formats/expression";
+import { parseExpression, withoutProgram } from "@notatio/formats/expression";
 import { portableTeX, registerTeXMacros } from "@notatio/formats/tex";
 import { emit, SYSTEMS, type System } from "@notatio/oracle";
 import {
@@ -112,7 +112,7 @@ function inputFormBack(expr: MathJSON, printed: string): MathJSON | undefined {
 function fullFormBack(expr: MathJSON, printed: string): MathJSON | undefined {
   const [json, errors] = parseEpsil(printed);
   if (errors.length > 0) return "Unreadable";
-  const read = attempt(() => JSON.stringify(numbersAsValues(box(stripOffsets(withoutProgramBlock(json))).json)));
+  const read = attempt(() => JSON.stringify(numbersAsValues(box(stripOffsets(withoutProgram(json))).json)));
   if (read === attempt(() => JSON.stringify(numbersAsValues(box(expr).json)))) return undefined;
   return read === undefined ? "Unreadable" : (JSON.parse(read) as MathJSON);
 }
