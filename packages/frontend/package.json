@@ -53,7 +53,7 @@
     "d3-scale-chromatic": "catalog:"
   },
   "devDependencies": {
-    "@cortex-js/compute-engine": "^0.192.0",
+    "@cortex-js/compute-engine": "^0.193.0",
     "@notatio/combinatorics": "workspace:*",
     "@notatio/config": "workspace:*",
     "@notatio/entry": "workspace:*",
@@ -67,7 +67,7 @@
     "vite-plus": "catalog:"
   },
   "peerDependencies": {
-    "@cortex-js/compute-engine": "^0.192.0"
+    "@cortex-js/compute-engine": "^0.193.0"
   },
   "enumeratio": {
     "layer": "presentation",

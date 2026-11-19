@@ -33,7 +33,7 @@
     "@notatio/wolfram": "workspace:*"
   },
   "devDependencies": {
-    "@cortex-js/compute-engine": "^0.192.0",
+    "@cortex-js/compute-engine": "^0.193.0",
     "@notatio/adeles": "workspace:*",
     "@notatio/analytic": "workspace:*",
     "@notatio/boxes": "workspace:*",
