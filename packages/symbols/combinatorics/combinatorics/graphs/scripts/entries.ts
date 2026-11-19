@@ -35,6 +35,8 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   definitions: GRAPH_STATISTICS,
   frontier: GRAPHS_FRONTIER,
   samples: SAMPLES,
+  // `AutomorphismGroupSize` is also the tree statistic: the record stays the trees' own, and takes the graphs' notes and examples.
+  curatedHeads: ["AutomorphismGroupSize"],
   declareArea: declareGraphsArea,
   carrierNames: { LabeledGraph: { subjectName: "graph", domain: "Graph statistics" } },
   dir: REFERENCE_DIR,
