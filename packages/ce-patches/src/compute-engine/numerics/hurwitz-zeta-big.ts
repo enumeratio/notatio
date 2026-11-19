@@ -27,11 +27,12 @@ const GUARD_DIGITS = 8;
 /**
  * The most direct terms a plan may sum at `TERM_BUDGET_DIGITS` working digits, past which the kernel
  * declines before summing anything. A BigDecimal term costs about 19 µs there (measured on
- * ζ(1e-12 + it) at 15 digits: 0.4 s at t = 1e5, 1.1 s at 3e5, 3.8 s at 1e6, 6.6 s at 1.74e6, which
- * plans 3.4e5 terms), so 5e4 terms is about a second, and ζ(1e-12 + 1.74e6 i) declines from its
- * plan alone (70 ms) instead of summing for seven seconds.
+ * ζ(1e-12 + it) at 15 digits: 0.4 s at t = 1e5, 1.1 s at 2.5e5, 3.8 s at 1e6, 6.6 s at 1.74e6, which
+ * plans 3.4e5 terms), so 1.3e5 terms is about 2.5 s, the one time rule for a bound that declines a
+ * call that would have answered. ζ(1e-12 + 5e5 i) plans about 1e5 terms and answers; at 1e6 (2e5
+ * terms) and 1.74e6 the call declines from its plan alone (70 ms) instead of summing for seconds.
  */
-const MAX_TERMS = 5e4;
+const MAX_TERMS = 1.3e5;
 
 /** The working digits `MAX_TERMS` is measured at; a term costs more in proportion to the digits past it. */
 const TERM_BUDGET_DIGITS = 25;

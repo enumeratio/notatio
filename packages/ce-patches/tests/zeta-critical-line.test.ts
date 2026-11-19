@@ -56,7 +56,28 @@ test("a sum too long for the kernel is declined, not thrown", () => {
   expect(beyondTermCap(bigCx(0.5, 1000055), bigCx(1), 17)).toBe(true);
   // Two decades short of it the kernel answers.
   expect(beyondTermCap(bigCx(0.5, 10055), bigCx(1), 17)).toBe(false);
+  // Half a decade short of it the plan fits the budget (1e5 terms, about 2 s to sum).
+  expect(beyondTermCap(bigCx(0.5, 500000), bigCx(1), 17)).toBe(false);
 });
+
+// The sum itself takes about 2 s here, so the standard run holds the plan only (above).
+test.skipIf(!process.env.DEEP_TESTS)(
+  "ζ(σ + 5e5 i) answers, to mpmath's digits",
+  () => {
+    // mpmath zeta at 40 digits.
+    const known: [number, number, number][] = [
+      [1e-12, -544.6063823408917, -199.8076922847187],
+      [0.5, -4.731042704710499, 6.170078276330033],
+      [2, 1.235775356087263, 0.3856778058131882],
+    ];
+    for (const [re, x, y] of known) {
+      const value = evaluateHurwitz(machine, [machine.box(["Complex", re, 5e5] as never), machine.One], true)!;
+      expect(value.re / x, String(re)).toBeCloseTo(1, 13);
+      expect(value.im / y, String(re)).toBeCloseTo(1, 13);
+    }
+  },
+  120_000,
+);
 
 test("a call past the term budget declines from its plan, in well under a second", () => {
   for (const re of [1e-12, 0.5, 2, -1]) {
