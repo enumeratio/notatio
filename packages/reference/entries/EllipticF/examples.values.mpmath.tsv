@@ -1,9 +1,9 @@
 id	in	out
-ellipticf-400i-overflowed-to-infinity	(ellipf(mpc(0.3, 400), 0.5))	
-ellipticf-355i-parameter-2-was-zero	(ellipf(mpc(0, 355), 2))	
-ellipticf-neg-1000i-parameter-neg-2	(ellipf(mpc(0.3, -1000), -2))	
-ellipticf-700i-complex-parameter	(ellipf(mpc(10, 700), mpc(0.5, 0.3)))	
-ellipticf-1e4i-with-a-shift-by-pi	(ellipf(mpc(2, 10000), 0.9))	
+ellipticf-400i-overflowed-to-infinity	(ellipf(mpc(0.3, 400), 0.5))	(2.43345628823601922138642959596e-35 + 1.8540746773013719184338503472j)
+ellipticf-355i-parameter-2-was-zero	(ellipf(mpc(0, 355), 2))	(0.0 + 1.31102877714605990523241979495j)
+ellipticf-neg-1000i-parameter-neg-2	(ellipf(mpc(0.3, -1000), -2))	(1.1714200841467698589263358801 - 1.00107738045610623607965958638j)
+ellipticf-700i-complex-parameter	(ellipf(mpc(10, 700), mpc(0.5, 0.3)))	(10.9256007995458043933567992224 + 3.13858205192934645446075086834j)
+ellipticf-1e4i-with-a-shift-by-pi	(ellipf(mpc(2, 10000), 0.9))	(5.15618422669634658536527996314 + 1.6124413487202193884154926388j)
 ellipticf-list-list-1-0-list-0-1-0	[[ellipf(1, 0), ellipf(0, 0)], [ellipf(0, 0), ellipf(1, 0)]]	[[mpf('1.0'), mpf('0.0')], [mpf('0.0'), mpf('1.0')]]
 matrixfunction-function-ellipticf-1-0-1-list		
 n-ellipticf-12-over-5-3-50	enumeratio_n(lambda: (ellipf((mpf(12)/5), 3)), 50)	(1.0010773804561062360796595863838358931497135904585-1.9231661895046253531841444093352781715706878703094j)

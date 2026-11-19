@@ -1,9 +1,9 @@
 id	in	out	verdict
-ellipticf-400i-overflowed-to-infinity	N(elliptic_f((0.3 + 400*I), 0.5), 30)		
-ellipticf-355i-parameter-2-was-zero	N(elliptic_f((0 + 355*I), 2), 30)		
-ellipticf-neg-1000i-parameter-neg-2	N(elliptic_f((0.3 + -1000*I), -2), 30)		
-ellipticf-700i-complex-parameter	N(elliptic_f((10 + 700*I), (0.5 + 0.3*I)), 30)		
-ellipticf-1e4i-with-a-shift-by-pi	N(elliptic_f((2 + 10000*I), 0.9), 30)		
+ellipticf-400i-overflowed-to-infinity	N(elliptic_f((0.3 + 400*I), 0.5), 30)	1.14365712258654345549073916867e-21 + 1.85407467730137187622574401757*I	
+ellipticf-355i-parameter-2-was-zero	N(elliptic_f((0 + 355*I), 2), 30)	1.31102877714605990523241979495*I	
+ellipticf-neg-1000i-parameter-neg-2	N(elliptic_f((0.3 + -1000*I), -2), 30)	1.1714200841467698589263358801 - 1.00107738045610623607965958638*I	
+ellipticf-700i-complex-parameter	N(elliptic_f((10 + 700*I), (0.5 + 0.3*I)), 30)	10.9256007995458043933567992224 + 3.13858205192934645446075086834*I	
+ellipticf-1e4i-with-a-shift-by-pi	N(elliptic_f((2 + 10000*I), 0.9), 30)	5.15618422669634658536527996314 + 1.6124413487202193884154926388*I	
 ellipticf-list-list-1-0-list-0-1-0	[[elliptic_f(1, 0), elliptic_f(0, 0)], [elliptic_f(0, 0), elliptic_f(1, 0)]]	[[1, 0], [0, 1]]	
 matrixfunction-function-ellipticf-1-0-1-list	Matrix([[1, 0], [0, 1]]).analytic_func(elliptic_f(Symbol("_mf"), 0), Symbol("_mf")).applyfunc(simplify).tolist()	[[1, 0], [0, 1]]	
 n-ellipticf-12-over-5-3-50	N(elliptic_f(Rational(12, 5), 3), 30)	1.00107738045610623607965958638 - 1.92316618950462535318414440934*I	
