@@ -123,6 +123,8 @@ export const FOREIGN: Record<string, string> = {
   Depth: "the number of indices needed to reach any part of an expression",
   Word: "the token specification used by Read and Find",
   Restricted: "an Interpreter form narrowed by a condition",
+  // Ours counts a lattice's atoms (FindStat St001621).
+  AtomCount: "the number of atoms in a molecule",
   // Ours is the carrier's plural type-space symbol (https://github.com/enumeratio/notatio/wiki/Archive-Domains §2 — Element(x,
   // GaussianIntegers) checks x's carrier); Wolfram's is an option flag (IsPrime[n,
   // GaussianIntegers -> True]), never a value on its own.
