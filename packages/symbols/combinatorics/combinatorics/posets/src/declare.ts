@@ -7,7 +7,7 @@ import { declareStatistics } from "../../src/statistics/declare.ts";
 import { canonicalCode, isReduced, MAX_CODED, type Poset } from "./canonical.ts";
 import { POSETS_CARRIERS } from "./carrier-data.ts";
 import { coreEntries } from "./families/index.ts";
-import { POSET_STATISTICS } from "./statistics.ts";
+import { POSET_AREA_STATISTICS } from "./statistics.lattices.ts";
 
 /** The lower covers a `Poset(...)` call holds, or undefined for anything that is no such value. */
 function posetOf(expr: Expr): Poset | undefined {
@@ -22,7 +22,7 @@ export function declarePosetsArea(ce: Engine): void {
   declareCarriers(ce, POSETS_CARRIERS, { plurals: false });
   declareFamilies(ce, coreEntries.map(liftFamily));
   // Its statistics, after its own carriers and families.
-  declareStatistics(ce, POSET_STATISTICS);
+  declareStatistics(ce, POSET_AREA_STATISTICS);
 
   defineMessages(ce, "IsIsomorphicPoset", {
     toobig: "posets of more than `1` elements are not tested; the call stays unevaluated.",

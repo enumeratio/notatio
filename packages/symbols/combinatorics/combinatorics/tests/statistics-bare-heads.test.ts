@@ -30,12 +30,18 @@ const SAMPLE: Record<string, unknown> = {
   CartanType: ["At", ["FiniteCartanTypes", 4], 5],
 };
 
+// A statistic with a `where` is called on a subject in its domain.
+const DOMAIN_SAMPLE: Record<string, unknown> = {
+  // The pentagon lattice.
+  Poset: ["Poset", ["List", ["List"], ["List", 1], ["List", 1], ["List", 3], ["List", 2, 4]]],
+};
+
 test("every statistic is callable by its bare head on each of its carriers", () => {
   const ce = bareEngine();
   declareCombinatorics(ce);
   const failures: string[] = [];
-  for (const { head, on } of ALL_STATISTICS) {
-    const sample = SAMPLE[on];
+  for (const { head, on, where } of ALL_STATISTICS) {
+    const sample = (where === undefined ? undefined : DOMAIN_SAMPLE[on]) ?? SAMPLE[on];
     if (sample === undefined) {
       failures.push(`${head}@${on}: no sample`);
       continue;

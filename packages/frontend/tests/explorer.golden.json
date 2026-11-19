@@ -1411,7 +1411,7 @@
     "glyph": "hasse",
     "columns": ["AntichainCount", "ChainCount", "ChainPolytopeFacetCount", "CoverRelationCount"],
     "derived": false,
-    "statistics": 45
+    "statistics": 68
   },
   "PowerSet": null,
   "PowerfulNumbers": {

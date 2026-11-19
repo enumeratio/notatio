@@ -51,7 +51,10 @@ export function engineProbes(
       try {
         const batch = await opened.source.rows([1n, 2n], [0, opened.source.columns.length]);
         const cell = batch.rows[0]?.at(-1);
-        return cell !== undefined && cell !== "" && toText(cell) !== "⚠";
+        // A statistic off its domain (a lattice statistic on a poset that is no lattice) stays an unevaluated call.
+        return (
+          cell !== undefined && cell !== "" && toText(cell) !== "⚠" && !toText(cell).startsWith("CombinatorialStat")
+        );
       } catch {
         return false;
       }

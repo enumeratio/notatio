@@ -19,7 +19,7 @@ import { PERMUTATIONS_FRONTIER } from "../../permutations/src/statistics.frontie
 import { WORD_STATISTICS } from "../../words/src/statistics.ts";
 import { GRAPH_STATISTICS } from "../../graphs/src/statistics.ts";
 import { GRAPHS_FRONTIER } from "../../graphs/src/statistics.frontier.ts";
-import { POSET_STATISTICS } from "../../posets/src/statistics.ts";
+import { POSET_AREA_STATISTICS } from "../../posets/src/statistics.lattices.ts";
 import { POSETS_FRONTIER } from "../../posets/src/statistics.frontier.ts";
 import { WORDS_FRONTIER } from "../../words/src/statistics.frontier.ts";
 import { CARTAN_STATISTICS } from "../../cartan/src/statistics.ts";
@@ -36,7 +36,7 @@ export const ALL_STATISTICS: readonly Definition[] = [
   ...WORD_STATISTICS,
   ...TABLEAU_STATISTICS,
   ...GRAPH_STATISTICS,
-  ...POSET_STATISTICS,
+  ...POSET_AREA_STATISTICS,
   ...CARTAN_STATISTICS,
 ];
 

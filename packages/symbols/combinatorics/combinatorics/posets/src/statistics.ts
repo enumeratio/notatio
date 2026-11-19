@@ -74,6 +74,45 @@ const less = (a: MathJSON, b: MathJSON): MathJSON => ["At", "below", plus(times(
 const atMost = (a: MathJSON, b: MathJSON): MathJSON => ["If", equals(a, b), 1, less(a, b)];
 const comparable = (a: MathJSON, b: MathJSON): MathJSON => plus(atMost(a, b), less(b, a));
 
+/**
+ * The joins (`meets` the meets) as a flat row-major list of n² entries: entry (a - 1) n + b is the join of a and b, the
+ * least-labeled common upper bound, which in a natural labeling is below every other one; n + 1 when a and b have none
+ * (the meet is the greatest-labeled common lower bound, 0 when there is none). Built a row at a time. Read inside
+ * `withRelation`.
+ */
+const boundTable = (pick: "Min" | "Max", test: (z: MathJSON) => MathJSON, none: MathJSON): MathJSON =>
+  fold(
+    ["Join", "acc", map([pick, map(["If", equals(test("z"), 1), "z", none], "z", elements)], "j", elements)],
+    "acc",
+    "i",
+    ["List"],
+    elements,
+    "list<integer>",
+  );
+/** `body` with `joins` the join table. */
+export const withJoins = (body: MathJSON): MathJSON =>
+  bind(
+    "joins",
+    boundTable("Min", (z) => times(atMost("i", z), atMost("j", z)), plus("n", 1)),
+    body,
+    "list<integer>",
+  );
+/** `body` with `meets` the meet table. */
+export const withMeets = (body: MathJSON): MathJSON =>
+  bind(
+    "meets",
+    boundTable("Max", (z) => times(atMost(z, "i"), atMost(z, "j")), 0),
+    body,
+    "list<integer>",
+  );
+
+/**
+ * `body` for a poset that is a lattice, with `n` and `below`; the poset with no elements gives `otherwise`. There is no
+ * guard: the caller's `where` (`IsLattice`) keeps the statistic off every other subject.
+ */
+export const withLattice = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withPoset(withRelation(body), otherwise);
+
 /** The upper covers of each element: how many elements have it as a lower cover. */
 const upperCoverCount = (element: MathJSON): MathJSON => total(one(["Contains", lowerCovers("k"), element]), "k");
 
@@ -927,3 +966,32 @@ export const POSET_STATISTICS: readonly Definition[] = [
     `FindStat's St001909. ${CONVENTION("1, the empty subset")}`,
   ),
 ];
+
+/** The builders the lattice statistics (statistics.lattices.ts) write their definitions with. */
+export {
+  accumulate,
+  atMost,
+  chainSizes,
+  comparable,
+  elements,
+  entryOf,
+  equals,
+  fold,
+  greatest,
+  inMask,
+  less,
+  lowerCovers,
+  map,
+  masks,
+  minus,
+  moebiusRow,
+  noLowerCovers,
+  NO_ELEMENTS,
+  one,
+  plus,
+  stat,
+  times,
+  total,
+  upperCoverCount,
+  upTo,
+};

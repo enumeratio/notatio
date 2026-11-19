@@ -89,6 +89,7 @@ export { CARTAN_STATISTICS } from "../cartan/src/statistics.ts";
 export { WORD_STATISTICS } from "../words/src/statistics.ts";
 export { GRAPH_STATISTICS } from "../graphs/src/statistics.ts";
 export { POSET_STATISTICS } from "../posets/src/statistics.ts";
+export { LATTICE_STATISTICS } from "../posets/src/statistics.lattices.ts";
 export { TABLEAU_STATISTICS } from "../tableaux/src/statistics.ts";
 export { CARDINALITIES, type Cardinality } from "../partitions/src/cardinalities.ts";
 export { NATIVE_TO_ENGINE, type NativeStatistic } from "../partitions/src/native-statistics.ts";

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-pentagon-lattice-1-2-5-and-1-3-4-5			[DoublyIrreducibleCount, [Poset, [List, [List], [List, 1], [List, 1], [List, 3], [List, 2, 4]]]]	3			the pentagon lattice: 1 < 2 < 5 and 1 < 3 < 4 < 5
+findstat-st001623-1	Properties		[CombinatorialStat, [Poset, [List, [List]]], "'DoublyIrreducibleCount'"]	0	0	FindStat St001623	FindStat's value for ([],1)
+findstat-st001623-2	Properties		[CombinatorialStat, [Poset, [List, [List], [List, 1]]], "'DoublyIrreducibleCount'"]	0	0	FindStat St001623	FindStat's value for ([(0,1)],2)
+findstat-st001623-3	Properties		[CombinatorialStat, [Poset, [List, [List], [List, 1], [List, 2]]], "'DoublyIrreducibleCount'"]	1	1	FindStat St001623	FindStat's value for ([(0,2),(2,1)],3)
