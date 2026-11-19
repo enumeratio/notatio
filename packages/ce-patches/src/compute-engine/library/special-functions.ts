@@ -19,6 +19,7 @@ import { atEnginePrecision, bigRealOperand, bigResult, DOUBLE_DIGITS } from "../
 import {
   declined,
   isFiniteNum,
+  isExactInt,
   isRealInt,
   inexactComplex,
   numberResult,
@@ -139,6 +140,23 @@ export const lerchPhiLibrary: LibraryRecord = {
 // HurwitzZeta(s, a) — Wolfram has all three; compute-engine's native `Zeta` is real,
 // one-argument only.
 
+/**
+ * How near an integer (and not at it) a real s must be for the kernel to answer in place of
+ * compute-engine's own ζ. Measured at 30 and 50 digits against mpmath: compute-engine's Zeta(s) keeps its
+ * digits from 1e-14 to 1e-20 off an integer and loses about five at 1e-30 (ζ(−1e-30) is 1.8e-25 off at
+ * 30 digits), and its HurwitzZeta(s, a) for a ≠ 1 declines at 1 ± 1e-16, so 1e-6 covers every distance
+ * that fails with room to spare.
+ */
+const NEAR_INTEGER_S = 1e-6;
+
+/** A real s within `NEAR_INTEGER_S` of an integer that it is not exactly (−2 − 1e-16 is the double −2 but not −2). */
+export const nearButNotInteger = (s: Expression | undefined): boolean =>
+  s !== undefined &&
+  s.im === 0 &&
+  Number.isFinite(s.re) &&
+  !isExactInt(s) &&
+  Math.abs(s.re - Math.round(s.re)) < NEAR_INTEGER_S;
+
 export function evaluateHurwitz(
   ce: ComputeEngine,
   ops: readonly Expression[],
@@ -164,20 +182,21 @@ export function evaluateHurwitz(
   // ζ(s, a) for a a nonpositive integer: the (n+a) = 0 term is 0^{−s}. Re(s) > 0: a genuine
   // pole (0^{−s} diverges) — not the generalized-zeta convention (`Zeta(s, a)`, below) that
   // drops it and stays finite. Matches Wolfram, mpmath and SymPy, all of which diverge here.
-  if (a.im === 0 && Number.isInteger(a.re) && a.re <= 0 && isFiniteNum(s) && s.re > 0) {
+  if (a.im === 0 && isExactInt(a) && a.re <= 0 && isFiniteNum(s) && s.re > 0) {
     return ce.symbol("ComplexInfinity");
   }
   // Re(s) = 0, s ≠ 0: 0^{−s} = 0^{−i·Im(s)} doesn't converge to any value (it winds the
   // unit circle) — neither the pole above nor the clean 0 that Re(s) < 0 gets. Declined,
   // not NaN: Wolfram calls it Indeterminate, which no numeric answer stands for.
-  if (a.im === 0 && Number.isInteger(a.re) && a.re <= 0 && isFiniteNum(s) && s.re === 0 && s.im !== 0) {
+  if (a.im === 0 && isExactInt(a) && a.re <= 0 && isFiniteNum(s) && s.re === 0 && s.im !== 0) {
     return undefined;
   }
 
   // ζ(s, m) for a positive integer m: ζ(s) − Σ_{k=1}^{m-1} k^{-s}. Skipped for a concretely
-  // complex s, which ζ(s) can't evaluate numerically — those fall through to Euler–Maclaurin.
-  const complexS = Number.isFinite(s.re) && Number.isFinite(s.im) && s.im !== 0;
-  if (!complexS && a.im === 0 && Number.isInteger(a.re) && a.re >= 1) {
+  // complex s, which ζ(s) can't evaluate numerically, and for an s next to an integer, which is the kernel's
+  // (`nearButNotInteger`) — those fall through to Euler–Maclaurin.
+  const complexS = (Number.isFinite(s.re) && Number.isFinite(s.im) && s.im !== 0) || nearButNotInteger(s);
+  if (!complexS && a.im === 0 && isExactInt(a) && a.re >= 1) {
     const m = a.re;
     const sJson = s.json as unknown as Json;
     if (m === 1) return done(boxed(["Zeta", sJson]));
@@ -218,8 +237,7 @@ const MAX_EXACT_SHIFT = 64;
  * longer sum with a non-closed ζ(s) stays symbolic. Elsewhere undefined, so it stays symbolic.
  */
 export function zetaAtNonpositiveShift(ce: ComputeEngine, s: Expression, a: Expression): Expression | undefined {
-  if (a.im !== 0 || !Number.isInteger(a.re) || a.re >= 0 || -a.re > MAX_EXACT_SHIFT || !isFiniteNum(s))
-    return undefined;
+  if (a.im !== 0 || !isExactInt(a) || a.re >= 0 || -a.re > MAX_EXACT_SHIFT || !isFiniteNum(s)) return undefined;
   const sJson = s.json as unknown as Json;
   if (!isRealInt(s)) {
     // 1 + ζ(s) for an exact non-integer s; a float s is a numeric request and goes native.
@@ -302,6 +320,9 @@ function numericZeta(
   if (zetaKernel === "bignum" && beyondTermCap(bigOperand(ce, s), bigOperand(ce, a), Math.max(ce.precision, 17))) {
     return undefined;
   }
+  // Past machine precision the double kernel reads s as the nearest double, which for s = −2 − 1e-16 is
+  // the integer −2: its plan would drop terms as large as the result. Machine precision reads the double itself.
+  if (ce.precision > DOUBLE_DIGITS && nearButNotInteger(s)) return undefined;
   return checkedResult(ce, double, s, a);
 }
 

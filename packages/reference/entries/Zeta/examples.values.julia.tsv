@@ -49,6 +49,7 @@ n-zeta-1-2-plus-135i-to-30-digits	enumeratio_nshow(enumeratio_ball(zeta, ((1 // 
 n-zeta-9-10-plus-191i-to-30-digits	enumeratio_nshow(enumeratio_ball(zeta, ((9 // 10) + enumeratio_complex(0, 191))), 30)	(1.76079401087835538042786325771e+00-1.16526388297386637019490483070e+00j)	
 n-zeta-1-2-plus-3000i-to-40-digits	enumeratio_nshow(enumeratio_ball(zeta, ((1 // 2) + enumeratio_complex(0, 3000))), 40)	(1.590473014640815435801482698477309542532e+00+3.184612407390822327170750884117281014623e+00j)	
 n-zeta-1e-12-plus-1-74e6-i-past-the-term-budget	(enumeratio_ball(zeta, enumeratio_complex(enumeratio_decimal("1e-12"), 1740000)))		
+n-zeta-neg-2-minus-1e-16-d30	enumeratio_nshow(enumeratio_ball(zeta, enumeratio_decimal("-2.0000000000000001")), 30)		
 on-the-critical-line-zeta-1-2-14i-0-02224-0	(enumeratio_ball(zeta, enumeratio_complex(enumeratio_decimal("0.5"), 14)))	(0.02224114260999358924621319920396862638678624319492363247593648136038874661599966-0.1032581232664500579023630955525738345075490304641007147174290250287179265348952j)	
 two-argument-zeta-s-a-via-enumeratio-analytic	enumeratio_ball(zeta, 2, 1)	1.644934066848226436472415166646025189218949901206798437735558229370007470403202	
 zeta-2-2-zeta-2-1-pi-2-6-1	enumeratio_ball(zeta, 2, 2)	0.6449340668482264364724151666460251892189499012067984377355582293700074704032022	

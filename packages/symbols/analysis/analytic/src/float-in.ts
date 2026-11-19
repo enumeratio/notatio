@@ -1,4 +1,13 @@
-import { asDouble, doublesForFloats, evaluateHurwitz, wantsBigDigits, wantsNumber } from "@notatio/ce-patches";
+import {
+  asDouble,
+  doublesForFloats,
+  evaluateHurwitz,
+  evaluateZeta,
+  isExactInt,
+  nearButNotInteger,
+  wantsBigDigits,
+  wantsNumber,
+} from "@notatio/ce-patches";
 import { type Engine, type Expr, wrapOperator } from "@notatio/engine";
 
 // A float operand gets a float answer. These heads reach compute-engine's bignum arithmetic
@@ -54,13 +63,26 @@ export function declineHurwitzIndeterminate(ce: Engine): void {
         s.re === 0 &&
         s.im !== 0 &&
         a.im === 0 &&
-        Number.isInteger(a.re) &&
+        isExactInt(a) &&
         a.re <= 0
       );
     },
     () => () => undefined,
     { arity: 2, compile: "builtin" },
   );
+}
+
+/**
+ * A real s that is not the same distance from its nearest integer as its double is: −2 − 1e-16 rounds to
+ * the double −2, at distance 0, so a machine-precision answer would be ζ(−2) = 0 for an s that is not −2.
+ * Within 1e-9 of the exact distance the double is the s (−2.0000001 is the double nearest it, to 1e-9 of 1e-7).
+ */
+function doubleLosesDistance(x: Expr | undefined): boolean {
+  const exact = x?.bignumRe;
+  if (x === undefined || exact === undefined || x.im !== 0 || !Number.isFinite(x.re)) return false;
+  const nearest = Math.round(x.re);
+  const distance = exact.sub(nearest).abs().toNumber();
+  return Math.abs(distance - Math.abs(x.re - nearest)) > 1e-9 * distance;
 }
 
 /**
@@ -77,6 +99,7 @@ function bigOrDouble(
   compute: () => Expr | undefined,
 ): Expr | undefined {
   if (wantsBigDigits(ce, options, ops)) return compute();
+  if (doubleLosesDistance(ops[0])) return undefined;
   const precision = ce.precision;
   ce.precision = "machine";
   try {
@@ -88,7 +111,8 @@ function bigOrDouble(
 }
 
 /**
- * ζ(s) and ζ(s, a) at a complex s or a, on the bignum Euler–Maclaurin kernel
+ * ζ(s) and ζ(s, a) at a complex s or a, or a real s next to an integer (compute-engine's own ζ loses
+ * digits within 1e-30 of one and declines next to s = 1), on the bignum Euler–Maclaurin kernel
  * (hurwitz-zeta-big.ts), rounded once: to the double pair at machine precision, else to the
  * engine's digits in each part. compute-engine's own complex kernel runs in doubles and
  * measured 6e-13 relative off mpmath at |Im s| = 400 (5e-14 at ζ(1/2 + 14i)).
@@ -100,7 +124,7 @@ export function declareComplexZeta(ce: Engine): void {
   wrapOperator(
     ce,
     ["Zeta", 1],
-    (ops) => complex(ops[0]),
+    (ops) => complex(ops[0]) || nearButNotInteger(ops[0]),
     (native) => (ops, options) =>
       !wantsNumber(ops, options)
         ? native?.(ops, options)
@@ -111,11 +135,22 @@ export function declareComplexZeta(ce: Engine): void {
   wrapOperator(
     ce,
     ["HurwitzZeta", 2],
-    (ops) => complex(ops[0]) || complex(ops[1]),
+    (ops) => complex(ops[0]) || complex(ops[1]) || nearButNotInteger(ops[0]),
     (native) => (ops, options) =>
       !wantsNumber(ops, options)
         ? native?.(ops, options)
         : bigOrDouble(ce, ops, options, () => evaluateHurwitz(ce, ops, true)),
+    { arity: 2, compile: "builtin" },
+  );
+  // compile builtin: rounds a float operand's answer to a double, and leaves a NaN unevaluated: no number differs
+  wrapOperator(
+    ce,
+    ["Zeta", 2],
+    (ops) => nearButNotInteger(ops[0]),
+    (native) => (ops, options) =>
+      !wantsNumber(ops, options)
+        ? native?.(ops, options)
+        : bigOrDouble(ce, ops, options, () => evaluateZeta(ce, ops, true)),
     { arity: 2, compile: "builtin" },
   );
 }
