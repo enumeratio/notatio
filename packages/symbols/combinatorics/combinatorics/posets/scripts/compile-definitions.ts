@@ -5,14 +5,14 @@
 
 import { fileURLToPath } from "node:url";
 import { compileArea } from "../../scripts/compile-area.ts";
-import { POSET_STATISTICS } from "../src/statistics.ts";
+import { POSET_AREA_STATISTICS } from "../src/statistics.lattices.ts";
 
 // A poset is the list of each element's lower covers.
 if (process.argv[1] === fileURLToPath(import.meta.url))
   await compileArea(
     import.meta.url,
     "compile-posets",
-    POSET_STATISTICS,
+    POSET_AREA_STATISTICS,
     "list<list<integer>>",
     "../src/statistics.compiled.generated.js",
   );

@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-pentagon-lattice-1-2-5-and-1-3-4-5			[ModularElementCount, [Poset, [List, [List], [List, 1], [List, 1], [List, 3], [List, 2, 4]]]]	4			the pentagon lattice: 1 < 2 < 5 and 1 < 3 < 4 < 5
+findstat-st000550-1	Properties		[CombinatorialStat, [Poset, [List, [List]]], "'ModularElementCount'"]	1	1	FindStat St000550	FindStat's value for ([],1)
+findstat-st000550-2	Properties		[CombinatorialStat, [Poset, [List, [List], [List, 1]]], "'ModularElementCount'"]	2	2	FindStat St000550	FindStat's value for ([(0,1)],2)
+findstat-st000550-3	Properties		[CombinatorialStat, [Poset, [List, [List], [List, 1], [List, 2]]], "'ModularElementCount'"]	3	3	FindStat St000550	FindStat's value for ([(0,2),(2,1)],3)

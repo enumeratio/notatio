@@ -11,6 +11,7 @@ signatures:
 enumerate:
   expr: Posets(4)
   glyph: hasse
+  columns: AntichainCount, ChainCount, CoverRelationCount, ElementCountMinusWidth
 seeAlso:
   - CanonicalPoset
   - IsIsomorphicPoset

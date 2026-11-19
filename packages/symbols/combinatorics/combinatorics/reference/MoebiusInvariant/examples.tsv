@@ -1,0 +1,5 @@
+id	section	role	expr	expected	known	source	caption
+the-pentagon-lattice-1-2-5-and-1-3-4-5			[MoebiusInvariant, [Poset, [List, [List], [List, 1], [List, 1], [List, 3], [List, 2, 4]]]]	1			the pentagon lattice: 1 < 2 < 5 and 1 < 3 < 4 < 5
+findstat-st001625-1	Properties		[CombinatorialStat, [Poset, [List, [List]]], "'MoebiusInvariant'"]	1	1	FindStat St001625	FindStat's value for ([],1)
+findstat-st001625-2	Properties		[CombinatorialStat, [Poset, [List, [List], [List, 1]]], "'MoebiusInvariant'"]	-1	-1	FindStat St001625	FindStat's value for ([(0,1)],2)
+findstat-st001625-3	Properties		[CombinatorialStat, [Poset, [List, [List], [List, 1], [List, 2]]], "'MoebiusInvariant'"]	0	0	FindStat St001625	FindStat's value for ([(0,2),(2,1)],3)
