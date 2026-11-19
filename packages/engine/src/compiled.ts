@@ -4,8 +4,8 @@
 // compiler.
 
 import { type Expression, type ComputeEngine, version } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
-import { FastTarget } from "./compiled-target.ts";
+import { compile } from "@cortex-js/compute-engine/compile";
+import { createJavaScriptRuntime } from "@cortex-js/compute-engine/runtime";
 
 export type MathJSON = number | string | boolean | readonly MathJSON[] | { readonly [key: string]: unknown };
 export type Js = number | boolean | readonly Js[];
@@ -13,7 +13,7 @@ export type Js = number | boolean | readonly Js[];
 /** A compiled definition: its free variables in, a plain JS value out. */
 export type CompiledRun = (vars: Record<string, unknown>) => unknown;
 
-/** Generated code's shape: compute-engine's runtime helpers and the free variables. */
+/** Generated code's shape: compute-engine's runtime helpers (`_SYS`) and the free variables (`_`). */
 export type GeneratedRun = (sys: unknown, vars: Record<string, unknown>) => unknown;
 
 /** MathJSON integers, and lists and tuples of them, as plain JS (a tuple as an array: compiled
@@ -107,7 +107,8 @@ export function compileTyped(
   ce.pushScope();
   try {
     for (const [name, type] of Object.entries(types)) ce.declare(name, type);
-    const result = new FastTarget().compile(ce.box(expression as never) as Expression) as {
+    // `fallback: false` makes a decline throw; the default logs it and hands back an interpreter.
+    const result = compile(ce.box(expression as never) as Expression, { fallback: false }) as {
       success?: boolean;
       run?: Compilation["run"];
       code?: string;
@@ -129,7 +130,7 @@ export function compileTyped(
  *  point; the caller keeps the symbolic route as its fallback. */
 export function compileExpression(expr: Expression): CompiledRun | undefined {
   try {
-    const result = new JavaScriptTarget().compile(expr.canonical) as { success?: boolean; run?: CompiledRun };
+    const result = compile(expr.canonical, { fallback: false }) as { success?: boolean; run?: CompiledRun };
     return result.success === true && typeof result.run === "function" ? result.run : undefined;
   } catch {
     return undefined;
@@ -138,14 +139,14 @@ export function compileExpression(expr: Expression): CompiledRun | undefined {
 
 const helpersByEngine = new WeakMap<ComputeEngine, unknown>();
 
-/** compute-engine's runtime helpers (`_SYS`), which generated code calls into. They belong to an
- *  engine (its random source, its streams), so each engine gets its own. Not exported by
- *  compute-engine, so taken from a function compiled on that engine. */
+/** compute-engine's runtime helpers (`_SYS`), which generated code calls into: the standalone
+ *  runtime, which is the helper table `run()` uses (compute-engine types only `load()` and keeps
+ *  the helpers' names to itself). Each engine gets its own, so random frames and loop counts are
+ *  not shared. */
 export function runtimeHelpers(ce: ComputeEngine): unknown {
   let helpers = helpersByEngine.get(ce);
   if (helpers === undefined) {
-    helpers = compileTyped(ce, ["Add", "_h", 1], { _h: "integer" })?.run.SYS;
-    if (helpers === undefined) throw new Error("compute-engine's compiled-code helpers are unavailable");
+    helpers = createJavaScriptRuntime();
     helpersByEngine.set(ce, helpers);
   }
   return helpers;

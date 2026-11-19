@@ -1,19 +1,20 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { expect, test } from "vite-plus/test";
 import { compileExpression, compileTyped } from "../src/compiled.ts";
 import { defineOverload, declareCompile, extendHead, refusing, widenSignature, wrapOperator } from "../src/index.ts";
 
 // compute-engine lowers a head by name (`Sin` to `Math.sin`) only while its definition keeps the library's
-// handlers: a definition whose `evaluate` was replaced is a shadow, and compiling it throws (an extension
-// shadows only by `lazy`, `broadcastable` or `evaluateAsync`). A package says how the head compiles instead (`CompileStance`); a replacement that says nothing closes the head.
+// handlers: a definition whose `evaluate` was replaced is a shadow, and compiling it declines (an extension
+// shadows only by `lazy`, `broadcastable` or `evaluateAsync`). A package says how the head compiles instead
+// (`CompileStance`); a replacement that says nothing closes the head.
 const code = (ce: ComputeEngine, head: string, ...operands: string[]): string | undefined =>
   compileTyped(ce, [head, ...operands], Object.fromEntries(operands.map((name) => [name, "real"])))?.code;
 
-/** Why compiling `expression` fails, or undefined when it compiles. */
+/** Why compiling `expression` declines, or undefined when it compiles. `fallback: false` makes a decline throw. */
 const failure = (ce: ComputeEngine, expression: unknown): string | undefined => {
   try {
-    new JavaScriptTarget().compile(ce.box(expression as never));
+    compile(ce.box(expression as never), { fallback: false });
     return undefined;
   } catch (error) {
     return (error as Error).message;
@@ -22,13 +23,14 @@ const failure = (ce: ComputeEngine, expression: unknown): string | undefined => 
 
 const inert = () => () => undefined;
 const CLOSED = /replaced what it computes without saying how it compiles/;
+const SIN = "Math.sin(_.x)";
 
 test("a head that states nothing is closed on a fresh engine, with nothing extended before", () => {
   const ce = new ComputeEngine();
   wrapOperator(ce, ["Sin", 1], () => false, inert, 1);
   expect(failure(ce, ["Sin", "x"])).toMatch(CLOSED);
   expect(code(ce, "Sin", "x")).toBeUndefined();
-  expect(code(ce, "Cos", "x")).toBe("Math.cos(_.x)");
+  expect(code(ce, "Cos", "x")).toContain("Math.cos(_.x)");
 });
 
 test("a replaced evaluate on an extension is closed too, not left to compute-engine's shadow check", () => {
@@ -43,7 +45,7 @@ test("a head that states 'builtin' keeps the target's lowering, after a signatur
   defineOverload(ce, "Sin", { package: "test", on: ["Interval"], written: true, evaluate: () => undefined });
   extendHead(ce, "Sin", { broadcastable: true });
   wrapOperator(ce, ["Sin", 1], () => false, inert, { arity: 1, compile: "builtin" });
-  expect(code(ce, "Sin", "x")).toBe("Math.sin(_.x)");
+  expect(code(ce, "Sin", "x")).toContain(SIN);
   expect(compileExpression(ce.box(["Sin", "x"]))?.({ x: 0 })).toBe(0);
 });
 
@@ -60,19 +62,21 @@ test("a head with a widened signature compiles up to its native operand count", 
   const ce = new ComputeEngine();
   widenSignature(ce, "Erf", "(number, number?) -> number");
   wrapOperator(ce, ["Erf", 1], () => false, inert, { compile: { upTo: 1 } });
-  expect(code(ce, "Erf", "x")).toContain("erf(");
+  expect(code(ce, "Erf", "x")).toContain("erf");
   expect(failure(ce, ["Erf", "x", "y"])).toMatch(/Erf has no javascript lowering for 2 operands/);
 });
 
-test("a lowering of its own answers, and declines to the built-in", () => {
+// A handler's answer is an expression the compiler compiles in place of the call (compute-engine 0.194.0
+// takes no code text from one).
+test("a lowering of its own answers with an expression, and declines to the built-in", () => {
   const ce = new ComputeEngine();
   extendHead(ce, "Sin", { broadcastable: true });
   wrapOperator(ce, ["Sin", 1], () => false, inert, {
     arity: 1,
-    compile: (args) => (JSON.stringify(args[0]?.json) === '"y"' ? "SIN_OF_Y" : undefined),
+    compile: (args) => (JSON.stringify(args[0]?.json) === '"y"' ? ce.box(["Cos", "y"]) : undefined),
   });
-  expect(code(ce, "Sin", "y")).toBe("SIN_OF_Y");
-  expect(code(ce, "Sin", "x")).toBe("Math.sin(_.x)");
+  expect(code(ce, "Sin", "y")).toContain("Math.cos(_.y)");
+  expect(code(ce, "Sin", "x")).toContain(SIN);
 });
 
 test("a guard throws for the operands it can't vouch for and declines otherwise", () => {
@@ -81,7 +85,7 @@ test("a guard throws for the operands it can't vouch for and declines otherwise"
   const guard = refusing((operands) => operands.some((op) => JSON.stringify(op.json) === '"y"'), "y is special");
   wrapOperator(ce, ["Sin", 1], () => false, inert, { arity: 1, compile: guard });
   expect(failure(ce, ["Sin", "y"])).toMatch(/no javascript lowering: y is special/);
-  expect(code(ce, "Sin", "x")).toBe("Math.sin(_.x)");
+  expect(code(ce, "Sin", "x")).toContain(SIN);
 });
 
 test("a handler attached in place states its own stance", () => {
@@ -89,15 +93,15 @@ test("a handler attached in place states its own stance", () => {
   extendHead(ce, "Sin", { broadcastable: true });
   const operator = (ce.lookupDefinition("Sin") as { operator: { evaluate?: unknown } }).operator;
   operator.evaluate = () => undefined;
-  // compute-engine 0.170 compiles an extension whose `evaluate` was replaced in place as the library head.
-  expect(code(ce, "Sin", "x")).toBe("Math.sin(_.x)");
+  // compute-engine compiles an extension whose `evaluate` was replaced in place as the library head.
+  expect(code(ce, "Sin", "x")).toContain(SIN);
   declareCompile(ce, "Sin", undefined);
   expect(failure(ce, ["Sin", "x"])).toMatch(CLOSED);
   const stated = new ComputeEngine();
   extendHead(stated, "Sin", { broadcastable: true });
   (stated.lookupDefinition("Sin") as { operator: { evaluate?: unknown } }).operator.evaluate = () => undefined;
   declareCompile(stated, "Sin", "builtin");
-  expect(code(stated, "Sin", "x")).toBe("Math.sin(_.x)");
+  expect(code(stated, "Sin", "x")).toContain(SIN);
 });
 
 test("an overload row with no carrier states how the head compiles", () => {
@@ -105,7 +109,7 @@ test("an overload row with no carrier states how the head compiles", () => {
   defineOverload(ce, "Sin", { package: "test", compile: "builtin", when: () => false, evaluate: () => undefined });
   extendHead(ce, "Sin", { broadcastable: true });
   wrapOperator(ce, ["Sin", 1], () => false, inert, { arity: 1, compile: "builtin" });
-  expect(code(ce, "Sin", "x")).toBe("Math.sin(_.x)");
+  expect(code(ce, "Sin", "x")).toContain(SIN);
   const closed = new ComputeEngine();
   defineOverload(closed, "Sin", { package: "test", when: () => false, evaluate: () => undefined });
   expect(failure(closed, ["Sin", "x"])).toMatch(CLOSED);
@@ -113,8 +117,16 @@ test("an overload row with no carrier states how the head compiles", () => {
 
 test("compute-engine's own compile for a head survives a stance that restricts it", () => {
   const ce = new ComputeEngine();
-  ce.declare("Twice", { signature: "(number) -> number", compile: () => "OWN_LOWERING" });
-  expect(code(ce, "Twice", "x")).toBe("OWN_LOWERING");
+  ce.declare("Twice", { signature: "(number) -> number", compile: ([x]) => ce.box(["Multiply", 2, x!]) });
+  expect(code(ce, "Twice", "x")).toContain("2 * _.x");
   wrapOperator(ce, ["Twice", 1], () => false, inert, { arity: 1, compile: { upTo: 1 } });
-  expect(code(ce, "Twice", "x")).toBe("OWN_LOWERING");
+  expect(code(ce, "Twice", "x")).toContain("2 * _.x");
+});
+
+test("a declined compilation falls back to the interpreter's value", () => {
+  const ce = new ComputeEngine();
+  wrapOperator(ce, ["Sin", 1], () => false, inert, 1);
+  const result = compile(ce.box(["Sin", 0]));
+  expect(result.success).toBe(false);
+  expect(result.run?.({})).toBe(0);
 });

@@ -77,7 +77,7 @@ function stanceOf(ce: ComputeEngine, name: string): Stance {
         }
         for (const handler of record.handlers) {
           const lowered = handler(args, compile, context);
-          if (lowered !== undefined && lowered !== "") return lowered;
+          if (lowered !== undefined) return lowered;
         }
         return record.inherited?.(args, compile, context);
       },
