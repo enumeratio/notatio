@@ -5,7 +5,7 @@ every-element-tied-for-most-frequent-symbols-and	Commonest[List[b, a, c, 2, a, b
 a-single-most-frequent-element-still-comes-back	Commonest[List[1, 2, 2, 3, 3, 3, 4]]	{3}		\text{Commonest}[\{1,2,2,3,3,3,4\}]	\{3\}
 commonest-list-b-a-c-2-a-b-1-2-4	Commonest[List[b, a, c, 2, a, b, 1, 2], 4]	{b, a, c, 2}		\text{Commonest}[\{b,a,c,2,a,b,1,2\},4]	\{b,a,c,2\}
 commonest-list-b-a-c-2-a-b-1-2-upto-6	Commonest[List[b, a, c, 2, a, b, 1, 2], UpTo[6]]	{b, a, c, 2, 1}		\text{Commonest}[\{b,a,c,2,a,b,1,2\},\text{UpTo}[6]]	\{b,a,c,2,1\}
-commonest-keeps-numerically-close-values-apart	Commonest[List[1, 1.0000000001, 1.0000000001]]				
+commonest-keeps-numerically-close-values-apart	Commonest[List[1, 1.0000000001, 1.0000000001]]	{1.0000000001}		\text{Commonest}[\{1,1.,1.\}]	\{1.\}
 all-distinct-all-tie	Commonest[List[1, 2, 3]]	{1, 2, 3}		\text{Commonest}[\{1,2,3\}]	\{1,2,3\}
 the-n-commonest-in-first-appearance-order	Commonest[List[1, 2, 2, 3, 3, 3, 4], 2]	{2, 3}		\text{Commonest}[\{1,2,2,3,3,3,4\},2]	\{2,3\}
 commonest-n-list-1-2-2-3-3-3-4	Commonest[N[List[1, 2, 2, 3, 3, 3, 4]]]	{3.}		\text{Commonest}[N[\{1,2,2,3,3,3,4\}]]	\{3.\}
