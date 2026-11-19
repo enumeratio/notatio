@@ -3,6 +3,7 @@ riemannsiegelz-1p5			[RiemannSiegelZ, 1.5]	-0.595568336782887
 riemannsiegelz-20p5			[RiemannSiegelZ, 20.5]	0.5993287025147513					
 riemannsiegelz-100		test	[N, [RiemannSiegelZ, 100]]	2.6926970566644637					
 fullsimplify-series-riemannsiegelz-x-x-0-2			[FullSimplify, [Series, [RiemannSiegelZ, x], x, 0, 2]]	[Add, [Multiply, [Rational, 1, 2], [Apply, [Derivative, RiemannSiegelZ, 2], 0], [Power, x, 2]], [Multiply, x, [Apply, [Derivative, RiemannSiegelZ, 1], 0]], [BigO, [Power, x, 3]], [RiemannSiegelZ, 0]]			Ours leaves the coefficients as symbolic Derivative terms of RiemannSiegelZ; Wolfram expands them through Zeta and PolyGamma.		
+n-riemannsiegelz-1e-12-i-20-an-exactly-zero-part		test	[N, [RiemannSiegelZ, [Complex, 0, 1e-12]], 20]	[RiemannSiegelZ, [Complex, 0, 1e-12]]	Declines at once: Z(iy) is a real zeta times a phase of ±1 or ±i, so one part is exactly zero and no working precision settles it; N leaves the call unevaluated rather than search for digits of the zero.			domain	mpmath answers a real -1.4603545088095868129; ours declines on purpose, as one part of Z(iy) is exactly zero and the bignum kernel cannot settle it.
 n-riemannsiegelz-1-over-3	Scope		[N, [RiemannSiegelZ, [Rational, 1, 3]]]	-1.2321867790632623	A real-valued function evaluated at $\frac13$				
 n-riemannsiegelz-neg-12	Scope		[N, [RiemannSiegelZ, -12]]	-1.2598888341244696	An even function, so the value at $-12$ matches $Z(12)$				
 n-riemannsiegelz-5-over-4-50	Scope		[N, [RiemannSiegelZ, [Rational, 5, 4]], 50]	{num: "-0.65081889537920883712698417960938732591709344035087"}					

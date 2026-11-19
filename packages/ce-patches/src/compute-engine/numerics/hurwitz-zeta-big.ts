@@ -24,8 +24,22 @@ export interface BigCx {
 /** Digits carried past the ones asked for, so a final rounding is (almost always) correct. */
 const GUARD_DIGITS = 8;
 
-/** The most direct terms a plan may sum: a cap on the work, past which the kernel declines. */
-const MAX_TERMS = 1e6;
+/**
+ * The most direct terms a plan may sum at `TERM_BUDGET_DIGITS` working digits, past which the kernel
+ * declines before summing anything. A BigDecimal term costs about 19 µs there (measured on
+ * ζ(1e-12 + it) at 15 digits: 0.4 s at t = 1e5, 1.1 s at 2.5e5, 3.8 s at 1e6, 6.6 s at 1.74e6, which
+ * plans 3.4e5 terms), so 1.3e5 terms is about 2.5 s, the one time rule for a bound that declines a
+ * call that would have answered. ζ(1e-12 + 5e5 i) plans about 1e5 terms and answers; at 1e6 (2e5
+ * terms) and 1.74e6 the call declines from its plan alone (70 ms) instead of summing for seconds.
+ */
+const MAX_TERMS = 1.3e5;
+
+/** The working digits `MAX_TERMS` is measured at; a term costs more in proportion to the digits past it. */
+const TERM_BUDGET_DIGITS = 25;
+
+/** The terms a plan at `digits` may sum: `MAX_TERMS`, scaled down by the digits carried past `TERM_BUDGET_DIGITS`. */
+const termBudget = (digits: number): number =>
+  Math.floor((MAX_TERMS * TERM_BUDGET_DIGITS) / Math.max(TERM_BUDGET_DIGITS, digits));
 
 /** Past this many working digits the cancellation left of the strip is too costly to carry. */
 const MAX_WORKING_DIGITS = 1200;
@@ -158,17 +172,18 @@ const lnAbsPow = (wr: number, wi: number, s: Cx): number =>
  * Choose N (direct terms) and M (Bernoulli pairs) so the first omitted tail term is below
  * 10^(−digits). A direct term costs a log, an exp and a sin/cos; a pair costs a few
  * multiplies — so of the N that work, take the one that minimises N + M/8. Undefined where no N
- * within `MAX_TERMS` of the start works (|Im s| near 10^7): the caller declines.
+ * within `termBudget(digits)` of the start works (|Im s| past ~2.5e5 at 15 digits): the caller declines.
  */
 export function plan(s: Cx, a: Cx, digits: number): Plan | undefined {
   const target = -digits * LN10 - LN10;
   const n0 = Math.max(0, Math.ceil(1 - a.re)); // Re z ≥ 1
   const maxPairs = 4 * digits + 50;
+  const budget = termBudget(digits);
   let best: Plan | undefined;
   let bestCost = Infinity;
   let firstN = -1;
   for (let n = n0; firstN < 0 || n <= 2 * firstN + 8; n += Math.max(1, Math.ceil((n - n0) / 16))) {
-    if (n > n0 + MAX_TERMS) break;
+    if (n > n0 + budget) break;
     const zr = a.re + n;
     const zi = a.im;
     const lnZ = 0.5 * Math.log(zr * zr + zi * zi);
@@ -208,7 +223,7 @@ export function plan(s: Cx, a: Cx, digits: number): Plan | undefined {
   return best;
 }
 
-/** Whether ζ(s, a) at `digits` needs more direct terms than `MAX_TERMS`, so the kernel declines it. */
+/** Whether ζ(s, a) at `digits` needs more direct terms than `termBudget`, so the kernel declines it. */
 export const beyondTermCap = (s: BigCx, a: BigCx, digits: number): boolean =>
   plan(
     { re: s.re.toNumber(), im: s.im.toNumber() },
