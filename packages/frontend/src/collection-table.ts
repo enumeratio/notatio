@@ -258,7 +258,7 @@ export function listOfLists(json: MathJsonExpression): number[][] | undefined {
 
 /**
  * What an element's JSON is to the glyph `kind` that draws it: the shape each kind reads (the integer
- * list most take; rows for `tableau`, blocks for `set-composition`, nested lists for `nested-tree`;
+ * list most take; rows for `tableau`, blocks for `set-composition`, lower covers for `hasse`, nested lists for `nested-tree`;
  * `set-partition` and `diagram` take the restricted-growth string, converted from blocks when
  * the element is a block list). `undefined` when the element is not that shape.
  */
@@ -267,6 +267,7 @@ export function glyphValue(kind: string, json: MathJsonExpression): GlyphValue |
     case "nested-tree":
       return nestedTree(json);
     case "set-composition":
+    case "hasse":
       return listOfLists(json);
     case "tableau":
       return listOfLists(json) ?? flatInts(json);

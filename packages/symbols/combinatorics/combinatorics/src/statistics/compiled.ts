@@ -21,11 +21,16 @@ import { COMPILED as POSETS_COMPILED } from "../../posets/src/statistics.compile
 import { COMPILED as CARTAN_COMPILED } from "../../cartan/src/statistics.compiled.generated.js";
 import { COMPILED as WORDS_COMPILED } from "../../words/src/statistics.compiled.generated.js";
 import { FLAT_BY_NAME as FLAT, subjectToJs } from "../flat.ts";
-import { type Definition, definitionKey, SUBJECT, signatureOf } from "./types.ts";
+import { type Definition, definitionKey, SUBJECT, signatureOf, whereSignatureOf } from "./types.ts";
+
+interface CompiledEntry {
+  readonly hash: string;
+  readonly run: (sys: never, vars: Record<string, unknown>) => unknown;
+}
 
 /** Every area's compiled table, merged. Add a spread here when an area's kernel moves in;
  *  nothing else in this file changes. */
-const COMPILED = {
+export const COMPILED: Record<string, CompiledEntry> = {
   ...PERMUTATIONS_COMPILED,
   ...PARTITIONS_COMPILED,
   ...COMPOSITIONS_COMPILED,
@@ -39,12 +44,19 @@ const COMPILED = {
   ...CARTAN_COMPILED,
 };
 
-/** The compiled form of `definition`, as a function of its subject's MathJSON, or undefined
- *  when there is none current. The function answers undefined where it can't answer exactly. */
+/** The compiled form of `definition` (or of its `where`), as a function of its subject's MathJSON, or
+ *  undefined when there is none current. The function answers undefined where it can't answer exactly. */
 export function compiledStatistic(
   ce: Engine,
   definition: Definition,
+  part: "expr" | "where" = "expr",
 ): ((subject: unknown) => MathJSON | undefined) | undefined {
+  if (part === "where") {
+    const held = COMPILED[whereSignatureOf(definition)];
+    if (held === undefined || definition.where === undefined || held.hash !== definitionHash(definition.where))
+      return undefined;
+    return compiledRun(ce, held.run, undefined);
+  }
   const entry = COMPILED[signatureOf(definition)];
   if (entry === undefined) return undefined;
   // An entry stamped with the flat alternative's hash was compiled from it, and takes the flat reading.
@@ -52,13 +64,21 @@ export function compiledStatistic(
   if (!flat && entry.hash !== definitionHash(definition.expr)) return undefined;
   const codec = flat ? FLAT[definition.on] : undefined;
   if (flat && codec === undefined) return undefined;
+  return compiledRun(ce, entry.run, codec);
+}
+
+function compiledRun(
+  ce: Engine,
+  run: CompiledEntry["run"],
+  codec: (typeof FLAT)[string] | undefined,
+): (subject: unknown) => MathJSON | undefined {
   const sys = runtimeHelpers(ce);
   return (subject) => {
     const nested = subjectToJs(subject);
     const value = codec === undefined || nested === undefined ? nested : codec.encode(nested);
     if (value === undefined) return undefined;
     try {
-      return fromJs(entry.run(sys, { [SUBJECT]: value }));
+      return fromJs(run(sys as never, { [SUBJECT]: value }));
     } catch {
       return undefined;
     }

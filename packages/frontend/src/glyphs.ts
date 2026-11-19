@@ -310,6 +310,50 @@ export function setCompositionSvg(blocks: number[][], unit = 22): string {
   return pillsSvg(blocks, "set composition", true, unit);
 }
 
+/**
+ * Hasse diagram of a naturally labeled poset, given as its lower covers (entry `i` lists the elements element `i + 1`
+ * covers): one row per height, minimal elements at the bottom, an element in the row above its highest cover. The bottom row
+ * keeps label order and each row above it is ordered by the mean place of its covers (one barycenter pass), rows centred;
+ * a line joins each element to the elements it covers.
+ */
+export function hasseSvg(lower: readonly (readonly number[])[], unit = 26, r = 4.5): string {
+  const n = lower.length;
+  if (n === 0) return svg("-1 -1 24 24", "Hasse diagram", "");
+  const height: number[] = [];
+  lower.forEach((covers, i) => {
+    height[i] = covers.length === 0 ? 0 : 1 + Math.max(...covers.map((c) => height[c - 1] ?? 0));
+  });
+  const levels = Math.max(...height) + 1;
+  const rows: number[][] = Array.from({ length: levels }, () => []);
+  height.forEach((h, i) => rows[h].push(i + 1));
+  const x = new Map<number, number>();
+  const place = (row: number[]): void => row.forEach((el, k) => x.set(el, k - (row.length - 1) / 2));
+  place(rows[0]);
+  for (let h = 1; h < levels; h++) {
+    const mean = (el: number): number => {
+      const covers = lower[el - 1];
+      return covers.reduce((sum, c) => sum + (x.get(c) ?? 0), 0) / covers.length;
+    };
+    rows[h].sort((a, b) => mean(a) - mean(b) || a - b);
+    place(rows[h]);
+  }
+  const widest = Math.max(...rows.map((row) => row.length));
+  const px = (el: number): number => r + 1 + ((widest - 1) / 2 + (x.get(el) ?? 0)) * unit;
+  const py = (el: number): number => r + 1 + (levels - 1 - height[el - 1]) * unit;
+  let body = "";
+  lower.forEach((covers, i) => {
+    for (const c of covers)
+      body += `<line x1="${n2(px(c))}" y1="${n2(py(c))}" x2="${n2(px(i + 1))}" y2="${n2(py(i + 1))}" stroke="${BORDER}" stroke-width="1.5"/>`;
+  });
+  for (let el = 1; el <= n; el++)
+    body += `<circle cx="${n2(px(el))}" cy="${n2(py(el))}" r="${n2(r)}" fill="${ACCENT}"/>`;
+  return svg(
+    `0 0 ${n2((widest - 1) * unit + 2 * r + 2)} ${n2((levels - 1) * unit + 2 * r + 2)}`,
+    "Hasse diagram",
+    body,
+  );
+}
+
 /** A nested tree value: a list is a node holding its children, anything else a leaf. */
 export type NestedTree = number | readonly NestedTree[];
 
@@ -478,7 +522,8 @@ export type GlyphKind =
   | "lukasiewicz"
   | "nested-tree"
   | "signed-permutation"
-  | "set-composition";
+  | "set-composition"
+  | "hasse";
 
 /** Every kind `renderGlyph` draws; what a row source or a carrier record may name. */
 export const GLYPH_KINDS: ReadonlySet<string> = new Set<GlyphKind>([
@@ -499,6 +544,7 @@ export const GLYPH_KINDS: ReadonlySet<string> = new Set<GlyphKind>([
   "nested-tree",
   "signed-permutation",
   "set-composition",
+  "hasse",
 ]);
 
 /** What a glyph draws: a flat integer list, or the nested lists a tableau, set composition or tree is. */
@@ -542,6 +588,8 @@ export function renderGlyph(kind: GlyphKind, value: GlyphValue, opts?: { n?: num
       return signedPermutationSvg(ints);
     case "set-composition":
       return setCompositionSvg(value as number[][]);
+    case "hasse":
+      return hasseSvg(value as number[][]);
     default:
       throw new Error("unreachable: GlyphKind is exhaustive above");
   }

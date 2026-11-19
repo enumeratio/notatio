@@ -136,12 +136,20 @@ const NO_EDGE = new Set([
   "SeparablePermutations",
   // UnlabeledGraphs' fast path stops at 8 vertices by choice, not at 2^53 (see LARGEST_PARAM).
   "UnlabeledGraphs",
+  // Posets' definitions scan every code below 2^C(n, 2) against every permutation: the fast path lists to n = 9, and
+  // compiled Epsil is held to it where it takes about a second a call (SMALL_PARAMS).
+  "Posets",
 ]);
 
 /** The params 0 to this one are tried where Epsil reaches no further in a few seconds: UnlabeledGraphs(n) tries every
  *  relabeling of all 2^C(n, 2) graphs (n = 4: 64 graphs of 24 relabelings; n = 5 takes minutes interpreted, so only
  *  DEEP_TESTS takes it). */
 const LARGEST_PARAM: Readonly<Record<string, number>> = { UnlabeledGraphs: DEEP ? 5 : 4 };
+
+/** Params tried in place of the default small ones, for a family whose Epsil is out of reach past them. */
+const SMALL_PARAMS: Readonly<Record<string, readonly number[]>> = {
+  Posets: DEEP ? [0, 1, 2, 3, 4, 5] : [0, 1, 2, 3, 4],
+};
 
 const grids = new Map<string, { grid: number[][]; above: number[][] }>();
 
@@ -151,15 +159,17 @@ const grids = new Map<string, { grid: number[][]; above: number[][] }>();
 function paramGrid(family: EpsilFamily): { grid: number[][]; above: number[][] } {
   const cached = grids.get(family.head);
   if (cached !== undefined) return cached;
-  const small = interpreted(family)
-    ? DEEP
-      ? family.paramCount === 1
-        ? [0, 1, 2, 3, 4, 5]
-        : [0, 1, 2, 3]
-      : [0, 1, 2]
-    : DEEP
-      ? [0, 1, 2, 3, 4, 5, 6, 8, 10, 13]
-      : [0, 1, 2, 3, 5, 8];
+  const small = SMALL_PARAMS[family.head]
+    ? [...SMALL_PARAMS[family.head]]
+    : interpreted(family)
+      ? DEEP
+        ? family.paramCount === 1
+          ? [0, 1, 2, 3, 4, 5]
+          : [0, 1, 2, 3]
+        : [0, 1, 2]
+      : DEEP
+        ? [0, 1, 2, 3, 4, 5, 6, 8, 10, 13]
+        : [0, 1, 2, 3, 5, 8];
   const walks: ((x: number) => number[])[] = [];
   if (family.paramCount === 1) walks.push((n) => [n]);
   else

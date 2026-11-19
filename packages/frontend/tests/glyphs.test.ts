@@ -3,6 +3,7 @@ import {
   compositionSvg,
   dyckSvg,
   ferrersSvg,
+  hasseSvg,
   permutationSvg,
   renderGlyph,
   latticePathSvg,
@@ -201,4 +202,28 @@ test("set composition: pills in order, an arrow between neighbors", () => {
   expect(count(s, "polygon")).toBe(1);
   expect(s.indexOf(">3<")).toBeLessThan(s.indexOf(">1<"));
   expect(renderGlyph("set-composition", [[1], [2]])).toBe(setCompositionSvg([[1], [2]]));
+});
+
+/** The (x, y) of each dot of a diagram, in element order. */
+const dotsOf = (s: string): (readonly [number, number])[] =>
+  [...s.matchAll(/<circle cx="([\d.]+)" cy="([\d.]+)"/g)].map((m) => [Number(m[1]), Number(m[2])] as const);
+
+test("Hasse diagram: a dot per element, a line per cover, rows by height", () => {
+  // 1 < 3, 2 < 3, 3 < 4, and 5 alone.
+  const s = hasseSvg([[], [], [1, 2], [3], []]);
+  expect(count(s, "circle")).toBe(5);
+  expect(count(s, "line")).toBe(3);
+  expect(count(hasseSvg([]), "circle")).toBe(0);
+  // The chain 1 < 2 < 3 stands in one column, 1 lowest.
+  const chain = dotsOf(hasseSvg([[], [1], [2]]));
+  expect(new Set(chain.map(([x]) => x)).size).toBe(1);
+  expect(chain[0]![1] > chain[1]![1] && chain[1]![1] > chain[2]![1]).toBe(true);
+  expect(renderGlyph("hasse", [[], [1]])).toBe(hasseSvg([[], [1]]));
+});
+
+test("Hasse diagram: one barycenter pass orders a row by its covers, not its labels", () => {
+  // Element 3 covers 2 and element 4 covers 1: 4 stands over 1, to the left of 3.
+  const dots = dotsOf(hasseSvg([[], [], [2], [1]]));
+  expect(dots[0]![0]).toBeLessThan(dots[1]![0]);
+  expect(dots[3]![0]).toBeLessThan(dots[2]![0]);
 });

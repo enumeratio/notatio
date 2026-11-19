@@ -18,12 +18,13 @@ import type { ReferenceEntry, ReferenceExample } from "@notatio/entry";
 import { headExists, readEntry } from "@notatio/entry/node";
 import type { GeneratedEntries } from "@notatio/entry/node";
 import { captionId, dedupeId } from "@notatio/entry";
-import { type Engine, isNativeHead } from "@notatio/engine";
+import { type Engine, isNativeHead, toInputForm } from "@notatio/engine";
 import { bareEngine } from "@notatio/engine/testing";
 import { readFileSync } from "node:fs";
 import { findstat } from "../../findstat/src/findstat-data.ts";
 import { readObject } from "../../findstat/src/objects.ts";
-import { bySignature, type Definition, type FrontierEntry } from "./types.ts";
+import { inDomain } from "./declare.ts";
+import { bySignature, type Definition, type FrontierEntry, signatureOf } from "./types.ts";
 
 /** FindStat's statistics: each id's smallest (object, value) rows, a few or, for a collection held object by object, every row to a size (`collect-findstat-data.ts`). */
 const FINDSTAT = (
@@ -232,7 +233,13 @@ export function areaStatisticsEntries(options: AreaEntriesOptions): {
 
   function examplesFor(definition: Definition): Example[] {
     const out: Example[] = [];
+    let offDomain = 0;
     for (const sample of samples.filter((s) => s.on === undefined || s.on === definition.on)) {
+      // A sample off the definition's domain is not evaluated for it.
+      if (!inDomain(ce, definition, ce.box((sample.contents ?? sample.subject ?? listOf(sample.list)) as never))) {
+        offDomain++;
+        continue;
+      }
       for (const subject of subjectsFor(definition, sample)) {
         const bare = !Array.isArray(subject) || subject[0] !== definition.on;
         // One carrier example per sample, and a single bare-list example overall — enough to
@@ -248,6 +255,8 @@ export function areaStatisticsEntries(options: AreaEntriesOptions): {
         });
       }
     }
+    if (out.length === 0 && offDomain > 0)
+      throw new Error(`${signatureOf(definition)}: none of its ${offDomain} samples is in its domain`);
     return out;
   }
 
@@ -261,6 +270,9 @@ export function areaStatisticsEntries(options: AreaEntriesOptions): {
       definition.alsoOnList === true
         ? `Takes a \`${definition.on}\`, and also a bare list of integers: this reading compares entries with each other rather than with their positions, so it stands on any sequence.`
         : `Takes a \`${definition.on}\` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.`,
+      ...(definition.where === undefined
+        ? []
+        : [`Defined where \`${toInputForm(definition.where as never)}\` holds; elsewhere the call stays unevaluated.`]),
       ...(definition.note === undefined ? [] : [definition.note]),
       ...(shadowedByHead.get(definition.head) ?? []).map(
         (d) =>

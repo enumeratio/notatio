@@ -45,6 +45,7 @@ import {
   pruferSequencesEntries as treesPruferSequencesEntries,
 } from "../../../trees/src/families/index.ts";
 import { coreEntries as graphsCoreEntries } from "../../../graphs/src/families/index.ts";
+import { coreEntries as posetsCoreEntries } from "../../../posets/src/families/index.ts";
 import { finiteCartanTypes } from "../../../cartan/src/families/index.ts";
 import {
   coreSurjectionsEntries as setPartitionsSurjectionsEntries,
@@ -121,6 +122,7 @@ const numberEntries = [
   ...numericDivisor,
   ...numericDigitsPrimes,
   ...treesUnlabeledTreesEntries,
+  ...posetsCoreEntries,
 ].map(liftFamily);
 
 // Every family: a TS kernel in the bigint contract, or an Epsil definition whose kernel belongs

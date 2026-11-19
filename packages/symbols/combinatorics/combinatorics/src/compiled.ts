@@ -197,6 +197,7 @@ export function fastDefinition(options: {
     imageParts,
   } = options;
   const hash = definitionHash({ body, guard });
+  const namesImage = JSON.stringify(guard)?.includes('"_image"') === true;
   const withFlat = flatHash({ body, guard, flat });
   type Ready = { body: Compiled; guard?: Compiled } & Codecs;
   let compiled: Ready | null | undefined;
@@ -238,6 +239,9 @@ export function fastDefinition(options: {
     const raw = plain === undefined || compiled?.encode === undefined ? plain : compiled.encode.encode(plain);
     if (compiled !== null && raw !== undefined) {
       try {
+        // A guard that does not name `_image` is checked first, as the interpreter does: a subject outside the domain
+        // can be one the body cannot afford to run.
+        if (!namesImage && compiled.guard !== undefined && compiled.guard.run({ _raw: raw }) !== true) return undefined;
         const answer = compiled.body.run({ _raw: raw });
         const image = compiled.decode === undefined || answer === undefined ? answer : compiled.decode.decode(answer);
         const json = fromJs(image);
