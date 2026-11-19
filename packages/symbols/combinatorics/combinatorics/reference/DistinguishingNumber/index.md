@@ -19,4 +19,5 @@ signatures:
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
 - Takes a `LabeledGraph` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
-- FindStat's St000469. A coloring is read as the digits of c in base k, vertex v the digit at position v - 1; k = n always works, so the search ends. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row.
+- Defined where `_x[1] <= 5` holds; elsewhere the call stays unevaluated.
+- FindStat's St000469. A coloring is read as the digits of c in base k, vertex v the digit at position v - 1; k = n always works, so the search ends. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row. The k^n colorings take 9.5 s for the edgeless graph on 6 vertices, so a graph of 6 or more vertices (every row FindStat holds on 6 and 7) is left unevaluated.
