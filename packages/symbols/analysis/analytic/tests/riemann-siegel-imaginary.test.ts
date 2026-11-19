@@ -5,8 +5,8 @@ import { declareAnalytic } from "../src/declare.ts";
 
 // Z(iy) = π^{y/2} √(|Γ(¼ − y/2)| / Γ(¼ + y/2)) (−i)^⌈y/2 − ¼⌉ ζ(½ − y), from ζ and ln Γ at real
 // arguments (riemann-siegel-big.ts). It is real for |y| < ½ and between the poles y = ½ + 2k it is
-// real or purely imaginary by turns, the other part exactly zero; at a pole, near a half-integer by less than the guard, and past the
-// range checked against mpmath (|y| ≤ 100), it declines. There is no compile target for it.
+// real or purely imaginary by turns, the other part exactly zero; at a pole and past the range checked
+// against mpmath (|y| ≤ 100) it declines. There is no compile target for it.
 
 const ce = new ComputeEngine();
 declareAnalytic(ce);
@@ -102,21 +102,20 @@ describe("it declines where it can't vouch for the value", () => {
   });
 });
 
-// The guard (riemann-siegel-big.ts): within 1e-13 of a half-integer from 1.5 up, a y with more digits than
-// a double declines, because ζ's kernel plans from s = ½ − y as a double and reads a negative integer.
-// Outside it, and next to ½ at any distance, the digits asked for are right. Values: mpmath's definition
-// at 120 digits (`loggamma`, `zeta`), which agrees with `siegelz`; the double rows are at the exact double.
+// Next to a pole y = ½ + 2k the digits asked for are right at any distance: ζ's kernel reads s = ½ − y
+// exactly (it once planned from the double, which for y = 5/2 + 1e-16 is the integer −2, and was 9% off).
+// Values: mpmath's definition at 120 digits (`loggamma`, `zeta`); the double rows are at the exact double.
 const nString = (y: string, digits: number) =>
   ce.box(["N", ["RiemannSiegelZ", ["Complex", 0, { num: y }]], digits] as never).evaluate();
 
-describe("the pole guard", () => {
+describe("next to a pole", () => {
   // [y, real part, imaginary part] at 20 digits; a part of 0 is exactly zero.
   const outside: [string, string | 0, string | 0][] = [
     ["2.5000000000002", "-8.5557907872494162922e-8", 0],
     ["98.4999999999998", 0, "2.3788698414875517737e31"],
     ["40.5000000000002", 0, "31.061696140059109618"],
     ["10.4999999999998", 0, "6.1545562459062083437e-8"],
-    ["0.500000000001", 0, "707106.78118610181329"], // next to ½ no guard is needed
+    ["0.500000000001", 0, "707106.78118610181329"],
     ["0.499999999999", "-707106.78118699323551", 0],
   ];
   for (const [y, re, im] of outside) {
@@ -137,11 +136,29 @@ describe("the pole guard", () => {
     });
   }
 
-  test("a y inside the radius that a double can't hold declines at every digit count", () => {
-    for (const y of ["2.5000000000000001", "98.49999999999999999", "40.5000000000000001", "1.5000000000000001"]) {
-      for (const digits of [20, 50]) expect(isDeclined(nString(y, digits))).toBe(true);
-    }
-  });
+  // [y, real part, imaginary part] at 22 digits: a y that has more digits than a double and lies a hair
+  // off a half-integer. ζ's kernel reads s = ½ − y exactly, so each answers (a part of 0 is exactly zero).
+  const hair: [string, string | 0, string | 0][] = [
+    ["2.5000000000000001", "-1.913132980155851592183e-9", 0],
+    ["98.49999999999999999", 0, "1.682114996476478191854e29"],
+    ["40.5000000000000001", 0, "0.6945606406560206126622"],
+    ["1.5000000000000001", 0, "0.3702402448465304732862"],
+  ];
+  for (const [y, re, im] of hair) {
+    test(`y = ${y}, which a double can't hold, answers at 20 and 50 digits, to mpmath`, () => {
+      for (const digits of [20, 50]) {
+        const value = nString(y, digits);
+        expect(isDeclined(value), `${digits} digits`).toBe(false);
+        for (const [part, want] of [
+          [value.re, re],
+          [value.im, im],
+        ] as const) {
+          if (want === 0) expect(part).toBe(0);
+          else expect(part / Number(want)).toBeCloseTo(1, 14);
+        }
+      }
+    });
+  }
 
   test("a double one ulp off a half-integer answers on the double route, to mpmath at that double", () => {
     const value = ce.box(call(2.5000000000000004)).N();
