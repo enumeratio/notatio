@@ -4,8 +4,8 @@ sum-k-pow-neg-6-k-1-positiveinfinity	Sum[Power[k, -6], List[k, 1, Infinity]]	Pi^
 sum-of-a-subset				
 sum-of-a-lehmer-code				
 sum-of-a-subexcedant-sequence				
-sum-2-pow-neg-k-no-bounds				
-sum-k-pow-neg-2-no-bounds				
-sum-k-no-bounds-diverges				
+sum-2-pow-neg-k-no-bounds	Sum[Power[2, Minus[k]], k]			
+sum-k-pow-neg-2-no-bounds	Sum[Power[k, -2], k]			
+sum-k-no-bounds-diverges	Sum[k, k]			
 sum-k-pow-neg-2-k-1-positiveinfinity	Sum[Power[k, -2], List[k, 1, Infinity]]	Pi^2/6	\sum _{k=1}^{\infty } \frac{1}{k^2}	\frac{\pi ^2}{6}
 sum-i-limits-i-1-4-2				
