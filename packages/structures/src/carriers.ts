@@ -49,12 +49,6 @@ export interface Carrier {
    * onto compute-engine's own expansion — there is no plural type space for it.
    */
   readonly plural?: string;
-  /** The carrier this one RESTRICTS, when it is a restriction. compute-engine cannot express
-   *  the subtype relation between minted types (§1.1), so this is recorded as data and
-   *  checked by predicate rather than believed by the engine. */
-  readonly restricts?: string;
-  /** The membership predicate, as a head taking a value of the parent carrier. */
-  readonly predicate?: string;
   /** How many of a packed multi-arg operand's LEADING slots are params, not the element(s) --
    *  the same count a family with this carrier declares as its own `carrierParams`
    *  (`@notatio/combinatorics/collections`'s `families/declare.ts`, e.g. `Tournament(n,

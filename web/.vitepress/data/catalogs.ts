@@ -74,7 +74,6 @@ export const domainsRows: readonly CatalogRow[] = [...CARRIERS]
     name: c.name,
     href: symbol(c.name),
     badges: [c.shape],
-    summary: c.restricts ? `restricts ${c.restricts}` : undefined,
     references: crosswalkFor(c.name),
   }))
   .toSorted(byName);

@@ -67,9 +67,7 @@ export function assemble(loaded: readonly ReferenceEntry[]) {
     name: c.name,
     domain: "Carrier domains",
     signature: `${c.name}: ${c.shape}`,
-    summary: c.restricts
-      ? `A carrier domain restricting ${c.restricts}.`
-      : "A carrier domain: the nominal type this object is stored and dispatched as.",
+    summary: "A carrier domain: the nominal type this object is stored and dispatched as.",
     examples: [],
     stub: "carrier",
   }));
