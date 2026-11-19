@@ -19,4 +19,5 @@ signatures:
 
 - Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
 - Takes a `LabeledGraph` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
+- Defined where `_x[1] <= 17` holds; elsewhere the call stays unevaluated.
 - FindStat's St001286: the largest k with the k smallest degrees adding up to at most the edges; the best set of k vertices is those. The graph with no vertices gives 0.
