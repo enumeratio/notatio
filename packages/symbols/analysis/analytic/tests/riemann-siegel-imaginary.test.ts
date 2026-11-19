@@ -5,7 +5,7 @@ import { declareAnalytic } from "../src/declare.ts";
 
 // Z(iy) = π^{y/2} √(|Γ(¼ − y/2)| / Γ(¼ + y/2)) (−i)^⌈y/2 − ¼⌉ ζ(½ − y), from ζ and ln Γ at real
 // arguments (riemann-siegel-big.ts). It is real for |y| < ½ and between the poles y = ½ + 2k it is
-// real or purely imaginary by turns, the other part exactly zero; at and near a pole, and past the
+// real or purely imaginary by turns, the other part exactly zero; at a pole, near a half-integer by less than the guard, and past the
 // range checked against mpmath (|y| ≤ 100), it declines. There is no compile target for it.
 
 const ce = new ComputeEngine();
@@ -80,7 +80,7 @@ describe("the routes agree", () => {
 });
 
 describe("it declines where it can't vouch for the value", () => {
-  const declined = [0.5, -0.5, 2.5, 4.5, 10.5, 40.5, 0.5 + 1e-5, 2.5 - 1e-5, 4.5 + 1e-6, 101, 1e6];
+  const declined = [0.5, -0.5, 2.5, 4.5, 10.5, 40.5, 98.5, 101, 1e6];
   for (const y of declined) {
     test(`y = ${y}`, () => {
       expect(isDeclined(n(y, 20))).toBe(true);
@@ -94,9 +94,106 @@ describe("it declines where it can't vouch for the value", () => {
     for (const y of [0.5, 2.5]) expect(ce.box(call(y)).N().type.matches("real")).toBe(false);
   });
 
-  test("the nearest answered points on either side of a pole", () => {
-    for (const y of [0.5 - 2e-4, 0.5 + 2e-4, 2.5 - 2e-4, 2.5 + 2e-4]) expect(isDeclined(n(y, 20))).toBe(false);
+  test("the points on either side of a pole answer", () => {
+    for (const y of [0.5 - 2e-4, 0.5 + 2e-4, 2.5 - 2e-4, 2.5 + 2e-4, 0.5 + 1e-5, 2.5 - 1e-5, 4.5 + 1e-6]) {
+      expect(isDeclined(n(y, 20))).toBe(false);
+      expect(isDeclined(ce.box(call(y)).N())).toBe(false);
+    }
   });
+});
+
+// The guard (riemann-siegel-big.ts): within 1e-13 of a half-integer from 1.5 up, a y with more digits than
+// a double declines, because ζ's kernel plans from s = ½ − y as a double and reads a negative integer.
+// Outside it, and next to ½ at any distance, the digits asked for are right. Values: mpmath's definition
+// at 120 digits (`loggamma`, `zeta`), which agrees with `siegelz`; the double rows are at the exact double.
+const nString = (y: string, digits: number) =>
+  ce.box(["N", ["RiemannSiegelZ", ["Complex", 0, { num: y }]], digits] as never).evaluate();
+
+describe("the pole guard", () => {
+  // [y, real part, imaginary part] at 20 digits; a part of 0 is exactly zero.
+  const outside: [string, string | 0, string | 0][] = [
+    ["2.5000000000002", "-8.5557907872494162922e-8", 0],
+    ["98.4999999999998", 0, "2.3788698414875517737e31"],
+    ["40.5000000000002", 0, "31.061696140059109618"],
+    ["10.4999999999998", 0, "6.1545562459062083437e-8"],
+    ["0.500000000001", 0, "707106.78118610181329"], // next to ½ no guard is needed
+    ["0.499999999999", "-707106.78118699323551", 0],
+  ];
+  for (const [y, re, im] of outside) {
+    test(`y = ${y} answers, 20 and 50 digits agree`, () => {
+      const value = nString(y, 20);
+      expect(isDeclined(value)).toBe(false);
+      for (const [part, want] of [
+        [value.re, re],
+        [value.im, im],
+      ] as const) {
+        if (want === 0) expect(part).toBe(0);
+        else expect(part / Number(want)).toBeCloseTo(1, 14);
+      }
+      const fifty = nString(y, 50);
+      expect(
+        Math.abs(Number(fifty.re) - Number(value.re)) + Math.abs(Number(fifty.im) - Number(value.im)),
+      ).toBeLessThanOrEqual(1e-14 * Math.hypot(Number(value.re), Number(value.im)));
+    });
+  }
+
+  test("a y inside the radius that a double can't hold declines at every digit count", () => {
+    for (const y of ["2.5000000000000001", "98.49999999999999999", "40.5000000000000001", "1.5000000000000001"]) {
+      for (const digits of [20, 50]) expect(isDeclined(nString(y, digits))).toBe(true);
+    }
+  });
+
+  test("a double one ulp off a half-integer answers on the double route, to mpmath at that double", () => {
+    const value = ce.box(call(2.5000000000000004)).N();
+    expect(isDeclined(value)).toBe(false);
+    expect(value.im).toBe(0);
+    expect(value.re / -4.031626294791195e-9).toBeCloseTo(1, 13);
+    const half = ce.box(call(1.5)).N(); // not a pole: Z(1.5i) = 0.37024024484653052058 i
+    expect(half.re).toBe(0);
+    expect(half.im / 0.3702402448465305).toBeCloseTo(1, 13);
+  });
+
+  test("every route at a point just outside the guard", () => {
+    const y = "2.5000000000002";
+    const viaN = ce.box(call(Number(y))).N();
+    const viaEvaluate = ce.box(["RiemannSiegelZ", ["Complex", 0, { num: y }]] as never).evaluate();
+    const parsed = ce.parse(`\\operatorname{RiemannSiegelZ}(${y}i)`).N();
+    // the double route is held to the definition at the exact double, which is 4e-4 from the decimal's value
+    for (const v of [viaN, viaEvaluate, parsed]) {
+      expect(isDeclined(v)).toBe(false);
+      expect(v.im).toBe(0);
+      expect(v.re / -8.552370876769486e-8).toBeCloseTo(1, 13);
+    }
+  });
+});
+
+// Every pole at every distance from 1e-4 to 1e-12 (the hand-back's grid, against mpmath) holds the digits
+// across routes: 20 against 50 digits, a part that is zero exactly zero, and the double route within its
+// conditioning of the big route (a double y moves Z by about ulp(y)/distance).
+describe.runIf(process.env.DEEP_TESTS === "1")("the grid around each pole", () => {
+  for (const pole of [0.5, 2.5, 10.5, 40.5, 98.5]) {
+    test(`pole ${pole}`, () => {
+      for (const sign of [-1, 1]) {
+        for (let e = 4; e <= 12; e++) {
+          const distance = 10 ** -e;
+          const text = (pole + sign * distance).toFixed(12);
+          const [a, b] = [nString(text, 20), nString(text, 50)];
+          expect(isDeclined(a)).toBe(false);
+          const size = Math.hypot(Number(b.re), Number(b.im));
+          expect(Math.abs(Number(a.re) - Number(b.re)) + Math.abs(Number(a.im) - Number(b.im))).toBeLessThanOrEqual(
+            1e-14 * size,
+          );
+          expect(a.re === 0 || a.im === 0).toBe(true); // one part is exactly zero
+          const dbl = ce.box(call(Number(text))).N();
+          expect(isDeclined(dbl)).toBe(false);
+          const tolerance = 1e-13 + (4 * Number.EPSILON * pole) / distance;
+          expect(Math.abs(Number(dbl.re) - Number(b.re)) + Math.abs(Number(dbl.im) - Number(b.im))).toBeLessThanOrEqual(
+            tolerance * size,
+          );
+        }
+      }
+    });
+  }
 });
 
 // Precision independence and evenness across every interval between poles up to 100, a few points
