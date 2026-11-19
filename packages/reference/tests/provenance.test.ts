@@ -2489,6 +2489,7 @@ test("every head we invented is either novel or known to exist elsewhere", () =>
       "AnimatorBox",
       "AppendTo",
       "CanonicalGraph",
+      "GraphComplement",
       "Around",
       "Array",
       "ArrowBox",
