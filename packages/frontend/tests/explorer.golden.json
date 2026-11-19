@@ -1409,9 +1409,9 @@
   "Posets": {
     "expr": "Posets(4)",
     "glyph": "hasse",
-    "columns": ["AntichainCount", "ChainCount", "CoverRelationCount", "ElementCountMinusWidth"],
+    "columns": ["AntichainCount", "ChainCount", "ChainPolytopeFacetCount", "CoverRelationCount"],
     "derived": false,
-    "statistics": 28
+    "statistics": 45
   },
   "PowerSet": null,
   "PowerfulNumbers": {
