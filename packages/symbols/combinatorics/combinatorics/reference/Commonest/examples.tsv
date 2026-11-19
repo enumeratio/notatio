@@ -5,6 +5,7 @@ every-element-tied-for-most-frequent-symbols-and			[Commonest, [List, b, a, c, 2
 a-single-most-frequent-element-still-comes-back			[Commonest, [List, 1, 2, 2, 3, 3, 3, 4]]	[List, 3]	A single most-frequent element still comes back in a list
 commonest-list-b-a-c-2-a-b-1-2-4			[Commonest, [List, b, a, c, 2, a, b, 1, 2], 4]	[List, b, a, c, 2]	
 commonest-list-b-a-c-2-a-b-1-2-upto-6			[Commonest, [List, b, a, c, 2, a, b, 1, 2], [UpTo, 6]]	[List, b, a, c, 2, 1]	
+commonest-keeps-numerically-close-values-apart		test	[Commonest, [List, 1, 1.0000000001, 1.0000000001]]	[List, 1.0000000001]	
 all-distinct-all-tie	Scope		[Commonest, [List, 1, 2, 3]]	[List, 1, 2, 3]	All distinct: all tie
 the-n-commonest-in-first-appearance-order	Scope		[Commonest, [List, 1, 2, 2, 3, 3, 3, 4], 2]	[List, 2, 3]	The $n$ commonest, ties broken by first appearance
 commonest-n-list-1-2-2-3-3-3-4	Scope		[Commonest, [N, [List, 1, 2, 2, 3, 3, 3, 4]]]	[List, {num: "3.0"}]	Numeric input still picks the most frequent value, 3

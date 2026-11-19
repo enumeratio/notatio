@@ -280,7 +280,10 @@ export function declareListOpsWolfram(ce: Engine): void {
   });
 
   // Gather(list, test?): group identical (or `test`-equivalent) elements, first-appearance
-  // order, elements within a group in their original relative order.
+  // order, elements within a group in their original relative order. Identical is structural
+  // (`isSame`, Wolfram's SameQ): `isEqual` is numeric, so it joins `1` and `1.0000000001` and
+  // leaves `Sin(x)` against `Cos(x)` undecided, where compute-engine's Unique and Tally compare
+  // structurally. Union, GatherBy, Split, SplitBy and Commonest compare the same way.
   ce.declare("Gather", {
     signature: "(indexed_collection<T>, ((T, T) any -> boolean)?) -> list<list<T>> where T",
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
@@ -293,7 +296,7 @@ export function declareListOpsWolfram(ce: Engine): void {
       const test = ops[1];
       const sameGroup =
         test === undefined
-          ? (a: Expr, b: Expr) => a.isEqual(b) === true
+          ? (a: Expr, b: Expr) => a.isSame(b)
           : (a: Expr, b: Expr) => symbolNameOf(applyFunction(ce, test, [a, b])) === "True";
       const groups = groupBy(items, sameGroup);
       return ce.box(["List", ...groups.map((group) => ce.box(["List", ...group]))]);
@@ -311,7 +314,7 @@ export function declareListOpsWolfram(ce: Engine): void {
       const groups: { key: Expr; members: Expr[] }[] = [];
       for (const item of items) {
         const key = applyFunction(ce, f, [item]);
-        const group = groups.find((g) => g.key.isEqual(key) === true);
+        const group = groups.find((g) => g.key.isSame(key));
         if (group !== undefined) group.members.push(item);
         else groups.push({ key, members: [item] });
       }
@@ -328,7 +331,7 @@ export function declareListOpsWolfram(ce: Engine): void {
       const test = ops[1];
       const same =
         test === undefined
-          ? (a: Expr, b: Expr) => a.isEqual(b) === true
+          ? (a: Expr, b: Expr) => a.isSame(b)
           : (a: Expr, b: Expr) => symbolNameOf(applyFunction(ce, test, [a, b])) === "True";
       const runs = splitRuns(items, same);
       return ce.box(["List", ...runs.map((run) => ce.box(["List", ...run]))]);
@@ -348,7 +351,7 @@ export function declareListOpsWolfram(ce: Engine): void {
       const keyRuns: Expr[] = [];
       items.forEach((item, i) => {
         const lastKey = keyRuns[keyRuns.length - 1];
-        if (lastKey !== undefined && lastKey.isEqual(keys[i]) === true) {
+        if (lastKey !== undefined && lastKey.isSame(keys[i]!)) {
           runs[runs.length - 1].push(item);
         } else {
           runs.push([item]);

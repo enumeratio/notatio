@@ -262,3 +262,71 @@ test("a worker whose CPU time tracks the wall clock is killed at its budget", as
     pool.close();
   }
 });
+
+/** A fake worker whose `"started"` and answer come `startAfterMs` after the request (never, if
+ * omitted), with `cpu()` as its `cpuUsage` clock in microseconds. */
+function fakeSlowStartWorker(cpu: () => number, startAfterMs?: number): NodeWorkerLike {
+  const listeners = new Set<(message: unknown) => void>();
+  return {
+    postMessage: (message) => {
+      const { id } = message as { id: number };
+      if (startAfterMs === undefined) return;
+      setTimeout(() => {
+        for (const l of listeners) l({ id, kind: "started" });
+        for (const l of listeners) l({ id, kind: "result", ok: true, json: 2 });
+      }, startAfterMs);
+    },
+    terminate: () => {},
+    unref: () => {},
+    ref: () => {},
+    on: (event, listener) => {
+      if (event === "message") listeners.add(listener);
+    },
+    once: () => {},
+    off: (_event, listener) => listeners.delete(listener as (message: unknown) => void),
+    cpuUsage: () => ({ user: cpu(), system: 0 }),
+  };
+}
+
+test("a worker slow to start for want of CPU time is not replaced at the spawn budget", async () => {
+  // Spawn budget 50 ms; the starved worker (CPU time frozen) starts at 120 ms, inside the 3x wall cap.
+  const pool = createEvaluatorPool({
+    size: 1,
+    spawnTimeoutMs: 50,
+    createWorker: () => fakeSlowStartWorker(() => 1_000, 120),
+  });
+  try {
+    expect(await pool.evaluateDetailed(["Add", 1, 1], { timeMs: 10_000 })).toMatchObject({
+      outcome: "Evaluated",
+      value: 2,
+    });
+  } finally {
+    pool.close();
+  }
+});
+
+test("a worker that spends its spawn budget in CPU time without starting is replaced", async () => {
+  const pool = createEvaluatorPool({
+    size: 1,
+    spawnTimeoutMs: 50,
+    createWorker: () => fakeSlowStartWorker(() => performance.now() * 1000),
+  });
+  try {
+    expect((await pool.evaluateDetailed(["Add", 1, 1], { timeMs: 10_000 })).outcome).toBe("Aborted");
+  } finally {
+    pool.close();
+  }
+});
+
+test("a worker that never starts and uses no CPU is replaced at the wall-clock cap", async () => {
+  const pool = createEvaluatorPool({
+    size: 1,
+    spawnTimeoutMs: 20,
+    createWorker: () => fakeSlowStartWorker(() => 1_000),
+  });
+  try {
+    expect((await pool.evaluateDetailed(["Add", 1, 1], { timeMs: 10_000 })).outcome).toBe("Aborted");
+  } finally {
+    pool.close();
+  }
+});

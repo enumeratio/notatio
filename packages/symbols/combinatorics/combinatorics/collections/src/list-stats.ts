@@ -96,7 +96,7 @@ export function declareListStats(ce: Engine): void {
       const n = commonestCount(ops[1])!;
       const tally: { value: Expr; count: number }[] = [];
       for (const item of items) {
-        const existing = tally.find((entry) => entry.value.isEqual(item) === true);
+        const existing = tally.find((entry) => entry.value.isSame(item));
         if (existing !== undefined) existing.count++;
         else tally.push({ value: item, count: 1 });
       }

@@ -25,8 +25,10 @@ notation and need it back as an expression.
   uncanonical MathJSON. Wolfram's FullForm is the `WL` format.
 - `./tex` — `portableTeX`: compute-engine's LaTeX rewritten for a document (amsmath/amssymb
   macros in place of MathLive-only commands like `\imaginaryI`).
-- `./mathml`, `./asciimath` — MathMLForm and AsciiMath, built on [`boxes`](../boxes/README.md)'s
-  presentation tree.
+- `./mathml`, `./asciimath` — MathMLForm and AsciiMath, in and out. Writing is built on
+  [`boxes`](../boxes/README.md)'s presentation tree. `fromAsciiMath` reads AsciiMath by way
+  of TeX (asciimath2tex, then compute-engine's LaTeX parser), so it reads what that TeX
+  covers; `asciiMathToTeX` gives the intermediate TeX.
 
 ## Usage
 
