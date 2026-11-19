@@ -71,7 +71,9 @@ type BigDecimal = ReturnType<ComputeEngine["bignum"]>;
 
 /** A MathJSON number leaf's value -- a double (`0.5`) or a decimal (`{ num: "0.5…" }`) -- or
  * `undefined` for any other node, an integer, or a non-finite number. Integers are left
- * alone: in a numeric result they are exponents, counts and exact values, not readings. */
+ * alone: in a numeric result they are exponents, counts and exact values, not readings. A
+ * value written with a point or an exponent is a reading even when it is whole, as every
+ * float past its digits is (`BesselK(300, 2)` is 5.08e611 at any precision below 611 digits). */
 function leafOf(ce: ComputeEngine, node: unknown): BigDecimal | undefined {
   const text =
     typeof node === "number"
@@ -81,7 +83,7 @@ function leafOf(ce: ComputeEngine, node: unknown): BigDecimal | undefined {
         : undefined;
   if (text === undefined) return undefined;
   const value = ce.bignum(text);
-  return value.isFinite() && !value.isInteger() ? value : undefined;
+  return value.isFinite() && (!value.isInteger() || /[.eE]/.test(text)) ? value : undefined;
 }
 
 /** Significant digits a decimal carries. */
