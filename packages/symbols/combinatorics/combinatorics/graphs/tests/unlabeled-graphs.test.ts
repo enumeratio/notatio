@@ -160,6 +160,7 @@ test("CanonicalGraph's compiled definition gives the kernel's answer, on graphs 
   const compiled = fastDefinition({
     ce,
     body: canonicalGraph.body,
+    guard: canonicalGraph.guard,
     from: "tuple<integer, list<list<integer>>>",
     to: "tuple<integer, list<list<integer>>>",
     interpret: () => {
@@ -238,6 +239,30 @@ test("CanonicalGraph's kernel declines what is not a graph, or a graph past its 
   expect(canonicalGraphKernel([31, []])).toBeUndefined();
   expect(canonicalGraphKernel("graph")).toBeUndefined();
   expect(canonicalGraphKernel([0, []])).toEqual([0, []]);
+});
+
+// Past the kernel's reach the definition tries every relabeling (n! of them, 9 to 26 s compiled at 10 vertices): its
+// guard leaves a graph of more than 9 vertices unevaluated, so a call the kernel declines returns at once.
+test("CanonicalGraph on a graph past the kernel and past the definition's vertices stays unevaluated, promptly", () => {
+  const cycle = (n: number): number[][] =>
+    Array.from({ length: n }, (_, i) => [i + 1, ((i + 1) % n) + 1].toSorted((a, b) => a! - b!));
+  const path = (n: number): number[][] => Array.from({ length: n - 1 }, (_, i) => [i + 1, i + 2]);
+  const started = performance.now();
+  // 31 vertices is past the kernel's limit; the path and cycle on 25 are past its 2 million branches.
+  for (const subject of [graph(31, []), graph(31, path(31)), graph(25, cycle(25)), graph(25, path(25))]) {
+    const call = ["CanonicalGraph", subject];
+    for (const route of [evaluate, numeric]) expect(route(call)).toEqual(call);
+  }
+  // The definition itself declines past 9 vertices, and answers through them.
+  const edges = (n: number) => ["Tuple", n, ["List", ...path(n).map((edge) => ["List", ...edge])]];
+  expect(evaluateDefinition(ce, canonicalGraph, edges(10))).toBeUndefined();
+  const [size, canonical] = canonicalGraphKernel([3, path(3)])!;
+  expect(evaluateDefinition(ce, canonicalGraph, edges(3))).toEqual([
+    "Tuple",
+    size,
+    ["List", ...canonical.map((edge) => ["List", ...edge])],
+  ]);
+  expect(performance.now() - started).toBeLessThan(30_000);
 });
 
 // ─── IsIsomorphicGraph ─────────────────────────────────────────────────────────────────────────────────────

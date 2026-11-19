@@ -165,6 +165,9 @@ jobs:
       # Poset statistics at their size limits, against closed forms.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @notatio/combinatorics exec vp test run posets/tests/poset-statistic-limits
+      # The graph statistics' size bounds: the value at each bound against the independent reading.
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @notatio/combinatorics exec vp test run graphs/tests/graph-statistic-caps.test.ts
       # Cartan type statistics over the larger types and the group-generating readings.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @notatio/combinatorics exec vp test run cartan/tests/cartan-statistics
