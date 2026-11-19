@@ -129,17 +129,22 @@ export function canonicalGraphKernel(raw: unknown): [number, number[][]] | undef
   return levels === undefined ? undefined : [size, edgesOfBlocks(levels)];
 }
 
+/** The definition tries every relabeling: compiled it takes 2 s at 9 vertices and 9 to 26 s at 10 (n! of them). It answers
+ *  only what the kernel leaves to it (a graph past the kernel's reach, or no graph), and only through this many vertices. */
+const DEFINITION_LIMIT = 9;
+
 export const GRAPHS_MAPS: readonly CombinatorialMap[] = [
   {
     name: "CanonicalGraph",
     from: "labeled_graph",
     to: "labeled_graph",
     body: canonicalGraphBody,
+    guard: ["LessEqual", ["At", "_raw", 1], DEFINITION_LIMIT],
     kernel: canonicalGraphKernel as (raw: never) => unknown,
     // The image is Tuple(n, edges), both plain: no part is a carrier.
     imageParts: ["", ""],
     summary: "The graph relabeled so that its rank in LabeledGraphs(n) is least.",
-    note: "Two graphs are isomorphic exactly when their canonical graphs are equal, and the members of UnlabeledGraphs are the graphs equal to their own. The definition is the least rank over every relabeling, so it reaches few vertices: compiled, a tenth of a second at 8 vertices, interpreted a second and a half at 4; a kernel in plain numbers chooses the vertex of label n, then n - 1, and so on, keeping the candidates whose block of pairs is least and taking one of each set of twins, and answers up to 30 vertices, declining a graph whose search passes two million branches (a path or cycle past about 17 vertices, a grid past 4 x 4). Wolfram's CanonicalGraph labels by its own rule, so the two agree only up to isomorphism: the oracle compares IsomorphicGraphQ of the two answers, never their values.",
+    note: "Two graphs are isomorphic exactly when their canonical graphs are equal, and the members of UnlabeledGraphs are the graphs equal to their own. The definition is the least rank over every relabeling, so it reaches few vertices: compiled, a tenth of a second at 8 vertices, interpreted a second and a half at 4; a kernel in plain numbers chooses the vertex of label n, then n - 1, and so on, keeping the candidates whose block of pairs is least and taking one of each set of twins, and answers up to 30 vertices, declining a graph whose search passes two million branches (a path or cycle past about 17 vertices, a grid past 4 x 4). A graph the kernel declines is answered by the definition through 9 vertices and left unevaluated past them. Wolfram's CanonicalGraph labels by its own rule, so the two agree only up to isomorphism: the oracle compares IsomorphicGraphQ of the two answers, never their values.",
   },
   {
     name: "ComponentSizePartition",

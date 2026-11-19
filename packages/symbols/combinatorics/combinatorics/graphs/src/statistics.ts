@@ -49,6 +49,11 @@ const withGraph = (body: MathJSON, otherwise: MathJSON = 0): MathJSON => [
   bind("n", at(1), bindList("edges", at(2), body, "list<list<integer>>"), "integer"),
 ];
 
+/** `_x` has at most `limit` vertices. */
+const atMostVertices = (limit: number): MathJSON => atMostValue(at(1), limit);
+/** `_x` has at most `limit` edges. */
+const atMostEdges = (limit: number): MathJSON => atMostValue(length(at(2)), limit);
+
 /** The ends of edge e. */
 const lower = (edge: MathJSON): MathJSON => at(1, edge);
 const upper = (edge: MathJSON): MathJSON => at(2, edge);
@@ -1613,6 +1618,86 @@ const PERMUTATION_FOLDS: ReadonlySet<string> = new Set([
   "MinimumOuterplanarPatternOccurrenceCount",
   "MinimumThreeColorablePatternOccurrenceCount",
 ]);
+
+/**
+ * The vertices a head that folds over the vertex orders answers through (n! orders a call): the largest size at which
+ * the slowest of the edgeless, complete, complete bipartite, triangle, edge, cycle and path graphs takes about 2 s
+ * compiled, and the independent reading has been run and agrees. One size more takes 2.4 s (a pattern, 9) to 95 s
+ * (`AutomorphismBaseSize`, 9). `DistinguishingNumber` colors k^n times and takes 9.5 s on the edgeless graph on 6
+ * vertices; `DistinguishingIndex` colors k^m times and takes 48 s on the complete graph on 7.
+ */
+export const VERTEX_LIMITS: Readonly<Record<string, number>> = {
+  AutomorphismGroupSize: 9,
+  DistinctAdjacencyMatrixCount: 9,
+  VertexOrbitCount: 9,
+  OddAutomorphismCount: 9,
+  AutomorphismGroupExponent: 8,
+  AutomorphismBaseSize: 7,
+  AutomorphismGroupFactorCount: 7,
+  DistinguishingIndex: 6,
+  DistinguishingNumber: 5,
+  MinimumForestPatternOccurrenceCount: 8,
+  MinimumStarPatternOccurrenceCount: 8,
+  MinimumPathPatternOccurrenceCount: 8,
+  MinimumChordalPatternOccurrenceCount: 8,
+  MinimumComparabilityPatternOccurrenceCount: 8,
+  MinimumIntervalPatternOccurrenceCount: 8,
+  MinimumSplitPatternOccurrenceCount: 8,
+  MinimumBipartitePatternOccurrenceCount: 8,
+  MinimumOuterplanarPatternOccurrenceCount: 8,
+  MinimumThreeColorablePatternOccurrenceCount: 8,
+};
+
+/** A head over the table of every subset of the edges answers through this many edges: 2^m rows, 0.5 to 2.7 s compiled at 21. The complete graph on 7 vertices has 21. */
+export const EDGE_TABLE_LIMIT = 21;
+/** A row is a column wider for each vertex, isolated ones included (100 vertices take 5 s at 21 edges): a graph with 21 edges and no isolated vertex has at most 42. */
+const EDGE_TABLE_VERTEX_LIMIT = 42;
+/** The heads over that table, and the vertices each answers through where its cost grows faster than the width. */
+export const EDGE_TABLE_HEADS: Readonly<Record<string, number>> = {
+  ComponentPreservingSpanningSubgraphCount: EDGE_TABLE_VERTEX_LIMIT,
+  ContainedForestCount: EDGE_TABLE_VERTEX_LIMIT,
+  TutteXYCoefficient: EDGE_TABLE_VERTEX_LIMIT,
+  ChromaticPolynomialDerivativeAtOne: EDGE_TABLE_VERTEX_LIMIT,
+  BetaInvariant: EDGE_TABLE_VERTEX_LIMIT,
+  TutteEvaluationAtThreeAndThree: EDGE_TABLE_VERTEX_LIMIT,
+  NowhereZeroThreeFlowCount: EDGE_TABLE_VERTEX_LIMIT,
+  TutteEvaluationAtTwoAndMinusOne: EDGE_TABLE_VERTEX_LIMIT,
+  TutteEvaluationAtOneAndZero: EDGE_TABLE_VERTEX_LIMIT,
+  TutteEvaluationAtOneAndMinusOne: EDGE_TABLE_VERTEX_LIMIT,
+  NowhereZeroFiveFlowCount: EDGE_TABLE_VERTEX_LIMIT,
+  NowhereZeroFourFlowCount: EDGE_TABLE_VERTEX_LIMIT,
+  TwoComponentSpanningForestCount: EDGE_TABLE_VERTEX_LIMIT,
+  OverfullSubgraphCount: EDGE_TABLE_VERTEX_LIMIT,
+  LargestRegularSpanningSubgraphDegree: EDGE_TABLE_VERTEX_LIMIT,
+  MaximalSpanningForestCount: EDGE_TABLE_VERTEX_LIMIT,
+  StronglyConnectedOrientationCount: EDGE_TABLE_VERTEX_LIMIT,
+  StronglyConnectedOutdegreeSequenceCount: EDGE_TABLE_VERTEX_LIMIT,
+  ChromaticDiscriminant: EDGE_TABLE_VERTEX_LIMIT,
+  TutteMinusOneSpanningTreeQuotient: EDGE_TABLE_VERTEX_LIMIT,
+  // Past 30 vertices 21 edges take 2.4 s and more (2.9 s at 42).
+  LargestRegularSubgraphDegree: 30,
+  // Degree columns as well: 21 edges take 2.0 s at 17 vertices, 2.6 s at 21 and 4.8 s at 42.
+  LongestTrailLength: 17,
+  // The tally of the monomials sums over every pair of exponents and every key: 2.5 s for the complete graph on 7 vertices,
+  // 2.6 s at 8 vertices and 12.9 s at 42.
+  TutteMonomialCount: 8,
+  // 2^n sets of vertices for the chromatic number: 21 edges take 2.0 s at 17 vertices and double with each vertex after (24 s at 22).
+  MinimumProperColoringCount: 17,
+};
+
+/** `definition` with the size bound of its head as its `where`, ahead of the condition it has. */
+const bounded = (definition: Definition): Definition => {
+  const vertices = VERTEX_LIMITS[definition.head];
+  const tableVertices = EDGE_TABLE_HEADS[definition.head];
+  const bound =
+    vertices !== undefined
+      ? atMostVertices(vertices)
+      : tableVertices !== undefined
+        ? ["And", atMostEdges(EDGE_TABLE_LIMIT), atMostVertices(tableVertices)]
+        : undefined;
+  if (bound === undefined) return definition;
+  return { ...definition, where: definition.where === undefined ? bound : ["And", bound, definition.where] };
+};
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -3558,7 +3643,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
         "integer",
       ),
     ),
-    `FindStat's St000469. A coloring is read as the digits of c in base k, vertex v the digit at position v - 1; k = n always works, so the search ends. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+    `FindStat's St000469. A coloring is read as the digits of c in base k, vertex v the digit at position v - 1; k = n always works, so the search ends. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row. The k^n colorings take 9.5 s for the edgeless graph on 6 vertices, so a graph of 6 or more vertices (every row FindStat holds on 6 and 7) is left unevaluated.`,
   ),
   stat(
     "OddAutomorphismCount",
@@ -3923,19 +4008,21 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     [],
     `FindStat's St001334.`,
   ),
-].map((definition) =>
-  PERMUTATION_FOLDS.has(definition.head)
-    ? {
-        ...definition,
-        checkWeight:
-          definition.head === "DistinguishingNumber" ||
-          definition.head === "DistinguishingIndex" ||
-          definition.head === "AutomorphismGroupFactorCount"
-            ? ENUMERATING_CHECK_WEIGHT
-            : PERMUTATION_CHECK_WEIGHT,
-      }
-    : definition,
-);
+]
+  .map((definition) =>
+    PERMUTATION_FOLDS.has(definition.head)
+      ? {
+          ...definition,
+          checkWeight:
+            definition.head === "DistinguishingNumber" ||
+            definition.head === "DistinguishingIndex" ||
+            definition.head === "AutomorphismGroupFactorCount"
+              ? ENUMERATING_CHECK_WEIGHT
+              : PERMUTATION_CHECK_WEIGHT,
+        }
+      : definition,
+  )
+  .map(bounded);
 
 /** The index among the edges of the image under `p` of edge `f`: the edge between the images of its ends. */
 function edgeImage(): MathJSON {
