@@ -2433,7 +2433,6 @@ const NOVEL = [
   "AntichainCount",
   "MaximalChainCount",
   "ShortestMaximalChainSize",
-  "GraphComplement",
   "GraphSquare",
   "GraphCone",
   "IsolatedVertexAddition",
