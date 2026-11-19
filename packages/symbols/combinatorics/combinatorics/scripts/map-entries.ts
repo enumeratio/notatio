@@ -90,6 +90,10 @@ const SAMPLES: Record<string, { contents: unknown; caption: string }> = {
     contents: ["List", ["List", 2, 1], ["List", 1]],
     caption: "the plane partition with rows $21$ and $1$",
   },
+  poset: {
+    contents: ["List", ["List"], ["List"], ["List", 1], ["List", 2], ["List", 3, 4]],
+    caption: "the poset with $1 < 3 < 5$ and $2 < 4 < 5$",
+  },
 };
 
 const constructorFor = Object.fromEntries(CARRIERS.map((c) => [c.type, c.name]));

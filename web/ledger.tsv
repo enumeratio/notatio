@@ -5576,3 +5576,6 @@ symbol	/reference/symbol/VSubsetCount
 map	/reference/map/LabeledGraph/CanonicalGraph
 symbol	/reference/symbol/CanonicalGraph
 symbol	/reference/symbol/UnlabeledGraphs
+map	/reference/map/Poset/CanonicalPoset
+symbol	/reference/symbol/CanonicalPoset
+symbol	/reference/symbol/IsIsomorphicPoset

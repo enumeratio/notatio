@@ -1,6 +1,6 @@
 // A map's hand-written kernel is a fast path for its Epsil, which stays the meaning: each kernel gives the
 // Epsil's answer, over every small permutation (the standard run) and larger ones (the deep run). A map on another
-// carrier (CanonicalGraph) holds its kernel to its Epsil in its own package's tests.
+// carrier (CanonicalGraph, CanonicalPoset) holds its kernel to its Epsil in its own package's tests.
 
 import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
