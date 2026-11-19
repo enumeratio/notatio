@@ -44,13 +44,14 @@ test("an exact power or an integer order still evaluates exactly", () => {
   );
 });
 
-test("past the engine's default digits it stays unevaluated rather than answer in a double", () => {
+test("past the engine's default digits it answers at those digits, from the exact s and a", () => {
   const high = new ComputeEngine();
   applyAllPatches(high);
   high.precision = 40;
-  expect(JSON.stringify(high.box(["LerchPhi", 0, 2.976, -2.664] as never).N().json)).toMatchInlineSnapshot(
-    `"["LerchPhi",0,2.976,-2.664]"`,
-  );
+  const answer = high.box(["LerchPhi", 0, { num: "2.976" }, { num: "-2.664" }] as never).N();
+  // mpmath: lerchphi(0, mpf('2.976'), mpf('-2.664')) at 100 digits
+  expect(String(answer.bignumRe)).toBe("-0.05399760899362249961455303457960938818136");
+  expect(String(answer.bignumIm)).toBe("-0.004079056397704412055472053384257057689986");
 });
 
 test("the compiled real path has no real value to give: NaN", () => {

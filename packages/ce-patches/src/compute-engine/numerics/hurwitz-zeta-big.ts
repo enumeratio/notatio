@@ -292,6 +292,81 @@ const log10Abs = (x: BigDecimal): number => {
 };
 
 /**
+ * The relative digits a complex value keeps when its parts were computed to a common working precision:
+ * the smaller nonzero part has lost `log10(larger / smaller)` of them. Infinity where the ratio underflows.
+ */
+function digitsLost(r: BigCx): number {
+  const [x, y] = [r.re.abs(), r.im.abs()];
+  if (x.isZero() || y.isZero()) return 0;
+  const ratio = (x.lt(y) ? x.div(y) : y.div(x)).toNumber();
+  return ratio > 0 ? Math.ceil(-Math.log10(ratio)) : Infinity;
+}
+
+/**
+ * `compute(working)` to `digits` significant digits in each nonzero part: the first pass carries `extra` digits for a
+ * part that is small next to the other (Φ(0, 2 + 1e-20, −½) is 4 − 1.3e-19i), and a second carries the digits the
+ * first lost. A part that still lacks them is noise, so the answer is undefined.
+ */
+export function atRelativeDigits(
+  digits: number,
+  extra: number,
+  compute: (working: number) => BigCx | undefined,
+): BigCx | undefined {
+  let working = digits + GUARD_DIGITS + extra;
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const r = compute(working);
+    if (r === undefined) return undefined;
+    const lost = digitsLost(r);
+    if (working - lost >= digits + GUARD_DIGITS / 2) return r;
+    if (!Number.isFinite(lost) || working + lost > MAX_WORKING_DIGITS) return undefined;
+    working += lost;
+  }
+  return undefined;
+}
+
+/**
+ * Principal base^exponent to `digits` significant digits in each nonzero part, from the exact base and exponent. The
+ * exponential loses the digits of the exponent's own size, |exponent · ln base|, so past 1e6 the answer is undefined.
+ */
+export function principalPower(base: BigCx, exponent: BigCx, digits: number): BigCx | undefined {
+  const size = atDigits(GUARD_DIGITS + 20, () => {
+    const w = mul(exponent, log(base));
+    return Math.max(Math.abs(w.re.toNumber()), Math.abs(w.im.toNumber()));
+  });
+  if (!(size < 1e6)) return undefined;
+  return atRelativeDigits(digits, Math.ceil(Math.log10(1 + size)), (working) =>
+    atDigits(working, () => pow(base, exponent)),
+  );
+}
+
+/**
+ * ζ(s, a) for a positive real a whose double is 0 (1e-400): the plan reads a as the double, drops the k = 0 term
+ * a^(−s), which is the largest, and answers ζ(s, 1). ζ(s, a) = a^(−s) + ζ(s, 1 + a) holds exactly, the first term from
+ * the exact a and the second at 1 + a, which at the working digits is 1. The value is carried as a BigDecimal
+ * (ζ(2, 1e-400) is 1e800). A negative or complex a that small is undefined.
+ */
+function hurwitzAtTinyShift(s: BigCx, a: BigCx, digits: number): BigCx | undefined {
+  if (!a.im.isZero() || !a.re.isPositive()) return undefined;
+  const negS = { re: s.re.neg(), im: s.im.neg() };
+  return atRelativeDigits(digits, 0, (working) => {
+    const first = principalPower(a, negS, working);
+    const rest = hurwitzZetaBig(
+      s,
+      atDigits(working, () => add(a, bigCx(1))),
+      working,
+    );
+    if (first === undefined || rest === undefined) return undefined;
+    return atDigits(working, () => {
+      const sum = add(first, rest);
+      // The two terms cancel (|sum| ≪ the larger): the digits that takes are not there to give.
+      const norm = (x: BigCx): BigDecimal => x.re.mul(x.re).add(x.im.mul(x.im));
+      const [nf, nr] = [norm(first), norm(rest)];
+      return norm(sum).lt((nf.gt(nr) ? nf : nr).div(1e10)) ? undefined : sum;
+    });
+  });
+}
+
+/**
  * ζ(s, a) to `digits` significant digits in each nonzero part, or undefined where it would
  * cost more working precision than it is worth (far left of the strip). The s = 1 pole gives
  * undefined as well; the caller has the exact answer there.
@@ -299,6 +374,10 @@ const log10Abs = (x: BigDecimal): number => {
  * Terms where k + a = 0 (a a nonpositive integer) are dropped, as in `hurwitzZeta`.
  */
 export function hurwitzZetaBig(s: BigCx, a: BigCx, digits: number): BigCx | undefined {
+  // An a below the double's range reads as 0 in the plan below: ζ(s, a) = a^(−s) + ζ(s, 1 + a).
+  if (a.re.toNumber() === 0 && a.im.toNumber() === 0 && !(a.re.isZero() && a.im.isZero())) {
+    return hurwitzAtTinyShift(s, a, digits);
+  }
   // ζ(0, a) = 1/2 − a with the (k+a)=0 term kept (see `hurwitzAtZero`).
   if (s.re.isZero() && s.im.isZero()) return { re: bigCx(0.5).re.sub(a.re), im: a.im.neg() };
   if (s.re.eq(1) && s.im.isZero()) return undefined;

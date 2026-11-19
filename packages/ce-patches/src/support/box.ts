@@ -17,8 +17,26 @@ export type EvalOptions = Parameters<NonNullable<NativeEval>>[1];
 export const isExactInt = (x: Expression): boolean =>
   Number.isInteger(x.re) && (x.bignumRe === undefined || x.bignumRe.isInteger());
 
+/** The imaginary part is exactly zero: the double and, where there is one, the bignum (1e-400 reads as the double 0). */
+export const isExactReal = (x: Expression): boolean => x.im === 0 && (x.bignumIm === undefined || x.bignumIm.isZero());
+
 /** A real exact integer (see `isExactInt`). */
 export const isRealInt = (x: Expression): boolean => x.im === 0 && isExactInt(x);
+
+/** Exactly zero, both parts: a value below the double's range (1e-400) is not zero though its double is. */
+export const isExactZero = (x: Expression): boolean =>
+  x.re === 0 && isExactReal(x) && (x.bignumRe === undefined || x.bignumRe.isZero());
+
+/** The sign of the real part, read from the bignum where there is one (1e-400 is positive, its double is 0). */
+export const reSign = (x: Expression): -1 | 0 | 1 => {
+  const big = x.bignumRe;
+  if (big === undefined) return Math.sign(x.re) as -1 | 0 | 1;
+  return big.isZero() ? 0 : big.isNegative() ? -1 : 1;
+};
+
+/** Exactly the real number `n`, read from the bignum where there is one (0.99999999999999999999 is not 1). */
+export const isExactlyReal = (x: Expression, n: number): boolean =>
+  x.re === n && isExactReal(x) && (x.bignumRe === undefined || x.bignumRe.eq(n));
 
 /** A concrete (finite) numeric operand — as opposed to a symbolic one (NaN re/im). */
 export const isFiniteNum = (x: Expression): boolean => Number.isFinite(x.re) && Number.isFinite(x.im);

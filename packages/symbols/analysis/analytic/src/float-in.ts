@@ -1,10 +1,13 @@
 import {
   asDouble,
+  belowDoubleShift,
   doublesForFloats,
   evaluateHurwitz,
   evaluateZeta,
   isExactInt,
+  isExactReal,
   nearButNotInteger,
+  reSign,
   wantsBigDigits,
   wantsNumber,
 } from "@notatio/ce-patches";
@@ -60,8 +63,8 @@ export function declineHurwitzIndeterminate(ce: Engine): void {
       return (
         Number.isFinite(s.re) &&
         Number.isFinite(s.im) &&
-        s.re === 0 &&
-        s.im !== 0 &&
+        reSign(s) === 0 &&
+        !isExactReal(s) &&
         a.im === 0 &&
         isExactInt(a) &&
         a.re <= 0
@@ -135,7 +138,7 @@ export function declareComplexZeta(ce: Engine): void {
   wrapOperator(
     ce,
     ["HurwitzZeta", 2],
-    (ops) => complex(ops[0]) || complex(ops[1]) || nearButNotInteger(ops[0]),
+    (ops) => complex(ops[0]) || complex(ops[1]) || nearButNotInteger(ops[0]) || belowDoubleShift(ops[1]),
     (native) => (ops, options) =>
       !wantsNumber(ops, options)
         ? native?.(ops, options)
@@ -146,7 +149,7 @@ export function declareComplexZeta(ce: Engine): void {
   wrapOperator(
     ce,
     ["Zeta", 2],
-    (ops) => nearButNotInteger(ops[0]),
+    (ops) => nearButNotInteger(ops[0]) || belowDoubleShift(ops[1]),
     (native) => (ops, options) =>
       !wantsNumber(ops, options)
         ? native?.(ops, options)

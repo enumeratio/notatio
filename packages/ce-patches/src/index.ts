@@ -30,6 +30,8 @@ export { PATCHES };
 export {
   evaluateHurwitz,
   nearButNotInteger,
+  belowDoubleShift,
+  unreadableNearOne,
   evaluateZeta,
   evaluatePolygamma,
   hurwitzZeta,
@@ -138,6 +140,9 @@ export {
   type NativeEval,
   type EvalOptions,
   isExactInt,
+  isExactReal,
+  isExactZero,
+  reSign,
   isRealInt,
   isFiniteNum,
   numberResult,
