@@ -17,6 +17,9 @@ const SAMPLES: readonly Sample[] = [
   },
 ];
 
+/** The heads with a hand-written record in `../../reference/`: `LinearExtensionCount` is also defined on trees. */
+const CURATED_HEADS: readonly string[] = ["LinearExtensionCount"];
+
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));
 
 export const generated: { standard: GeneratedEntries; curated: GeneratedEntries } = areaStatisticsEntries({
@@ -27,5 +30,6 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   samples: SAMPLES,
   declareArea: declarePosetsArea,
   carrierNames: { Poset: { subjectName: "poset", domain: "Poset statistics" } },
+  curatedHeads: CURATED_HEADS,
   dir: REFERENCE_DIR,
 });

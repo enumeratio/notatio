@@ -126,6 +126,71 @@ function closedRelationCount(o: Order, x: number, y: number): number {
   return sum(le.map((row) => row.filter(Boolean).length));
 }
 
+/** Every linear extension, as a list of elements from 0, found by search: each step places an element all of whose lower elements are placed. */
+function linearExtensions(o: Order): number[][] {
+  const found: number[][] = [];
+  const place = (sequence: number[]): void => {
+    if (sequence.length === o.n) {
+      found.push(sequence);
+      return;
+    }
+    for (const x of o.elements)
+      if (!sequence.includes(x) && o.elements.every((y) => !o.lt(y, x) || sequence.includes(y)))
+        place([...sequence, x]);
+  };
+  place([]);
+  return found;
+}
+/** The unordered pairs {x, y}, x < y as numbers, with the count of linear extensions placing x first, over the count of all. */
+function pairShares(o: Order): { first: number; all: number }[] {
+  const extensions = linearExtensions(o);
+  return pairsOf(o.elements).map(([x, y]) => ({
+    first: extensions.filter((e) => e.indexOf(x) < e.indexOf(y)).length,
+    all: extensions.length,
+  }));
+}
+/** The maximal chains and antichains: the ones no other element can join. */
+const maximalChains = (o: Order): number[][] =>
+  chains(o).filter((c) => o.elements.every((x) => c.includes(x) || !c.every((y) => o.related(x, y))));
+const maximalAntichains = (o: Order): number[][] =>
+  antichains(o).filter((a) => o.elements.every((x) => a.includes(x) || a.some((y) => o.related(x, y))));
+/** How many sets of `family` have the fewest (or most) elements, the family being empty giving 0. */
+const withExtremeSize = (family: number[][], pick: (sizes: number[]) => number): number => {
+  const target = pick(family.map((s) => s.length));
+  return family.filter((s) => s.length === target).length;
+};
+
+/** The sequences of the greedy algorithm: from the rest's minimal elements, one covering the last chosen if there is one. */
+function greedySequences(o: Order): number {
+  const take = (sequence: number[]): number => {
+    if (sequence.length === o.n) return 1;
+    const last = sequence.at(-1);
+    const minimal = o.elements.filter(
+      (x) => !sequence.includes(x) && o.elements.every((y) => !o.lt(y, x) || sequence.includes(y)),
+    );
+    const covering = minimal.filter((x) => last !== undefined && isCover(o, last, x));
+    return sum((covering.length > 0 ? covering : minimal).map((x) => take([...sequence, x])));
+  };
+  return take([]);
+}
+
+/** The maps from the elements to 0 .. size - 1 that never send a < b to a larger value of a than of b, listed as value lists. */
+function monotoneMaps(o: Order, size: number): number[][] {
+  const maps: number[][] = [];
+  const assign = (values: number[]): void => {
+    if (values.length === o.n) {
+      maps.push(values);
+      return;
+    }
+    for (let value = 0; value < size; value++) {
+      const x = values.length;
+      if (o.elements.every((y) => y >= x || !o.lt(y, x) || values[y]! <= value)) assign([...values, value]);
+    }
+  };
+  assign([]);
+  return maps;
+}
+
 export const POSET_READINGS: Readonly<Record<string, (covers: Poset) => number>> = {
   ElementCount: (p) => p.length,
   MinimalElementCount: (p) => {
@@ -228,5 +293,51 @@ export const POSET_READINGS: Readonly<Record<string, (covers: Poset) => number>>
     const o = orderOf(p);
     const maximal = chains(o).filter((c) => o.elements.every((x) => c.includes(x) || !c.every((y) => o.related(x, y))));
     return maximal.length === 0 ? 0 : Math.min(...maximal.map((c) => c.length));
+  },
+  LinearExtensionCount: (p) => linearExtensions(orderOf(p)).length,
+  // The empty poset has no chain polytope row: 0 by convention, not the one maximal chain it has.
+  ChainPolytopeFacetCount: (p) => (p.length === 0 ? 0 : p.length + maximalChains(orderOf(p)).length),
+  JumpNumber: (p) => {
+    const o = orderOf(p);
+    return Math.min(...linearExtensions(o).map((e) => e.slice(1).filter((next, i) => !isCover(o, e[i]!, next)).length));
+  },
+  // A cut: the subsets equal to the lower bounds of their upper bounds.
+  CutCount: (p) => {
+    const o = orderOf(p);
+    const atMost = (x: number, y: number): boolean => x === y || o.lt(x, y);
+    return subsets(o.n).filter((a) => {
+      const upper = o.elements.filter((w) => a.every((x) => atMost(x, w)));
+      const lower = o.elements.filter((z) => upper.every((w) => atMost(z, w)));
+      return lower.length === a.length && lower.every((z) => a.includes(z));
+    }).length;
+  },
+  MostBalancedPairExtensionCount: (p) => largest(pairShares(orderOf(p)).map((s) => Math.min(s.first, s.all - s.first))),
+  OneThirdBalancedPairCount: (p) =>
+    pairShares(orderOf(p)).filter((s) => 3 * s.first >= s.all && 3 * s.first <= 2 * s.all).length,
+  HalfBalancedPairCount: (p) => pairShares(orderOf(p)).filter((s) => 2 * s.first === s.all).length,
+  ShortestMaximalAntichainCount: (p) => withExtremeSize(maximalAntichains(orderOf(p)), (sizes) => Math.min(...sizes)),
+  ShortestMaximalAntichainSize: (p) => Math.min(...maximalAntichains(orderOf(p)).map((a) => a.length)),
+  LongestMaximalChainCount: (p) => withExtremeSize(maximalChains(orderOf(p)), (sizes) => Math.max(...sizes)),
+  ShortestMaximalChainCount: (p) => withExtremeSize(maximalChains(orderOf(p)), (sizes) => Math.min(...sizes)),
+  LargestMaximalAntichainCount: (p) => withExtremeSize(maximalAntichains(orderOf(p)), (sizes) => Math.max(...sizes)),
+  MaximalAntichainCount: (p) => maximalAntichains(orderOf(p)).length,
+  GreedyLinearExtensionCount: (p) => greedySequences(orderOf(p)),
+  // The maps route: every monotone map to the 3-chain, not the pairs of ideals the definition counts.
+  ThreeChainHomomorphismCount: (p) => monotoneMaps(orderOf(p), 3).length,
+  // The surjections onto a chain of any size k, found among the monotone maps to 0 .. k - 1.
+  OrderPreservingSurjectionToChainCount: (p) => {
+    const o = orderOf(p);
+    if (o.n === 0) return 1;
+    return sum(
+      range(1, o.n).map(
+        (k) => monotoneMaps(o, k).filter((values) => range(0, k - 1).every((v) => values.includes(v))).length,
+      ),
+    );
+  },
+  IntervalClosedSetCount: (p) => {
+    const o = orderOf(p);
+    return subsets(o.n).filter((s) =>
+      s.every((x) => s.every((y) => (x !== y && !o.lt(x, y)) || between(o, x, y).every((z) => s.includes(z)))),
+    ).length;
   },
 };

@@ -1,9 +1,13 @@
 id	section	role	expr	expected	known	source	caption
 the-binary-tree			[LinearExtensionCount, [BinaryTree, [List, [List, 0, 0], [List, [List, 0, 0], 0]]]]	3			the binary tree $[[.,.],[[.,.],.]]$
 the-ordered-tree			[LinearExtensionCount, [OrderedTree, [List, [List], [List, [List]], [List]]]]	12			the ordered tree $[[],[[]],[]]$
+the-poset-on-4-elements-with-1-3-1-4-and-2-4			[LinearExtensionCount, [Poset, [List, [List], [List], [List, 1], [List, 1, 2]]]]	5			the poset on 4 elements with 1 < 3, 1 < 4 and 2 < 4
 findstat-st000045-1	Properties		[CombinatorialStat, [BinaryTree, [List, 0, [List, 0, [List, 0, 0]]]], "'LinearExtensionCount'"]	1	1	FindStat St000045	FindStat's value for [.,[.,[.,.]]]
 findstat-st000045-2	Properties		[CombinatorialStat, [BinaryTree, [List, 0, [List, [List, 0, 0], 0]]], "'LinearExtensionCount'"]	1	1	FindStat St000045	FindStat's value for [.,[[.,.],.]]
 findstat-st000045-3	Properties		[CombinatorialStat, [BinaryTree, [List, [List, 0, 0], [List, 0, 0]]], "'LinearExtensionCount'"]	2	2	FindStat St000045	FindStat's value for [[.,.],[.,.]]
 findstat-st000085-1	Properties		[CombinatorialStat, [OrderedTree, [List, [List]]], "'LinearExtensionCount'"]	1	1	FindStat St000085	FindStat's value for [[]]
 findstat-st000085-2	Properties		[CombinatorialStat, [OrderedTree, [List, [List, [List]]]], "'LinearExtensionCount'"]	1	1	FindStat St000085	FindStat's value for [[[]]]
 findstat-st000085-3	Properties		[CombinatorialStat, [OrderedTree, [List, [List], [List]]], "'LinearExtensionCount'"]	2	2	FindStat St000085	FindStat's value for [[],[]]
+findstat-st000100-1	Properties		[CombinatorialStat, [Poset, [List, [List], [List]]], "'LinearExtensionCount'"]	2	2	FindStat St000100	FindStat's value for ([],2)
+findstat-st000100-2	Properties		[CombinatorialStat, [Poset, [List, [List], [List], [List]]], "'LinearExtensionCount'"]	6	6	FindStat St000100	FindStat's value for ([],3)
+findstat-st000100-3	Properties		[CombinatorialStat, [Poset, [List, [List], [List], [List], [List]]], "'LinearExtensionCount'"]	24	24	FindStat St000100	FindStat's value for ([],4)
