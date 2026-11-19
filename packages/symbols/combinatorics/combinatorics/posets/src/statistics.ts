@@ -217,6 +217,221 @@ const withSummandEnds = (body: MathJSON): MathJSON => bind("ends", summandEnds, 
 const width: MathJSON = greatest(times(one(isAntichain("m")), maskSize("m")), "m", masks);
 
 const NO_ELEMENTS = (value: string): string => `The poset with no elements gives ${value}.`;
+/** The empty poset has no FindStat row: its value is chosen, not checked. */
+const CONVENTION = (value: string): string =>
+  `The poset with no elements gives ${value}, a convention: FindStat has no row for it.`;
+
+/** 2^(v - 1), the mask of the element v. */
+const bit = (element: MathJSON): MathJSON => ["Power", 2, minus(element, 1)];
+/** The mask holding every element. */
+const fullMask: MathJSON = minus(["Power", 2, "n"], 1);
+/** 1 + a mask: its position in a table built over `masks`. */
+const slot = (mask: MathJSON): MathJSON => plus(mask, 1);
+/** 1 when `element` is not in the subset and every element below it is. */
+const extends_ = (mask: MathJSON, element: MathJSON): MathJSON =>
+  equals(plus(inMask(mask, element), total(times(less("u", element), minus(1, inMask(mask, "u"))), "u")), 0);
+/** Whether every member of the subset has all the elements below it in the subset: an order ideal. */
+const isIdeal = (mask: MathJSON): MathJSON =>
+  equals(total(times(inMask(mask, "v"), total(times(less("u", "v"), minus(1, inMask(mask, "u"))), "u")), "v"), 0);
+/** 1 when the subset `inner` lies inside `outer`. */
+const containedIn = (inner: MathJSON, outer: MathJSON): MathJSON =>
+  one(equals(total(times(inMask(inner, "v"), minus(1, inMask(outer, "v"))), "v"), 0));
+
+/** A list over `over`, built an entry at a time from the entries `acc` already holds. */
+const tableOver = (entry: MathJSON, variable: string, over: MathJSON): MathJSON =>
+  fold(["Join", "acc", ["List", entry]], "acc", variable, ["List"], over, "list<integer>");
+const tableEntry = (table: MathJSON, position: MathJSON): MathJSON => ["At", table, position];
+
+/**
+ * The linear extensions that build each order ideal, by mask (0 for a subset that is not an ideal): the empty ideal has one;
+ * an ideal's are those of the ideals it gives by dropping a maximal member, summed.
+ */
+const idealWays: MathJSON = tableOver(
+  [
+    "If",
+    equals("m", 0),
+    1,
+    ["If", isIdeal("m"), total(["If", hasBit("m", "v"), tableEntry("acc", slot(minus("m", bit("v")))), 0], "v"), 0],
+  ],
+  "m",
+  masks,
+);
+/**
+ * The ways to finish from each order ideal to the whole poset, by mask, read only at ideals: the whole poset has one, and
+ * an ideal sums those of the ideals it gives by adding an element. The table runs from the full mask down, so position j
+ * is the mask 2^n - j.
+ */
+const backwardSlot = (mask: MathJSON): MathJSON => minus(["Power", 2, "n"], mask);
+const idealCompletions: MathJSON = tableOver(
+  [
+    "If",
+    equals("m", fullMask),
+    1,
+    total(["If", extends_("m", "v"), tableEntry("acc", backwardSlot(plus("m", bit("v")))), 0], "v"),
+  ],
+  "m",
+  ["Range", fullMask, 0, -1],
+);
+const withIdealWays = (body: MathJSON): MathJSON => bind("ways", idealWays, body, "list<integer>");
+const withIdealCompletions = (body: MathJSON): MathJSON => bind("completions", idealCompletions, body, "list<integer>");
+const linearExtensions: MathJSON = tableEntry("ways", slot(fullMask));
+/** The linear extensions with x before y: x joins an ideal that leaves y out. */
+const extensionsBefore = (x: MathJSON, y: MathJSON): MathJSON =>
+  total(
+    [
+      "If",
+      extends_("m", x),
+      times(
+        tableEntry("ways", slot("m")),
+        minus(1, inMask("m", y)),
+        tableEntry("completions", backwardSlot(plus("m", bit(x)))),
+      ),
+      0,
+    ],
+    "m",
+    masks,
+  );
+/** The pairs x < y (as numbers) whose count c of extensions with x first passes `balanced` (1 or 0), which reads `c` and `e`. */
+const balancedPairs = (balanced: (c: MathJSON, e: MathJSON) => MathJSON): MathJSON =>
+  withIdealWays(
+    withIdealCompletions(
+      bind(
+        "e",
+        linearExtensions,
+        total(
+          total(
+            ["If", ["Less", "x", "y"], bind("c", extensionsBefore("x", "y"), balanced("c", "e"), "integer"), 0],
+            "y",
+          ),
+          "x",
+        ),
+        "integer",
+      ),
+    ),
+  );
+
+/**
+ * The table over (mask, last) for the extensions that end in `last`, flat with n entries per mask: `entry` reads the entries
+ * of the ideal `m` without `last`, at `previous(prev)`, and is held at `invalid` where `last` cannot be the final element.
+ */
+const lastTable = (entry: MathJSON, invalid: MathJSON): MathJSON =>
+  fold(
+    [
+      "Join",
+      "acc",
+      map(
+        [
+          "If",
+          hasBit("m", "last"),
+          ["If", isIdeal(withoutLast), ["If", extends_(withoutLast, "last"), entry, invalid], invalid],
+          invalid,
+        ],
+        "last",
+        elements,
+      ),
+    ],
+    "acc",
+    "m",
+    ["List"],
+    masks,
+    "list<integer>",
+  );
+/** The entry of `table` at the ideal `mask` ending in `last`. */
+const lastEntry = (table: MathJSON, mask: MathJSON, last: MathJSON): MathJSON =>
+  tableEntry(table, plus(times(mask, "n"), last));
+const withoutLast: MathJSON = minus("m", bit("last"));
+/** 1 when `last` covers `prev`. */
+const covers = (last: MathJSON, prev: MathJSON): MathJSON => one(["Contains", lowerCovers(last), prev]);
+
+/** The fewest jumps over the linear extensions that end in each element; the ideal table of `lastTable` with sentinel 2n. */
+const jumpTable: MathJSON = lastTable(
+  [
+    "If",
+    equals(withoutLast, 0),
+    0,
+    ["Min", map(plus(lastEntry("acc", withoutLast, "prev"), minus(1, covers("last", "prev"))), "prev", elements)],
+  ],
+  times(2, "n"),
+);
+/** The sequences of the greedy algorithm that end in each element. */
+const greedyTable: MathJSON = lastTable(
+  [
+    "If",
+    equals(withoutLast, 0),
+    1,
+    total(
+      times(
+        lastEntry("acc", withoutLast, "prev"),
+        one([
+          "Greater",
+          plus(
+            covers("last", "prev"),
+            minus(1, one(["Greater", total(times(one(extends_(withoutLast, "w")), covers("w", "prev")), "w"), 0])),
+          ),
+          0,
+        ]),
+      ),
+      "prev",
+    ),
+  ],
+  0,
+);
+
+/** The paths of each element along covers that have the best size there, by `best`: a list of the best size per element. */
+const bestPathCounts: MathJSON = accumulate([
+  "If",
+  noLowerCovers("i"),
+  1,
+  total(times(one(equals(plus(["At", "best", "c"], 1), ["At", "best", "i"])), entryOf("c")), "c", lowerCovers("i")),
+]);
+/** The maximal chains whose size is the `extreme` (Max or Min) over maximal chains, by their best sizes `sizes`. */
+const extremeMaximalChains = (sizes: MathJSON, extreme: "Max" | "Min"): MathJSON =>
+  bind(
+    "best",
+    sizes,
+    bind(
+      "paths",
+      bestPathCounts,
+      bind(
+        "target",
+        [
+          extreme,
+          map(["If", noUpperCovers("v"), ["At", "best", "v"], extreme === "Max" ? 0 : plus("n", 1)], "v", elements),
+        ],
+        total(times(one(noUpperCovers("v")), one(equals(["At", "best", "v"], "target")), ["At", "paths", "v"]), "v"),
+        "integer",
+      ),
+      "list<integer>",
+    ),
+    "list<integer>",
+  );
+
+/** 1 when the subset is an antichain no other element can join. */
+const isMaximalAntichain = (mask: MathJSON): MathJSON =>
+  equals(
+    plus(
+      relatedInside(mask),
+      total(
+        times(
+          minus(1, inMask(mask, "w")),
+          one(equals(total(times(inMask(mask, "a"), plus(less("a", "w"), less("w", "a"))), "a"), 0)),
+        ),
+        "w",
+      ),
+    ),
+    0,
+  );
+/** The elements of each maximal antichain by mask, and `other` for a subset that is not one. */
+const maximalAntichainSizes = (other: MathJSON): MathJSON =>
+  map(["If", isMaximalAntichain("m"), maskSize("m"), other], "m", masks);
+/** The maximal antichains with the `extreme` (Max or Min) number of elements. */
+const extremeMaximalAntichains = (extreme: "Max" | "Min"): MathJSON =>
+  bind(
+    "sizes",
+    maximalAntichainSizes(extreme === "Max" ? 0 : plus("n", 1)),
+    bind("target", [extreme, "sizes"], total(one(equals("s", "target")), "s", "sizes"), "integer"),
+    "list<integer>",
+  );
 
 export const POSET_STATISTICS: readonly Definition[] = [
   stat("ElementCount", "The elements of the poset.", withPoset("n"), `FindStat's St000189. ${NO_ELEMENTS("0")}`),
@@ -470,5 +685,245 @@ export const POSET_STATISTICS: readonly Definition[] = [
       ),
     ),
     `FindStat's St000906, whose title says the length of the chain: its rows count the elements of the chain, one more than the covers. ${NO_ELEMENTS("0")}`,
+  ),
+  stat(
+    "LinearExtensionCount",
+    "The number of linear extensions of the poset: the orderings of its elements that keep every x < y with x first.",
+    withPoset(withRelation(withIdealWays(linearExtensions)), 1),
+    `FindStat's St000100. A table over the order ideals: the extensions that build an ideal are the sums over its maximal members of those of the ideal without them. ${CONVENTION("1, the empty ordering")}`,
+  ),
+  stat(
+    "ChainPolytopeFacetCount",
+    "The facets of the chain polytope: the elements and the maximal chains.",
+    withPoset(
+      plus(
+        "n",
+        bind(
+          "paths",
+          chainsEndingAt,
+          total(times(one(noUpperCovers("v")), ["At", "paths", "v"]), "v"),
+          "list<integer>",
+        ),
+      ),
+    ),
+    `FindStat's St000151, held to its rows only, which stop at 6 elements: the closed form, the elements plus the paths up the Hasse diagram from a minimal to a maximal element, is not read from the polytope. ${CONVENTION("0")}`,
+  ),
+  stat(
+    "JumpNumber",
+    "The fewest jumps over the linear extensions: the steps where the next element does not cover the last.",
+    withPoset(
+      withRelation(
+        bind("jumps", jumpTable, ["Min", map(lastEntry("jumps", fullMask, "last"), "last", elements)], "list<integer>"),
+      ),
+    ),
+    `FindStat's St000632. A table over the order ideals and their last element. ${CONVENTION("0")}`,
+  ),
+  stat(
+    "CutCount",
+    "The Dedekind-MacNeille cuts: the subsets A equal to the elements below every upper bound of A, the empty subset included.",
+    withPoset(
+      withRelation(
+        total(
+          one(
+            bind(
+              "upper",
+              map(one(equals(total(times(inMask("m", "a"), minus(1, atMost("a", "w"))), "a"), 0)), "w", elements),
+              equals(
+                total(
+                  [
+                    "Abs",
+                    minus(
+                      inMask("m", "z"),
+                      one(equals(total(times(["At", "upper", "w"], minus(1, atMost("z", "w"))), "w"), 0)),
+                    ),
+                  ],
+                  "z",
+                ),
+                0,
+              ),
+              "list<integer>",
+            ),
+          ),
+          "m",
+          masks,
+        ),
+      ),
+      1,
+    ),
+    `FindStat's St000656. The rows count these cuts of the order; a graph's cut is a bipartition, which this is not. ${CONVENTION("1, the empty subset")}`,
+  ),
+  stat(
+    "MostBalancedPairExtensionCount",
+    "The most, over the pairs x, y, of the fewer of the linear extensions with x first and with y first.",
+    withPoset(
+      withRelation(
+        withIdealWays(
+          withIdealCompletions(
+            bind(
+              "e",
+              linearExtensions,
+              [
+                "If",
+                ["Less", "n", 2],
+                0,
+                greatest(
+                  greatest(
+                    [
+                      "If",
+                      ["Less", "x", "y"],
+                      bind("c", extensionsBefore("x", "y"), ["Min", "c", minus("e", "c")], "integer"),
+                      0,
+                    ],
+                    "y",
+                  ),
+                  "x",
+                ),
+              ],
+              "integer",
+            ),
+          ),
+        ),
+      ),
+    ),
+    `FindStat's St000848. A comparable pair gives 0, and so does a poset with fewer than two elements. ${CONVENTION("0")}`,
+  ),
+  stat(
+    "OneThirdBalancedPairCount",
+    "The pairs x, y whose share of the linear extensions with x first is between a third and two thirds.",
+    withPoset(
+      withRelation(
+        balancedPairs((c, e) => [
+          "If",
+          ["GreaterEqual", times(3, c), e],
+          one(["LessEqual", times(3, c), times(2, e)]),
+          0,
+        ]),
+      ),
+    ),
+    `FindStat's St000849. The shares are compared as integers. A pair counts once. ${CONVENTION("0")}`,
+  ),
+  stat(
+    "HalfBalancedPairCount",
+    "The pairs x, y with as many linear extensions with x first as with y first.",
+    withPoset(withRelation(balancedPairs((c, e) => one(equals(times(2, c), e))))),
+    `FindStat's St000850. The shares are compared as integers. A pair counts once. ${CONVENTION("0")}`,
+  ),
+  stat(
+    "ShortestMaximalAntichainCount",
+    "The maximal antichains with the fewest elements.",
+    withPoset(withRelation(extremeMaximalAntichains("Min")), 1),
+    `FindStat's St000907. ${CONVENTION("1, the empty antichain")}`,
+  ),
+  stat(
+    "ShortestMaximalAntichainSize",
+    "The fewest elements in a maximal antichain.",
+    withPoset(withRelation(["Min", maximalAntichainSizes(plus("n", 1))])),
+    `FindStat's St000908, whose title says the length of the antichain: its rows count its elements. ${CONVENTION("0")}`,
+  ),
+  stat(
+    "LongestMaximalChainCount",
+    "The maximal chains with the most elements.",
+    withPoset(extremeMaximalChains(chainSizes, "Max"), 1),
+    `FindStat's St000909. ${CONVENTION("1, the empty chain")}`,
+  ),
+  stat(
+    "ShortestMaximalChainCount",
+    "The maximal chains with the fewest elements.",
+    withPoset(extremeMaximalChains(shortestChains, "Min"), 1),
+    `FindStat's St000910, whose title says the length of the chain: its rows count the chains with the fewest elements. ${CONVENTION("1, the empty chain")}`,
+  ),
+  stat(
+    "LargestMaximalAntichainCount",
+    "The maximal antichains with the most elements.",
+    withPoset(withRelation(extremeMaximalAntichains("Max")), 1),
+    `FindStat's St000911. ${CONVENTION("1, the empty antichain")}`,
+  ),
+  stat(
+    "MaximalAntichainCount",
+    "The antichains that no element can be added to.",
+    withPoset(withRelation(total(one(isMaximalAntichain("m")), "m", masks)), 1),
+    `FindStat's St000912. ${CONVENTION("1, the empty antichain")}`,
+  ),
+  stat(
+    "GreedyLinearExtensionCount",
+    "The sequences the greedy algorithm builds: a minimal element of the rest that covers the last chosen, else any minimal element.",
+    withPoset(
+      withRelation(bind("greedy", greedyTable, total(lastEntry("greedy", fullMask, "last"), "last"), "list<integer>")),
+      1,
+    ),
+    `FindStat's St001105. A table over the order ideals and their last element. ${CONVENTION("1, the empty sequence")}`,
+  ),
+  stat(
+    "ThreeChainHomomorphismCount",
+    "The order-preserving maps to the chain of three elements: the pairs of nested order ideals.",
+    withPoset(
+      withRelation(
+        bind(
+          "ideals",
+          ["Filter", masks, ["Function", isIdeal("m"), "m"]],
+          total(total(containedIn("a", "b"), "a", "ideals"), "b", "ideals"),
+          "list<integer>",
+        ),
+      ),
+      1,
+    ),
+    `FindStat's St001709. ${CONVENTION("1, the empty map")}`,
+  ),
+  stat(
+    "OrderPreservingSurjectionToChainCount",
+    "The order-preserving surjections from the poset onto a chain of any size: the chains of order ideals from the empty one to the whole poset with strict steps.",
+    withPoset(
+      withRelation(
+        bind(
+          "chains",
+          tableOver(
+            [
+              "If",
+              equals("m", 0),
+              1,
+              [
+                "If",
+                isIdeal("m"),
+                total(times(containedIn("s", "m"), tableEntry("acc", slot("s"))), "s", ["Range", 0, minus("m", 1), 1]),
+                0,
+              ],
+            ],
+            "m",
+            masks,
+          ),
+          tableEntry("chains", slot(fullMask)),
+          "list<integer>",
+        ),
+      ),
+      1,
+    ),
+    `FindStat's St001815. ${CONVENTION("1, the empty map")}`,
+  ),
+  stat(
+    "IntervalClosedSetCount",
+    "The subsets that hold every element between two of their members, the empty subset included.",
+    withPoset(
+      withRelation(
+        total(
+          one(
+            equals(
+              total(
+                times(
+                  minus(1, inMask("m", "z")),
+                  one(["Greater", total(times(inMask("m", "x"), atMost("x", "z")), "x"), 0]),
+                  one(["Greater", total(times(inMask("m", "y"), atMost("z", "y")), "y"), 0]),
+                ),
+                "z",
+              ),
+              0,
+            ),
+          ),
+          "m",
+          masks,
+        ),
+      ),
+      1,
+    ),
+    `FindStat's St001909. ${CONVENTION("1, the empty subset")}`,
   ),
 ];

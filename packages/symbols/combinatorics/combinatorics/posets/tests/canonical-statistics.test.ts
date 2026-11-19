@@ -22,8 +22,8 @@ const contents = (p: Poset): unknown => ["List", ...p.map((lower) => ["List", ..
 const evaluate = (head: string, p: Poset): number =>
   applyDefinition(ce, index.get(`${head}@Poset`)!, ce.box(contents(p) as never)).re;
 
-test("the statistics are the 28 of the carrier", () => {
-  expect(heads.length).toBe(28);
+test("the statistics are the 45 of the carrier", () => {
+  expect(heads.length).toBe(45);
 });
 
 test(`every statistic is the same on a poset and on its canonical form, through ${LARGEST} elements`, () => {

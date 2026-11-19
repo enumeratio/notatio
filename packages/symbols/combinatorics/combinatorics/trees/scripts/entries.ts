@@ -5,9 +5,10 @@
 // `Height` is ALSO defined on `DyckPath` (lattice-paths' own kernel), which owns its entry:
 // `omitHeads` keeps this generator out of that folder.
 //
-// Four heads have a hand-written record in `../../reference/` (`curatedHeads`): their curated
+// Five heads have a hand-written record in `../../reference/` (`curatedHeads`): their curated
 // `domain`/`signature`/`summary`/`catalog`/`statOn` win and this generator only merges in
-// `details`/`examples`.
+// `details`/`examples`. `LinearExtensionCount` is also defined on `Poset` (the posets area merges its
+// own `details`/`examples` into the same record).
 
 import { fileURLToPath } from "node:url";
 import type { GeneratedEntries } from "@notatio/entry/node";
@@ -29,8 +30,16 @@ const SAMPLES: readonly Sample[] = [
 ];
 
 /** The heads with a hand-written record in `../../reference/`. */
-// `AutomorphismGroupSize` is also the graph statistic (graphs' generator adds its notes and examples to this record).
-const CURATED_HEADS: readonly string[] = ["AutomorphismGroupSize", "LeftSpine", "Leaves", "RootDegree", "UnaryNodes"];
+// `AutomorphismGroupSize` is also the graph statistic and `LinearExtensionCount` the poset one (graphs' and posets'
+// generators add their notes and examples to these records).
+const CURATED_HEADS: readonly string[] = [
+  "AutomorphismGroupSize",
+  "LeftSpine",
+  "Leaves",
+  "RootDegree",
+  "UnaryNodes",
+  "LinearExtensionCount",
+];
 
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));
 
