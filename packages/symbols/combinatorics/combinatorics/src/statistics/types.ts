@@ -45,10 +45,19 @@ export interface Definition {
   /** The largest total of a subject's entries the build's compile cross-check interprets: for a
    *  definition whose interpreted cost grows steeply with the subject's size. */
   readonly checkWeight?: number;
+  /** The subjects of the carrier `expr` has a value on: a boolean over `_x`, read as `expr` is. Absent
+   *  means the whole carrier. Off it the call stays unevaluated (`inDomain`, declare.ts). */
+  readonly where?: MathJSON;
 }
 
 /** `head` at `carrier`, the key a signature-addressed lookup uses. */
 export const signatureOf = (definition: Definition): string => `${definition.head}@${definition.on}`;
+
+/** The key of a definition's compiled `where`, beside its own entry. */
+export const whereSignatureOf = (definition: Definition): string => `${signatureOf(definition)} where`;
+
+/** Whether an answer is `True`: the only answer that puts a subject in a definition's domain. */
+export const isTrue = (answer: unknown): boolean => answer === "True";
 
 /** The hash a compiled entry of `definition` is stamped with: its meaning, and its flat alternative where it has one. */
 export const definitionKey = (definition: Definition): string =>
