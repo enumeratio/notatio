@@ -10,7 +10,13 @@ import { declareCombinatorics } from "../../src/index.ts";
 import { COMPILED } from "../../src/statistics/compiled.ts";
 import { applyDefinition, inDomain } from "../../src/statistics/declare.ts";
 import { bySignature, signatureOf, whereSignatureOf } from "../../src/statistics/types.ts";
-import { EDGE_TABLE_HEADS, EDGE_TABLE_LIMIT, GRAPH_STATISTICS, VERTEX_LIMITS } from "../src/statistics.ts";
+import {
+  EDGE_TABLE_HEADS,
+  EDGE_TABLE_LIMIT,
+  GRAPH_STATISTICS,
+  SUBSET_LIMITS,
+  VERTEX_LIMITS,
+} from "../src/statistics.ts";
 import { type Graph, GRAPH_READINGS } from "./graph-findstat-readings.ts";
 
 const DEEP = process.env.DEEP_TESTS === "1";
@@ -48,7 +54,9 @@ const path = (n: number): Graph => ({ n, edges: pairs(n).filter(([u, v]) => v ==
 /** The graphs the bounds are measured on: the edgeless, complete, complete bipartite, triangles, edges, cycle and path graphs. */
 const WORST = { edgeless, complete, bipartite, triangles, matching, cycle, path };
 
-const vertexHeads = Object.keys(VERTEX_LIMITS);
+/** The vertices each head that folds over the vertex orders or over the subsets, paths and cycles of the vertices answers through. */
+const LIMITS: Readonly<Record<string, number>> = { ...VERTEX_LIMITS, ...SUBSET_LIMITS };
+const vertexHeads = Object.keys(LIMITS);
 const tableHeads = Object.keys(EDGE_TABLE_HEADS);
 const capped = [...vertexHeads, ...tableHeads];
 const reading = (head: string): ((g: Graph) => number) => GRAPH_READINGS[head]!;
@@ -69,7 +77,7 @@ test("a graph on 7 vertices (21 edges at most) is in every table head's domain",
 
 test("a vertex fold is in its domain at its bound and out of it one vertex past", () => {
   for (const head of vertexHeads) {
-    const limit = VERTEX_LIMITS[head]!;
+    const limit = LIMITS[head]!;
     expect(inside(head, complete(limit)), head).toBe(true);
     expect(inside(head, path(limit)), head).toBe(true);
     for (const g of [complete(limit + 1), path(limit + 1), cycle(limit + 1)]) expect(inside(head, g), head).toBe(false);
@@ -93,8 +101,8 @@ test("a table head is in its domain at 21 edges and its vertex bound, out of it 
 
 /** One graph past the bound of each kind: more vertices than a vertex fold takes, more edges (or vertices) than a table head. */
 const pastBound = (head: string): Graph[] =>
-  VERTEX_LIMITS[head] !== undefined
-    ? [edgeless(VERTEX_LIMITS[head]! + 1), complete(VERTEX_LIMITS[head]! + 1)]
+  LIMITS[head] !== undefined
+    ? [edgeless(LIMITS[head]! + 1), complete(LIMITS[head]! + 1)]
     : [path(23), { n: EDGE_TABLE_HEADS[head]! + 1, edges: [] }];
 
 for (const compiled of [true, false]) {
@@ -121,9 +129,207 @@ for (const compiled of [true, false]) {
   });
 }
 
+/**
+ * A head whose bound is past the size the independent reading reaches (`reads`, measured: the reading agrees on the
+ * eight worst graphs through it and no further, for its time or for the spread of its subsets into `Math.max`): its
+ * value on the complete graph and on a path, which the bound is held to instead. `why` is the reason of each form.
+ */
+interface ClosedForm {
+  reads: number;
+  complete: (n: number) => number;
+  /** The path on n vertices, n at least 2. */
+  path: (n: number) => number;
+  why: string;
+}
+const factorial = (n: number): number => (n <= 1 ? 1 : n * factorial(n - 1));
+const alternating = (n: number): number => (n % 2 === 0 ? 1 : -1);
+const CLOSED_FORMS: Record<string, ClosedForm> = {
+  MatchingNumber: {
+    reads: 11,
+    complete: (n) => Math.floor(n / 2),
+    path: (n) => Math.floor(n / 2),
+    why: "pair the vertices in order",
+  },
+  SpanningTreeCount: {
+    reads: 8,
+    complete: (n) => n ** (n - 2),
+    path: () => 1,
+    why: "Cayley's n^(n-2); a tree has one",
+  },
+  GraphEdgeConnectivity: {
+    reads: 8,
+    complete: (n) => n - 1,
+    path: () => 1,
+    why: "a vertex of K_n has n - 1 edges; a path has a bridge",
+  },
+  AdjacencyDeterminant: {
+    reads: 11,
+    complete: (n) => alternating(n - 1) * (n - 1),
+    path: (n) => (n % 2 === 0 ? alternating(n / 2) : 0),
+    why: "the eigenvalues of K_n are n - 1 and -1 (n - 1 times); a path matches, or is singular for odd n",
+  },
+  AbsoluteAdjacencyDeterminant: {
+    reads: 11,
+    complete: (n) => n - 1,
+    path: (n) => (n % 2 === 0 ? 1 : 0),
+    why: "the absolute value of the adjacency determinant's closed form",
+  },
+  GraphLongestCycleLength: {
+    reads: 9,
+    complete: (n) => (n >= 3 ? n : 0),
+    path: () => 0,
+    why: "K_n has a Hamiltonian cycle; a path has none",
+  },
+  ShortestMaximalPathLength: {
+    reads: 8,
+    complete: (n) => n - 1,
+    path: (n) => n - 1,
+    why: "a maximal path of K_n or of a path visits every vertex",
+  },
+  AcyclicOrientationCount: {
+    reads: 7,
+    complete: factorial,
+    path: (n) => 2 ** (n - 1),
+    why: "the orders of K_n's vertices (Stanley's chromatic polynomial at -1); a tree orients freely",
+  },
+  DistanceMatrixDeterminant: {
+    reads: 11,
+    complete: (n) => alternating(n - 1) * (n - 1),
+    path: (n) => alternating(n - 1) * (n - 1) * 2 ** (n - 2),
+    why: "Graham and Pollak: a tree's is (-1)^(n-1) (n - 1) 2^(n-2), and K_n's is (-1)^(n-1) (n - 1)",
+  },
+};
+
+test("a closed form is the reading's value on the complete graph and on a path (up to 5 vertices; 7 deep), and the compiled one at 6", () => {
+  for (const [head, form] of Object.entries(CLOSED_FORMS)) {
+    expect(LIMITS[head], head).toBeGreaterThan(form.reads);
+    for (let n = 2; n <= (DEEP ? 7 : 5); n++) {
+      expect(form.complete(n), `${head} complete ${n}`).toBe(reading(head)(complete(n)));
+      expect(form.path(n), `${head} path ${n}`).toBe(reading(head)(path(n)));
+    }
+    expect(ce.box(call(head, complete(6)) as never).evaluate().re, head).toBe(form.complete(6));
+    expect(ce.box(call(head, path(6)) as never).evaluate().re, head).toBe(form.path(6));
+  }
+});
+
+if (DEEP)
+  test(
+    "at its bound a head past its reading's reach has the closed form's value, on the complete graph and on a path",
+    { timeout: 1_800_000 },
+    () => {
+      for (const [head, form] of Object.entries(CLOSED_FORMS)) {
+        const n = LIMITS[head]!;
+        expect(ce.box(call(head, complete(n)) as never).evaluate().re, `${head} complete ${n}`).toBe(form.complete(n));
+        expect(ce.box(call(head, path(n)) as never).evaluate().re, `${head} path ${n}`).toBe(form.path(n));
+      }
+    },
+  );
+
+// A new statistic is bounded, listed as one that grows polynomially (and timed here), or left for the maintainers: a
+// head with no bound that is in no list fails, so every graph statistic is classified.
+/** The statistics whose cost is polynomial: the slowest, `BridgeCount`, takes 0.25 s on the complete graph on 32 vertices. */
+const POLYNOMIAL = [
+  "GraphEdgeCount",
+  "MaximumDegree",
+  "MinimumDegree",
+  "EvenDegreeVertexCount",
+  "OddDegreeVertexCount",
+  "GraphLeafCount",
+  "DegreeTwoVertexCount",
+  "IsolatedVertexCount",
+  "FirstZagrebIndex",
+  "SecondZagrebIndex",
+  "ForgottenIndex",
+  "OreDegree",
+  "TotalIrregularity",
+  "AlbertsonIndex",
+  "MaximumDegreeVertexCount",
+  "TriangleCount",
+  "TriangleVertexCount",
+  "InducedPathOnThreeVerticesCount",
+  "WienerIndex",
+  "DistanceTwoPairCount",
+  "DistanceThreePairCount",
+  "DistanceFourPairCount",
+  "GraphComponentCount",
+  "ComplementComponentCount",
+  "CutVertexCount",
+  "BridgeCount",
+  "CyclomaticNumber",
+  "DegreeRange",
+  "MaximumDegreeMultiplicity",
+  "SmallestMissingDegree",
+  "DistinctNeighborhoodCount",
+  "SzegedIndex",
+  "SchultzIndex",
+  "GutmanIndex",
+  "HyperWienerIndex",
+  "CenterVertexCount",
+  "SpanningSubgraphCount",
+  "DegreeSum",
+  "EulerFaceCount",
+  "BlockCount",
+  "MaximumNeighborhoodMultiplicity",
+  "CenterEdgeCount",
+  "SameNeighborhoodPairCount",
+  "HalfAlbertsonIndex",
+  "HalfTotalIrregularity",
+  "CelebrityCount",
+  "KingCount",
+  "AboveAverageDegreeVertexCount",
+  "DifferentDegreePairCount",
+  "MaximumLeafNeighborCount",
+  "NonTriangleVertexCount",
+  "AdjacencyPositiveEigenvalueCount",
+  "AdjacencyNegativeEigenvalueCount",
+  "AdjacencyNullity",
+  "AdjacencyRank",
+  "NullspaceZeroColumnCount",
+  "NullspaceDistinctColumnCount",
+  "GraphSignature",
+  "NegativeEigenvaluePairGap",
+  "DistinctEigenvalueCount",
+  "GraphEulerCharacteristic",
+  "SzegedWienerGap",
+  "PadmakarIvanIndex",
+];
+/**
+ * Statistics that take over 2.5 s on a graph of fewer than 7 vertices (the FindStat crawl's largest are 7) or over
+ * 21 edges, so a bound by the rule would put crawl rows off the domain; they are left unbounded for the maintainers
+ * (measured compiled, the worst of the eight graphs: `Girth` 1.8 s on a path of 4 and 3.9 s of 5, `MaximumDistance`
+ * 1.6 s on 4 vertices and 3.3 s on 6, `MinimumEccentricity` 2.0 s on 4 and 2.6 s on 5, all on a graph with more than
+ * one component or no cycle; `TriangleFreeEdgeDeletionNumber` 1.5 s at 15 edges, 2.7 s at 16, and more than a minute on K7).
+ */
+const UNBOUNDED_FOR_THE_MAINTAINERS = [
+  "Girth",
+  "MaximumDistance",
+  "MinimumEccentricity",
+  "TriangleFreeEdgeDeletionNumber",
+];
+
+test("every graph statistic is bounded, listed as polynomial or listed as left unbounded", () => {
+  const heads = GRAPH_STATISTICS.map((d) => d.head);
+  const known = new Set([...capped, ...POLYNOMIAL, ...UNBOUNDED_FOR_THE_MAINTAINERS]);
+  expect(heads.filter((head) => !known.has(head))).toEqual([]);
+  for (const head of [...POLYNOMIAL, ...UNBOUNDED_FOR_THE_MAINTAINERS]) {
+    expect(heads, head).toContain(head);
+    expect(capped, head).not.toContain(head);
+  }
+});
+
+test(`the polynomial statistics answer on ${DEEP ? "the complete and the edgeless graph on 24" : "the complete graph on 10"} vertices within 5 seconds in all`, () => {
+  const graphs = DEEP ? [complete(24), edgeless(24)] : [complete(10)];
+  const started = performance.now();
+  for (const head of POLYNOMIAL)
+    for (const g of graphs) expect(Number.isFinite(ce.box(call(head, g) as never).evaluate().re), head).toBe(true);
+  expect(performance.now() - started).toBeLessThan(DEEP ? 15_000 : 5_000);
+});
+
 // At the bound the head gives its definition's value, which the independent reading shares: the standard run takes the
-// bounds' graphs at up to 5 vertices (and a few with 8 for the table heads), the deep run at the bound itself.
-const sizeToRead = (head: string): number => (DEEP ? VERTEX_LIMITS[head]! : Math.min(5, VERTEX_LIMITS[head]!));
+// bounds' graphs at up to 5 vertices (and a few with 8 for the table heads), the deep run at the bound itself, or at
+// the size the reading reaches where the bound is held to a closed form.
+const sizeToRead = (head: string): number =>
+  DEEP ? (CLOSED_FORMS[head]?.reads ?? LIMITS[head]!) : Math.min(5, LIMITS[head]!);
 for (const head of vertexHeads)
   test(
     `${head} gives its reading at ${DEEP ? "its bound" : "5 vertices"}, by every route`,

@@ -981,14 +981,16 @@ export const ELEMENT_LIMIT = 12;
 /** `GreedyLinearExtensionCount` and `OrderPreservingSurjectionToChainCount`: the antichain takes 3.0 s and 5.3 s at 12. */
 const TABLE_LIMIT = 11;
 /** `ThreeChainHomomorphismCount`, whose antichain pairs every two ideals: 2.3 s at 11 and 9.9 s at 12. */
-const PAIRS_LIMIT = 10;
+const PAIRS_LIMIT = 11;
+/** `PrincipalFilterSizeProduct` does not enumerate; a chain's product is n!, below 2^53 through 18 elements. */
+const PRODUCT_LIMIT = 18;
 
 /** The statistics that enumerate subsets, ideals or extensions, or pass the double range, and the size they answer up to. */
 const LIMITS: Readonly<Record<string, number>> = {
   PosetWidth: ELEMENT_LIMIT,
   ElementCountMinusWidth: ELEMENT_LIMIT,
   // A chain's product is n!: past 18 elements it passes 2^53 and the call leaves the compiled code for the interpreter, 1 s at 19.
-  PrincipalFilterSizeProduct: ELEMENT_LIMIT,
+  PrincipalFilterSizeProduct: PRODUCT_LIMIT,
   ChainCount: ELEMENT_LIMIT,
   AntichainCount: ELEMENT_LIMIT,
   LinearExtensionCount: ELEMENT_LIMIT,

@@ -1685,9 +1685,115 @@ export const EDGE_TABLE_HEADS: Readonly<Record<string, number>> = {
   MinimumProperColoringCount: 17,
 };
 
+/**
+ * The vertices a head whose cost doubles with each vertex answers through (the subsets of the vertices, the paths and
+ * cycles, an expansion by minors, and `RegularEdgeEditNumber`'s 2^(n(n-1)/2) edge sets): the largest size at which the
+ * slowest of the edgeless, complete, complete bipartite, triangle, edge, cycle, path and star graphs takes 2.5 s or less
+ * compiled, and the independent reading has been run and agrees there, or the value is held to a closed form (see
+ * `graph-statistic-caps.test.ts`). One size more takes 2.6 s to over a minute. The eigenvalue counts are not doubling: they
+ * answer in milliseconds, and the complete graph one size past the bound does not finish (`DistanceMatrixDeterminant`'s
+ * path at 22), so the bound is where that stops.
+ */
+export const SUBSET_LIMITS: Readonly<Record<string, number>> = {
+  // 2^n subsets: 2.0 s at 17 and 4.5 s at 18, and the reading agrees through 17.
+  FourCliqueCount: 17,
+  IndependentSetCount: 17,
+  AnnihilationNumber: 17,
+  InducedDiamondCount: 17,
+  CommonIndependenceNumber: 17,
+  // The same, but the reading stops at 16 (it spreads 2^17 values into `Math.max`, or takes over a minute), or 17
+  // takes more than 2.5 s (`TwoPackingDifferential` 4.2 s).
+  IndependenceNumber: 16,
+  CliqueNumber: 16,
+  MaximalIndependentSetCount: 16,
+  VertexCoverNumber: 16,
+  MinimumVertexCoverCount: 16,
+  MaximumCutSize: 16,
+  BipartiteEdgeDeletionNumber: 16,
+  CliqueCocliqueNumber: 16,
+  IndependenceGap: 16,
+  TuranEdgeExcess: 16,
+  TwoPackingDifferential: 16,
+  // The call takes 0.04 s at 12, but its inclusion-exclusion raises the number of independent sets of a subset to the
+  // n-th power, which passes 2^53 from 14 vertices: the complete graph on 15 gives 14, on 16 gives 13. The bound is the
+  // reading's reach.
+  ChromaticNumber: 12,
+  // The reading reaches 8 vertices (11 for `MatchingNumber`, the two determinants and `DistanceMatrixDeterminant`; 9 for
+  // `GraphLongestCycleLength`; 8 and 7 for `ShortestMaximalPathLength` and `AcyclicOrientationCount`): the value at the
+  // bound is held to its closed form on the complete graph and on a path.
+  GraphEdgeConnectivity: 17,
+  SpanningTreeCount: 15,
+  // 15 takes 3.2 to 4.4 s.
+  ConnectedInducedSubgraphCount: 14,
+  HosoyaIndex: 14,
+  PerfectMatchingCount: 14,
+  GraphVertexConnectivity: 14,
+  MatchingNumber: 14,
+  AdjacencyDeterminant: 14,
+  AbsoluteAdjacencyDeterminant: 14,
+  // Every subset with a test over its pairs or its neighbors: 14 takes 2.6 to 3.4 s.
+  InducedMatchingNumber: 13,
+  DominationNumber: 13,
+  DominatingSetCount: 13,
+  MinimalDominatingSetCount: 13,
+  UpperDominationNumber: 13,
+  IndependentDominationNumber: 13,
+  GraphDifferential: 13,
+  Degeneracy: 13,
+  DissociationNumber: 13,
+  InducedFourCycleCount: 13,
+  GraphPackingNumber: 13,
+  GraphOpenPackingNumber: 13,
+  GraphTwoLimitedPackingNumber: 13,
+  InducedPathOnFourVerticesCount: 13,
+  InducedStarOnFourVerticesCount: 13,
+  LargestInducedStarSize: 13,
+  ClosedVertexSetCount: 13,
+  MaximumDissociationSetCount: 13,
+  HalfDominatingNonblockingSetCount: 13,
+  RestrainedDominationNumber: 13,
+  UpperIrredundanceNumber: 13,
+  IrredundanceNumber: 13,
+  ProperSeparationCount: 13,
+  ConvexVertexSetCount: 13,
+  NonconvexVertexSetCount: 13,
+  GeneralPositionNumber: 13,
+  LargestInducedPathSize: 13,
+  // Cycles and paths: 13 takes 3.7 to 4.2 s.
+  GraphCycleCount: 12,
+  HamiltonianCycleCount: 12,
+  GraphLongestCycleLength: 12,
+  // The call takes 0.1 s at 12 (`LargestComponentPreservingForestSize`, `TriangleFreeVertexDeletionNumber`: 0.5 s) but
+  // the reading reaches 12 (11 for the next three), and its value past that is not held to anything.
+  ChromaticCliqueGap: 12,
+  LargestComponentPreservingForestSize: 12,
+  TriangleFreeVertexDeletionNumber: 12,
+  LongestPathLength: 11,
+  FeedbackVertexSetNumber: 11,
+  LargestInducedForestSize: 11,
+  // Paths: 12 takes 8.7 s.
+  MaximumSimplePathCount: 11,
+  ShortestMaximalPathLength: 11,
+  // These answer in milliseconds, then one size more does not finish within 30 s on the complete graph (the distance
+  // Laplacian's counts: on a path of 10); the bound is the size before.
+  LaplacianPositiveEigenvalueCount: 12,
+  DistinctLaplacianEigenvalueCount: 12,
+  MaximumLaplacianEigenvalueMultiplicity: 12,
+  AltshulerSteinbergDeterminant: 11,
+  AltshulerSteinbergQuarter: 11,
+  DistinctDistanceLaplacianEigenvalueCount: 9,
+  MaximumDistanceLaplacianEigenvalueMultiplicity: 9,
+  MaximumEigenvalueMultiplicity: 19,
+  DistanceMatrixDeterminant: 21,
+  // n! orientations of the complete graph: 11 takes 2.7 s.
+  AcyclicOrientationCount: 10,
+  // 2^(n(n-1)/2) rows: 7 takes 1.6 s, 8 does not fit in memory.
+  RegularEdgeEditNumber: 7,
+};
+
 /** `definition` with the size bound of its head as its `where`, ahead of the condition it has. */
 const bounded = (definition: Definition): Definition => {
-  const vertices = VERTEX_LIMITS[definition.head];
+  const vertices = VERTEX_LIMITS[definition.head] ?? SUBSET_LIMITS[definition.head];
   const tableVertices = EDGE_TABLE_HEADS[definition.head];
   const bound =
     vertices !== undefined
