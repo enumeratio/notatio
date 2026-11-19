@@ -168,17 +168,45 @@ export interface Plan {
 const lnAbsPow = (wr: number, wi: number, s: Cx): number =>
   -s.re * 0.5 * Math.log(wr * wr + wi * wi) + s.im * Math.atan2(wi, wr);
 
+/** ln |x + iy|, without squaring (a part near 1e-200 would underflow to −∞ and read as a zero). */
+const lnAbs = (x: number, y: number): number => Math.log(Math.hypot(x, y));
+
+/** The operands a plan reads exactly, where `s` and `a` (doubles) are only their nearest doubles. */
+export interface ExactOperands {
+  s: BigCx;
+  a: BigCx;
+}
+
 /**
  * Choose N (direct terms) and M (Bernoulli pairs) so the first omitted tail term is below
  * 10^(−digits). A direct term costs a log, an exp and a sin/cos; a pair costs a few
  * multiplies — so of the N that work, take the one that minimises N + M/8. Undefined where no N
  * within `termBudget(digits)` of the start works (|Im s| past ~2.5e5 at 15 digits): the caller declines.
+ *
+ * `s` and `a` are doubles, and a double is enough for every size the plan estimates (a relative
+ * error of 1e-16 in a logarithm moves a term by far less than the one digit of margin in `target`).
+ * It is not enough for a difference that cancels: s + m (the Pochhammer factors, s − 1) reads the
+ * exact s when `exact` is given, since s = −2 − 1e-16 is the double −2 and its factor s + 2 would be
+ * read as 0, dropping every pair that carries it (terms as large as the result). A direct term
+ * (k + a)^(−s) that the double reads as a zero is the sum's largest, so the result's own size sets
+ * the working digits and nothing is lost.
  */
-export function plan(s: Cx, a: Cx, digits: number): Plan | undefined {
+export function plan(s: Cx, a: Cx, digits: number, exact?: ExactOperands): Plan | undefined {
   const target = -digits * LN10 - LN10;
   const n0 = Math.max(0, Math.ceil(1 - a.re)); // Re z ≥ 1
   const maxPairs = 4 * digits + 50;
   const budget = termBudget(digits);
+  // The real part of s + m. Only m = −round(Re s) can cancel to a small number (every other m is at
+  // least ½ from it, where the double sum is good to 1e-16 relative), so that one is read exactly.
+  const mZero = Math.round(-s.re);
+  const shifted = (m: number): number => (exact !== undefined && m === mZero ? exact.s.re.add(m).toNumber() : s.re + m);
+  const lnShift = (m: number): number => lnAbs(shifted(m), s.im);
+  // lnPochTable[j] = ln |(s)₂ⱼ₋₁|, (s)₁ = s and (s)₂ⱼ₊₁ = (s)₂ⱼ₋₁ (s+2j−1)(s+2j); it does not depend on N.
+  const lnPochTable: number[] = [-Infinity, lnShift(0)];
+  for (let j = 1; j <= maxPairs; j++) {
+    lnPochTable.push(lnPochTable[j] + lnShift(2 * j - 1) + lnShift(2 * j));
+  }
+  const lnSMinus1 = lnAbs(shifted(-1), s.im);
   let best: Plan | undefined;
   let bestCost = Infinity;
   let firstN = -1;
@@ -186,16 +214,14 @@ export function plan(s: Cx, a: Cx, digits: number): Plan | undefined {
     if (n > n0 + budget) break;
     const zr = a.re + n;
     const zi = a.im;
-    const lnZ = 0.5 * Math.log(zr * zr + zi * zi);
+    const lnZ = lnAbs(zr, zi);
     const lnZs = lnAbsPow(zr, zi, s); // ln |z^(−s)|
-    let lnPoch = 0; // ln |(s)₂ⱼ₋₁|, starting from (s)₁ = s
-    lnPoch += 0.5 * Math.log(s.re * s.re + s.im * s.im);
-    let largest = lnZs + lnZ - 0.5 * Math.log((s.re - 1) ** 2 + s.im ** 2); // z^{1−s}/(s−1)
+    let largest = lnZs + lnZ - lnSMinus1; // z^{1−s}/(s−1)
     let prev = Infinity;
     let pairs = -1;
     for (let j = 1; j <= maxPairs; j++) {
       // |B₂ⱼ/(2j)!| ≈ 2/(2π)^{2j}; z^{−s−2j+1} = z^{−s}·z^{1−2j}
-      const t = Math.LN2 - 2 * j * LN_2PI + lnPoch + lnZs - (2 * j - 1) * lnZ;
+      const t = Math.LN2 - 2 * j * LN_2PI + lnPochTable[j] + lnZs - (2 * j - 1) * lnZ;
       if (t === -Infinity || t < target) {
         pairs = j - 1;
         break;
@@ -203,9 +229,6 @@ export function plan(s: Cx, a: Cx, digits: number): Plan | undefined {
       if (t > prev) break; // past the smallest term: this N can't get there
       largest = Math.max(largest, t);
       prev = t;
-      // (s)₂ⱼ₊₁ = (s)₂ⱼ₋₁ (s+2j−1)(s+2j)
-      lnPoch += 0.5 * Math.log((s.re + 2 * j - 1) ** 2 + s.im ** 2);
-      lnPoch += 0.5 * Math.log((s.re + 2 * j) ** 2 + s.im ** 2);
     }
     if (pairs < 0) continue;
     if (firstN < 0) firstN = n;
@@ -229,6 +252,7 @@ export const beyondTermCap = (s: BigCx, a: BigCx, digits: number): boolean =>
     { re: s.re.toNumber(), im: s.im.toNumber() },
     { re: a.re.toNumber(), im: a.im.toNumber() },
     digits + GUARD_DIGITS,
+    { s, a },
   ) === undefined;
 
 /** Euler–Maclaurin at the working precision, for a plan made for it. */
@@ -257,8 +281,15 @@ function eulerMaclaurin(s: BigCx, a: BigCx, { terms, pairs }: Plan): BigCx {
   return sum;
 }
 
-/** log10 |x|, or +∞ for an exact zero, which has no digits to lose. */
-const log10Abs = (x: BigDecimal): number => (x.isZero() ? Infinity : Math.log10(Math.abs(x.toNumber())));
+/**
+ * log10 |x|, +∞ for an exact zero (which has no digits to lose), and NaN for a nonzero value past the
+ * double range, whose size this cannot read.
+ */
+const log10Abs = (x: BigDecimal): number => {
+  if (x.isZero()) return Infinity;
+  const magnitude = Math.abs(x.toNumber());
+  return magnitude > 0 && Number.isFinite(magnitude) ? Math.log10(magnitude) : NaN;
+};
 
 /**
  * ζ(s, a) to `digits` significant digits in each nonzero part, or undefined where it would
@@ -278,15 +309,20 @@ export function hurwitzZetaBig(s: BigCx, a: BigCx, digits: number): BigCx | unde
   // digits than asked for; once its size is known, go again if that ate half the guard.
   let absolute = digits + GUARD_DIGITS;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const p = plan(sd, ad, absolute);
+    const p = plan(sd, ad, absolute, { s, a });
     if (p === undefined) return undefined;
     const working = absolute + Math.max(0, Math.ceil(p.largest)) + 4;
     if (working > MAX_WORKING_DIGITS) return undefined;
     const r = atDigits(working, () => eulerMaclaurin(s, a, p));
     const smallest = Math.min(log10Abs(r.re), log10Abs(r.im));
+    if (Number.isNaN(smallest)) return undefined;
     const short = Math.ceil(-smallest);
-    if (attempt > 0 || !(short > GUARD_DIGITS / 2)) return r;
-    absolute += Math.min(short, 2 * digits);
+    // The digits the smaller part keeps, relative to its own size.
+    if (absolute - short >= digits + GUARD_DIGITS / 2) return r;
+    // A value next to a zero (ζ(−2 − 1e-60)) is as small as its distance from it: the second plan
+    // carries every digit the first lost, and a part that still lacks them is noise, not an answer.
+    if (attempt > 0) return undefined;
+    absolute += short;
   }
   return undefined; // unreachable
 }

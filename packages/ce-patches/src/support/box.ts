@@ -9,8 +9,16 @@ export type BoxInput = Parameters<ComputeEngine["box"]>[0];
 export type NativeEval = NonNullable<Expression["operatorDefinition"]>["evaluate"];
 export type EvalOptions = Parameters<NonNullable<NativeEval>>[1];
 
-/** A concrete real integer operand (NaN re from a symbolic operand fails Number.isInteger). */
-export const isRealInt = (x: Expression): boolean => x.im === 0 && Number.isInteger(x.re);
+/**
+ * Whether the real part is exactly an integer (a NaN re from a symbolic operand fails Number.isInteger).
+ * `x.re` is a double, so a bignum such as −2 − 1e-16 reads as the integer −2; the bignum, where there
+ * is one, is the exact part.
+ */
+export const isExactInt = (x: Expression): boolean =>
+  Number.isInteger(x.re) && (x.bignumRe === undefined || x.bignumRe.isInteger());
+
+/** A real exact integer (see `isExactInt`). */
+export const isRealInt = (x: Expression): boolean => x.im === 0 && isExactInt(x);
 
 /** A concrete (finite) numeric operand — as opposed to a symbolic one (NaN re/im). */
 export const isFiniteNum = (x: Expression): boolean => Number.isFinite(x.re) && Number.isFinite(x.im);

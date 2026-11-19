@@ -29,6 +29,7 @@ export { PATCHES };
 // their library file below.
 export {
   evaluateHurwitz,
+  nearButNotInteger,
   evaluateZeta,
   evaluatePolygamma,
   hurwitzZeta,
@@ -136,6 +137,7 @@ export {
   type BoxInput,
   type NativeEval,
   type EvalOptions,
+  isExactInt,
   isRealInt,
   isFiniteNum,
   numberResult,

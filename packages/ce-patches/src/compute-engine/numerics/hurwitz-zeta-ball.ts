@@ -34,7 +34,10 @@ export function hurwitzZetaBall(s: Ball, a: Ball, digits: number): Ball | undefi
   // asked for, so once its size is known, go again with those added.
   let absolute = digits + GUARD_DIGITS;
   for (let attempt = 0; attempt < 2; attempt++) {
-    const p = plan(sd, ad, absolute);
+    const p = plan(sd, ad, absolute, {
+      s: { re: s.mid, im: BigDecimal.ZERO },
+      a: { re: a.mid, im: BigDecimal.ZERO },
+    });
     if (p === undefined) return undefined;
     const working = absolute + Math.max(0, Math.ceil(p.largest)) + 4;
     if (working > MAX_WORKING_DIGITS) return undefined;

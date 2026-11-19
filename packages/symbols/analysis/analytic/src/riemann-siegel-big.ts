@@ -210,19 +210,11 @@ const IMAGINARY_GUARD = 15;
 // A pole of the Γ factor sits at y = ½ + 2k (k ≥ 0, and ζ's at y = −½ by Z's evenness): there Z jumps
 // from one branch to the next, and ln Γ(¼ − y/2) and ζ(½ − y) (a zero for k ≥ 1) each lose digits to the
 // other, about log10(1/distance) of them, which the working precision adds. No radius is needed for
-// that: with the guard off, at 20 and 50 digits and as a double, 1e-4 down to 1e-12 off ½, 2.5, 10.5,
-// 40.5 and 98.5 answered right (worst relative error 3.4e-20 at 20 digits, 3.1e-50 at 50, 9.2e-17 for
-// the double), as did ½ itself down to 1e-50, and a double y down to one ulp off each. What breaks
-// is ζ's kernel, which plans its Euler–Maclaurin terms from s = ½ − y rounded to a double: a y with
-// more digits than a double, within ~1e-15 of a half-integer n + ½ ≥ 1.5 (s near a negative integer), has
-// its dropped terms as large as the result, the same at every working precision, so the two-precision
-// check agrees on it. Errors seen: 8.8% at 2.5 ± 1e-16, 5.0% at 10.5 ± 1e-16, 1.4% at 40.5 ± 1e-15,
-// 0.6% at 98.5 ± 1e-15, 1.5e-18 at 1.5 ± 1e-16 (and 1.5e-22 at 1.5 ± 1e-20 at 50 digits). Every
-// half-integer was right from 1e-14 off. Within 1e-13 (ten times that) of a half-integer from 1.5 up,
-// a y that is not exactly a double declines. A double y never reaches it:
-// ½ − y is exact for it, and it was right at 1 to 64 ulp off each. An exact pole has distance 0 and
-// declines too.
-const HALF_INTEGER_GUARD = 1e-13;
+// that: at 20 and 50 digits and as a double, 1e-4 down to 1e-12 off ½, 2.5, 10.5, 40.5 and 98.5 answered
+// right (worst relative error 3.4e-20 at 20 digits, 3.1e-50 at 50, 9.2e-17 for the double), as did ½
+// itself down to 1e-50, and with ζ's kernel reading s = ½ − y exactly so did 5/2, 21/2, 81/2 and 197/2
+// ± 1e-14 … 1e-30 (a y with more digits than a double, where s is within 1e-15 of a negative integer and
+// the double is that integer). Only an exact pole is declined: its distance is 0, and so is the sine.
 
 /** The distance from y > 0 to the nearest half-integer ½ + n, exact (a double's subtraction loses a distance below its spacing), and that n. */
 const halfIntegerDistance = (y: BigDecimal): { distance: BigDecimal; n: number } => {
@@ -253,15 +245,13 @@ function imaginaryAxisFactor(y: BigDecimal, working: number): { value: BigDecima
 
 /**
  * Z(iy) to `digits` significant digits, from the real route above, with the part that is zero
- * exactly zero; undefined at a pole, past MAX_IMAGINARY, where ζ's kernel can't tell y from a
- * half-integer, or where two working precisions don't agree to the digits asked for.
+ * exactly zero; undefined at a pole, past MAX_IMAGINARY, or where two working precisions don't agree to the digits asked for.
  */
 export function riemannSiegelZImaginaryBig(y: BigDecimal, digits: number): BigCx | undefined {
   const ay = y.abs();
   if (ay.isZero() || ay.gt(MAX_IMAGINARY)) return undefined;
   const { distance, n } = halfIntegerDistance(ay);
   if (distance.isZero() && n % 2 === 0) return undefined; // a pole
-  if (n >= 1 && distance.lt(HALF_INTEGER_GUARD) && !exactDouble(ay.toNumber()).eq(ay)) return undefined;
   const nearness = distance.isZero() ? 0 : Math.ceil(-log10(distance));
   const base = digits + IMAGINARY_GUARD + nearness + Math.ceil(Math.log10(1 + ay.toNumber()));
   const at = (working: number) => atDigits(working, () => imaginaryAxisFactor(ay, working));
