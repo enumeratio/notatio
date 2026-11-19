@@ -34,3 +34,4 @@ signatures:
 - Defined over `Poset` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
 - Takes a `Poset` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
 - FindStat's St000100. A table over the order ideals: the extensions that build an ideal are the sums over its maximal members of those of the ideal without them. The poset with no elements gives 1, the empty ordering, a convention: FindStat has no row for it.
+- Defined where `Length(_x) <= 12` holds; elsewhere the call stays unevaluated.

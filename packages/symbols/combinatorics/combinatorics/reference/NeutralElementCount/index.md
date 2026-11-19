@@ -19,5 +19,5 @@ signatures:
 
 - Defined over `Poset` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
 - Takes a `Poset` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
-- Defined where `IsLattice(Poset(_x)) && Length(_x) >= 1` holds; elsewhere the call stays unevaluated.
-- FindStat's St001616. Written as: for each way to take r from {e, p, q}, with u and v the others, (u ∨ v) ∧ r = (u ∧ r) ∨ (v ∧ r) and (u ∧ v) ∨ r = (u ∨ r) ∧ (v ∨ r); that agrees with the sublattice reading on every row. Defined on a lattice with at least one element; FindStat has no row for the poset with no elements.
+- Defined where `IsLattice(Poset(_x)) && Length(_x) >= 0` holds; elsewhere the call stays unevaluated.
+- FindStat's St001616. Written as: for each way to take r from {e, p, q}, with u and v the others, (u ∨ v) ∧ r = (u ∧ r) ∨ (v ∧ r) and (u ∧ v) ∨ r = (u ∨ r) ∧ (v ∨ r); that agrees with the sublattice reading on every row. Defined on a lattice. FindStat has no row for the poset with no elements, which gives 0, a count of nothing.

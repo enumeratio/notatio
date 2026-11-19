@@ -162,6 +162,9 @@ jobs:
       # The graph statistics against FindStat's rows, object by object (split from the distributions; one test per slow head).
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @notatio/combinatorics exec vp test run findstat/tests/graph-crosscheck.test.ts
+      # Poset statistics at their size limits, against closed forms.
+      - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
+        run: pnpm --filter @notatio/combinatorics exec vp test run posets/tests/poset-statistic-limits
       # Cartan type statistics over the larger types and the group-generating readings.
       - if: ${{ !cancelled() && steps.setup.outcome == 'success' }}
         run: pnpm --filter @notatio/combinatorics exec vp test run cartan/tests/cartan-statistics
