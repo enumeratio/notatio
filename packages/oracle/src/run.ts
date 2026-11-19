@@ -1689,7 +1689,7 @@ def enumeratio_symbolic_agree(a, b, trials):
 /** mpmath at 30 digits, plus `enumeratio_n(thunk, d)`: N(x, d) evaluates the thunk at d + 20 digits and answers the
  * value rounded to d, as text a scan compares digit for digit; and `enumeratio_hyperreg`, a regularized pFq
  * (divided by the gamma of each lower parameter) by its limit where a lower parameter is a pole. */
-const MPMATH_PREAMBLE = `from mpmath import *
+export const MPMATH_PREAMBLE = `from mpmath import *
 mp.dps = 30
 ${PY_VALUE}
 ${PY_BROADCAST}
@@ -1709,12 +1709,55 @@ def enumeratio_round(x, d):
         return "(" + nstr(x.real, d, strip_zeros=False) + ("-" if x.imag < 0 else "+") + nstr(abs(x.imag), d, strip_zeros=False) + "j)"
     return x
 
+# PolyLog and LerchPhi lose digits near |z| = 1 (Li_(1/2)(1 - 1e-12) at 30 and at 40 digits differ in the
+# 20th), so a row there is ground truth only when a second, higher precision agrees with it to
+# _enumeratio_convergence_digits significant digits of the whole value (a small part of a complex value is
+# not held to its own digits). Otherwise the item raises Unconverged and the scan records no answer.
+# Other heads are not evaluated twice.
+_enumeratio_convergence_digits = 25
+_enumeratio_convergence_extra_dps = 20
+_enumeratio_checked_heads = ("polylog", "lerchphi")
+_enumeratio_check = False
+
+def _enumeratio_agree(a, b, digits):
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_enumeratio_agree(x, y, digits) for x, y in zip(a, b))
+    if isinstance(a, (mpf, mpc)) and isinstance(b, (mpf, mpc)):
+        if not (isfinite(a) and isfinite(b)):
+            return True
+        with workdps(max(mp.dps, digits) + 10):
+            return abs(a - b) <= max(abs(a), abs(b)) * mpf(10) ** (-digits)
+    return True
+
+def enumeratio_checked(src, ns):
+    global _enumeratio_check
+    v = eval(src, ns)
+    low = src.lower()
+    if not any(h in low for h in _enumeratio_checked_heads):
+        return v
+    _enumeratio_check = True
+    try:
+        with workdps(mp.dps + _enumeratio_convergence_extra_dps):
+            w = eval(src, dict(ns))
+    finally:
+        _enumeratio_check = False
+    if not _enumeratio_agree(v, w, _enumeratio_convergence_digits):
+        raise ArithmeticError("Unconverged: precisions " + str(mp.dps) + " and " + str(mp.dps + _enumeratio_convergence_extra_dps) + " differ before " + str(_enumeratio_convergence_digits) + " digits")
+    return v
+
 def enumeratio_n(thunk, d):
     if not isinstance(d, (int, float)):
         return thunk()
     d = int(d)
     with workdps(max(d, 15) + 20):
-        return enumeratio_round(thunk(), d)
+        v = thunk()
+    if _enumeratio_check:
+        with workdps(max(d, 15) + 40):
+            w = thunk()
+        if not _enumeratio_agree(v, w, d + 5):
+            raise ArithmeticError("Unconverged: " + str(max(d, 15) + 20) + " and " + str(max(d, 15) + 40) + " digits differ before digit " + str(d + 5))
+    with workdps(max(d, 15) + 20):
+        return enumeratio_round(v, d)
 
 # The whole expression at the precision of its widest nested N(x, d), so a bare constant beside it is not a double.
 def enumeratio_at(thunk, d):
@@ -1872,6 +1915,7 @@ export function preludeFor(system: System): Prelude {
       return {
         binary: "python3",
         preamble: MPMATH_PREAMBLE,
+        evaluate: (src) => `enumeratio_checked(${src}, globals())`,
         printer: "enumeratio_value",
       };
     case "sage":
@@ -2010,7 +2054,15 @@ function runBatch(system: System, sources: readonly string[], itemSeconds: numbe
         itemSeconds,
       );
     case "mpmath":
-      return runPython(sources, "python3", MPMATH_PREAMBLE, "batch.py", undefined, "enumeratio_value", itemSeconds);
+      return runPython(
+        sources,
+        "python3",
+        MPMATH_PREAMBLE,
+        "batch.py",
+        (src, ns) => `enumeratio_checked(${src}, ${ns})`,
+        "enumeratio_value",
+        itemSeconds,
+      );
     case "sage":
       // A `.sage` file is preparsed as `sage -c` was. The preparsed source is evaluated
       // with the per-item ns as its globals (copied from the module globals snapshotted right
