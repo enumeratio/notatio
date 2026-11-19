@@ -596,6 +596,117 @@ function stronglyConnectedOrientations(g: Graph): (readonly Edge[])[] {
 const spanningTrees = (g: Graph): number =>
   g.n === 0 ? 0 : edgeSets(g.edges).filter((set) => set.length === g.n - 1 && componentTotal(g.n, set) === 1).length;
 
+/** Every permutation of 0 .. n - 1, as lists. */
+function allPermutations(n: number): number[][] {
+  if (n === 0) return [[]];
+  return allPermutations(n - 1).flatMap((rest) =>
+    Array.from({ length: n }, (_, at) => [...rest.slice(0, at), n - 1, ...rest.slice(at)]),
+  );
+}
+/** The automorphisms (vertices from 0): the permutations under which {p(u), p(v)} is an edge exactly when {u, v} is, all n! tried. */
+function automorphismList(g: Graph): number[][] {
+  const m = matrix(g);
+  return allPermutations(g.n).filter((p) =>
+    range(0, g.n - 1).every((u) => range(0, g.n - 1).every((v) => m[p[u]!]![p[v]!] === m[u]![v])),
+  );
+}
+const gcdOf = (a: number, b: number): number => (b === 0 ? a : gcdOf(b, a % b));
+/** The order of a permutation: the least k >= 1 with p^k the identity. */
+function orderOf(p: readonly number[]): number {
+  let power = [...p];
+  let k = 1;
+  while (power.some((x, i) => x !== i)) {
+    power = power.map((x) => p[x]!);
+    k++;
+  }
+  return k;
+}
+const isIdentity = (p: readonly number[]): boolean => p.every((x, i) => x === i);
+/** Every k-subset of 0 .. n - 1, ascending. */
+function combinations(n: number, k: number): number[][] {
+  if (k === 0) return [[]];
+  return range(0, n - 1).flatMap((first) =>
+    combinations(n, k - 1)
+      .filter((rest) => rest.every((x) => x > first))
+      .map((rest) => [first, ...rest]),
+  );
+}
+/** The least number of colors of the vertices with which no nontrivial automorphism preserves every color. */
+function distinguishingNumber(g: Graph): number {
+  const nontrivial = automorphismList(g).filter((p) => !isIdentity(p));
+  for (let k = 1; k <= g.n; k++)
+    for (let code = 0; code < k ** g.n; code++) {
+      const colors = range(0, g.n - 1).map((v) => Math.floor(code / k ** v) % k);
+      if (nontrivial.every((p) => colors.some((c, v) => c !== colors[p[v]!]))) return k;
+    }
+  return 0;
+}
+/** The fewest vertices, tried by size, that no nontrivial automorphism fixes pointwise. */
+function baseSize(g: Graph): number {
+  const nontrivial = automorphismList(g).filter((p) => !isIdentity(p));
+  for (let size = 0; size <= g.n; size++)
+    if (combinations(g.n, size).some((set) => nontrivial.every((p) => set.some((v) => p[v] !== v)))) return size;
+  return 0;
+}
+/** The partitions of a list into blocks, each as a list of lists. */
+function partitionsOf<T>(items: readonly T[]): T[][][] {
+  if (items.length === 0) return [[]];
+  const [first, ...rest] = items;
+  return partitionsOf(rest).flatMap((partition) => [
+    [[first!], ...partition],
+    ...partition.map((block, i) => partition.map((b, j) => (i === j ? [first!, ...b] : b))),
+  ]);
+}
+/** The most blocks in a partition of the orbits whose unions' restrictions of the group multiply to its order. */
+function groupFactorCount(g: Graph): number {
+  if (g.n === 0) return 0;
+  const group = automorphismList(g);
+  const orbits = [...new Set(range(0, g.n - 1).map((v) => Math.min(...group.map((p) => p[v]!))))].map((rep) =>
+    range(0, g.n - 1).filter((v) => group.some((p) => p[rep] === v)),
+  );
+  return Math.max(
+    0,
+    ...partitionsOf(orbits)
+      .filter(
+        (blocks) =>
+          blocks.reduce(
+            (product, block) =>
+              product *
+              new Set(
+                group.map((p) =>
+                  block
+                    .flat()
+                    .map((v) => p[v])
+                    .join(","),
+                ),
+              ).size,
+            1,
+          ) === group.length,
+      )
+      .map((blocks) => blocks.length),
+  );
+}
+/** The fewest occurrences over all orderings of the vertices (position -> vertex) of the pattern on k positions. */
+function patternOccurrences(
+  g: Graph,
+  k: number,
+  must: readonly (readonly [number, number])[],
+  mustNot: readonly (readonly [number, number])[],
+): number {
+  if (g.n === 0) return 0;
+  const m = matrix(g);
+  return Math.min(
+    ...allPermutations(g.n).map(
+      (ordering) =>
+        combinations(g.n, k).filter(
+          (positions) =>
+            must.every(([a, b]) => m[ordering[positions[a]!]!]![ordering[positions[b]!]!]) &&
+            mustNot.every(([a, b]) => !m[ordering[positions[a]!]!]![ordering[positions[b]!]!]),
+        ).length,
+    ),
+  );
+}
+
 export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   GraphEdgeCount: (g) => g.edges.length,
   MaximumDegree: (g) => Math.max(0, ...degrees(g)),
@@ -1152,6 +1263,81 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   },
   TutteMonomialCount: (g) => [...tuttePolynomial(g.edges).values()].filter((c) => c !== 0).length,
   TutteMinusOneSpanningTreeQuotient: (g) => Math.floor(spanningTrees(g) / Math.abs(tutteAt(g, -1, -1))),
+  AutomorphismGroupSize: (g) => automorphismList(g).length,
+  DistinctAdjacencyMatrixCount: (g) => allPermutations(g.n).length / automorphismList(g).length,
+  // The rows hold the least common multiple of the automorphisms' orders, not of the orbit sizes.
+  AutomorphismGroupExponent: (g) => automorphismList(g).reduce((l, p) => (l * orderOf(p)) / gcdOf(l, orderOf(p)), 1),
+  VertexOrbitCount: (g) => range(0, g.n - 1).filter((v) => automorphismList(g).every((p) => p[v]! >= v)).length,
+  DistinguishingNumber: distinguishingNumber,
+  OddAutomorphismCount: (g) =>
+    automorphismList(g).filter((p) => g.edges.filter(([u, v]) => p[u - 1]! > p[v - 1]!).length % 2 === 1).length,
+  AutomorphismBaseSize: baseSize,
+  AutomorphismGroupFactorCount: groupFactorCount,
+  MinimumForestPatternOccurrenceCount: (g) =>
+    patternOccurrences(
+      g,
+      3,
+      [
+        [0, 2],
+        [1, 2],
+      ],
+      [],
+    ),
+  MinimumStarPatternOccurrenceCount: (g) => patternOccurrences(g, 3, [[0, 1]], []),
+  MinimumPathPatternOccurrenceCount: (g) => patternOccurrences(g, 3, [[0, 2]], []),
+  MinimumChordalPatternOccurrenceCount: (g) =>
+    patternOccurrences(
+      g,
+      3,
+      [
+        [0, 2],
+        [1, 2],
+      ],
+      [[0, 1]],
+    ),
+  MinimumComparabilityPatternOccurrenceCount: (g) =>
+    patternOccurrences(
+      g,
+      3,
+      [
+        [0, 1],
+        [1, 2],
+      ],
+      [[0, 2]],
+    ),
+  MinimumIntervalPatternOccurrenceCount: (g) => patternOccurrences(g, 3, [[0, 2]], [[0, 1]]),
+  MinimumSplitPatternOccurrenceCount: (g) => patternOccurrences(g, 3, [[0, 1]], [[1, 2]]),
+  MinimumBipartitePatternOccurrenceCount: (g) =>
+    patternOccurrences(
+      g,
+      3,
+      [
+        [0, 1],
+        [1, 2],
+      ],
+      [],
+    ),
+  MinimumOuterplanarPatternOccurrenceCount: (g) =>
+    patternOccurrences(
+      g,
+      4,
+      [
+        [0, 2],
+        [1, 3],
+      ],
+      [],
+    ),
+  MinimumThreeColorablePatternOccurrenceCount: (g) =>
+    patternOccurrences(
+      g,
+      4,
+      [
+        [0, 1],
+        [1, 2],
+        [2, 3],
+      ],
+      [],
+    ),
   // Every graph on the same vertices that is regular, by the number of pairs where it differs from this one.
   RegularEdgeEditNumber: (g) => {
     const pairs = pairsOf(range(1, g.n)).filter(([u, v]) => u < v);

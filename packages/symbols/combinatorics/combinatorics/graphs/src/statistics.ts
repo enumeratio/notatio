@@ -2,11 +2,13 @@
 // [u, v] with u < v. Every definition guards the graph with no vertices, whose ranges are empty.
 
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
+import { lexUnrank } from "../../permutations/src/families/core.ts";
 import type { Definition, MathJSON } from "../../src/statistics/types.ts";
 import {
   add,
   at,
   atLeastValue,
+  atMostValue,
   bind,
   bindList,
   equals,
@@ -1492,6 +1494,124 @@ const tutteAt = (x: number, y: number, wrap?: (sum: MathJSON, full: MathJSON) =>
 const keyRange: MathJSON = ["Range", 0, subtract(times("n", "width"), 1)];
 const corankOfKey: MathJSON = ["Divide", subtract("t", ["Mod", "t", "width"]), "width"];
 const nullityOfKey: MathJSON = ["Mod", "t", "width"];
+
+// ─── Folds over the permutations of the vertices, by rank ───
+// `Permutations(n)` has no compiled form, so the permutation of rank q in lex order is read from its mixed-radix digits
+// (`lexUnrank`), and the ranks 0 .. n! - 1 are folded or mapped over. A permutation is the list `p` with p(i) its
+// image of vertex i; an ordering of the vertices is the same list read as position -> vertex.
+
+const notEqual = (a: MathJSON, b: MathJSON): MathJSON => ["NotEqual", a, b];
+/** 2^(vertex - 1) with a non-negative exponent, which Epsil types an integer where `bitValue` is a rational. */
+const wholeBit = (vertex: MathJSON): MathJSON => ["Power", 2, ["Max", subtract(vertex, 1), 0]];
+/** The ranks of the permutations of 1 .. n in lex order, identity first. */
+const permutationRanks: MathJSON = ["Range", 0, subtract(["Factorial", "n"], 1)];
+/** The permutation of rank `rank` (a variable), as a list of integers. */
+const permutationOfRank = (rank: string): MathJSON => lexUnrank("n", "n", rank) as MathJSON;
+/** `body` (reading the permutation as `p`) at each permutation, as a list. */
+const overPermutations = (body: MathJSON): MathJSON =>
+  forEach(permutationRanks, bindList("p", permutationOfRank("q"), body), "q");
+/** The quotient of the integer a by b. */
+const quotient = (a: MathJSON, b: MathJSON): MathJSON => ["Divide", subtract(a, ["Mod", a, b]), b];
+/** The number of edges a permutation `p` maps to an edge: all of them exactly when `p` is an automorphism. */
+const edgesPreserved: MathJSON = floored(sumOver("edges", adjacent(at(lower("e"), "p"), at(upper("e"), "p")), "e"));
+/** The automorphisms, in lex order of their ranks, the identity first, as the list `auts`. */
+const automorphisms: MathJSON = forEach(
+  [
+    "Filter",
+    permutationRanks,
+    ["Function", bindList("p", permutationOfRank("q"), equals(edgesPreserved, length("edges"))), "q"],
+  ],
+  bindList("p", permutationOfRank("q"), "p"),
+  "q",
+);
+/** `body` reading the list of automorphisms as `auts`; the graph with no vertices gives `otherwise`. */
+const withAutomorphisms = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withAdjacency(bindList("auts", automorphisms, body, "list<list<integer>>"), otherwise);
+/** 1 when the permutation `p` moves some vertex. */
+const isNontrivial: MathJSON = one(less(0, floored(sumOver(vertices, one(notEqual(at("v", "p"), "v")), "v"))));
+/** The length of the cycle of `p` through vertex `i`: the first step at which the walk i, p(i), ... returns, found within n steps. The state packs the position x and the length found so far (0 until found) as x + (n + 1) * length. */
+const cycleLength = (i: MathJSON): MathJSON =>
+  bind(
+    "found",
+    typedFolding(
+      bind(
+        "x",
+        ["Mod", "s", add("n", 1)],
+        bind(
+          "x2",
+          at("x", "p"),
+          bind(
+            "len",
+            ["If", greater(quotient("s", add("n", 1)), 0), quotient("s", add("n", 1)), ["If", equals("x2", i), "k", 0]],
+            add("x2", times(add("n", 1), "len")),
+            "integer",
+          ),
+          "integer",
+        ),
+        "integer",
+      ),
+      "s",
+      "k",
+      i,
+      vertices,
+      "integer",
+    ),
+    quotient("found", add("n", 1)),
+    "integer",
+  );
+
+/** A pattern statistic: the fewest occurrences over all orderings of the vertices of a pattern on `size` positions, whose `must` pairs of positions are edges and `mustNot` pairs are not. The occurrences are the increasing position tuples, found by nested sums that skip a tuple once two positions fail to increase. */
+const patternStat = (
+  head: string,
+  summary: string,
+  size: number,
+  must: readonly (readonly [number, number])[],
+  mustNot: readonly (readonly [number, number])[],
+  note: string,
+): Definition => {
+  const slot = (a: number): string => `s${a}`;
+  const joined = (a: number, b: number): MathJSON => adjacent(at(slot(a), "p"), at(slot(b), "p"));
+  const holds = [...must.map(([a, b]) => joined(a, b)), ...mustNot.map(([a, b]) => subtract(1, joined(a, b)))].reduce(
+    (product, factor) => times(product, factor),
+  );
+  const nested = (a: number): MathJSON =>
+    a === size
+      ? holds
+      : floored(
+          sumOver(vertices, a === 0 ? nested(a + 1) : ["If", less(slot(a - 1), slot(a)), nested(a + 1), 0], slot(a)),
+        );
+  return stat(
+    head,
+    summary,
+    withAdjacency(["Min", overPermutations(nested(0))]),
+    `${note} With fewer than ${size} vertices there is no occurrence, so 0. ${NO_VERTICES}`,
+  );
+};
+
+/** The largest subject (vertices plus edge ends) the build's compile cross-check interprets for a head that folds over the permutations: the interpreter takes 2 to 7 s a graph on 4 vertices and tens of seconds on 5, so larger graphs are held by the compiled tests. */
+const PERMUTATION_CHECK_WEIGHT = 7;
+/** The same for the two heads that also enumerate colorings or partitions of the orbits (k^n and r^r of them), hours for the edgeless graph on 5 vertices. */
+const ENUMERATING_CHECK_WEIGHT = 3;
+const PERMUTATION_FOLDS: ReadonlySet<string> = new Set([
+  "AutomorphismGroupSize",
+  "DistinctAdjacencyMatrixCount",
+  "AutomorphismGroupExponent",
+  "VertexOrbitCount",
+  "DistinguishingNumber",
+  "OddAutomorphismCount",
+  "AutomorphismBaseSize",
+  "AutomorphismGroupFactorCount",
+  "MinimumForestPatternOccurrenceCount",
+  "MinimumStarPatternOccurrenceCount",
+  "MinimumPathPatternOccurrenceCount",
+  "MinimumChordalPatternOccurrenceCount",
+  "MinimumComparabilityPatternOccurrenceCount",
+  "MinimumIntervalPatternOccurrenceCount",
+  "MinimumSplitPatternOccurrenceCount",
+  "MinimumBipartitePatternOccurrenceCount",
+  "MinimumOuterplanarPatternOccurrenceCount",
+  "MinimumThreeColorablePatternOccurrenceCount",
+]);
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -3341,4 +3461,374 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     ),
     `FindStat's St001796: SpanningTreeCount over the absolute value of the Tutte polynomial at (-1, -1), which is never 0; the sets of edges with size = rank = n - 1 are the spanning trees, so a disconnected graph has none and gives 0. The graph with no vertices has no spanning-tree count, as SpanningTreeCount: 0.`,
   ),
-];
+  stat(
+    "AutomorphismGroupSize",
+    "The permutations of the vertices that map every edge to an edge.",
+    withAutomorphisms(length("auts"), 1),
+    `FindStat's St000244, the order of the automorphism group. The graph with no vertices has one automorphism, the empty permutation, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "DistinctAdjacencyMatrixCount",
+    "The distinct adjacency matrices a relabeling of the vertices gives.",
+    withAutomorphisms(["Divide", ["Factorial", "n"], length("auts")], 1),
+    `FindStat's St000349: n! divided by the order of the automorphism group. The graph with no vertices has one, a convention and not a FindStat row: 1.`,
+  ),
+  stat(
+    "AutomorphismGroupExponent",
+    "The least common multiple of the orders of the automorphisms.",
+    withAutomorphisms(
+      typedFolding(
+        ["LCM", "g", typedFolding(["LCM", "h", cycleLength("i")], "h", "i", 1, vertices, "integer")],
+        "g",
+        "p",
+        1,
+        "auts",
+        "integer",
+      ),
+      1,
+    ),
+    `FindStat's St000364. The rows count the least common multiple of the orders of the automorphisms, each the least common multiple of its cycle lengths; the title's "least common multiple of orbit sizes" is not what the rows hold (143 rows differ). The graph with no vertices gives 1, a convention and not a FindStat row.`,
+  ),
+  stat(
+    "VertexOrbitCount",
+    "The vertices that no automorphism sends to a smaller vertex.",
+    withAutomorphisms(floored(sumOver(vertices, one(equals(["Min", forEach("auts", at("v", "p"), "p")], "v")), "v"))),
+    `FindStat's St000388: one vertex for each orbit of the automorphism group, its least. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+  ),
+  stat(
+    "DistinguishingNumber",
+    "The fewest colors of the vertices such that no nontrivial automorphism preserves every color.",
+    withAutomorphisms(
+      typedFolding(
+        [
+          "If",
+          greater("best", 0),
+          "best",
+          [
+            "If",
+            greater(
+              typedFolding(
+                [
+                  "If",
+                  greater("seen", 0),
+                  "seen",
+                  [
+                    "If",
+                    equals(
+                      floored(
+                        sumOver(
+                          "auts",
+                          times(
+                            isNontrivial,
+                            one(
+                              equals(
+                                floored(
+                                  sumOver(vertices, one(notEqual(colorOf("c", "w"), colorOf("c", at("w", "p")))), "w"),
+                                ),
+                                0,
+                              ),
+                            ),
+                          ),
+                          "p",
+                        ),
+                      ),
+                      0,
+                    ),
+                    1,
+                    0,
+                  ],
+                ],
+                "seen",
+                "c",
+                0,
+                ["Range", 0, subtract(["Power", "k", "n"], 1)],
+                "integer",
+              ),
+              0,
+            ),
+            "k",
+            0,
+          ],
+        ],
+        "best",
+        "k",
+        0,
+        vertices,
+        "integer",
+      ),
+    ),
+    `FindStat's St000469. A coloring is read as the digits of c in base k, vertex v the digit at position v - 1; k = n always works, so the search ends. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+  ),
+  stat(
+    "OddAutomorphismCount",
+    "The automorphisms with an odd number of edges whose ends swap order.",
+    withAutomorphisms(
+      floored(
+        sumOver(
+          "auts",
+          ["Mod", floored(sumOver("edges", one(greater(at(lower("e"), "p"), at(upper("e"), "p"))), "e")), 2],
+          "p",
+        ),
+      ),
+    ),
+    `FindStat's St001783: the automorphisms p for which the number of edges (u, v), u < v, with p(u) > p(v) is odd. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+  ),
+  stat(
+    "AutomorphismBaseSize",
+    "The fewest vertices that only the identity automorphism fixes pointwise.",
+    withAutomorphisms(
+      bindList(
+        "moved",
+        forEach("auts", floored(sumOver(vertices, times(one(notEqual(at("v", "p"), "v")), wholeBit("v")), "v")), "p"),
+        [
+          "Min",
+          forEach(
+            masks,
+            [
+              "If",
+              equals(
+                [
+                  "Min",
+                  forEach(
+                    "moved",
+                    [
+                      "If",
+                      equals("mv", 0),
+                      1,
+                      one(
+                        less(0, floored(sumOver(vertices, times(one(hasBit("mk", "w")), one(hasBit("mv", "w"))), "w"))),
+                      ),
+                    ],
+                    "mv",
+                  ),
+                ],
+                1,
+              ),
+              maskSize("mk"),
+              "n",
+            ],
+            "mk",
+          ),
+        ],
+      ),
+    ),
+    `FindStat's St001949: a set of vertices is a base when every nontrivial automorphism moves one of them; each automorphism's moved vertices are a bitmask. A graph with no nontrivial automorphism has the empty base, 0. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+  ),
+  stat(
+    "AutomorphismGroupFactorCount",
+    "The most blocks in a partition of the vertex orbits into unions whose restrictions multiply to the order of the automorphism group.",
+    withAutomorphisms(
+      bindList(
+        "rep",
+        forEach(vertices, ["Min", forEach("auts", at("v", "p"), "p")], "v"),
+        bindList(
+          "orbitNo",
+          forEach(
+            vertices,
+            floored(
+              sumOver(vertices, times(one(equals(at("w", "rep"), "w")), one(atMostValue("w", at("v", "rep")))), "w"),
+            ),
+            "v",
+          ),
+          bind(
+            "r",
+            floored(sumOver(vertices, one(equals(at("w", "rep"), "w")), "w")),
+            bindList(
+              "kernel",
+              forEach(
+                masks,
+                floored(
+                  sumOver(
+                    "auts",
+                    one(
+                      equals(
+                        floored(
+                          sumOver(vertices, times(one(hasBit("mk", "w")), one(notEqual(at("w", "p"), "w"))), "w"),
+                        ),
+                        0,
+                      ),
+                    ),
+                    "p",
+                  ),
+                ),
+                "mk",
+              ),
+              bind(
+                "order",
+                length("auts"),
+                [
+                  "If",
+                  equals("order", 1),
+                  "n",
+                  [
+                    "Max",
+                    forEach(
+                      ["Range", 0, subtract(["Power", "r", "r"], 1)],
+                      bindList(
+                        "blocks",
+                        forEach(
+                          ["Range", 0, subtract("r", 1)],
+                          floored(
+                            sumOver(
+                              vertices,
+                              times(
+                                one(
+                                  equals(
+                                    ["Mod", quotient("c", ["Power", "r", subtract(at("w", "orbitNo"), 1)]), "r"],
+                                    "l",
+                                  ),
+                                ),
+                                wholeBit("w"),
+                              ),
+                              "w",
+                            ),
+                          ),
+                          "l",
+                        ),
+                        [
+                          "If",
+                          equals(
+                            typedFolding(
+                              times("acc", ["If", equals("m", 0), 1, ["Divide", "order", at(add("m", 1), "kernel")]]),
+                              "acc",
+                              "m",
+                              1,
+                              "blocks",
+                              "integer",
+                            ),
+                            "order",
+                          ),
+                          floored(sumOver("blocks", one(greater("m", 0)), "m")),
+                          0,
+                        ],
+                      ),
+                      "c",
+                    ),
+                  ],
+                ],
+                "integer",
+              ),
+              "list<integer>",
+            ),
+            "integer",
+          ),
+        ),
+      ),
+    ),
+    `FindStat's St001951. A partition of the orbits is read as the base-r digits of c, r the orbit count, a digit the block of an orbit; the restriction of the group to a union of orbits has |G| over the automorphisms that fix those vertices. The rows count the most blocks whose restrictions multiply to |G|, so a graph with no nontrivial automorphism gives n. The graph with no vertices gives 0, a convention and not a FindStat row.`,
+  ),
+  patternStat(
+    "MinimumForestPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-3 and 2-3 on three positions.",
+    3,
+    [
+      [0, 2],
+      [1, 2],
+    ],
+    [],
+    `FindStat's St001317: positions i < j < k whose vertices have edges i-k and j-k, the pair i-j free.`,
+  ),
+  patternStat(
+    "MinimumStarPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with the edge 1-2 on three positions.",
+    3,
+    [[0, 1]],
+    [],
+    `FindStat's St001319: positions i < j < k whose first two vertices are joined, the others free.`,
+  ),
+  patternStat(
+    "MinimumPathPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with the edge 1-3 on three positions.",
+    3,
+    [[0, 2]],
+    [],
+    `FindStat's St001320: positions i < j < k whose outer vertices are joined, the others free.`,
+  ),
+  patternStat(
+    "MinimumChordalPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-3 and 2-3 and no edge 1-2.",
+    3,
+    [
+      [0, 2],
+      [1, 2],
+    ],
+    [[0, 1]],
+    `FindStat's St001324.`,
+  ),
+  patternStat(
+    "MinimumComparabilityPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-2 and 2-3 and no edge 1-3.",
+    3,
+    [
+      [0, 1],
+      [1, 2],
+    ],
+    [[0, 2]],
+    `FindStat's St001325.`,
+  ),
+  patternStat(
+    "MinimumIntervalPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with the edge 1-3 and no edge 1-2.",
+    3,
+    [[0, 2]],
+    [[0, 1]],
+    `FindStat's St001326.`,
+  ),
+  patternStat(
+    "MinimumSplitPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with the edge 1-2 and no edge 2-3.",
+    3,
+    [[0, 1]],
+    [[1, 2]],
+    `FindStat's St001327.`,
+  ),
+  patternStat(
+    "MinimumBipartitePatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-2 and 2-3.",
+    3,
+    [
+      [0, 1],
+      [1, 2],
+    ],
+    [],
+    `FindStat's St001328.`,
+  ),
+  patternStat(
+    "MinimumOuterplanarPatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-3 and 2-4 on four positions.",
+    4,
+    [
+      [0, 2],
+      [1, 3],
+    ],
+    [],
+    `FindStat's St001329.`,
+  ),
+  patternStat(
+    "MinimumThreeColorablePatternOccurrenceCount",
+    "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-2, 2-3 and 3-4 on four positions.",
+    4,
+    [
+      [0, 1],
+      [1, 2],
+      [2, 3],
+    ],
+    [],
+    `FindStat's St001334.`,
+  ),
+].map((definition) =>
+  PERMUTATION_FOLDS.has(definition.head)
+    ? {
+        ...definition,
+        checkWeight:
+          definition.head === "DistinguishingNumber" || definition.head === "AutomorphismGroupFactorCount"
+            ? ENUMERATING_CHECK_WEIGHT
+            : PERMUTATION_CHECK_WEIGHT,
+      }
+    : definition,
+);
+
+/** The color of vertex w in the coloring c with k colors: digit w - 1 of c in base k. */
+function colorOf(c: MathJSON, w: MathJSON): MathJSON {
+  return ["Mod", quotient(c, ["Power", "k", subtract(w, 1)]), "k"];
+}
