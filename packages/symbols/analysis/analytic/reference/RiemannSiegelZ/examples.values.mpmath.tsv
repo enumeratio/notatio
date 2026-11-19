@@ -3,7 +3,14 @@ riemannsiegelz-1p5	siegelz(1.5)	-0.595568336782886970481068891603
 riemannsiegelz-20p5	siegelz(20.5)	0.599328702514751321387209891229	
 riemannsiegelz-100	(siegelz(100))	2.69269705666446347499537982869	
 fullsimplify-series-riemannsiegelz-x-x-0-2			
-n-riemannsiegelz-1e-12-i-20-an-exactly-zero-part	enumeratio_n(lambda: (siegelz(mpc(0, mpf("1e-12")))), 20)	(-1.4603545088095868129+0.0j)	disagree
+n-riemannsiegelz-1e-12-i-20	enumeratio_n(lambda: (siegelz(mpc(0, mpf("1e-12")))), 20)	(-1.4603545088095868129+0.0j)	
+n-riemannsiegelz-3-i-20	enumeratio_n(lambda: (siegelz(mpc(0, 3))), 20)	(-0.097960768165277449275-4.2464363742098596214e-52j)	
+n-riemannsiegelz-neg-3-i-20	enumeratio_n(lambda: (siegelz(mpc(0, -3))), 20)	(-0.097960768165277449275+4.2464363742098596214e-52j)	
+n-riemannsiegelz-7p25-i-20	enumeratio_n(lambda: (siegelz(mpc(0, mpf("7.25")))), 20)	(0.060980767932008238254+5.2868297365090701588e-52j)	
+n-riemannsiegelz-1-over-2-i-20	enumeratio_n(lambda: (siegelz(mpc(0, mpf("0.5")))), 20)	ValueError: gamma function pole	error
+n-riemannsiegelz-0p3-i-20	enumeratio_n(lambda: (siegelz(mpc(0, mpf("0.3")))), 20)	(-1.8046612697282292210+0.0j)	
+n-riemannsiegelz-i-20	enumeratio_n(lambda: (siegelz(mpc(0, 1))), 20)	(-1.5972507052042107586e-51+0.73693748002264514385j)	
+n-riemannsiegelz-5-over-2-i-20	enumeratio_n(lambda: (siegelz(mpc(0, mpf("2.5")))), 20)	ValueError: gamma function pole	error
 n-riemannsiegelz-1-over-3	(siegelz((mpf(1)/3)))	-1.23218677906326315211667240246	
 n-riemannsiegelz-neg-12	(siegelz(-12))	-1.25988883412447225689352554257	
 n-riemannsiegelz-5-over-4-50	enumeratio_n(lambda: (siegelz((mpf(5)/4))), 50)	-0.65081889537920883712698417960938732591709344035087	
