@@ -189,6 +189,10 @@ export function riemannSiegelZBig(t: BigDecimal, digits: number): BigDecimal | u
 /** Z(x + iy) to `digits` significant digits in each part; a part that is exactly zero stays so. */
 export function riemannSiegelZComplexBig(x: BigDecimal, y: BigDecimal, digits: number): BigCx | undefined {
   if (!x.isFinite() || !y.isFinite()) return undefined;
+  // Z(iy) = e^{iϑ(iy)} ζ(½ − y) is a real ζ times a phase that is ±1 or ±i, so one part is exactly
+  // zero and no precision resolves it: `resolved` doubles the working digits until its cap (2 s at
+  // Z(1e-12 i), 20 digits). Declined here, from the argument alone.
+  if (x.isZero() && !y.isZero()) return undefined;
   const asymptotic = asymptoticParts(x, y, digits);
   if (asymptotic !== undefined) return { re: asymptotic[0]!, im: asymptotic[1]! };
   if (x.abs().gt(MAX_COMPLEX_ARGUMENT) || y.abs().gt(MAX_COMPLEX_ARGUMENT)) return undefined;

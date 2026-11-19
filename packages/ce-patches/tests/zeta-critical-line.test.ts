@@ -52,8 +52,20 @@ test("a sum too long for the kernel is declined, not thrown", () => {
   expect(
     evaluateHurwitz(machine, [machine.box(["Complex", 0.5, 10000055.072951317]), machine.One], true),
   ).toBeUndefined();
-  // One decade short of it the kernel still answers (ζ(1/2 + 10^6 i), 7 s here, so not in the standard run).
-  expect(beyondTermCap(bigCx(0.5, 1000055), bigCx(1), 17)).toBe(false);
+  // The plan alone decides: ζ(1/2 + 10^6 i) needs 2e5 direct terms (3.8 s), past the budget.
+  expect(beyondTermCap(bigCx(0.5, 1000055), bigCx(1), 17)).toBe(true);
+  // Two decades short of it the kernel answers.
+  expect(beyondTermCap(bigCx(0.5, 10055), bigCx(1), 17)).toBe(false);
+});
+
+test("a call past the term budget declines from its plan, in well under a second", () => {
+  for (const re of [1e-12, 0.5, 2, -1]) {
+    const s = machine.box(["Complex", re, 1.74e6] as never);
+    const started = performance.now();
+    expect(evaluateHurwitz(machine, [s, machine.One], true)).toBeUndefined();
+    expect(hurwitzZetaBig(bigCx(re, 1.74e6), bigCx(1), 17)).toBeUndefined();
+    expect(performance.now() - started).toBeLessThan(1000);
+  }
 });
 
 test("exactDouble leaves integers and non-finite values to BigDecimal", () => {
