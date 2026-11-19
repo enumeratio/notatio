@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-composition-2-1-3			[ThresholdGraph, [IntegerComposition, [List, 2, 1, 3]]]	[LabeledGraph, [Tuple, 6, [List, [List, 1, 3], [List, 1, 4], [List, 2, 3], [List, 2, 4], [List, 3, 4]]]]	the composition $2 + 1 + 3$

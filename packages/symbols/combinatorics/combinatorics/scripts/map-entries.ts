@@ -122,15 +122,95 @@ const OWN_SAMPLES: Record<string, { contents: unknown; caption: string }> = {
   SimionSchmidt: { contents: ["List", 1, 2, 3], caption: "the identity $123$" },
 };
 
+/** The graph on `n` vertices with the edges `pairs`, as the contents of a LabeledGraph. */
+const graphOf = (n: number, pairs: readonly (readonly [number, number])[]): unknown => [
+  "Tuple",
+  n,
+  ["List", ...pairs.map(([u, v]) => ["List", u, v])],
+];
+
+/** Further subjects of a graph map, each pinning a labeling the default sample does not reach. */
+const EXTRA_SAMPLES: Record<string, { contents: unknown; caption: string }[]> = {
+  "BlockCutTree@labeled_graph": [
+    {
+      contents: graphOf(6, [
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [3, 4],
+        [4, 5],
+      ]),
+      caption: "a triangle with a path of two edges attached, and an isolated vertex",
+    },
+  ],
+  "CliqueGraph@labeled_graph": [
+    {
+      contents: graphOf(5, [
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [3, 4],
+        [4, 5],
+      ]),
+      caption: "a triangle with a path of two edges attached",
+    },
+  ],
+  "EndpointDeletion@labeled_graph": [
+    {
+      contents: graphOf(6, [
+        [1, 2],
+        [1, 3],
+        [2, 3],
+        [3, 4],
+        [5, 6],
+      ]),
+      caption: "a triangle with a pendant edge, and a separate edge",
+    },
+  ],
+  "DeduplicatedGraph@labeled_graph": [
+    {
+      contents: graphOf(4, [
+        [1, 2],
+        [1, 3],
+        [1, 4],
+      ]),
+      caption: "a star with three leaves",
+    },
+  ],
+  "ConnectedComplement@labeled_graph": [
+    {
+      contents: graphOf(4, [
+        [1, 2],
+        [2, 3],
+        [3, 4],
+      ]),
+      caption: "a path on 4 vertices",
+    },
+  ],
+  "OreClosure@labeled_graph": [
+    {
+      contents: graphOf(4, [
+        [1, 2],
+        [2, 3],
+        [3, 4],
+        [1, 4],
+      ]),
+      caption: "a cycle on 4 vertices",
+    },
+  ],
+};
+
 function exampleFor(map: CombinatorialMap): { expr: unknown; expected: unknown; caption?: string }[] {
-  const sample = OWN_SAMPLES[map.name] ?? SAMPLES[map.from];
-  if (sample === undefined) return [];
-  const subject = [carrier(map.from), sample.contents];
-  const expr = [map.name, subject];
-  const result = ce.box(expr as never).evaluate();
-  const text = JSON.stringify(result.json);
-  if (result.json === undefined || text.includes("Error")) return [];
-  return [{ expr, expected: result.json, caption: sample.caption }];
+  const samples = [
+    OWN_SAMPLES[map.name] ?? SAMPLES[map.from],
+    ...(EXTRA_SAMPLES[`${map.name}@${map.from}`] ?? []),
+  ].filter((sample) => sample !== undefined);
+  return samples.flatMap((sample) => {
+    const expr = [map.name, [carrier(map.from), sample.contents]];
+    const result = ce.box(expr as never).evaluate();
+    if (result.json === undefined || JSON.stringify(result.json).includes("Error")) return [];
+    return [{ expr, expected: result.json, caption: sample.caption }];
+  });
 }
 
 /** One record per head, however many carriers it is a map over (`Reverse` is one per carrier): the
@@ -160,11 +240,14 @@ const entryFor = (overloads: readonly CombinatorialMap[]): ReferenceEntry => {
   };
 };
 
+/** Heads whose record is another area's, written by hand: the map overload is added to it there, not generated. */
+const HAND_RECORDS: ReadonlySet<string> = new Set(["LineGraph"]);
+const generatedMaps = MAPS.filter((m) => m.convert !== true && !HAND_RECORDS.has(m.name));
+
 /** The non-conversion maps, grouped by head, in declaration order. */
 const mapsByName = (): CombinatorialMap[][] => {
   const groups = new Map<string, CombinatorialMap[]>();
-  for (const map of MAPS.filter((m) => m.convert !== true))
-    groups.set(map.name, [...(groups.get(map.name) ?? []), map]);
+  for (const map of generatedMaps) groups.set(map.name, [...(groups.get(map.name) ?? []), map]);
   return [...groups.values()];
 };
 
@@ -202,7 +285,7 @@ const frontierEntryFor = (map: (typeof UNDEFINED_MAPS)[number]): ReferenceEntry 
  * the test asserts the gap is still open. */
 export const generated: GeneratedEntries = {
   entries: [...mapsByName().map(entryFor), ...UNDEFINED_MAPS.map(frontierEntryFor)],
-  owned: new Set([...MAPS.filter((m) => m.convert !== true), ...UNDEFINED_MAPS].map((m) => m.name)),
+  owned: new Set([...generatedMaps, ...UNDEFINED_MAPS].map((m) => m.name)),
   // Anything else on a record (`formerly`, `references`, `names`) is curated by hand.
   fields: new Set(["name", "domain", "signature", "summary", "details", "examples", "seeAlso"]),
 };

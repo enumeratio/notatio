@@ -3,7 +3,7 @@
 // `binary_tree` lives in `../../lattice-paths/src/maps.ts` instead — its `from` carrier is
 // lattice-paths' own, even though it shares `binary-tree.ts`'s bodies with the maps here.
 
-import type { CombinatorialMap } from "../../src/map-helpers.ts";
+import { bind, forEach, graphWhere, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
 import { isLeaf } from "../../src/recursion.ts";
 import {
   dyckPathBody,
@@ -33,8 +33,80 @@ import {
   rotateOrderedBody,
 } from "./ordered-tree.ts";
 
+const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
 const left = (tree: unknown): unknown => ["At", tree, 1];
 const right = (tree: unknown): unknown => ["At", tree, 2];
+
+/** Mp00011: the graph of a tree's in-order parent array `parents`, nodes joined to their parents. */
+const underlyingOfBinary = (parents: MathJSON): MathJSON =>
+  bind(
+    "ug_parents",
+    parents,
+    graphWhere(["Length", "ug_parents"], (u, v) => [
+      "Or",
+      ["Equal", ["At", "ug_parents", v], u],
+      ["Equal", ["At", "ug_parents", u], v],
+    ]),
+    "list<integer>",
+  );
+
+/** Mp00046: the graph of an ordered tree from its Dyck word `word`: the k-th up step is node k + 1 (preorder, the root 1),
+ *  its parent the latest earlier up step one level down, or the root. */
+const underlyingOfOrdered = (word: MathJSON): MathJSON =>
+  bind(
+    "ug_word",
+    word,
+    [
+      "If",
+      ["Equal", ["Length", "ug_word"], 0],
+      ["Tuple", 1, ["List"]],
+      lets(
+        [
+          [
+            "ug_steps",
+            ["Filter", upTo(["Length", "ug_word"]), ["Function", ["Equal", ["At", "ug_word", "p"], 1], "p"]],
+            "list<integer>",
+          ],
+          [
+            "ug_depth",
+            forEach(
+              "ug_steps",
+              ["Sum", forEach(upTo("p"), ["Subtract", ["Multiply", 2, ["At", "ug_word", "q"]], 1], "q")],
+              "p",
+            ),
+            "list<integer>",
+          ],
+          [
+            "ug_parent",
+            forEach(
+              upTo(["Length", "ug_steps"]),
+              [
+                "If",
+                ["Equal", ["At", "ug_depth", "j"], 1],
+                1,
+                [
+                  "Add",
+                  1,
+                  [
+                    "Max",
+                    [
+                      "Filter",
+                      upTo(["Subtract", "j", 1]),
+                      ["Function", ["Equal", ["At", "ug_depth", "i"], ["Subtract", ["At", "ug_depth", "j"], 1]], "i"],
+                    ],
+                  ],
+                ],
+              ],
+              "j",
+            ),
+            "list<integer>",
+          ],
+        ],
+        graphWhere(["Add", ["Length", "ug_steps"], 1], (u, v) => ["Equal", ["At", "ug_parent", ["Subtract", v, 1]], u]),
+      ),
+    ],
+    "list<integer>",
+  );
 
 export const TREES_MAPS: readonly CombinatorialMap[] = [
   {
@@ -216,5 +288,27 @@ export const TREES_MAPS: readonly CombinatorialMap[] = [
     summary:
       "The Dyck path T(L) U T(R) D of a tree with subtrees L and R: the bijection compatible with the Tamari order.",
     note: "FindStat's Mp00020; the inverse is TamariBinaryTree. DyckPath(BinaryTree) reads the other decomposition, U T(L) D T(R), so this is it after a left-right mirror and a reverse-complement.",
+  },
+  {
+    name: "UnderlyingGraph",
+    findstat: ["Mp00011"],
+    from: "binary_tree",
+    to: "labeled_graph",
+    body: underlyingOfBinary(parentArrayBody as MathJSON),
+    flat: underlyingOfBinary("_raw"),
+    imageParts: ["", ""],
+    summary: "The graph on the internal nodes of a binary tree, each joined to its parent; leaves are ignored.",
+    note: "FindStat's Mp00011. The nodes are numbered in order, as in BinaryTreeParentArray.",
+  },
+  {
+    name: "UnderlyingGraph",
+    findstat: ["Mp00046"],
+    from: "ordered_tree",
+    to: "labeled_graph",
+    body: underlyingOfOrdered(dyckPathOfOrderedTreeBody as MathJSON),
+    flat: underlyingOfOrdered("_raw"),
+    imageParts: ["", ""],
+    summary: "The graph on the nodes of an ordered tree, each joined to its parent.",
+    note: "FindStat's Mp00046. The nodes are numbered in preorder, the root 1.",
   },
 ];

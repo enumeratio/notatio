@@ -264,6 +264,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00277", rows: 1200, compared: 873, skipped: 0 }],
   },
   {
+    name: "InversionGraph",
+    from: "Permutation",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00160", rows: 1200, compared: 873, skipped: 0 }],
+  },
+  {
     name: "Reverse",
     from: "SignedPermutation",
     to: "SignedPermutation",
@@ -430,6 +436,18 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     from: "BinaryTree",
     to: "DyckPath",
     findstat: [{ id: "Mp00020", rows: 1200, compared: 196, skipped: 0 }],
+  },
+  {
+    name: "UnderlyingGraph",
+    from: "BinaryTree",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00011", rows: 1200, compared: 196, skipped: 0 }],
+  },
+  {
+    name: "UnderlyingGraph",
+    from: "OrderedTree",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00046", rows: 1200, compared: 197, skipped: 0 }],
   },
   {
     name: "ReverseComplement",
@@ -1122,6 +1140,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00180", rows: 1200, compared: 63, skipped: 0 }],
   },
   {
+    name: "ThresholdGraph",
+    from: "IntegerComposition",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00184", rows: 1200, compared: 63, skipped: 0 }],
+  },
+  {
     name: "Reverse",
     from: "BinaryWord",
     to: "BinaryWord",
@@ -1354,6 +1378,78 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     from: "LabeledGraph",
     to: "IntegerPartition",
     findstat: [{ id: "Mp00276", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "GraphComplement",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00111", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "GraphSquare",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00147", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "GraphCone",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00203", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "IsolatedVertexAddition",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00259", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "LineGraph",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00156", rows: 712, compared: 190, skipped: 0 }],
+  },
+  {
+    name: "ConnectedComplement",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00157", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "OreClosure",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00117", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "DeduplicatedGraph",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00247", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "CliqueGraph",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00250", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "EndpointDeletion",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00264", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "BlockCutTree",
+    from: "LabeledGraph",
+    to: "LabeledGraph",
+    findstat: [{ id: "Mp00274", rows: 1200, compared: 208, skipped: 0 }],
+  },
+  {
+    name: "ChromaticDifferenceSequence",
+    from: "LabeledGraph",
+    to: "IntegerComposition",
+    findstat: [{ id: "Mp00324", rows: 1200, compared: 208, skipped: 0 }],
   },
   {
     name: "LeftKeyPermutation",

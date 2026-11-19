@@ -15,6 +15,7 @@ import {
   bind,
   blocksOf,
   forEach,
+  graphWhere,
   lets,
   type CombinatorialMap,
   type MathJSON,
@@ -967,6 +968,16 @@ export const PERMUTATIONS_MAPS: readonly CombinatorialMap[] = [
     summary:
       "The product of the transpositions (i j), one for each inversion at positions i < j in lexicographic order, each exchanging the entries i and j.",
     note: "FindStat's Mp00277. Fixes exactly the 231-avoiding permutations.",
+  },
+  {
+    name: "InversionGraph",
+    findstat: ["Mp00160"],
+    from: "permutation",
+    to: "labeled_graph",
+    body: graphWhere(["Length", "_raw"], (u, v) => ["Greater", at(u), at(v)]),
+    imageParts: ["", ""],
+    summary: "The graph on the positions 1 .. n, joined when i < j and the entry at i is above the entry at j.",
+    note: "FindStat's Mp00160. The vertices are the positions.",
   },
 ];
 

@@ -7,6 +7,7 @@ import {
   bind,
   descending,
   forEach,
+  graphWhere,
   type CombinatorialMap,
   type MathJSON,
   reversedWord,
@@ -227,5 +228,29 @@ export const COMPOSITIONS_MAPS: readonly CombinatorialMap[] = [
     note: "FindStat's Mp00180. Injective. The empty composition has no ribbon.",
     findstat: ["Mp00180"],
     guard: ["Greater", ["Length", "_raw"], 0],
+  },
+  {
+    name: "ThresholdGraph",
+    findstat: ["Mp00184"],
+    from: "composition",
+    to: "labeled_graph",
+    body: bind(
+      "th_first",
+      forEach(
+        upTo(["Length", "_raw"]),
+        ["Add", 1, ["Sum", forEach(upTo(["Length", "_raw"]), ["If", ["Less", "j", "k"], at("j"), 0], "j")]],
+        "k",
+      ),
+      graphWhere(["Sum", "_raw"], (_u, v) => [
+        "Greater",
+        ["Sum", forEach("th_first", ["If", ["Equal", "f", v], 1, 0], "f")],
+        0,
+      ]),
+      "list<integer>",
+    ),
+    imageParts: ["", ""],
+    summary:
+      "The threshold graph of a composition: for each part c a vertex joined to every earlier vertex, then c - 1 isolated vertices.",
+    note: "FindStat's Mp00184. A vertex is joined to all earlier vertices exactly when it is the first vertex of a part.",
   },
 ];

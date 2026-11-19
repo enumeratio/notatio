@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+a-four-node-tree			[UnderlyingGraph, [BinaryTree, [List, [List, 0, 0], [List, 0, [List, 0, 0]]]]]	[LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 2, 3], [List, 3, 4]]]]	a four-node tree
+an-ordered-tree-with-four-edges			[UnderlyingGraph, [OrderedTree, [List, [List, [List], [List]], [List]]]]	[LabeledGraph, [Tuple, 5, [List, [List, 1, 2], [List, 1, 5], [List, 2, 3], [List, 2, 4]]]]	an ordered tree with four edges

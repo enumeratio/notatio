@@ -25,6 +25,7 @@ import { COMPOSITIONS_MAPS } from "../compositions/src/maps.ts";
 import { DYCK_CONVERSION_MAPS } from "../lattice-paths/src/dyck-conversion-maps.ts";
 import { DYCK_MAPS } from "../lattice-paths/src/dyck-maps.ts";
 import { LATTICE_PATHS_MAPS } from "../lattice-paths/src/maps.ts";
+import { GRAPH_IMAGE_MAPS } from "../graphs/src/graph-image-maps.ts";
 import { GRAPHS_MAPS } from "../graphs/src/maps.ts";
 import { PARTITIONS_MAPS } from "../partitions/src/maps.ts";
 import { POSETS_MAPS } from "../posets/src/maps.ts";
@@ -79,6 +80,7 @@ export const MAPS: readonly CombinatorialMap[] = [
   ...COMPOSITIONS_MAPS,
   ...WORDS_MAPS,
   ...GRAPHS_MAPS,
+  ...GRAPH_IMAGE_MAPS,
   ...POSETS_MAPS,
   ...ALTERNATING_SIGN_MAPS,
   ...DYCK_ALTERNATING_SIGN_MAPS,

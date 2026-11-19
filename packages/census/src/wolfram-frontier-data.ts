@@ -1329,10 +1329,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 5,
   },
   {
-    head: "GraphComplement",
-    uses: 5,
-  },
-  {
     head: "GraphicsGrid",
     uses: 5,
   },

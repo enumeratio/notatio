@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+the-graph-on-5-vertices-with-the-edges-12-23-and			[OreClosure, [LabeledGraph, [Tuple, 5, [List, [List, 1, 2], [List, 2, 3], [List, 4, 5]]]]]	[LabeledGraph, [Tuple, 5, [List, [List, 1, 2], [List, 2, 3], [List, 4, 5]]]]	the graph on 5 vertices with the edges 12, 23 and 45
+a-cycle-on-4-vertices			[OreClosure, [LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 2, 3], [List, 3, 4], [List, 1, 4]]]]]	[LabeledGraph, [Tuple, 4, [List, [List, 1, 2], [List, 1, 3], [List, 1, 4], [List, 2, 3], [List, 2, 4], [List, 3, 4]]]]	a cycle on 4 vertices
