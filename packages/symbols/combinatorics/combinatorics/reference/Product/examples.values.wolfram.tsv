@@ -24,10 +24,10 @@ exact-rationals-in-a-collection	Apply[Times, List[Rational[1, 2], Rational[2, 3]
 symbolic-elements	Apply[Times, List[a, b, c]]	a*b*c	\text{Times}\text{@@}\{a,b,c\}	a b c	
 product-a-pow-k-k-nothing-n	Product[Power[a, k], List[k, n]]	a^((n*(1 + n))/2)	\prod _k^n a^k	a^{\frac{1}{2} n (n+1)}	
 product-a-pow-k-j-nothing-m-k-nothing-j	Product[Power[a, k], List[j, m], List[k, j]]	a^((m*(1 + m)*(2 + m))/6)	\prod _j^m \prod _k^j a^k	a^{\frac{1}{6} m (m+1) (m+2)}	
-product-j-times-k-k-nothing-nothing-j-nothing	Product[Times[j, k], k, j]	Gamma[j]^(-1 + k)*Gamma[k]^(-1 + j)	\prod _k \prod _j j k	\Gamma (j)^{k-1} \Gamma (k)^{j-1}	disagree
-product-j-times-k-k-1-n-j-nothing-nothing	Product[Times[j, k], List[k, 1, n], j]	Gamma[j]^n*Gamma[1 + n]^(-1 + j)	\prod _{k=1}^n \prod _j j k	\Gamma (j)^n \Gamma (n+1)^{j-1}	disagree
-product-3-times-q-pow-2k-plus-5-k-nothing	Product[Plus[Times[3, Power[q, Times[2, k]]], 5], k]	5^k*QPochhammer[-3/5, q^2, k]	\prod _k \left(3 q^{2 k}+5\right)	5^k \left(-\frac{3}{5};q^2\right){}_k	disagree
-product-1-over-q-pow-8k-plus-11-times-q-pow-8	Product[Times[Divide[1, Plus[Power[q, Times[8, k]], 11]], Plus[Power[q, Times[8, Plus[k, 1]]], 11]], k]	11 + q^(8*k)	\prod _k \frac{1}{q^{8 k}+11} \left(q^{8 (k+1)}+11\right)	q^{8 k}+11	disagree
+product-j-times-k-k-nothing-nothing-j-nothing	Product[Times[j, k], List[k, 1, Infinity], List[j, 1, Infinity]]	Product[j*k, {k, 1, Infinity}, {j, 1, Infinity}]	\prod _{k=1}^{\infty } \prod _{j=1}^{\infty } j k	\prod _{k=1}^{\infty } \prod _{j=1}^{\infty } j k	disagree
+product-j-times-k-k-1-n-j-nothing-nothing	Product[Times[j, k], List[k, 1, n], List[j, 1, Infinity]]	Product[j*k, {k, 1, n}, {j, 1, Infinity}]	\prod _{k=1}^n \prod _{j=1}^{\infty } j k	\prod _{k=1}^n \prod _{j=1}^{\infty } j k	disagree
+product-3-times-q-pow-2k-plus-5-k-nothing	Product[Plus[Times[3, Power[q, Times[2, k]]], 5], List[k, 1, Infinity]]	Product[5 + 3*q^(2*k), {k, 1, Infinity}]	\prod _{k=1}^{\infty } \left(3 q^{2 k}+5\right)	\prod _{k=1}^{\infty } \left(3 q^{2 k}+5\right)	disagree
+product-1-over-q-pow-8k-plus-11-times-q-pow-8	Product[Times[Divide[1, Plus[Power[q, Times[8, k]], 11]], Plus[Power[q, Times[8, Plus[k, 1]]], 11]], List[k, 1, Infinity]]	Product[(11 + q^(8*(1 + k)))/(11 + q^(8*k)), {k, 1, Infinity}]	\prod _{k=1}^{\infty } \frac{1}{q^{8 k}+11} \left(q^{8 (k+1)}+11\right)	\prod _{k=1}^{\infty } \frac{q^{8 (k+1)}+11}{q^{8 k}+11}	disagree
 range-stays-lazy-on-its-own-but-product-forces	Apply[Times, Range[1, 6]]	720	\text{Times}\text{@@}\text{Range}[1,6]	720	
 the-product-of-1-through-n-is-n-see-factorial	(Apply[Times, List[1, 2, 3, 4]] == Factorial[4])	True	\text{Times}\text{@@}\{1,2,3,4\}=4!	\text{True}	
 the-wallis-product-prod-k-1-infty-frac-4k-2-4k-2	Product[Divide[Times[4, Power[k, 2]], Subtract[Times[4, Power[k, 2]], 1]], List[k, 1, Infinity]]	Pi/2	\prod _{k=1}^{\infty } \frac{4 k^2}{4 k^2-1}	\frac{\pi }{2}	

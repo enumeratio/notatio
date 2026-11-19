@@ -261,8 +261,8 @@ const SPECIAL: Record<string, (args: MathJson[]) => string> = {
         : call("Clip", a),
   // Wolfram's Sum/Product only take an iterator; the 1-arg list form is Total /
   // Times-apply. With an iterator the names agree and `Tuple` becomes `{k, a, b}`.
-  Sum: (a) => (a.length === 1 ? `Total[${toWolfram(a[0])}]` : call("Sum", a)),
-  Product: (a) => (a.length === 1 ? `Apply[Times, ${toWolfram(a[0])}]` : call("Product", a)),
+  Sum: (a) => (a.length === 1 ? `Total[${toWolfram(a[0])}]` : call("Sum", sumIterators(a))),
+  Product: (a) => (a.length === 1 ? `Apply[Times, ${toWolfram(a[0])}]` : call("Product", sumIterators(a))),
   // A definite integral's `Limits(x, a, b)` is Wolfram's iterator `{x, a, b}`.
   Integrate: (a) =>
     call(
@@ -644,6 +644,19 @@ function localScope(head: string, args: MathJson[]): string {
 
 /** Whether the transpiler vouches for a head — as opposed to passing it through by name. */
 export const isWolframHead = (head: string): boolean => head in HEADS || head in SPECIAL;
+
+// An index with no bounds runs from 1 to infinity here, but Wolfram's `Sum[f, k]` is an
+// indefinite sum, so the bounds are written out. `Limits(k, Nothing, n)` defaults each bound.
+const sumIterators = (args: MathJson[]): MathJson[] =>
+  args.map((it, i) => {
+    if (i === 0) return it;
+    if (typeof it === "string" && /^[\p{L}_][\p{L}\p{N}_]*$/u.test(it)) return ["List", it, 1, "PositiveInfinity"];
+    if (Array.isArray(it) && (it[0] === "Limits" || it[0] === "Tuple") && it.length === 4) {
+      const orElse = (b: MathJson, d: MathJson) => (b === "Nothing" ? d : b);
+      return ["List", it[1], orElse(it[2], 1), orElse(it[3], "PositiveInfinity")];
+    }
+    return it;
+  });
 
 const call = (head: string, args: MathJson[]): string => `${head}[${args.map((a) => toWolfram(a)).join(", ")}]`;
 

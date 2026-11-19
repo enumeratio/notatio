@@ -1,11 +1,11 @@
-id	section	role	expr	expected	caption	epsil.back
-sum-k-pow-2-k-nothing-10			[Sum, [Power, k, 2], [Limits, k, Nothing, 10]]	385	Sum of squares up to 10, using the default start of 1	
-sum-k-pow-neg-6-k-1-positiveinfinity			[Sum, [Power, k, -6], [Limits, k, 1, PositiveInfinity]]	[Divide, [Power, Pi, 6], 945]	The Basel-type sum, $\zeta(6)=\pi^6/945$	
-sum-of-a-subset			[CombinatorialStat, [Finset, [Tuple, 4, [List, 1, 3]]], "'Sum'"]	4	The members of the subset $\{1, 3\}$ of $\{1, \dots, 4\}$	
-sum-of-a-lehmer-code			[CombinatorialStat, [PermutationInversion, [List, 0, 1, 1, 0]], "'Sum'"]	2	The inversion table $0110$, whose sum is the permutation's inversion count	
-sum-of-a-subexcedant-sequence			[CombinatorialStat, [SubexcedantSeq, [List, 0, 0, 1, 1]], "'Sum'"]	2	The subexcedant sequence $0011$	
-sum-2-pow-neg-k-no-bounds		test	[Sum, [Power, 2, [Negate, k]], [Limits, k, Nothing, Nothing]]	1	Without bounds the index runs from 1 to infinity; the geometric series sums to 1	
-sum-k-pow-neg-2-no-bounds		test	[Sum, [Power, k, -2], [Limits, k, Nothing, Nothing]]	[Divide, [Power, Pi, 2], 6]	Without bounds the index runs from 1 to infinity; $\zeta(2)=\pi^2/6$	
-sum-k-no-bounds-diverges		test	[Sum, k, [Limits, k, Nothing, Nothing]]	PositiveInfinity	A divergent series with no bounds is left as compute-engine leaves it, infinite	
-sum-k-pow-neg-2-k-1-positiveinfinity	Scope		[Sum, [Power, k, -2], [Limits, k, 1, PositiveInfinity]]	[Divide, [Power, Pi, 2], 6]		
-sum-i-limits-i-1-4-2	Scope		[Sum, i, [Limits, i, 1, 4, 2]]	4	A step of 2 takes every other index: $1 + 3$, not $1 + 2 + 3 + 4$	[Sum, i, [Tuple, i, 1, 4, 2]]
+id	section	role	expr	expected	caption	epsil.back	wolfram.kind	wolfram.note
+sum-k-pow-2-k-nothing-10			[Sum, [Power, k, 2], [Limits, k, Nothing, 10]]	385	Sum of squares up to 10, using the default start of 1			
+sum-k-pow-neg-6-k-1-positiveinfinity			[Sum, [Power, k, -6], [Limits, k, 1, PositiveInfinity]]	[Divide, [Power, Pi, 6], 945]	The Basel-type sum, $\zeta(6)=\pi^6/945$			
+sum-of-a-subset			[CombinatorialStat, [Finset, [Tuple, 4, [List, 1, 3]]], "'Sum'"]	4	The members of the subset $\{1, 3\}$ of $\{1, \dots, 4\}$			
+sum-of-a-lehmer-code			[CombinatorialStat, [PermutationInversion, [List, 0, 1, 1, 0]], "'Sum'"]	2	The inversion table $0110$, whose sum is the permutation's inversion count			
+sum-of-a-subexcedant-sequence			[CombinatorialStat, [SubexcedantSeq, [List, 0, 0, 1, 1]], "'Sum'"]	2	The subexcedant sequence $0011$			
+sum-2-pow-neg-k-no-bounds		test	[Sum, [Power, 2, [Negate, k]], [Limits, k, Nothing, Nothing]]	1	Without bounds the index runs from 1 to infinity; the geometric series sums to 1			
+sum-k-pow-neg-2-no-bounds		test	[Sum, [Power, k, -2], [Limits, k, Nothing, Nothing]]	[Divide, [Power, Pi, 2], 6]	Without bounds the index runs from 1 to infinity; $\zeta(2)=\pi^2/6$			
+sum-k-no-bounds-diverges		test	[Sum, k, [Limits, k, Nothing, Nothing]]	PositiveInfinity	A divergent series with no bounds is left as compute-engine leaves it, infinite		convention	Wolfram leaves a divergent Sum unevaluated (with a message); compute-engine returns PositiveInfinity. With the bounds written out, Wolfram reads the same series we do.
+sum-k-pow-neg-2-k-1-positiveinfinity	Scope		[Sum, [Power, k, -2], [Limits, k, 1, PositiveInfinity]]	[Divide, [Power, Pi, 2], 6]				
+sum-i-limits-i-1-4-2	Scope		[Sum, i, [Limits, i, 1, 4, 2]]	4	A step of 2 takes every other index: $1 + 3$, not $1 + 2 + 3 + 4$	[Sum, i, [Tuple, i, 1, 4, 2]]		

@@ -4,10 +4,10 @@ division-by-zero-excludes-the-origin	FunctionDomain[Divide[1, x], x]	x < 0 || x 
 sqrt-of-a-bounded-quadratic	FunctionDomain[Sqrt[Plus[Minus[Power[x, 2]], 4]], x]	Inequality[-2, LessEqual, x, LessEqual, 2]	\text{FunctionDomain}\left[\sqrt{-x^2+4},x\right]	-2\leq x\leq 2	
 a-monomial-with-negative-integer-exponent	FunctionDomain[Power[x, -3], x]	x < 0 || x > 0	\text{FunctionDomain}\left[\frac{1}{x^3},x\right]	x<0\lor x>0	
 a-multivariate-expression-declines	FunctionDomain[Times[x, y], x]	True	\text{FunctionDomain}[x y,x]	\text{True}	disagree
-sqrt-of-a-negative-square-is-real-only-at-zero	FunctionDomain[Sqrt[Minus[Power[x, 2]]], x]				
-sqrt-of-a-shifted-negative-square-at-one-point	FunctionDomain[Sqrt[Minus[Power[Subtract[x, 1], 2]]], x]				
-irrational-roots-stay-exact	FunctionDomain[Sqrt[Plus[Power[x, 2], -2]], x]				
-rational-roots-stay-exact	FunctionDomain[Divide[1, Subtract[Times[2, x], 1]], x]				
+sqrt-of-a-negative-square-is-real-only-at-zero	FunctionDomain[Sqrt[Minus[Power[x, 2]]], x]	x == 0	\text{FunctionDomain}\left[\sqrt{-x^2},x\right]	x=0	
+sqrt-of-a-shifted-negative-square-at-one-point	FunctionDomain[Sqrt[Minus[Power[Subtract[x, 1], 2]]], x]	x == 1	\text{FunctionDomain}\left[\sqrt{-(x-1)^2},x\right]	x=1	
+irrational-roots-stay-exact	FunctionDomain[Sqrt[Plus[Power[x, 2], -2]], x]	x <= -Sqrt[2] || x >= Sqrt[2]	\text{FunctionDomain}\left[\sqrt{x^2-2},x\right]	x\leq -\sqrt{2}\lor x\geq \sqrt{2}	
+rational-roots-stay-exact	FunctionDomain[Divide[1, Subtract[Times[2, x], 1]], x]	x < 1/2 || x > 1/2	\text{FunctionDomain}\left[\frac{1}{2 x-1},x\right]	x<\frac{1}{2}\lor x>\frac{1}{2}	
 a-rational-function-with-two-real-poles	FunctionDomain[Divide[1, Plus[Power[x, 2], -1]], x]	x < -1 || Inequality[-1, Less, x, Less, 1] || x > 1	\text{FunctionDomain}\left[\frac{1}{x^2-1},x\right]	x<-1\lor -1<x<1\lor x>1	
 an-even-root-needs-a-nonnegative-radicand	FunctionDomain[Sqrt[Plus[Power[x, 2], -1]], x]	x <= -1 || x >= 1	\text{FunctionDomain}\left[\sqrt{x^2-1},x\right]	x\leq -1\lor x\geq 1	
 a-natural-log-needs-a-positive-argument	FunctionDomain[Log[Subtract[2, x]], x]	x < 2	\text{FunctionDomain}[\log (2-x),x]	x<2	
