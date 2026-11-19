@@ -19,5 +19,5 @@ signatures:
 
 - Defined over `Poset` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
 - Takes a `Poset` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
-- Defined where `IsLattice(Poset(_x)) && Length(_x) >= 1` holds; elsewhere the call stays unevaluated.
-- FindStat's St000550. Its title and description say that (x, y) and (y, x) are modular pairs for every y; that reading agrees with only 39 of the 78 rows through 7 elements, and the reading here, the modular elements of Stern's definition, with all 78. Defined on a lattice with at least one element; FindStat has no row for the poset with no elements.
+- Defined where `IsLattice(Poset(_x)) && Length(_x) >= 0` holds; elsewhere the call stays unevaluated.
+- FindStat's St000550. Its title and description say that (x, y) and (y, x) are modular pairs for every y; that reading agrees with only 39 of the 78 rows through 7 elements, and the reading here, the modular elements of Stern's definition, with all 78. Defined on a lattice. FindStat has no row for the poset with no elements, which gives 0, a count of nothing.

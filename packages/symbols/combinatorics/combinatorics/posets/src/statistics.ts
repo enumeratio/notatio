@@ -472,7 +472,7 @@ const extremeMaximalAntichains = (extreme: "Max" | "Min"): MathJSON =>
     "list<integer>",
   );
 
-export const POSET_STATISTICS: readonly Definition[] = [
+const DEFINITIONS: readonly Definition[] = [
   stat("ElementCount", "The elements of the poset.", withPoset("n"), `FindStat's St000189. ${NO_ELEMENTS("0")}`),
   stat(
     "MinimalElementCount",
@@ -966,6 +966,51 @@ export const POSET_STATISTICS: readonly Definition[] = [
     `FindStat's St001909. ${CONVENTION("1, the empty subset")}`,
   ),
 ];
+
+/**
+ * `where` for a poset of at most `most` elements. It reads `_x` unwrapped, so the elements are the length of the list; a
+ * head typed `(poset)` called from a `where` needs `Poset(_x)`.
+ */
+export const atMostElements = (most: number): MathJSON => ["LessEqual", ["Length", subject], most];
+
+/**
+ * The most elements a statistic over subsets, ideals or linear extensions answers on. Compiled, the worst posets (the
+ * antichain, the chain, two parallel chains) answer in 1.3 s or less at this size, and nothing is measured past it.
+ */
+export const ELEMENT_LIMIT = 12;
+/** `GreedyLinearExtensionCount` and `OrderPreservingSurjectionToChainCount`: the antichain takes 3.0 s and 5.3 s at 12. */
+const TABLE_LIMIT = 11;
+/** `ThreeChainHomomorphismCount`, whose antichain pairs every two ideals: 2.3 s at 11 and 9.9 s at 12. */
+const PAIRS_LIMIT = 10;
+
+/** The statistics that enumerate subsets, ideals or extensions, or pass the double range, and the size they answer up to. */
+const LIMITS: Readonly<Record<string, number>> = {
+  PosetWidth: ELEMENT_LIMIT,
+  ElementCountMinusWidth: ELEMENT_LIMIT,
+  // A chain's product is n!: past 18 elements it passes 2^53 and the call leaves the compiled code for the interpreter, 1 s at 19.
+  PrincipalFilterSizeProduct: ELEMENT_LIMIT,
+  ChainCount: ELEMENT_LIMIT,
+  AntichainCount: ELEMENT_LIMIT,
+  LinearExtensionCount: ELEMENT_LIMIT,
+  JumpNumber: ELEMENT_LIMIT,
+  CutCount: ELEMENT_LIMIT,
+  MostBalancedPairExtensionCount: ELEMENT_LIMIT,
+  OneThirdBalancedPairCount: ELEMENT_LIMIT,
+  HalfBalancedPairCount: ELEMENT_LIMIT,
+  ShortestMaximalAntichainCount: ELEMENT_LIMIT,
+  ShortestMaximalAntichainSize: ELEMENT_LIMIT,
+  LargestMaximalAntichainCount: ELEMENT_LIMIT,
+  MaximalAntichainCount: ELEMENT_LIMIT,
+  GreedyLinearExtensionCount: TABLE_LIMIT,
+  ThreeChainHomomorphismCount: PAIRS_LIMIT,
+  OrderPreservingSurjectionToChainCount: TABLE_LIMIT,
+  IntervalClosedSetCount: ELEMENT_LIMIT,
+};
+
+export const POSET_STATISTICS: readonly Definition[] = DEFINITIONS.map((definition) => {
+  const most = LIMITS[definition.head];
+  return most === undefined ? definition : { ...definition, where: atMostElements(most) };
+});
 
 /** The builders the lattice statistics (statistics.lattices.ts) write their definitions with. */
 export {

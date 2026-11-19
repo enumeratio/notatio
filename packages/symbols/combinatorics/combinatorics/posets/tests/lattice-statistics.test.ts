@@ -2,7 +2,8 @@ import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
 import { applyDefinition } from "../../src/statistics/declare.ts";
-import { bySignature } from "../../src/statistics/types.ts";
+import { COMPILED } from "../../src/statistics/compiled.ts";
+import { bySignature, signatureOf, whereSignatureOf } from "../../src/statistics/types.ts";
 import { LATTICE_STATISTICS } from "../src/statistics.lattices.ts";
 import {
   fewestSmallChainElements,
@@ -59,8 +60,8 @@ test("every lattice definition has an independent reading", () => {
 
 for (const [head, expected] of Object.entries(LATTICE_READINGS))
   test(`${head} agrees over every lattice on 1..${LARGEST} elements`, () => {
-    const size = index.get(`${head}@Poset`)!.where === undefined ? 0 : 1;
-    for (let n = size; n <= LARGEST; n++)
+    // A statistic that answers the poset with no elements is read there too.
+    for (let n = (head in ON_NOTHING) ? 0 : 1; n <= LARGEST; n++)
       for (const p of latticesOfSize(n)) {
         const value = expected(p);
         if (value === undefined) continue;
@@ -95,11 +96,70 @@ test("a statistic stays unevaluated on a poset that is not a lattice", () => {
     }
 });
 
-test("the poset with no elements: only the zero divisors have a value, 0", () => {
-  expect(call("ZeroDivisorCount", []).re).toBe(0);
-  for (const head of statistics.filter((h) => h !== "ZeroDivisorCount"))
-    expect(call(head, []).operator, head).toBe(head);
+/** The statistics whose reading counts elements, pairs or non-empty subsets answer the poset with no elements; the empty subset counts. */
+const ON_NOTHING: Record<string, number> = {
+  ModularElementCount: 0,
+  LeftModularElementCount: 0,
+  JoinPrimeCount: 0,
+  NeutralElementCount: 0,
+  AtomCount: 0,
+  JoinIrreducibleCount: 0,
+  DoublyIrreducibleCount: 0,
+  PopStackImageSize: 0,
+  LinearIntervalCount: 0,
+  UncomplementedElementCount: 0,
+  NondegenerateBottomMeetSubsetCount: 0,
+  BottomMeetSubsetCount: 0,
+  ZeroDivisorCount: 0,
+  SublatticeCount: 1,
+};
+/** Those whose reading names a bottom, a top, a rank or a maximum over nothing decline there. */
+const DECLINING_ON_NOTHING = [
+  "MoebiusInvariant",
+  "FranklNumber",
+  "ShortestSmallIntervalChainCount",
+  "CoverJoinChainSize",
+  "LatticeCenterRank",
+  "DirectFactorCount",
+  "JoinIrreducibleCountMinusRank",
+  "LatticeBreadth",
+  "MinimalBottomMeetSubsetCount",
+];
+
+test("every lattice statistic either answers the poset with no elements or declines it", () => {
+  expect([...Object.keys(ON_NOTHING), ...DECLINING_ON_NOTHING].toSorted()).toEqual(statistics.toSorted());
 });
+
+for (const [head, value] of Object.entries(ON_NOTHING))
+  test(`${head} on the poset with no elements is ${value}, the reading's count of nothing, on every route`, () => {
+    expect(LATTICE_READINGS[head]!([])).toBe(value);
+    expect(evaluate(head, [])).toBe(value);
+    expect(call(head, []).re).toBe(value);
+    expect(ce.box([head, carrier([])] as never).N().re).toBe(value);
+    expect(ce.box(["CombinatorialStat", carrier([]), `'${head}'`] as never).evaluate().re).toBe(value);
+    // Compiled code absent: the interpreter's answer, the same.
+    const definition = index.get(`${head}@Poset`)!;
+    const keys = [signatureOf(definition), whereSignatureOf(definition)];
+    const held = keys.map((key) => COMPILED[key]);
+    keys.forEach((key) => delete COMPILED[key]);
+    try {
+      expect(call(head, []).re).toBe(value);
+      expect(ce.box(["CombinatorialStat", carrier([]), `'${head}'`] as never).evaluate().re).toBe(value);
+    } finally {
+      keys.forEach((key, k) => {
+        if (held[k] !== undefined) COMPILED[key] = held[k]!;
+      });
+    }
+  });
+
+for (const head of DECLINING_ON_NOTHING)
+  test(`${head} stays unevaluated on the poset with no elements, on every route`, () => {
+    expect(call(head, []).operator).toBe(head);
+    expect(ce.box([head, carrier([])] as never).N().operator).toBe(head);
+    expect(ce.box(["CombinatorialStat", carrier([]), `'${head}'`] as never).evaluate().operator).toBe(
+      "CombinatorialStat",
+    );
+  });
 
 test("CoverJoinChainSize is FindStat's St001720, which is not always the shortest chain", () => {
   // The lattice of FindStat's row ([(0,3),(0,4),(1,5),(2,5),(3,6),(4,2),(4,6),(6,1)],7), whose row says 4.
