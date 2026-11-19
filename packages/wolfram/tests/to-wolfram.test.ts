@@ -125,6 +125,16 @@ test("a named slot is Wolfram's own Slot, vouched for", () => {
   expect(isWolframHead("Slot")).toBe(true);
 });
 
+test("an index with no bounds is written out, not left as an indefinite sum", () => {
+  const f = ["Power", 2, ["Negate", "k"]];
+  const open = "Sum[Power[2, Minus[k]], List[k, 1, Infinity]]";
+  expect(toWolfram(["Sum", f, "k"])).toBe(open);
+  expect(toWolfram(["Sum", f, ["Limits", "k", "Nothing", "Nothing"]])).toBe(open);
+  expect(toWolfram(["Sum", f, ["Limits", "k", "Nothing", "n"]])).toBe("Sum[Power[2, Minus[k]], List[k, 1, n]]");
+  expect(toWolfram(["Sum", "f", "List[k, 10]"])).toBe("Sum[f, List[k, 10]]");
+  expect(toWolfram(["Product", "k", ["Limits", "k", "Nothing", "Nothing"]])).toBe("Product[k, List[k, 1, Infinity]]");
+});
+
 test("DigitSum is Wolfram's own head, third argument included", () => {
   expect(toWolfram(["DigitSum", 58127, 2])).toBe("DigitSum[58127, 2]");
   // DigitSum[n, b, k] sums the FIRST k digits: 18 here. Total[IntegerDigits[n, b, k]] would
