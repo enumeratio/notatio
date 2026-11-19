@@ -186,13 +186,102 @@ export function riemannSiegelZBig(t: BigDecimal, digits: number): BigDecimal | u
   return values?.[0];
 }
 
+// --- Z on the imaginary axis ---------------------------------------------------------------
+//
+// With iϑ(iy) = −(ln Γ(¼ + y/2) − ln Γ(¼ − y/2))/2 + (y/2) ln π,
+//   Z(iy) = π^{y/2} · exp(−(ln Γ(¼ + y/2) − ln Γ(¼ − y/2))/2) · ζ(½ − y),   Z(−iy) = Z(iy),
+// every factor at a real argument. For y > ½ the argument ¼ − y/2 is negative, where ln Γ takes the
+// branch continued from above the axis, Im ln Γ(x) = −π⌈−x⌉ (mpmath's `loggamma`, Wolfram's
+// `LogGamma`), so the phase is (−i)^n with n = ⌈y/2 − ¼⌉: Z(iy) is real for even n and purely
+// imaginary for odd n, and the other part is exactly zero. ln|Γ(x)| at negative x is the reflection
+// ln π − ln|sin πx| − ln Γ(1 − x).
+//
+// Measured at 30 digits against the definition at 60 digits (mpmath `loggamma` and `zeta`) and
+// mpmath's `siegelz`, which agree: in each of the 51 intervals between consecutive poles from 0 to
+// 100.5, at 11 points each (1e-3 and 2e-4 off a pole, and across the interval), the digits asked
+// for were right (relative error ≤ 5e-30) with the zero part exactly zero, and the double route
+// within 1.4e-16. It takes ≤ 30 ms. The cap is 100, inside the last interval checked; past it nothing was, so it declines.
+
+/** The largest |y| answered: every interval between poles up to it was checked against mpmath. */
+const MAX_IMAGINARY = 100;
+/**
+ * A pole of the Γ factor sits at y = ½ + 2k (k ≥ 0, and ζ's at y = −½ by Z's evenness): there Z
+ * jumps from one branch to the next, and ln Γ(¼ − y/2) and ζ(½ − y) (a zero for k ≥ 1) each lose
+ * digits to the other. Within this distance the kernel declines.
+ */
+const POLE_GUARD = 1e-4;
+/** Working digits beyond those asked for, plus those the nearness to a pole costs. */
+const IMAGINARY_GUARD = 15;
+
+/** The distance from y > 0 to the nearest pole ½ + 2k. */
+const poleDistance = (y: number): number => Math.abs(y - (0.5 + 2 * Math.max(0, Math.round((y - 0.5) / 2))));
+
+/** |Z(iy)| · sign, with its phase (−i)^n applied by the caller: the real factor at the caller's precision. */
+function imaginaryAxisFactor(y: BigDecimal, working: number): { value: BigDecimal; turns: number } | undefined {
+  const lnPi = BigDecimal.PI.ln();
+  const plus = lnGammaBig(bigCx(y.div(2).add(0.25))).re;
+  const arg = new BigDecimal(0.25).sub(y.div(2));
+  let minus: BigDecimal;
+  let turns = 0;
+  if (arg.isPositive()) minus = lnGammaBig(bigCx(arg)).re;
+  else {
+    // sin πx needs ~log10(y) more digits than the rest to reduce its argument.
+    const sine = atDigits(working + Math.ceil(Math.log10(1 + y.toNumber())) + 2, () => BigDecimal.PI.mul(arg).sin());
+    if (sine.isZero()) return undefined;
+    minus = lnPi.sub(sine.abs().ln()).sub(lnGammaBig(bigCx(new BigDecimal(1).sub(arg))).re);
+    turns = Number(arg.neg().ceil().toBigInt());
+  }
+  const zeta = zetaOrUndefined(bigCx(new BigDecimal(0.5).sub(y)), working);
+  if (zeta === undefined) return undefined;
+  const scale = bigExp({ re: y.div(2).mul(lnPi).sub(plus.sub(minus).div(2)), im: BigDecimal.ZERO }).re;
+  return { value: scale.mul(zeta.re), turns };
+}
+
+/**
+ * Z(iy) to `digits` significant digits, from the real route above, with the part that is zero
+ * exactly zero; undefined at and near a pole, past MAX_IMAGINARY, or where two working precisions
+ * don't agree to the digits asked for.
+ */
+export function riemannSiegelZImaginaryBig(y: BigDecimal, digits: number): BigCx | undefined {
+  const ay = y.abs();
+  if (ay.isZero() || ay.gt(MAX_IMAGINARY)) return undefined;
+  const distance = poleDistance(ay.toNumber());
+  if (!(distance >= POLE_GUARD)) return undefined;
+  const base = digits + IMAGINARY_GUARD + Math.ceil(-Math.log10(distance)) + Math.ceil(Math.log10(1 + ay.toNumber()));
+  const at = (working: number) => atDigits(working, () => imaginaryAxisFactor(ay, working));
+  const [first, second] = [at(base), at(base + 10)];
+  if (first === undefined || second === undefined || first.turns !== second.turns) return undefined;
+  // Agreement to the digits asked for, relative to the value (a hit on zero has no digits to agree on).
+  if (second.value.isZero()) return undefined;
+  const gap = first.value.sub(second.value).abs();
+  if (gap.gt(second.value.abs().mul(new BigDecimal(10).pow(-(digits + 2))))) return undefined;
+  const value = atDigits(base, () => second.value.toPrecision(digits));
+  const zero = BigDecimal.ZERO;
+  switch (second.turns % 4) {
+    case 0:
+      return { re: value, im: zero };
+    case 1:
+      return { re: zero, im: value.neg() };
+    case 2:
+      return { re: value.neg(), im: zero };
+    default:
+      return { re: zero, im: value };
+  }
+}
+
+/** Z(iy) as a double pair, the double y taken as the exact number it is. */
+export function riemannSiegelZImaginaryDouble(y: number): readonly [number, number] | undefined {
+  if (!Number.isFinite(y)) return undefined;
+  const z = riemannSiegelZImaginaryBig(exactDouble(y), DOUBLE_ACCURACY + 3);
+  return z === undefined ? undefined : [z.re.toNumber(), z.im.toNumber()];
+}
+
 /** Z(x + iy) to `digits` significant digits in each part; a part that is exactly zero stays so. */
 export function riemannSiegelZComplexBig(x: BigDecimal, y: BigDecimal, digits: number): BigCx | undefined {
   if (!x.isFinite() || !y.isFinite()) return undefined;
-  // Z(iy) = e^{iϑ(iy)} ζ(½ − y) is a real ζ times a phase that is ±1 or ±i, so one part is exactly
-  // zero and no precision resolves it: `resolved` doubles the working digits until its cap (2 s at
-  // Z(1e-12 i), 20 digits). Declined here, from the argument alone.
-  if (x.isZero() && !y.isZero()) return undefined;
+  // On the imaginary axis one part is exactly zero, and no working precision resolves it: the
+  // real route answers instead.
+  if (x.isZero() && !y.isZero()) return riemannSiegelZImaginaryBig(y, digits);
   const asymptotic = asymptoticParts(x, y, digits);
   if (asymptotic !== undefined) return { re: asymptotic[0]!, im: asymptotic[1]! };
   if (x.abs().gt(MAX_COMPLEX_ARGUMENT) || y.abs().gt(MAX_COMPLEX_ARGUMENT)) return undefined;

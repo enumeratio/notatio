@@ -24,6 +24,7 @@ import { LARGEST_ARGUMENT } from "./riemann-siegel-asymptotic.ts";
 import {
   riemannSiegelZBig,
   riemannSiegelZComplexBig,
+  riemannSiegelZImaginaryDouble,
   riemannSiegelZLarge,
   riemannZetaZeroBig,
 } from "./riemann-siegel-big.ts";
@@ -171,6 +172,7 @@ function riemannSiegelZPastDouble(ce: ComputeEngine, t: Expression): Expression 
   }
   const value = riemannSiegelZComplexBig(t.bignumRe ?? ce.bignum(t.re), im, ce.precision);
   if (value === undefined) return undefined;
+  if (value.im.isZero() && t.re === 0) return bigResult(ce, value.re); // Z(iy) real: no Complex wrapper
   return ce.function("Complex", [bigResult(ce, value.re), bigResult(ce, value.im)]);
 }
 
@@ -203,6 +205,13 @@ export function declareRiemannSiegel(ce: ComputeEngine): void {
       // Past what a double carries only the bignum kernel answers; it declines rather than dress
       // ~17 correct digits as the d asked for.
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return riemannSiegelZPastDouble(ce, t);
+      // On the imaginary axis the real route answers or declines: the complex kernel below has a
+      // part that is exactly zero and loses its digits at a pole.
+      if (t.re === 0 && t.im !== 0) {
+        const z = riemannSiegelZImaginaryDouble(t.im);
+        if (z === undefined) return undefined;
+        return z[1] === 0 ? ce.number(z[0]) : numberResult(ce, cx(z[0], z[1]));
+      }
       if (Math.abs(t.re) > LARGEST_ARGUMENT) return undefined;
       // The zeta sum's phases lose digits as t grows; the Riemann–Siegel formula doesn't.
       const large = riemannSiegelZLarge(t.re, t.im);

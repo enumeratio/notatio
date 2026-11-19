@@ -5,7 +5,8 @@ import { declareAnalytic } from "../src/declare.ts";
 
 // A call the numeric kernels decline is declined from its argument, before any summing: ζ at
 // |Im s| = 1.74e6 plans 3.4e5 direct terms (past the term budget, 7 s to sum), and Z(iy) has an
-// exactly zero part that no working precision settles (2 s of passes before the cap).
+// exactly zero part that no working precision settles (2 s of passes before the cap); it now
+// answers from the real route (riemann-siegel-imaginary.test.ts) and declines at a pole.
 
 const ce = new ComputeEngine();
 declareAnalytic(ce);
@@ -31,10 +32,10 @@ test("Zeta under the term budget still answers, to mpmath's digits", () => {
   expect(value.im).toBeCloseTo(199.306410713309, 12);
 });
 
-test("RiemannSiegelZ at a purely imaginary argument stays unevaluated past a double's digits, at once", () => {
+test("RiemannSiegelZ at a pole of the imaginary axis, or past the checked range, declines at once", () => {
   const started = performance.now();
   for (const digits of [20, 50]) {
-    for (const im of [1e-12, 0.3, 1]) {
+    for (const im of [0.5, 2.5, 1e6]) {
       const call = ["RiemannSiegelZ", ["Complex", 0, im]];
       expect(ce.box(["N", call, digits] as never).evaluate().operator).toBe("RiemannSiegelZ");
     }
