@@ -8,6 +8,11 @@ catalog:
     identity: Mp00111
     url: https://www.findstat.org/Mp00111
     on: LabeledGraph
+  - system: wolfram
+    identity: GraphComplement
+    url: https://reference.wolfram.com/language/ref/GraphComplement.html
+names:
+  wolframIdentity: true
 mapOn:
   - LabeledGraph
 signatures:
