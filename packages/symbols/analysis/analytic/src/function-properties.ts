@@ -267,6 +267,69 @@ export interface SignShape {
   readonly zeros: readonly number[]; // ascending, deduplicated
   readonly sign: "pos" | "neg" | "nonneg" | "nonpos" | "mixed";
   readonly outsideSign?: 1 | -1;
+  /** Each zero in closed form, aligned with `zeros`, when the polynomial's coefficients are
+   * rational (`zeros` itself is the double, for ordering and interval tests). */
+  readonly exact?: readonly ExactZero[];
+}
+
+/** The zero `(p + s * Sqrt(rad)) / q`, with `p`, `rad` and `q` integers and `s` one of -1, 0, 1. */
+interface ExactZero {
+  readonly p: number;
+  readonly s: -1 | 0 | 1;
+  readonly rad: number;
+  readonly q: number;
+}
+
+/** Largest denominator tried when reading a coefficient list as rationals (`x^2/2 - 1`). */
+const MAX_COEFFICIENT_DENOMINATOR = 1000;
+/** Integer coefficients up to this keep the discriminant exact in a double. */
+const MAX_EXACT_COEFFICIENT = 2 ** 20;
+
+/** `coeffs` scaled by the smallest `q` that makes them all integers (the zeros do not
+ * change), or `undefined` when no `q` up to `MAX_COEFFICIENT_DENOMINATOR` does. */
+function integerCoefficients(coeffs: readonly number[]): number[] | undefined {
+  for (let q = 1; q <= MAX_COEFFICIENT_DENOMINATOR; q++) {
+    const scaled = coeffs.map((c) => c * q);
+    if (scaled.every((c) => Math.abs(c - Math.round(c)) < 1e-9 * Math.max(1, Math.abs(c)))) {
+      const ints = scaled.map(Math.round);
+      return ints.every((c) => Math.abs(c) <= MAX_EXACT_COEFFICIENT) ? ints : undefined;
+    }
+  }
+  return undefined;
+}
+
+/** The exact zeros of a degree 1 or 2 polynomial (ascending, as `signShape`'s `zeros`), or
+ * `undefined` when its coefficients are not rational. Zeros of a quadratic beyond the
+ * discriminant `b^2 - 4ac` stay symbolic: `x^2 - 2` has zeros `+-Sqrt(2)`, not `+-1.4142...`. */
+function exactZerosOf(coeffs: readonly number[]): ExactZero[] | undefined {
+  const ints = integerCoefficients(coeffs);
+  if (ints === undefined) return undefined;
+  if (ints.length === 2) return [{ p: -ints[0]!, s: 0, rad: 0, q: ints[1]! }];
+  const [c, b, a] = ints as [number, number, number];
+  const rad = b * b - 4 * a * c;
+  if (rad < 0) return [];
+  if (rad === 0) return [{ p: -b, s: 0, rad: 0, q: 2 * a }];
+  // `(-b - Sqrt(rad)) / 2a` is the smaller zero when `a > 0`, the larger when `a < 0`.
+  const lowSign = a > 0 ? -1 : 1;
+  return [
+    { p: -b, s: lowSign, rad, q: 2 * a },
+    { p: -b, s: -lowSign as -1 | 1, rad, q: 2 * a },
+  ];
+}
+
+/** Zero `i` of `shape` as an exact expression (an integer, a `Rational`, or a quadratic
+ * surd such as `-Sqrt(2)`), or its double when the shape has no closed form. */
+function zeroExpr(ce: ComputeEngine, shape: SignShape, i: number): Expression | number {
+  // A double discriminant of exactly 0 can differ from the rational one by rounding: then no closed form.
+  const e = shape.exact?.length === shape.zeros.length ? shape.exact[i] : undefined;
+  if (e === undefined) return shape.zeros[i]!;
+  const root = Math.sqrt(e.rad);
+  const surd = e.s === 0 || Number.isInteger(root) ? undefined : ce.function("Sqrt", [e.rad]);
+  const numerator: Expression =
+    surd === undefined
+      ? ce.number(e.p + e.s * (e.s === 0 ? 0 : root))
+      : ce.function("Add", [e.p, ce.function("Multiply", [e.s, surd])]);
+  return ce.function("Divide", [numerator, e.q]).evaluate();
 }
 
 /** Exported for `optimize-core.ts`: the same degree <= 2 (or bare monomial) sign/root
@@ -280,7 +343,7 @@ export function signShape(coeffs: readonly number[]): SignShape | undefined {
   if (d === 0) return { zeros: [], sign: c[0]! > 0 ? "pos" : "neg" };
   if (d === 1) {
     const [b, a] = c as [number, number];
-    return { zeros: [-b / a], sign: "mixed", outsideSign: a > 0 ? 1 : -1 };
+    return { zeros: [-b / a], sign: "mixed", outsideSign: a > 0 ? 1 : -1, exact: exactZerosOf(c) };
   }
   if (d === 2) {
     const [cc, b, a] = c as [number, number, number];
@@ -291,8 +354,9 @@ export function signShape(coeffs: readonly number[]): SignShape | undefined {
     const r2 = (-b + sq) / (2 * a);
     const lo = Math.min(r1, r2);
     const hi = Math.max(r1, r2);
-    if (disc === 0) return { zeros: [lo], sign: a > 0 ? "nonneg" : "nonpos" };
-    return { zeros: [lo, hi], sign: "mixed", outsideSign: a > 0 ? 1 : -1 };
+    const exact = exactZerosOf(c);
+    if (disc === 0) return { zeros: [lo], sign: a > 0 ? "nonneg" : "nonpos", exact };
+    return { zeros: [lo, hi], sign: "mixed", outsideSign: a > 0 ? 1 : -1, exact };
   }
   // Higher degree: only a bare monomial c*x^d (everything below the top coefficient
   // zero) has elementary, provable sign behaviour.
@@ -316,7 +380,7 @@ function vertexValue(coeffs: readonly number[]): number {
  * intervals between (and beyond) its zeros. `undefined`/no zeros renders `True`. */
 function conditionNonzero(ce: ComputeEngine, x: string, shape: SignShape): Expression {
   if (shape.zeros.length === 0) return ce.symbol("True");
-  const zs = shape.zeros;
+  const zs = shape.zeros.map((_, i) => zeroExpr(ce, shape, i));
   const parts: Expression[] = [ce.function("Less", [x, zs[0]!])];
   for (let i = 0; i + 1 < zs.length; i++) parts.push(ce.function("Less", [zs[i]!, x, zs[i + 1]!]));
   parts.push(ce.function("Less", [zs[zs.length - 1]!, x]));
@@ -341,7 +405,9 @@ function conditionSign(
   if (shape.sign === "neg") return ce.symbol(positive ? "False" : "True");
   if (shape.sign === "nonneg" || shape.sign === "nonpos") {
     const matches = (shape.sign === "nonneg") === positive;
-    if (!strict) return ce.symbol(matches ? "True" : "False");
+    // The wanted sign is the opposite one: the polynomial reaches it only at its touch point
+    // (`Sqrt(-x^2)` is real only at 0, so its domain is `x == 0`), and never strictly.
+    if (!strict) return matches ? ce.symbol("True") : ce.function("Equal", [x, zeroExpr(ce, shape, 0)]);
     // Strict: everywhere except the single touch point.
     return matches ? conditionNonzero(ce, x, shape) : ce.symbol("False");
   }
@@ -349,10 +415,11 @@ function conditionSign(
   const wantOutside = shape.outsideSign === (positive ? 1 : -1);
   const le = strict ? "Less" : "LessEqual";
   if (shape.zeros.length === 1) {
-    const z = shape.zeros[0]!;
+    const z = zeroExpr(ce, shape, 0);
     return wantOutside ? ce.function(le, [z, x]) : ce.function(le, [x, z]);
   }
-  const [lo, hi] = shape.zeros as [number, number];
+  const lo = zeroExpr(ce, shape, 0);
+  const hi = zeroExpr(ce, shape, 1);
   return wantOutside
     ? ce.function("Or", [ce.function(le, [x, lo]), ce.function(le, [hi, x])])
     : ce.function(le, [lo, x, hi]);
@@ -600,7 +667,7 @@ export function singularitiesOf(ce: ComputeEngine, rec: Recognized, x: string): 
     case "rational": {
       const shape = signShape(rec.den);
       if (shape === undefined || shape.zeros.length === 0) return ce.symbol("False");
-      const equalities = shape.zeros.map((z) => ce.function("Equal", [x, z]));
+      const equalities = shape.zeros.map((_, i) => ce.function("Equal", [x, zeroExpr(ce, shape, i)]));
       return equalities.length === 1 ? equalities[0]! : ce.function("Or", equalities);
     }
     case "sqrt": {
