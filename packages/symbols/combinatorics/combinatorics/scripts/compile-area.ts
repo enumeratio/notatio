@@ -3,11 +3,8 @@
 // across processes (shards.ts).
 
 import { fileURLToPath } from "node:url";
-import {
-  type CompiledDefinition,
-  compiledDefinitionsFor,
-  renderCompiled,
-} from "../src/statistics/generate-compiled.ts";
+import { type CompiledDefinition, renderCompiled } from "../src/statistics/generate-compiled.ts";
+import { compiledDefinitionsInDomains } from "../src/statistics/generate-domain.ts";
 import { type Definition, signatureOf } from "../src/statistics/types.ts";
 import { smallElements } from "./samples.ts";
 import { sharded } from "./shards.ts";
@@ -27,7 +24,7 @@ export async function compileArea(
   subjects = smallElements,
 ): Promise<void> {
   const run = await sharded(script, step, checkers.statistics, definitions.map(signatureOf), (verdicts, mine) =>
-    compiledDefinitionsFor(definitions, shape, subjects, verdicts, mine),
+    compiledDefinitionsInDomains(definitions, shape, subjects, verdicts, mine),
   );
   if (run === undefined) return;
   const entries: CompiledDefinition[] = run.results.flatMap((r) => r.compiled).toSorted(bySignature);

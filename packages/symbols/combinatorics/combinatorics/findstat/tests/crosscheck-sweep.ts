@@ -1,12 +1,16 @@
 // The sweep behind distribution-crosscheck.test.ts, graph-crosscheck.test.ts and poset-crosscheck.test.ts; see the first for what is compared.
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { operandsOf } from "@notatio/engine";
 import { bareEngine } from "@notatio/engine/testing";
 import { declareStructures } from "@notatio/structures";
 import { expect } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
 import { COLLECTION_CARRIER, objectLevel, objectSize, readObject } from "../src/objects.ts";
 import { findstat } from "../src/findstat-data.ts";
+import { ALL_STATISTICS } from "../../src/statistics/all.ts";
+import { inDomain } from "../../src/statistics/declare.ts";
+import { bySignature, type Definition } from "../../src/statistics/types.ts";
 
 export const DEEP = process.env.DEEP_TESTS === "1";
 export const CRAWL = process.env.FINDSTAT_CRAWL;
@@ -78,6 +82,13 @@ declareStructures(ce);
 declareCombinatorics(ce);
 declareMaps(ce, Object.fromEntries(CARRIERS.map((c) => [c.type, c.name])));
 const value = (json: unknown) => ce.box(json as never).evaluate().json;
+
+const DEFINITIONS = bySignature(ALL_STATISTICS);
+/** Whether the object FindStat's `text` names is in `definition`'s domain, read where the head reads it. */
+function inDomainOf(definition: Definition, carrier: string, text: string): boolean {
+  const subject = ce.box(readObject(carrier, text) as never);
+  return inDomain(ce, definition, subject.operator === carrier ? (operandsOf(subject)[0] ?? subject) : subject);
+}
 
 interface Snapshot {
   readonly items: Readonly<Record<string, { collection: string; sample: readonly [string, number][] }>>;
@@ -153,6 +164,8 @@ export interface Report {
   readonly compared: string[];
   /** The objects read one by one behind the labels `ending in "objects"`. */
   objects: number;
+  /** For each statistic with a `where`, the objects it declined (off its domain) rather than compared. */
+  readonly declined: Record<string, number>;
   readonly skipped: string[];
   readonly disagreements: Golden;
 }
@@ -162,6 +175,7 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
   const skipped: string[] = [];
   const disagreements: Golden = {};
   const counts = new Map<string, number>();
+  const tallies = new Map<string, { given: number; declined: number }>();
   let objectsRead = 0;
   for (const match of findstat) {
     if (OBJECT_WISE[match.on] ? !objectWise : !LEVELLED(match.on)) continue;
@@ -184,12 +198,27 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
       )) {
         const size = level[0]!;
         const label = `${match.head}@${match.on} ${id} n=${size}${level.length > 1 ? `,k=${level[1]}` : ""}`;
+        // An object off the definition's domain is declined, not compared.
+        const definition = DEFINITIONS.get(`${match.head}@${match.on}`);
+        const off = new Set<string>();
+        if (definition?.where !== undefined) {
+          for (const object of objects.keys()) if (!inDomainOf(definition, match.on, object)) off.add(object);
+          const tally = tallies.get(`${match.head}@${match.on}`) ?? { given: 0, declined: 0 };
+          tallies.set(`${match.head}@${match.on}`, tally);
+          tally.given += objects.size;
+          tally.declined += off.size;
+        }
+        if (off.size > 0 && !OBJECT_WISE[match.on]) {
+          skipped.push(`${label}: ${off.size} of ${objects.size} objects declined`);
+          continue;
+        }
         if (OBJECT_WISE[match.on]) {
           const ours: Record<string, number> = {};
           const theirs: Record<string, number> = {};
           const wrong: string[] = [];
           try {
             for (const [object, expected] of objects) {
+              if (off.has(object)) continue;
               const got = ourValue(match.on, object, match.head);
               if (got === expected) continue;
               wrong.push(`${object}: ours ${got}, FindStat ${expected}`);
@@ -200,7 +229,7 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
             skipped.push(`${label}: ${error instanceof Error ? error.message : String(error)}`);
             continue;
           }
-          objectsRead += objects.size;
+          objectsRead += objects.size - off.size;
           compared.push(`${label} objects`);
           if (wrong.length > 0)
             disagreements[`${label} objects`] = {
@@ -234,7 +263,13 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
       }
     }
   }
-  return { compared, objects: objectsRead, skipped, disagreements };
+  const declined: Record<string, number> = {};
+  for (const [signature, { given, declined: count }] of tallies) {
+    declined[signature] = count;
+    if (given > 0 && count === given)
+      throw new Error(`${signature} declines every one of the ${given} objects it is given`);
+  }
+  return { compared, objects: objectsRead, declined, skipped, disagreements };
 }
 
 export const readGolden = (): Golden =>

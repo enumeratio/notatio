@@ -1,5 +1,6 @@
 // A map's hand-written kernel is a fast path for its Epsil, which stays the meaning: each kernel gives the
-// Epsil's answer, over every small permutation (the standard run) and larger ones (the deep run).
+// Epsil's answer, over every small permutation (the standard run) and larger ones (the deep run). A map on another
+// carrier (CanonicalGraph, CanonicalPoset) holds its kernel to its Epsil in its own package's tests.
 
 import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
@@ -27,7 +28,6 @@ const SPREAD_7 = [
 // The standard run covers sizes 1-4; `DEEP_TESTS=1` (the nightly sweep) takes sizes 5-7.
 const deep = process.env.DEEP_TESTS === "1";
 
-// A kernel on another carrier is held to its Epsil by that carrier's own tests (the posets' are in posets/tests).
 const permutationKernels = MAPS.filter((m) => m.kernel !== undefined && m.from === "permutation");
 
 for (const map of permutationKernels) {
