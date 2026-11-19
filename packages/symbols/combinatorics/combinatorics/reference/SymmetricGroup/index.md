@@ -14,6 +14,7 @@ enumerate:
   columns: Descents, MajorIndex, Inversions, CycleCount, FixedPoints
   glyph: permutation
 seeAlso:
+  - Permutations
   - Factorial
   - Subfactorial
   - Count
