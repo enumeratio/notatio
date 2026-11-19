@@ -42,6 +42,8 @@ const CORE = [
   "Determinant",
   "Divide",
   "Equal",
+  // The permutations of the vertices by rank 0 .. n! - 1 (`lexUnrank`): the digits of a rank are its quotients by (n - j)!.
+  "Factorial",
   "Filter",
   "Flatten",
   // The row of a cell in the Robinson-Schensted state that LusztigAFunction (St001874) reads its shape from.

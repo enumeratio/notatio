@@ -641,6 +641,21 @@ function distinguishingNumber(g: Graph): number {
     }
   return 0;
 }
+/** The fewest colors of the edges with which no nontrivial automorphism preserves every color, each coloring a map tried (graphs where no automorphism fixes every edge). */
+function distinguishingIndex(g: Graph): number {
+  if (g.n === 0) return 0;
+  if (g.edges.length === 0) return 1;
+  const nontrivial = automorphismList(g).filter((p) => !isIdentity(p));
+  const image = (p: readonly number[], [u, v]: readonly [number, number]): number =>
+    g.edges.findIndex(([a, b]) => [p[u - 1]! + 1, p[v - 1]! + 1].toSorted((x, y) => x - y).join() === `${a},${b}`);
+  const m = g.edges.length;
+  for (let k = 1; k <= m; k++)
+    for (let code = 0; code < k ** m; code++) {
+      const colors = range(0, m - 1).map((f) => Math.floor(code / k ** f) % k);
+      if (nontrivial.every((p) => g.edges.some((edge, f) => colors[f] !== colors[image(p, edge)]))) return k;
+    }
+  return 0;
+}
 /** The fewest vertices, tried by size, that no nontrivial automorphism fixes pointwise. */
 function baseSize(g: Graph): number {
   const nontrivial = automorphismList(g).filter((p) => !isIdentity(p));
@@ -1269,6 +1284,7 @@ export const GRAPH_READINGS: Record<string, (g: Graph) => number> = {
   AutomorphismGroupExponent: (g) => automorphismList(g).reduce((l, p) => (l * orderOf(p)) / gcdOf(l, orderOf(p)), 1),
   VertexOrbitCount: (g) => range(0, g.n - 1).filter((v) => automorphismList(g).every((p) => p[v]! >= v)).length,
   DistinguishingNumber: distinguishingNumber,
+  DistinguishingIndex: distinguishingIndex,
   OddAutomorphismCount: (g) =>
     automorphismList(g).filter((p) => g.edges.filter(([u, v]) => p[u - 1]! > p[v - 1]!).length % 2 === 1).length,
   AutomorphismBaseSize: baseSize,

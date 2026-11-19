@@ -127,6 +127,19 @@ const FULL_ON_FIVE = new Set([
 const thinned = (head: string): boolean => BATCH_TWO.has(head) && !DEEP;
 const thinnest = (head: string): boolean => PAIR_SUBSETS.has(head) && !DEEP;
 
+// Where a statistic has a domain, the graphs it is read on; off it the call stays unevaluated.
+const DOMAINS: Record<string, (g: Graph) => boolean> = {
+  // No component is a single edge and at most one vertex is isolated.
+  DistinguishingIndex: (g) => {
+    const degree = (v: number): number => g.edges.filter((e) => e.includes(v)).length;
+    return (
+      g.edges.every(([u, v]) => degree(u) !== 1 || degree(v) !== 1) &&
+      Array.from({ length: g.n }, (_, i) => degree(i + 1)).filter((d) => d === 0).length <= 1
+    );
+  },
+};
+const inDomain = (head: string, g: Graph): boolean => DOMAINS[head]?.(g) ?? true;
+
 /** Every labeled graph on n vertices. */
 function graphs(n: number): Graph[] {
   const pairs: [number, number][] = [];
@@ -172,8 +185,10 @@ for (const [head, expected] of Object.entries(GRAPH_READINGS))
   test(`${head} agrees over every graph on 0..4 vertices`, () => {
     // Thinned: every graph to 3 vertices, every eighth on 4 (every 32nd for the thinnest).
     const all = thinned(head)
-      ? [0, 1, 2, 3, 4].flatMap((n) => graphs(n).filter((_, i) => n < 4 || i % (thinnest(head) ? 32 : 8) === 0))
-      : [0, 1, 2, 3, 4].flatMap(graphs);
+      ? [0, 1, 2, 3, 4].flatMap((n) =>
+          graphs(n).filter((g, i) => inDomain(head, g) && (n < 4 || i % (thinnest(head) ? 32 : 8) === 0)),
+        )
+      : [0, 1, 2, 3, 4].flatMap((n) => graphs(n).filter((g) => inDomain(head, g)));
     for (const g of all) expect(evaluate(head, g), JSON.stringify(g)).toBe(expected(g));
   });
 
@@ -181,7 +196,8 @@ for (const [head, expected] of Object.entries(GRAPH_READINGS))
 for (const [head, expected] of Object.entries(GRAPH_READINGS))
   test(`${head} is the same after relabeling, and agrees, on graphs of 1..6 vertices`, () => {
     for (let n = 1; n <= 6; n++) {
-      const all = graphs(n);
+      const all = graphs(n).filter((g) => inDomain(head, g));
+      if (all.length === 0) continue;
       // Thinned: two graphs of each size to 4, one of 5, none of 6 (one to 4 and none beyond for the thinnest).
       const count = thinnest(head) ? (n <= 4 ? 1 : 0) : thinned(head) ? (n <= 4 ? 2 : n === 5 ? 1 : 0) : 4;
       for (let k = 0; k < count; k++) {
@@ -195,10 +211,20 @@ for (const [head, expected] of Object.entries(GRAPH_READINGS))
 
 for (const [head, expected] of Object.entries(GRAPH_READINGS))
   test(`${head} called on the carrier value gives the reading`, () => {
-    for (const g of [0, 1, 2, 3].flatMap((n) => graphs(n).filter((_, i) => !thinned(head) || i % 2 === 0)))
+    for (const g of [0, 1, 2, 3].flatMap((n) =>
+      graphs(n).filter((g, i) => inDomain(head, g) && (!thinned(head) || i % 2 === 0)),
+    ))
       expect(ce.box([head, ["LabeledGraph", contents(g)]] as never).evaluate().re, `${head} ${JSON.stringify(g)}`).toBe(
         expected(g),
       );
+  });
+
+for (const head of Object.keys(DOMAINS))
+  test(`${head} stays unevaluated off its domain`, () => {
+    for (const g of [1, 2, 3].flatMap(graphs).filter((g) => !inDomain(head, g))) {
+      const call = [head, ["LabeledGraph", contents(g)]];
+      expect(ce.box(call as never).evaluate().json, JSON.stringify(g)).toEqual(ce.box(call as never).json);
+    }
   });
 
 test("CombinatorialStat reads the elements of LabeledGraphs", () => {
@@ -216,8 +242,8 @@ test.skipIf(!DEEP)(
     for (const [head, expected] of Object.entries(GRAPH_READINGS)) {
       const slow = BATCH_TWO.has(head) && !FULL_ON_FIVE.has(head);
       const all = [
-        ...graphs(5).filter((_, i) => !slow || i % 16 === 0),
-        ...graphs(6).filter((_, i) => i % (slow ? 256 : 8) === 0),
+        ...graphs(5).filter((g, i) => inDomain(head, g) && (!slow || i % 16 === 0)),
+        ...graphs(6).filter((g, i) => inDomain(head, g) && i % (slow ? 256 : 8) === 0),
       ];
       for (const g of all) expect(evaluate(head, g), `${head} ${JSON.stringify(g)}`).toBe(expected(g));
     }

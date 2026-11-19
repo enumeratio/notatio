@@ -29,7 +29,8 @@ const SAMPLES: readonly Sample[] = [
 ];
 
 /** The heads with a hand-written record in `../../reference/`. */
-const CURATED_HEADS: readonly string[] = ["LeftSpine", "Leaves", "RootDegree", "UnaryNodes"];
+// `AutomorphismGroupSize` is also the graph statistic (graphs' generator adds its notes and examples to this record).
+const CURATED_HEADS: readonly string[] = ["AutomorphismGroupSize", "LeftSpine", "Leaves", "RootDegree", "UnaryNodes"];
 
 export const REFERENCE_DIR = fileURLToPath(new URL("../../reference/", import.meta.url));
 

@@ -1601,6 +1601,7 @@ const PERMUTATION_FOLDS: ReadonlySet<string> = new Set([
   "OddAutomorphismCount",
   "AutomorphismBaseSize",
   "AutomorphismGroupFactorCount",
+  "DistinguishingIndex",
   "MinimumForestPatternOccurrenceCount",
   "MinimumStarPatternOccurrenceCount",
   "MinimumPathPatternOccurrenceCount",
@@ -3717,6 +3718,112 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     ),
     `FindStat's St001951. A partition of the orbits is read as the base-r digits of c, r the orbit count, a digit the block of an orbit; the restriction of the group to a union of orbits has |G| over the automorphisms that fix those vertices. The rows count the most blocks whose restrictions multiply to |G|, so a graph with no nontrivial automorphism gives n. The graph with no vertices gives 0, a convention and not a FindStat row.`,
   ),
+  {
+    ...stat(
+      "DistinguishingIndex",
+      "The fewest colors of the edges such that no nontrivial automorphism preserves every color.",
+      withAutomorphisms([
+        "If",
+        equals(length("edges"), 0),
+        1,
+        bindList(
+          "index",
+          forEach(
+            vertices,
+            forEach(
+              vertices,
+              floored(
+                sumOver(
+                  ["Range", 1, length("edges")],
+                  times(
+                    "f",
+                    times(one(equals(lower(at("f", "edges")), "a")), one(equals(upper(at("f", "edges")), "b"))),
+                  ),
+                  "f",
+                ),
+              ),
+              "b",
+            ),
+            "a",
+          ),
+          typedFolding(
+            [
+              "If",
+              greater("best", 0),
+              "best",
+              [
+                "If",
+                greater(
+                  typedFolding(
+                    [
+                      "If",
+                      greater("seen", 0),
+                      "seen",
+                      [
+                        "If",
+                        equals(
+                          floored(
+                            sumOver(
+                              "auts",
+                              times(
+                                isNontrivial,
+                                one(
+                                  equals(
+                                    floored(
+                                      sumOver(
+                                        ["Range", 1, length("edges")],
+                                        one(notEqual(colorOf("c", "f"), colorOf("c", edgeImage()))),
+                                        "f",
+                                      ),
+                                    ),
+                                    0,
+                                  ),
+                                ),
+                              ),
+                              "p",
+                            ),
+                          ),
+                          0,
+                        ),
+                        1,
+                        0,
+                      ],
+                    ],
+                    "seen",
+                    "c",
+                    0,
+                    ["Range", 0, subtract(["Power", "k", length("edges")], 1)],
+                    "integer",
+                  ),
+                  0,
+                ),
+                "k",
+                0,
+              ],
+            ],
+            "best",
+            "k",
+            0,
+            ["Range", 1, length("edges")],
+            "integer",
+          ),
+          "list<list<integer>>",
+        ),
+      ]),
+      `FindStat's St001060. An edge coloring is read as the digits of c in base k, edge f the digit at position f - 1; an automorphism sends edge f to the edge between the images of its ends. Defined where no component is a single edge and at most one vertex is isolated, so that no nontrivial automorphism fixes every edge; elsewhere the call stays unevaluated. A single vertex gives 1 and the graph with no vertices 0, conventions and not FindStat rows.`,
+    ),
+    where: withDegrees(
+      [
+        "And",
+        equals(
+          floored(sumOver("edges", times(one(equals(degree(lower("e")), 1)), one(equals(degree(upper("e")), 1))), "e")),
+          0,
+        ),
+        atMostValue(overDegrees(one(equals("d", 0))), 1),
+      ],
+      "True",
+    ),
+  },
   patternStat(
     "MinimumForestPatternOccurrenceCount",
     "The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-3 and 2-3 on three positions.",
@@ -3821,12 +3928,24 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     ? {
         ...definition,
         checkWeight:
-          definition.head === "DistinguishingNumber" || definition.head === "AutomorphismGroupFactorCount"
+          definition.head === "DistinguishingNumber" ||
+          definition.head === "DistinguishingIndex" ||
+          definition.head === "AutomorphismGroupFactorCount"
             ? ENUMERATING_CHECK_WEIGHT
             : PERMUTATION_CHECK_WEIGHT,
       }
     : definition,
 );
+
+/** The index among the edges of the image under `p` of edge `f`: the edge between the images of its ends. */
+function edgeImage(): MathJSON {
+  return bind(
+    "pa",
+    at(lower(at("f", "edges")), "p"),
+    bind("pb", at(upper(at("f", "edges")), "p"), entry("index", ["Min", "pa", "pb"], ["Max", "pa", "pb"]), "integer"),
+    "integer",
+  );
+}
 
 /** The color of vertex w in the coloring c with k colors: digit w - 1 of c in base k. */
 function colorOf(c: MathJSON, w: MathJSON): MathJSON {

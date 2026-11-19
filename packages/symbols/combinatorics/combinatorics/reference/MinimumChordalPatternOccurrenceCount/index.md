@@ -1,0 +1,22 @@
+---
+name: MinimumChordalPatternOccurrenceCount
+domain: Graph statistics
+signature: MinimumChordalPatternOccurrenceCount(graph)
+summary: The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-3 and 2-3 and no edge 1-2.
+catalog:
+  - system: findstat
+    identity: St001324
+    url: https://www.findstat.org/St001324
+    on: LabeledGraph
+statOn:
+  - LabeledGraph
+signatures:
+  - call: MinimumChordalPatternOccurrenceCount(graph)
+    description: The fewest occurrences, over all orderings of the vertices, of the pattern with edges 1-3 and 2-3 and no edge 1-2.
+    library: enumeratio-combinatorics
+    type: (labeled_graph) -> number
+---
+
+- Defined over `LabeledGraph` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
+- Takes a `LabeledGraph` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
+- FindStat's St001324. With fewer than 3 vertices there is no occurrence, so 0. The graph with no vertices gives 0.
