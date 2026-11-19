@@ -62,6 +62,31 @@ function graph(text: string): MathJSON {
   return ["Tuple", Number(match[2]), list(edges.map((edge) => list(edge)))];
 }
 
+/**
+ * `([(0,1),(0,2)],3)`: the cover relations (a, b), a below b, on the elements 0 .. n - 1, and n. Ours is the list of
+ * lower covers in a natural labeling: the elements are relabeled 1 .. n by repeatedly taking the least-labeled minimal
+ * element of what remains, and entry i is the ascending list of the elements i covers.
+ */
+function poset(text: string): MathJSON {
+  const match = /^\(\[(.*)\],(\d+)\)$/.exec(text);
+  if (match === null) throw new SyntaxError(`poset: expected ([(a,b),...],n), got ${text}`);
+  const n = Number(match[2]);
+  const covers = [...match[1]!.matchAll(/\((\d+),(\d+)\)/g)].map((end) => [Number(end[1]), Number(end[2])] as const);
+  const label: number[] = [];
+  const placed = new Set<number>();
+  for (let step = 1; step <= n; step++) {
+    const next = Array.from({ length: n }, (_, v) => v).find(
+      (v) => !placed.has(v) && !covers.some(([a, b]) => b === v && !placed.has(a)),
+    );
+    if (next === undefined) throw new SyntaxError(`poset: a cycle in ${text}`);
+    placed.add(next);
+    label[next] = step;
+  }
+  const lower = Array.from({ length: n }, () => [] as number[]);
+  for (const [a, b] of covers) lower[label[b]! - 1]!.push(label[a]!);
+  return list(lower.map((covered) => list(covered.toSorted((a, b) => a - b))));
+}
+
 interface Reader {
   readonly read: (text: string) => MathJSON;
   /** The size FindStat's tables are cut at: the length, sum or node count the collection grows by. */
@@ -147,10 +172,17 @@ const READERS: Readonly<Record<string, Reader>> = {
       return sum(outer) - sum(inner);
     },
   },
-  // A graph up to isomorphism, as the labeled graph FindStat lists it by; the vertex count is the size. We have no collection of
-  // graphs up to isomorphism, so the crosscheck compares object by object.
+  // A graph up to isomorphism, as the labeled graph FindStat lists it by; the vertex count is the size. Our UnlabeledGraphs lists
+  // them through 8 vertices, each in its canonical labeling, which FindStat's spelling need not be: the crosscheck still
+  // compares object by object.
   LabeledGraph: {
     read: (t) => ["LabeledGraph", graph(t)],
+    size: (t) => Number(/,(\d+)\)$/.exec(t)?.[1]),
+  },
+  // A poset up to isomorphism, as the naturally labeled poset of its lower covers; the element count is the size. We have no
+  // collection of posets up to isomorphism, so the crosscheck compares object by object.
+  Poset: {
+    read: (t) => ["Poset", poset(t)],
     size: (t) => Number(/,(\d+)\)$/.exec(t)?.[1]),
   },
   // `['A', 3]`: the letter and the rank, the size. FindStat also writes C_2 (and B_1, C_1), the same types as B_2 and A_1:
@@ -204,6 +236,8 @@ export const COLLECTION_CARRIER: Readonly<Record<string, string>> = {
   "Plane partitions": "PlanePartition",
   "Gelfand-Tsetlin patterns": "GelfandTsetlinPattern",
   Graphs: "LabeledGraph",
+  Posets: "Poset",
+  Lattices: "Poset",
   "Finite Cartan types": "CartanType",
 };
 

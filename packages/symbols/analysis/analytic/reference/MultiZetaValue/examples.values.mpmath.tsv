@@ -1,11 +1,11 @@
 id	in	out	verdict
-zeta-2-2-frac-34-zeta-4	(nsum(lambda n1: n1**(-2) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))		
-zeta-3-3-frac-12-zeta-3-2-zeta-6	(nsum(lambda n1: n1**(-3) * nsum(lambda n2: n2**(-3), [1, n1 - 1]), [2, inf]))		
-zeta-2-3	(nsum(lambda n1: n1**(-2) * nsum(lambda n2: n2**(-3), [1, n1 - 1]), [2, inf]))		
-zeta-3-2	(nsum(lambda n1: n1**(-3) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))		
-zeta-4-2	(nsum(lambda n1: n1**(-4) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))		
-zeta-2-4	(nsum(lambda n1: n1**(-2) * nsum(lambda n2: n2**(-4), [1, n1 - 1]), [2, inf]))		
-zeta-5-2	(nsum(lambda n1: n1**(-5) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))		
-zeta-3-4	(nsum(lambda n1: n1**(-3) * nsum(lambda n2: n2**(-4), [1, n1 - 1]), [2, inf]))		
+zeta-2-2-frac-34-zeta-4	(nsum(lambda n1: n1**(-2) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))	0.811742425283353643637002772406	
+zeta-3-3-frac-12-zeta-3-2-zeta-6	(nsum(lambda n1: n1**(-3) * nsum(lambda n2: n2**(-3), [1, n1 - 1]), [2, inf]))	0.213798868224592547099583574508	
+zeta-2-3	(nsum(lambda n1: n1**(-2) * nsum(lambda n2: n2**(-3), [1, n1 - 1]), [2, inf]))	0.711566197550572432096973806086	
+zeta-3-2	(nsum(lambda n1: n1**(-3) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))	0.228810397603353759768746148942	
+zeta-4-2	(nsum(lambda n1: n1**(-4) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))	0.0884833824543687142943278390858	
+zeta-2-4	(nsum(lambda n1: n1**(-2) * nsum(lambda n2: n2**(-4), [1, n1 - 1]), [2, inf]))	0.674523914033968140491560608257	
+zeta-5-2	(nsum(lambda n1: n1**(-5) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf]))	0.038575124342753255505925464373	
+zeta-3-4	(nsum(lambda n1: n1**(-3) * nsum(lambda n2: n2**(-4), [1, n1 - 1]), [2, inf]))	0.207505014615732095907807605495	
 zeta-2-2-frac-34-zeta-4-one-of-fungrim-s-exact			
 s-1-2-stays-symbolic-outside-the-depth-2-both	nsum(lambda n1: n1**(-1) * nsum(lambda n2: n2**(-2), [1, n1 - 1]), [2, inf])	15.57437444191338290079906669	inconclusive

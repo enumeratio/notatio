@@ -13,7 +13,8 @@ chebyshevu-2-3	chebyshev_U(2, 3)	35
 chebyshevu-10-x	chebyshev_U(10, SR.var("x"))	1024*x^10 - 2304*x^8 + 1792*x^6 - 560*x^4 + 60*x^2 - 1	
 series-chebyshevu-5-x-x-0-5	SR(chebyshev_U(5, SR.var("x"))).series(SR.var("x") == 0, 5 + 1)	6*x + (-32)*x^3 + 32*x^5 + Order(x^6)	
 u-of-a-negative-order-at-a-rational	chebyshev_U(-7, (1/2))	0	
-at-an-exact-zero	chebyshev_U(5, -0.5)		
+at-an-exact-zero	chebyshev_U(5, -0.5)	-0.000000000000000	
+a-small-imaginary-part-is-kept	chebyshev_U(6, (2.5 + 1e-15*I))		
 at-a-rational	chebyshev_U(3, (1/2))	-1	
 at-a-complex-argument	chebyshev_U(4, (2 + 3*I))	-2064*I - 1843	
 a-symbolic-order-stays-unevaluated	chebyshev_U(SR.var("n"), SR.var("x"))	chebyshev_U(n, x)	
@@ -40,3 +41,4 @@ sum-chebyshevu-k-1-over-2-times-chebyshevu-k-2-k	sum((chebyshev_U(SR.var("k"), (
 sum-chebyshevu-k-1-over-2-times-chebyshevu-k-2-2	sum((chebyshev_U(SR.var("k"), (1/2)) * chebyshev_U(SR.var("k"), 2)), SR.var("k"), 0, 3)	-51	
 n-integrate-sqrt-neg-t-pow-2-plus-1-times	enumeratio_n(integrate((sqrt(((-((SR.var("t"))^2)) + 1)) * ((chebyshev_U(2, SR.var("t")))^2)), SR.var("t"), -1, 1))	1.57079632679490	
 n-integrate-chebyshevu-2-t-times-chebyshevu-3-t	enumeratio_n(integrate((chebyshev_U(2, SR.var("t")) * chebyshev_U(3, SR.var("t")) * sqrt(((-((SR.var("t"))^2)) + 1))), SR.var("t"), -1, 1))	0.000000000000000	
+a-huge-order-at-1	chebyshev_U(100000, 1)	100001	

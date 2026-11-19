@@ -4,5 +4,6 @@
 import { referenceData } from "@notatio/reference/node";
 import { assemble } from "./reference-assemble.ts";
 import { recordsRoot } from "./records-root.ts";
+import { timed } from "./timings.ts";
 
-export const { documented, entries } = assemble(referenceData(recordsRoot).entries);
+export const { documented, entries } = timed("records", () => assemble(referenceData(recordsRoot).entries));

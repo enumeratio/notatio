@@ -2,6 +2,7 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import {
   type EvalOptions,
   exceedsDoublePrecision,
+  inexactComplex,
   isFiniteNum,
   isRealInt,
   numberResult,
@@ -17,10 +18,11 @@ import {
   scale,
   sub,
 } from "@notatio/ce-patches";
+import { eisensteinGBig } from "./eisenstein-g-big.ts";
 
 // ModularJ, ModularLambda, EisensteinG — Fungrim-frontier heads over τ in the upper
-// half-plane, delegating to compute-engine's own native EisensteinE/JacobiTheta rather
-// than reimplementing a q-series (https://github.com/enumeratio/notatio/wiki/Namespaces §6: extend, don't reimplement).
+// half-plane. ModularJ and ModularLambda delegate to compute-engine's own native
+// EisensteinE/DedekindEta/JacobiTheta rather than reimplementing a q-series (https://github.com/enumeratio/notatio/wiki/Namespaces §6: extend, don't reimplement).
 //
 // Both EisensteinE (Eisenstein series, a naive q-series here) and the theta-ratio behind
 // λ grow the way the true functions genuinely do near a cusp (Im τ → 0), which is real
@@ -36,8 +38,9 @@ import {
 // back-transform needed. E_k (weight k, level 1) transforms by E_k(τ+1) = E_k(τ) (T is
 // always the identity — period exactly 1, not just parity) and E_k(−1/τ) = τ^k·E_k(τ)
 // (S), so unwinding the S-steps in reverse — dividing by the PRE-inversion τ at that
-// step, raised to the k — recovers E_k(τ) from E_k(reduced τ); this is what EisensteinG
-// rides on. λ is invariant only under Γ(2) (index 6 in PSL2(Z)), so plain SL2(Z)
+// step, raised to the k — recovers E_k(τ) from E_k(reduced τ); EisensteinG does the same
+// for G_k in BigDecimal (eisenstein-g-big.ts), whose own q-series the native one's
+// truncation at high weight rules out. λ is invariant only under Γ(2) (index 6 in PSL2(Z)), so plain SL2(Z)
 // reduction does NOT land on an equivalent point for λ the way it does for j — instead
 // each step's known transform law (λ(τ+1) = λ/(λ−1), λ(−1/τ) = 1−λ, both self-inverse)
 // is applied, in reverse step order, to carry the reduced-domain λ back to λ(τ). All
@@ -49,9 +52,8 @@ import {
 const MAX_REDUCE_STEPS = 200;
 
 /**
- * The largest weight `EisensteinG` evaluates. The native E_k sums a q-series whose cost grows
- * steeply with k (k = 2000 takes 5 s, k = 1e5 over a minute), and past k = 300 it already
- * declines at most τ (cortex-js/compute-engine#595, the truncation of the native E_k; fixed by #601).
+ * The largest weight `EisensteinG` evaluates. The q-series (eisenstein-g-big.ts) has terms that rise
+ * until n ≈ (k − 1)/(2π Im τ), so its length and the size of σ_{k−1}(n) grow with k.
  */
 const MAX_EISENSTEIN_WEIGHT = 400;
 const REDUCE_EPS = 1e-12;
@@ -121,18 +123,6 @@ function callNative(ce: ComputeEngine, head: string, args: readonly (number | Cx
   return cx(r.re, r.im);
 }
 
-/** E_k(τ) for even k ≥ 4, native at the reduced point, unwound back to τ. */
-function eisensteinE(ce: ComputeEngine, k: number, tau0: Cx): Cx {
-  const { tau, steps } = reduceToFundamentalDomain(tau0);
-  let val = callNative(ce, "EisensteinE", [k, tau]);
-  for (let i = steps.length - 1; i >= 0; i--) {
-    const step = steps[i];
-    if (step.kind === "S") val = div(val, intPow(step.pre, k));
-    // T: E_k(τ+1) = E_k(τ) exactly — nothing to unwind.
-  }
-  return val;
-}
-
 /** j(τ) = E4³/Δ with Δ = η²⁴ — SL2(Z)-invariant, so the reduced point IS the answer. Δ from
  * η rather than (E4³ − E6²)/1728, which cancels to |q| and loses every digit as Im τ grows.
  * `noise` is the rounding error in `value`: E4 carries about REAL_COLLAPSE_RELATIVE, which E4³
@@ -158,18 +148,6 @@ function modularLambda(ce: ComputeEngine, tau0: Cx): Cx {
   let val = div(pow4(theta2), pow4(theta3));
   for (let i = steps.length - 1; i >= 0; i--) val = steps[i].kind === "T" ? hT(val) : hS(val);
   return val;
-}
-
-/** G_k(τ) = 2ζ(k)·E_k(τ), for even k ≥ 4 — the un-normalized Eisenstein series (DLMF
- * 23.16, Fungrim's convention), delegating entirely to the normalized E_k above. `noise` is
- * the size of the rounding error in `value`: about epsilon times 2ζ(k) at the reduced point,
- * which each S step then divides by pre^k. At a zero of G_k (E_4 at ρ) the value is that noise. */
-function eisensteinG(ce: ComputeEngine, k: number, tau0: Cx): { value: Cx; noise: number } {
-  const zetaK = ce.box(["Zeta", k] as never).N();
-  const value = scale(mul(cx(zetaK.re, zetaK.im), eisensteinE(ce, k, tau0)), 2);
-  let noise = REAL_COLLAPSE_RELATIVE * 2 * zetaK.re;
-  for (const step of reduceToFundamentalDomain(tau0).steps) if (step.kind === "S") noise /= abs(step.pre) ** k;
-  return { value, noise };
 }
 
 /**
@@ -241,8 +219,12 @@ export function declareModular(ce: ComputeEngine): void {
       if (!wantsNumber(ops, options) || !isFiniteNum(tau)) return undefined;
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (tauTooFarForDouble(cx(tau.re, tau.im))) return undefined;
-      const { value, noise } = eisensteinG(ce, k.re, cx(tau.re, tau.im));
-      return numberResult(ce, value, { noise });
+      const result = eisensteinGBig(k.re, tau.re, tau.im);
+      if (result === undefined) return undefined;
+      // The series vouches for `im` down to its own rounding, so only that noise drops it: numberResult's
+      // relative floor would drop a true im of 1e-14 of re (k = 100 at 0.7 + 0.3i is 3.4e37 + 3.2e23i).
+      const { re, im } = result.value;
+      return Math.abs(im) <= result.noise ? ce.number(re) : inexactComplex(ce, re, im);
     },
   });
 }

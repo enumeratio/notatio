@@ -22,12 +22,13 @@ theta1-0-4-0-85	(jtheta(1, 0.4, 0.85))	0.000955148881100374571395609302109
 theta2-0-4-0-85	(jtheta(2, 0.4, 0.85))	1.64270560137008332739770978895	
 theta3-0-4-0-85	(jtheta(3, 0.4, 0.85))	1.64270560137008332746990161337	
 theta4-0-4-0-85	(jtheta(4, 0.4, 0.85))	0.000955149248343578116555579824126	
+a-small-imaginary-part-is-kept	jtheta(3, mpc(0.5, 1e-15), 0.2)		
 each-of-the-four-theta-functions-a-1	(jtheta(1, 0.3, 0.2))	0.353430543747624530792312292974	
 a-complex-argument-u	(jtheta(3, mpc(0.3, 0.1), 0.2))	(1.33801224524452026773287266077 - 0.0466988573862009517085256595222j)	
 a-negative-real-nome-q	(jtheta(3, 1, -0.3))	1.23906127595427294844553048338	
 a-complex-nome-q	(jtheta(2, mpc(0.5, 0.5), mpc(0.1, 0.2)))	(1.48211180358308196100169498524 + 0.163554249597656100535649605138j)	
 q-0-leaves-the-constant-term	jtheta(3, 0.5, 0)	1.0	
-theta1-0-q-is-0-for-any-q-an-odd	(jtheta(1, 0, 0.5))	2.32487905450153152483035002528e-35	
+theta1-0-q-is-0-for-any-q-an-odd	(jtheta(1, 0, 0.5))	2.32487905450153152483035002528e-35	disagree
 q-1-is-declined-the-series-diverges	(jtheta(3, 0.3, 1))	ValueError: abs(q) > THETA_Q_LIM = 1.000000	error
 symbolic-arguments-are-left-unevaluated-rather			
 u-1e30-declines-rather-than-answering-wrong	(jtheta(1, enumeratio_pow(10, 30), (mpf(1)/2)))	-0.0503373446859382879424538688059	inconclusive

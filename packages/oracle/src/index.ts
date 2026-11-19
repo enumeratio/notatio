@@ -37,6 +37,7 @@ export {
   Undecided,
   symbolicAgreementSource,
 } from "./symbolic.ts";
+export { agreementBound, agreesWithZero } from "./bound.ts";
 export {
   asNumber,
   compare,
@@ -51,6 +52,7 @@ export {
 } from "./compare.ts";
 export {
   type Approximate,
+  agreesWithZeroLeaf,
   compareTrees,
   isNumericValue,
   type Leaf,

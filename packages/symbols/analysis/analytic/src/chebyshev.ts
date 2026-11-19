@@ -1,6 +1,17 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import type { Json } from "@notatio/ce-patches";
-import { type BoxInput, isFiniteNum, isRealInt, numberResult, cx, mul, scale, sub, type Cx } from "@notatio/ce-patches";
+import {
+  type BoxInput,
+  isFiniteNum,
+  isRealInt,
+  numberResult,
+  vouchesWhenComplex,
+  cx,
+  mul,
+  scale,
+  sub,
+  type Cx,
+} from "@notatio/ce-patches";
 
 // ChebyshevT(n, x) / ChebyshevU(n, x): T_0 = 1, T_1 = x, T_k = 2x T_{k-1} − T_{k-2}
 // (U seeded U_0 = 1, U_1 = 2x — the same recurrence, a different start). Wolfram uses
@@ -75,6 +86,24 @@ function normalizeOrder(n: number, kind: "T" | "U"): { index: number; negate: bo
   return { index: m - 2, negate: true, zero: false }; // U_{−n} = −U_{n−2}, n ≥ 2
 }
 
+/**
+ * The highest order whose coefficient vector is built: the cost grows with its square (order 2000 takes
+ * about half a second, 100000 never ends). Past it an exact or symbolic x stays unevaluated, except the
+ * points with a closed value (`closedValue`).
+ */
+const MAX_EXPANDED_ORDER = 2000;
+
+/** T_n and U_n at x = 1, −1, 0 for any order: T_n(±1) = (±1)^n, U_n(1) = n + 1, U_n(−1) = (−1)^n (n + 1), and
+ * at 0 both are 0 for odd n and (−1)^(n/2) for even n. `undefined` at any other x. */
+function closedValue(n: number, x: Expression, kind: "T" | "U"): number | undefined {
+  if (x.im !== 0 || !Number.isSafeInteger(n + 1)) return undefined;
+  const parity = n % 2 === 0 ? 1 : -1;
+  if (x.re === 1) return kind === "T" ? 1 : n + 1;
+  if (x.re === -1) return parity * (kind === "T" ? 1 : n + 1);
+  if (x.re === 0) return n % 2 === 0 ? (n % 4 === 0 ? 1 : -1) : 0;
+  return undefined;
+}
+
 function evaluate(
   ce: ComputeEngine,
   kind: "T" | "U",
@@ -88,8 +117,13 @@ function evaluate(
   const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
   if (zero) return finish(box(0));
   if (numeric && isFiniteNum(x)) {
+    if (index > MAX_COMPILED_ORDER) return undefined; // the loop's length: past it, decline
     const v = chebyshevAt(index, cx(x.re, x.im), kind);
-    return numberResult(ce, negate ? { re: -v.re, im: -v.im } : v);
+    return numberResult(ce, negate ? { re: -v.re, im: -v.im } : v, vouchesWhenComplex([x]));
+  }
+  if (index > MAX_EXPANDED_ORDER) {
+    const closed = closedValue(index, x, kind);
+    return closed === undefined ? undefined : finish(box(negate ? -closed : closed));
   }
   const expr = coeffsExpr(coeffs(index, kind), x.json as unknown as Json);
   return finish(box(negate ? ["Negate", expr] : expr));

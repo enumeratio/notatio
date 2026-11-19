@@ -7,6 +7,7 @@ the-derivative	diff(hermite(Symbol("n"), Symbol("x")), Symbol("x"))	2*n*hermite(
 at-t5-0-7	N(hermite(5, 0.7), 30)	34.4982400000000097861629910767
 at-t10-1-3	N(hermite(10, 1.3), 30)	-66123.4130330625339411199092865
 at-t4-2-3i	N(hermite(4, (2 + 3*I)), 30)	-1652.0 - 2496.0*I
+a-small-imaginary-part-is-kept	hermite(5, (1.7 + 1e-15*I))	
 at-a-rational	hermite(5, Rational(1, 3))	8312/243
 at-a-complex-argument	hermite(4, (2 + 3*I))	12 + 16*(2 + 3*I)**4 - 48*(2 + 3*I)**2
 a-symbolic-order-stays-unevaluated	hermite(Symbol("n"), Symbol("x"))	hermite(n, x)

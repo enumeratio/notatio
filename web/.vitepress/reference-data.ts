@@ -7,6 +7,7 @@ import type { ReferenceEntry } from "@notatio/reference";
 import { referenceData } from "@notatio/reference/node";
 import { assemble } from "./data/reference-assemble.ts";
 import { recordsRoot } from "./data/records-root.ts";
+import { timed } from "./data/timings.ts";
 import type { Plugin, ViteDevServer } from "vite";
 
 const ID = "virtual:reference-entries";
@@ -30,7 +31,7 @@ export function referenceDataPlugin(dev: boolean): Plugin {
       // has nothing to invalidate, so let referenceData's own memo answer every call after the
       // first -- resolving dynamic routes, and each of the client/SSR bundles, all read the same
       // parse of the YAML.
-      const { entries } = assemble(referenceData(recordsRoot, { fresh: dev }).entries);
+      const { entries } = timed("records-module", () => assemble(referenceData(recordsRoot, { fresh: dev }).entries));
       // A build ships each symbol page its own entry (its route's params) and every page only
       // what cross-page lookups read; dev keeps whole entries here, reread on every edit.
       return `export default ${JSON.stringify(dev ? entries : entries.map(slim))};`;

@@ -10,6 +10,7 @@ at-p5-0-7	N[LegendreP[5, 0.7]]	-0.3651987499999999	N[P_5(0.7)]	-0.365199
 at-p-1-0-7	N[LegendreP[-1, 0.7]]	1.	N[P_{-1}(0.7)]	1.
 at-p-4-0-7	N[LegendreP[-4, 0.7]]	-0.19250000000000025	N[P_{-4}(0.7)]	-0.1925
 at-p4-2-3i	N[LegendreP[4, Complex[2, 3]]]	-501.5 - 570.*I	N[P_4(2+3 i)]	-501.5-570. i
+a-small-imaginary-part-is-kept	LegendreP[4, Complex[2.5, 1*^-15]]			
 at-a-rational	LegendreP[3, Rational[1, 2]]	-7/16	P_3\left(\frac{1}{2}\right)	-\frac{7}{16}
 at-a-complex-argument	LegendreP[3, Complex[2, 3]]	-118 + 18*I	P_3(2+3 i)	-118+18 i
 a-symbolic-order-stays-unevaluated	LegendreP[n, x]	LegendreP[n, x]	P_n(x)	P_n(x)

@@ -6,3 +6,4 @@ agm-1-neg-1p5-plus-3p5i	enumeratio_n(lambda: (agm(1, mpc(mpf("-1.5"), mpf("3.5")
 agm-1-neg-10-plus-tiny-i	enumeratio_n(lambda: (agm(1, mpc(-10, mpf("1e-12")))), 20)	(1.3110074646130279818+0.37242167511526897373j)	disagree
 agm-1-neg-10-minus-tiny-i	enumeratio_n(lambda: (agm(1, mpc(-10, mpf("-1e-12")))), 20)	(1.3110074646130279818-0.37242167511526897373j)	disagree
 agm-1-neg-10-20	enumeratio_n(lambda: (agm(1, -10)), 20)	(1.3110074646130093426+0.37242167511537033081j)	disagree
+agm-neg-8-neg-10-20	enumeratio_n(lambda: (agm(-8, -10)), 20)	(0.90377874730356788193+1.3733606190170761696j)	inconclusive

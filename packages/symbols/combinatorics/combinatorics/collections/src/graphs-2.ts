@@ -2,6 +2,7 @@ import { defineMessages, emit, type Engine, type Expr, integerAt, operandsOf } f
 import { allPairsWeightedDistances, weightedAdjacencyMatrixExpr } from "./graph-weights.ts";
 import { degrees, directedAdjacency, type GraphModel, graphOf, integerGraph, listOf, vertexKey } from "./graphs.ts";
 import { rngFor } from "./list-frontier.ts";
+import { adjacencyOf, canonicalBlocks, SEARCH_VERTEX_LIMIT } from "../../graphs/src/canonical.ts";
 
 // Second wave of Wolfram-frontier graph heads, built on graphs.ts (PR #202): distance-based
 // measures, structural predicates (our `Is…` naming, see graphs.ts's own note), and a few
@@ -242,10 +243,76 @@ function* permutations(n: number): Generator<number[]> {
   }
 }
 
-function areIsomorphic(g1: GraphModel, g2: GraphModel): boolean | undefined {
+/** The undirected, unweighted, loop-free graph's adjacency rows (vertices from 0, in `order`), else undefined:
+ *  the canonical form reads only that case. */
+function undirectedRows(model: GraphModel): number[] | undefined {
+  if (model.weighted || model.order.length > SEARCH_VERTEX_LIMIT) return undefined;
+  const index = new Map(model.order.map((v, i) => [v, i]));
+  const edges: number[][] = [];
+  for (const e of model.edges) {
+    if (e.directed || e.a === e.b) return undefined;
+    edges.push([index.get(e.a)! + 1, index.get(e.b)! + 1]);
+  }
+  return adjacencyOf(model.order.length, edges);
+}
+
+/** The vertices past which `IsIsomorphicGraph` tests an undirected graph by its canonical form (graphs/src/canonical.ts).
+ *  The hardest graph measured, the path (no twins, nothing to prune by), takes 1.5 million search branches on 16
+ *  vertices (0.2 s) and 17 million on 18 (2.3 s); the cycle, the complete bipartite graphs, the Petersen graph, the
+ *  Paley graphs on 9 and 13 vertices and the 4 × 4 rook's graph take under 0.1 s on 16. */
+const CANONICAL_VERTEX_LIMIT = 16;
+
+/** The blocks of the canonical labeling, or "toohard" where the search gives up (past its branch limit). */
+const blocksOf = (rows: readonly number[]): readonly number[] | "toohard" => canonicalBlocks(rows) ?? "toohard";
+
+/** Whether two graphs of the same size are isomorphic, by canonical form: equal blocks. */
+function sameCanonicalForm(rows1: readonly number[], rows2: readonly number[]): boolean | "toohard" {
+  const [a, b] = [blocksOf(rows1), blocksOf(rows2)];
+  if (a === "toohard" || b === "toohard") return "toohard";
+  return a.every((block, i) => block === b[i]);
+}
+
+/** The adjacency rows of a `LabeledGraph(Tuple(n, edges))` value, else undefined. */
+function labeledGraphOf(expr: Expr): { vertices: number; rows: number[]; edges: number } | undefined {
+  if (expr.operator !== "LabeledGraph") return undefined;
+  const json = expr.json as unknown;
+  const tuple = Array.isArray(json) ? json[1] : undefined;
+  if (!Array.isArray(tuple) || tuple[0] !== "Tuple" || tuple.length !== 3) return undefined;
+  const [n, list] = [tuple[1] as unknown, tuple[2] as unknown];
+  if (!Number.isInteger(n) || (n as number) < 0 || !Array.isArray(list) || list[0] !== "List") return undefined;
+  const size = n as number;
+  // Past the search's reach only the size matters: the vertex limit declines before any row is read.
+  if (size > SEARCH_VERTEX_LIMIT) return { vertices: size, rows: [], edges: list.length - 1 };
+  const edges: number[][] = [];
+  for (const pair of list.slice(1) as unknown[]) {
+    if (!Array.isArray(pair) || pair[0] !== "List" || pair.length !== 3) return undefined;
+    const [u, v] = [pair[1], pair[2]] as number[];
+    if (!Number.isInteger(u) || !Number.isInteger(v) || u < 1 || v < 1 || u > size || v > size || u === v)
+      return undefined;
+    edges.push([u, v]);
+  }
+  return { vertices: size, rows: adjacencyOf(size, edges), edges: edges.length };
+}
+
+/** Two `LabeledGraph` values, by canonical form. */
+function areIsomorphicLabeled(
+  g1: { vertices: number; rows: number[]; edges: number },
+  g2: { vertices: number; rows: number[]; edges: number },
+): boolean | "toohard" | { over: number } {
+  if (g1.vertices !== g2.vertices || g1.edges !== g2.edges) return false;
+  if (g1.vertices > CANONICAL_VERTEX_LIMIT) return { over: CANONICAL_VERTEX_LIMIT };
+  return sameCanonicalForm(g1.rows, g2.rows);
+}
+
+/** The verdict, or what stops one: the vertex limit of the route taken when the graphs pass it, "toohard" where a search
+ *  gives up. */
+function areIsomorphic(g1: GraphModel, g2: GraphModel): boolean | "toohard" | { over: number } {
   if (g1.order.length !== g2.order.length || g1.edges.length !== g2.edges.length) return false;
   const n = g1.order.length;
-  if (n > ISOMORPHISM_VERTEX_LIMIT) return undefined;
+  const [rows1, rows2] = [undirectedRows(g1), undirectedRows(g2)];
+  const canonical = rows1 !== undefined && rows2 !== undefined;
+  const limit = canonical ? CANONICAL_VERTEX_LIMIT : ISOMORPHISM_VERTEX_LIMIT;
+  if (n > limit) return { over: limit };
   const deg1 = degrees(g1);
   const deg2 = degrees(g2);
   const sorted = (m: ReadonlyMap<string, number>, order: readonly string[]): number[] => {
@@ -254,6 +321,7 @@ function areIsomorphic(g1: GraphModel, g2: GraphModel): boolean | undefined {
     return degs;
   };
   if (JSON.stringify(sorted(deg1, g1.order)) !== JSON.stringify(sorted(deg2, g2.order))) return false;
+  if (canonical) return sameCanonicalForm(rows1, rows2);
 
   const target = pairSet(g1, g1.order);
   const base = g2.order;
@@ -768,16 +836,24 @@ export function declareGraphs2(ce: Engine): void {
 
   defineMessages(ce, "IsIsomorphicGraph", {
     toobig: "graphs of more than `1` vertices are not tested; the call stays unevaluated.",
+    toohard:
+      "the search for a canonical form gave up on these graphs, which are too symmetric; the call stays unevaluated.",
   });
   ce.declare("IsIsomorphicGraph", {
-    signature: "(value, value) -> boolean",
+    signature: "(any, any) -> boolean",
     evaluate: (ops) => {
+      const verdict = (result: boolean | "toohard" | { over: number }): Expr | undefined => {
+        if (typeof result === "boolean") return result ? ce.True : ce.False;
+        if (result === "toohard") emit(ce, "IsIsomorphicGraph", "toohard", []);
+        else emit(ce, "IsIsomorphicGraph", "toobig", [ce.number(result.over)]);
+        return undefined;
+      };
+      const [l1, l2] = [ops[0], ops[1]].map((op) => (op === undefined ? undefined : labeledGraphOf(op)));
+      if (l1 !== undefined && l2 !== undefined) return verdict(areIsomorphicLabeled(l1, l2));
       const g1 = ops[0] === undefined ? undefined : graphOf(ce, ops[0]);
       const g2 = ops[1] === undefined ? undefined : graphOf(ce, ops[1]);
       if (g1 === undefined || g2 === undefined) return undefined;
-      const result = areIsomorphic(g1, g2);
-      if (result === undefined) emit(ce, "IsIsomorphicGraph", "toobig", [ce.number(ISOMORPHISM_VERTEX_LIMIT)]);
-      return result === undefined ? undefined : result ? ce.True : ce.False;
+      return verdict(areIsomorphic(g1, g2));
     },
   });
 

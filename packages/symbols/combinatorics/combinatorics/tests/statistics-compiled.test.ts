@@ -25,6 +25,8 @@ import { COMPILED as CARTAN_COMPILED } from "../cartan/src/statistics.compiled.g
 import { cartanTypesUpTo } from "../cartan/src/sample-types.ts";
 import { COMPILED as WORDS_COMPILED } from "../words/src/statistics.compiled.generated.js";
 import { COMPILED as GRAPHS_COMPILED } from "../graphs/src/statistics.compiled.generated.js";
+import { COMPILED as POSETS_COMPILED } from "../posets/src/statistics.compiled.generated.js";
+import { posetsOfSize } from "../posets/tests/poset-findstat-readings.ts";
 
 const DEEP = process.env.DEEP_TESTS === "1";
 const ce = bareEngine();
@@ -41,6 +43,7 @@ const AREAS = [
   { name: "trees", compiled: TREES_COMPILED },
   { name: "words", compiled: WORDS_COMPILED },
   { name: "graphs", compiled: GRAPHS_COMPILED },
+  { name: "posets", compiled: POSETS_COMPILED },
   { name: "cartan", compiled: CARTAN_COMPILED },
 ] as const;
 
@@ -77,6 +80,7 @@ const COMPILED_SIGNATURES = new Set(
     TREES_COMPILED,
     WORDS_COMPILED,
     GRAPHS_COMPILED,
+    POSETS_COMPILED,
     CARTAN_COMPILED,
   ].flatMap((table) => Object.keys(table)),
 );
@@ -359,6 +363,8 @@ const SUBJECTS: Record<string, unknown[][]> = {
     ...[0, 1, 2, 3].map((n) => gelfandTsetlinPatterns(n, 2).map(ofLists)),
     gelfandTsetlinPatterns(4, DEEP ? 2 : 1).map(ofLists),
   ],
+  // To 3 elements (11 posets); deep, 4 and 5 (40 and 357). The bitmask and Möbius heads take tenths of a second to interpret at 4.
+  Poset: bySize([0, 1, 2, 3, ...(DEEP ? [4, 5] : [])], posetsOfSize, ofLists),
 };
 
 /** How many subjects of a carrier its heads interpret together, deep or not. The interpreter is the slow
@@ -387,6 +393,7 @@ const CARRIER_ALLOWANCE: Readonly<Record<string, number>> = {
   SemistandardTableau: 1500,
   GelfandTsetlinPattern: 200,
   LabeledGraph: 150,
+  Poset: 300,
   CartanType: 600,
 };
 

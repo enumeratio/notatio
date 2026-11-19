@@ -3,6 +3,8 @@
 
 import { fold as typedFold } from "../../collections/src/families/tables.ts";
 import { blockEdgePartitionBody } from "./block-edges.ts";
+import { adjacencyOf, canonicalBlocks, edgesOfBlocks, SEARCH_VERTEX_LIMIT } from "./canonical.ts";
+import { canonicalGraphBody } from "./families/epsil.ts";
 import { at, bind, forEach, lets, type CombinatorialMap, type MathJSON } from "../../src/map-helpers.ts";
 
 const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
@@ -107,7 +109,38 @@ const perComponent = (value: (leader: MathJSON) => MathJSON): MathJSON =>
     ),
   );
 
+/** CanonicalGraph over the plain contents [n, edges]: the search of ./canonical.ts. It declines (undefined) a value
+ *  that is no graph, and one the search gives up on. */
+export function canonicalGraphKernel(raw: unknown): [number, number[][]] | undefined {
+  if (!Array.isArray(raw) || raw.length !== 2) return undefined;
+  const [n, edges] = raw as [unknown, unknown];
+  if (!Number.isInteger(n) || (n as number) < 0 || (n as number) > SEARCH_VERTEX_LIMIT || !Array.isArray(edges))
+    return undefined;
+  const size = n as number;
+  const seen = new Set<number>();
+  for (const edge of edges as unknown[]) {
+    if (!Array.isArray(edge) || edge.length !== 2) return undefined;
+    const [u, v] = edge as number[];
+    if (!Number.isInteger(u) || !Number.isInteger(v) || u < 1 || v <= u || v > size || seen.has(u * 64 + v))
+      return undefined;
+    seen.add(u * 64 + v);
+  }
+  const levels = canonicalBlocks(adjacencyOf(size, edges as number[][]));
+  return levels === undefined ? undefined : [size, edgesOfBlocks(levels)];
+}
+
 export const GRAPHS_MAPS: readonly CombinatorialMap[] = [
+  {
+    name: "CanonicalGraph",
+    from: "labeled_graph",
+    to: "labeled_graph",
+    body: canonicalGraphBody,
+    kernel: canonicalGraphKernel as (raw: never) => unknown,
+    // The image is Tuple(n, edges), both plain: no part is a carrier.
+    imageParts: ["", ""],
+    summary: "The graph relabeled so that its rank in LabeledGraphs(n) is least.",
+    note: "Two graphs are isomorphic exactly when their canonical graphs are equal, and the members of UnlabeledGraphs are the graphs equal to their own. The definition is the least rank over every relabeling, so it reaches few vertices: compiled, a tenth of a second at 8 vertices, interpreted a second and a half at 4; a kernel in plain numbers chooses the vertex of label n, then n - 1, and so on, keeping the candidates whose block of pairs is least and taking one of each set of twins, and answers up to 30 vertices, declining a graph whose search passes two million branches (a path or cycle past about 17 vertices, a grid past 4 x 4). Wolfram's CanonicalGraph labels by its own rule, so the two agree only up to isomorphism: the oracle compares IsomorphicGraphQ of the two answers, never their values.",
+  },
   {
     name: "ComponentSizePartition",
     from: "labeled_graph",

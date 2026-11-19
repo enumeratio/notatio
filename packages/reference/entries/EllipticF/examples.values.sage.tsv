@@ -1,4 +1,9 @@
 id	in	out	verdict
+ellipticf-400i-overflowed-to-infinity	enumeratio_n(elliptic_f((RealField(200)("0.3") + 400*I), 0.5))		
+ellipticf-355i-parameter-2-was-zero	enumeratio_n(elliptic_f((0 + 355*I), 2))		
+ellipticf-neg-1000i-parameter-neg-2	enumeratio_n(elliptic_f((RealField(200)("0.3") + -1000*I), -2))		
+ellipticf-700i-complex-parameter	enumeratio_n(elliptic_f((10 + 700*I), (0.5 + RealField(200)("0.3")*I)))		
+ellipticf-1e4i-with-a-shift-by-pi	enumeratio_n(elliptic_f((2 + 10000*I), RealField(200)("0.9")))		
 ellipticf-list-list-1-0-list-0-1-0	[[elliptic_f(1, 0), elliptic_f(0, 0)], [elliptic_f(0, 0), elliptic_f(1, 0)]]	[[1, 0], [0, 1]]	
 matrixfunction-function-ellipticf-1-0-1-list			
 n-ellipticf-12-over-5-3-50	enumeratio_n(elliptic_f((12/5), 3), 50)	1.00107738045611 - 1.92316618950463*I	

@@ -1,9 +1,9 @@
 import { wrapOperator } from "@notatio/engine";
 import type { Patch } from "../patch.ts";
-import { ComputeEngine } from "@cortex-js/compute-engine";
 import { evaluateLerch, principalAtZero } from "../compute-engine/library/special-functions.ts";
 import type { Expression } from "@cortex-js/compute-engine";
 import { isFiniteNum, wantsNumber } from "../support/box.ts";
+import { DEFAULT_PRECISION } from "../support/precise.ts";
 
 // compute-engine evaluates LerchPhi natively, exactly for rational arguments and to the engine's
 // precision at real ones, but declines a result it can't vouch for relative digits of, which
@@ -11,9 +11,6 @@ import { isFiniteNum, wantsNumber } from "../support/box.ts";
 // The native handler answers first and this answers where it declines, except Φ(0, s, a) at a
 // negative or complex a and a non-integer s: native reads that as a real root, so this answers
 // first, with the principal branch.
-/** The engine's default `precision`, which a double-based kernel is allowed to answer at. */
-let defaultPrecision: number | undefined;
-const defaultDigits = (): number => (defaultPrecision ??= new ComputeEngine().precision);
 
 /**
  * Native's double kernel answers a real z < −1 at a negative a with an imaginary part that is
@@ -70,7 +67,7 @@ export const lerchPhiPatch: Patch = {
         // Native reads a negative base to a float power as a real root.
         if (principalAtZero(ops, wantsNumber(ops, options)))
           // The kernel is a double's worth: past the engine's default digits, stay unevaluated.
-          return ce.precision > defaultDigits() ? undefined : evaluateLerch(ce, ops, true);
+          return ce.precision > DEFAULT_PRECISION ? undefined : evaluateLerch(ce, ops, true);
         const answer = native?.(ops, options);
         if (answer !== undefined && answer.operator !== "LerchPhi")
           // Decline rather than answer an imaginary part that is rounding noise.

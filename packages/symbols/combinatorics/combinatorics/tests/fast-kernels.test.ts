@@ -134,7 +134,14 @@ const NO_EDGE = new Set([
   // a size before its count does, and Epsil declines there.
   "VexillaryPermutations",
   "SeparablePermutations",
+  // UnlabeledGraphs' fast path stops at 8 vertices by choice, not at 2^53 (see LARGEST_PARAM).
+  "UnlabeledGraphs",
 ]);
+
+/** The params 0 to this one are tried where Epsil reaches no further in a few seconds: UnlabeledGraphs(n) tries every
+ *  relabeling of all 2^C(n, 2) graphs (n = 4: 64 graphs of 24 relabelings; n = 5 takes minutes interpreted, so only
+ *  DEEP_TESTS takes it). */
+const LARGEST_PARAM: Readonly<Record<string, number>> = { UnlabeledGraphs: DEEP ? 5 : 4 };
 
 const grids = new Map<string, { grid: number[][]; above: number[][] }>();
 
@@ -167,8 +174,10 @@ function paramGrid(family: EpsilFamily): { grid: number[][]; above: number[][] }
     .filter((edge) => edge !== undefined)
     .toSorted((a, b) => size(a.below) - size(b.below))
     .slice(0, DEEP ? (interpreted(family) ? 1 : 4) : interpreted(family) ? 0 : 1);
+  const largest = LARGEST_PARAM[family.head];
+  const reach = largest === undefined ? small : Array.from({ length: largest + 1 }, (_, n) => n);
   const grid: number[][] =
-    family.paramCount === 1 ? small.map((n) => [n]) : small.flatMap((a) => small.map((b) => [a, b]));
+    family.paramCount === 1 ? reach.map((n) => [n]) : reach.flatMap((a) => reach.map((b) => [a, b]));
   const above: number[][] = [];
   for (const edge of edges) {
     // An interpreted family's edge is only for the fiber past 2^53: Epsil can't unrank or rank at its last one.

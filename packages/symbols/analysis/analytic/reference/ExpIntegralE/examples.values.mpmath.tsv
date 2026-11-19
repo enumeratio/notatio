@@ -9,7 +9,7 @@ normal-series-expintegrale-n-x-x
 order-2-over-3-at-negative-real-z	(expint((mpf(2)/3), -2.2))	(-5.52911089954803715837440504577 - 1.78382599074486241968251346843j)	
 order-5-over-3-at-negative-real-z	(expint((mpf(5)/3), -2.2))	(-4.70854571935734030143229692299 - 5.88662576945804646025901928974j)	
 large-integer-order-500000	expint(500000, 2.5)	0.00000016416950473764168400835514658	
-large-order-beside-an-underflowing-power	(expint(170, 100))	1.38101901432972544318795475577e-46	
+large-order-beside-an-underflowing-power	(expint(170, 100))	1.38101901432972544318795475577e-46	disagree
 large-order-at-a-negative-argument	(expint(170, -100))	(3.9849911058347421659189665514e+41 - 7.35896604824111773153549669643e+33j)	disagree
 n-expintegrale-340-neg-100	(expint(340, -100))	(1.12672310040601155985052558532e+41 - 2.0940401535114775429267833893e-34j)	
 n-expintegrale-neg-170-neg-2	(expint(-170, -2))	-2.42467054288340719284226946715e+255	inconclusive
@@ -31,3 +31,4 @@ e-n-0-1-n-1-for-n-1	expint(2, 0)	1.0
 e-0-x-e-x-x			
 expintegrale-0-0	expint(0, 0)	+inf	disagree
 expintegrale-3-0	expint(3, 0)	0.5	
+functionexpand-expintegrale-2-over-3-z			

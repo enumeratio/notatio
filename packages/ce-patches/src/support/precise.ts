@@ -30,7 +30,13 @@ const isMachineFloat = (x: Expression): boolean =>
   (x as Partial<{ isExact: boolean }>).isExact === false &&
   [x.bignumRe, x.bignumIm].every((part) => part === undefined || part.toPrecision(DOUBLE_DIGITS + 2).eq(part));
 
-let defaultPrecision: number | undefined;
+/**
+ * compute-engine's default `precision`. Read when the module loads: constructing an engine resets
+ * the bignum precision every engine shares, while an engine's own `precision` keeps reporting (and
+ * ignoring a set to) the value it had, so an engine built inside a numeric call would leave that
+ * call's first answer at the default's digits.
+ */
+export const DEFAULT_PRECISION: number = new ComputeEngine().precision;
 
 /**
  * Should a bignum kernel answer this numeric call? It must be a numeric request past a double's
@@ -45,8 +51,7 @@ export const wantsBigDigits = (
   ops: readonly Expression[],
 ): boolean => {
   if (!(options.numericApproximation ?? false) || ce.precision <= DOUBLE_DIGITS) return false;
-  defaultPrecision ??= new ComputeEngine().precision;
-  return !(ce.precision === defaultPrecision && ops.some(isMachineFloat));
+  return !(ce.precision === DEFAULT_PRECISION && ops.some(isMachineFloat));
 };
 
 /** An operand with a nonzero imaginary part: compute-engine's complex Gamma, Cos, … run in doubles. */

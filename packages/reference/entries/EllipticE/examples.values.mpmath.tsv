@@ -1,6 +1,11 @@
 id	in	out
 series-elliptice-m-m-0-6		
 normal-series-elliptice-x-x-positiveinfinity-2		
+elliptice-300i-overflowed-to-infinity	(ellipe(mpc(0.3, 300), 0.5))	
+elliptice-400i-parameter-neg-2	(ellipe(mpc(2, 400), -2))	
+elliptice-neg-700i-near-the-double-range	(ellipe(mpc(10, -700), 0.9))	
+elliptice-200i-complex-parameter	(ellipe(mpc(1.2, 200), mpc(0.5, 0.3)))	
+elliptice-355i-parameter-1p5-minus-0p2i	(ellipe(mpc(3.5, 355), mpc(1.5, -0.2)))	
 n-elliptice-1-over-3-50	enumeratio_n(lambda: (ellipe((mpf(1)/3))), 50)	1.4303152571722197239225284145322837302944509074089
 elliptice-list-list-1-0-list-0-1	[[ellipe(1), ellipe(0)], [ellipe(0), ellipe(1)]]	[[mpf('1.0'), mpf('1.57079632679489661923132169163967')], [mpf('1.57079632679489661923132169163967'), mpf('1.0')]]
 matrixfunction-elliptice-list-list-1-0-list-0-1		

@@ -156,6 +156,7 @@
       "maxSize": 6
     },
     "PlaneTree": null,
+    "Poset": null,
     "PruferSequence": {
       "collection": "PruferSequences",
       "template": "PruferSequences({size})",

@@ -31,3 +31,4 @@ e-n-0-1-n-1-for-n-1	exp_integral_e(2, 0)	1
 e-0-x-e-x-x	exp_integral_e(0, SR.var("x"))	e^(-x)/x	
 expintegrale-0-0	exp_integral_e(0, 0)	exp_integral_e(0, 0)	disagree
 expintegrale-3-0	exp_integral_e(3, 0)	1/2	
+functionexpand-expintegrale-2-over-3-z			

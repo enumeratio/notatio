@@ -6,6 +6,7 @@ import { readFileSync } from "node:fs";
 import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { CARRIERS, declareCombinatorics, declareMaps } from "../../src/index.ts";
+import { isPoset } from "../../posets/tests/poset-findstat-readings.ts";
 import { COLLECTION_CARRIER, objectLevel, objectSize, readableCarriers, readObject } from "../src/objects.ts";
 
 const ce = bareEngine();
@@ -42,6 +43,17 @@ test("a few objects per new carrier", () => {
   ]);
   expect(readObject("LabeledGraph", "([(2,0),(1,2)],4)")).toEqual(["LabeledGraph", ["Tuple", 4, L(L(1, 3), L(2, 3))]]);
   expect(readObject("LabeledGraph", "([],0)")).toEqual(["LabeledGraph", ["Tuple", 0, L()]]);
+});
+
+test("a poset is read as its lower covers in a natural labeling", () => {
+  expect(readObject("Poset", "([(0,1),(0,2)],3)")).toEqual(["Poset", L(L(), L(1), L(1))]);
+  // The elements are relabeled by repeatedly taking the least-labeled minimal element: 2, then 0, then 1.
+  expect(readObject("Poset", "([(2,0),(2,1)],3)")).toEqual(["Poset", L(L(), L(1), L(1))]);
+  // The diamond with its bottom labeled 3 and its top 0.
+  expect(readObject("Poset", "([(1,0),(2,0),(3,1),(3,2)],4)")).toEqual(["Poset", L(L(), L(1), L(1), L(2, 3))]);
+  expect(readObject("Poset", "([],2)")).toEqual(["Poset", L(L(), L())]);
+  expect(readObject("Poset", "([],0)")).toEqual(["Poset", L()]);
+  expect(() => readObject("Poset", "([(0,1),(1,0)],2)")).toThrow();
 });
 
 test("the empty objects", () => {
@@ -177,6 +189,21 @@ test("every snapshot object of the new carriers is an element of our collection 
       expect(member, `${carrier} ${text}`).toBe("True");
     }
   }
+});
+
+test("every poset in the snapshot reads as a naturally labeled, transitively reduced poset of its size", () => {
+  let read = 0;
+  for (const item of Object.values(snapshot("statistics.json").items)) {
+    if (COLLECTION_CARRIER[item.collection ?? ""] !== "Poset") continue;
+    for (const [object] of item.sample) {
+      const [, rows] = readObject("Poset", object) as [string, unknown[]];
+      const value = rows.slice(1).map((row) => (row as unknown[]).slice(1));
+      expect(isPoset(value), object).toBe(true);
+      expect(value.length, object).toBe(objectSize("Poset", object));
+      read++;
+    }
+  }
+  expect(read).toBeGreaterThan(0);
 });
 
 test("every carrier we read has a collection", () => {

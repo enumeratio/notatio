@@ -34,9 +34,9 @@ n-meijerg-list-list-list-2-list-list-1-over-2-3	enumeratio_n(lambda: (meijerg([[
 series-meijerg-list-list-a-list-list-list-d-list			
 p-q-1-z-past-the-unit-disc	meijerg([[-0.829], []], [[-0.9], []], -2.075)	(0.43574549950096077316039342836 + 0.259550338049314109981027836743j)	disagree
 an-upper-parameter-of-3-1e6-declines	meijerg([[3100000, 0.5], []], [[2.2, 4.4], []], -1e-12)	(-1.72754627524672232354316665148e-18776917 - 1.25513583804447958766458156314e-18776917j)	inconclusive
-a-tiny-value-keeps-its-imaginary-part	meijerg([[31, 0.5], []], [[2.2, 4.4], []], -1e-12)		
-a-tiny-value-at-a-negative-argument	meijerg([[], []], [[2.2], []], -1e-12)		
-a-value-past-the-double-range-stays-unevaluated	meijerg([[], []], [[100000], []], 3)		
+a-tiny-value-keeps-its-imaginary-part	meijerg([[31, 0.5], []], [[2.2, 4.4], []], -1e-12)	(1.87654896632122507691938967707e-55 + 1.36339262991687129234492247995e-55j)	
+a-tiny-value-at-a-negative-argument	meijerg([[], []], [[2.2], []], -1e-12)	(3.2207546656062526992074866238e-27 + 2.34001523683463033308716172988e-27j)	
+a-value-past-the-double-range-stays-unevaluated	meijerg([[], []], [[100000], []], 3)	6.64643130694330138307554043994e+47710	disagree
 a-value-below-the-double-range-stays-unevaluated	meijerg([[], []], [[100], []], mpc(1e-8, 1e-8))	(-1.1258998955836272872446655381e-785 + 1.12589989558362734833137111154e-793j)	inconclusive
 a-small-value-inside-the-double-range	meijerg([[], []], [[20], []], mpc(1e-8, 1e-8))	(-1.02399998976000042849404164318e-157 + 1.02399998976000048405207671098e-165j)	
 mixed-a-and-b	meijerg([[0.7], []], [[0.3], []], 0.4)	0.924468128124581687091667926741	

@@ -10,6 +10,7 @@ n-hypergeometric3f2regularized-1-1-1-neg-1-2-3	enumeratio_n(lambda: (enumeratio_
 n-hypergeometric3f2regularized-1-2-3-4-5-neg-99	enumeratio_n(lambda: (enumeratio_hyperreg([1, 2, 3], [4, 5], (mpf(-99)/100))), 50)	0.0054443110756106714511264237157860223284250329111684	
 n-hypergeometric3f2regularized-1-2-3-4-5-99-over	enumeratio_n(lambda: (enumeratio_hyperreg([1, 2, 3], [4, 5], (mpf(99)/100))), 50)	0.010777742588066192949898256818198843550905414725585	
 a-value-below-the-double-range-stays-unevaluated	enumeratio_hyperreg([1, 2, 3], [400, 5], 0.5)	2.6066766005851529690989972347e-868	inconclusive
+series-regularized-1-2-3-4-5-x-0-2			
 n-hypergeometric3f2regularized-1-1-1-2-3-1-over	enumeratio_n(lambda: (enumeratio_hyperreg([1, 1, 1], [2, 3], (mpf(1)/2))), 50)	0.55077541404991563063977688323571335363939721833276	
 z-ge-1-stays-symbolic-no-continuation-past-the	enumeratio_hyperreg([1, 1, 1], [2, 3], 1.2)	(0.71744148192634131828112695617 - 0.0409844065138693494258922156814j)	disagree
 n-hypergeometric3f2regularized-1-1-1-2-3-6-over	enumeratio_n(lambda: (enumeratio_hyperreg([1, 1, 1], [2, 3], (mpf(6)/5))), 30)	(0.717441481926341330842371400790-0.0409844065138693640567038329041j)	disagree

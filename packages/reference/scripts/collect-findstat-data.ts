@@ -6,7 +6,8 @@
 // Reads a crawl of those JSON files (the crawl itself is too big to commit; the site asks
 // crawlers for a 20 s delay, and we ask its maintainers before crawling again) and writes
 // `findstat/data/{statistics,maps}.json` in the combinatorics package: for every id its
-// collection, title, description, properties and a few of the smallest (object, value) rows.
+// collection, title, description, properties and a few of the smallest (object, value) rows
+// (every row up to a size for a collection held object by object, `OBJECT_WISE_THROUGH`).
 //
 // Each area's generated statistic records (`areaStatisticsEntries`) read the snapshot for the
 // FindStat rows they hold as `known` examples.
@@ -35,6 +36,23 @@ function smallest(data: Record<string, unknown>, n: number): [string, unknown][]
   return Object.entries(data)
     .toSorted((a, b) => a[0].length - b[0].length || (a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : 0))
     .slice(0, n);
+}
+
+/**
+ * The collections FindStat lists up to isomorphism and the crosscheck holds to their rows object by object: every row up to
+ * a size (the count of elements or vertices, the last number of the object's spelling) is kept, not a few, so a statistic is checked on
+ * more than the antichains.
+ */
+const OBJECT_WISE_THROUGH: Readonly<Record<string, number>> = { Graphs: 5, Posets: 5, Lattices: 6 };
+
+/** The rows of `data` a statistic of `collection` keeps: all rows up to the collection's size where it is held object by object, else the smallest few. */
+function sampleOf(collection: string, data: Record<string, unknown>): [string, unknown][] {
+  const through = OBJECT_WISE_THROUGH[collection];
+  if (through === undefined) return smallest(data, 8);
+  return smallest(
+    Object.fromEntries(Object.entries(data).filter(([object]) => Number(/,(\d+)\)$/.exec(object)?.[1]) <= through)),
+    Infinity,
+  );
 }
 
 /** The first paragraph, trimmed: a description's gist, with the page for the rest. */
@@ -66,7 +84,7 @@ for (const [dir, out, prefix] of kinds) {
             collection: raw.StatisticCollection,
             title: raw.StatisticTitle,
             description,
-            sample: smallest(raw.StatisticData ?? {}, 8),
+            sample: sampleOf(raw.StatisticCollection, raw.StatisticData ?? {}),
           }
         : {
             domain: raw.MapDomain,

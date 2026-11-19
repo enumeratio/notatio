@@ -25,7 +25,7 @@ import { findstat } from "../../findstat/src/findstat-data.ts";
 import { readObject } from "../../findstat/src/objects.ts";
 import { bySignature, type Definition, type FrontierEntry } from "./types.ts";
 
-/** FindStat's statistics: each id's few smallest (object, value) rows (`collect-findstat-data.ts`). */
+/** FindStat's statistics: each id's smallest (object, value) rows, a few or, for a collection held object by object, every row to a size (`collect-findstat-data.ts`). */
 const FINDSTAT = (
   JSON.parse(readFileSync(new URL("../../findstat/data/statistics.json", import.meta.url), "utf8")) as {
     items: Record<string, { sample: [string, number][] }>;

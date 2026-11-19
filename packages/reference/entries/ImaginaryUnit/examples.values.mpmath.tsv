@@ -1,2 +1,2 @@
-id	in
-i-squared	(mpc(0,1))**2
+id	in	out
+i-squared	(mpc(0,1))**2	(-1.0 + 0.0j)

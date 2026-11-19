@@ -47,14 +47,14 @@ const MAX_BYTES = 3 * 1024 ** 3;
 /** Files every package build may read. */
 const SHARED = ["pnpm-lock.yaml", "package.json", "pnpm-workspace.yaml", "tsconfig.json", "vite.config.ts"];
 
-function cacheDir(): string {
+export function cacheDir(): string {
   const set = process.env.DIST_CACHE_DIR;
   if (set) return isAbsolute(set) ? set : resolve(root, set);
   return join(resolve(root, git("rev-parse", "--git-common-dir").trim()), "dist-cache");
 }
 
 /** Repo-relative path → content hash, for every file a build could read. */
-function hashFiles(): Map<string, string> {
+export function hashFiles(): Map<string, string> {
   const hashes = new Map<string, string>();
   for (const line of git("ls-files", "-s", "-z").split("\0")) {
     const m = /^\d+ ([0-9a-f]+) \d\t(.*)$/.exec(line);
@@ -147,8 +147,11 @@ function buildOrder(members: Pkg[]): Pkg[] {
   return out;
 }
 
-function computeKeys(all: Map<string, Pkg>, unitMap: Map<string, Unit>): Map<string, string> {
-  const files = hashFiles();
+function computeKeys(
+  all: Map<string, Pkg>,
+  unitMap: Map<string, Unit>,
+  files: Map<string, string> = hashFiles(),
+): Map<string, string> {
   const shared = createHash("sha1");
   shared.update(`${KEY_VERSION} ${process.versions.node.split(".")[0]} ${process.platform} ${process.arch}\n`);
   for (const f of SHARED) shared.update(`${f} ${files.get(f) ?? ""}\n`);
@@ -197,6 +200,18 @@ function computeKeys(all: Map<string, Pkg>, unitMap: Map<string, Unit>): Map<str
     return key;
   };
   return new Map([...unitMap.keys()].map((id) => [id, keyOf(id, true)]));
+}
+
+/**
+ * The build keys of every unit `name` reads (not `name` itself, which is no unit), and the content
+ * hash of every file a build could read, from the same pass.
+ */
+export function inputsOf(name: string): { keys: Map<string, string>; files: Map<string, string> } {
+  const all = loadWorkspace();
+  const names = closure([name], (n) => all.get(n)!.deps);
+  names.delete(name);
+  const files = hashFiles();
+  return { keys: computeKeys(all, units(all, names), files), files };
 }
 
 /** Gitignored files under a unit's package dirs, as repo-relative paths (ignored directories whole). */
@@ -338,8 +353,10 @@ async function build(requested: string[]): Promise<void> {
   if (out !== undefined) appendFileSync(out, `built=${misses}\nrestored=${hits}\n`);
 }
 
-const [command, ...rest] = process.argv.slice(2);
-if (command === "build") await build(rest);
+const [command, ...rest] = import.meta.main ? process.argv.slice(2) : [];
+if (!import.meta.main) {
+  // imported for its key functions
+} else if (command === "build") await build(rest);
 else if (command === "keys") {
   const all = loadWorkspace();
   const wanted = rest.length > 0 ? resolveNames(all, rest) : [...all.keys()].filter((n) => n !== WEB);

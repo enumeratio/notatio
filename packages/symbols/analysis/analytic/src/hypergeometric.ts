@@ -3,6 +3,7 @@ import {
   type EvalOptions,
   isFiniteNum,
   numberResult,
+  vouchesWhenComplex,
   underflows,
   wantsNumber,
   add,
@@ -223,7 +224,13 @@ function pfqRegularizedSeries(upper: readonly Cx[], lower: readonly Cx[], z: Cx)
     const term = mul(core, invG);
     sum = add(sum, term);
     peak = Math.max(peak, mag(term));
-    if (core.re === 0 && core.im === 0) return vouch(); // terminated (a polynomial case)
+    if (core.re === 0 && core.im === 0) {
+      // A zero core ends the series at a zero z or an upper pole (a polynomial). Otherwise it underflowed:
+      // an empty sum then is no value (0F1~(−65; 1e-8 + 1e-8i) = z⁶⁶/66!·…, about 1e-519), while a sum
+      // already holding a term is complete, as what underflowed is far below it.
+      const empty = sum.re === 0 && sum.im === 0;
+      return !empty || (z.re === 0 && z.im === 0) || upper.some(isNonPositiveInt) ? vouch() : undefined;
+    }
     if (k > poleBound) {
       const size = mag(term);
       const ratio = previous === undefined ? 1 : size / previous;
@@ -493,7 +500,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
         return regularizedPastDouble(ce, [], ops[0], ops[1]);
       if (invGammaUnderflows(b)) return undefined;
       const r = pfqRegularizedSeries([], [b], z);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([b, z]));
     },
   });
 
@@ -516,7 +523,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       if (isMinusOneShift(a, b)) return numberResult(ce, regularizedMinusOne(a, z));
       if (isDiagonal(a, b)) return numberResult(ce, regularizedDiagonal(a, z));
       const r = regularizedRaise(a, b, z) ?? regularizedKummer(a, b, z) ?? pfqRegularizedSeries([a], [b], z);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([a, b, z]));
     },
   });
 
@@ -545,7 +552,7 @@ export function declareHypergeometric(ce: ComputeEngine): void {
       if (exceedsDoublePrecision(ce, options.numericApproximation)) return regularized2F1PastDouble(ce, ops);
       if (mag(z) >= 1 || invGammaUnderflows(c)) return undefined;
       const r = pfqRegularizedSeries([a, b], [c], z);
-      return r === undefined ? undefined : numberResult(ce, r);
+      return r === undefined ? undefined : numberResult(ce, r, vouchesWhenComplex([a, b, c, z]));
     },
   });
 
