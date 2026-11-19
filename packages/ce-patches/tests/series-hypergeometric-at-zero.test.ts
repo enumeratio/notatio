@@ -2,7 +2,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { operandsOf } from "@notatio/engine";
 import { expect, test } from "vite-plus/test";
 import { applyAllPatches } from "../src/index.ts";
-import { monomial } from "../src/compute-engine/library/series-inverse-functions.ts";
+import { monomial } from "../src/compute-engine/library/series-handlers.ts";
 
 const ce = new ComputeEngine();
 applyAllPatches(ce);
@@ -102,12 +102,10 @@ test("evaluate, .N(), the parse route and Normal agree", () => {
 
 test("the cases it does not take go to native", () => {
   // a lower parameter at a pole, not cancelled
-  expect(text(series(["Hypergeometric1F1", 1, -1, "x"]).evaluate())).toContain("Derivative");
+  expect(text(series(["Hypergeometric1F1", 1, -1, "x"]).evaluate())).toContain("Series");
   // an argument not vanishing at 0, and a point other than 0
-  expect(text(series(["Hypergeometric1F1", 1, 2, ["Add", "x", 1]]).evaluate())).toContain("Derivative");
-  expect(text(ce.box(["Series", ["Hypergeometric1F1", 1, 2, "x"], "x", 1, 2] as never).evaluate())).toContain(
-    "Derivative",
-  );
+  expect(text(series(["Hypergeometric1F1", 1, 2, ["Add", "x", 1]]).evaluate())).toContain("Series");
+  expect(text(ce.box(["Series", ["Hypergeometric1F1", 1, 2, "x"], "x", 1, 2] as never).evaluate())).toContain("Series");
   // a pole of the regularized head's Γ is native's too
   expect(text(series(["Hypergeometric1F1Regularized", 1, -1, "x"]).evaluate())).toContain("Derivative");
 });

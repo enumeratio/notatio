@@ -1,9 +1,9 @@
 import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
 import { integerAt, operandsOf, symbolNameOf } from "@notatio/engine";
-import { addSeriesHandler, monomial } from "./series-inverse-functions.ts";
+import { addSeriesHandler, monomial } from "./series-handlers.ts";
 
-// cortex-js/compute-engine#597: native `Series` of a hypergeometric function at 0 leaves each
-// coefficient as an inert `Apply(Derivative(f, 0, 0, n), a, b, 0)`. For `pFq(a; b; u)` with
+// Native `Series` of `Hypergeometric0F1`, `Hypergeometric1F1`, `HypergeometricPFQ` and the regularized heads
+// at 0 stays unevaluated (only Hypergeometric2F1 expands, cortex-js/compute-engine#603). For `pFq(a; b; u)` with
 // `u(0) = 0` the series is the defining sum Σ (a)ₙ/(b)ₙ uⁿ/n! through the order, composed with the
 // series of `u`; the regularized heads divide by Γ of each lower parameter. The remainder term
 // is `O(x^(order+1))`, where native puts it.

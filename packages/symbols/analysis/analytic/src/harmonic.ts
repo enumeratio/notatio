@@ -9,8 +9,9 @@ import { numerically } from "./finish.ts";
 // convention is the analytic continuation: HarmonicNumber(z) = ψ(z+1) + γ and
 // HarmonicNumber(z, r) = ζ(r) − ζ(r, z+1). Both continuations reduce to the same exact
 // values at the integers (ψ(n+1) + γ = H_n is the standard digamma identity), so this
-// kernel only needs the exact path where it beats double precision. compute-engine leaves
-// HarmonicNumber(1/2) and a complex argument unevaluated (cortex-js/compute-engine#598, fixed by #604).
+// kernel only needs the exact path where it beats double precision. compute-engine evaluates a rational
+// argument of denominator 1 to 4 exactly (0.193) and leaves other rationals, a complex argument and the
+// generalized form unevaluated under `evaluate()`.
 
 type Rat = readonly [bigint, bigint]; // [num, den], den > 0, reduced
 

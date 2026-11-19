@@ -38,9 +38,7 @@ import { ellipticPiBig, incompleteEllipticEBig, incompleteEllipticFBig } from ".
  * Native `head(φ, m)` for the incomplete head that delegates to it, at finite operands. Where
  * native declines (`EllipticE(400000i, 0.5)` is past the double range) its call comes back as the
  * native head, which would rename the caller's call, so the caller stays unevaluated instead.
- * Both integrals are finite at every complex operand (F and E diverge only at real m = 1,
- * φ = π/2 + kπ), so a ComplexInfinity there is native's overflow (`EllipticF(0.3 + 400i, 0.5)`
- * is 1.854i, not ∞) and is declined the same way (cortex-js/compute-engine#605, fixed by #606). Non-finite operands keep native's own form.
+ * Non-finite operands keep native's own form.
  */
 function delegate(
   ce: ComputeEngine,
@@ -51,12 +49,11 @@ function delegate(
 ): Expression | undefined {
   const value = ce.box([head, phi, m]).evaluate(options);
   if (!isFiniteNum(phi) || !isFiniteNum(m)) return value;
-  return isDeclined(value, head, phi.im !== 0 || m.im !== 0) ? undefined : value;
+  return isDeclined(value, head) ? undefined : value;
 }
 
-/** Native's answer is its own call left unevaluated, or (at a complex operand) an overflowed ∞. */
-const isDeclined = (value: Expression, head: string, complex: boolean): boolean =>
-  value.operator === head || (complex && value.isFinite === false);
+/** Native's answer is its own call left unevaluated. */
+const isDeclined = (value: Expression, head: string): boolean => value.operator === head;
 
 /**
  * Declare `IncompleteEllipticF(φ, m)` — Fungrim's name for the incomplete Legendre
@@ -119,7 +116,7 @@ function declareIncompleteE(ce: ComputeEngine): void {
       const phi0 = phi.im === 0 ? ce.number(phi.re - k * Math.PI) : inexactComplex(ce, phi.re - k * Math.PI, phi.im);
       const eComplete = ce.box(["EllipticE", m]).evaluate(options); // the patched complete form
       const eIncomplete = ce.box(["EllipticE", phi0, m]).evaluate(options); // φ0 is back in range
-      if (isDeclined(eComplete, "EllipticE", true) || isDeclined(eIncomplete, "EllipticE", true)) return undefined;
+      if (isDeclined(eComplete, "EllipticE") || isDeclined(eIncomplete, "EllipticE")) return undefined;
       return ce.box(["Add", ["Multiply", 2 * k, eComplete], eIncomplete]).evaluate(options);
     },
   });

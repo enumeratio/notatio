@@ -39,8 +39,8 @@ import { eisensteinGBig } from "./eisenstein-g-big.ts";
 // always the identity — period exactly 1, not just parity) and E_k(−1/τ) = τ^k·E_k(τ)
 // (S), so unwinding the S-steps in reverse — dividing by the PRE-inversion τ at that
 // step, raised to the k — recovers E_k(τ) from E_k(reduced τ); EisensteinG does the same
-// for G_k in BigDecimal (eisenstein-g-big.ts), whose own q-series the native one's
-// truncation at high weight rules out. λ is invariant only under Γ(2) (index 6 in PSL2(Z)), so plain SL2(Z)
+// for G_k in BigDecimal (eisenstein-g-big.ts), which native EisensteinE (a double kernel)
+// does not reach. λ is invariant only under Γ(2) (index 6 in PSL2(Z)), so plain SL2(Z)
 // reduction does NOT land on an equivalent point for λ the way it does for j — instead
 // each step's known transform law (λ(τ+1) = λ/(λ−1), λ(−1/τ) = 1−λ, both self-inverse)
 // is applied, in reverse step order, to carry the reduced-domain λ back to λ(τ). All

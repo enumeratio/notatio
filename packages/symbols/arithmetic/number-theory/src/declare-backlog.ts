@@ -1,44 +1,10 @@
-import {
-  applyFunction,
-  bigIntegerAt,
-  isNumber,
-  operandsOf,
-  symbolNameOf,
-  type Engine,
-  type Expr,
-  wrapOperator,
-} from "@notatio/engine";
+import { applyFunction, bigIntegerAt, operandsOf, symbolNameOf, type Engine, type Expr } from "@notatio/engine";
 import { factorInteger, gcd as gcdBig, isqrt } from "@notatio/residues";
 import { SUMMARIES } from "@notatio/manifest/package/number-theory";
 
 // Heads new to compute-engine, from the Wolfram-sweep backlog (https://github.com/enumeratio/notatio/wiki/Symbols §4, issue
 // #113). Every one stays unevaluated — never approximate — when it cannot answer: a
 // non-integer, an out-of-range table lookup, or a search past what its guard allows.
-
-/** The largest Euler index `EulerE` evaluates at a complex point. */
-const MAX_EULER_INDEX = 2000n;
-
-/** An exact rational as [numerator, denominator], denominator > 0. */
-type Q = readonly [bigint, bigint];
-
-const qgcd = (a: bigint, b: bigint): bigint => {
-  let [x, y] = [a < 0n ? -a : a, b < 0n ? -b : b];
-  while (y !== 0n) [x, y] = [y, x % y];
-  return x === 0n ? 1n : x;
-};
-const qnorm = (n: bigint, d: bigint): Q => {
-  const sign = d < 0n ? -1n : 1n;
-  const [num, den] = [n * sign, d * sign];
-  const g = qgcd(num, den);
-  return [num / g, den / g];
-};
-const qadd = (a: Q, b: Q): Q => qnorm(a[0] * b[1] + b[0] * a[1], a[1] * b[1]);
-const qmul = (a: Q, b: Q): Q => qnorm(a[0] * b[0], a[1] * b[1]);
-const qpow = (a: Q, e: number): Q => {
-  let r: Q = [1n, 1n];
-  for (let i = 0; i < e; i++) r = qmul(r, a);
-  return r;
-};
 
 /** C(n, k) for bigint n ≥ 0, computed exactly (each partial product divides evenly). */
 function binomialBig(n: bigint, k: bigint): bigint {
@@ -80,54 +46,6 @@ function divisorsOf(n: bigint): bigint[] | undefined {
 
 const isTrue = (expr: Expr): boolean => symbolNameOf(expr) === "True";
 const isFalse = (expr: Expr): boolean => symbolNameOf(expr) === "False";
-
-/** The Euler numbers E₀..E_n. Odd-indexed ones past E₀ are 0; the even ones come from
- *  ∑_{k=0}^{n/2} C(n,2k) Eₖ = 0 (n ≥ 2 even), the recurrence behind sech's series. */
-function eulerNumbers(maxN: number): bigint[] {
-  const E = Array.from<bigint>({ length: maxN + 1 }).fill(0n);
-  if (maxN >= 0) E[0] = 1n;
-  for (let n = 2; n <= maxN; n += 2) {
-    let sum = 0n;
-    for (let k = 0; k < n / 2; k++) sum += binomialBig(BigInt(n), BigInt(2 * k)) * E[2 * k]!;
-    E[n] = -sum;
-  }
-  return E;
-}
-
-/** The Euler polynomial Eₙ(x)'s coefficients in the monomial basis (index = power of x), from
- *  Eₙ(x) = ∑ₖ C(n,k)(Eₖ/2ᵏ)(x−½)ⁿ⁻ᵏ expanded by the binomial theorem. */
-function eulerPolynomialCoeffs(n: number, E: readonly bigint[]): Q[] {
-  const coeffs: Q[] = Array.from({ length: n + 1 }, () => [0n, 1n] as Q);
-  const half: Q = [-1n, 2n];
-  for (let k = 0; k <= n; k++) {
-    if (E[k] === 0n) continue;
-    const ekOver2k: Q = qnorm(E[k]!, 1n << BigInt(k));
-    for (let j = 0; j <= n - k; j++) {
-      const term = qmul(
-        qmul([binomialBig(BigInt(n), BigInt(k)), 1n], ekOver2k),
-        qmul([binomialBig(BigInt(n - k), BigInt(j)), 1n], qpow(half, n - k - j)),
-      );
-      coeffs[j] = qadd(coeffs[j]!, term);
-    }
-  }
-  return coeffs;
-}
-
-/** A polynomial from its monomial coefficients, over the boxed expression `x` — built as raw
- *  arithmetic and handed to `evaluate()`, so compute-engine's own canonicalisation (dropping
- *  a zero term, collapsing ×1 and ×(−1), sorting by degree) decides the printed form. */
-function polynomialExpr(ce: Engine, coeffs: readonly Q[], x: Expr): Expr {
-  const terms: Expr[] = [];
-  for (let j = 0; j < coeffs.length; j++) {
-    const [num, den] = coeffs[j]!;
-    if (num === 0n) continue;
-    const coeffExpr = den === 1n ? ce.number(num) : ce.number([num, den]);
-    const power = j === 0 ? undefined : j === 1 ? x : ce.function("Power", [x, ce.number(j)]);
-    terms.push(power === undefined ? coeffExpr : ce.function("Multiply", [coeffExpr, power]));
-  }
-  if (terms.length === 0) return ce.Zero;
-  return terms.length === 1 ? terms[0]!.evaluate() : ce.function("Add", terms).evaluate();
-}
 
 /** Every non-negative integer solution x of coeffs·x = b, lexicographically — x₀ ascending,
  *  then x₁ ascending within each, and so on. */
@@ -427,22 +345,6 @@ export function declareBacklog(ce: Engine): void {
       return ce.number(squaresR(Number(d), n));
     },
   });
-
-  // compute-engine answers EulerE(n) and EulerE(n, x); a complex point it leaves unevaluated (cortex-js/compute-engine#598, fixed by #604), and is ours.
-  wrapOperator(
-    ce,
-    ["EulerE", 2],
-    (ops) => {
-      const n = bigIntegerAt(ops[0]);
-      const x = ops[1]?.evaluate();
-      return n !== undefined && n >= 0n && n <= MAX_EULER_INDEX && x !== undefined && isNumber(x) && x.im !== 0;
-    },
-    () => (ops) => {
-      const n = Number(bigIntegerAt(ops[0]));
-      return polynomialExpr(ce, eulerPolynomialCoeffs(n, eulerNumbers(n)), ops[1]!.evaluate());
-    },
-    { arity: 2, compile: "builtin" },
-  );
 
   ce.declare("FrobeniusSolve", {
     description: SUMMARIES.FrobeniusSolve,
