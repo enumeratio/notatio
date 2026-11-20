@@ -63,9 +63,17 @@ export const collectionElements = (expr: Expression): readonly Expression[] | un
   }
 };
 
+type TypeLike = { matches: (t: never) => boolean | undefined; type?: unknown };
+
 /** Whether `type` is a number or a boolean, so a value of it can never be a collection. */
-const isScalarType = (ce: ComputeEngine, type: { matches: (t: never) => boolean | undefined }): boolean =>
+const isScalarType = (ce: ComputeEngine, type: TypeLike): boolean =>
   type.matches(ce.type("number") as never) === true || type.matches(ce.type("boolean") as never) === true;
+
+/** Whether `type` is a named carrier type (`dyck_path`) that is no collection: a call of it stays a call of it,
+ *  whatever its operands. */
+const isNominalType = (ce: ComputeEngine, type: TypeLike): boolean =>
+  (type.type as { kind?: string; alias?: boolean } | undefined)?.kind === "reference" &&
+  type.matches(ce.type("collection") as never) !== true;
 
 /** Whether `symbol` can only ever be a scalar: it holds one, or its declared (not inferred) type is one. */
 const symbolIsScalar = (ce: ComputeEngine, symbol: Expression): boolean => {
@@ -77,11 +85,13 @@ const symbolIsScalar = (ce: ComputeEngine, symbol: Expression): boolean => {
   return declared !== undefined && declared.inferredType !== true && isScalarType(ce, declared.type);
 };
 
-/** `expr` and every call inside it has a known scalar type, and every symbol in it is a scalar: nothing
- *  binding the symbols can make it a collection. A head typed `any` (or a list, like `Divisors`) fails. */
+/** `expr` and every call inside it has a known scalar type (or is a call of a carrier type), and every symbol
+ *  in it is a scalar: nothing binding the symbols can make it a collection. A head typed `any` (or a list, like
+ *  `Divisors`) fails. */
 const isSymbolicScalar = (ce: ComputeEngine, expr: Expression): boolean => {
   if (symbolNameOf(expr) !== undefined) return symbolIsScalar(ce, expr);
   const ops = (expr as { ops?: unknown }).ops;
+  if (isNominalType(ce, expr.type)) return true;
   if (!isScalarType(ce, expr.type)) return false;
   if (!Array.isArray(ops)) return true;
   return ops.length > 0 && (ops as Expression[]).every((op) => isSymbolicScalar(ce, op));
