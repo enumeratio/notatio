@@ -281,16 +281,91 @@ const independentSetsWithin: MathJSON = typedFolding(
   forEach(masks, one(isIndependent("m")), "m"),
   vertices,
 );
-/** The ways to color the vertices in `k` colors, each a cover by `k` independent sets, by inclusion-exclusion over the subsets left uncovered. */
-const coloringCount = (k: MathJSON): MathJSON =>
-  floored([
-    "Sum",
-    forEach(
-      masks,
-      times(["If", equals(["Mod", subtract("n", total("m")), 2], 0), 1, -1], ["Power", at(add("m", 1), "within"), k]),
-      "m",
+/**
+ * Moduli for the spectra and the colorings: primes between 2^25 and 2^26, so a product of two residues and a sum of two
+ * such products stay below 2^53.
+ */
+const SPECTRUM_PRIMES: readonly number[] = [
+  67108859, 67108837, 67108819, 67108777, 67108763, 67108757, 67108753, 67108747, 67108739, 67108729, 67108721,
+  67108709, 67108693, 67108669, 67108667, 67108661, 67108649, 67108633, 67108597, 67108579, 67108529, 67108511,
+  67108507, 67108493, 67108471, 67108463, 67108453, 67108439, 67108387, 67108373, 67108369, 67108351, 67108331,
+  67108313, 67108303, 67108289, 67108271, 67108219, 67108207, 67108201, 67108199, 67108187, 67108183, 67108177,
+  67108127, 67108109, 67108081, 67108049, 67108039, 67108037, 67108033, 67108009, 67108007, 67108003, 67107983,
+  67107977, 67107967, 67107941, 67107919, 67107913, 67107883, 67107881, 67107871, 67107863, 67107809, 67107797,
+  67107793, 67107787, 67107773, 67107757, 67107749, 67107739, 67107737, 67107713, 67107707, 67107697, 67107673,
+  67107643, 67107641, 67107631,
+];
+/** Bits every one of `SPECTRUM_PRIMES` exceeds. */
+const PRIME_BITS = 25;
+/** `base` to the power `exponent`, modulo `prime`, by repeated multiplication: every product is below 2^53. */
+const powerResidue = (base: MathJSON, exponent: MathJSON, prime: MathJSON): MathJSON =>
+  typedFolding(["Mod", times("pw", base), prime], "pw", "t", 1, ["Range", 1, exponent, 1], "integer");
+/**
+ * Whether the vertices have a coloring in `colors` colors, each a cover by `colors` independent sets. The covers are
+ * counted by inclusion-exclusion over the subsets left uncovered, Σ (-1)^(n - |S|) i(S)^colors with `within` the
+ * independent sets i(S) inside each subset S. That count passes 2^53 (and the double range) from 13 vertices, and a
+ * rounded one is wrong where it should be 0 (the complete graph on 15 vertices in 14 colors), so it is never formed:
+ * it is read modulo enough primes that their product exceeds its bound i(V)^colors, and is zero exactly when every
+ * residue is. `bits` is the ceiling of log2 of i(V), so `primeCount` primes with 25 `primeCount` > `colors` `bits`
+ * suffice; the 40 primes serve up to 31 vertices (`colors` and `bits` are each at most n, and 1000 > 31 * 31), far
+ * past the heads' bounds.
+ */
+const hasColoring = (colors: MathJSON): MathJSON =>
+  bind(
+    "bits",
+    floored(sumOver(["Range", 0, 40], one(less(["Power", 2, "t"], "whole")), "t")),
+    bind(
+      "primeCount",
+      add(
+        floored(
+          sumOver(
+            ["Range", 1, SPECTRUM_PRIMES.length - 1],
+            one(less(times(PRIME_BITS, "t"), add(times(colors, "bits"), 1))),
+            "t",
+          ),
+        ),
+        1,
+      ),
+      greater(
+        floored(
+          sumOver(
+            ["Range", 1, "primeCount", 1],
+            bind(
+              "prime",
+              at("q", ["List", ...SPECTRUM_PRIMES]),
+              one(
+                greater(
+                  [
+                    "Mod",
+                    floored([
+                      "Sum",
+                      forEach(
+                        masks,
+                        [
+                          "If",
+                          equals(["Mod", subtract("n", total("m")), 2], 0),
+                          powerResidue(at(add("m", 1), "within"), colors, "prime"),
+                          subtract("prime", powerResidue(at(add("m", 1), "within"), colors, "prime")),
+                        ],
+                        "m",
+                      ),
+                    ]),
+                    "prime",
+                  ],
+                  0,
+                ),
+              ),
+              "integer",
+            ),
+            "q",
+          ),
+        ),
+        0,
+      ),
+      "integer",
     ),
-  ]);
+    "integer",
+  );
 /**
  * A table over the subsets, built up from the smaller ones: entry mask + 1 describes the matchings of the subgraph the
  * mask induces. Its lowest vertex is either left out, or matched to a neighbor in the subset; `combine` takes the entry
@@ -581,10 +656,23 @@ const isMaximalIndependent = (mask: MathJSON): MathJSON =>
     ),
   );
 /** The least k with a coloring in k colors, from the independent sets within each subset. */
-const chromaticNumber: MathJSON = bindList("within", independentSetsWithin, [
-  "Min",
-  forEach(vertices, ["If", greater(coloringCount("k"), 0), "k", "n"], "k"),
-]);
+const chromaticNumber: MathJSON = bindList(
+  "within",
+  independentSetsWithin,
+  bind(
+    "whole",
+    at(["Power", 2, "n"], "within"),
+    typedFolding(
+      ["If", greater("found", 0), "found", ["If", hasColoring("colors"), "colors", 0]],
+      "found",
+      "colors",
+      0,
+      vertices,
+      "integer",
+    ),
+    "integer",
+  ),
+);
 /** The vertices adjacent to both ends of some edge. */
 const triangleVertices: MathJSON = floored(
   sumOver(
@@ -927,22 +1015,6 @@ const maximumMultiplicity: MathJSON = bindList(
   ),
 );
 
-/**
- * Moduli for the spectra: primes between 2^25 and 2^26, so a product of two residues and a sum of two
- * such products stay below 2^53.
- */
-const SPECTRUM_PRIMES: readonly number[] = [
-  67108859, 67108837, 67108819, 67108777, 67108763, 67108757, 67108753, 67108747, 67108739, 67108729, 67108721,
-  67108709, 67108693, 67108669, 67108667, 67108661, 67108649, 67108633, 67108597, 67108579, 67108529, 67108511,
-  67108507, 67108493, 67108471, 67108463, 67108453, 67108439, 67108387, 67108373, 67108369, 67108351, 67108331,
-  67108313, 67108303, 67108289, 67108271, 67108219, 67108207, 67108201, 67108199, 67108187, 67108183, 67108177,
-  67108127, 67108109, 67108081, 67108049, 67108039, 67108037, 67108033, 67108009, 67108007, 67108003, 67107983,
-  67107977, 67107967, 67107941, 67107919, 67107913, 67107883, 67107881, 67107871, 67107863, 67107809, 67107797,
-  67107793, 67107787, 67107773, 67107757, 67107749, 67107739, 67107737, 67107713, 67107707, 67107697, 67107673,
-  67107643, 67107641, 67107631,
-];
-/** Bits every one of `SPECTRUM_PRIMES` exceeds. */
-const PRIME_BITS = 25;
 /** Euclid's round of `gcdRound` over the integers mod `prime`: no content to divide out, the cross-multiplied residues stay exact. */
 const modularGcdRound: MathJSON = bindList(
   "front",
@@ -1798,10 +1870,10 @@ export const SUBSET_LIMITS: Readonly<Record<string, number>> = {
   IndependenceGap: 16,
   TuranEdgeExcess: 16,
   TwoPackingDifferential: 16,
-  // The call takes 0.04 s at 12, but its inclusion-exclusion raises the number of independent sets of a subset to the
-  // n-th power, which passes 2^53 from 14 vertices: the complete graph on 15 gives 14, on 16 gives 13. The bound is the
-  // reading's reach.
-  ChromaticNumber: 12,
+  // The complete graph is the slowest of the worst graphs (every color count up to n is tried): 2.3 to 2.5 s at 16,
+  // 5.2 s at 17.
+  ChromaticNumber: 16,
+  ChromaticCliqueGap: 16,
   // The reading reaches 8 vertices (11 for `MatchingNumber`, the two determinants and `DistanceMatrixDeterminant`; 9 for
   // `GraphLongestCycleLength`; 8 and 7 for `ShortestMaximalPathLength` and `AcyclicOrientationCount`): the value at the
   // bound is held to its closed form on the complete graph and on a path.
@@ -1847,9 +1919,8 @@ export const SUBSET_LIMITS: Readonly<Record<string, number>> = {
   GraphCycleCount: 12,
   HamiltonianCycleCount: 12,
   GraphLongestCycleLength: 12,
-  // The call takes 0.1 s at 12 (`LargestComponentPreservingForestSize`, `TriangleFreeVertexDeletionNumber`: 0.5 s) but
-  // the reading reaches 12 (11 for the next three), and its value past that is not held to anything.
-  ChromaticCliqueGap: 12,
+  // The call takes 0.5 s at 12 but the reading reaches 12 (11 for the next three), and its value past that is not held to
+  // anything.
   LargestComponentPreservingForestSize: 12,
   TriangleFreeVertexDeletionNumber: 12,
   LongestPathLength: 11,
@@ -2195,7 +2266,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
     "ChromaticNumber",
     "The fewest colors for the vertices so that adjacent vertices differ.",
     withMasks(chromaticNumber),
-    `FindStat's St000098. The colorings in k colors are counted as the covers of the vertices by k independent sets, Σ over the subsets S of (-1)^(n - |S|) i(S)^k with i(S) the independent sets inside S, and the number is the least k with one. ${NO_VERTICES}`,
+    `FindStat's St000098. The colorings in k colors are counted as the covers of the vertices by k independent sets, Σ over the subsets S of (-1)^(n - |S|) i(S)^k with i(S) the independent sets inside S, and the number is the least k with one. The count passes 2^53, so it is read modulo as many primes as its bound i(V)^k needs, and is zero when every residue is. ${NO_VERTICES}`,
   ),
   stat(
     "IndependentSetCount",
