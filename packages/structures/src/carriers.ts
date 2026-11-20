@@ -60,10 +60,10 @@ export interface Carrier {
   /** The flat reading compiled code uses in place of the nested shape, where the carrier has one. */
   readonly flat?: FlatCodec;
   /**
-   * `false` when the constructor's call is not its own parts before evaluation: it also names a conversion
-   * from another carrier (`BinaryTree(DyckPath(…))`), so reading `At(C(args), i)` ahead of evaluating it would
-   * read the argument. Default true: the constructor keeps its operands. `carrier-parts.test.ts` in census holds
-   * the flag to what evaluation does.
+   * `true` when the constructor's call is its own parts before evaluation, so `At(C(args), i)` may be read
+   * without evaluating it. Default false: only a carrier the law in census's `carrier-parts.test.ts` covers
+   * with an example, and that passes, is marked. A name that also converts from another carrier
+   * (`BinaryTree(DyckPath(…))`) fails it.
    */
   readonly readable?: boolean;
 }
@@ -113,7 +113,7 @@ export function declareCarriers(
   for (const carrier of ordered) declareConstructor(ce, carrier);
   declareStructuralHeads(
     ce,
-    ordered.filter((carrier) => carrier.readable !== false).map((carrier) => carrier.name),
+    ordered.filter((carrier) => carrier.readable === true).map((carrier) => carrier.name),
   );
   for (const carrier of ordered)
     registerCarrier(ce, {

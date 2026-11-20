@@ -14,6 +14,7 @@ export const PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "IntegerPartition",
+    readable: true,
     type: "integer_partition",
     shape: "list<integer>",
     id: "integer_partition",
@@ -28,6 +29,7 @@ export const PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SkewPartition",
+    readable: true,
     type: "skew_partition",
     shape: "list<list<integer>>",
     id: "skew_partition",

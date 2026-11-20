@@ -9,7 +9,6 @@ import { ORDERED_TREE_FLAT } from "./flat-ordered.ts";
 export const TREES_CARRIERS: readonly Carrier[] = [
   {
     name: "BinaryTree",
-    readable: false,
     type: "binary_tree",
     shape: "integer | list<any>",
     id: "binary_tree",
@@ -18,7 +17,6 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "BinaryTreeParentArray",
-    readable: false,
     type: "binary_tree_parent_array",
     shape: "list<integer>",
     id: "binary_tree_parent_array",
@@ -52,6 +50,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "LabeledTree",
+    readable: true,
     type: "labeled_tree",
     shape: "list<list<integer>>",
     id: "labeled_tree",
@@ -66,6 +65,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "OrderedTree",
+    readable: true,
     type: "ordered_tree",
     shape: "integer | list<any>",
     id: "ordered_tree",

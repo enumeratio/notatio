@@ -7,6 +7,7 @@ import type { Carrier } from "@notatio/structures";
 export const COMPOSITIONS_CARRIERS: readonly Carrier[] = [
   {
     name: "IntegerComposition",
+    readable: true,
     type: "composition",
     shape: "list<integer>",
     id: "composition",
@@ -21,6 +22,7 @@ export const COMPOSITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "WeakComposition",
+    readable: true,
     type: "weak_composition",
     shape: "list<integer>",
     id: "weak_composition",

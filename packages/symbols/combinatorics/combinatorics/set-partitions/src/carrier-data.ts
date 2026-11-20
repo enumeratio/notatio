@@ -14,7 +14,6 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Finset",
-    readable: false,
     type: "finset",
     // Params first (n, then the element list) — `carrierParams`'s packing convention
     // (declare.ts: `Tuple(...params, encoded)`), matching LabeledGraph/Tournament's own
@@ -37,6 +36,7 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PerfectMatching",
+    readable: true,
     type: "perfect_matching",
     shape: "list<list<integer>>",
     id: "perfect_matching",
@@ -44,7 +44,6 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "RestrictedGrowthString",
-    readable: false,
     type: "restricted_growth_string",
     shape: "list<integer>",
     id: "restricted_growth_string",
@@ -52,7 +51,6 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SetComposition",
-    readable: false,
     type: "set_composition",
     shape: "list<list<integer>>",
     id: "set_composition",
@@ -60,6 +58,7 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SetPartition",
+    readable: true,
     type: "set_partition",
     shape: "list<list<integer>>",
     id: "set_partition",
@@ -88,7 +87,6 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Surjection",
-    readable: false,
     type: "surjection",
     shape: "list<integer>",
     id: "surjection",

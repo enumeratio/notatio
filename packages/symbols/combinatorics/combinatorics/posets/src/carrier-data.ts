@@ -6,6 +6,7 @@ import type { Carrier } from "@notatio/structures";
 export const POSETS_CARRIERS: readonly Carrier[] = [
   {
     name: "Poset",
+    readable: true,
     type: "poset",
     shape: "list<list<integer>>",
     id: "poset",

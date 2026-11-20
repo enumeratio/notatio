@@ -5,6 +5,7 @@
 // the reference examples hold.
 
 import { CARRIERS } from "@notatio/combinatorics";
+import { declareStructuralHeads } from "@notatio/engine";
 import { recordsRoot, referenceData } from "@notatio/reference/node";
 import { expect, test } from "vite-plus/test";
 import { fullEngine } from "../src/engine.ts";
@@ -38,28 +39,38 @@ for (const { entry } of heads)
 const PER_CARRIER = 6;
 const PARTS = 3;
 
-/** The carriers where reading a part first and evaluating after disagrees with evaluating first. */
-function failing(): Record<string, string> {
-  const failures: Record<string, string> = {};
+/** The law's engine reads every constructor by parts, so the comparison tests the constructor and not the registry. */
+const lawEngine = fullEngine();
+declareStructuralHeads(
+  lawEngine,
+  CARRIERS.map((carrier) => carrier.name),
+);
+
+/** Whether reading a part first and evaluating after agrees with evaluating first, per carrier with subjects. */
+function law(): Record<string, string | true> {
+  const results: Record<string, string | true> = {};
   for (const [name, byText] of subjects) {
+    results[name] = true;
     for (const call of [...byText.values()].slice(0, PER_CARRIER)) {
-      const evaluated = ce.box(call as never).evaluate();
+      const evaluated = lawEngine.box(call as never).evaluate();
       for (let i = 1; i <= PARTS; i++) {
-        const before = JSON.stringify(ce.box(["At", call, i] as never).evaluate().json);
-        const after = JSON.stringify(ce.box(["At", evaluated.json, i] as never).evaluate().json);
-        if (before !== after && failures[name] === undefined)
-          failures[name] = `At(${JSON.stringify(call)}, ${i}): ${before} against ${after}`;
+        const before = JSON.stringify(lawEngine.box(["At", call, i] as never).evaluate().json);
+        const after = JSON.stringify(lawEngine.box(["At", evaluated.json, i] as never).evaluate().json);
+        if (before !== after && results[name] === true)
+          results[name] = `At(${JSON.stringify(call)}, ${i}): ${before} against ${after}`;
       }
     }
   }
-  return failures;
+  return results;
 }
 
-/** Carriers whose constructor call is not read by parts (`readable: false` in their data). */
-const NOT_READABLE = CARRIERS.filter((carrier) => carrier.readable === false).map((carrier) => carrier.name);
+/** Carriers whose constructor call is read by parts: only those the law vouches for (`readable: true` in their data). */
+const READABLE = CARRIERS.filter((carrier) => carrier.readable === true).map((carrier) => carrier.name);
 
-test("a carrier's constructor keeps its operands through evaluation unless it is marked not readable", () => {
-  expect(Object.keys(failing()).toSorted()).toEqual(NOT_READABLE.toSorted());
+test("a carrier is readable exactly when the law covers it with an example and it passes", () => {
+  const results = law();
+  const passing = Object.keys(results).filter((name) => results[name] === true);
+  expect(READABLE.toSorted()).toEqual(passing.toSorted());
 });
 
 const value = (expr: unknown) => JSON.stringify(ce.box(expr as never).evaluate().json);
