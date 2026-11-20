@@ -45,3 +45,16 @@ test("a real operand stays bignum-backed past a double", () => {
   expect(isMachine(n(["HarmonicNumber", 2.5], 30))).toBe(false);
   expect(isMachine(n(["FallingFactorial", 2.5, 1.5], 30))).toBe(false);
 });
+
+// compute-engine's AiryBiPrime answers a double whose shortest print is 14 digits. A short print
+// is no sign of an exact value: the double is what a double-only kernel hands back.
+test("a double that prints in fewer than 15 digits still declines past a double's digits", () => {
+  expect(n(["AiryBiPrime", 0.7], 30).operator).toBe("AiryBiPrime");
+});
+
+test("an exact answer that prints short still answers", () => {
+  expect(n(["Divide", 1, 4], 30).json).toEqual(0.25);
+  expect(n(["Sqrt", ["Divide", 1, 4]], 30).json).toEqual(0.5);
+  expect(n(["Divide", 1, 8], 30).json).toEqual(0.125);
+  expect(n(["Add", ["Divide", 1, 4], ["Divide", 1, 4]], 30).json).toEqual(0.5);
+});

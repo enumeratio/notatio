@@ -84,9 +84,6 @@ function leafOf(ce: ComputeEngine, node: unknown): BigDecimal | undefined {
   return value.isFinite() && !value.isInteger() ? value : undefined;
 }
 
-/** Significant digits a decimal carries. */
-const digitsOf = (x: BigDecimal): number => (x.significand < 0n ? -x.significand : x.significand).toString().length;
-
 /** `json` with every inexact number leaf -- a real, or either part of a `Complex` -- rounded to
  * `d` significant digits, ties to even. A list or a symbolic result (`x + 3.14159…`) is
  * rounded leaf by leaf. */
@@ -96,16 +93,45 @@ export function roundedTree(ce: ComputeEngine, json: unknown, d: number): unknow
   return leaf === undefined ? json : { num: leaf.toPrecision(d).toString() };
 }
 
-/** Did a head behind `json` answer with a double, ignoring the precision it was asked for?
- * Its digits then stop at a double's 15-17 however far the precision is raised, where a
- * precision-honouring head's fill the precision -- unless the value terminates early, as 1/8
- * does, which leaves far fewer digits than a double's. */
-function hasDoubleOnly(ce: ComputeEngine, json: unknown, precision: number): boolean {
-  if (Array.isArray(json)) return json.some((node) => hasDoubleOnly(ce, node, precision));
-  const leaf = leafOf(ce, json);
-  if (leaf === undefined) return false;
-  const digits = digitsOf(leaf);
-  return digits >= DOUBLE_DIGITS && digits < precision - FIRST_GUARD;
+/** Significant digits a decimal carries, and whether its print ends in an exponent. */
+function printOf(part: BigDecimal): { digits: number; exponent: boolean; whole: string; fraction: string } {
+  const [mantissa = "", exponent] = part.abs().toString().split("e");
+  const [whole = "", fraction = ""] = mantissa.split(".");
+  return { digits: (whole.replace(/^0+/, "") + fraction).length, exponent: exponent !== undefined, whole, fraction };
+}
+
+/** Does a bignum part read as a double's shortest print? Past 14 digits and up to 17 it does;
+ * fewer, only when no dyadic fraction (`0.25`, `0.5`) stands behind it: `0.65440591917214` is a
+ * double's print, `0.25` a value a double holds exactly. */
+function doubleDecimal(part: BigDecimal): boolean {
+  const { digits, exponent, whole, fraction } = printOf(part);
+  if (digits > 17) return false;
+  if (digits >= DOUBLE_DIGITS) return true;
+  return !exponent && BigInt(whole + fraction) % 5n ** BigInt(fraction.length) !== 0n;
+}
+
+/** Did a head behind `x` answer with a double, ignoring the precision it was asked for? A real
+ * is decided by its kind, not its printed digits: a machine double has no bignum behind it
+ * (`bignumRe` is undefined), where a precision-honouring head's bignum has one however few
+ * digits it prints (`1/4`), and a double prints as few as it likes (`0.65440591917214`). A
+ * double a later step re-boxed as a bignum (`Chop`), and a complex, which keeps a bignum for
+ * each part either way, are read by what a double can print. Whole numbers are exponents, counts
+ * and exact values, so they are left alone. Only the answer itself (or the entries of a list) is
+ * read by kind: an operand of a call left unevaluated (`1.2` in `F(…, 1.2)`) is an input, and
+ * only a long double-like digit run in it counts. */
+function hasDoubleOnly(x: Expression, precision: number, answer = true): boolean {
+  if (isNumber(x)) {
+    const fractional = (part: number): boolean => Number.isFinite(part) && !Number.isInteger(part);
+    if (answer && x.im === 0 && x.bignumRe === undefined) return fractional(x.re);
+    return [x.bignumRe, x.bignumIm].some((part) => {
+      if (part === undefined || !part.isFinite() || part.isInteger()) return false;
+      const { digits } = printOf(part);
+      return (digits >= DOUBLE_DIGITS && digits < precision - FIRST_GUARD) || (answer && doubleDecimal(part));
+    });
+  }
+  const ops = (x as Partial<{ ops: readonly Expression[] }>).ops;
+  const entries = x.operator === "List" || x.operator === "Tuple";
+  return ops?.some((op) => hasDoubleOnly(op, precision, answer && entries)) ?? false;
 }
 
 /** Is `x` a value we hold exactly or were handed -- a number literal, or an expression that
@@ -167,7 +193,7 @@ function correctlyRounded(ce: ComputeEngine, x: Expression, d: number): Expressi
   // coarser one by rounding, rather than recomputing everything one precision up.
   let guard = FIRST_GUARD;
   let finest = reading(d + 2 * guard);
-  if (d > DOUBLE_DIGITS && hasDoubleOnly(ce, finest.json, d + 2 * guard) && !isGivenValue(x)) return undefined;
+  if (d > DOUBLE_DIGITS && hasDoubleOnly(finest, d + 2 * guard) && !isGivenValue(x)) return undefined;
   let answer = key(finest);
   let agreed = key(reading(d + guard)) === answer;
   for (let doubling = 0; !agreed && doubling < MAX_DOUBLINGS; doubling++) {
