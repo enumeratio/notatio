@@ -41,12 +41,23 @@ export const operandsOf = (expr: Expression | undefined): readonly Expression[] 
  */
 export const collectionElements = (expr: Expression): readonly Expression[] | undefined => {
   if (!expr.isCollection) return operandsOf(expr);
+  // `each()` on an infinite collection (`PrimeNumbers`) does not stop at the budget, so it
+  // declines up front, and the walk stops at MAX_COLLECTION_ELEMENTS whatever `each()` does.
+  if (expr.isFiniteCollection === false) return undefined;
   try {
-    return [...expr.each()];
+    const elements: Expression[] = [];
+    for (const element of expr.each()) {
+      if (elements.length === MAX_COLLECTION_ELEMENTS) return undefined;
+      elements.push(element);
+    }
+    return elements;
   } catch {
     return undefined;
   }
 };
+
+/** The most elements `collectionElements` lists; `At(PrimeNumbers, -1)` filled a 4 GB heap without it. */
+const MAX_COLLECTION_ELEMENTS = 1 << 16;
 
 /** The symbol an expression names, or `undefined` if it is not a symbol. */
 export const symbolNameOf = (expr: Expression): string | undefined => {
