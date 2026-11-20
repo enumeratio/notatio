@@ -1,5 +1,5 @@
 import { type BigDecimal, type Expression, ComputeEngine, isNumber } from "@cortex-js/compute-engine";
-import { inexactComplex } from "./box.ts";
+import { doubleBox, inexactComplex, isDoubleBox } from "./box.ts";
 
 /** Above this many digits a double is no longer the limiting factor — and neither should we be. */
 export const DOUBLE_DIGITS = 15;
@@ -25,10 +25,64 @@ const REQUESTED_DIGITS_GUARD = 20;
 export const exceedsDoublePrecision = (ce: ComputeEngine, numericApproximation: boolean | undefined): boolean =>
   (numericApproximation ?? false) && ce.precision > DOUBLE_DIGITS + REQUESTED_DIGITS_GUARD;
 
-/** A float literal that carries no more digits than a machine double holds (`0.5`, not `1/3` widened by `N`). */
-const isMachineFloat = (x: Expression): boolean =>
+/** A float literal operand that carries no more digits than a machine double holds (`0.5`, not `1/3` widened by `N`). */
+const isFloatLiteral = (x: Expression): boolean =>
   (x as Partial<{ isExact: boolean }>).isExact === false &&
   [x.bignumRe, x.bignumIm].every((part) => part === undefined || part.toPrecision(DOUBLE_DIGITS + 2).eq(part));
+
+/** The most digits a double's shortest print runs to. */
+const MAX_DOUBLE_PRINT = 17;
+
+/** Digits short of the precision asked for, below which a printed run of a double's digits is no
+ * bignum's: one that honours the precision fills it. */
+const FILLED_GUARD = 10;
+
+/** Significant digits a decimal prints, whether the print ends in an exponent, and its two halves. */
+function printOf(part: BigDecimal): { digits: number; exponent: boolean; whole: string; fraction: string } {
+  const [mantissa = "", exponent] = part.abs().toString().split("e");
+  const [whole = "", fraction = ""] = mantissa.split(".");
+  return { digits: (whole.replace(/^0+/, "") + fraction).length, exponent: exponent !== undefined, whole, fraction };
+}
+
+/** Does a bignum part read as a double's shortest print? From 15 to 17 digits it does; fewer, only
+ * when no dyadic fraction (`0.25`, `0.5`) stands behind it: `0.65440591917214` is a double's print,
+ * `0.25` a value a double holds exactly. */
+function readsAsDouble(part: BigDecimal): boolean {
+  const { digits, exponent, whole, fraction } = printOf(part);
+  if (digits > MAX_DOUBLE_PRINT) return false;
+  if (digits >= DOUBLE_DIGITS) return true;
+  return !exponent && BigInt(whole + fraction) % 5n ** BigInt(fraction.length) !== 0n;
+}
+
+/**
+ * Is the number `x` a machine double rather than a bignum that happens to print short? Decided by
+ * kind wherever the kind can be read: a real with no bignum behind it is compute-engine's own
+ * double (`AiryBiPrime(0.7)`), and a number our kernels boxed from a double is recorded as one
+ * (`doubleBox`); a precision-honouring head's bignum is neither, however few digits it prints
+ * (`1/4`, `-1/64`). Whole numbers are exponents, counts and exact values, so they are left alone.
+ *
+ * Anywhere else the kind is gone, and the print is all there is:
+ *  - a bignum part printing a run of a double's digits (15 up to `precision - 10`) is a double's;
+ *  - so is a complex part reading as a double's shortest print (`readsAsDouble`), since compute-engine
+ *    keeps a bignum behind each part of a complex however it was built. That also declines an exact
+ *    complex answer no double kernel boxed whose part prints as short as a double's (`0.1 + 0.3i`):
+ *    declining is the safe side.
+ *
+ * `answer` is false for an operand of a call left unevaluated (`1.2` in `F(…, 1.2)`): it is an
+ * input, never read by kind, and only a long double-like run of digits in it counts.
+ */
+export function isMachineNumber(x: Expression, precision: number, answer = true): boolean {
+  if (!isNumber(x) || (x as Partial<{ isExact: boolean }>).isExact === true) return false;
+  const fractional = (part: number): boolean => Number.isFinite(part) && !Number.isInteger(part);
+  if (answer && x.im === 0 && x.bignumRe === undefined) return fractional(x.re);
+  if (answer && isDoubleBox(x)) return fractional(x.re) || fractional(x.im);
+  const complex = x.im !== 0;
+  return [x.bignumRe, x.bignumIm].some((part) => {
+    if (part === undefined || !part.isFinite() || part.isInteger()) return false;
+    const { digits } = printOf(part);
+    return (digits >= DOUBLE_DIGITS && digits < precision - FILLED_GUARD) || (answer && complex && readsAsDouble(part));
+  });
+}
 
 /**
  * compute-engine's default `precision`. Read when the module loads: constructing an engine resets
@@ -51,14 +105,14 @@ export const wantsBigDigits = (
   ops: readonly Expression[],
 ): boolean => {
   if (!(options.numericApproximation ?? false) || ce.precision <= DOUBLE_DIGITS) return false;
-  return !(ce.precision === DEFAULT_PRECISION && ops.some(isMachineFloat));
+  return !(ce.precision === DEFAULT_PRECISION && ops.some(isFloatLiteral));
 };
 
 /**
  * `compute()` for a route that may fall through to a double kernel: its answer stands unless more
  * digits than a double's were asked for (`exceedsDoublePrecision`) and the answer carries no more
  * than a double's, in which case the call stays unevaluated. A bignum answer, an exact one and a
- * machine-precision call pass through. (A machine float is what `isMachineFloat` reads.)
+ * machine-precision call pass through. (A machine double is what `isMachineNumber` reads.)
  */
 export function declineMachineAnswer(
   ce: ComputeEngine,
@@ -67,7 +121,7 @@ export function declineMachineAnswer(
 ): Expression | undefined {
   const value = compute();
   if (value === undefined || !exceedsDoublePrecision(ce, numericApproximation)) return value;
-  return isMachineFloat(value) ? undefined : value;
+  return isMachineNumber(value, ce.precision) ? undefined : value;
 }
 
 /** An operand with a nonzero imaginary part: compute-engine's complex Gamma, Cos, … run in doubles. */
@@ -86,7 +140,7 @@ export const hasFloatOperand = (ops: readonly Expression[]): boolean =>
  */
 export function asDouble(ce: ComputeEngine, value: Expression): Expression {
   if (!isNumber(value) || !Number.isFinite(value.re) || !Number.isFinite(value.im)) return value;
-  return value.im === 0 ? ce.number(value.re) : inexactComplex(ce, value.re, value.im);
+  return value.im === 0 ? doubleBox(ce.number(value.re)) : inexactComplex(ce, value.re, value.im);
 }
 
 /**

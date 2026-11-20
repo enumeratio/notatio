@@ -42,11 +42,28 @@ export const isExactlyReal = (x: Expression, n: number): boolean =>
 export const isFiniteNum = (x: Expression): boolean => Number.isFinite(x.re) && Number.isFinite(x.im);
 
 /**
+ * Numbers a double kernel boxed. compute-engine keeps a bignum behind every number built from a
+ * double (`ce.number(0.1)`, each part of a complex), so once boxed a double's kind can't be read
+ * back, and the boxer that knows records it here. Held by identity: an arithmetic step over the
+ * number is a new one.
+ */
+const doubleBoxes = new WeakSet<object>();
+
+/** `x`, a number a double kernel produced, recorded as one (`isMachineNumber`). */
+export const doubleBox = (x: Expression): Expression => {
+  doubleBoxes.add(x);
+  return x;
+};
+
+/** Did a double kernel box `x`? */
+export const isDoubleBox = (x: Expression): boolean => doubleBoxes.has(x);
+
+/**
  * A complex number boxed inexact. compute-engine 0.147 boxes a JS Complex with whole-number
  * parts as exact (`-911 - 1056i`); a numeric route must still yield floats, so `.N()` marks it.
  */
 export const inexactComplex = (ce: ComputeEngine, re: number, im: number): Expression =>
-  ce.number(ce.complex(re, im)).N();
+  doubleBox(ce.number(ce.complex(re, im)).N());
 
 /**
  * An imaginary part this small next to the real part it rides on is rounding noise. It is
@@ -96,7 +113,7 @@ export interface NumberResultOptions {
 export const numberResult = (ce: ComputeEngine, r: Cx, options: NumberResultOptions = {}): Expression | undefined => {
   if (!Number.isFinite(r.re) || !Number.isFinite(r.im)) return options.pole ? ce.symbol("ComplexInfinity") : undefined;
   const floor = options.vouchesImaginary ? 0 : REAL_COLLAPSE_RELATIVE * Math.abs(r.re);
-  if (isReal(r, Math.max(options.noise ?? 0, floor))) return ce.number(r.re);
+  if (isReal(r, Math.max(options.noise ?? 0, floor))) return doubleBox(ce.number(r.re));
   return inexactComplex(ce, r.re, r.im);
 };
 

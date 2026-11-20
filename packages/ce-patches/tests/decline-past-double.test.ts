@@ -1,6 +1,14 @@
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
-import { applyAllPatches, evaluateHurwitz, evaluatePolygamma, evaluateZeta, setZetaKernel } from "../src/index.ts";
+import {
+  applyAllPatches,
+  doubleBox,
+  evaluateHurwitz,
+  evaluatePolygamma,
+  evaluateZeta,
+  isMachineNumber,
+  setZetaKernel,
+} from "../src/index.ts";
 
 // A numeric call that asks for more digits than a double holds stays unevaluated where only a double
 // kernel could answer; at machine precision the double stands.
@@ -58,4 +66,22 @@ test("HurwitzZeta and Zeta on the double kernel decline at 50 digits and answer 
   } finally {
     setZetaKernel("bignum");
   }
+});
+
+// A bignum answer that prints short is no double's: ζ(-2, 1/4) is exactly -1/64.
+test("a short bignum answer still answers at 50 digits through the wrapped native route", () => {
+  const exact = atPrecision(50, () => ce.box(["HurwitzZeta", -2, ["Divide", 1, 4]] as never).N());
+  expect(exact.operator).not.toBe("HurwitzZeta");
+  expect(exact.re).toBe(-0.015625);
+});
+
+test("isMachineNumber reads a double by kind and a short bignum by what it is", () => {
+  const asBignum = atPrecision(50, () => ce.box({ num: "0.25" } as never));
+  expect(isMachineNumber(asBignum, 50)).toBe(false);
+  expect(isMachineNumber(doubleBox(ce.number(0.25)), 50)).toBe(true);
+  expect(isMachineNumber(doubleBox(ce.number(3)), 50)).toBe(false);
+  // A complex keeps a bignum behind each part however it was built, so an unboxed one is read by its print:
+  // an exact complex answer with a short part declines (the safe side), a long double-like run does too.
+  expect(isMachineNumber(ce.box(["Complex", 0.1, 0.3] as never), 50)).toBe(true);
+  expect(isMachineNumber(ce.box(["Complex", 0.5, 0.25] as never), 50)).toBe(false);
 });
