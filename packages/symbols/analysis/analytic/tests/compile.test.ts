@@ -18,7 +18,7 @@ const compiled = (head: string, operands: number): string | undefined => {
 };
 
 test("Sin(x) compiles to Math.sin once analytic is declared, through compileTyped and compileExpression", () => {
-  expect(compiled("Sin", 1)).toBe("Math.sin(_.x)");
+  expect(compiled("Sin", 1)).toContain("Math.sin(_.x)");
   const run = compileExpression(ce.box(["Add", ["Sin", "x"], ["Cos", "x"]]));
   expect(run?.({ x: 0 })).toBe(1);
 });
@@ -35,8 +35,13 @@ test("a head analytic widens compiles only up to its native operand count", () =
   expect(compiled("Zeta", 2)).toBeUndefined();
 });
 
-// compute-engine 0.156 fixed the two-operand lowering (compute-engine#447) and 0.159 a negative order (#457); it must match evaluate.
-test.each(["Gamma", "GammaRegularized"])("compiled two-operand %s matches evaluate", (head) => {
+// compute-engine 0.194.0's compiler lowers the two-operand GammaRegularized and declines the two-operand
+// Gamma (the upper incomplete gamma, which 0.156 lowered: compute-engine#447); what compiles must match evaluate.
+test("the two-operand Gamma has no compiled lowering, and the interpreter's value stands", () => {
+  expect(compileTyped(ce, ["Gamma", "x", "y"], { x: "real", y: "real" })).toBeUndefined();
+});
+
+test.each(["GammaRegularized"])("compiled two-operand %s matches evaluate", (head) => {
   const run = compileTyped(ce, [head, "x", "y"], { x: "real", y: "real" })?.run;
   expect(run, head).toBeDefined();
   for (const [x, y] of [

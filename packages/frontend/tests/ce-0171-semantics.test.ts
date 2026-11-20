@@ -1,14 +1,14 @@
 // Behavior pinned under compute-engine >= 0.171 semantics (BL-415).
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { createJavaScriptRuntime } from "@cortex-js/compute-engine/runtime";
 import { expect, test } from "vite-plus/test";
 import { freeSymbols, inferControls } from "../src/infer-controls.ts";
 import { compilePlot } from "../src/plot-compile.ts";
 import { cellBindings } from "../src/tracked-symbols.ts";
 
 const ce = new ComputeEngine();
-const SYS = (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
+const SYS = createJavaScriptRuntime();
 const run = (code: string | undefined, scope: Record<string, unknown>): unknown =>
   // oxlint-disable-next-line no-implied-eval -- the compiled code under test
   new Function("_SYS", "_", `return (${code});`)(SYS, scope);
@@ -31,12 +31,15 @@ test("N and D, compute-engine's one-letter functions, get no control as values",
   expect(inferControls(expr, { engine: ce }).map((c) => c.name)).toEqual(["a"]);
 });
 
-test("a derivative with a control substituted becomes EvaluateAt, and still compiles and runs", () => {
+// compute-engine 0.194.0's compiler declines EvaluateAt, so the item has no code, and its value (a number
+// with no free names) is what the page draws.
+test("a derivative with a control substituted becomes EvaluateAt, which has no code but its value", () => {
   const derivative = ["D", ["Power", "x", 2], "x"];
   expect(ce.box(derivative as never).subs({ x: ce.number(3) }).operator).toBe("EvaluateAt");
   const plot = compilePlot(ce, ["Add", derivative, "x"], { target: "javascript", bindings: { x: 3 } });
   expect(plot.unknowns).toEqual([]);
-  expect(run(plot.items[0]!.code, {})).toBe(9);
+  expect(plot.items[0]!.code).toBeUndefined();
+  expect(plot.items[0]!.value).toBe(9);
 });
 
 test("a derivative that keeps its variable free still compiles over it", () => {

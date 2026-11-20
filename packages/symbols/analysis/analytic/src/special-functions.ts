@@ -36,7 +36,7 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
       ops[0] === undefined || ops[1] === undefined
         ? undefined
         : evaluateChebyshevT(ce, ops[0], ops[1], wants(ops, options)),
-    compile: compileChebyshevT,
+    compile: compileChebyshevT(ce),
   });
 
   ce.declare("ChebyshevU", {
@@ -45,7 +45,7 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
       ops[0] === undefined || ops[1] === undefined
         ? undefined
         : evaluateChebyshevU(ce, ops[0], ops[1], wants(ops, options)),
-    compile: compileChebyshevU,
+    compile: compileChebyshevU(ce),
   });
 
   ce.declare("HermiteH", {
@@ -54,13 +54,13 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
       ops[0] === undefined || ops[1] === undefined
         ? undefined
         : evaluateHermiteH(ce, ops[0], ops[1], wants(ops, options)),
-    compile: compileHermiteH,
+    compile: compileHermiteH(ce),
   });
 
   ce.declare("LaguerreL", {
     signature: "(number, number, number?) -> number",
     evaluate: (ops, options) => (ops.length < 2 ? undefined : evaluateLaguerreL(ce, ops, wants(ops, options))),
-    compile: compileLaguerreL,
+    compile: compileLaguerreL(ce),
   });
 
   ce.declare("LegendrePolynomial", {

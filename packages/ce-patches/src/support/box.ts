@@ -3,7 +3,7 @@ import { isReal, type Cx } from "../compute-engine/numerics/complex-arithmetic.t
 
 // Shared glue between the numeric kernels and compute-engine's boxed expressions:
 // the operand predicates the evaluate handlers branch on, the boxed-result helper,
-// and the `compile` handler factory the heads share.
+// and the local-declaration helper the `compile` handlers share.
 
 export type BoxInput = Parameters<ComputeEngine["box"]>[0];
 export type NativeEval = NonNullable<Expression["operatorDefinition"]>["evaluate"];
@@ -103,26 +103,14 @@ export const wantsNumber = (ops: readonly Expression[], options: EvalOptions): b
 export const declined = (r: Expression | undefined, head: string): boolean => r === undefined || r.operator === head;
 
 /**
- * A `compile` handler so `ce.compile(expr, {target})` emits a call to our kernel for
- * a head compute-engine's own compiler can't lower. Real-valued: assumes real args
- * and emits the real part, which composes in the real-scalar JS / GLSL pipelines the
- * plotters use.
- *  - javascript: `_.<js>(…)`, a real wrapper injected on the scope object.
- *  - glsl: `<glsl>(vec2(…, 0.0), …).x`, using the `zetaGLSL` kernel (which the shader
- *    host must prepend). `.x` takes the real part back to a float.
- * A target left unnamed returns undefined, which lets a native lowering (where the
- * target has one) take over instead. Other targets fall through the same way.
+ * A local of a compiled block, as MathJSON: `Declare(name, { value })`. A `compile` handler of ours
+ * answers with an expression (compute-engine's compiler takes no code text from one), and a
+ * recurrence is a `Block` of locals and a `Loop`, which the JavaScript and GLSL targets both lower.
+ * The local's name must not occur in the operands the block reads: a handler's names start `_`
+ * and are one letter or two, as `_z` and `_k`.
  */
-export const realCompile =
-  (arity: number, emit: { js?: string; glsl?: string; glslReal?: string }) =>
-  (args: readonly Expression[], compile: (e: Expression) => string, ctx: { language?: string }): string | undefined => {
-    const ops = args.slice(0, arity);
-    if (ops.length < arity || ops.some((o) => o === undefined)) return undefined;
-    const cs = ops.map(compile);
-    if (ctx.language === "javascript" && emit.js) return `_.${emit.js}(${cs.join(", ")})`;
-    // A kernel with a real-valued wrapper (NaN where the value is not real) is called as is.
-    if (ctx.language === "glsl" && emit.glslReal)
-      return `${emit.glslReal}(${cs.map((c) => `vec2(${c}, 0.0)`).join(", ")})`;
-    if (ctx.language === "glsl" && emit.glsl) return `${emit.glsl}(${cs.map((c) => `vec2(${c}, 0.0)`).join(", ")}).x`;
-    return undefined;
-  };
+export const local = (name: string, value: unknown): unknown => [
+  "Declare",
+  name,
+  ["Dictionary", ["KeyValuePair", "value", value]],
+];

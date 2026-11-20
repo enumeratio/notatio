@@ -108,7 +108,11 @@ test("exact input stays symbolic on evaluate(), a positive real is unchanged", (
 });
 
 test("compiled JavaScript keeps native's real lowering: the positive value, NaN off the reals", () => {
+  // An undeclared `x` is `complex | infinity`, which the compiler declines; declared real it compiles.
+  ce.pushScope();
+  ce.declare("x", "real");
   const compiled = compile(ce.box(["AGM", 1, "x"] as never), { to: "javascript" });
+  ce.popScope();
   expect(compiled.success).toBe(true);
   const run = compiled.run as (scope: { x: number }) => number;
   expect(run({ x: 2 })).toBeCloseTo(1.4567910310469068, 14);

@@ -4,7 +4,7 @@
 // samples the same code again rather than asking for new code.
 
 import type { CompiledItem, CompiledPlot, PlotCompileSpec } from "@notatio/frontend/plot-compile";
-import { loadBareEngine, loadEngineFor, parseFor } from "@notatio/frontend/core";
+import { loadEngineFor, parseFor } from "@notatio/frontend/core";
 import { pageKernel, translate, WorkerUnavailableError } from "./kernel-client.ts";
 
 export type { CompiledItem, CompiledPlot, PlotCompileSpec };
@@ -61,14 +61,12 @@ async function compileOnce(text: string, spec: PlotCompileSpec): Promise<Compile
   return compilePlot(engine, parsed.json, spec);
 }
 
-// compute-engine's helpers for compiled JavaScript (`_SYS`: integer powers, gamma, …) come
-// only with an engine, so a bare one (no libraries) lends them: the first compiled function
-// carries them. An upstream candidate: an engine-free runtime entry.
+// compute-engine's helpers for compiled JavaScript (`_SYS`: integer powers, gamma, …) come from its
+// engine-free runtime, loaded only for code that reads them.
 let helpers: Promise<unknown> | undefined;
 const systemHelpers = (): Promise<unknown> =>
-  (helpers ??= Promise.all([loadBareEngine(), import("@cortex-js/compute-engine/compile")]).then(
-    ([ce, { JavaScriptTarget }]) =>
-      (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS,
+  (helpers ??= import("@cortex-js/compute-engine/runtime").then(({ createJavaScriptRuntime }) =>
+    createJavaScriptRuntime(),
   ));
 
 // The analytic kernels the JavaScript target emits calls to, read from the scope

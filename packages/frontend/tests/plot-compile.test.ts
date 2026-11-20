@@ -2,13 +2,13 @@
 // variables and wildcards from the scope `_`, and compute-engine's helpers from `_SYS`.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { createJavaScriptRuntime } from "@cortex-js/compute-engine/runtime";
 import { expect, test } from "vite-plus/test";
 import { declareAnalytic } from "@notatio/analytic";
 import { compilePlot } from "../src/plot-compile.ts";
 
 const ce = new ComputeEngine();
-const SYS = (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
+const SYS = createJavaScriptRuntime();
 const run = (code: string | undefined, scope: Record<string, unknown>): unknown =>
   // oxlint-disable-next-line no-implied-eval -- the compiled code under test
   new Function("_SYS", "_", `return (${code});`)(SYS, scope);
@@ -46,7 +46,7 @@ test("a plot of Sin(x) compiles to Math.sin on an engine with analytic declared"
   const withAnalytic = new ComputeEngine();
   declareAnalytic(withAnalytic);
   const plot = compilePlot(withAnalytic, ["Sin", "x"], { target: "javascript" });
-  expect(plot.items[0]?.code).toBe("Math.sin(_.x)");
+  expect(plot.items[0]?.code).toContain("Math.sin(_.x)");
 });
 
 test("a GLSL plotFn defines every _gpu_ helper it calls", () => {
@@ -55,18 +55,28 @@ test("a GLSL plotFn defines every _gpu_ helper it calls", () => {
   const code = plot.items[0]!.code!;
   const called = new Set(code.match(/_gpu_\w+(?=\()/g));
   expect(called.size).toBeGreaterThan(0);
-  for (const name of called) expect(code).toMatch(new RegExp(`float ${name}\\(`));
+  for (const name of called) expect(code).toMatch(new RegExp(`\\w+ ${name}\\(`));
 });
 
 test("a surface compiles to GLSL after it compiled to JavaScript, its variables real", () => {
   const engine = new ComputeEngine();
   declareAnalytic(engine);
-  const hurwitz = ["HurwitzZeta", "x", "y"];
+  const surface = ["Multiply", ["Gamma", "x"], ["Gamma", "y"]];
   // A page compiles an expression for the CPU, and again for the GPU, on one engine.
-  compilePlot(engine, hurwitz, { target: "glsl", vars: ["x", "y"], each: true });
-  compilePlot(engine, hurwitz, { target: "javascript", each: true });
-  const plot = compilePlot(engine, hurwitz, { target: "glsl", vars: ["x", "y"], each: true });
+  compilePlot(engine, surface, { target: "glsl", vars: ["x", "y"], each: true });
+  compilePlot(engine, surface, { target: "javascript", each: true });
+  const plot = compilePlot(engine, surface, { target: "glsl", vars: ["x", "y"], each: true });
   expect(plot.items[0]!.code).toMatch(/float plotFn\(float x, float y\)/);
+});
+
+// compute-engine 0.194.0 lowers HurwitzZeta to JavaScript only: a surface of it has no shader, and the plot
+// takes its CPU path (the previous GLSL target had a lowering).
+test("a head with no shader lowering has no plotFn, though it compiles to JavaScript", () => {
+  const engine = new ComputeEngine();
+  declareAnalytic(engine);
+  const hurwitz = ["HurwitzZeta", "x", "y"];
+  expect(compilePlot(engine, hurwitz, { target: "glsl", vars: ["x", "y"], each: true }).items[0]!.code).toBeUndefined();
+  expect(compilePlot(engine, hurwitz, { target: "javascript", each: true }).items[0]!.code).toBeDefined();
 });
 
 test("a plot's code reads its variables as reals, whatever type the engine inferred for them before", () => {
@@ -105,10 +115,20 @@ test("fields compile to one GLSL unit: a function each, a shared helper once, wi
   const unit = plot.unit!;
   expect(unit).toContain("float field0(float x, float y, float _a) {");
   expect(unit).toContain("float field1(float x, float y, float _a) {");
-  // Both margins call the target's sinc helper; two definitions of it would not compile.
-  expect(unit.split("float _gpu_sinc(float x) {")).toHaveLength(2);
-  // The helpers come before the functions that call them.
-  expect(unit.indexOf("float _gpu_sinc(")).toBeLessThan(unit.indexOf("float field0("));
+});
+
+test("fields that call one helper define it once, before the functions that call it", () => {
+  const margins = ["List", ["Gamma", "x"], ["Multiply", "_a", ["Gamma", "y"]]];
+  const unit = compilePlot(ce, margins, {
+    target: "glsl",
+    vars: ["x", "y"],
+    each: true,
+    fields: true,
+    params: ["_a"],
+  }).unit!;
+  // Both margins call the target's gamma helper; two definitions of it would not compile.
+  expect(unit.split("float _gpu_ir_gamma(float z) {")).toHaveLength(2);
+  expect(unit.indexOf("float _gpu_ir_gamma(")).toBeLessThan(unit.indexOf("float field0("));
 });
 
 test("fields with one that has no shader have no unit", () => {

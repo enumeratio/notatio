@@ -1,9 +1,10 @@
-// A value's source in each code form compute-engine compiles to: GLSL
-// through its target, JavaScript through `compile()`. Each only takes a numeric or
+// A value's source in each code form compute-engine compiles to: GLSL and
+// JavaScript, through `compile()`. Each only takes a numeric or
 // function expression, so a list or a comparison simply has no source in that form.
 // GPUShaderForm is the whole shader one of our GPU paths runs for the expression.
 
-import { type ComputeEngine, compile, type Expression, GLSLTarget } from "@cortex-js/compute-engine";
+import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
 import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
@@ -11,28 +12,24 @@ import { toGlslFn } from "./plot-compile.ts";
 
 export type CodeForm = "python" | "glsl" | "javascript" | "gpushader";
 
-// compute-engine 0.193 removed its Python target, so `python` has no source.
-const TARGETS = { glsl: GLSLTarget } as const;
-
-/** `json`'s source in each code form that can compile it. */
+/** `json`'s source in each code form that can compile it. compute-engine 0.193 removed its Python
+ *  target, so `python` has no source. A decline throws (`fallback: false`), where the default hands
+ *  back an interpreter with no `code`. */
 export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<CodeForm, string>> {
   const out: Partial<Record<CodeForm, string>> = {};
   const expr = ce.box(json as never);
   const shader = gpuShader(expr);
   if (shader !== undefined) out.gpushader = shader;
-  for (const [form, Target] of Object.entries(TARGETS)) {
+  for (const [form, to] of [
+    ["glsl", "glsl"],
+    ["javascript", "javascript"],
+  ] as const) {
     try {
-      const source = (new Target() as unknown as { compileToSource(e: unknown): unknown }).compileToSource(expr);
-      if (typeof source === "string") out[form as CodeForm] = source;
+      const code = (compile(expr, { to, fallback: false }) as { code?: unknown } | undefined)?.code;
+      if (typeof code === "string" && code !== "") out[form] = code;
     } catch {
       // this target can't compile this expression
     }
-  }
-  try {
-    const code = (compile(json as never, { engine: ce } as never) as { code?: unknown } | undefined)?.code;
-    if (typeof code === "string") out.javascript = code;
-  } catch {
-    // not compilable to JavaScript
   }
   return out;
 }

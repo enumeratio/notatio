@@ -1,7 +1,7 @@
 // Emit GLSL that evaluates a MathJSON expression as a *complex* value (vec2f),
-// for per-pixel domain coloring. compute-engine's own GLSL target is real-scalar —
-// our `realCompile` handlers take `.x` off the kernels — which is right for plotting
-// a surface and useless for a portrait, where the phase is the whole picture.
+// for per-pixel domain coloring. compute-engine's own GLSL target is real-scalar,
+// which is right for plotting a surface and useless for a portrait, where the phase
+// is the whole picture.
 //
 // Two things make this worth its own emitter rather than a second CE target:
 //  • every arithmetic node needs the complex form (`cmul`, not `*`), which is a

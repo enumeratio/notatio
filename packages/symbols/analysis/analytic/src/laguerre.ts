@@ -5,6 +5,7 @@ import {
   type BoxInput,
   isFiniteNum,
   isRealInt,
+  local,
   numberResult,
   vouchesWhenComplex,
   add,
@@ -83,22 +84,47 @@ export function evaluateLaguerreL(
 }
 
 /**
- * A JavaScript `compile` handler: the recurrence inline, for real n-, a- and x-values, NaN for an
- * order that is negative, non-integer or past `MAX_NUMERIC_ORDER`. Other targets aren't lowered.
+ * A `compile` handler: the recurrence as a block and a loop, for real n-, a- and x-values, NaN for
+ * an order that is negative, non-integer or past `MAX_NUMERIC_ORDER`. The answer is an expression
+ * the compiler lowers in place of the call (JavaScript and GLSL), since it takes no code text from
+ * a handler.
  */
-export const compileLaguerreL = (
-  args: readonly Expression[],
-  compile: (e: Expression) => string,
-  ctx: { language?: string },
-): string | undefined => {
-  const n = args[0];
-  const a = args.length === 3 ? args[1] : undefined;
-  const x = args.length === 3 ? args[2] : args[1];
-  if (ctx.language !== "javascript" || n === undefined || x === undefined) return undefined;
-  return (
-    `((n, a, x) => { if (!Number.isInteger(n) || n < 0 || n > ${MAX_NUMERIC_ORDER}) return NaN; ` +
-    `if (n === 0) return 1; let p = 1, c = 1 + a - x; ` +
-    `for (let k = 1; k < n; k++) { const t = ((2 * k + 1 + a - x) * c - (k + a) * p) / (k + 1); p = c; c = t; } ` +
-    `return c; })(${compile(n)}, ${a === undefined ? "0" : compile(a)}, ${compile(x)})`
-  );
-};
+export const compileLaguerreL =
+  (ce: ComputeEngine) =>
+  (args: readonly Expression[]): Expression | undefined => {
+    const n = args[0];
+    const a = args.length === 3 ? args[1]! : 0;
+    const x = args.length === 3 ? args[2] : args[1];
+    if (n === undefined || x === undefined) return undefined;
+    const outOfRange = ["Or", ["Less", n, 0], ["Greater", n, MAX_NUMERIC_ORDER], ["NotEqual", ["Floor", n], n]];
+    const step = [
+      "Divide",
+      [
+        "Subtract",
+        ["Multiply", ["Subtract", ["Add", ["Multiply", 2, "_k"], 1, a], x], "_c"],
+        ["Multiply", ["Add", "_k", a], "_p"],
+      ],
+      ["Add", "_k", 1],
+    ];
+    const recurrence = [
+      "If",
+      ["Equal", n, 0],
+      1,
+      [
+        "Block",
+        local("_p", 1),
+        local("_c", ["Subtract", ["Add", 1, a], x]),
+        [
+          "If",
+          ["Greater", n, 1],
+          [
+            "Loop",
+            ["Block", local("_t", step), ["Assign", "_p", "_c"], ["Assign", "_c", "_t"]],
+            ["Element", "_k", ["Range", 1, ["Subtract", n, 1]]],
+          ],
+        ],
+        "_c",
+      ],
+    ];
+    return ce.box(["If", outOfRange, "NaN", recurrence] as never);
+  };

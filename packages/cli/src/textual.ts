@@ -3,7 +3,7 @@
 // The Node host prefers an inline image where the terminal has one; this is what
 // stands in where it does not, and what the control strip draws under itself.
 
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { createJavaScriptRuntime } from "@cortex-js/compute-engine/runtime";
 import { type Box, notationOf } from "@notatio/boxes";
 import { optionsOf } from "@notatio/formats";
 import {
@@ -68,9 +68,8 @@ export function samplePlot(session: Session, json: Json): PlotPoint[] | undefine
 const TERMINAL_ARROWS = 8;
 const TERMINAL_STREAMS = 4;
 
-/** A bare compute-engine's helpers for compiled JavaScript (`_SYS`: integer powers, gamma, …). */
-const systemHelpers = (ce: Session["ce"]): unknown =>
-  (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
+/** compute-engine's helpers for compiled JavaScript (`_SYS`: integer powers, gamma, …), from its engine-free runtime. */
+const systemHelpers = (): unknown => createJavaScriptRuntime();
 
 /** `component` as a function of the plot's two variables: compiled JavaScript, else `subs` and `N`. */
 function componentSampler(
@@ -83,7 +82,7 @@ function componentSampler(
   if (item?.code !== undefined && !item.code.includes("_.__")) {
     // oxlint-disable-next-line no-implied-eval -- the code is compute-engine's compiled output
     const fn = new Function("_SYS", "_", `return (${item.code});`) as (sys: unknown, scope: object) => unknown;
-    const sys = systemHelpers(ce);
+    const sys = systemHelpers();
     return (x, y) => {
       const v = fn(sys, { [vx]: x, [vy]: y });
       return typeof v === "number" ? v : Number.NaN;

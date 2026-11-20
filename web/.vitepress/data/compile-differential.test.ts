@@ -3,7 +3,7 @@
 // form for) it must fail to compile rather than compile to something else.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { beforeAll, expect, test } from "vite-plus/test";
 import { CATALOGUE } from "../theme/worker-catalogue.ts";
 import { makeEngine } from "./prerender.ts";
@@ -53,7 +53,8 @@ function compileTyped(
   ce.pushScope();
   try {
     for (const [name, type] of Object.entries(types)) ce.declare(name, type);
-    const result = new JavaScriptTarget().compile(ce.box(expr as never)) as {
+    // `fallback: false` makes a decline throw, where the default hands back an interpreter.
+    const result = compile(ce.box(expr as never), { fallback: false }) as {
       success?: boolean;
       run?: (scope: Record<string, number>) => unknown;
     };

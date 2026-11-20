@@ -4,7 +4,7 @@
 // engine is threaded in via opts only where a decoder needs to parse (TeX).
 
 import type { Expression } from "@cortex-js/compute-engine";
-import { compile, GLSLTarget } from "@cortex-js/compute-engine/compile";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { parseEpsil, serializeEpsil } from "@cortex-js/compute-engine/epsil";
 import { MATHJSON_MIME } from "@notatio/boxes/render";
 import { fromWolfram, toWolfram } from "@notatio/wolfram";
@@ -182,7 +182,8 @@ registerFileFormat({
   mimeTypes: ["x-shader/x-fragment"],
   extensions: ["glsl", "frag"],
   binary: false,
-  encode: (v) => new GLSLTarget().compileToSource(asExpr(v)),
+  // `fallback: false` makes a decline throw, where the default gives an empty `code`.
+  encode: (v) => compile(asExpr(v), { to: "glsl", fallback: false }).code,
 });
 
 registerFileFormat({

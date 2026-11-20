@@ -1,5 +1,5 @@
 import { ComputeEngine, version } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { compile } from "@cortex-js/compute-engine/compile";
 import { expect, test } from "vite-plus/test";
 import { CHECKED_COMPUTE_ENGINE, functionNodePrototype, libraryOperator, shadowsLibrary } from "../src/ce-internals.ts";
 import { extendHead } from "../src/index.ts";
@@ -30,10 +30,10 @@ test("the library operator is the one a fresh engine's lookup resolves to, and a
 test("shadowsLibrary agrees with compute-engine's own refusal to compile a shadowed head", () => {
   const compiles = (ce: ComputeEngine, head: string): boolean => {
     try {
-      new JavaScriptTarget().compile(ce.box([head, "x"]));
+      compile(ce.box([head, "x"]), { fallback: false });
       return true;
     } catch (error) {
-      expect((error as Error).message).toMatch(/shadows the library operator/);
+      expect((error as Error).message).toMatch(/not the library operator/);
       return false;
     }
   };
@@ -56,7 +56,7 @@ test("a definition that is not an extension shadows by a replaced evaluate", () 
   const operator = () => (ce.lookupDefinition("Sin") as { operator: { evaluate?: unknown } }).operator;
   ce.declare("Sin", { signature: "(number) -> number", evaluate: () => undefined } as never);
   expect(shadowsLibrary(ce, "Sin", operator())).toBe(true);
-  expect(() => new JavaScriptTarget().compile(ce.box(["Sin", "x"]))).toThrow(/shadows the library operator/);
+  expect(() => compile(ce.box(["Sin", "x"]), { fallback: false })).toThrow(/not the library operator/);
 });
 
 test("function nodes share one prototype that carries evaluate and evaluateAsync", () => {

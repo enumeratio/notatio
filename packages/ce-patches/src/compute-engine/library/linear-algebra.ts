@@ -45,8 +45,9 @@ export function evaluateShapeOfUnknownElements(ce: ComputeEngine): void {
   declareCompile(ce, "Shape", "builtin");
 }
 
-/** Give `MatrixRank` a JavaScript lowering (compute-engine's has none). */
+/** Give `MatrixRank` a JavaScript lowering (compute-engine's has none). The handler writes code text,
+ *  which compute-engine 0.194.0 no longer takes (the node declines): see `matrix-rank-compiles.ts`. */
 export function compileMatrixRankToJavaScript(ce: ComputeEngine): void {
   if (ce.lookupDefinition("MatrixRank") === undefined) return;
-  declareCompile(ce, "MatrixRank", compileMatrixRank);
+  declareCompile(ce, "MatrixRank", compileMatrixRank as never);
 }

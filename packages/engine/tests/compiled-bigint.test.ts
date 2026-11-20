@@ -2,71 +2,58 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
 import { compileBigint, fromBigint, isBigintDecline, toBigint } from "../src/compiled-bigint.ts";
 
+// compute-engine's `bigint` compile mode: every integer a bigint, anything else a decline (a result of
+// `undefined` here, which a caller hands to the interpreter).
 const ce = new ComputeEngine();
 const run = (expression: unknown, types: Record<string, string>, vars: Record<string, unknown>): unknown =>
   compileBigint(ce, expression, types)!.run(toBigint(vars) as Record<string, unknown>);
+const declines = (expression: unknown, types: Record<string, string>): boolean =>
+  compileBigint(ce, expression, types) === undefined;
 
 test("integer arithmetic is exact past 2^53", () => {
   expect(run(["Multiply", "_n", "_n"], { _n: "integer" }, { _n: 94906267 })).toBe(94906267n * 94906267n);
 });
 
-test("a division is exact, and declines (RangeError) where it isn't", () => {
-  const divide = ["Divide", "_n", 2];
-  expect(run(divide, { _n: "integer" }, { _n: 2 ** 60 })).toBe(2n ** 59n);
-  expect(() => run(divide, { _n: "integer" }, { _n: 7 })).toThrow(RangeError);
+// The changelog says `Floor(n/3)` compiles exactly; canonicalization reads `n/3` as `1/3 * n` first, and the
+// bigint mode declines the rational (the quotient: see the handback's upstream questions).
+test("a division declines, also under a floor", () => {
+  expect(declines(["Divide", "_n", 2], { _n: "integer" })).toBe(true);
+  expect(declines(["Floor", ["Divide", "_n", 3]], { _n: "integer" })).toBe(true);
 });
 
-test("Binomial and a fold over a range are exact", () => {
+test("Binomial is exact", () => {
   expect(run(["Binomial", 70, "_k"], { _k: "integer" }, { _k: 35 })).toBe(112186277816662845432n);
-  const factorial = ["Fold", ["Function", ["Multiply", "a", "i"], "a", "i"], 1, ["Range", 1, "_n", 1]];
-  expect(run(factorial, { _n: "integer" }, { _n: 25 })).toBe(15511210043330985984000000n);
 });
 
-test("Factorial is exact past 2^53, and declines (RangeError) outside its range", () => {
+test("a fold by a function of its own declines", () => {
+  const factorial = ["Fold", ["Function", ["Multiply", "a", "i"], "a", "i"], 1, ["Range", 1, "_n", 1]];
+  expect(declines(factorial, { _n: "integer" })).toBe(true);
+});
+
+test("Factorial is exact past 2^53, and an argument outside its range is not a finite value", () => {
   expect(run(["Factorial", "_n"], { _n: "integer" }, { _n: 25 })).toBe(15511210043330985984000000n);
   expect(run(["Factorial", "_n"], { _n: "integer" }, { _n: 0 })).toBe(1n);
-  expect(() => run(["Factorial", "_n"], { _n: "integer" }, { _n: -1 })).toThrow(RangeError);
-  expect(() => run(["Factorial", "_n"], { _n: "integer" }, { _n: 10 ** 6 })).toThrow(RangeError);
+  expect(run(["Factorial", "_n"], { _n: "integer" }, { _n: -1 })).toBe(Number.POSITIVE_INFINITY);
+  expect(() => run(["Factorial", "_n"], { _n: "integer" }, { _n: 10 ** 7 })).toThrow(RangeError);
 });
 
 test("a list of integers in, a list out", () => {
-  const sum = ["Fold", ["Function", ["Add", "a", ["At", "_x", "i"]], "a", "i"], 0, ["Range", 1, 2, 1]];
-  expect(run(sum, { _x: "list<integer>" }, { _x: [2 ** 52, 2 ** 52, 5] })).toBe(2n ** 53n);
+  const types = { _x: "list<integer>" };
+  expect(run(["Take", "_x", 2], types, { _x: [2 ** 52, 2 ** 53, 5] })).toEqual([2n ** 52n, 2n ** 53n]);
 });
 
-test("what mixes in a real declines with a TypeError", () => {
-  let error: unknown;
-  try {
-    run(["Sqrt", "_n"], { _n: "integer" }, { _n: 16 });
-  } catch (e) {
-    error = e;
-  }
-  expect(isBigintDecline(error)).toBe(true);
+test("what mixes in a real declines", () => {
+  expect(declines(["Sqrt", "_n"], { _n: "integer" })).toBe(true);
 });
 
 test("results come back as numbers where a double holds them", () => {
   expect(fromBigint([1n, 2n ** 60n])).toEqual([1, 2n ** 60n]);
+  expect(isBigintDecline(new RangeError("x"))).toBe(true);
 });
 
-test("a power of two is exact, and floor(log2) by shifting needs no Log", () => {
-  expect(run(["Power", 2, "_k"], { _k: "integer" }, { _k: 100 })).toBe(2n ** 100n);
-  const shift = [
-    "Function",
-    [
-      "If",
-      ["GreaterEqual", ["At", "s", 1], ["Power", 2, "k"]],
-      [
-        "List",
-        ["Divide", ["Subtract", ["At", "s", 1], ["Mod", ["At", "s", 1], ["Power", 2, "k"]]], ["Power", 2, "k"]],
-        ["Add", ["At", "s", 2], "k"],
-      ],
-      "s",
-    ],
-    "s",
-    "k",
-  ];
-  const log2 = ["At", ["Fold", shift, ["List", "_x", 0], ["List", 64, 32, 16, 8, 4, 2, 1]], 2];
-  expect(run(log2, { _x: "integer" }, { _x: 2 ** 60 + 5 })).toBe(60n);
+test("a power of two with a stated exponent is exact; an unproved exponent declines", () => {
+  expect(declines(["Power", 2, "_k"], { _k: "integer" })).toBe(true);
+  expect(run(["Power", 2, ["Abs", "_k"]], { _k: "integer" }, { _k: 100 })).toBe(2n ** 100n);
 });
 
 test("an equality of integers past 2^53 holds", () => {
@@ -86,20 +73,8 @@ test("Take, Drop, Min, Max and Length work on bigint counts", () => {
   expect(run(["Add", ["Length", "_x"], "_n"], types, vars)).toBe(6n);
 });
 
-test("a list's length bounds a range, and ReplaceAt copies", () => {
+test("a sum over a list's length is exact past 2^53", () => {
   const types = { _x: "list<integer>" };
-  const sum = ["Fold", ["Function", ["Add", "a", ["At", "_x", "i"]], "a", "i"], 0, ["Range", 1, ["Length", "_x"], 1]];
+  const sum = ["Sum", ["At", "_x", "i"], ["Limits", "i", 1, ["Length", "_x"]]];
   expect(run(sum, types, { _x: [2 ** 60, 1, 2] })).toBe(2n ** 60n + 3n);
-  const x = [1n, 2n, 3n];
-  const replaced = ["ReplaceAt", "_x", 2, ["Add", ["At", "_x", 1], 2 ** 60]];
-  expect(run(replaced, types, { _x: x })).toEqual([1n, 2n ** 60n + 1n, 3n]);
-});
-
-test("a stepped range counts and runs over bigints, down as well as up", () => {
-  const collect = (range: unknown) => ["Fold", ["Function", ["Join", "a", ["List", "i"]], "a", "i"], ["List"], range];
-  const types = { _n: "integer" };
-  expect(run(collect(["Range", "_n", 1, -1]), types, { _n: 4 })).toEqual([4n, 3n, 2n, 1n]);
-  expect(run(collect(["Range", 1, "_n", 2]), types, { _n: 6 })).toEqual([1n, 3n, 5n]);
-  // Too many elements to list declines rather than counting a bigint bound as infinite.
-  expect(() => run(collect(["Range", "_n", 1, -3]), types, { _n: 2 ** 60 })).toThrow(RangeError);
 });
