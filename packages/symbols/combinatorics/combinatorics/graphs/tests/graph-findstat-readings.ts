@@ -72,16 +72,17 @@ function chromaticNumber(g: Graph): number {
   const m = matrix(g);
   for (let k = 0; k <= g.n; k++) {
     const colors: number[] = [];
-    const assign = (v: number): boolean => {
+    // A vertex takes a color already used or the next unused one: the colors are interchangeable.
+    const assign = (v: number, used: number): boolean => {
       if (v === g.n) return true;
-      for (let c = 0; c < k; c++) {
+      for (let c = 0; c < Math.min(k, used + 1); c++) {
         if (colors.slice(0, v).some((other, u) => other === c && m[u]![v])) continue;
         colors[v] = c;
-        if (assign(v + 1)) return true;
+        if (assign(v + 1, Math.max(used, c + 1))) return true;
       }
       return false;
     };
-    if (assign(0)) return k;
+    if (assign(0, 0)) return k;
   }
   return g.n;
 }
