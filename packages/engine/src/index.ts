@@ -63,6 +63,73 @@ export const collectionElements = (expr: Expression): readonly Expression[] | un
   }
 };
 
+const structuralHeads = new WeakMap<ComputeEngine, Set<string>>();
+
+/** Heads whose call keeps its operands through evaluation, so `partsOf` reads them before it: a carrier's constructor. */
+export function declareStructuralHeads(ce: ComputeEngine, heads: Iterable<string>): void {
+  const known = structuralHeads.get(ce) ?? new Set<string>();
+  for (const head of heads) known.add(head);
+  structuralHeads.set(ce, known);
+}
+
+type TypeLike = { matches: (t: never) => boolean | undefined; type?: unknown };
+
+/** Whether `type` is a number or a boolean, so a value of it can never be a collection. */
+const isScalarType = (ce: ComputeEngine, type: TypeLike): boolean =>
+  type.matches(ce.type("number") as never) === true || type.matches(ce.type("boolean") as never) === true;
+
+/** Whether `type` is a named carrier type (`dyck_path`) that is no collection: a call of it stays a call of it,
+ *  whatever its operands. */
+const isNominalType = (ce: ComputeEngine, type: TypeLike): boolean =>
+  (type.type as { kind?: string; alias?: boolean } | undefined)?.kind === "reference" &&
+  type.matches(ce.type("collection") as never) !== true;
+
+/** Whether `symbol` can only ever be a scalar: it holds one, or its declared (not inferred) type is one. */
+const symbolIsScalar = (ce: ComputeEngine, symbol: Expression): boolean => {
+  const value = symbol.value;
+  if (value !== undefined) return value.isCollection !== true && isScalarType(ce, value.type);
+  // A symbol only mentioned has no definition.
+  const definition = ce.lookupDefinition(symbolNameOf(symbol)!);
+  const declared = definition !== undefined && "value" in definition ? definition.value : undefined;
+  return declared !== undefined && declared.inferredType !== true && isScalarType(ce, declared.type);
+};
+
+/** `expr` and every call inside it has a known scalar type (or is a call of a carrier type), and every symbol
+ *  in it is a scalar: nothing binding the symbols can make it a collection. A head typed `any` (or a list, like
+ *  `Divisors`) fails. */
+const isSymbolicScalar = (ce: ComputeEngine, expr: Expression): boolean => {
+  if (symbolNameOf(expr) !== undefined) return symbolIsScalar(ce, expr);
+  const ops = (expr as { ops?: unknown }).ops;
+  if (isNominalType(ce, expr.type)) return structuralHeads.get(ce)?.has(expr.operator) === true;
+  if (!isScalarType(ce, expr.type)) return false;
+  if (!Array.isArray(ops)) return true;
+  return ops.length > 0 && (ops as Expression[]).every((op) => isSymbolicScalar(ce, op));
+};
+
+/**
+ * The operands of a non-collection expression, read as its parts (`f(a, b)` has parts `a` and `b`) --
+ * or `undefined` when they may not be its parts once its symbols are bound. Its parts are sound when
+ * either
+ *  - its head is an undeclared symbol, so the call is inert whatever `a` and `b` turn out to be; or
+ *  - its head is declared and it is a symbolic scalar: every call in it has a known number or boolean type
+ *    (not `any`, not a list like `Divisors(n)`) and every symbol is a declared scalar. `u + v` is read
+ *    elementwise once `u` and `v` are lists, so an untyped symbol (a lambda's parameter) may make it one.
+ * The expression's own type alone is no evidence: `u + v` types as a number whatever `u` and `v` are.
+ */
+const structuralOperands = (ce: ComputeEngine, expr: Expression): readonly Expression[] | undefined => {
+  if (expr.isCollection === true) return undefined;
+  const head = expr.operator;
+  const ops = (expr as { ops?: unknown }).ops;
+  if (typeof head !== "string" || !Array.isArray(ops)) return undefined;
+  if (ce.lookupDefinition(head) === undefined || isSymbolicScalar(ce, expr)) return ops as Expression[];
+  return undefined;
+};
+
+/** The parts `First`, `Last` and `At` read: a collection's elements, else a non-collection's operands where
+ *  those are sound (see `structuralOperands`). `undefined` leaves the call as native has it. */
+export const partsOf = (ce: ComputeEngine, expr: Expression): readonly Expression[] | undefined =>
+  expr.isCollection === true ? collectionElements(expr) : structuralOperands(ce, expr);
+
 /** The most elements `collectionElements` lists before it declines: `At(PrimeNumbers, -1)` filled a 4 GB heap without a bound. */
 export const MAX_COLLECTION_ELEMENTS = 1 << 16;
 

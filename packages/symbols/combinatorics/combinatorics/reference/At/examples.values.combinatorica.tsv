@@ -32,7 +32,7 @@ a-span-2-4-in-wolfram-takes-a-contiguous-slice
 a-stepped-span-1-1-2-takes-every-other-element				
 a-negative-step-1-1-1-walks-backwards-reversing				
 negative-bounds-the-last-two-elements				
-parts-of-any-expression-not-just-lists-the				
+parts-of-a-call-are-its-operands				
 indexes-into-a-named-integer-collection				
 indexes-into-a-parameterized-collection				
 first-term-of-fibonaccinumbers-is-0				
@@ -51,4 +51,5 @@ chaining-at-reaches-into-nested-collections-like
 list-a-b-c-d-k-list-list-4-5-1-2-3				
 list-a-b-c-list-0				
 list-1-2-3-list-list				
+parts-of-any-expression-not-just-lists-the				
 an-out-of-range-index-evaluates-to-nan-rather				

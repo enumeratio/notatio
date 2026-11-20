@@ -9,6 +9,7 @@ import {
   lazyMisfires,
   nativeMisfires,
   range,
+  shapeMisfires,
 } from "./override-differential.ts";
 
 // An override of a compute-engine head agrees with the native head wherever the native head
@@ -71,6 +72,14 @@ const DELIBERATE: readonly Deliberate[] = [
     skip: (call) => call[0] === "At" && Array.isArray(call[2]),
   },
   {
+    why: "First(c, default) and Last(c, default) take a fallback for an empty collection; the native takes no second argument",
+    skip: (call) => (call[0] === "First" || call[0] === "Last") && call.length === 3,
+  },
+  {
+    why: "At(c, All, …) is every part, Span(1, −1); the native reads All as a head and fails typing",
+    skip: (call) => call[0] === "At" && call[2] === "All",
+  },
+  {
     why: "a trailing integer is Wolfram's Join level; the native has no level and joins the integer as one more element",
     skip: (call) => call[0] === "Join" && call.length === 4 && (call[1] as Call)[0] === "List",
   },
@@ -121,6 +130,11 @@ test("an overridden head answers a lazy collection as it answers the list of its
         name.startsWith("empty") && (head === "At" || ((head === "First" || head === "Last") && call.length === 2)),
     }),
   ).toBe("");
+});
+
+// An operand that may still become a list (`u + v` over a lambda's parameters) is not read by parts.
+test("an overridden head answers a lambda's untyped sum as the native head does", () => {
+  expect(shapeMisfires(calls, ["First", "Last", "At"], { deliberate: DELIBERATE })).toBe("");
 });
 
 test("Join's trailing integer is a level: past the operands' depth the call stays unevaluated", () => {

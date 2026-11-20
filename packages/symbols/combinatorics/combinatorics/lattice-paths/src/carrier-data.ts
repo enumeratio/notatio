@@ -21,6 +21,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "DyckPath",
+    readable: true,
     type: "dyck_path",
     shape: "list<integer>",
     id: "dyck_path",
@@ -49,6 +50,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "MotzkinPath",
+    readable: true,
     type: "motzkin_path",
     shape: "list<integer>",
     id: "motzkin_path",
@@ -63,6 +65,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SchroederPath",
+    readable: true,
     type: "schroeder_path",
     shape: "list<integer>",
     id: "schroeder_path",

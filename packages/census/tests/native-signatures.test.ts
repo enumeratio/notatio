@@ -42,15 +42,6 @@ const NOT_YET_KEPT: Readonly<Record<string, string>> = Object.fromEntries([
     "Sign",
     "Tanh",
   ].map((head) => [head, DOMAIN]),
-  // Price: `First`/`Last` of a `list<integer>` does not type as an integer on our engine.
-  [
-    "First",
-    "reads the first operand of an expression that is not a collection; native's collection overload types an unknown operand as a collection",
-  ],
-  [
-    "Last",
-    "reads the last operand of an expression that is not a collection; native's collection overload types an unknown operand as a collection",
-  ],
   ...["Histogram", "Random"].map((head) => [head, COLLECTIONS]),
 ]);
 

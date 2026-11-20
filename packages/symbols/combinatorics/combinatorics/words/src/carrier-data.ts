@@ -21,6 +21,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Endofunction",
+    readable: true,
     type: "endofunction",
     shape: "list<integer>",
     id: "endofunction",
@@ -42,6 +43,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "ParkingFunction",
+    readable: true,
     type: "parking_function",
     shape: "list<integer>",
     id: "parking_function",
@@ -63,6 +65,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Word",
+    readable: true,
     type: "word",
     shape: "list<integer>",
     id: "word",

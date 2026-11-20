@@ -14,6 +14,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Arrangement",
+    readable: true,
     type: "arrangement",
     shape: "list<integer>",
     id: "arrangement",
@@ -49,6 +50,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Permutation",
+    readable: true,
     type: "permutation",
     shape: "list<integer>",
     id: "permutation",
@@ -56,6 +58,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PermutationInversion",
+    readable: true,
     type: "permutation_inversion",
     shape: "list<integer>",
     id: "permutation_inversion",
@@ -70,6 +73,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SignedPermutation",
+    readable: true,
     type: "signed_permutation",
     shape: "list<integer>",
     id: "signed_permutation",

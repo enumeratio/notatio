@@ -36,6 +36,7 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PerfectMatching",
+    readable: true,
     type: "perfect_matching",
     shape: "list<list<integer>>",
     id: "perfect_matching",
@@ -57,6 +58,7 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SetPartition",
+    readable: true,
     type: "set_partition",
     shape: "list<list<integer>>",
     id: "set_partition",

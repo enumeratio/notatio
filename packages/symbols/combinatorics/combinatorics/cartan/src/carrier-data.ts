@@ -6,6 +6,7 @@ import type { Carrier } from "@notatio/structures";
 export const CARTAN_CARRIERS: readonly Carrier[] = [
   {
     name: "CartanType",
+    readable: true,
     type: "cartan_type",
     shape: "tuple<string, integer>",
     id: "cartan_type",

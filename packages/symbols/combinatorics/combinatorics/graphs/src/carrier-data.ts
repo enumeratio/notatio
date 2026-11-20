@@ -12,6 +12,7 @@ import type { Carrier } from "@notatio/structures";
 export const GRAPHS_CARRIERS: readonly Carrier[] = [
   {
     name: "LabeledGraph",
+    readable: true,
     type: "labeled_graph",
     shape: "tuple<integer, list<list<integer>>>",
     id: "labeled_graph",

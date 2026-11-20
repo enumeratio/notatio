@@ -9,7 +9,7 @@ signatures:
   - call: Last(collection, default)
     description: "`default` when the collection is empty, instead of the last element."
     library: enumeratio-combinatorics
-    type: (any, any?) -> any
+    type: "((any, any?) -> any) & ((xs: indexed_collection<any>) -> any)"
     overrides: compute-engine
   - call: Last(expr)
     description: the last operand of any expression, not just a collection.

@@ -50,6 +50,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "LabeledTree",
+    readable: true,
     type: "labeled_tree",
     shape: "list<list<integer>>",
     id: "labeled_tree",
@@ -64,6 +65,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "OrderedTree",
+    readable: true,
     type: "ordered_tree",
     shape: "integer | list<any>",
     id: "ordered_tree",

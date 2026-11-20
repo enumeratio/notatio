@@ -7,6 +7,7 @@ import type { Carrier } from "@notatio/structures";
 export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   {
     name: "AlternatingSignMatrix",
+    readable: true,
     type: "alternating_sign_matrix",
     shape: "list<list<integer>>",
     id: "alternating_sign_matrix",
@@ -14,6 +15,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "GelfandTsetlinPattern",
+    readable: true,
     type: "gelfand_tsetlin_pattern",
     shape: "list<list<integer>>",
     id: "gelfand_tsetlin_pattern",
@@ -21,6 +23,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PlanePartition",
+    readable: true,
     type: "plane_partition",
     shape: "list<list<integer>>",
     id: "plane_partition",
@@ -28,6 +31,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SemistandardTableau",
+    readable: true,
     type: "semistandard_tableau",
     shape: "list<list<integer>>",
     id: "semistandard_tableau",
@@ -49,6 +53,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "StandardTableau",
+    readable: true,
     // Rows, not a flattened row word: a row word alone doesn't determine a shape (two
     // different tableaux can share one, e.g. [[1,2],[3,4]] and [[1,2,3,4]] both flatten to
     // [1,2,3,4]), so it can't stand for the tableau on its own -- fixed alongside
@@ -60,6 +65,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "StandardTableauPair",
+    readable: true,
     type: "standard_tableau_pair",
     shape: "tuple<standard_tableau, standard_tableau>",
     id: "standard_tableau_pair",

@@ -8,6 +8,7 @@ import type { Carrier } from "@notatio/structures";
 export const FINDSTAT_CARRIERS: readonly Carrier[] = [
   {
     name: "DistributionMatchHit",
+    readable: true,
     type: "distribution_match_hit",
     shape: "tuple<string, string, list<string>, number, number>",
     id: "distribution_match_hit",
@@ -15,6 +16,7 @@ export const FINDSTAT_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "FindStatHit",
+    readable: true,
     type: "find_stat_hit",
     shape: "tuple<string, string, list<string>, number, number>",
     id: "find_stat_hit",
