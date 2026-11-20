@@ -89,7 +89,7 @@ export function declineMachineAnswers(ce: Engine): void {
       [head],
       () => true,
       (native) => (ops, options) =>
-        declineMachineAnswer(ce, options.numericApproximation, () => native?.(ops, options)),
+        declineMachineAnswer(ce, options.numericApproximation, () => native?.(ops, options), ops),
       { compile: "builtin" },
     );
   }

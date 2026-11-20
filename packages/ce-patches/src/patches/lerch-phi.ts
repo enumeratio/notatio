@@ -74,18 +74,23 @@ export const lerchPhiPatch: Patch = {
       () => true,
       (native) => (ops, options) =>
         // Past a double's digits, the double kernels (the continuation past |z| = 1, complex operands) decline.
-        declineMachineAnswer(ce, options.numericApproximation, () => {
-          // Native reads a negative base to a float power as a real root.
-          if (principalAtZero(ops, wantsNumber(ops, options))) return evaluateLerch(ce, ops, true);
-          // Native reads z as a double: 1 − 1e-20 is the pole's double, and Φ there is a different number.
-          if (wantsNumber(ops, options) && unreadableNearOne(ops[0]!))
-            return lerchNearOne(ce, ops[0]!, ops[1]!, ops[2]!);
-          const answer = native?.(ops, options);
-          if (answer !== undefined && answer.operator !== "LerchPhi")
-            // Decline rather than answer an imaginary part that is rounding noise.
-            return unresolvableImaginary(ops, answer) ? undefined : answer;
-          return evaluateLerch(ce, ops, wantsNumber(ops, options)) ?? answer;
-        }),
+        declineMachineAnswer(
+          ce,
+          options.numericApproximation,
+          () => {
+            // Native reads a negative base to a float power as a real root.
+            if (principalAtZero(ops, wantsNumber(ops, options))) return evaluateLerch(ce, ops, true);
+            // Native reads z as a double: 1 − 1e-20 is the pole's double, and Φ there is a different number.
+            if (wantsNumber(ops, options) && unreadableNearOne(ops[0]!))
+              return lerchNearOne(ce, ops[0]!, ops[1]!, ops[2]!);
+            const answer = native?.(ops, options);
+            if (answer !== undefined && answer.operator !== "LerchPhi")
+              // Decline rather than answer an imaginary part that is rounding noise.
+              return unresolvableImaginary(ops, answer) ? undefined : answer;
+            return evaluateLerch(ce, ops, wantsNumber(ops, options)) ?? answer;
+          },
+          ops,
+        ),
     ),
 };
 
