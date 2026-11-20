@@ -206,7 +206,7 @@ export type Environment = "engine" | "browser" | "gpu" | "node" | "external";
  *   oracle for every other row (https://github.com/enumeratio/notatio/wiki/Namespaces §6)
  * - `native`    authored by us in TypeScript — what actually runs; stored as a POINTER,
  *   because the source lives in the repo and a copy here would rot
- * - `compiled`  produced by a compute-engine compile target (numpy, glsl, js);
+ * - `compiled`  produced by a compute-engine compile target (glsl, js);
  *   derivable live from the expression, so normally not stored at all
  * - `component` bottoms out in a web component — the head's meaning IS the rendered element
  * - `mapped`    the equivalent call in an external system; the table lives in
@@ -217,7 +217,7 @@ export type BindingOrigin = "reference" | "native" | "compiled" | "component" | 
 /** One of the several things a head is "made of". */
 export interface ReferenceBinding {
   readonly origin: BindingOrigin;
-  /** Target or language: "notatio", "typescript", "glsl", "numpy", "<graphics-box>", … */
+  /** Target or language: "notatio", "typescript", "glsl", "<graphics-box>", … */
   readonly form: string;
   readonly environment?: Environment;
   /**

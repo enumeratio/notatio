@@ -237,20 +237,12 @@
       "out": "\u001b[2mOut[3]= \u001b[0mPlus[Power[x, 2], 1]"
     },
     {
-      "in": ":form numpy",
-      "out": "\u001b[2m  form -> numpy\u001b[0m"
-    },
-    {
-      "in": "x^2 + 1",
-      "out": "\u001b[2mOut[4]= \u001b[0mx ** 2 + 1"
-    },
-    {
       "in": ":form js",
       "out": "\u001b[2m  form -> js\u001b[0m"
     },
     {
       "in": "x^2 + 1",
-      "out": "\u001b[2mOut[5]= \u001b[0m(_.x * _.x) + 1"
+      "out": "\u001b[2mOut[4]= \u001b[0m\n(() => {\n  return ((_.x * _.x) + 1);\n})()"
     },
     {
       "in": ":form inputform",
@@ -259,12 +251,12 @@
   ],
   "compile-targets": [
     {
-      "in": ":form numpy",
-      "out": "\u001b[2m  form -> numpy\u001b[0m"
+      "in": ":form js",
+      "out": "\u001b[2m  form -> js\u001b[0m"
     },
     {
       "in": "Sqrt(x^2 + 1)",
-      "out": "\u001b[2mOut[1]= \u001b[0mnp.sqrt(x ** 2 + 1)"
+      "out": "\u001b[2mOut[1]= \u001b[0m\n(() => {\n  return Math.sqrt(((_.x * _.x) + 1));\n})()"
     },
     {
       "in": ":form glsl",
@@ -272,7 +264,7 @@
     },
     {
       "in": "Sin(x) * Cos(x)",
-      "out": "\u001b[2mOut[2]= \u001b[0m_gpu_sin(x) * _gpu_cos(x)"
+      "out": "\u001b[2mOut[2]= \u001b[0m(sin(x) * cos(x))"
     },
     {
       "in": ":form inputform",
@@ -448,7 +440,7 @@
   "formats-registry": [
     {
       "in": ":formats",
-      "out": "  InputForm     .txt       text/plain  [export/import]\n  OutputForm    .          text/x-outputform  [export]\n  TeX           .tex       application/x-tex  [export/import]\n  MathML        .mml       application/mathml-presentation+xml  [export/import]\n  AsciiMath     .am        text/x-asciimath  [export/import]\n  MathJSON      .json      application/mathjson+json  [export/import]\n  WL            .wl .m     application/vnd.wolfram.wl  [export/import]\n  FullForm      .          text/x-epsil-fullform  [export/import]\n  Epsil         .epsil .ep text/x-epsil  [export/import]\n  Python        .py        text/x-python  [export]\n  GLSL          .glsl .frag x-shader/x-fragment  [export]\n  JavaScript    .js .mjs   text/javascript  [export]\n  SVG           .svg       image/svg+xml  [export/import]\n\n  export: InputForm, OutputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, Python, GLSL, JavaScript, SVG\n  import: InputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, SVG\n  (display form: inputform)"
+      "out": "  InputForm     .txt       text/plain  [export/import]\n  OutputForm    .          text/x-outputform  [export]\n  TeX           .tex       application/x-tex  [export/import]\n  MathML        .mml       application/mathml-presentation+xml  [export/import]\n  AsciiMath     .am        text/x-asciimath  [export/import]\n  MathJSON      .json      application/mathjson+json  [export/import]\n  WL            .wl .m     application/vnd.wolfram.wl  [export/import]\n  FullForm      .          text/x-epsil-fullform  [export/import]\n  Epsil         .epsil .ep text/x-epsil  [export/import]\n  GLSL          .glsl .frag x-shader/x-fragment  [export]\n  JavaScript    .js .mjs   text/javascript  [export]\n  SVG           .svg       image/svg+xml  [export/import]\n\n  export: InputForm, OutputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, GLSL, JavaScript, SVG\n  import: InputForm, TeX, MathML, AsciiMath, MathJSON, WL, FullForm, Epsil, SVG\n  (display form: inputform)"
     },
     {
       "in": ":mime image/png",

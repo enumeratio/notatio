@@ -165,18 +165,6 @@ registerFileFormat({
 });
 
 registerFileFormat({
-  name: "Python",
-  aliases: ["python", "numpy", "py"],
-  mimeTypes: ["text/x-python"],
-  extensions: ["py"],
-  binary: false,
-  // compute-engine 0.193 removed its Python target, so no source is written until one is registered.
-  encode: () => {
-    throw new Error("Python: compute-engine no longer compiles to Python");
-  },
-});
-
-registerFileFormat({
   name: "GLSL",
   aliases: ["glsl"],
   mimeTypes: ["x-shader/x-fragment"],

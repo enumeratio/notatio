@@ -37,7 +37,7 @@ export function main(argv: readonly string[] = process.argv.slice(2)): void {
   }
 
   // Read piped stdin unconditionally; runCommand uses it only when argv carries
-  // no expression (so `notatio -f numpy <<EOF …` and `echo … | notatio` both work).
+  // no expression (so `notatio -f js <<EOF …` and `echo … | notatio` both work).
   let stdin: string | undefined;
   if (stdinPiped) {
     try {

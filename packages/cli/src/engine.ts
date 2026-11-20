@@ -72,7 +72,6 @@ export const FORMS = [
   "outputform",
   "asciimath",
   "mathml",
-  "numpy",
   "glsl",
   "js",
 ] as const;
@@ -88,7 +87,6 @@ export const FORM_LABEL: Record<Form, string> = {
   outputform: "OutputForm",
   asciimath: "AsciiMath",
   mathml: "MathML",
-  numpy: "NumPy / Python",
   glsl: "GLSL",
   js: "JavaScript",
 };
@@ -103,7 +101,6 @@ const FORMAT_OF: Record<Exclude<Form, "standardform">, string> = {
   outputform: "OutputForm",
   asciimath: "AsciiMath",
   mathml: "MathML",
-  numpy: "Python",
   glsl: "GLSL",
   js: "JavaScript",
 };
@@ -131,8 +128,6 @@ export const SYNTAXES: readonly Syntax[] = ["latex", "mathjson", "wolfram", "eps
 // ones, but the sets are finite so a unique prefix (or a listed alias) resolves.
 // Wolfram's *Form symbols land on the form they correspond to (matched case-insensitively).
 const FORM_ALIASES: Record<string, Form> = {
-  python: "numpy",
-  py: "numpy",
   javascript: "js",
   latex: "tex",
   texform: "tex",
