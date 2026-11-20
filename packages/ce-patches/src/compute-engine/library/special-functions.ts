@@ -20,6 +20,7 @@ import {
   bigRealOperand,
   bigResult,
   DEFAULT_PRECISION,
+  declineMachineAnswer,
   DOUBLE_DIGITS,
 } from "../../support/precise.ts";
 import {
@@ -404,7 +405,7 @@ function numericZeta(
   // Past machine precision the double kernel reads s as the nearest double, which for s = −2 − 1e-16 is
   // the integer −2: its plan would drop terms as large as the result. Machine precision reads the double itself.
   if (ce.precision > DOUBLE_DIGITS && nearButNotInteger(s)) return undefined;
-  return checkedResult(ce, double, s, a);
+  return declineMachineAnswer(ce, true, () => checkedResult(ce, double, s, a));
 }
 
 /**
@@ -463,7 +464,9 @@ export function evaluatePolygamma(
   // double: only the bignum kernel reads it, and its answer must fit one.
   if (belowDoubleShift(z)) {
     const big = m.re >= 1 ? bigPolygamma(ce, m.re, z) : undefined;
-    return big !== undefined && Number.isFinite(big.re) && Number.isFinite(big.im) ? numberResult(ce, big) : r;
+    return big !== undefined && Number.isFinite(big.re) && Number.isFinite(big.im)
+      ? (declineMachineAnswer(ce, true, () => numberResult(ce, big)) ?? r)
+      : r;
   }
 
   const v =
@@ -477,7 +480,8 @@ export function evaluatePolygamma(
   // before this ran. Stay symbolic there instead of reporting `ComplexInfinity` for what
   // is just a lost digit budget.
   if (Number.isNaN(v.re) && z.im !== 0) return r;
-  return numberResult(ce, v);
+  // The kernels above are doubles (bigPolygamma reads its bignum back as one).
+  return declineMachineAnswer(ce, true, () => numberResult(ce, v)) ?? r;
 }
 
 export { barnesG, barnesGReal, logBarnesG, logBarnesGReal } from "../numerics/barnes-g.ts";

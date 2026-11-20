@@ -54,6 +54,22 @@ export const wantsBigDigits = (
   return !(ce.precision === DEFAULT_PRECISION && ops.some(isMachineFloat));
 };
 
+/**
+ * `compute()` for a route that may fall through to a double kernel: its answer stands unless more
+ * digits than a double's were asked for (`exceedsDoublePrecision`) and the answer carries no more
+ * than a double's, in which case the call stays unevaluated. A bignum answer, an exact one and a
+ * machine-precision call pass through. (A machine float is what `isMachineFloat` reads.)
+ */
+export function declineMachineAnswer(
+  ce: ComputeEngine,
+  numericApproximation: boolean | undefined,
+  compute: () => Expression | undefined,
+): Expression | undefined {
+  const value = compute();
+  if (value === undefined || !exceedsDoublePrecision(ce, numericApproximation)) return value;
+  return isMachineFloat(value) ? undefined : value;
+}
+
 /** An operand with a nonzero imaginary part: compute-engine's complex Gamma, Cos, … run in doubles. */
 export const hasComplexOperand = (ops: readonly Expression[]): boolean =>
   ops.some((op) => Number.isFinite(op.re) && Number.isFinite(op.im) && op.im !== 0);

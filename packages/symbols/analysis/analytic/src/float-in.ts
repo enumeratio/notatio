@@ -1,6 +1,7 @@
 import {
   asDouble,
   belowDoubleShift,
+  declineMachineAnswer,
   doublesForFloats,
   evaluateHurwitz,
   evaluateZeta,
@@ -43,6 +44,24 @@ export function declareFloatInDoubleOut(ce: Engine): void {
       [head],
       () => true,
       (native) => (ops, options) => doublesForFloats(ce, ops, options, () => native?.(ops, options)),
+      { compile: "builtin" },
+    );
+  }
+}
+
+// compute-engine's complex PolyLog, PolyGamma, LogGamma, BarnesG and Zeta, and its PolyLog past |z| = 1,
+// run in doubles whatever precision was asked for.
+const DOUBLE_KERNEL_HEADS = ["PolyLog", "PolyGamma", "LogGamma", "BarnesG", "Zeta", "HurwitzZeta"] as const;
+
+/** Past a double's digits these heads leave a call unevaluated where their kernel answers with a double. */
+export function declineMachineAnswers(ce: Engine): void {
+  for (const head of DOUBLE_KERNEL_HEADS) {
+    wrapOperator(
+      ce,
+      [head],
+      () => true,
+      (native) => (ops, options) =>
+        declineMachineAnswer(ce, options.numericApproximation, () => native?.(ops, options)),
       { compile: "builtin" },
     );
   }

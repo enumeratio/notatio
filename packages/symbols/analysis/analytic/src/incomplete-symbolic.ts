@@ -1,5 +1,5 @@
 import { finish } from "./finish.ts";
-import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
+import { isNumber, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
 import { bigRationalAt, wrapOperator } from "@notatio/engine";
 import { declined, isRealInt } from "@notatio/ce-patches";
 
@@ -102,7 +102,10 @@ function declareLerchToPolyLogIdentity(ce: ComputeEngine): void {
       if (!declined(r, "LerchPhi")) return r; // the existing evaluator already answered
       const [z, s] = ops;
       const expr = ce.function("Divide", [ce.function("PolyLog", [s, z]), z]);
-      return finish(expr, options);
+      const answer = finish(expr, options);
+      // At numeric operands PolyLog declines past a double's digits; the call then stays LerchPhi's, not a PolyLog quotient.
+      const numeric = [z, s].every((x) => Number.isFinite(x.re) && Number.isFinite(x.im));
+      return options.numericApproximation && numeric && !isNumber(answer) ? r : answer;
     },
     { arity: 3, compile: "builtin" },
   );
