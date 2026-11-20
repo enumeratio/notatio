@@ -935,7 +935,11 @@ const SPECTRUM_PRIMES: readonly number[] = [
   67108859, 67108837, 67108819, 67108777, 67108763, 67108757, 67108753, 67108747, 67108739, 67108729, 67108721,
   67108709, 67108693, 67108669, 67108667, 67108661, 67108649, 67108633, 67108597, 67108579, 67108529, 67108511,
   67108507, 67108493, 67108471, 67108463, 67108453, 67108439, 67108387, 67108373, 67108369, 67108351, 67108331,
-  67108313, 67108303, 67108289, 67108271, 67108219, 67108207, 67108201,
+  67108313, 67108303, 67108289, 67108271, 67108219, 67108207, 67108201, 67108199, 67108187, 67108183, 67108177,
+  67108127, 67108109, 67108081, 67108049, 67108039, 67108037, 67108033, 67108009, 67108007, 67108003, 67107983,
+  67107977, 67107967, 67107941, 67107919, 67107913, 67107883, 67107881, 67107871, 67107863, 67107809, 67107797,
+  67107793, 67107787, 67107773, 67107757, 67107749, 67107739, 67107737, 67107713, 67107707, 67107697, 67107673,
+  67107643, 67107641, 67107631,
 ];
 /** Bits every one of `SPECTRUM_PRIMES` exceeds. */
 const PRIME_BITS = 25;
@@ -1010,6 +1014,89 @@ const modularDerivative = (poly: MathJSON): MathJSON =>
     "j",
   );
 /**
+ * The coefficients of det(xI - M) mod `prime` for the matrix called `name`, highest power first, by Faddeev-LeVerrier as
+ * in `characteristicCoefficients` with every product reduced at once, so nothing passes 2^53 however large the integer
+ * coefficients grow. The division by k (below n, so below the prime) is the multiplication by (j prime + 1) / k, j the
+ * one value in 1 .. k - 1 that makes it exact.
+ */
+const modularCoefficients = (name: string): MathJSON =>
+  bindList(
+    "steps",
+    typedFolding(
+      bindList(
+        "product",
+        forEach(
+          vertices,
+          forEach(
+            vertices,
+            [
+              "Mod",
+              sumOver(
+                vertices,
+                ["Mod", times(["Mod", entry(name, "i", "l"), "prime"], entry("state", "l", "j")), "prime"],
+                "l",
+              ),
+              "prime",
+            ],
+            "j",
+          ),
+          "i",
+        ),
+        bind(
+          "coefficient",
+          [
+            "Mod",
+            times(
+              ["Mod", subtract(0, sumOver(vertices, entry("product", "i", "i"), "i")), "prime"],
+              [
+                "Divide",
+                add(
+                  times(
+                    sumOver(
+                      ["Range", 1, "k"],
+                      times("t", times(one(less("t", "k")), one(equals(["Mod", add(times("t", "prime"), 1), "k"], 0)))),
+                      "t",
+                    ),
+                    "prime",
+                  ),
+                  1,
+                ),
+                "k",
+              ],
+            ),
+            "prime",
+          ],
+          [
+            "Join",
+            forEach(
+              vertices,
+              forEach(
+                vertices,
+                ["Mod", add(entry("product", "i", "j"), times(one(equals("i", "j")), "coefficient")), "prime"],
+                "j",
+              ),
+              "i",
+            ),
+            [
+              "List",
+              forEach(vertices, ["If", equals("j", "k"), "coefficient", at("j", at(add("n", 1), "state"))], "j"),
+            ],
+          ],
+          "integer",
+        ),
+        "list<list<integer>>",
+      ),
+      "state",
+      "k",
+      ["Join", identityRows, ["List", forEach(vertices, 0, "j")]],
+      vertices,
+      "list<list<integer>>",
+    ),
+    ["Join", ["List", 1], at(add("n", 1), "steps")],
+    "list<list<integer>>",
+  );
+
+/**
  * `perPrime`, a list of integers over the primes of `SPECTRUM_PRIMES` with `polynomial` the characteristic
  * polynomial's coefficients reduced mod `prime`, lowest power first. The roots of the reduced polynomial are the images of
  * the eigenvalues, so it has at most as many distinct roots, and none of a lower multiplicity, than the integer one
@@ -1058,7 +1145,11 @@ const overPrimes = (name: string, perPrime: MathJSON, pick: "Max" | "Min", other
                 at("q", ["List", ...SPECTRUM_PRIMES]),
                 bindList(
                   "polynomial",
-                  forEach(polynomialPositions, ["Mod", at("j", "integral"), "prime"], "j"),
+                  bindList(
+                    "reduced",
+                    modularCoefficients(name),
+                    forEach(polynomialPositions, at(subtract(add("n", 2), "j"), "reduced"), "j"),
+                  ),
                   perPrime,
                 ),
                 "integer",
@@ -1075,53 +1166,45 @@ const overPrimes = (name: string, perPrime: MathJSON, pick: "Max" | "Min", other
   );
 /** The distinct eigenvalues of the symmetric integer matrix called `name` (its characteristic polynomial's coefficients bound as `coefficients`), mod primes; the integer route beyond the primes. */
 const distinctSpectrumValues = (name: string): MathJSON =>
-  bindList(
-    "integral",
-    ascendingCoefficients,
-    overPrimes(
-      name,
-      subtract("n", degreeOf(modularGcd("polynomial", modularDerivative("polynomial")))),
-      "Max",
-      distinctEigenvalues,
-    ),
+  overPrimes(
+    name,
+    subtract("n", degreeOf(modularGcd("polynomial", modularDerivative("polynomial")))),
+    "Max",
+    withCoefficients(name, distinctEigenvalues),
   );
 const maximumSpectrumMultiplicity = (name: string): MathJSON =>
-  bindList(
-    "integral",
-    ascendingCoefficients,
-    overPrimes(
-      name,
+  overPrimes(
+    name,
+    at(
+      1,
       at(
-        1,
-        at(
-          2,
-          typedFolding(
-            bindList(
-              "current",
-              at(1, "chain"),
+        2,
+        typedFolding(
+          bindList(
+            "current",
+            at(1, "chain"),
+            [
+              "If",
+              equals(degreeOf("current"), 0),
+              "chain",
               [
-                "If",
-                equals(degreeOf("current"), 0),
-                "chain",
-                [
-                  "List",
-                  modularGcd("current", modularDerivative("current")),
-                  forEach(polynomialPositions, ["If", equals("j", 1), add(at(1, at(2, "chain")), 1), 0], "j"),
-                ],
+                "List",
+                modularGcd("current", modularDerivative("current")),
+                forEach(polynomialPositions, ["If", equals("j", 1), add(at(1, at(2, "chain")), 1), 0], "j"),
               ],
-              "list<integer>",
-            ),
-            "chain",
-            "turn",
-            ["List", "polynomial", forEach(polynomialPositions, 0, "j")],
-            ["Range", 1, "n"],
-            "list<list<integer>>",
+            ],
+            "list<integer>",
           ),
+          "chain",
+          "turn",
+          ["List", "polynomial", forEach(polynomialPositions, 0, "j")],
+          ["Range", 1, "n"],
+          "list<list<integer>>",
         ),
       ),
-      "Min",
-      maximumMultiplicity,
     ),
+    "Min",
+    withCoefficients(name, maximumMultiplicity),
   );
 
 /** The Laplacian, degrees on the diagonal and minus the adjacency off it. */
@@ -1136,18 +1219,17 @@ const signlessLaplacianRows: MathJSON = forEach(
   forEach(vertices, ["If", equals("i", "j"), degree("i"), adjacent("i", "j")], "j"),
   "i",
 );
-const withMatrix = (name: string, rows: MathJSON, body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+const withMatrixRows = (name: string, rows: MathJSON, body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
   withDegrees(
-    bindList(
-      "adjacency",
-      adjacencyMatrix,
-      bindList(name, rows, withCoefficients(name, body), "list<list<integer>>"),
-      "list<list<integer>>",
-    ),
+    bindList("adjacency", adjacencyMatrix, bindList(name, rows, body, "list<list<integer>>"), "list<list<integer>>"),
     otherwise,
   );
+const withMatrix = (name: string, rows: MathJSON, body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
+  withMatrixRows(name, rows, withCoefficients(name, body), otherwise);
 const withAdjacencySpectrum = (body: MathJSON): MathJSON => withAdjacency(withCoefficients("adjacency", body));
 const withLaplacianSpectrum = (body: MathJSON): MathJSON => withMatrix("laplacian", laplacianRows, body);
+/** The distinct and repeated eigenvalues are read mod primes, which bind the coefficients themselves only where the integer route answers. */
+const withLaplacianModularSpectrum = (body: MathJSON): MathJSON => withMatrixRows("laplacian", laplacianRows, body);
 const withSignlessSpectrum = (body: MathJSON, otherwise: MathJSON = 0): MathJSON =>
   withMatrix("signless", signlessLaplacianRows, body, otherwise);
 const withEigenvalueSigns = (body: MathJSON): MathJSON =>
@@ -1166,13 +1248,15 @@ const distanceLaplacianRows: MathJSON = forEach(
   "i",
 );
 /** `body` over the matrix called `name`, for a connected graph; any other gives 0. */
-const withConnectedSpectrum = (name: string, rows: MathJSON, body: MathJSON): MathJSON =>
+const withConnectedSpectrum = (name: string, rows: MathJSON, body: MathJSON, modular = false): MathJSON =>
   withDistances([
     "If",
     equals(componentsIn("distances"), 1),
     name === "distances"
-      ? withCoefficients(name, body)
-      : bindList(name, rows, withCoefficients(name, body), "list<list<integer>>"),
+      ? modular
+        ? body
+        : withCoefficients(name, body)
+      : bindList(name, rows, modular ? body : withCoefficients(name, body), "list<list<integer>>"),
     0,
   ]);
 
@@ -2933,25 +3017,25 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   spectrumStat(
     "DistinctEigenvalueCount",
     "The distinct eigenvalues of the adjacency matrix.",
-    withAdjacencySpectrum(distinctSpectrumValues("adjacency")),
+    withAdjacency(distinctSpectrumValues("adjacency")),
     `FindStat's St000452. The characteristic polynomial has as many distinct roots as its degree less that of its greatest common divisor with its derivative. ${NO_VERTICES}`,
   ),
   spectrumStat(
     "DistinctLaplacianEigenvalueCount",
     "The distinct eigenvalues of the Laplacian.",
-    withLaplacianSpectrum(distinctSpectrumValues("laplacian")),
+    withLaplacianModularSpectrum(distinctSpectrumValues("laplacian")),
     `FindStat's St000453. ${NO_VERTICES}`,
   ),
   spectrumStat(
     "MaximumEigenvalueMultiplicity",
     "The greatest multiplicity of an eigenvalue of the adjacency matrix.",
-    withAdjacencySpectrum(maximumSpectrumMultiplicity("adjacency")),
+    withAdjacency(maximumSpectrumMultiplicity("adjacency")),
     `FindStat's St000776. A root of multiplicity m is a root of the m - 1 greatest common divisors of the polynomial with its derivatives in turn. ${NO_VERTICES}`,
   ),
   spectrumStat(
     "MaximumLaplacianEigenvalueMultiplicity",
     "The greatest multiplicity of an eigenvalue of the Laplacian.",
-    withLaplacianSpectrum(maximumSpectrumMultiplicity("laplacian")),
+    withLaplacianModularSpectrum(maximumSpectrumMultiplicity("laplacian")),
     `FindStat's St000774. ${NO_VERTICES}`,
   ),
   stat(
@@ -2975,13 +3059,23 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   spectrumStat(
     "DistinctDistanceLaplacianEigenvalueCount",
     "The distinct eigenvalues of the distance Laplacian.",
-    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, distinctSpectrumValues("distanceLaplacian")),
+    withConnectedSpectrum(
+      "distanceLaplacian",
+      distanceLaplacianRows,
+      distinctSpectrumValues("distanceLaplacian"),
+      true,
+    ),
     `FindStat's St000777, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
   ),
   spectrumStat(
     "MaximumDistanceLaplacianEigenvalueMultiplicity",
     "The greatest multiplicity of an eigenvalue of the distance Laplacian.",
-    withConnectedSpectrum("distanceLaplacian", distanceLaplacianRows, maximumSpectrumMultiplicity("distanceLaplacian")),
+    withConnectedSpectrum(
+      "distanceLaplacian",
+      distanceLaplacianRows,
+      maximumSpectrumMultiplicity("distanceLaplacian"),
+      true,
+    ),
     `FindStat's St000771, of a connected graph; a disconnected graph gives 0. ${NO_VERTICES}`,
   ),
   stat(
