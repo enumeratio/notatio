@@ -95,7 +95,6 @@ type Form =
   | "asciimath"
   | "mathml"
   | "wolfram"
-  | "python"
   | "glsl"
   | "gpushader"
   | "javascript";
@@ -191,8 +190,8 @@ function replaceAt(tree: unknown, path: string, replacement: unknown): unknown {
 
 // The code forms, each the source a compilation target writes (`out-engine.ts`'s
 // `codeSources`, or the kernel's display).
-const CODE_FORMS = new Set<Form>(["python", "glsl", "javascript", "gpushader"]);
-type CodeForm = "python" | "glsl" | "javascript" | "gpushader";
+const CODE_FORMS = new Set<Form>(["glsl", "javascript", "gpushader"]);
+type CodeForm = "glsl" | "javascript" | "gpushader";
 
 // The display forms offered by the In/Out menu.
 const FORMS: readonly Form[] = [
@@ -206,7 +205,6 @@ const FORMS: readonly Form[] = [
   "asciimath",
   "mathml",
   "wolfram",
-  "python",
   "javascript",
   "glsl",
   "gpushader",
@@ -222,7 +220,6 @@ const FORM_LABEL: Record<Form, string> = {
   asciimath: "AsciiMathForm",
   mathml: "MathMLForm",
   wolfram: "WolframFullForm",
-  python: "PythonForm",
   javascript: "JavaScriptForm",
   glsl: "GLSLForm",
   gpushader: "GPUShaderForm",
@@ -235,7 +232,6 @@ const FORM_LANG: Partial<Record<Form, string>> = {
   asciimath: "asciimath",
   mathml: "xml",
   wolfram: "wolfram",
-  python: "python",
   javascript: "javascript",
   glsl: "glsl",
   gpushader: "glsl",
@@ -277,7 +273,7 @@ export class NotatioOut extends LitElement {
     expect: { type: String },
     /** Mark an `expect` mismatch as a known gap — shown as a note rather than a failure. */
     planned: { type: Boolean },
-    /** The representation to show, e.g. `standard`, `traditional`, `fullform`, `numpy`. */
+    /** The representation to show, e.g. `standard`, `traditional`, `fullform`, `glsl`. */
     form: { type: String, reflect: true },
     /** Row label, e.g. `In` or `Out`. */
     label: { type: String, reflect: true },

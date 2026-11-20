@@ -19,7 +19,6 @@ const ce = new ComputeEngine();
 const box = (mj: unknown) => ce.box(mj as Parameters<ComputeEngine["box"]>[0]);
 
 test("alias, extension, and MIME resolution", () => {
-  expect(getFormat("numpy")?.name).toBe("Python");
   expect(getFormat("WolframLanguage")?.name).toBe("WL");
   expect(fileFormat("out/plot.png")?.name).toBe("PNG");
   expect(mimeTypeToFormatList("image/png")).toEqual(["PNG"]);

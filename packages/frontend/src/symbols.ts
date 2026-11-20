@@ -1126,7 +1126,6 @@ const FORM_IDS: Readonly<Record<string, string>> = {
   AsciiMathForm: "asciimath",
   MathMLForm: "mathml",
   WolframFullForm: "wolfram",
-  PythonForm: "python",
   JavaScriptForm: "javascript",
 };
 const formId = (value: Json): string | undefined => {

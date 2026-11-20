@@ -46,17 +46,14 @@ Out[1]= x ^ 2 + 1
 In[2]:= :form wolfram
 In[2]:= x^2 + 1
 Out[2]= Plus[Power[x, 2], 1]
-In[3]:= :form numpy
+In[3]:= :form js
 In[3]:= x^2 + 1
-Out[3]= x ** 2 + 1
-In[4]:= :form js
-In[4]:= x^2 + 1
-Out[4]= (_.x * _.x) + 1
+Out[3]= (_.x * _.x) + 1
 ```
 
 Forms: `inputform` (the default), `standardform`, `tex`, `mathjson`, `wolfram`, `epsil`,
-`outputform`, `asciimath`, `mathml`, `numpy`, `glsl`, `js`. Aliases: `text` is
-`outputform`, `wl`/`fullform` are `wolfram`, `texform`/`latex` are `tex`, `py`/`python` are `numpy`.
+`outputform`, `asciimath`, `mathml`, `glsl`, `js`. Aliases: `text` is
+`outputform`, `wl`/`fullform` are `wolfram`, `texform`/`latex` are `tex`.
 
 `standardform` is the notation the web shows, laid out on character cells: stacked fractions,
 raised scripts, fenced matrices. On a terminal it is styled (variables slanted, numbers
@@ -66,7 +63,7 @@ colored, a `StyleBox`'s weight and color); piped, or with `NO_COLOR` set, it is 
 PascalCase heads and option names, and normalises the tree (`x - 2` for `x + -2`). `epsil` is
 the raw serialisation of the tree, with compute-engine's camelCase library names.
 
-The code forms (`numpy`/`glsl`/`js`) are real compute-engine
+The code forms (`glsl`/`js`) are real compute-engine
 compilation targets — they only apply to numeric/function expressions.
 
 ## History and variables
@@ -205,7 +202,6 @@ it prints the result and exits — ideal for scripts and pipes. Try it in the
 ```bash
 notatio "Binomial(10, 3)"        # 120
 notatio -f wolfram "x^2 + 1"     # Plus[Power[x, 2], 1]
-notatio -f numpy "Sin(x) + 1"    # np.sin(x) + 1
 echo "2 + 40" | notatio          # 42
 notatio -i wolfram "Inversions[List[3,1,2]]"   # 2
 ```

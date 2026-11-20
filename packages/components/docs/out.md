@@ -45,7 +45,7 @@ drawn by the build, so it is in the page before any script runs.
 <template #description>
 The In/Out label shows the current form and opens a menu of forms —
 StandardForm, TraditionalForm, MatrixForm, TreeForm, FullForm, TeXForm, WolframFullForm,
-PythonForm, GPUShaderForm — plus copy. The source-shaped forms (Full/TeX/Wolfram/Python) render
+JavaScriptForm, GLSLForm, GPUShaderForm — plus copy. The source-shaped forms (Full/TeX/Wolfram/JavaScript/GLSL) render
 in a <code>&lt;notatio-code&gt;</code> box.
 </template>
 <notatio-out value="\binom{n}{k}" label="Out" />
@@ -95,15 +95,6 @@ via <code>@notatio/wolfram</code> — the same serializer the reference
 validation loop uses. Shown in a <code>&lt;notatio-code&gt;</code> box.
 </template>
 <notatio-out value='["Binomial","n","k"]' format="mathjson" form="wolfram" label="Out" />
-</Story>
-
-<Story
-  title="PythonForm (NumPy)">
-<template #description>
-compute-engine's Python target emits NumPy source (<code>x ** 2 + np.sin(x)</code>).
-Non-numeric results (lists, comparisons) have no NumPy form.
-</template>
-<notatio-out value='["Add",["Sin","x"],["Power","x",2]]' format="mathjson" form="python" label="Out" />
 </Story>
 
 <Story

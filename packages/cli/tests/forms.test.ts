@@ -15,7 +15,6 @@ test("inputform/tex/mathjson/wolfram forms", () => {
 test("code targets compile a numeric expression", () => {
   const e = box(["Add", ["Power", "x", 2], 1]);
   expect(renderForm(e, "js")).toMatch(/x/);
-  expect(renderForm(e, "numpy")).toMatch(/x/);
 });
 
 test("evaluate records history and honours % references", () => {

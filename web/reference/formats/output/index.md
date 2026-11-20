@@ -23,7 +23,6 @@ string).
   Listed in the order the CLI's `-f` names them (`FORMS`):
 
   - [Wolfram FullForm](/reference/formats/output/wolfram) — Wolfram Language `Head[…]`.
-  - [NumPy](/reference/formats/output/numpy) — Python/NumPy source.
   - [GLSL](/reference/formats/output/glsl) — GLSL ES 3.00 (WebGL2) shader source, and **GPUShaderForm**,
     the whole shader a GPU path here would run for the expression.
   - [JavaScript](/reference/formats/output/javascript) — JS source (the default eval target).
@@ -31,7 +30,7 @@ string).
 ## On the code forms
 
 A code form is a _translation_, and translations aren't always faithful — Wolfram
-rounds half-to-even, NumPy has no rationals, and so on. Where that happens we flag
+rounds half-to-even, JavaScript has no rationals, and so on. Where that happens we flag
 it. The longer-term aim is to **compile into something slightly different** so the
 result matches compute-engine's semantics; until then, the alterations and
 footguns are documented on each page.

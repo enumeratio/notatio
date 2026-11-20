@@ -148,7 +148,6 @@ export const oneLine = (json: MathJsonExpression): string =>
 // value so the classes aren't tree-shaken out of the bundle. JavaScript is a
 // code form too but uses the free `compile().code` path (see #codeSources).
 const CODE_TARGETS = {
-  python: "PythonTarget",
   glsl: "GLSLTarget",
 } as const;
 export type CodeForm = keyof typeof CODE_TARGETS | "javascript" | "gpushader";

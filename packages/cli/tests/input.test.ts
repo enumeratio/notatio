@@ -32,7 +32,6 @@ test("the fallback overrides the default for bare input", () => {
 test("resolveForm / resolveSyntax accept full names, aliases, and unique prefixes", () => {
   expect(resolveForm("wolfram")).toBe("wolfram");
   expect(resolveForm("wolf")).toBe("wolfram");
-  expect(resolveForm("python")).toBe("numpy"); // alias
   expect(resolveForm("w")).toBe("wolfram"); // the only form that starts with w
   expect(resolveForm("m")).toBeUndefined(); // ambiguous: mathjson / mathml
   expect(resolveSyntax("w")).toBe("wolfram");

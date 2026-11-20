@@ -10,10 +10,9 @@ import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
 import { toGlslFn } from "./plot-compile.ts";
 
-export type CodeForm = "python" | "glsl" | "javascript" | "gpushader";
+export type CodeForm = "glsl" | "javascript" | "gpushader";
 
-/** `json`'s source in each code form that can compile it. compute-engine 0.193 removed its Python
- *  target, so `python` has no source. A decline throws (`fallback: false`), where the default hands
+/** `json`'s source in each code form that can compile it. A decline throws (`fallback: false`), where the default hands
  *  back an interpreter with no `code`. */
 export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<CodeForm, string>> {
   const out: Partial<Record<CodeForm, string>> = {};

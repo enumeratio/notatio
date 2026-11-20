@@ -30,7 +30,7 @@ node packages/cli/bin/notatio.mjs "Binomial(10, 3)"
 the expression explicitly. With no expression on a TTY it drops into the REPL.
 
 The full form/syntax names are `inputform`, `tex`, `mathjson`, `wolfram`, `epsil`,
-`numpy`, `glsl`, `js` (forms) and `latex`, `mathjson`, `wolfram`, `epsil`
+`glsl`, `js` (forms) and `latex`, `mathjson`, `wolfram`, `epsil`
 (syntaxes) — but any **unambiguous prefix** works, so `-f wolf`, `-f math`, and
 `-i w` all resolve.
 
@@ -45,10 +45,9 @@ on stdin, which needs no escaping at all:
 ```bash
 notatio '$\frac{d}{dx}\sin(x^2)$'    # 2 * x * Cos(x ^ 2)
 
-notatio -i latex -f numpy <<'EOF'
+notatio -i latex -f js <<'EOF'
 \sqrt{x^2 + 1}
 EOF
-# np.sqrt(x ** 2 + 1)
 ```
 
 A quoted heredoc (`<<'EOF'`) is literal — the backslashes reach `notatio` intact.

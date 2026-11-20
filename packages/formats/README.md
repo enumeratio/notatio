@@ -1,7 +1,7 @@
 # @notatio/formats
 
 A Wolfram-style format registry — `Import`/`Export` over MathJSON, Wolfram Language, TeX,
-AsciiMath, MathML, code targets (Python/JS/GLSL), and images. Reach for this when
+AsciiMath, MathML, code targets (JS/GLSL), and images. Reach for this when
 you have a boxed expression and need it as text in some notation, or text in some
 notation and need it back as an expression.
 
@@ -37,12 +37,10 @@ exportTo(box(["Binomial", 10, 3]), "WL"); // "Binomial[10, 3]"
 exportTo(box(["Add", ["Power", "x", 2], 1]), "JavaScript"); // contains "x"
 importFrom("Binomial[10, 3]", "WL"); // ["Binomial", 10, 3]
 
-getFormat("numpy")?.name; // "Python"
 fileFormat("out/plot.png")?.name; // "PNG"
 ```
 
-A format name resolves case-insensitively and by alias (`numpy` → `Python`,
-`WolframLanguage` → `WL`). Text formats consume a boxed compute-engine expression; image
+A format name resolves case-insensitively and by alias (`WolframLanguage` → `WL`). Text formats consume a boxed compute-engine expression; image
 formats consume an SVG string — the registry stays value-agnostic about which.
 
 ## Graphics as values

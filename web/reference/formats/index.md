@@ -33,7 +33,7 @@ output cell), including code forms whose translations carry footguns.
 - [MathML](/reference/formats/output/mathml) — presentation MathML, the one text form with
   a page of its own because it is export-only: nothing parses it back.
 - Code forms (a language each, with an editable try-it cell + footguns):
-  [Wolfram FullForm](/reference/formats/output/wolfram), [NumPy](/reference/formats/output/numpy),
+  [Wolfram FullForm](/reference/formats/output/wolfram),
   [GLSL](/reference/formats/output/glsl),
   [JavaScript](/reference/formats/output/javascript).
 
