@@ -5,7 +5,7 @@ import {
   type EvaluateOptions,
   type Expr,
   operandsOf,
-  widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 import { finish } from "./distributions.ts";
@@ -205,7 +205,7 @@ const medianOf = (ce: Engine, dist: Expr, options: EvaluateOptions): Expr | unde
  *  ahead of whatever handles `Median` of data. */
 export function declareMedian(ce: Engine): void {
   const isLaw = (op: Expr): boolean => op.operator.endsWith("Distribution");
-  widenSignature(ce, "Median", "(distribution+) -> number", (op) => !isLaw(op));
+  widenSignatureKeepingNative(ce, "Median", "(distribution+) -> number", (op) => !isLaw(op));
   wrapOperator(
     ce,
     ["Median"],

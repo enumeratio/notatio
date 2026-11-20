@@ -9,7 +9,7 @@ signatures:
   - call: Union(a, b, …)
     description: The union of the argument collections, sorted and de-duplicated.
     library: enumeratio-combinatorics
-    type: (any+) -> collection
+    type: ((any+) -> collection) & ((any+) -> set)
     overrides: compute-engine
 seeAlso:
   - Intersection

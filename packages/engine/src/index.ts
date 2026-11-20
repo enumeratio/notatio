@@ -239,6 +239,12 @@ export { isOptionList, optionName, optionsOf, ruleOf, type Split, withOptions } 
 export { checkpoint, DeadlineExceededError, withDeadline } from "./deadline.ts";
 export { defineOverload, joinSignatures, type Overload, type OverloadTable, overloadTable } from "./overloads.ts";
 
+const PLAINLY_WIDENED = new Set<string>();
+
+/** Heads a plain `widenSignature` has been called on, in any engine of this process; a census
+ *  test holds it to the heads that cannot yet keep their native signature. */
+export const plainlyWidenedHeads = (): ReadonlySet<string> => PLAINLY_WIDENED;
+
 /**
  * Widen the signature of an operator the engine already defines, in place, so arguments its
  * native declaration would reject at boxing reach `evaluate` — where a `wrapOperator` handler
@@ -258,7 +264,23 @@ export function widenSignature(
   signature: string,
   nativeAccepts?: (op: Expression) => boolean,
 ): void {
+  PLAINLY_WIDENED.add(name);
   addHeadSignature(ce, name, signature, nativeAccepts);
+}
+
+/**
+ * `widenSignature` that adds `signature` as one more overload and keeps the head's own signature
+ * (and any earlier widening) whole. `widenSignature` joins positionally, so a native result like
+ * `number` becomes `any` and a generic native is replaced outright; here a native-typed call still
+ * types as natively. Use it unless a native-typed call must mean something else on our engine.
+ */
+export function widenSignatureKeepingNative(
+  ce: ComputeEngine,
+  name: string,
+  signature: string,
+  nativeAccepts?: (op: Expression) => boolean,
+): void {
+  addHeadSignature(ce, name, signature, nativeAccepts, true);
 }
 
 /**

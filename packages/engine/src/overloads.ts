@@ -269,10 +269,11 @@ export function addHeadSignature(
   head: string,
   signature: string,
   nativeAccepts?: (op: Expression) => boolean,
+  keepNative = false,
 ): boolean {
   const table = tableOf(ce, head);
   if (table === undefined) return false;
-  table.base = widenedSignature(ce, table.base, signature);
+  table.base = keepNative ? joinSignatures([table.base, signature]) : widenedSignature(ce, table.base, signature);
   if (nativeAccepts !== undefined) table.gates.push(nativeAccepts);
   install(ce, head, table, true);
   return true;

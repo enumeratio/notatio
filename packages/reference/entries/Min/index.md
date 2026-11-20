@@ -8,11 +8,6 @@ signatures:
     description: the smallest of two or more values.
   - call: Min(list)
     description: the smallest value in a list.
-  - call: Min()
-    description: the identity element $+\infty$, for a call with no arguments at all.
-    library: enumeratio-combinatorics
-    type: (any*) -> any
-    overrides: enumeratio-analytic
   - call: Min(a, b, …)
     description: The smallest of its arguments.
     library: enumeratio-analytic
@@ -21,12 +16,12 @@ signatures:
   - call: Min(a, b, …)
     description: for values of any ordered type, not just numbers -- the meet, in a lattice that is not a total order.
     library: enumeratio-structures
-    type: (any*) -> any
-    overrides: enumeratio-combinatorics
+    type: ((any+) -> any) & ((value+) -> number)
+    overrides: enumeratio-analytic
   - call: Min(finset)
     description: the smallest member of a [[Finset]].
     library: enumeratio-combinatorics
-    type: (any*) -> any
+    type: ((any+) -> any) & ((value+) -> number)
     overrides: enumeratio-structures
     on:
       - Finset

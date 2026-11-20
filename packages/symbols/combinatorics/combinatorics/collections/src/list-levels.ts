@@ -9,7 +9,7 @@ import {
   operandsOf,
   stringAt,
   symbolNameOf,
-  widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 
@@ -264,7 +264,7 @@ export const positionsOf = (expr: Expr, value: Expr, first = false): number[][] 
 export function declareListLevelHeads(ce: Engine): void {
   // Partition(list, {n1, n2, …}, offset): a list of sizes cuts a rank-k array into
   // rectangular blocks, `offset` either a shared scalar or a per-dimension list.
-  widenSignature(ce, "Partition", "(any, any, any?, any?, any?) -> any");
+  widenSignatureKeepingNative(ce, "Partition", "(any, any, any?, any?, any?) -> any");
   wrapOperator(
     ce,
     ["Partition", 1, 1],
@@ -321,7 +321,7 @@ export function declareListLevelHeads(ce: Engine): void {
   // Flatten(list, PositiveInfinity): an explicit infinite depth, same as the (already
   // fully-flattening) default — compute-engine's depth parameter wants a plain integer.
   // `PositiveInfinity` boxes as a number (re === Infinity), not a symbol.
-  widenSignature(ce, "Flatten", "(any, any?) -> any");
+  widenSignatureKeepingNative(ce, "Flatten", "(any, any?) -> any");
   wrapOperator(
     ce,
     ["Flatten", 1, 1],

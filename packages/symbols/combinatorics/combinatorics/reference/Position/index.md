@@ -7,7 +7,7 @@ signatures:
   - call: Position(collection, value)
     description: every position `value` occurs at, each wrapped in its own $List$.
     library: enumeratio-combinatorics
-    type: (indexed_collection<any>, any) -> list<integer> | list<list<integer>>
+    type: "((indexed_collection<T>, predicate: (T) any -> boolean) -> list<integer> where T: any) & ((indexed_collection<any>, any) -> list<integer> | list<list<integer>>)"
     overrides: compute-engine
 seeAlso:
   - IndexOf

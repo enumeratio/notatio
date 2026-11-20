@@ -9,7 +9,7 @@ signatures:
   - call: Ordering(collection, n)
     description: just the first `n` indices of the full ordering; a negative `n` takes the last `|n|` (the largest elements); `{m, n}` takes positions `m` through `n` of the full ordering; `UpTo(n)` caps at `n` without erroring on a shorter collection.
     library: enumeratio-combinatorics
-    type: (indexed_collection<any>, any?, any?) -> list<integer>
+    type: "((indexed_collection<T>, order: (((T) any -> unknown) | ((any, any) any -> boolean | number))?) -> list<integer> where T: any) & ((indexed_collection<any>, any?, any?) -> list<integer>)"
     overrides: compute-engine
   - call: Ordering(collection, All, Greater)
     description: every index, ordered descending rather than ascending.

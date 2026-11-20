@@ -9,7 +9,7 @@ signatures:
   - call: Unique(xs, test)
     description: as above, but two elements count as duplicates when $test$ holds for them, not just when they're structurally equal.
     library: enumeratio-combinatorics
-    type: (collection<any>, function?) -> list<any>
+    type: "((T) -> T where T: string) & ((collection<T>) -> list<T> where T: any) & ((collection<any>, function?) -> list<any>)"
     overrides: compute-engine
 names:
   wolfram: DeleteDuplicates

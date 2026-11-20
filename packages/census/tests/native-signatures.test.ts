@@ -1,19 +1,21 @@
-// A head compute-engine ships keeps its signature on the declared engine, or the change is
-// deliberate: a replaced signature drops compute-engine's overloads and generics (a `Map`
-// lambda's parameter stops being typed from its collection; interpreted calls get several
-// times slower). Either the native signature is kept whole as one overload, or the head is
-// listed here with why, and its widening still takes every call the native one takes.
+// A head compute-engine ships keeps its signature on the declared engine: a widening adds an
+// overload and keeps the native signature whole. A replaced signature drops compute-engine's
+// overloads and generics (a `Map` lambda's parameter stops being typed from its collection,
+// `First` of a `list<integer>` stops typing as an integer; interpreted calls get several times
+// slower). `NOT_YET_KEPT` lists the heads not yet converted; their widening still takes every
+// call the native one takes.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
+import { plainlyWidenedHeads } from "@notatio/engine";
 import { bindings, fullEngine } from "../src/engine.ts";
 
 const ARGUMENTS = "an extra optional argument, as Wolfram's head takes";
 const DOMAIN = "a wider operand domain (any number, a carrier or a complex value) than the native integer or real";
 const COLLECTIONS = "Wolfram's wider collection and result shapes";
 
-/** Heads whose declared signature replaces compute-engine's, and why. */
-const DELIBERATE: Readonly<Record<string, string>> = Object.fromEntries([
+/** Heads whose widening still replaces the native signature, and why. Only ever shrinks. */
+const NOT_YET_KEPT: Readonly<Record<string, string>> = Object.fromEntries([
   ...[
     "BellNumber",
     "BernoulliB",
@@ -70,23 +72,17 @@ const DELIBERATE: Readonly<Record<string, string>> = Object.fromEntries([
     "MatrixPower",
     "Sign",
     "Tanh",
-    "Min",
-    "Max",
   ].map((head) => [head, DOMAIN]),
-  ...[
+  // Price: `First`/`Last` of a `list<integer>` does not type as an integer on our engine.
+  [
     "First",
+    "reads the first operand of an expression that is not a collection; native's collection overload types an unknown operand as a collection",
+  ],
+  [
     "Last",
-    "Flatten",
-    "Partition",
-    "Ordering",
-    "Histogram",
-    "Unique",
-    "Position",
-    "Mean",
-    "Median",
-    "Union",
-    "Random",
-  ].map((head) => [head, COLLECTIONS]),
+    "reads the last operand of an expression that is not a collection; native's collection overload types an unknown operand as a collection",
+  ],
+  ...["Histogram", "Random"].map((head) => [head, COLLECTIONS]),
 ]);
 
 interface Parameter {
@@ -99,6 +95,7 @@ interface Shape {
   readonly variadicArg?: Parameter;
   readonly variadicMin?: number;
   readonly typeParams?: unknown[];
+  readonly result?: unknown;
 }
 
 const bare = new ComputeEngine();
@@ -142,30 +139,53 @@ const keepsNative = (native: string, declared: string): boolean => {
   return members(native).every((member) => kept.has(unwrap(member)));
 };
 
-/** A declared signature takes every call arity the native one takes, each operand in a type the native one takes.
- *  A native signature of several overloads is not compared overload by overload. */
-function acceptsNative(native: string, declared: string): boolean {
-  // Several overloads, or a zero-argument random form that is an overload of its own.
-  if (members(native).length > 1 || native.includes(") random")) return true;
-  const overloads = members(declared).map(unwrap);
-  return overloads.some((overload) => acceptsShape(native, overload));
+/** A type parameter erased to its bound (`any` when unbound): `T` in a native parameter stands for
+ *  every type it can be instantiated with, so the declared parameter must take the bound itself.
+ *  Comparing erased forms is sound for the question asked here, whether a native call is still
+ *  accepted, and needs no unifying of `T` per call. */
+function erase(type: unknown, bounds: ReadonlyMap<string, unknown>): unknown {
+  if (Array.isArray(type)) return type.map((t) => erase(t, bounds));
+  if (typeof type !== "object" || type === null) return type;
+  const node = type as { kind?: string; name?: string };
+  if (node.kind === "variable" && node.name !== undefined) return bounds.get(node.name) ?? "any";
+  return Object.fromEntries(Object.entries(type).map(([key, value]) => [key, erase(value, bounds)]));
 }
 
-function acceptsShape(native: string, declared: string): boolean {
-  const n = bare.type(native as never).type as Shape;
-  const d = full.type(declared as never).type as Shape;
+/** An overload's shape with its type parameters erased. */
+function shapeOf(ce: ComputeEngine, overload: string): Shape {
+  const shape = ce.type(overload as never).type as Shape;
+  const bounds = new Map(
+    ((shape.typeParams ?? []) as { name: string; bound?: string }[]).map((p) => [p.name, p.bound ?? "any"]),
+  );
+  return erase(shape, bounds) as Shape;
+}
+
+/** A declared signature takes every call arity the native one takes, each operand in a type the native one takes:
+ *  each native overload (a zero-argument random form is an overload of its own, not compared) needs
+ *  some declared overload that accepts it. */
+function acceptsNative(native: string, declared: string): boolean {
+  const overloads = members(declared).map((member) => shapeOf(full, unwrap(member)));
+  return members(native)
+    .filter((member) => !member.includes(") random"))
+    .map((member) => shapeOf(bare, unwrap(member)))
+    .every((own) => overloads.some((overload) => acceptsShape(own, overload)));
+}
+
+function acceptsShape(n: Shape, d: Shape): boolean {
   if (n.kind !== "signature" || d.kind !== "signature") return false;
   const fixed = (s: Shape): Parameter[] => [...(s.args ?? []), ...(s.optArgs ?? [])];
   const declaredAt = (i: number): Parameter | undefined => fixed(d)[i] ?? d.variadicArg;
   if ((d.args?.length ?? 0) > (n.args?.length ?? 0)) return false;
   if (n.variadicArg !== undefined && d.variadicArg === undefined) return false;
+  // A native result the declared one doesn't cover is a call that now answers another type
+  // (`Unique` of a string: native's string, ours a list).
+  if (!bare.type(n.result as never).matches(full.type(d.result as never))) return false;
   const count = fixed(n).length + (n.variadicArg === undefined ? 0 : 1);
   if (d.variadicArg === undefined && fixed(d).length < fixed(n).length) return false;
   for (let i = 0; i < count; i++) {
     const own = fixed(n)[i] ?? n.variadicArg!;
     const wider = declaredAt(i);
     if (wider === undefined) return false;
-    if (n.typeParams?.length) continue;
     if (!bare.type(own.type as never).matches(full.type(wider.type as never))) return false;
   }
   return true;
@@ -174,7 +194,7 @@ function acceptsShape(native: string, declared: string): boolean {
 test("a head with a native signature keeps it, or is a deliberate widening that takes every native call", () => {
   const replaced = changed.filter((n) => !keepsNative(signatureOf(bare, n)!, signatureOf(full, n)!));
   expect(
-    replaced.filter((n) => DELIBERATE[n] === undefined),
+    replaced.filter((n) => NOT_YET_KEPT[n] === undefined),
     "replaces the native signature and is not listed as deliberate",
   ).toEqual([]);
   expect(
@@ -185,5 +205,18 @@ test("a head with a native signature keeps it, or is a deliberate widening that 
 
 test("the deliberate list names only heads that still replace the native signature", () => {
   const replaced = new Set(changed.filter((n) => !keepsNative(signatureOf(bare, n)!, signatureOf(full, n)!)));
-  expect(Object.keys(DELIBERATE).filter((n) => !replaced.has(n))).toEqual([]);
+  expect(Object.keys(NOT_YET_KEPT).filter((n) => !replaced.has(n))).toEqual([]);
+});
+
+/** Heads widened with plain `widenSignature` that write native's signature into the request. */
+const SPELLS_NATIVE = new Set(["Map", "Fold", "Filter", "Join"]);
+
+test("a plain widening of a head with a native signature is a listed NOT_YET_KEPT head", () => {
+  // Widen with `widenSignatureKeepingNative` unless a native-typed call must mean something else.
+  const native = new Set(names().filter((n) => signatureOf(bare, n) !== undefined));
+  expect(
+    [...plainlyWidenedHeads()]
+      .filter((n) => native.has(n) && NOT_YET_KEPT[n] === undefined && !SPELLS_NATIVE.has(n))
+      .toSorted(),
+  ).toEqual([]);
 });
