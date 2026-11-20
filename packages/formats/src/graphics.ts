@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { widenSignature, wrapOperator } from "@notatio/engine";
+import { widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 
 // Graphics as *values*: an `Image` head, and a `Rasterize` that makes one.
 //
@@ -176,7 +176,7 @@ export { GRAPHICS_OPTIONS } from "./graphics-options.ts";
  * mirrors the engine's, so nothing else changes.
  */
 export function declareHistogram(ce: ComputeEngine): void {
-  widenSignature(ce, "Histogram", "(collection<any>, (list<number> | number)?) -> any");
+  widenSignatureKeepingNative(ce, "Histogram", "(collection<any>, (list<number> | number)?) -> any");
   wrapOperator(
     ce,
     ["Histogram", [1]],

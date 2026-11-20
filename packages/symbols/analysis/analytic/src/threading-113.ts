@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, threadOverLists, widenSignature, wrapOperator } from "@notatio/engine";
+import { operandsOf, threadOverLists, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 import type { EvalOptions, NativeEval } from "@notatio/ce-patches";
 
 /** No free variable anywhere in `expr` — a plain number, `Pi`/`ExponentialE`, or a closed
@@ -58,7 +58,7 @@ export function declareThreading113(ce: ComputeEngine): void {
   // including a compound one like `Exp(Sqrt(2))`, which native already reduces
   // internally; only a List, or an expression with a genuine free variable in it,
   // reaches the wrapper.
-  widenSignature(ce, "Rationalize", "(value, number?) -> value", isClosed);
+  widenSignatureKeepingNative(ce, "Rationalize", "(value, number?) -> value", isClosed);
   wrapOperator(
     ce,
     ["Rationalize", 1],

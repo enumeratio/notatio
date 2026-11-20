@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf, widenSignature, wrapOperator } from "@notatio/engine";
+import { bigRationalAt, operandsOf, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 import type { EvalOptions } from "@notatio/ce-patches";
 
 // Issue #113's remaining elementary backlog (excluding every Interval/CenteredInterval/Around
@@ -272,7 +272,7 @@ function declareTrigToExpInverses(ce: ComputeEngine): void {
  * it (`complex | signed_infinity`, not the direction-agnostic `infinity`). Widened to accept
  * it so this can answer NaN explicitly instead of erroring at the boxing stage. */
 function declareTanhComplexInfinity(ce: ComputeEngine): void {
-  widenSignature(ce, "Tanh", "(complex | infinity) -> number", (op) => !isComplexInfinity(op));
+  widenSignatureKeepingNative(ce, "Tanh", "(complex | infinity) -> number", (op) => !isComplexInfinity(op));
   // compile builtin: identities, exact folds and ComplexInfinity: the built-in lowering gives the same value
   wrapOperator(
     ce,

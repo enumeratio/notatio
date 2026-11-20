@@ -11,7 +11,6 @@ import {
   optionName,
   optionsOf,
   takeOptionsAsRules,
-  widenSignature,
   widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
@@ -195,7 +194,7 @@ export function declareGaussian(ce: Engine): void {
     );
   }
 
-  widenSignature(ce, "ExtendedGCD", "(number, number) -> tuple<number, number, number>", mayBeInteger);
+  widenSignatureKeepingNative(ce, "ExtendedGCD", "(number, number) -> tuple<number, number, number>", mayBeInteger);
   // compile builtin: a Gaussian integer or rational operand: the built-in lowering handles complex operands
   wrapOperator(
     ce,
@@ -218,7 +217,7 @@ export function declareGaussian(ce: Engine): void {
   // engine#339/#347) landed natively in compute-engine 0.139 -- the ce-patches
   // patch that used to apply it here was retired. Only the genuinely Gaussian case (a or m
   // off the real line) is still ours: ℤ[i] is beyond Wolfram, not part of that issue.
-  widenSignature(ce, "ModularInverse", "(number, number) -> number", mayBeInteger);
+  widenSignatureKeepingNative(ce, "ModularInverse", "(number, number) -> number", mayBeInteger);
   // compile builtin: a Gaussian integer or rational operand: the built-in lowering handles complex operands
   wrapOperator(
     ce,
@@ -246,8 +245,8 @@ export function declareGaussian(ce: Engine): void {
     integer?: (n: bigint) => Expr | undefined,
     quadratic?: QuadraticAnswer,
   ): void => {
-    widenSignature(ce, head, signature, native);
-    if (quadratic) widenSignature(ce, head, signature.replace(/^\(number/, "(quadratic_integer"));
+    widenSignatureKeepingNative(ce, head, signature, native);
+    if (quadratic) widenSignatureKeepingNative(ce, head, signature.replace(/^\(number/, "(quadratic_integer"));
     // A `->` canonicalises to a Tuple a broadcastable head would thread over; a Rule it leaves whole.
     takeOptionsAsRules(ce, head);
     const fallback = nativeEvaluate(ce, head);
@@ -441,7 +440,7 @@ export function declareGaussian(ce: Engine): void {
   // DivisorSigma(k, n, Over -> GaussianIntegers): two positional arguments ahead of the
   // option, so it needs its own wiring rather than `optionHead`'s single-positional one.
   // Widened first so a Complex n, or a trailing option tuple, reach `evaluate` at all.
-  widenSignature(ce, "DivisorSigma", "(number, number, any*) -> number");
+  widenSignatureKeepingNative(ce, "DivisorSigma", "(number, number, any*) -> number");
   if (ce.lookupDefinition("DivisorSigma") !== undefined) {
     // declare.ts marks DivisorSigma broadcastable, for the list-in-n case; as a Tuple the Over
     // option would be threaded over too, as a Rule it is left whole.

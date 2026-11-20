@@ -5,7 +5,7 @@ import {
   optionsOf,
   symbolNameOf,
   takeOptionsAsRules,
-  widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
   type Engine,
   type Expr,
@@ -274,7 +274,7 @@ export function declareNumerator(ce: Engine): void {
   for (const head of ["Numerator", "Denominator"] as const) {
     // The option rides as a trailing rule; as a `Rule` (not the Tuple a `->` canonicalises to) the
     // generic broadcast leaves it whole.
-    widenSignature(ce, head, "(number, any*) -> number");
+    widenSignatureKeepingNative(ce, head, "(number, any*) -> number");
     takeOptionsAsRules(ce, head);
     wrapOperator(
       ce,

@@ -10,7 +10,7 @@ import {
   operandsOf,
   stringAt,
   threadOverLists,
-  widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 import { continuedFractionKOf, convergentsOf } from "./convergents.ts";
@@ -152,7 +152,7 @@ export function declareModular(ce: Engine): void {
 
   const matrixType = ce.type("matrix");
 
-  widenSignature(
+  widenSignatureKeepingNative(
     ce,
     "Dot",
     "(matrix | tuple | vector | expression<ModularMatrix> | string, matrix | tuple | vector | expression<ModularMatrix> | string) -> matrix | vector | number | expression<ModularMatrix>",
@@ -170,7 +170,7 @@ export function declareModular(ce: Engine): void {
     { arity: 2, compile: "builtin" },
   );
 
-  widenSignature(
+  widenSignatureKeepingNative(
     ce,
     "MatrixPower",
     "(matrix | real | expression<ModularMatrix> | string, real) -> matrix | real | expression<ModularMatrix>",

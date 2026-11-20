@@ -294,12 +294,12 @@ function declareCombinatoricsGamma113(ce: Engine): void {
   const nativeTakes = (op: Expr): boolean => !inexactNumber(op);
   // Two exact numbers, for the Binomial gate below.
   const isExact = (op: Expr): boolean => integerAt(op) !== undefined || bigRationalAt(op) !== undefined;
-  widenSignature(ce, "CatalanNumber", "(any) -> any", nativeTakes);
-  widenSignature(ce, "Subfactorial", "(any) -> any", nativeTakes);
-  widenSignature(ce, "Factorial2", "(any) -> any", nativeTakes);
+  widenSignatureKeepingNative(ce, "CatalanNumber", "(any) -> any", nativeTakes);
+  widenSignatureKeepingNative(ce, "Subfactorial", "(any) -> any", nativeTakes);
+  widenSignatureKeepingNative(ce, "Factorial2", "(any) -> any", nativeTakes);
   // Now zero-or-more arguments: Multinomial() is the empty product, 1, same convention as
   // Factorial(0) -- see the wrapOperator right below, which answers that specific call.
-  widenSignature(ce, "Multinomial", "(any*) -> any", nativeTakes);
+  widenSignatureKeepingNative(ce, "Multinomial", "(any*) -> any", nativeTakes);
 
   // Multinomial() -- the empty product, by the same convention as Factorial(0) = 1 -- and
   // Multinomial(x) for any single x, symbolic or not: x!/x! = 1.
