@@ -49,9 +49,36 @@ export function declareFloatInDoubleOut(ce: Engine): void {
   }
 }
 
-// compute-engine's complex PolyLog, PolyGamma, LogGamma, BarnesG and Zeta, and its PolyLog past |z| = 1,
-// run in doubles whatever precision was asked for.
-const DOUBLE_KERNEL_HEADS = ["PolyLog", "PolyGamma", "LogGamma", "BarnesG", "Zeta", "HurwitzZeta"] as const;
+// Heads whose kernel answers with a double whatever precision was asked for: compute-engine's complex PolyLog,
+// PolyGamma, LogGamma, BarnesG and Zeta and its PolyLog past |z| = 1, and our own double kernels.
+const DOUBLE_KERNEL_HEADS = [
+  "PolyLog",
+  "PolyGamma",
+  "LogGamma",
+  "BarnesG",
+  "Zeta",
+  "HurwitzZeta",
+  "Beta",
+  "Digamma",
+  "LambertW",
+  "Gudermannian",
+  "Hyperfactorial",
+  "HypergeometricU",
+  "HypergeometricUStar",
+  "BernoulliB",
+  "BernoulliPolynomial",
+  "ChebyshevT",
+  "ChebyshevU",
+  "HermiteH",
+  "LaguerreL",
+  "LegendrePolynomial",
+  "NorlundB",
+  "TriangleWave",
+  "RiemannSiegelTheta",
+  "RisingFactorial",
+  "IncompleteEllipticE",
+  "IncompleteEllipticF",
+] as const;
 
 /** Past a double's digits these heads leave a call unevaluated where their kernel answers with a double. */
 export function declineMachineAnswers(ce: Engine): void {
