@@ -9,7 +9,7 @@ signatures:
   - call: Filter(predicate)
     description: the operator form, $\mathrm{Filter}(p)(xs) = \mathrm{Filter}(xs, p)$.
     library: enumeratio-combinatorics
-    type: (any) -> any
+    type: "((collection<T>, predicate: (T) any -> boolean) -> collection where T) & ((any) -> any)"
     overrides: compute-engine
 names:
   wolfram: Select

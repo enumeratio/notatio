@@ -9,7 +9,7 @@ signatures:
   - call: Fold(f)
     description: the operator form, $\mathrm{Fold}(f)(xs) = \mathrm{Fold}(f, xs)$.
     library: enumeratio-combinatorics
-    type: (any) -> any
+    type: "((reducer: (unknown, T) any -> unknown, initial: value, collection<T>) -> value where T) & ((any) -> any)"
     overrides: compute-engine
   - call: Fold(f, xs)
     description: "the same fold with no seed, starting from $xs$'s own first element: $f(\\ldots f(x_1, x_2)\\ldots, x_n)$."

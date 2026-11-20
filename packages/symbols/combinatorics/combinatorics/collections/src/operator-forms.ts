@@ -12,6 +12,15 @@ const ARITHMETIC = new Set(["Add", "Multiply", "Subtract", "Divide", "Power", "N
 
 const hasSlot = (expr: Expr): boolean => (symbolNameOf(expr) ?? "").startsWith("_") || operandsOf(expr).some(hasSlot);
 
+/** The head's own signature as compute-engine declares it, so the operator form is added to it
+ *  and never replaces it: a replaced signature stops typing a lambda's parameter from its
+ *  collection and makes every interpreted call slower. */
+function nativeSignature(ce: Engine, head: string): string {
+  const definition = ce.lookupDefinition(head);
+  const signature = definition !== undefined && "operator" in definition ? definition.operator.signature : undefined;
+  return String(signature);
+}
+
 /** `Map(f)(xs)`, `Fold(f)(xs)` and `Filter(pred)(xs)`. Only the form holding one operand:
  *  `Fold(f, x)` is our unseeded `Fold(f, xs)`, so Wolfram's seeded operator form can't be told
  *  from it. */
@@ -19,7 +28,7 @@ export function declareOperatorForms(ce: Engine): void {
   // The one-operand callee is a valid call, not a missing operand: compute-engine boxes the
   // callee of `Apply` before our hook runs, and flags the absent collection as `missing`.
   for (const head of Object.keys(FORMS)) {
-    widenSignature(ce, head, "(any) -> any");
+    widenSignature(ce, head, `(${nativeSignature(ce, head)}) & ((any) -> any)`);
     wrapOperator(
       ce,
       [head],
