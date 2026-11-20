@@ -9,12 +9,12 @@ signatures:
   - call: Median(matrix)
     description: the column-wise median, one value per column.
     library: enumeratio-combinatorics
-    type: ((collection<number> | list<list<any>> | number)*) -> list | nan | real | signed_infinity
+    type: (((collection<number> | number)+) -> nan | real | signed_infinity) & ((list<list<any>>) -> list)
     overrides: compute-engine
   - call: Median(dist)
     description: the exact quantile at 1/2 of a distribution, where one exists; otherwise unevaluated.
     library: enumeratio-statistics
-    type: ((collection<number> | distribution | list<list<any>> | number)*) -> list | nan | number | real | signed_infinity
+    type: (((collection<number> | number)+) -> nan | real | signed_infinity) & ((list<list<any>>) -> list) & ((distribution+) -> number)
     overrides: enumeratio-combinatorics
 seeAlso:
   - Mean

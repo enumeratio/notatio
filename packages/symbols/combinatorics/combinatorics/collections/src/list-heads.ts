@@ -11,6 +11,7 @@ import {
   stringAt,
   symbolNameOf,
   widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 import { positionsOf } from "./list-levels.ts";
@@ -299,7 +300,7 @@ export function declareListHeads(ce: Engine): void {
   // Ordering(c, All, Greater): every index, sorted descending rather than ascending; the
   // one custom-test form in scope (`All` positions, `Greater` as the comparator) — any
   // other test symbol falls through unevaluated rather than guessing at its meaning.
-  widenSignature(ce, "Ordering", "(indexed_collection<any>, any?, any?) -> list<integer>");
+  widenSignatureKeepingNative(ce, "Ordering", "(indexed_collection<any>, any?, any?) -> list<integer>");
   wrapOperator(
     ce,
     ["Ordering", 1, 1],
@@ -326,8 +327,10 @@ export function declareListHeads(ce: Engine): void {
   // Mean/Median thread column-wise over a matrix (a list of equal-length rows), reusing
   // the native 1-arg logic on each column rather than reimplementing the arithmetic.
   for (const head of ["Mean", "Median"] as const) {
-    // The native data parameter is a collection of numbers and refuses a matrix when boxed.
-    widenSignature(ce, head, "(list<list<any>>) -> list");
+    // The native data parameter is a collection of numbers and gives a matrix a type error, by
+    // compute-engine's design (CE-13): the column-wise form is an added overload, where native
+    // doesn't answer.
+    widenSignatureKeepingNative(ce, head, "(list<list<any>>) -> list");
     wrapOperator(
       ce,
       [head, 1],
@@ -404,7 +407,7 @@ export function declareListHeads(ce: Engine): void {
   // operand here is already a materialized, finite `List`, so there's nothing unbounded to
   // guard against; falls back to computing the union directly rather than inheriting a
   // cap Wolfram itself doesn't have.
-  widenSignature(ce, "Union", "(any+) -> collection");
+  widenSignatureKeepingNative(ce, "Union", "(any+) -> collection");
   wrapOperator(
     ce,
     ["Union", 1],
@@ -706,7 +709,7 @@ export function declareListHeads(ce: Engine): void {
   // (T) -> boolean function and answers a flat `list<integer>`. That call form — a second
   // operand that IS a function — is untouched; only a plain VALUE in the second slot (not
   // a function) gets Wolfram's value-matching, each-wrapped-in-its-own-list answer.
-  widenSignature(ce, "Position", "(indexed_collection<any>, any) -> list<integer> | list<list<integer>>");
+  widenSignatureKeepingNative(ce, "Position", "(indexed_collection<any>, any) -> list<integer> | list<list<integer>>");
   wrapOperator(
     ce,
     ["Position", 1, 1],

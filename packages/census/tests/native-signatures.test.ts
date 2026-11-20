@@ -11,6 +11,9 @@ import { bindings, fullEngine } from "../src/engine.ts";
 
 const ARGUMENTS = "an extra optional argument, as Wolfram's head takes";
 const DOMAIN = "a wider operand domain (any number, a carrier or a complex value) than the native integer or real";
+// Keeping the native overload types a symbolic operand as a collection first, so `a^2` in
+// `First(a^2 + b^2)` canonicalizes to `MatrixPower`, and the reference example answers otherwise.
+const OPERAND_TYPING = "keeping native's collection overload changes how a symbolic operand canonicalizes";
 const COLLECTIONS = "Wolfram's wider collection and result shapes";
 
 /** Heads whose widening still replaces the native signature, and why. Only ever shrinks. */
@@ -71,23 +74,9 @@ const NOT_YET_KEPT: Readonly<Record<string, string>> = Object.fromEntries([
     "MatrixPower",
     "Sign",
     "Tanh",
-    "Min",
-    "Max",
   ].map((head) => [head, DOMAIN]),
-  ...[
-    "First",
-    "Last",
-    "Flatten",
-    "Partition",
-    "Ordering",
-    "Histogram",
-    "Unique",
-    "Position",
-    "Mean",
-    "Median",
-    "Union",
-    "Random",
-  ].map((head) => [head, COLLECTIONS]),
+  ...["First", "Last"].map((head) => [head, OPERAND_TYPING]),
+  ...["Histogram", "Random"].map((head) => [head, COLLECTIONS]),
 ]);
 
 interface Parameter {

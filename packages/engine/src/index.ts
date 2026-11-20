@@ -262,6 +262,21 @@ export function widenSignature(
 }
 
 /**
+ * `widenSignature` that adds `signature` as one more overload and keeps the head's own signature
+ * (and any earlier widening) whole. `widenSignature` joins positionally, so a native result like
+ * `number` becomes `any` and a generic native is replaced outright; here a native-typed call still
+ * types as natively. Use it unless a native-typed call must mean something else on our engine.
+ */
+export function widenSignatureKeepingNative(
+  ce: ComputeEngine,
+  name: string,
+  signature: string,
+  nativeAccepts?: (op: Expression) => boolean,
+): void {
+  addHeadSignature(ce, name, signature, nativeAccepts, true);
+}
+
+/**
  * Make operators the engine already defines thread over a list argument, as Wolfram's
  * Listable heads do: `Totient([2, 4, 6])` is `[1, 2, 2]` instead of a type error. Flagged
  * through `extendHead`, so every other part of each definition — and any wrapper

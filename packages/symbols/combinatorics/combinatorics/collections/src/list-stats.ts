@@ -8,6 +8,7 @@ import {
   operandsOf,
   symbolNameOf,
   widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 import { isMatrixLike } from "./list-heads.ts";
@@ -258,7 +259,7 @@ export function declareListStats(ce: Engine): void {
   // already kept, so `test` never has to be a total-order comparator, just a pairwise
   // sameness check. The 1-argument form (structural equality) is compute-engine's own,
   // untouched.
-  widenSignature(ce, "Unique", "(collection<any>, function?) -> list<any>");
+  widenSignatureKeepingNative(ce, "Unique", "(collection<any>, function?) -> list<any>");
   wrapOperator(
     ce,
     ["Unique", 1, 1],

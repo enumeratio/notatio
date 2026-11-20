@@ -11,7 +11,7 @@ signatures:
   - call: Partition(collection, {n1, n2, …}, d)
     description: a rank-k array cut into rectangular blocks of shape $\{n_1, n_2, …\}$, offset by `d` (shared, or one per dimension) between windows — a matrix into overlapping 2×2 blocks, say.
     library: enumeratio-combinatorics
-    type: (any, any, any?, any?, any?) -> any
+    type: "((any, any, any?, any?, any?) -> any) & ((indexed_collection<T>, ((T) any -> boolean) | integer, integer?) -> list<list<T>> where T: any)"
     overrides: compute-engine
   - call: Partition(collection, n, d, {kL, kR}, pad?)
     description: sliding windows whose overhang past either end of the collection wraps around cyclically, or — with a trailing `pad` — is filled with `pad` instead.
