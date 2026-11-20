@@ -20,6 +20,8 @@ import { COMPILED as GRAPHS_COMPILED } from "../../graphs/src/statistics.compile
 import { COMPILED as POSETS_COMPILED } from "../../posets/src/statistics.compiled.generated.js";
 import { COMPILED as CARTAN_COMPILED } from "../../cartan/src/statistics.compiled.generated.js";
 import { COMPILED as WORDS_COMPILED } from "../../words/src/statistics.compiled.generated.js";
+import { bigintRuntime, fromBigint, toBigint } from "@notatio/engine/compiled-bigint";
+import { EXACT_COMPILED } from "../statistics.exact.generated.js";
 import { FLAT_BY_NAME as FLAT, subjectToJs } from "../flat.ts";
 import { type Definition, definitionKey, SUBJECT, signatureOf, whereSignatureOf } from "./types.ts";
 
@@ -57,6 +59,12 @@ export function compiledStatistic(
       return undefined;
     return compiledRun(ce, held.run, undefined);
   }
+  // An exact count has BigInt code or none: its doubles' code (a stale build's) is never used.
+  if (definition.exact === true) {
+    const held: CompiledEntry | undefined = EXACT_COMPILED[signatureOf(definition)];
+    if (held === undefined || held.hash !== definitionHash(definition.expr)) return undefined;
+    return exactRun(ce, held.run);
+  }
   const entry = COMPILED[signatureOf(definition)];
   if (entry === undefined) return undefined;
   // An entry stamped with the flat alternative's hash was compiled from it, and takes the flat reading.
@@ -65,6 +73,21 @@ export function compiledStatistic(
   const codec = flat ? FLAT[definition.on] : undefined;
   if (flat && codec === undefined) return undefined;
   return compiledRun(ce, entry.run, codec);
+}
+
+/** BigInt code run over the subject as bigints: an answer past the safe range, or a division that leaves a remainder,
+ *  is undefined (the interpreter gives the exact integer). */
+function exactRun(ce: Engine, run: CompiledEntry["run"]): (subject: unknown) => MathJSON | undefined {
+  const sys = bigintRuntime(ce);
+  return (subject) => {
+    const value = subjectToJs(subject);
+    if (value === undefined) return undefined;
+    try {
+      return fromJs(fromBigint(run(sys as never, toBigint({ [SUBJECT]: value }) as Record<string, unknown>)));
+    } catch {
+      return undefined;
+    }
+  };
 }
 
 function compiledRun(

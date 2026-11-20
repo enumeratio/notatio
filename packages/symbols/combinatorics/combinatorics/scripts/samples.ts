@@ -27,6 +27,52 @@ export function smallElements(ce: Engine, carrier: string, maxSize = 5, perFamil
   });
 }
 
+let kernelCache: ReturnType<typeof allKernels> | undefined;
+
+/**
+ * Elements (as MathJSON contents) of the families over `carrier` at exactly `size`, for checks past
+ * `smallElements`' sizes: each family's ranks are spread (the first, the last, the middle, the thirds and
+ * the fifth) rather than the first few, which at a large size are all alike. A two-parameter family is
+ * taken at k of 0, 1, half and all.
+ */
+export function ladderElements(ce: Engine, carrier: string, size: number, perFamily = 6): unknown[] {
+  const kernels = (kernelCache ??= allKernels(ce));
+  const defining = DEFINING[carrier];
+  const definer = defining && kernels.find((f) => f.head === defining.family);
+  const out: unknown[] = [];
+  const seen = new Set<string>();
+  const chosen = kernels.filter(
+    (f) => f.carrier === carrier && f.paramCount >= 1 && f.paramCount <= 2 && f.carrierElements === undefined,
+  );
+  for (const family of chosen) {
+    const paramSets =
+      family.paramCount === 1 ? [[size]] : [0, 1, Math.floor(size / 2), size].map((k) => [size, Math.min(k, size)]);
+    for (const params of paramSets) {
+      const total = family.count(params);
+      if (typeof total !== "bigint" || total === 0n) continue;
+      const ranks = [0n, total - 1n, total / 2n, total / 3n, (2n * total) / 3n, total / 5n].slice(0, perFamily);
+      for (const r of ranks) {
+        let raw: unknown;
+        try {
+          raw = family.unrank(params, r);
+        } catch {
+          continue;
+        }
+        if (definer && !definer.valid(raw as never, defining.params(raw as never))) continue;
+        const element = toJson(raw);
+        const packed = family.carrierParams ?? 0;
+        const subject = packed === 0 ? element : ["Tuple", ...params.slice(0, packed), element];
+        const key = JSON.stringify(subject);
+        if (!seen.has(key)) {
+          seen.add(key);
+          out.push(subject);
+        }
+      }
+    }
+  }
+  return out;
+}
+
 /** `smallElements` before de-duplication. */
 export function allElements(ce: Engine, carrier: string, maxSize = 5, perFamily = 8, declared = false): unknown[] {
   const out: unknown[] = [];

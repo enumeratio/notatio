@@ -23,15 +23,17 @@ export async function compileArea(
   output: string,
   subjects = smallElements,
 ): Promise<void> {
-  const run = await sharded(script, step, checkers.statistics, definitions.map(signatureOf), (verdicts, mine) =>
-    compiledDefinitionsInDomains(definitions, shape, subjects, verdicts, mine),
+  // An exact count compiles over BigInts (compile-exact.ts), never as doubles.
+  const compiled = definitions.filter((d) => d.exact !== true);
+  const run = await sharded(script, step, checkers.statistics, compiled.map(signatureOf), (verdicts, mine) =>
+    compiledDefinitionsInDomains(compiled, shape, subjects, verdicts, mine),
   );
   if (run === undefined) return;
   const entries: CompiledDefinition[] = run.results.flatMap((r) => r.compiled).toSorted(bySignature);
   const disagreed = run.results.flatMap((r) => r.disagreed).toSorted();
   writeGenerated(fileURLToPath(new URL(output, script)), renderCompiled(entries));
   run.verdicts.save();
-  console.log(`${entries.length} of ${definitions.length} definitions compiled`);
+  console.log(`${entries.length} of ${compiled.length} definitions compiled`);
   for (const signature of disagreed)
     console.log(`${signature}: no fresh verdict that the compiled code agrees; left interpreted`);
 }

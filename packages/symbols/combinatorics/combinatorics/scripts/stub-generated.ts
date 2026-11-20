@@ -21,6 +21,7 @@ const STUBS: Record<string, string> = {
   "../graphs/src/statistics.compiled.generated.js": "COMPILED",
   "../posets/src/statistics.compiled.generated.js": "COMPILED",
   "../cartan/src/statistics.compiled.generated.js": "COMPILED",
+  "../src/statistics.exact.generated.js": "EXACT_COMPILED",
 };
 
 for (const [path, name] of Object.entries(STUBS)) {

@@ -15,12 +15,14 @@ export const compiles: ReadonlyArray<readonly [script: string, output: string]> 
   ["graphs/scripts/compile-definitions.ts", "graphs/src/statistics.compiled.generated.js"],
   ["posets/scripts/compile-definitions.ts", "posets/src/statistics.compiled.generated.js"],
   ["cartan/scripts/compile-definitions.ts", "cartan/src/statistics.compiled.generated.js"],
+  ["scripts/compile-exact.ts", "src/statistics.exact.generated.js"],
 ];
 
 /** The step names the snapshot's rows carry, by script (each script names its own: see its `compileArea`). */
 export const STEP_NAMES: Readonly<Record<string, string>> = {
   "scripts/compile-maps.ts": "compile-maps",
   "scripts/compile-families.ts": "compile-families",
+  "scripts/compile-exact.ts": "compile-exact",
   ...Object.fromEntries(
     compiles
       .map(([script]) => script)
