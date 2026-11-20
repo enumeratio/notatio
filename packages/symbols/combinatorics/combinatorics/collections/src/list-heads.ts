@@ -408,11 +408,15 @@ export function declareListHeads(ce: Engine): void {
         parts.sort(canonicalCompare);
         return ce.function(single.operator, parts);
       }
-      // Lists in, sorted de-duplicated list out (Wolfram); any set in, a set out.
-      if (ops.every((op) => op.operator === "List")) {
+      // Lists in, sorted de-duplicated list out (Wolfram); any set in, a set out. A lazy
+      // collection whose elements can be listed counts as a list; one that can't defers to native.
+      const listed = ops.map((op) =>
+        op.operator === "List" ? operandsOf(op) : op.isLazyCollection ? collectionElements(op) : undefined,
+      );
+      if (listed.every((items) => items !== undefined)) {
         const elements: Expr[] = [];
-        for (const op of ops) {
-          for (const element of operandsOf(op)) {
+        for (const items of listed) {
+          for (const element of items!) {
             if (elements.every((e) => !e.isSame(element))) elements.push(element);
           }
         }
