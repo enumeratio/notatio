@@ -5,11 +5,23 @@
 //
 //   1. its declared result type admits the infinity (`number` does, `integer` does not);
 //   2. its Epsil writes the literal (`PositiveInfinity` or `NegativeInfinity`), so an infinity is its own;
-//   3. nothing in it can make an infinity out of finite numbers: no `Divide`, no `Power`, no `Ln`, no
-//      reciprocal trigonometric or Gamma-like head, which in JS give `Infinity` where the interpreter gives
-//      `ComplexInfinity` or `NaN`; a head not classified here counts as one;
-//   4. its integer arithmetic stays inside the 2^53 rule, which until an instrumented run exists means it
-//      is limited to `Add`, `Subtract`, `Min`, `Max` and comparisons (`Sum` is `Add` over a range).
+//   3. nothing in it can make an infinity out of finite numbers: no `Divide`, no pole-bearing head (`Ln`, `Tan`,
+//      `Gamma`, `Factorial`, ...), and no head not classified here, which in JS give `Infinity` where the interpreter
+//      gives `ComplexInfinity` or `NaN`. `Filter` is a list head with no pole; `self` (a recursive call) is
+//      classified with the restriction of rule 4;
+//   4. nothing in it can grow without limit by multiplying, which is what takes a finite computation past the
+//      doubles (1.8e308) to `Infinity`; the 2^53 rule on finite answers is a separate obligation, not guarded here:
+//        - no `Multiply` or `Power` has an operand that is a fold's accumulator, or the result of a recursive call
+//          (`n * self(n - 1)` is a factorial and overflows at 171), or a name bound to one;
+//        - a `Power` has a literal positive base and an exponent that is a literal, a name, or their sum or
+//          difference (`Power(2, v)` for a mask), so it is bounded by the subject's size;
+//        - a `Multiply` has at most one factor that is neither a literal nor a 0/1 indicator (`If(..., 1, 0)`, a
+//          `Boole`, a comparison, a product of indicators), and when that factor is tainted as above, every other
+//          factor is an indicator;
+//        - `Add`, `Subtract`, `Min`, `Max`, `Mod` and comparisons are allowed anywhere (`Mod` by 0 is `NaN`, which
+//          declines). A recursive result may be combined by `Add`, `Min`, `Max` and comparisons only.
+//      A definition with a `where` and an `intermediates` statement (types.ts) holds its intermediates under 2^53 by
+//      that bound, which is far below the doubles' range, so it needs no walk for rule 4.
 //
 // A statistic with the flag lists the signs it may answer (`infinite` in its compiled entry); `compiledRun`
 // reads a JS `Infinity` as `PositiveInfinity` only for a statistic that lists it, and everything else
@@ -47,6 +59,10 @@ const EXACT = new Set([
   "Max",
   "Abs",
   "Sum",
+  "Mod",
+  "Boole",
+  "Filter",
+  "self",
   "If",
   "Equal",
   "NotEqual",
@@ -74,7 +90,6 @@ const EXACT = new Set([
 const POLES = new Set([
   "Divide",
   "Rational",
-  "Power",
   "Sqrt",
   "Root",
   "Ln",
@@ -99,19 +114,11 @@ const POLES = new Set([
   "Binomial",
 ]);
 
-/** Other arithmetic that can pass 2^53 (rule 4). */
-const WIDE_ARITHMETIC = new Set([
-  "Multiply",
-  "Mod",
-  "Floor",
-  "Ceil",
-  "Round",
-  "Truncate",
-  "GCD",
-  "LCM",
-  "Product",
-  "Square",
-]);
+/** Other arithmetic that can grow past the doubles (rule 4); `Multiply` and `Power` have rules of their own. */
+const WIDE_ARITHMETIC = new Set(["Floor", "Ceil", "Round", "Truncate", "GCD", "LCM", "Product", "Square"]);
+
+/** The head of a recursive call: its result is tainted, as a fold's accumulator is. */
+const RECURSIVE = "self";
 
 /** Symbols that are an infinity or a non-number, none of which the definition writes on purpose. */
 const NOT_A_NUMBER = new Set(["ComplexInfinity", "NaN"]);
@@ -138,7 +145,9 @@ export function infiniteAnswers(ce: Engine, definition: Definition): InfinityVer
   }
   // The flat alternative is what compiles where it is held: both readings keep the rules.
   for (const expression of [definition.expr, ...(definition.flat === undefined ? [] : [definition.flat as MathJSON])]) {
-    const failure = firstFailure(expression);
+    const failure = firstFailure(expression, {
+      bounded: definition.where !== undefined && definition.intermediates !== undefined,
+    });
     if (failure !== undefined) return refuse(failure.rule, failure.why);
   }
   return { signs: written };
@@ -147,22 +156,123 @@ export function infiniteAnswers(ce: Engine, definition: Definition): InfinityVer
 const mentions = (node: unknown, symbol: string): boolean =>
   node === symbol || (Array.isArray(node) && node.some((child) => mentions(child, symbol)));
 
-/** The first head or symbol of `node` that breaks rule 3 or 4, with the reason. */
-function firstFailure(node: unknown): { rule: 3 | 4; why: string } | undefined {
+/** Whether `node` is a literal 0 or 1, a `Boole`, a comparison or a logic head, an `If` of indicators, or a product of them. */
+function isIndicator(node: unknown): boolean {
+  if (node === 0 || node === 1 || node === "True" || node === "False") return true;
+  if (!Array.isArray(node)) return false;
+  const [head, ...operands] = node;
+  switch (head) {
+    case "Boole":
+    case "Equal":
+    case "NotEqual":
+    case "Less":
+    case "LessEqual":
+    case "Greater":
+    case "GreaterEqual":
+    case "And":
+    case "Or":
+    case "Not":
+      return true;
+    case "If":
+      return isIndicator(operands[1]) && isIndicator(operands[2]);
+    case "Multiply":
+      return operands.every(isIndicator);
+    default:
+      return false;
+  }
+}
+
+/** Whether `node` is, or reads, a fold or a recursive result, or a name bound to one (`tainted`). */
+function isTainted(node: unknown, tainted: ReadonlySet<string>): boolean {
+  if (typeof node === "string") return tainted.has(node);
+  if (!Array.isArray(node)) return false;
+  if (node[0] === RECURSIVE || node[0] === "Fold") return true;
+  return node.some((child) => isTainted(child, tainted));
+}
+
+/** The name a function parameter binds: `a`, or `a` of `["Typed", "a", type]`. */
+const parameterName = (parameter: unknown): string | undefined =>
+  typeof parameter === "string"
+    ? parameter
+    : Array.isArray(parameter) && parameter[0] === "Typed" && typeof parameter[1] === "string"
+      ? parameter[1]
+      : undefined;
+
+/** Whether `node` is a literal integer, a name that is not tainted, or a sum or difference of those: bounded by the subject's size. */
+function isSizeBound(node: unknown, tainted: ReadonlySet<string>): boolean {
+  if (typeof node === "number") return Number.isInteger(node);
+  if (typeof node === "string") return node !== SUBJECT && !tainted.has(node);
+  if (!Array.isArray(node)) return false;
+  // The length of a list is its size.
+  if (node[0] === "Length") return !isTainted(node, tainted);
+  return (node[0] === "Add" || node[0] === "Subtract") && node.slice(1).every((child) => isSizeBound(child, tainted));
+}
+
+/** Rule 4 on one `Multiply` or `Power`: why it may grow without limit, or `undefined`. */
+function growth(head: string, operands: readonly unknown[], tainted: ReadonlySet<string>): string | undefined {
+  if (head === "Power") {
+    const [base, exponent] = operands;
+    if (typeof base === "number" && base > 0 && isSizeBound(exponent, tainted)) return undefined;
+    return "Power is not a literal base to an exponent bounded by the subject's size";
+  }
+  const factors = operands.filter((factor) => !isIndicator(factor));
+  const others = factors.filter((factor) => typeof factor !== "number");
+  if (others.length > 1) return "Multiply has more than one factor that is neither a literal nor an indicator";
+  if (others.some((factor) => isTainted(factor, tainted)) && factors.length > 1)
+    return "Multiply scales a fold's accumulator or a recursive result";
+  return undefined;
+}
+
+interface Walk {
+  /** `where` and `intermediates` keep every intermediate under 2^53: rule 4 holds by that bound. */
+  readonly bounded: boolean;
+}
+
+/**
+ * The first head or symbol of `node` that breaks rule 3 or 4, with the reason. `tainted` are the names that hold a
+ * fold's accumulator or a recursive result: an `Apply` binds a name to its value, tainted when the value is.
+ */
+function firstFailure(
+  node: unknown,
+  walk: Walk,
+  tainted: ReadonlySet<string> = new Set(),
+): { rule: 3 | 4; why: string } | undefined {
   if (typeof node === "string") return NOT_A_NUMBER.has(node) ? { rule: 3, why: `the symbol ${node}` } : undefined;
   if (!Array.isArray(node)) return undefined;
   const [head, ...operands] = node;
+  const each = (children: readonly unknown[], names: ReadonlySet<string>) => {
+    for (const child of children) {
+      const failure = firstFailure(child, walk, names);
+      if (failure !== undefined) return failure;
+    }
+    return undefined;
+  };
+  const extend = (names: readonly (string | undefined)[]): ReadonlySet<string> =>
+    new Set([...tainted, ...names.filter((name): name is string => name !== undefined)]);
+  /** `Function(body, parameters)` applied to `values`: a parameter is tainted when its value is. */
+  const applied = (fn: readonly unknown[], values: readonly unknown[]) => {
+    const [, body, ...parameters] = fn;
+    const bound = parameters.map((p, i) => (isTainted(values[i], tainted) ? parameterName(p) : undefined));
+    return each(values, tainted) ?? firstFailure(body, walk, extend(bound));
+  };
   if (typeof head === "string") {
     if (POLES.has(head)) return { rule: 3, why: `${head} can make an infinity from finite numbers` };
-    if (WIDE_ARITHMETIC.has(head))
-      return { rule: 4, why: `${head} is integer arithmetic beyond Add, Subtract, Min, Max` };
-    if (!EXACT.has(head)) return { rule: 3, why: `${head} is not classified` };
+    if (head === "Multiply" || head === "Power") {
+      const why = walk.bounded ? undefined : growth(head, operands, tainted);
+      if (why !== undefined) return { rule: 4, why };
+    } else if (WIDE_ARITHMETIC.has(head)) {
+      if (!walk.bounded) return { rule: 4, why: `${head} is integer arithmetic beyond Add, Subtract, Min, Max, Mod` };
+    } else if (!EXACT.has(head)) return { rule: 3, why: `${head} is not classified` };
+    // A fold's accumulator is its function's first parameter.
+    if (head === "Fold" && Array.isArray(operands[0]) && operands[0][0] === "Function")
+      return each(operands, extend([parameterName(operands[0][2])]));
+    if (head === "Apply" && Array.isArray(operands[0]) && operands[0][0] === "Function")
+      return applied(operands[0], operands.slice(1));
+    return each(operands, tainted);
   }
-  for (const child of operands) {
-    const failure = firstFailure(child);
-    if (failure !== undefined) return failure;
-  }
-  return undefined;
+  // `[Function(body, parameters), arguments]`, the form a recursive definition is applied in.
+  if (Array.isArray(head) && head[0] === "Function") return applied(head, operands);
+  return each(node, tainted);
 }
 
 /** The text of this file, which keys the cross-check rows it makes. */
@@ -228,13 +338,19 @@ export function compiledDefinitionsWithInfinity(
     const signs = verdict.signs;
     const entry = entries.get(signatureOf(definition));
     const label = `${signatureOf(definition)} (infinite)`;
+    // The row's key holds the definition's own hash and the statement that waives rule 4, so a change to either, and
+    // not only to this file, makes the row stale.
+    const own = { hash: definitionKey(definition), intermediates: definition.intermediates };
     const kept = definition.where === undefined ? verdicts : withWhere(verdicts, definition.where);
     const subjects = (): readonly unknown[] =>
       subjectsOf(ce, definition.on)
         .filter((s) => definition.where === undefined || inDomain(ce, definition, s))
         .filter((s) => weightOf(s) <= (definition.checkWeight ?? Infinity));
     if (verdicts.sourceOnly) {
-      kept.note({ expr: definition.expr, flat: definition.flat, signs, subjects: subjects(), by: OWN_TEXT }, label);
+      kept.note(
+        { expr: definition.expr, flat: definition.flat, ...own, signs, subjects: subjects(), by: OWN_TEXT },
+        label,
+      );
       continue;
     }
     if (entry === undefined) continue;
@@ -242,7 +358,7 @@ export function compiledDefinitionsWithInfinity(
     const codec = flat ? FLAT_BY_NAME[definition.on] : undefined;
     if (flat && codec === undefined) continue;
     const checked = subjects();
-    const source = { expr: definition.expr, flat: definition.flat, signs, subjects: checked, by: OWN_TEXT };
+    const source = { expr: definition.expr, flat: definition.flat, ...own, signs, subjects: checked, by: OWN_TEXT };
     const parts = { ...source, code: entry.code };
     const agree = () => infinitiesAgree(ce, definition, signs, shape, codec, checked);
     if (kept.remember(parts, source, agree, label, false)) flagged.set(entry.signature, signs);

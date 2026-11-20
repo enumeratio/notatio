@@ -55,6 +55,10 @@ export interface Definition {
    *  answer stays under it, which doubles round silently. It compiles over BigInts only (`compile-exact`), with every
    *  division exact; a call the BigInt code declines is interpreted, and the doubles' code is never built for it. */
   readonly exact?: true;
+  /** With `where`: the largest intermediate any subject of the domain reaches, stated so a reader can check it. Its
+   *  presence says every intermediate stays under 2^53 within `where`; the infinity flag takes that as holding its
+   *  rule 4 (infinity.ts), and the cross-check's row keys on it. */
+  readonly intermediates?: string;
 }
 
 /** `head` at `carrier`, the key a signature-addressed lookup uses. */
