@@ -28,6 +28,17 @@ test("the first matching rule wins at a part, and its result is not searched aga
   ]);
 });
 
+test("symbol and compound rules apply together, top-down, as in Wolfram", () => {
+  // compute-engine#637 applies symbol rules first, so its answer here is 6.
+  const call = ["ReplaceAll", ["Add", "x", x2], ["List", ["Rule", "x", 2], ["Rule", x2, "y"]]];
+  expect(
+    ce
+      .box(call as never)
+      .evaluate()
+      .isSame(ce.box(["Add", "y", 2]).evaluate()),
+  ).toBe(true);
+});
+
 test("rules given as extra arguments apply as a set", () => {
   expect(run(ce, ["ReplaceAll", ["List", "x", x2], ["Rule", x2, "a"], ["Rule", "x", "b"]])).toEqual(["List", "b", "a"]);
 });
