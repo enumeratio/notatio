@@ -1,6 +1,6 @@
 import {
   applyFunction,
-  collectionElements,
+  partsOf,
   type Engine,
   type Expr,
   integerAt,
@@ -44,7 +44,7 @@ function declareThread(ce: Engine): void {
         a.operator === headName
           ? operandsOf(a)
           : headName === "List" && a.isIndexedCollection === true && stringAt(a) === undefined
-            ? collectionElements(a)
+            ? partsOf(ce, a)
             : undefined,
       );
       const threadAt = parts.map((p, i) => (p !== undefined ? i : -1)).filter((i) => i >= 0);

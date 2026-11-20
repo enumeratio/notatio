@@ -1,12 +1,4 @@
-import {
-  applyFunction,
-  collectionElements,
-  type Engine,
-  type Expr,
-  operandsOf,
-  stringAt,
-  symbolNameOf,
-} from "@notatio/engine";
+import { applyFunction, partsOf, type Engine, type Expr, operandsOf, stringAt, symbolNameOf } from "@notatio/engine";
 
 // A fourth wave of Wolfram-frontier heads: boolean normal forms (LogicalExpand,
 // BooleanConvert) and a batch of `Is…` predicates (our naming for Wolfram's `…Q` — see
@@ -385,7 +377,7 @@ function declareIsVector(ce: Engine): void {
       // A lazy ordered collection (`Range(1, 10)`) is the `List` Wolfram would have evaluated to.
       const lazy = !isListExpr(expr) && stringAt(expr) === undefined && expr.isIndexedCollection === true;
       if (!isListExpr(expr) && !lazy) return ce.symbol("False");
-      const elements = lazy ? collectionElements(expr) : operandsOf(expr);
+      const elements = lazy ? partsOf(ce, expr) : operandsOf(expr);
       if (elements === undefined) return undefined;
       const ok = !elements.some(isListExpr) && elements.every((e) => passesTest(ce, ops[1], e));
       return ce.symbol(ok ? "True" : "False");

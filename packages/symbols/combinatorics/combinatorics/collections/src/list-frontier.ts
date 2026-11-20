@@ -1,6 +1,6 @@
 import {
   applyFunction,
-  collectionElements,
+  partsOf,
   type Engine,
   ensureRandom,
   type Expr,
@@ -93,7 +93,7 @@ const declareCases = (ce: Engine): void => {
       const list = ops[0];
       const pattern = ops[1];
       if (list === undefined || pattern === undefined) return undefined;
-      const elements = collectionElements(list);
+      const elements = partsOf(ce, list);
       if (elements === undefined) return undefined;
       const matched = elements.filter((item) => item.match(pattern) !== null);
       return ce.function("List", matched);
@@ -129,7 +129,7 @@ const declareSparseArray = (ce: Engine): void => {
       const rulesExpr = ops[0];
       if (rulesExpr === undefined) return undefined;
       // A dense array (no rules) is already its dense form.
-      const dense = ops.length === 1 ? collectionElements(rulesExpr) : undefined;
+      const dense = ops.length === 1 ? partsOf(ce, rulesExpr) : undefined;
       if (dense !== undefined && dense.length > 0 && dense.every((item) => item.operator !== "Rule"))
         return ce.function("List", dense);
       if (rulesExpr.operator !== "List") return undefined;
@@ -342,7 +342,7 @@ export function declareListFrontier(ce: Engine): void {
     signature: "(collection<any>) -> collection",
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       if (ops[0] === undefined || isFreeSymbol(ops[0])) return undefined;
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       if (items.length === 0) return ce.function("List", []);
       const [seed, ...rest] = items;
@@ -357,11 +357,11 @@ export function declareListFrontier(ce: Engine): void {
       if (f === undefined) return undefined;
       if (ops.length >= 3 && ops[2] !== undefined) {
         if (isFreeSymbol(ops[2])) return undefined;
-        const items = collectionElements(ops[2]);
+        const items = partsOf(ce, ops[2]);
         return items === undefined ? undefined : foldListFrom(ce, f, ops[1], items);
       }
       if (ops[1] === undefined || isFreeSymbol(ops[1])) return undefined;
-      const items = collectionElements(ops[1]);
+      const items = partsOf(ce, ops[1]);
       if (items === undefined) return undefined;
       if (items.length === 0) return ce.function("List", []);
       const [seed, ...rest] = items;

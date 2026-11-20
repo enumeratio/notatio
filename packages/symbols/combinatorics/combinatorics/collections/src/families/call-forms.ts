@@ -34,6 +34,8 @@ import {
   integerAt,
   isNumber,
   operandsOf,
+  partsOf,
+  stringAt,
   symbolNameOf,
   widenSignature,
   wrapOperator,
@@ -441,6 +443,7 @@ function sizesInRange(kmin: number, kmax: number, step: number): number[] {
  *  list otherwise. A list's own subsets are over its positions 1..n, printed as the list's
  *  elements, and stay unwrapped: they are the original list's values, not a Finset's 1..n. */
 function resolveSubsets(
+  ce: Engine,
   kernels: SubsetKernels,
   ops: readonly Expr[],
   wrapElement: (n: number, idxs: number[]) => unknown,
@@ -449,7 +452,10 @@ function resolveSubsets(
   // is rebuilt under `f` (`Add()` for the empty one), as Wolfram's `Subsets[f[a, b, c]]` does.
   const listed = elementsOf(ops[0]);
   const call = ops[0];
-  const operands = listed === undefined && call !== undefined && !isNumber(call) ? operandsOf(call) : [];
+  const operands =
+    listed === undefined && call !== undefined && !isNumber(call) && stringAt(call) === undefined
+      ? (partsOf(ce, call) ?? [])
+      : [];
   const elements = listed ?? (operands.length > 0 ? operands : undefined);
   const n = elements !== undefined ? elements.length : integerAt(ops[0]);
   if (n === undefined) return undefined;
@@ -569,7 +575,7 @@ export function declareCallForms(ce: Engine): void {
             ? (b.ops![0]!.ops![b.ops![0]!.ops!.length - 1]! as Boxed)
             : b) as never,
         ),
-      (ops) => resolveSubsets(kernels, ops, wrapSubset),
+      (ops) => resolveSubsets(ce, kernels, ops, wrapSubset),
       own,
     ),
   );
@@ -593,7 +599,7 @@ export function declareCallForms(ce: Engine): void {
   // above decline there, and these two forms know the exact count.
   const BIG = BigInt(Number.MAX_SAFE_INTEGER);
   const exactSubsets = (call: Expr): bigint | undefined => {
-    const exact = resolveSubsets(kernels, operandsOf(call), wrapSubset)?.exact;
+    const exact = resolveSubsets(ce, kernels, operandsOf(call), wrapSubset)?.exact;
     return exact !== undefined && exact > BIG ? exact : undefined;
   };
   // Permutations of a list of distinct elements (or a Range): n!.

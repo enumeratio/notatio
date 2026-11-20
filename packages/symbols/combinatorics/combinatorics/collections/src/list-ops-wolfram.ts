@@ -1,6 +1,6 @@
 import {
   applyFunction,
-  collectionElements,
+  partsOf,
   type Engine,
   type Expr,
   integerAt,
@@ -54,7 +54,7 @@ const spanIndices = (span: Expr, length: number): number[] | undefined => {
 const partWithSpecs = (ce: Engine, expr: Expr, specs: readonly Expr[]): Expr | undefined => {
   if (specs.length === 0) return expr;
   const [spec, ...rest] = specs;
-  const items = collectionElements(expr);
+  const items = partsOf(ce, expr);
   if (items === undefined) return undefined;
   if (spec.operator === "Span") {
     const indices = spanIndices(spec, items.length);
@@ -224,7 +224,7 @@ export function declareListOpsWolfram(ce: Engine): void {
     () => (ops) => {
       const n = integerAt(operandsOf(ops[1])[0]);
       if (n === undefined || n <= 0) return undefined;
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const chunks: Expr[] = [];
       for (let i = 0; i < items.length; i += n) {
@@ -291,7 +291,7 @@ export function declareListOpsWolfram(ce: Engine): void {
       // `operandsOf`, which reads `[]` off it same as an empty `List` — must not read as
       // "empty collection" (`List()`); same trap as `Accumulate` (list-frontier.ts).
       if (ops[0] === undefined || symbolNameOf(ops[0]) !== undefined) return undefined;
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const test = ops[1];
       const sameGroup =
@@ -309,7 +309,7 @@ export function declareListOpsWolfram(ce: Engine): void {
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       const f = ops[1];
       if (f === undefined || (ops[0] !== undefined && symbolNameOf(ops[0]) !== undefined)) return undefined;
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const groups: { key: Expr; members: Expr[] }[] = [];
       for (const item of items) {
@@ -326,7 +326,7 @@ export function declareListOpsWolfram(ce: Engine): void {
   ce.declare("Split", {
     signature: "(indexed_collection<T>, ((T, T) any -> boolean)?) -> list<list<T>> where T",
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const test = ops[1];
       const same =
@@ -342,7 +342,7 @@ export function declareListOpsWolfram(ce: Engine): void {
   ce.declare("SplitBy", {
     signature: "(indexed_collection<T>, (T) any -> any) -> list<list<T>> where T",
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const f = ops[1];
       if (f === undefined) return undefined;
@@ -370,7 +370,7 @@ export function declareListOpsWolfram(ce: Engine): void {
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       const f = ops[1];
       if (f === undefined || (ops[0] !== undefined && symbolNameOf(ops[0]) !== undefined)) return undefined;
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const stable = f.operator === "List";
       const keyFunctions = stable ? operandsOf(f) : [f];
@@ -453,7 +453,7 @@ export function declareListOpsWolfram(ce: Engine): void {
     ops: readonly Expr[],
     settling: "True" | "False",
   ): { settled: true } | { settled: false; open: Expr[] } | undefined => {
-    const items = collectionElements(ops[0]);
+    const items = partsOf(ce, ops[0]);
     if (items === undefined) return undefined;
     const open: Expr[] = [];
     for (const item of items) {
@@ -474,7 +474,7 @@ export function declareListOpsWolfram(ce: Engine): void {
     wrapOperator(
       ce,
       [head, 1, 1],
-      (ops) => ops.length === 2 && collectionElements(ops[0]) !== undefined,
+      (ops) => ops.length === 2 && partsOf(ce, ops[0]) !== undefined,
       (native) => (ops, options) => {
         const decided = native?.(ops, options);
         if (decided !== undefined && ["True", "False"].includes(symbolNameOf(decided) ?? "")) return decided;

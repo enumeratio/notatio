@@ -6,6 +6,7 @@ import {
   integerAt,
   nativeEvaluate,
   operandsOf,
+  partsOf as soundPartsOf,
   stringAt,
   symbolNameOf,
   toInputForm,
@@ -48,6 +49,13 @@ import { applyPatch, replaceAllCompoundPatternsPatch } from "@notatio/ce-patches
 /** Wolfram 1-based position, negative counting from the end, to a positive 1-based index. */
 const normalizePosition = (position: number, length: number): number =>
   position < 0 ? length + position + 1 : position;
+
+/** The parts a tree walk descends into: none for an atom (a number, a symbol, a string), else `soundPartsOf`
+ *  -- `undefined` for a call whose operands may not be its parts once its symbols are bound. */
+export const treeParts = (ce: Engine, expr: Expr): readonly Expr[] | undefined =>
+  stringAt(expr) !== undefined || (expr.isCollection !== true && !Array.isArray((expr as { ops?: unknown }).ops))
+    ? []
+    : soundPartsOf(ce, expr);
 
 /** Whether `pattern` holds a blank this grammar can't read: a head-restricted blank
  *  (`_Integer`) or Wolfram's trailing-underscore name (`x_`, `x_Integer`). Matching one as
@@ -124,15 +132,18 @@ const inLevels = ({ lo, hi }: LevelSpec, level: number, depth: number): boolean 
  *  `{1, 2, 3, {2, 3}, 4}` — `{2, 3}` printed AFTER its own parts `2, 3`, not before them.
  *  Siblings still keep their original left-to-right order; only each node's position
  *  relative to its OWN descendants moves. */
-function levelsInRange(expr: Expr, spec: LevelSpec): Expr[] {
+function levelsInRange(ce: Engine, expr: Expr, spec: LevelSpec): Expr[] | undefined {
   const results: Expr[] = [];
+  let sound = true;
   const walk = (node: Expr, level: number): number => {
-    const depth = 1 + Math.max(0, ...operandsOf(node).map((op) => walk(op, level + 1)));
+    const parts = treeParts(ce, node);
+    if (parts === undefined) sound = false;
+    const depth = 1 + Math.max(0, ...(parts ?? []).map((op) => walk(op, level + 1)));
     if (inLevels(spec, level, depth)) results.push(node);
     return depth;
   };
   walk(expr, 0);
-  return results;
+  return sound ? results : undefined;
 }
 
 /** Read a `ReplacePart` position — a plain (possibly negative) integer, or a `{i, j, …}`
@@ -151,7 +162,8 @@ function positionPath(expr: Expr): number[] | undefined {
 function replaceAtPath(ce: Engine, expr: Expr, path: readonly number[], value: Expr): Expr | undefined {
   const [head, ...rest] = path;
   if (head === undefined) return value;
-  const ops = operandsOf(expr);
+  const ops = stringAt(expr) === undefined ? soundPartsOf(ce, expr) : undefined;
+  if (ops === undefined) return undefined;
   const index = normalizePosition(head, ops.length) - 1;
   if (index < 0 || index >= ops.length) return undefined;
   const child = replaceAtPath(ce, ops[index]!, rest, value);
@@ -402,7 +414,8 @@ export function declareExpressionOps(ce: Engine): void {
       if (expr === undefined || specExpr === undefined) return undefined;
       const spec = parseLevelSpec(specExpr);
       if (spec === undefined) return undefined;
-      return ce.box(["List", ...levelsInRange(expr, spec)]);
+      const levels = levelsInRange(ce, expr, spec);
+      return levels === undefined ? undefined : ce.box(["List", ...levels]);
     },
   });
 
