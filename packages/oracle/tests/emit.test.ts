@@ -1059,3 +1059,13 @@ test("SymPy's crt takes the moduli and residues as lists, and a call over residu
   const out = emit(["ChineseRemainder", ["IntegerMod", 2, 3], ["IntegerMod", 3, 5]] as MathJSON, "sympy");
   expect(out.ok && out.source).toBe("(lambda _c: GF(_c[1], symmetric=False)(_c[0]))(crt([3, 5], [2, 3]))");
 });
+
+test("Wolfram reads a decimal inside N(x, d) past a double's digits as the exact rational, and a machine N as is", () => {
+  expect(emit(["N", ["Zeta", { num: "-2.0000000000000001" }], 30] as MathJSON, "wolfram")).toMatchObject({
+    source: "N[Zeta[Rational[-20000000000000001, 10000000000000000]], 30]",
+  });
+  expect(emit(["N", ["Zeta", { num: "-2.5" }]] as MathJSON, "wolfram")).toMatchObject({ source: "N[Zeta[-2.5]]" });
+  expect(emit(["Zeta", { num: "-2.0000000000000001" }] as MathJSON, "wolfram")).toMatchObject({
+    source: "Zeta[-2.0000000000000001]",
+  });
+});

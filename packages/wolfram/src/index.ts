@@ -4,6 +4,7 @@ export { fromWolfram, type FromWolframOptions, READ_SYMBOLS, REVERSE_HEADS } fro
 // than write the correspondence out a second time.
 export {
   CONTEXT,
+  decimalLiteralToWolfram,
   FOREIGN,
   HEADS,
   isWolframHead,

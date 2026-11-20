@@ -3,7 +3,7 @@ erfc-1-1-2-erf-1-1-2	InverseErfc[0.5]	0.47693627620446993		\text{erfc}^{-1}(0.5)
 erfc-1-1-0	InverseErfc[1]	0		\text{erfc}^{-1}(1)	0	
 argument-1-7	InverseErfc[1.7]	-0.732869077959217		\text{erfc}^{-1}(1.7)	-0.732869	
 deep-tail-0-001	InverseErfc[0.001]	2.3267537655135246		\text{erfc}^{-1}(0.001)	2.32675	
-n-inverseerfc-1-plus-1e-20-d30	N[InverseErfc[1.00000000000000000001], 30]	0``19.84948500216801	0.	N\left[\text{erfc}^{-1}(1.0000000000000000000),30\right]	\text{0$\grave{ }\grave{ }$19.84948500216801}	
+n-inverseerfc-1-plus-1e-20-d30	N[InverseErfc[Rational[100000000000000000001, 100000000000000000000]], 30]	-8.86226925452758013649083741670572591398797929427847029557`30.*^-21	-0.00000000000000000000886226925452758013649083741671	N\left[\text{erfc}^{-1}\left(\frac{100000000000000000001}{100000000000000000000}\right),30\right]	-\text{8.86226925452758013649083741670572591398797929427847029557$\grave{ }$30.*${}^{\wedge}$-21}	
 erfc-1-0-infty	InverseErfc[0]	Infinity		\text{erfc}^{-1}(0)	\infty	
 erfc-1-2-infty	InverseErfc[2]	-Infinity		\text{erfc}^{-1}(2)	-\infty	
 arguments-in-1-2-give-negative-values	InverseErfc[1.5]	-0.47693627620446993		\text{erfc}^{-1}(1.5)	-0.476936	
