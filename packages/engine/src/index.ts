@@ -239,6 +239,12 @@ export { isOptionList, optionName, optionsOf, ruleOf, type Split, withOptions } 
 export { checkpoint, DeadlineExceededError, withDeadline } from "./deadline.ts";
 export { defineOverload, joinSignatures, type Overload, type OverloadTable, overloadTable } from "./overloads.ts";
 
+const PLAINLY_WIDENED = new Set<string>();
+
+/** Heads a plain `widenSignature` has been called on, in any engine of this process; a census
+ *  test holds it to the heads that cannot yet keep their native signature. */
+export const plainlyWidenedHeads = (): ReadonlySet<string> => PLAINLY_WIDENED;
+
 /**
  * Widen the signature of an operator the engine already defines, in place, so arguments its
  * native declaration would reject at boxing reach `evaluate` — where a `wrapOperator` handler
@@ -258,6 +264,7 @@ export function widenSignature(
   signature: string,
   nativeAccepts?: (op: Expression) => boolean,
 ): void {
+  PLAINLY_WIDENED.add(name);
   addHeadSignature(ce, name, signature, nativeAccepts);
 }
 

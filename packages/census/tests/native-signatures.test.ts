@@ -7,13 +7,11 @@
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
+import { plainlyWidenedHeads } from "@notatio/engine";
 import { bindings, fullEngine } from "../src/engine.ts";
 
 const ARGUMENTS = "an extra optional argument, as Wolfram's head takes";
 const DOMAIN = "a wider operand domain (any number, a carrier or a complex value) than the native integer or real";
-// Keeping the native overload types a symbolic operand as a collection first, so `a^2` in
-// `First(a^2 + b^2)` canonicalizes to `MatrixPower`, and the reference example answers otherwise.
-const OPERAND_TYPING = "keeping native's collection overload changes how a symbolic operand canonicalizes";
 const COLLECTIONS = "Wolfram's wider collection and result shapes";
 
 /** Heads whose widening still replaces the native signature, and why. Only ever shrinks. */
@@ -75,7 +73,15 @@ const NOT_YET_KEPT: Readonly<Record<string, string>> = Object.fromEntries([
     "Sign",
     "Tanh",
   ].map((head) => [head, DOMAIN]),
-  ...["First", "Last"].map((head) => [head, OPERAND_TYPING]),
+  // Price: `First`/`Last` of a `list<integer>` does not type as an integer on our engine.
+  [
+    "First",
+    "reads the first operand of an expression that is not a collection; native's collection overload types an unknown operand as a collection",
+  ],
+  [
+    "Last",
+    "reads the last operand of an expression that is not a collection; native's collection overload types an unknown operand as a collection",
+  ],
   ...["Histogram", "Random"].map((head) => [head, COLLECTIONS]),
 ]);
 
@@ -200,4 +206,17 @@ test("a head with a native signature keeps it, or is a deliberate widening that 
 test("the deliberate list names only heads that still replace the native signature", () => {
   const replaced = new Set(changed.filter((n) => !keepsNative(signatureOf(bare, n)!, signatureOf(full, n)!)));
   expect(Object.keys(NOT_YET_KEPT).filter((n) => !replaced.has(n))).toEqual([]);
+});
+
+/** Heads widened with plain `widenSignature` that write native's signature into the request. */
+const SPELLS_NATIVE = new Set(["Map", "Fold", "Filter", "Join"]);
+
+test("a plain widening of a head with a native signature is a listed NOT_YET_KEPT head", () => {
+  // Widen with `widenSignatureKeepingNative` unless a native-typed call must mean something else.
+  const native = new Set(names().filter((n) => signatureOf(bare, n) !== undefined));
+  expect(
+    [...plainlyWidenedHeads()]
+      .filter((n) => native.has(n) && NOT_YET_KEPT[n] === undefined && !SPELLS_NATIVE.has(n))
+      .toSorted(),
+  ).toEqual([]);
 });
