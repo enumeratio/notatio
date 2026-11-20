@@ -494,6 +494,42 @@ test("the spectrum heads' compiled code answers a graph whose gcd passes 2^53 ov
   }
 });
 
+// The characteristic polynomial's integer coefficients pass 2^53 on the complete graph from 14 vertices and on a path's
+// distance Laplacian from 10, and a compiled decline there leaves the interpreter minutes of work. The spectrum heads
+// reduce it mod primes instead, so these sizes answer, promptly and as the closed forms say.
+test("the spectrum heads' compiled code answers the complete graph and a path past the integer range", () => {
+  const graph = (n: number, edges: number[][]) => ["Tuple", n, list(edges.map(([u, v]) => list([u!, v!])))];
+  const pairs = (n: number) => Array.from({ length: n * n }, (_, k) => [Math.floor(k / n) + 1, (k % n) + 1]);
+  const complete = (n: number) =>
+    graph(
+      n,
+      pairs(n).filter(([u, v]) => u! < v!),
+    );
+  const path = (n: number) =>
+    graph(
+      n,
+      pairs(n).filter(([u, v]) => v === u! + 1),
+    );
+  const cases: [string, unknown, number][] = [
+    ["DistinctLaplacianEigenvalueCount", complete(14), 2],
+    ["MaximumLaplacianEigenvalueMultiplicity", complete(14), 13],
+    ["DistinctDistanceLaplacianEigenvalueCount", complete(14), 2],
+    ["MaximumDistanceLaplacianEigenvalueMultiplicity", complete(14), 13],
+    ["DistinctLaplacianEigenvalueCount", path(16), 16],
+    ["MaximumLaplacianEigenvalueMultiplicity", path(16), 1],
+    ["DistinctDistanceLaplacianEigenvalueCount", path(11), 11],
+    ["MaximumDistanceLaplacianEigenvalueMultiplicity", path(11), 1],
+  ];
+  const started = performance.now();
+  for (const [head, subject, answer] of cases) {
+    const definition = compiledDefinitions.find((d) => signatureOf(d) === `${head}@LabeledGraph`)!;
+    expect(compiledStatistic(ce, definition)!(subject), `${head} on ${JSON.stringify(subject).slice(0, 20)}`).toEqual(
+      answer,
+    );
+  }
+  expect(performance.now() - started).toBeLessThan(10_000);
+});
+
 // Hand-written kernels against the compiled definitions, over subjects up to n = 1000. A size
 // that already takes long is the last one tried: the point is the ratio, not the wait.
 test.runIf(DEEP)(
