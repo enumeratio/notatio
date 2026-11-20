@@ -91,21 +91,24 @@ function polyCollection<E>(
   decode: (b: Boxed) => unknown,
   resolve: (ops: readonly Expr[]) => Resolved<E> | undefined,
   own?: CollectionHandlers,
+  declines: (ops: readonly Expr[]) => boolean = () => false,
 ): CollectionHandlers {
   const opsOf = (c: Expr) => operandsOf(c);
   const element = (res: Resolved<E>, i: number): Expr => ce.box((res.encode ?? encode)(res.unrank(i)) as BoxInput);
   return {
     // A double past 2^53 is rounded: unknown to the engine, never a wrong count.
     count: (c) => {
+      if (declines(opsOf(c))) return undefined;
       const total = resolve(opsOf(c))?.count ?? 0;
       return total > Number.MAX_SAFE_INTEGER ? undefined : total;
     },
-    isFinite: () => true,
+    // A call whose parts are not sound yet has no known size: it is neither empty nor finite.
+    isFinite: (c) => !declines(opsOf(c)),
     isLazy: () => true,
-    isEnumerable: () => true,
-    isEmpty: (c) => (resolve(opsOf(c))?.count ?? 0) === 0,
+    isEnumerable: (c) => !declines(opsOf(c)),
+    isEmpty: (c) => !declines(opsOf(c)) && (resolve(opsOf(c))?.count ?? 0) === 0,
     iterator: (c) => {
-      const res = resolve(opsOf(c));
+      const res = declines(opsOf(c)) ? undefined : resolve(opsOf(c));
       const total = res?.count ?? 0;
       let i = 0;
       return {
@@ -454,9 +457,9 @@ function resolveSubsets(
   const call = ops[0];
   const operands =
     listed === undefined && call !== undefined && !isNumber(call) && stringAt(call) === undefined
-      ? (partsOf(ce, call) ?? [])
-      : [];
-  const elements = listed ?? (operands.length > 0 ? operands : undefined);
+      ? partsOf(ce, call)
+      : undefined;
+  const elements = listed ?? (operands !== undefined && operands.length > 0 ? operands : undefined);
   const n = elements !== undefined ? elements.length : integerAt(ops[0]);
   if (n === undefined) return undefined;
   const subsetHead = listed === undefined ? call?.operator : "List";
@@ -577,6 +580,18 @@ export function declareCallForms(ce: Engine): void {
         ),
       (ops) => resolveSubsets(ce, kernels, ops, wrapSubset),
       own,
+      // `Subsets(a + b)`: the operands of a sum of untyped symbols are not elements yet.
+      (ops) => {
+        const call = ops[0];
+        return (
+          call !== undefined &&
+          !isNumber(call) &&
+          stringAt(call) === undefined &&
+          call.isCollection !== true &&
+          Array.isArray((call as { ops?: unknown }).ops) &&
+          partsOf(ce, call) === undefined
+        );
+      },
     ),
   );
 

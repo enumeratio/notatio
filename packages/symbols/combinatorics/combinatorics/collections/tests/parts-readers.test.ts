@@ -85,6 +85,14 @@ test("the operands of a sum of untyped symbols are not its parts", () => {
   }
 });
 
+test("Subsets of a sum of untyped symbols stays unevaluated, and so does a Sum over it", () => {
+  const subsets = ["Subsets", ["Add", "a", "b", "c"]];
+  const materialized = ce.box(subsets as never).evaluate() as unknown as { isFiniteCollection?: boolean };
+  expect(materialized.isFiniteCollection).not.toBe(true);
+  expect(run(["Sum", subsets])).toContain('"Subsets"');
+  expect(run(["Sum", ["Subsets", ["Multiply", "a", "b", "c", "d", "k"], ["List", 3]]])).toContain('"Subsets"');
+});
+
 test("the same sum is read once its symbols are declared numbers", () => {
   const typed = createEngine(declareCollections);
   for (const name of ["a", "b", "c", "d"]) typed.declare(name, "real");

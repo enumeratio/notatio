@@ -40,6 +40,14 @@ test("no handler calls collectionElements: a non-collection's operands are read 
   expect(hits(files, /\bcollectionElements\(/)).toEqual([]);
 });
 
+// A decline is not an empty list of parts: `partsOf(…) ?? []` answers for the wrong expression.
+test("no partsOf(…) ?? [] — a decline is not an empty list of parts", () => {
+  const files = [...sources(SYMBOLS), ...sources(CE_PATCHES)];
+  expect(
+    hits(files, /\b(?:partsOf|treeParts|soundPartsOf)\([^()]*(?:\([^()]*\)[^()]*)*\)\s*(?:\?\?|\|\|)\s*\[\]/),
+  ).toEqual([]);
+});
+
 // Reading the first operand's operands directly. Each exception is a head that has already
 // checked the operand is a literal `List` or `Association` (or whose signature types it a list), so
 // the operands are its elements whatever is bound later.
