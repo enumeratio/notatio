@@ -14,5 +14,6 @@ f-3-0-57-0-23i	enumeratio_n(elliptic_f(-3, (RealField(200)("0.57") + RealField(2
 f-4-5-0-1-0-9i	enumeratio_n(elliptic_f(4.5, (RealField(200)("0.1") + RealField(200)("0.9")*I)))	4.20950241998387 + 0.827759281089238*I	
 f-jacobiamplitude-0-0-m-0	elliptic_f(jacobi_am(0, 0), 0)	0	
 f-jacobiamplitude-0-1-m-1	elliptic_f(jacobi_am(0, 1), 1)	0	
+n-incompleteellipticf-1e-400-1-2-d30	enumeratio_n(elliptic_f(((10)^-400), (1/2)), 30)		
 f-phi-arccsc-0-m-0	elliptic_f(arccsc(0), 0)	NaN	disagree
 f-phi-pi-plus-arccsc-0-m-0	elliptic_f((pi + arccsc(0)), 0)	NaN + pi	disagree

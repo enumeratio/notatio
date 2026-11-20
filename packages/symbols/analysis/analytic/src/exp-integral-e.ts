@@ -5,8 +5,14 @@ import {
   bigResult,
   type EvalOptions,
   exceedsDoublePrecision,
+  isExactInt,
+  isExactReal,
+  isExactZero,
   isFiniteNum,
   asDouble,
+  hasUnreadablePart,
+  reExceeds,
+  reSign,
   wantsNumber,
 } from "@notatio/ce-patches";
 import { BigDecimal } from "@notatio/engine";
@@ -23,6 +29,9 @@ import { BigDecimal } from "@notatio/engine";
 /** Past this z the series' terms outgrow the answer by more digits than are worth carrying. */
 const MAX_BIG_Z = 100;
 const GUARD = 15;
+
+/** The digits a double holds: the series runs at this many at least, and a machine-precision call gets a double. */
+const MACHINE_DIGITS = 15;
 
 /** The named constant (γ, π) to `digits` digits, from the engine's own. */
 function constantAt(ce: ComputeEngine, name: "EulerGamma" | "Pi", digits: number): BigDecimal | undefined {
@@ -113,26 +122,39 @@ export function declareExpIntegralE(ce: ComputeEngine): void {
       const [n, z] = ops;
       if (n === undefined || z === undefined) return undefined;
 
-      if (n.re === 0 && n.im === 0) {
+      // Every special point is exact: n = 1 + 1e-20 has Re n > 1, and a z below the double's range is no 0.
+      if (isExactZero(n)) {
         const expr = ce.function("Divide", [ce.function("Gamma", [ce.One, z]), z]);
         return wantsNumber(ops, options) ? expr.N() : expr.evaluate();
       }
-      if (z.re === 0 && z.im === 0 && n.re > 1) {
+      const zIsZero = isExactZero(z);
+      if (zIsZero && reExceeds(n, 1)) {
         const expr = ce.function("Divide", [ce.One, ce.function("Subtract", [n, ce.One])]);
         return wantsNumber(ops, options) ? expr.N() : expr.evaluate();
       }
 
       // E_n(z) ~ Γ(1−n)·z^(n−1) (a logarithm at n = 1) diverges at z = 0 for Re(n) ≤ 1.
-      if (z.re === 0 && z.im === 0 && n.im === 0 && n.re <= 1) return ce.symbol("ComplexInfinity");
+      if (zIsZero && isExactReal(n) && !reExceeds(n, 1)) return ce.symbol("ComplexInfinity");
 
       if (!wantsNumber(ops, options) || !isFiniteNum(n) || !isFiniteNum(z)) return undefined;
-      if (z.re === 0 && z.im === 0) return undefined; // pole/undefined for other n — decline
+      if (zIsZero) return undefined; // pole/undefined for other n — decline
+
+      // A z below the double's range is no zero, and the Gamma route reads it as one (E_1(1e-400) is
+      // 920.45, not ∞). The series carries it for an integer order (ln z is finite in a bignum);
+      // another order has z^(n−1) terms of every size between 1 and the answer's last digit, so it declines.
+      if (hasUnreadablePart(z)) {
+        if (!isExactInt(n) || !isExactReal(n) || !isExactReal(z) || z.bignumRe === undefined || reSign(z) <= 0)
+          return undefined;
+        const value = expIntegralEBig(ce, n.re, z.bignumRe, Math.max(ce.precision, MACHINE_DIGITS));
+        if (value === undefined) return undefined;
+        return ce.precision <= MACHINE_DIGITS ? asDouble(ce, ce.number(value.re.toNumber())) : bigResult(ce, value.re);
+      }
 
       // Past a double's digits: the bignum series for integer n and real z > 0, else decline
       // (the Gamma route below is a double).
       if (exceedsDoublePrecision(ce, options.numericApproximation)) {
         const big = bigRealOperand(ce, z);
-        if (big === undefined || n.im !== 0) return undefined;
+        if (big === undefined || !isExactReal(n) || !isExactInt(n)) return undefined;
         const value = big.isPositive() ? expIntegralEBig(ce, n.re, big, ce.precision) : undefined;
         return value === undefined ? undefined : bigResult(ce, value.re);
       }
@@ -153,7 +175,11 @@ export function declareExpIntegralE(ce: ComputeEngine): void {
       // exact rational exponent (z = −2.2, n = 2/3 reads (−2.2)^(−1/3) as −0.769), so a
       // negative real z goes through Exp((n−1)·Ln z) unless n is an integer.
       const exponent = ce.function("Subtract", [n, ce.One]);
-      const principal = z.im === 0 && z.re < 0 && !(n.im === 0 && Number.isInteger(n.re));
+      // n = 2 + 1e-20 is not an integer (its double is): the real root of a negative z is the wrong branch there.
+      const principal = z.im === 0 && z.re < 0 && !(isExactReal(n) && isExactInt(n));
+      // The principal branch below runs on a double complex Gamma, good to a double's digits. At an n whose
+      // double is an integer it is not (the value is 16 digits right of 30 asked), so the call stays unevaluated.
+      if (principal && Number.isInteger(n.re) && ce.precision > MACHINE_DIGITS) return undefined;
       const expr = ce.function("Multiply", [
         principal
           ? ce.function("Exp", [ce.function("Multiply", [exponent, ce.function("Ln", [z])])])

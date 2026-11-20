@@ -14,5 +14,6 @@ f-3-0-57-0-23i	N[EllipticF[-3, Complex[0.57, 0.23]]]	-3.577957673312077 - 0.4175
 f-4-5-0-1-0-9i	N[EllipticF[4.5, Complex[0.1, 0.9]]]	4.209502419983872 + 0.8277592810892385*I	N[F(4.5|0.1\, +0.9 i)]	4.2095\, +0.827759 i	
 f-jacobiamplitude-0-0-m-0	EllipticF[JacobiAmplitude[0, 0], 0]	0	F(\text{am}(0|0)|0)	0	
 f-jacobiamplitude-0-1-m-1	EllipticF[JacobiAmplitude[0, 1], 1]	0	F(\text{am}(0|1)|1)	0	
+n-incompleteellipticf-1e-400-1-2-d30	N[EllipticF[Power[10, -400], Rational[1, 2]], 30]				
 f-phi-arccsc-0-m-0	EllipticF[ArcCsc[0], 0]	ComplexInfinity	F\left(\left.\csc ^{-1}(0)\right|0\right)	\text{ComplexInfinity}	disagree
 f-phi-pi-plus-arccsc-0-m-0	EllipticF[Plus[Pi, ArcCsc[0]], 0]	ComplexInfinity	F\left(\left.\pi +\csc ^{-1}(0)\right|0\right)	\text{ComplexInfinity}	disagree

@@ -1,7 +1,16 @@
 import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
 import { ellipticFarFromReal, LARGE_IMAGINARY } from "../numerics/elliptic-incomplete.ts";
 import { wantsBigDigits } from "../../support/precise.ts";
-import { type EvalOptions, isFiniteNum, type NativeEval, numberResult, wantsNumber } from "../../support/box.ts";
+import {
+  type EvalOptions,
+  hasUnreadablePart,
+  isExactZero,
+  isFiniteNum,
+  type NativeEval,
+  numberResult,
+  UNDERFLOW_SAFE_DIGITS,
+  wantsNumber,
+} from "../../support/box.ts";
 
 // EllipticF(φ, m) and the two-operand EllipticE(φ, m) at a φ far from the real axis. Native's
 // Carlson forms overflow there (EllipticF(0.3 + 400i, 0.5) is ComplexInfinity, where the value is
@@ -19,7 +28,13 @@ export const evaluateIncompleteElliptic =
     const [phi, m] = ops;
     if (ops.length !== 2 || phi === undefined || m === undefined) return native?.(ops, options);
     if (!isFiniteNum(phi) || !isFiniteNum(m) || !wantsNumber(ops, options)) return native?.(ops, options);
-    if (m.re === 0 && m.im === 0) return phi.N(); // F(φ|0) = E(φ|0) = φ
+    if (isExactZero(m)) return phi.N(); // F(φ|0) = E(φ|0) = φ
+    // F and E are φ·(1 + O(mφ²)): an amplitude below the double's range is its own value (the native
+    // handler reads it as 0 and answers 0).
+    if (phi.re === 0 && phi.im === 0 && hasUnreadablePart(phi)) return phi.N();
+    // A modulus below the double's range reads as 0 below, and F, E differ from φ by about m: right
+    // to that many digits, so a call asking for more stays unevaluated.
+    if (hasUnreadablePart(m) && ce.precision > UNDERFLOW_SAFE_DIGITS) return undefined;
     if (Math.abs(phi.im) < LARGE_IMAGINARY) return native?.(ops, options);
     if (!wantsBigDigits(ce, options, ops)) {
       const value = ellipticFarFromReal(

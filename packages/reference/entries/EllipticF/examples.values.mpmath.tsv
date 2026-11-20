@@ -4,6 +4,7 @@ ellipticf-355i-parameter-2-was-zero	(ellipf(mpc(0, 355), 2))
 ellipticf-neg-1000i-parameter-neg-2	(ellipf(mpc(0.3, -1000), -2))	
 ellipticf-700i-complex-parameter	(ellipf(mpc(10, 700), mpc(0.5, 0.3)))	
 ellipticf-1e4i-with-a-shift-by-pi	(ellipf(mpc(2, 10000), 0.9))	
+n-ellipticf-1e-400-1-2-d30	enumeratio_n(lambda: (ellipf(enumeratio_pow(10, -400), (mpf(1)/2))), 30)	1.00000000000000000000000000000e-400
 ellipticf-list-list-1-0-list-0-1-0	[[ellipf(1, 0), ellipf(0, 0)], [ellipf(0, 0), ellipf(1, 0)]]	[[mpf('1.0'), mpf('0.0')], [mpf('0.0'), mpf('1.0')]]
 matrixfunction-function-ellipticf-1-0-1-list		
 n-ellipticf-12-over-5-3-50	enumeratio_n(lambda: (ellipf((mpf(12)/5), 3)), 50)	(1.0010773804561062360796595863838358931497135904585-1.9231661895046253531841444093352781715706878703094j)

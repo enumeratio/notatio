@@ -14,5 +14,6 @@ f-3-0-57-0-23i	N(elliptic_f(-3, (0.57 + 0.23*I)), 30)	-3.57795767331207709373726
 f-4-5-0-1-0-9i	N(elliptic_f(4.5, (0.1 + 0.9*I)), 30)	4.20950241998387220121458085487 + 0.82775928108923801929108776676*I	
 f-jacobiamplitude-0-0-m-0			
 f-jacobiamplitude-0-1-m-1			
+n-incompleteellipticf-1e-400-1-2-d30	N(elliptic_f((S(10)**-400), Rational(1, 2)), 30)		
 f-phi-arccsc-0-m-0	elliptic_f(acsc(0), 0)	zoo	disagree
 f-phi-pi-plus-arccsc-0-m-0	elliptic_f((pi + acsc(0)), 0)	zoo	disagree

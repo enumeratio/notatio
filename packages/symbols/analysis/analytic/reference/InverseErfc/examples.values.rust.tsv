@@ -3,6 +3,7 @@ erfc-1-1-2-erf-1-1-2	erfc_inv(x(0.5))	0.4769362762044699
 erfc-1-1-0	erfc_inv(n(1))	0.0	
 argument-1-7	erfc_inv(x(1.7))	-0.7328690779592169	
 deep-tail-0-001	erfc_inv(x(0.001))	2.3267537655135246	
+n-inverseerfc-1-plus-1e-20-d30	nf(erfc_inv(x(1.0)))		
 erfc-1-0-infty	erfc_inv(n(0))	panic: non-finite result: inf	error
 erfc-1-2-infty	erfc_inv(n(2))	panic: non-finite result: -inf	error
 arguments-in-1-2-give-negative-values	erfc_inv(x(1.5))	-0.4769362762044699	

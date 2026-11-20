@@ -6,6 +6,11 @@ summary: "Cosine integral: γ + ln(x) + ∫₀ˣ (cos(t)−1)/t dt."
 signatures:
   - call: CosIntegral(complex | infinity) -> number
     description: as compute-engine declares it
+  - call: CosIntegral(complex | infinity) -> number
+    description: "Cosine integral: γ + ln(x) + ∫₀ˣ (cos(t)−1)/t dt."
+    library: enumeratio-analytic
+    type: (complex | infinity) -> number
+    overrides: compute-engine
 stub: engine
 names:
   wolframIdentity: true

@@ -6,6 +6,11 @@ summary: "Sine integral: ∫₀ˣ sin(t)/t dt."
 signatures:
   - call: SinIntegral(complex | infinity) -> number
     description: as compute-engine declares it
+  - call: SinIntegral(complex | infinity) -> number
+    description: "Sine integral: ∫₀ˣ sin(t)/t dt."
+    library: enumeratio-analytic
+    type: (complex | infinity) -> number
+    overrides: compute-engine
 stub: engine
 names:
   wolframIdentity: true

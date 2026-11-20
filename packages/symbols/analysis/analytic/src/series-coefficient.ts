@@ -1,6 +1,6 @@
 import { isNumber, type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
 import { operandsOf, symbolNameOf } from "@notatio/engine";
-import { isRealInt } from "@notatio/ce-patches";
+import { isExactZero, isRealInt } from "@notatio/ce-patches";
 import { powerSeriesCoefficient } from "./power-orders.ts";
 import { fractionFactors } from "./transforms.ts";
 
@@ -70,7 +70,7 @@ function besselCoefficient(
   x0: Expression,
   n: Expression,
 ): Expression | undefined {
-  if (!(x0.re === 0 && x0.im === 0)) return undefined;
+  if (!isExactZero(x0)) return undefined; // about 1e-400 is no 0: the series about 0 is not its series
   const consts: Expression[] = [];
   let m = 0;
   let bessel: Expression | undefined;

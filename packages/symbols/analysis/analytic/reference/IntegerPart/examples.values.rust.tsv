@@ -3,6 +3,7 @@ integerpart-2p4	trunc(x(2.4))	2.0
 truncates-toward-0-unlike-floor	trunc(x(-2.4))	-2.0
 integerpart-7-over-2	trunc(rational(n(7), n(2)))	3
 integerpart-neg-7-over-2	trunc(rational(n(-7), n(2)))	-3
+n-integerpart-pi-times-1e20-d30	nf(trunc((x(std::f64::consts::PI) * power(n(10), n(20)))))	
 exact-numeric-arguments-stay-exact	trunc(x(std::f64::consts::PI))	3.0
 threads-element-wise-over-a-list	list(vec![trunc(x(2.5)), trunc(x(-2.5))])	[2.0, -2.0]
 complex-numbers-real-and-imaginary-parts		

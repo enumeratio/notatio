@@ -14,5 +14,6 @@ f-3-0-57-0-23i	(ellipf(-3, mpc(0.57, 0.23)))	(-3.57795767331207709373726016641 -
 f-4-5-0-1-0-9i	(ellipf(4.5, mpc(0.1, 0.9)))	(4.20950241998387208699324769113 + 0.827759281089238073466979123898j)	
 f-jacobiamplitude-0-0-m-0			
 f-jacobiamplitude-0-1-m-1			
+n-incompleteellipticf-1e-400-1-2-d30	enumeratio_n(lambda: (ellipf(enumeratio_pow(10, -400), (mpf(1)/2))), 30)	1.00000000000000000000000000000e-400	
 f-phi-arccsc-0-m-0	ellipf(acsc(0), 0)	ZeroDivisionError: 	error
 f-phi-pi-plus-arccsc-0-m-0	ellipf((pi + acsc(0)), 0)	ZeroDivisionError: 	error

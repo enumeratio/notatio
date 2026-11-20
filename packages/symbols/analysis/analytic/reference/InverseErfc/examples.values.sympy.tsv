@@ -3,6 +3,7 @@ erfc-1-1-2-erf-1-1-2	erfcinv(0.5)	erfcinv(0.5)	inconclusive
 erfc-1-1-0	erfcinv(1)	0	
 argument-1-7	erfcinv(1.7)	erfcinv(1.7)	inconclusive
 deep-tail-0-001	erfcinv(0.001)	erfcinv(0.001)	inconclusive
+n-inverseerfc-1-plus-1e-20-d30	N(erfcinv(Float("1.00000000000000000001", 50)), 30)		
 erfc-1-0-infty	erfcinv(0)	oo	
 erfc-1-2-infty	erfcinv(2)	-oo	
 arguments-in-1-2-give-negative-values	erfcinv(1.5)	erfcinv(1.5)	inconclusive

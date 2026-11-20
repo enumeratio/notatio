@@ -1,5 +1,5 @@
 import { bigRationalAt, type Engine, type Expr, extendHead, operandsOf, symbolNameOf } from "@notatio/engine";
-import type { EvalOptions, Json } from "@notatio/ce-patches";
+import { type EvalOptions, type Json, isExactZero } from "@notatio/ce-patches";
 import { JACOBI_POLE_HEADS, MAX_LAURENT_ORDER, jacobiLaurent } from "./jacobi-laurent.ts";
 import { JACOBI_M_SERIES_HEADS, MAX_ORDER, jacobiMCoefficients } from "./jacobi-m-series.ts";
 
@@ -24,7 +24,8 @@ function poleSeries(
   x0: Expr,
   order: Expr | undefined,
 ): Expr | undefined {
-  if (extra > 0 || symbolNameOf(u) !== variable || m.symbols.includes(variable) || x0.N().re !== 0) return undefined;
+  if (extra > 0 || symbolNameOf(u) !== variable || m.symbols.includes(variable) || !isExactZero(x0.N()))
+    return undefined;
   const n = order === undefined ? DEFAULT_ORDER : Math.floor(order.N().re);
   const terms = jacobiLaurent(head, n, m.json as Json);
   if (terms === undefined || !(n <= MAX_LAURENT_ORDER)) return undefined;
@@ -61,7 +62,7 @@ export function declareSeriesJacobi(ce: Engine): void {
         m !== undefined &&
         symbolNameOf(m) === variable &&
         !u.symbols.includes(variable) &&
-        x0.N().re === 0;
+        isExactZero(x0.N());
       if (!claimed) return before?.(ops, options);
       const n = order === undefined ? DEFAULT_ORDER : Math.floor(order.N().re);
       if (!(n >= 0) || n > MAX_ORDER) return before?.(ops, options);

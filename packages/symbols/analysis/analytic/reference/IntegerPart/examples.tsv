@@ -3,6 +3,7 @@ integerpart-2p4			[IntegerPart, 2.4]	2
 truncates-toward-0-unlike-floor			[IntegerPart, -2.4]	-2			Truncates toward 0, unlike [[Floor]]					
 integerpart-7-over-2			[IntegerPart, [Rational, 7, 2]]	3								
 integerpart-neg-7-over-2			[IntegerPart, [Rational, -7, 2]]	-3								
+n-integerpart-pi-times-1e20-d30		test	[N, [IntegerPart, [Multiply, Pi, [Power, 10, 20]]], 30]	{num: "314159265358979323846"}	{num: "314159265358979323846"}	mpmath: floor(pi * 10**20) at 60 digits	Past 2^53 a double rounds the integer part: pi * 10^20 as a double is 314159265358979340000.					
 exact-numeric-arguments-stay-exact	Scope		[IntegerPart, Pi]	3			Exact numeric arguments stay exact					
 threads-element-wise-over-a-list	Scope		[IntegerPart, [List, 2.5, -2.5]]	[List, 2, -2]			Threads element-wise over a list					
 complex-numbers-real-and-imaginary-parts	Scope		[IntegerPart, [Complex, 2.5, 3.7]]	[Complex, 2, 3]			Complex numbers: real and imaginary parts truncated separately				domain	Sage has no floor on a complex number, so the call stays held; ours takes the integer part of each component.

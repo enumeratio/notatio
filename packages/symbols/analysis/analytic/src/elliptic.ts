@@ -5,6 +5,7 @@ import {
   bigRealOperand,
   bigResult,
   exceedsDoublePrecision,
+  isExactZero,
   isFiniteNum,
   numberResult,
   wantsNumber,
@@ -75,7 +76,7 @@ function declareIncompleteF(ce: ComputeEngine): void {
       if (phi === undefined || m === undefined) return undefined;
       // F(0,m) = 0 for any m — the integral's upper limit is its lower limit — exact even
       // without N(), unlike the general case below (Wolfram's EllipticF[0,m] agrees).
-      if (phi.re === 0 && phi.im === 0) return ce.Zero;
+      if (isExactZero(phi)) return ce.Zero; // an amplitude below the double's range is no 0: F(φ, m) is φ
       // Stay symbolic under a plain `evaluate()` at symbolic/exact operands, same as
       // every other head here — only delegate once a numeric answer is actually wanted,
       // so this head's own name survives an unevaluated call.

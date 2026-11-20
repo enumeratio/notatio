@@ -6,6 +6,11 @@ summary: "Hyperbolic sine integral: ∫₀ˣ sinh(t)/t dt."
 signatures:
   - call: SinhIntegral(complex | infinity) -> number
     description: as compute-engine declares it
+  - call: SinhIntegral(complex | infinity) -> number
+    description: "Hyperbolic sine integral: ∫₀ˣ sinh(t)/t dt."
+    library: enumeratio-analytic
+    type: (complex | infinity) -> number
+    overrides: compute-engine
 stub: engine
 names:
   wolframIdentity: true

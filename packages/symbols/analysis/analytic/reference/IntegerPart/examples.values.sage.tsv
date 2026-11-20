@@ -3,6 +3,7 @@ integerpart-2p4	(floor(2.4) if (2.4) >= 0 else ceil(2.4))	2
 truncates-toward-0-unlike-floor	(floor(-2.4) if (-2.4) >= 0 else ceil(-2.4))	-2	
 integerpart-7-over-2	(floor((7/2)) if ((7/2)) >= 0 else ceil((7/2)))	3	
 integerpart-neg-7-over-2	(floor((-7/2)) if ((-7/2)) >= 0 else ceil((-7/2)))	-3	
+n-integerpart-pi-times-1e20-d30	enumeratio_n((floor((pi * ((10)^20))) if ((pi * ((10)^20))) >= 0 else ceil((pi * ((10)^20)))), 30)		
 exact-numeric-arguments-stay-exact	(floor(pi) if (pi) >= 0 else ceil(pi))	3	
 threads-element-wise-over-a-list	[(floor(2.5) if (2.5) >= 0 else ceil(2.5)), (floor(-2.5) if (-2.5) >= 0 else ceil(-2.5))]	[2, -2]	
 complex-numbers-real-and-imaginary-parts	(floor((2.5 + 3.7*I)) if ((2.5 + 3.7*I)) >= 0 else ceil((2.5 + 3.7*I)))	floor(2.50000000000000 + 3.70000000000000*I)	disagree
