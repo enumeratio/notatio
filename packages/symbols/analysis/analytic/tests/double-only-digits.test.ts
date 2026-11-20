@@ -58,3 +58,16 @@ test("an exact answer that prints short still answers", () => {
   expect(n(["Divide", 1, 8], 30).json).toEqual(0.125);
   expect(n(["Add", ["Divide", 1, 4], ["Divide", 1, 4]], 30).json).toEqual(0.5);
 });
+
+// ζ(-2, 1/4) is exactly -1/64: a bignum that prints short, answered by both N paths.
+test("a short bignum answer from a wrapped native head still answers at 30 digits", () => {
+  const hurwitz = ["HurwitzZeta", -2, ["Divide", 1, 4]];
+  expect(n(hurwitz, 30).re).toBe(-0.015625);
+  const precision = ce.precision;
+  try {
+    ce.precision = 50;
+    expect(ce.box(hurwitz as never).N().re).toBe(-0.015625);
+  } finally {
+    ce.precision = precision;
+  }
+});
