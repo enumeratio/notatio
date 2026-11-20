@@ -138,8 +138,8 @@ const applyOrderingSpec = (full: readonly number[], spec: OrderingSpec): number[
 
 /** A non-empty $List$ of $List$s, all the same shape — what Mean/Median thread over column-wise. */
 export const isMatrixLike = (expr: Expr): boolean => {
-  const rows = operandsOf(expr);
-  if (rows.length === 0) return false;
+  const rows = collectionElements(expr);
+  if (rows === undefined || rows.length === 0) return false;
   return rows.every((row) => row.operator === "List") && operandsOf(rows[0]).length > 0;
 };
 
@@ -162,7 +162,7 @@ const columnsOf = (rows: readonly Expr[]): Expr[][] => {
 const threadOverColumns =
   (ce: Engine, head: string) =>
   (matrix: Expr): Expr | undefined => {
-    const columns = columnsOf(operandsOf(matrix));
+    const columns = columnsOf(collectionElements(matrix) ?? []);
     const results = columns.map((column) => ce.function(head, [ce.box(["List", ...column])]).evaluate());
     return results.some((r) => r === undefined) ? undefined : ce.box(["List", ...(results as Expr[])]);
   };
@@ -172,19 +172,21 @@ const threadOverColumns =
  *  the moment a level is ragged or mixes lists with non-lists: that level is still a
  *  vector (depth 1) of whatever is there. A lazy `Tabulate(f, m, n, …)` reads as depth =
  *  the count of its dimension arguments, without generating a single element. */
-const arrayRank = (expr: Expr): number => {
+const arrayRank = (expr: Expr): number | undefined => {
   if (expr.operator === "Tabulate") {
     return operandsOf(expr)
       .slice(1)
       .filter((op) => integerAt(op) !== undefined).length;
   }
-  if (expr.operator !== "List") return 0;
-  const items = operandsOf(expr);
+  if (expr.operator !== "List" && !expr.isLazyCollection) return 0;
+  const items = collectionElements(expr);
+  if (items === undefined) return undefined;
   if (items.length === 0) return 1;
   if (items.every((item) => item.operator === "List")) {
     const length = operandsOf(items[0]).length;
     if (items.every((item) => operandsOf(item).length === length)) {
-      return 1 + arrayRank(items[0]);
+      const inner = arrayRank(items[0]);
+      return inner === undefined ? undefined : 1 + inner;
     }
   }
   return 1;
@@ -231,7 +233,7 @@ export function declareListHeads(ce: Engine): void {
     ce,
     ["First", 1, 1],
     () => true,
-    (native) => (ops, options) => (operandsOf(ops[0]).length === 0 ? ops[1] : native?.([ops[0]], options)),
+    (native) => (ops, options) => (collectionElements(ops[0])?.length === 0 ? ops[1] : native?.([ops[0]], options)),
     2,
   );
   widenSignature(ce, "Last", "(any, any?) -> any");
@@ -239,7 +241,7 @@ export function declareListHeads(ce: Engine): void {
     ce,
     ["Last", 1, 1],
     () => true,
-    (native) => (ops, options) => (operandsOf(ops[0]).length === 0 ? ops[1] : native?.([ops[0]], options)),
+    (native) => (ops, options) => (collectionElements(ops[0])?.length === 0 ? ops[1] : native?.([ops[0]], options)),
     2,
   );
 
@@ -254,7 +256,8 @@ export function declareListHeads(ce: Engine): void {
     (native) => (ops, options) => {
       const result = native?.(ops, options);
       if (result !== undefined && result.operator !== "Error") return result;
-      const operands = operandsOf(ops[0]);
+      const operands = collectionElements(ops[0]);
+      if (operands === undefined) return result;
       if (operands.length > 0) return operands[0];
       return ops.length === 2 ? ops[1] : result;
     },
@@ -267,7 +270,8 @@ export function declareListHeads(ce: Engine): void {
     (native) => (ops, options) => {
       const result = native?.(ops, options);
       if (result !== undefined && result.operator !== "Error") return result;
-      const operands = operandsOf(ops[0]);
+      const operands = collectionElements(ops[0]);
+      if (operands === undefined) return result;
       if (operands.length > 0) return operands[operands.length - 1];
       return ops.length === 2 ? ops[1] : result;
     },
@@ -369,7 +373,8 @@ export function declareListHeads(ce: Engine): void {
     (ops) => ops[0].operator !== "List" && symbolNameOf(ops[0]) === undefined,
     (native) => (ops, options) => {
       const result = native?.(ops, options);
-      if (result !== undefined && result.operator !== "Error") return result;
+      // A lazy collection has elements, not parts to sort under its own head.
+      if ((result !== undefined && result.operator !== "Error") || ops[0].isLazyCollection) return result;
       const sorted = [...operandsOf(ops[0])];
       sorted.sort(naturalCompare);
       return ce.function(ops[0].operator, sorted);
@@ -507,7 +512,9 @@ export function declareListHeads(ce: Engine): void {
     ["At", 1, 1],
     (ops) => ops[1].operator === "Span",
     (native) => (ops, options) => {
-      const length = operandsOf(ops[0]).length;
+      const items = collectionElements(ops[0]);
+      if (items === undefined) return native?.(ops, options);
+      const length = items.length;
       const spanOps = operandsOf(ops[1]);
       const start = integerAt(spanOps[0]) ?? 1;
       const end = integerAt(spanOps[1]) ?? -1;
@@ -535,10 +542,9 @@ export function declareListHeads(ce: Engine): void {
       (symbolNameOf(ops[1]) === "All" && ops[0].operator === "List") ||
       (ops[1].operator === "List" && ops[2].operator === "List"),
     (native) => (ops, options) => {
-      const rows =
-        symbolNameOf(ops[1]) === "All"
-          ? operandsOf(ops[0])
-          : operandsOf(native?.([ops[0], ops[1]], options) ?? ce.box(["List"]));
+      const picked = symbolNameOf(ops[1]) === "All" ? ops[0] : native?.([ops[0], ops[1]], options);
+      const rows = picked === undefined ? [] : collectionElements(picked);
+      if (rows === undefined) return native?.(ops, options);
       const results = rows.map((row) => native?.([row, ops[2]], options));
       return results.some((r) => r === undefined) ? undefined : ce.box(["List", ...(results as Expr[])]);
     },
@@ -653,7 +659,8 @@ export function declareListHeads(ce: Engine): void {
       // A free `c` stays unevaluated rather than answering `List()` — same trap as
       // `Accumulate` (list-frontier.ts).
       if (ops[0] === undefined || symbolNameOf(ops[0]) !== undefined) return undefined;
-      const items = operandsOf(ops[0]);
+      const items = collectionElements(ops[0]);
+      if (items === undefined) return undefined;
       const tally: { value: Expr; count: number }[] = [];
       for (const item of items) {
         const existing = tally.find((entry) => entry.value.isSame(item));
@@ -703,7 +710,10 @@ export function declareListHeads(ce: Engine): void {
     ce,
     ["Rank", 1],
     () => true,
-    () => (ops) => ce.number(arrayRank(ops[0])),
+    (native) => (ops, options) => {
+      const rank = arrayRank(ops[0]);
+      return rank === undefined ? native?.(ops, options) : ce.number(rank);
+    },
     1,
   );
 
@@ -754,7 +764,12 @@ export function declareListHeads(ce: Engine): void {
       operator.canonical = (ops, options) => {
         // An atom has no operands and a pseudo-head ("Symbol", "Number"): `Append(x, k)` for a
         // free `x` (a `Function` slot, say) stays the call, not `Symbol(k)`.
-        if (ops.length === 2 && !NATIVE_APPEND_HEADS.has(ops[0].operator) && operandsOf(ops[0]).length > 0) {
+        if (
+          ops.length === 2 &&
+          !NATIVE_APPEND_HEADS.has(ops[0].operator) &&
+          !ops[0].isLazyCollection &&
+          operandsOf(ops[0]).length > 0
+        ) {
           return ce.function(ops[0].operator, [...operandsOf(ops[0]), ops[1]]);
         }
         return nativeCanonical?.call(operator, ops, options);

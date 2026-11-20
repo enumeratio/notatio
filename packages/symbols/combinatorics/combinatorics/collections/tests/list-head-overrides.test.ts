@@ -179,8 +179,9 @@ test("an overridden head answers a lazy collection as it answers the list of its
       const listCalls = build(asList);
       build(operand).forEach((call, i) => {
         if (DELIBERATE.some((d) => d.skip(call))) return;
-        // The native At past the end of a lazy collection is NaN, and of a list Missing.
-        if (head === "At" && name.startsWith("empty")) return;
+        // The native At, or First without a default, of an empty lazy collection is NaN, and of an empty list Missing.
+        if (name.startsWith("empty") && (head === "At" || ((head === "First" || head === "Last") && call.length === 2)))
+          return;
         const reference = answer(declared, listCalls[i]);
         const ours = answer(declared, call);
         if (reference !== undefined && ours !== undefined && !same(head, reference, ours)) {
