@@ -26,3 +26,25 @@ test("a collection not known to be finite is not walked", () => {
   expect(collectionElements(unknown as never)).toBeUndefined();
   expect(walked).toBe(false);
 });
+
+test("a symbol or number has no elements to read", () => {
+  for (const atom of ["xs", 3]) expect(collectionElements(ce.box(atom as never))).toBeUndefined();
+});
+
+test("a lazy collection over an unknown symbol is not listed", () => {
+  expect(collectionElements(ce.box(["Take", "xs", 3]))).toBeUndefined();
+  expect(collectionElements(ce.box(["Map", ["Function", ["Multiply", "x", 2], "x"], "xs"]))).toBeUndefined();
+  expect(collectionElements(ce.box(["Take", ["List", 1, 2, 3], 2]))?.map((e) => e.re)).toEqual([1, 2]);
+});
+
+test("a walk that disagrees with the collection's own count declines", () => {
+  const short = {
+    isCollection: true,
+    isFiniteCollection: true,
+    count: 3,
+    *each() {
+      yield ce.One;
+    },
+  };
+  expect(collectionElements(short as never)).toBeUndefined();
+});

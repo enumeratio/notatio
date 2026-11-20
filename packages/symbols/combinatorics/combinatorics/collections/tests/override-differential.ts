@@ -40,6 +40,10 @@ operands.nested = ["List", ["List", 3, 1], ["List", 2], ["List", 1, 2, 3]];
 operands.matrix = ["List", ["List", 1, 2], ["List", 3, 4]];
 operands.words = ["List", "'pear'", "'fig'", "'apple'"];
 operands.string = "'hello'";
+// An unknown symbol, bare and under a lazy head: neither has elements to read.
+operands.unknown = "xs";
+operands.takeUnknown = ["Take", "xs", 3];
+operands.mapUnknown = ["Map", double, "xs"];
 
 /** A call the override answers differently on purpose, with its reason. */
 export interface Deliberate {

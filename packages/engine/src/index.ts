@@ -40,16 +40,23 @@ export const operandsOf = (expr: Expression | undefined): readonly Expression[] 
  * function exists to avoid.
  */
 export const collectionElements = (expr: Expression): readonly Expression[] | undefined => {
-  if (!expr.isCollection) return operandsOf(expr);
+  // A symbol or number has no operands: reading it as `[]` answers for an empty list.
+  if (!expr.isCollection) return Array.isArray((expr as { ops?: unknown }).ops) ? operandsOf(expr) : undefined;
   // Only a known-finite collection is walked: `each()` on `PrimeNumbers` does not stop at the
   // budget. A walk that reaches MAX_COLLECTION_ELEMENTS declines; a prefix would be a wrong answer.
   if (expr.isFiniteCollection !== true) return undefined;
+  // `Take(P, 3)` over an unknown symbol `P` claims to be finite, has no count and walks nothing:
+  // with no count to check the walk against, a lazy collection's source must be a collection.
+  const count = expr.count;
+  if (count === undefined && expr.isLazyCollection && operandsOf(expr)[0]?.isCollection !== true) return undefined;
   try {
     const elements: Expression[] = [];
     for (const element of expr.each()) {
       if (elements.length === MAX_COLLECTION_ELEMENTS) return undefined;
       elements.push(element);
     }
+    // A walk that disagrees with the collection's own count is not the collection.
+    if (count !== undefined && Number(count) !== elements.length) return undefined;
     return elements;
   } catch {
     return undefined;
