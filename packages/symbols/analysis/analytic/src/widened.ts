@@ -1,6 +1,7 @@
 import { numerically } from "./finish.ts";
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigIntegerAt, bigRationalAt, mayBeInteger, widenSignature, wrapOperator } from "@notatio/engine";
+import { wantsNumber } from "@notatio/ce-patches";
 
 // compute-engine's Gamma-built combinatorial heads, widened to the exact values Wolfram gives
 // and the native handler leaves unevaluated or rejects: Binomial, Beta and CatalanNumber at
@@ -178,7 +179,12 @@ export function declareWidened(ce: ComputeEngine): void {
     ce,
     ["BernoulliB", 1],
     () => true,
-    () => (ops) => ce.function("BernoulliPolynomial", [...ops]).evaluate(),
+    () => (ops, options) => {
+      const call = ce.function("BernoulliPolynomial", [...ops]);
+      // N() stays a numeric call. A numeric call the polynomial declines (past a double's digits) stays BernoulliB's.
+      const value = options.numericApproximation ? call.N() : call.evaluate();
+      return wantsNumber(ops, options) && value.operator === "BernoulliPolynomial" ? undefined : value;
+    },
     { arity: 2, compile: "builtin" },
   );
 
