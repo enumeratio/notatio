@@ -72,7 +72,6 @@ test("a double overflowing, or a point outside the kernel's domain, stays uneval
     ["MeijerG", L(L(), L()), L(L(100000), L()), 3],
     ["ChebyshevT", 100000, 2],
     ["ChebyshevU", 100000, 100000],
-    ["HermiteH", 200, 50],
     ["KleinInvariantJ", C(2, -1)],
     ["ModularLambda", C(2, -1)],
     ["Digamma", C(1e300, 1)],
@@ -80,6 +79,14 @@ test("a double overflowing, or a point outside the kernel's domain, stays uneval
     const v = N(expr);
     expect(v.operator).toBe((expr as unknown[])[0]);
   }
+});
+
+// H_200(50) is 1.5774e398, past a double's range: the bignum recurrence answers it (mpmath: 1.57739097169115269872e+398).
+test("a Hermite value past a double's range is answered by the bignum recurrence", () => {
+  const big = (
+    N(["HermiteH", 200, 50]) as unknown as { bignumRe?: { toPrecision(n: number): { significand: bigint } } }
+  ).bignumRe;
+  expect(big?.toPrecision(20).significand.toString().startsWith("15773909716911526987")).toBe(true);
 });
 
 test("Beta at a pole of Γ over a finite denominator is ComplexInfinity; elsewhere it is finite", () => {

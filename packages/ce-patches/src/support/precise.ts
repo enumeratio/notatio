@@ -1,5 +1,5 @@
 import { type BigDecimal, type Expression, ComputeEngine, isNumber } from "@cortex-js/compute-engine";
-import { clearKernelZero, doubleBox, inexactComplex, isDoubleBox, takeKernelZero } from "./box.ts";
+import { clearKernelZero, doubleBox, inexactComplex, isBigBox, isDoubleBox, takeKernelZero } from "./box.ts";
 
 /** Above this many digits a double is no longer the limiting factor — and neither should we be. */
 export const DOUBLE_DIGITS = 15;
@@ -78,6 +78,7 @@ export function isMachineNumber(x: Expression, precision: number, answer = true)
   // A double kernel's answer is a double whatever it rounded to: 1 for a value of 1 + 5e-401 is no exact 1. The kind is
   // read before exactness, since compute-engine boxes a whole-valued double as the exact integer.
   if (answer && isDoubleBox(x)) return Number.isFinite(x.re) && Number.isFinite(x.im);
+  if (answer && isBigBox(x)) return false;
   if ((x as Partial<{ isExact: boolean }>).isExact === true) return false;
   if (answer && x.im === 0 && x.bignumRe === undefined) return Number.isFinite(x.re);
   const complex = x.im !== 0;

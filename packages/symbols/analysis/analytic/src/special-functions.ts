@@ -1,5 +1,5 @@
 import { type Expression, type ComputeEngine } from "@cortex-js/compute-engine";
-import { type EvalOptions, evaluateBernoulliPolynomial } from "@notatio/ce-patches";
+import { type EvalOptions, evaluateBernoulliPolynomial, wantsBigDigits } from "@notatio/ce-patches";
 import { compileChebyshevT, compileChebyshevU, evaluateChebyshevT, evaluateChebyshevU } from "./chebyshev.ts";
 import { evaluateCsgn } from "./csgn.ts";
 import { evaluateCongruentMod } from "./congruent-mod.ts";
@@ -35,7 +35,13 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
     evaluate: (ops, options) =>
       ops[0] === undefined || ops[1] === undefined
         ? undefined
-        : evaluateChebyshevT(ce, ops[0], ops[1], wants(ops, options)),
+        : evaluateChebyshevT(
+            ce,
+            ops[0],
+            ops[1],
+            wants(ops, options),
+            wantsBigDigits(ce, { numericApproximation: wants(ops, options) }, ops),
+          ),
     compile: compileChebyshevT,
   });
 
@@ -44,7 +50,13 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
     evaluate: (ops, options) =>
       ops[0] === undefined || ops[1] === undefined
         ? undefined
-        : evaluateChebyshevU(ce, ops[0], ops[1], wants(ops, options)),
+        : evaluateChebyshevU(
+            ce,
+            ops[0],
+            ops[1],
+            wants(ops, options),
+            wantsBigDigits(ce, { numericApproximation: wants(ops, options) }, ops),
+          ),
     compile: compileChebyshevU,
   });
 
@@ -53,13 +65,27 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
     evaluate: (ops, options) =>
       ops[0] === undefined || ops[1] === undefined
         ? undefined
-        : evaluateHermiteH(ce, ops[0], ops[1], wants(ops, options)),
+        : evaluateHermiteH(
+            ce,
+            ops[0],
+            ops[1],
+            wants(ops, options),
+            wantsBigDigits(ce, { numericApproximation: wants(ops, options) }, ops),
+          ),
     compile: compileHermiteH,
   });
 
   ce.declare("LaguerreL", {
     signature: "(number, number, number?) -> number",
-    evaluate: (ops, options) => (ops.length < 2 ? undefined : evaluateLaguerreL(ce, ops, wants(ops, options))),
+    evaluate: (ops, options) =>
+      ops.length < 2
+        ? undefined
+        : evaluateLaguerreL(
+            ce,
+            ops,
+            wants(ops, options),
+            wantsBigDigits(ce, { numericApproximation: wants(ops, options) }, ops),
+          ),
     compile: compileLaguerreL,
   });
 
@@ -68,7 +94,13 @@ export function declareSpecialFunctions(ce: ComputeEngine): void {
     evaluate: (ops, options) =>
       ops[0] === undefined || ops[1] === undefined
         ? undefined
-        : evaluateLegendreP(ce, ops[0], ops[1], wants(ops, options)),
+        : evaluateLegendreP(
+            ce,
+            ops[0],
+            ops[1],
+            wants(ops, options),
+            wantsBigDigits(ce, { numericApproximation: wants(ops, options) }, ops),
+          ),
   });
 
   ce.declare("RisingFactorial", {

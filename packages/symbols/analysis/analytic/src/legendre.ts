@@ -13,6 +13,7 @@ import {
   type Cx,
 } from "@notatio/ce-patches";
 import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
+import { orthogonalBig } from "./orthogonal-big.ts";
 
 // LegendrePolynomial(n, x): P_0 = 1, P_1 = x, (k+1) P_{k+1} = (2k+1) x P_k − k P_{k−1}.
 // Fungrim's name; Wolfram's is `LegendreP` (bridged in the wolfram package's HEADS map,
@@ -112,12 +113,15 @@ export function evaluateLegendreP(
   n: Expression,
   x: Expression,
   numeric: boolean,
+  big = false,
 ): Expression | undefined {
   if (!isRealInt(n)) return undefined;
   const index = n.re >= 0 ? n.re : -n.re - 1; // P_{−n} = P_{n−1}, n ≥ 1
   const box = (expr: Json) => ce.box(expr as unknown as BoxInput);
   const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
   if (index === 0 && allExact([n])) return degreeZero(ce, [x]);
+  const wide = orthogonalBig(ce, big, "P", index, undefined, x);
+  if (wide !== undefined) return wide;
   if (numeric && isFiniteNum(x)) {
     const value = numberResult(ce, legendreAt(index, cx(x.re, x.im)), vouchesWhenComplex([x]));
     // A 0 on exact operands is confirmed by the exact polynomial; on a float it is a double's and stays so.

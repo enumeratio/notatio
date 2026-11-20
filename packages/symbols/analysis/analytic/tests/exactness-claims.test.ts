@@ -72,9 +72,9 @@ test("a Jacobi function at an exact m = 0 is exact where it has a closed form, a
 });
 
 test("a zero from a double kernel declines past a double's digits unless an exact route produced it", () => {
-  // L₁(1 + 1e-20) = −1e-20: the decimal is read exactly, and the kernel's 0 is a double's.
+  // L₁(1 + 1e-20) = −1e-20: the decimal is read exactly by the bignum recurrence, and the double kernel's 0 is not kept.
   const near = { num: "1.00000000000000000001" };
-  expect(run(["LaguerreL", 1, near], "N", 50).operator).toBe("LaguerreL");
+  expect(run(["LaguerreL", 1, near], "N", 50).toString()).toBe("-1e-20");
   // L₁(1) = 0 exactly, on exact operands.
   const exact = run(["LaguerreL", 1, 1], "N", 50);
   expect(exact.re).toBe(0);
