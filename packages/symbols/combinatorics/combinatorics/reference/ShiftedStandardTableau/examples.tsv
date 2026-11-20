@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[ShiftedStandardTableau, [List, [List, 1, 2], [List, 3]]]	[ShiftedStandardTableau, [List, [List, 1, 2], [List, 3]]]	The constructor on one of its elements

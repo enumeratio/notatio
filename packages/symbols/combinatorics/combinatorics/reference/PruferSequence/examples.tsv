@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[PruferSequence, [List, 1, 2]]	[PruferSequence, [List, 1, 2]]	The constructor on one of its elements

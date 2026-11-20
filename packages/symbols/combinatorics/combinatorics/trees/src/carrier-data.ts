@@ -31,6 +31,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "IncreasingBinaryTree",
+    readable: true,
     type: "increasing_binary_tree",
     // Nested, following BinaryTree/FullKAryTree/OrderedTree's own convention (leaf 0, node a
     // list): [label, left, right], label folded in as the first slot. Matches what
@@ -43,6 +44,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "FullKAryTree",
+    readable: true,
     type: "full_k_ary_tree",
     shape: "integer | list<any>",
     id: "full_k_ary_tree",
@@ -58,6 +60,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "NonCrossingTree",
+    readable: true,
     type: "non_crossing_tree",
     shape: "list<integer>",
     id: "non_crossing_tree",
@@ -74,6 +77,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PhylogeneticTree",
+    readable: true,
     type: "phylogenetic_tree",
     shape: "list<integer>",
     id: "phylogenetic_tree",
@@ -88,6 +92,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PruferSequence",
+    readable: true,
     // A word, not an edge list -- counted in its own right (n^(n-2)), and the Prüfer bijection
     // to LabeledTree is a conversion (LabeledTree(PruferSequence(...))), not this carrier's shape.
     type: "prufer_sequence",
@@ -97,6 +102,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "RootedForest",
+    readable: true,
     type: "rooted_forest",
     shape: "list<integer>",
     id: "rooted_forest",
@@ -111,6 +117,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "RootedUnlabeledTree",
+    readable: true,
     type: "rooted_unlabeled_tree",
     shape: "list<integer>",
     id: "rooted_unlabeled_tree",
@@ -118,6 +125,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "UnlabeledFreeTree",
+    readable: true,
     type: "unlabeled_free_tree",
     shape: "list<integer>",
     id: "unlabeled_free_tree",

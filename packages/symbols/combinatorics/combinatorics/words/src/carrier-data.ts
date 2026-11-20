@@ -51,6 +51,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "StirlingPermutation",
+    readable: true,
     type: "stirling_permutation",
     shape: "list<integer>",
     id: "stirling_permutation",
@@ -58,6 +59,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "TernaryGrayCode",
+    readable: true,
     type: "ternary_gray_code",
     shape: "list<integer>",
     id: "ternary_gray_code",

@@ -14,6 +14,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "DelannoyPath",
+    readable: true,
     type: "delannoy_path",
     shape: "list<integer>",
     id: "delannoy_path",
@@ -43,6 +44,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "LukasiewiczPath",
+    readable: true,
     type: "lukasiewicz_path",
     shape: "list<integer>",
     id: "lukasiewicz_path",

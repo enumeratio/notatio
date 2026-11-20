@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[ColoredPermutation, [Tuple, [List, 1, 3, 2], [List, 0, 0, 0]]]	[ColoredPermutation, [Tuple, [List, 1, 3, 2], [List, 0, 0, 0]]]	The constructor on one of its elements

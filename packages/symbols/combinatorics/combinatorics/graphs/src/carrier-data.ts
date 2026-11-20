@@ -21,6 +21,7 @@ export const GRAPHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Tournament",
+    readable: true,
     type: "tournament",
     shape: "tuple<integer, list<list<integer>>>",
     id: "tournament",

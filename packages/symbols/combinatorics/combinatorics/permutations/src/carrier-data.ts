@@ -22,6 +22,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "ColoredPermutation",
+    readable: true,
     type: "colored_permutation",
     shape: "tuple<list<integer>, list<integer>>",
     id: "colored_permutation",

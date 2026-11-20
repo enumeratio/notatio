@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[TernaryGrayCode, [List, 0, 0, 1]]	[TernaryGrayCode, [List, 0, 0, 1]]	The constructor on one of its elements

@@ -452,6 +452,22 @@ test("the Wolfram rename column is reflected from the transpiler, not copied", (
  * normalization). KeiperLiLambda has no known equivalent anywhere.
  */
 const NOVEL = [
+  "ColoredPermutation",
+  "StirlingPermutation",
+  "TernaryGrayCode",
+  "DelannoyPath",
+  "LukasiewiczPath",
+  "IncreasingBinaryTree",
+  "FullKAryTree",
+  "NonCrossingTree",
+  "PhylogeneticTree",
+  "PruferSequence",
+  "RootedForest",
+  "RootedUnlabeledTree",
+  "UnlabeledFreeTree",
+  "Multiset",
+  "ShiftedStandardTableau",
+  "Tournament",
   "AdditionTable",
   "AdditiveEnergy",
   "Adele",

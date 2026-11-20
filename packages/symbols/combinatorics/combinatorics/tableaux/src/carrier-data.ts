@@ -46,6 +46,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "ShiftedStandardTableau",
+    readable: true,
     type: "shifted_standard_tableau",
     shape: "list<list<integer>>",
     id: "shifted_standard_tableau",
