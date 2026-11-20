@@ -49,11 +49,37 @@ export const isFiniteNum = (x: Expression): boolean => Number.isFinite(x.re) && 
  */
 const doubleBoxes = new WeakSet<object>();
 
-/** `x`, a number a double kernel produced, recorded as one (`isMachineNumber`). */
+/**
+ * `x`, a number a double kernel produced, recorded as one (`isMachineNumber`). A whole-valued double is boxed
+ * as the float it is (`3.0`): compute-engine shares one exact `3` among every use of it, so recording that one
+ * would make each exact 3 in the engine read as a double. An exact zero stays the shared exact zero, so it cannot be
+ * recorded; `takeKernelZero` reports it instead, and a call past a double's digits declines it.
+ */
 export const doubleBox = (x: Expression): Expression => {
-  doubleBoxes.add(x);
-  return x;
+  const exact = (x as Partial<{ isExact: boolean }>).isExact === true;
+  if (exact && x.im === 0 && x.re === 0) {
+    kernelZeroBoxed = true;
+    return x;
+  }
+  const boxed = exact && x.im === 0 && Number.isSafeInteger(x.re) ? x.engine.box({ num: `${x.re}.0` } as never) : x;
+  doubleBoxes.add(boxed);
+  return boxed;
 };
+
+/**
+ * Set when `doubleBox` was handed an exact zero: a double kernel's 0, which an exact branch's 0 never passes through.
+ * `declineMachineAnswer` reads it, so a call asking for more digits than a double holds declines a zero no exact
+ * branch produced. It is read within one synchronous call, so one flag serves.
+ */
+let kernelZeroBoxed = false;
+
+/** Forget a zero boxed so far; `takeKernelZero` then reports only zeros boxed after this. */
+export const clearKernelZero = (): void => {
+  kernelZeroBoxed = false;
+};
+
+/** Did a double kernel box a zero since `clearKernelZero`? */
+export const takeKernelZero = (): boolean => kernelZeroBoxed;
 
 /** Did a double kernel box `x`? */
 export const isDoubleBox = (x: Expression): boolean => doubleBoxes.has(x);

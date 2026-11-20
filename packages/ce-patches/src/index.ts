@@ -162,6 +162,7 @@ export {
   underflows,
   inexactComplex,
   doubleBox,
+  clearKernelZero,
   wantsNumber,
   declined,
   realCompile,
