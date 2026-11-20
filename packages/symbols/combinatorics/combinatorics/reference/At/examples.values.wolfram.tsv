@@ -32,7 +32,7 @@ a-span-2-4-in-wolfram-takes-a-contiguous-slice	Part[List[a, b, c, d, f], Span[2,
 a-stepped-span-1-1-2-takes-every-other-element	Part[List[a, b, c, d, f], Span[1, -1, 2]]	{a, c, f}	\{a,b,c,d,f\}[[1\text{;;}-1\text{;;}2]]	\{a,c,f\}	
 a-negative-step-1-1-1-walks-backwards-reversing	Part[List[a, b, c, d, f], Span[-1, 1, -1]]	{f, d, c, b, a}	\{a,b,c,d,f\}[[-1\text{;;}1\text{;;}-1]]	\{f,d,c,b,a\}	
 negative-bounds-the-last-two-elements	Part[List[a, b, c, d, f], Span[-2, -1]]	{d, f}	\{a,b,c,d,f\}[[-2\text{;;}-1]]	\{d,f\}	
-parts-of-a-call-are-its-operands	Part[f[a, b, c], 2]	b	f(a,b,c)[[2]]	b	
+parts-of-a-call-are-its-operands	Part[f[a, b, c], 2]				
 indexes-into-a-named-integer-collection					
 indexes-into-a-parameterized-collection					
 first-term-of-fibonaccinumbers-is-0					

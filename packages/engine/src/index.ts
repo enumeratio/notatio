@@ -63,26 +63,28 @@ export const collectionElements = (expr: Expression): readonly Expression[] | un
   }
 };
 
-/** A symbol's definition, as far as `symbolIsNumber` reads it. */
-type ValueDefinitionLike = {
-  value?: { inferredType?: boolean; type?: { matches: (t: unknown) => boolean | undefined } };
+/** Whether `type` is a number or a boolean, so a value of it can never be a collection. */
+const isScalarType = (ce: ComputeEngine, type: { matches: (t: never) => boolean | undefined }): boolean =>
+  type.matches(ce.type("number") as never) === true || type.matches(ce.type("boolean") as never) === true;
+
+/** Whether `symbol` can only ever be a scalar: it holds one, or its declared (not inferred) type is one. */
+const symbolIsScalar = (ce: ComputeEngine, symbol: Expression): boolean => {
+  const value = symbol.value;
+  if (value !== undefined) return value.isCollection !== true && isScalarType(ce, value.type);
+  // A symbol only mentioned has no definition.
+  const definition = ce.lookupDefinition(symbolNameOf(symbol)!);
+  const declared = definition !== undefined && "value" in definition ? definition.value : undefined;
+  return declared !== undefined && declared.inferredType !== true && isScalarType(ce, declared.type);
 };
 
-/** Whether `symbol` can only ever be a number: it holds a number, or its declared (not inferred) type is one. */
-const symbolIsNumber = (ce: ComputeEngine, symbol: Expression): boolean => {
-  const value = (symbol as { value?: Expression }).value;
-  if (value !== undefined) return value.isCollection !== true && value.type.matches(ce.type("number"));
-  const definition = ce.lookupDefinition(symbolNameOf(symbol)!) as ValueDefinitionLike | undefined;
-  const declared = definition?.value;
-  return declared !== undefined && declared.inferredType !== true && declared.type?.matches(ce.type("number")) === true;
-};
-
-/** Every leaf of `expr` is a number or a symbol that can only be one. */
-const isSymbolicNumber = (ce: ComputeEngine, expr: Expression): boolean => {
-  if (symbolNameOf(expr) !== undefined) return symbolIsNumber(ce, expr);
+/** `expr` and every call inside it has a known scalar type, and every symbol in it is a scalar: nothing
+ *  binding the symbols can make it a collection. A head typed `any` (or a list, like `Divisors`) fails. */
+const isSymbolicScalar = (ce: ComputeEngine, expr: Expression): boolean => {
+  if (symbolNameOf(expr) !== undefined) return symbolIsScalar(ce, expr);
   const ops = (expr as { ops?: unknown }).ops;
-  if (!Array.isArray(ops)) return expr.type.matches(ce.type("number"));
-  return ops.length > 0 && (ops as Expression[]).every((op) => isSymbolicNumber(ce, op));
+  if (!isScalarType(ce, expr.type)) return false;
+  if (!Array.isArray(ops)) return true;
+  return ops.length > 0 && (ops as Expression[]).every((op) => isSymbolicScalar(ce, op));
 };
 
 /**
@@ -90,16 +92,17 @@ const isSymbolicNumber = (ce: ComputeEngine, expr: Expression): boolean => {
  * or `undefined` when they may not be its parts once its symbols are bound. Its parts are sound when
  * either
  *  - its head is an undeclared symbol, so the call is inert whatever `a` and `b` turn out to be; or
- *  - its head is declared and every symbol in it is a number: `u + v` is read elementwise once `u`
- *    and `v` are lists, so an untyped symbol (a lambda's parameter, say) may still make it one.
- * The expression's own type is no evidence: `u + v` types as a number whatever `u` and `v` are.
+ *  - its head is declared and it is a symbolic scalar: every call in it has a known number or boolean type
+ *    (not `any`, not a list like `Divisors(n)`) and every symbol is a declared scalar. `u + v` is read
+ *    elementwise once `u` and `v` are lists, so an untyped symbol (a lambda's parameter) may make it one.
+ * The expression's own type alone is no evidence: `u + v` types as a number whatever `u` and `v` are.
  */
 const structuralOperands = (ce: ComputeEngine, expr: Expression): readonly Expression[] | undefined => {
   if (expr.isCollection === true) return undefined;
   const head = expr.operator;
   const ops = (expr as { ops?: unknown }).ops;
   if (typeof head !== "string" || !Array.isArray(ops)) return undefined;
-  if (ce.lookupDefinition(head) === undefined || isSymbolicNumber(ce, expr)) return ops as Expression[];
+  if (ce.lookupDefinition(head) === undefined || isSymbolicScalar(ce, expr)) return ops as Expression[];
   return undefined;
 };
 

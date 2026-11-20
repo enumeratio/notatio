@@ -66,3 +66,18 @@ test("function nodes share one prototype that carries evaluate and evaluateAsync
   expect(Object.getPrototypeOf(ce.box(["Add", "x", 1]))).toBe(prototype);
   expect(Object.getPrototypeOf(ce.box(["Sin", "x"]))).toBe(prototype);
 });
+
+// structuralOperands (index.ts) trusts a symbol's type only if it was declared: `inferredType` tells which.
+test("a declared symbol's definition reports inferredType false, an inferred one true, a mentioned one has none", () => {
+  const ce = new ComputeEngine();
+  const valueOf = (name: string) => {
+    const definition = ce.lookupDefinition(name);
+    return definition !== undefined && "value" in definition ? definition.value : undefined;
+  };
+  ce.declare("declared", "real");
+  ce.assign("assigned", 3);
+  ce.box(["Add", "mentioned", 1]).evaluate();
+  expect(valueOf("declared")?.inferredType).toBe(false);
+  expect(valueOf("assigned")?.inferredType).toBe(true);
+  expect(ce.lookupDefinition("mentioned")).toBeUndefined();
+});

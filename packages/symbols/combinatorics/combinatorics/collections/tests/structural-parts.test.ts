@@ -66,6 +66,33 @@ for (const head of ["First", "Last"] as const) {
   });
 }
 
+// A typed leaf doesn't make an operand safe: its head may return a list once its operand is bound.
+test("an operand whose head returns a list is not read by parts, though its symbol is typed", () => {
+  const typedEngines = () => {
+    const withN = (ce: typeof bare) => {
+      ce.declare("n", "integer");
+      return ce;
+    };
+    return [withN(bareEngine()), withN(createEngine(declareCollections))] as const;
+  };
+  const [native, ours] = typedEngines();
+  for (const call of [
+    ["First", ["Divisors", "n"]],
+    ["Last", ["IntegerDigits", "n"]],
+    ["At", ["Range", "n"], 1],
+    ["First", ["FactorInteger", "n"]],
+  ]) {
+    expect(run(ours, call), JSON.stringify(call)).toBe(run(native, call));
+  }
+});
+
+// Key is one of ours, typed (any) -> any and left alone for a symbol: its operand is not a part to read.
+test("an operand under a head typed (any) -> any is not read by parts", () => {
+  const ce = createEngine(declareCollections);
+  ce.declare("p", "boolean");
+  expect(run(ce, ["First", ["Key", "p"]])).not.toBe('"p"');
+});
+
 /** The head of a JSON answer. */
 function ce_head(json: string): unknown {
   const parsed = JSON.parse(json) as unknown;
