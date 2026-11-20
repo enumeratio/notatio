@@ -61,3 +61,30 @@ test("Symbol of a non-string stays held", () => {
   expect(run(["Symbol", "x"])).toEqual(["Symbol", "x"]);
   expect(run(["Symbol", { str: "x" }])).toBe("x");
 });
+
+const native = bareEngine();
+const hasError = (json: unknown): boolean => JSON.stringify(json).includes('"Error"');
+
+test("a Map lambda's parameter is typed from its collection, as natively", () => {
+  const call = ["Map", ["Function", ["If", ["Element", "i", ["List"]], 1, 0], "i"], ["List", 1, 2, 3]];
+  const declared = run(call);
+  expect(hasError(declared)).toBe(false);
+  expect(declared).toEqual(native.box(call as never).evaluate({ materialization: true }).json);
+});
+
+test("Map, Fold and Filter keep compute-engine's signatures and add only the operator form", () => {
+  const signatureOf = (engine: typeof ce, head: string) =>
+    String((engine.lookupDefinition(head) as { operator: { signature: unknown } }).operator.signature);
+  for (const head of ["Map", "Fold", "Filter"]) {
+    expect(signatureOf(ce, head)).toContain(signatureOf(native, head));
+  }
+  // Typed calls the native signatures answer get the same result type.
+  const calls = [
+    ["Map", ["Function", ["Add", "x", 1], "x"], ["List", 1, 2, 3]],
+    ["Fold", ["Function", ["Add", "a", "b"], "a", "b"], 0, ["List", 1, 2, 3]],
+    ["Filter", ["List", 1, 2, 3], ["Function", ["Greater", "x", 1], "x"]],
+  ];
+  for (const call of calls) {
+    expect(String(ce.box(call as never).type)).toBe(String(native.box(call as never).type));
+  }
+});

@@ -12,7 +12,7 @@ signatures:
   - call: Map(f)
     description: the operator form, $\mathrm{Map}(f)(xs) = \mathrm{Map}(f, xs)$.
     library: enumeratio-combinatorics
-    type: (any) -> any
+    type: "((mapping: (T) any -> U, collection<T>+) -> indexed_collection where T, U) & ((any) -> any)"
     overrides: compute-engine
 seeAlso:
   - Tabulate
