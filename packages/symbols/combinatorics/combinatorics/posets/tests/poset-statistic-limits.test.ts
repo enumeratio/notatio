@@ -58,7 +58,7 @@ const CASES: Record<string, Case> = {
     reason: "the elements less the width, n and 1",
   },
   PrincipalFilterSizeProduct: {
-    limit: ELEMENT_LIMIT,
+    limit: 18,
     antichain: () => 1,
     chain: factorial,
     reason: "each filter of the chain has n, n - 1, ... 1 elements; of the antichain, 1",
@@ -138,7 +138,7 @@ const CASES: Record<string, Case> = {
     reason: "in an antichain every element is minimal, so the greedy sequences are the n! orderings; a chain has one",
   },
   ThreeChainHomomorphismCount: {
-    limit: 10,
+    limit: 11,
     antichain: (n) => 3 ** n,
     chain: (n) => ((n + 1) * (n + 2)) / 2,
     reason: "each of n free elements goes to one of three; a chain's maps are the pairs of nested prefixes",

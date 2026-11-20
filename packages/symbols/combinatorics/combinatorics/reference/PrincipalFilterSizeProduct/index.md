@@ -19,5 +19,5 @@ signatures:
 
 - Defined over `Poset` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.
 - Takes a `Poset` and nothing else — it reads values against their positions, or walks the orbits, so it needs the bijection. Applying it to a bare list is a type error, not a wrong answer.
-- Defined where `Length(_x) <= 12` holds; elsewhere the call stays unevaluated.
+- Defined where `Length(_x) <= 18` holds; elsewhere the call stays unevaluated.
 - FindStat's St001813. The poset with no elements gives 1, the empty product.
