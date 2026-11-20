@@ -250,9 +250,10 @@ kernel, the network or hand curation stays committed.
     config, CI or the engine selects all packages.
   - The nightly (`ci.yml`'s schedule, also `workflow_dispatch`) tests every package and all of combinatorics, and files a
     rolling `nightly-fixup` issue on failure. Main never cancels an in-progress run.
-- **Production** (`enumeratio.dev`) ships from Cloudflare Pages (project `enumeratio`) on merge to `main`; `ci.yml` deploys it. Every
-  build also goes up as a Cloudflare Pages preview at `<sha7>.enumeratio.pages.dev`; the PR's
-  sticky `<!-- cf-preview -->` comment carries the URL, and review links go below its first
+- **Production** ships from Cloudflare Pages on merge to `main`; `ci.yml` deploys the one site build to two
+  projects, `enumeratio` (`enumeratio.dev`) and `notatio` (`notatio.app`), while both hosts serve the same site.
+  Every build also goes up as a preview at `<sha7>.enumeratio.pages.dev` and `<sha7>.notatio.pages.dev`; the PR's
+  sticky `<!-- cf-preview -->` comment carries both URLs, and review links go below its first
   two lines, which each push rewrites.
 - **Advisory sweeps** (Plausible on main and nightly, the nightly and weekly oracle rescans, the nightly tarball check) are never
   required checks. A lane fails when an answered row changes verdict, classification or input, not on
