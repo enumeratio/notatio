@@ -9,12 +9,12 @@ signatures:
   - call: "Conjugate(T) -> T where T: number"
     description: Complex conjugate of a number, or the pointwise conjugate of a function.
     library: enumeratio-hypercomplex
-    type: (value) -> value
+    type: "((T) -> T where T: number) & ((value) -> value)"
     overrides: enumeratio-analytic
   - call: Conjugate(x)
     description: holds when x isn't known to be a number, so `Conjugate(Transpose(m))` stays unevaluated instead of a type error.
     library: enumeratio-analytic
-    type: (value) -> value
+    type: "((T) -> T where T: number) & ((value) -> value)"
     overrides: compute-engine
 catalog:
   - system: findstat

@@ -9,7 +9,7 @@ signatures:
   - call: DivisorSigma(k, n)
     description: The sum of the kth powers of the divisors of n.
     library: enumeratio-number-theory
-    type: (number, number, any*) -> number
+    type: ((integer, integer) -> integer) & ((number, number, any*) -> number)
     overrides: compute-engine
 seeAlso:
   - Divisors

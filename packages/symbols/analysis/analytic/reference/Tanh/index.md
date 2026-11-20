@@ -9,7 +9,7 @@ signatures:
   - call: Tanh(x)
     description: 'Hyperbolic tangent: $\tanh(x) = \frac{\sinh(x)}{\cosh(x)}$.'
     library: enumeratio-analytic
-    type: (complex | complex | infinity | quantity | signed_infinity) -> number
+    type: ((complex | infinity) -> number) & ((complex | quantity | signed_infinity) -> number)
     overrides: compute-engine
 seeAlso:
   - Sinh

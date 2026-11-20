@@ -18,7 +18,7 @@ signatures:
   - call: Multinomial(k_1, k_2, …)
     description: The multinomial coefficient $\frac{(k_1 + k_2 + \cdots)!}{k_1!\,k_2!\cdots}$ generalises [[Binomial]] to more than two parts.
     library: enumeratio-number-theory
-    type: (any*) -> any
+    type: ((any*) -> any) & ((integer+) -> integer)
     overrides: enumeratio-analytic
 seeAlso:
   - Binomial

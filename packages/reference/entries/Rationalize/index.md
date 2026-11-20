@@ -11,7 +11,7 @@ signatures:
   - call: Rationalize(x, tolerance?)
     description: Finds a simple rational number near x.
     library: enumeratio-analytic
-    type: (value, number?) -> value
+    type: ((real, real<0..>?) -> rational) & ((value, number?) -> value)
     overrides: compute-engine
   - call: Rationalize(x, tolerance?)
     description: Finds a simple rational number near x.

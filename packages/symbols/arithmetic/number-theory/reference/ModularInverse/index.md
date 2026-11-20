@@ -9,7 +9,7 @@ signatures:
   - call: ModularInverse(z, m)
     description: over the Gaussian integers
     library: enumeratio-number-theory
-    type: (number, number) -> number
+    type: ((integer, integer) -> integer) & ((number, number) -> number)
     overrides: compute-engine
 seeAlso:
   - PowerMod

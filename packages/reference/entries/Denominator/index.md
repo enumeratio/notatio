@@ -16,12 +16,12 @@ signatures:
   - call: Denominator(number) -> nothing | number
     description: Denominator of an expression
     library: enumeratio-number-theory
-    type: (number, any*) -> nothing | number
+    type: ((number) -> nothing | number) & ((number, any*) -> number)
     overrides: enumeratio-residues
   - call: Denominator(number) -> nothing | number
     description: Denominator of an expression
     library: enumeratio-residues
-    type: (number, any*) -> nothing | number
+    type: ((number) -> nothing | number) & ((number, any*) -> number)
     overrides: compute-engine
 statOn:
   - RationalNumber

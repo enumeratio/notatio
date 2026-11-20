@@ -9,7 +9,7 @@ signatures:
   - call: Subfactorial(n)
     description: "The number of derangements of n objects: permutations that leave no element in its original position."
     library: enumeratio-number-theory
-    type: (any) -> any
+    type: ((any) -> any) & ((integer) -> integer)
     overrides: compute-engine
 seeAlso:
   - Factorial

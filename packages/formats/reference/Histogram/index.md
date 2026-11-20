@@ -7,6 +7,6 @@ signatures:
   - call: Histogram(data, bins)
     description: with one argument held inert and drawn as a picture; with a bin spec, computed as compute-engine's own $\mathrm{Histogram}$ does
     library: enumeratio-formats
-    type: (collection<any>, (list<number> | number)?) -> any
+    type: ((collection<any>, (list<number> | number)?) -> any) & ((collection<number>, list<number> | number) -> list<tuple<number, integer>>)
     overrides: compute-engine
 ---
