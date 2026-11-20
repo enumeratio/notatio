@@ -297,6 +297,12 @@ const SPECTRUM_PRIMES: readonly number[] = [
 ];
 /** Bits every one of `SPECTRUM_PRIMES` exceeds. */
 const PRIME_BITS = 25;
+/**
+ * The primes the colorings read their count modulo: enough for 31 vertices (see `hasColoring`), far past the bounds. The
+ * definition embeds its list, so a longer one is a different source, whose stored cross-check verdict is stale and whose
+ * compiled code the build then leaves out (the interpreter takes seconds a call at five vertices).
+ */
+const COLORING_PRIMES: readonly number[] = SPECTRUM_PRIMES.slice(0, 40);
 /** `base` to the power `exponent`, modulo `prime`, by repeated multiplication: every product is below 2^53. */
 const powerResidue = (base: MathJSON, exponent: MathJSON, prime: MathJSON): MathJSON =>
   typedFolding(["Mod", times("pw", base), prime], "pw", "t", 1, ["Range", 1, exponent, 1], "integer");
@@ -319,7 +325,7 @@ const hasColoring = (colors: MathJSON): MathJSON =>
       add(
         floored(
           sumOver(
-            ["Range", 1, SPECTRUM_PRIMES.length - 1],
+            ["Range", 1, COLORING_PRIMES.length - 1],
             one(less(times(PRIME_BITS, "t"), add(times(colors, "bits"), 1))),
             "t",
           ),
@@ -332,7 +338,7 @@ const hasColoring = (colors: MathJSON): MathJSON =>
             ["Range", 1, "primeCount", 1],
             bind(
               "prime",
-              at("q", ["List", ...SPECTRUM_PRIMES]),
+              at("q", ["List", ...COLORING_PRIMES]),
               one(
                 greater(
                   [

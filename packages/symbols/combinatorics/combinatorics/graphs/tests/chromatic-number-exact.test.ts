@@ -8,6 +8,7 @@ import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
 import { SUBSET_LIMITS } from "../src/statistics.ts";
+import { COMPILED } from "../src/statistics.compiled.generated.js";
 import { type Graph, GRAPH_READINGS } from "./graph-findstat-readings.ts";
 
 const DEEP = process.env.DEEP_TESTS === "1";
@@ -62,6 +63,13 @@ const value = (head: string, g: Graph): number =>
     .box([head, ["LabeledGraph", ["Tuple", g.n, ["List", ...g.edges.map(([u, v]) => ["List", u, v])]]]] as never)
     .evaluate().re;
 const factorial = (n: number): number => (n <= 1 ? 1 : n * factorial(n - 1));
+
+// A head the build leaves out falls to the interpreter, seconds a call at five vertices: its stored cross-check verdict
+// goes stale whenever its definition's source changes (the primes it embeds included), so the build must still compile it.
+test("every head on the chromatic number is compiled", () => {
+  for (const head of ["ChromaticNumber", "ChromaticCliqueGap", "MinimumProperColoringCount"])
+    expect(Object.keys(COMPILED), head).toContain(`${head}@LabeledGraph`);
+});
 
 const CHROMATIC_BOUND = SUBSET_LIMITS.ChromaticNumber!;
 
