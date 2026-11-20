@@ -110,13 +110,13 @@ const CASES: Case[] = [
     digits: 50,
     value: "23.718998110500402149713241658854320654835368341418637872755008707",
   },
-  // RC(1, 1e-400) is 461.2…: the kernel's atanh of 1 − 1e-400 rounded to 1 is ∞, which is not a value
+  // RC(1, 1e-400) = ln(4/y)/2 + …: y below the double's range is not the pole (mpmath elliprc)
   {
     head: "CarlsonRC",
     call: ["CarlsonRC", 1, num("1e-400")],
     text: "\\operatorname{CarlsonRC}(1, 1e-400)",
     digits: 50,
-    value: "declines",
+    value: "461.2101657793690821130155230583310180882957978601148504607862602",
   },
   // W(−1/e + 5e-54) is −1 + 7e-27: next to the branch point only the exact z decides, so a z whose digits go past a
   // double's, within a double's rounding of −1/e, stays unevaluated (native answers −1)
