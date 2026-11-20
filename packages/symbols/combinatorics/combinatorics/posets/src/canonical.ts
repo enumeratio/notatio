@@ -15,7 +15,8 @@ import { declineWork } from "../../collections/src/families/work.ts";
 /** A poset as its lower covers, elements 1..n. */
 export type Poset = readonly (readonly number[])[];
 
-/** The most elements a code is carried for: C(10, 2) = 45 bits, the last size a double holds. */
+/** The most elements a code is carried for: C(10, 2) = 45 bits, the last size a double holds, and the last size the
+ *  search is checked at (`canonical-definition-reach`, `canonical-reach` and `canonical-least-code` in `tests/`). */
 export const MAX_CODED = 10;
 
 /** The most elements `posetCodes` lists. The first list of 9 takes about five seconds, some fourteen times the list of 8;
