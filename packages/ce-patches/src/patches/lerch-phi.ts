@@ -1,6 +1,11 @@
 import { wrapOperator } from "@notatio/engine";
 import type { Patch } from "../patch.ts";
-import { evaluateLerch, principalAtZero, unreadableNearOne } from "../compute-engine/library/special-functions.ts";
+import {
+  evaluateLerch,
+  lerchNearOne,
+  principalAtZero,
+  unreadableNearOne,
+} from "../compute-engine/library/special-functions.ts";
 import type { Expression } from "@cortex-js/compute-engine";
 import { isFiniteNum, wantsNumber } from "../support/box.ts";
 import { declineMachineAnswer } from "../support/precise.ts";
@@ -46,7 +51,11 @@ export const lerchPhiPatch: Patch = {
   issue: "https://github.com/cortex-js/compute-engine/issues/340",
   lands:
     "LerchPhi(z, s, a) on the unit circle where it is exactly 0, and Φ(0, s, a) at a negative a on the principal branch",
-  files: ["src/compute-engine/numerics/lerch-phi-big.ts", "src/compute-engine/library/special-functions.ts"],
+  files: [
+    "src/compute-engine/numerics/lerch-phi-big.ts",
+    "src/compute-engine/numerics/lerch-phi-about-one.ts",
+    "src/compute-engine/library/special-functions.ts",
+  ],
   heads: ["LerchPhi"],
 
   fixed: (ce) =>
@@ -69,7 +78,8 @@ export const lerchPhiPatch: Patch = {
           // Native reads a negative base to a float power as a real root.
           if (principalAtZero(ops, wantsNumber(ops, options))) return evaluateLerch(ce, ops, true);
           // Native reads z as a double: 1 − 1e-20 is the pole's double, and Φ there is a different number.
-          if (wantsNumber(ops, options) && unreadableNearOne(ops[0]!)) return undefined;
+          if (wantsNumber(ops, options) && unreadableNearOne(ops[0]!))
+            return lerchNearOne(ce, ops[0]!, ops[1]!, ops[2]!);
           const answer = native?.(ops, options);
           if (answer !== undefined && answer.operator !== "LerchPhi")
             // Decline rather than answer an imaginary part that is rounding noise.
@@ -81,6 +91,7 @@ export const lerchPhiPatch: Patch = {
 
 export {
   evaluateLerch,
+  lerchNearOne,
   lerchPhi,
   lerchPhiChecked,
   lerchPhiReal,
@@ -88,4 +99,5 @@ export {
   lerchContinued,
   lerchPhiBig,
   lerchPhiBall,
+  lerchPhiAboutOne,
 } from "../compute-engine/library/special-functions.ts";

@@ -25,6 +25,7 @@ import {
 } from "../../support/precise.ts";
 import {
   declined,
+  doubleBox,
   isFiniteNum,
   isExactInt,
   isRealInt,
@@ -44,6 +45,7 @@ import { logGamma } from "../numerics/log-gamma.ts";
 import { lerchPhiChecked } from "../numerics/lerch-phi.ts";
 import { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 import { lerchPhiBig } from "../numerics/lerch-phi-big.ts";
+import { lerchPhiAboutOne } from "../numerics/lerch-phi-about-one.ts";
 import { hurwitzZetaChecked, zetaGeneralizedChecked } from "../numerics/hurwitz-zeta.ts";
 import {
   hurwitzZetaBig,
@@ -91,27 +93,41 @@ function checkedLerch(ce: ComputeEngine, z: Expression, s: Expression, a: Expres
 
 /**
  * How near 1 a z may be before a double kernel refuses to read it. Φ(z, s, a) is singular at z = 1
- * (Φ(z, 1, 1) = −ln(1 − z)/z), so a z that is not its double moves the value by about 1e-16/|1 − z| relative: 1e-7
- * at 1e-9. 1 − 1e-20 is the double 1, which is the pole where the value is 46.05.
+ * (Φ(z, 1, 1) = −ln(1 − z)/z), so a z that is not its double moves the value by about 1e-16/|1 − z| relative: 1e-10
+ * at 1e-6. 1 − 1e-20 is the double 1, which is the pole where the value is 46.05. The series about z = 1
+ * (numerics/lerch-phi-about-one.ts) answers within it.
  */
-const NEAR_ONE = 1e-9;
+const NEAR_ONE = 1e-6;
 
-/** How far a z's double may sit from its exact distance to 1 (relative) and still be read as the z. */
-const SAME_DISTANCE = 1e-9;
+/** How far a z's double may sit from its exact distance to 1 (relative) and still be read as the z: a double's own rounding. */
+const SAME_DISTANCE = 1e-14;
 
 /**
  * A z within `NEAR_ONE` of 1 whose double is not at its distance from 1: 1 − 1e-20 reads as 1 and 1 − 1e-14 as
- * 1 − 9.99200722162641e-15. A double kernel would answer for the double, so the call declines. A z that is a double
- * (1 − 2⁻⁵⁰) reads as itself.
+ * 1 − 9.99200722162641e-15. A double kernel would answer for the double, so the call goes to the series about
+ * z = 1, which reads z exactly. A z that is a double (1 − 2⁻⁵⁰) reads as itself.
  */
 export function unreadableNearOne(z: Expression): boolean {
   const approx = Math.hypot(z.re - 1, z.im);
-  if (!isFiniteNum(z) || approx >= NEAR_ONE) return false;
+  if (!isFiniteNum(z) || approx >= NEAR_ONE * 2) return false;
   const exact = Math.hypot(
     (z.bignumRe ?? exactDouble(z.re)).sub(1).toNumber(),
     (z.bignumIm ?? exactDouble(z.im)).toNumber(),
   );
-  return exact > 0 && Math.abs(exact - approx) > SAME_DISTANCE * exact;
+  return exact > 0 && exact < NEAR_ONE && Math.abs(exact - approx) > SAME_DISTANCE * exact;
+}
+
+/** A numeric operand as the exact BigDecimals it holds: its bignum, or the double's binary value. */
+const exactOperand = (x: Expression): BigCx => bigCx(x.bignumRe ?? exactDouble(x.re), x.bignumIm ?? exactDouble(x.im));
+
+/**
+ * Φ(z, s, a) next to z = 1 from the series about it, read exactly (the double of z is not its distance to 1), or
+ * undefined (unevaluated) where the kernel declines. Machine precision answers a double of its 17 digits.
+ */
+export function lerchNearOne(ce: ComputeEngine, z: Expression, s: Expression, a: Expression): Expression | undefined {
+  if (![z, s, a].every(isFiniteNum)) return undefined;
+  const r = lerchPhiAboutOne(exactOperand(z), exactOperand(s), exactOperand(a), Math.max(ce.precision, 17));
+  return r === undefined ? undefined : boxBig(ce, r);
 }
 
 /** An operand with more digits than a double holds (2 + 1e-20, 1/3 widened to the engine's digits), not 2.976. */
@@ -129,7 +145,7 @@ function boxBig(ce: ComputeEngine, r: BigCx): Expression | undefined {
     const digits = (x: BigDecimal): Json => ({ num: x.toPrecision(ce.precision).toString() });
     return ce.box(["Complex", digits(r.re), digits(r.im)] as never);
   }
-  return ce.number(wide ? r.re.toPrecision(ce.precision) : r.re.toNumber());
+  return wide ? ce.number(r.re.toPrecision(ce.precision)) : doubleBox(ce.number(r.re.toNumber()));
 }
 
 /**
@@ -165,7 +181,7 @@ export function evaluateLerch(ce: ComputeEngine, ops: readonly Expression[], num
   }
   // Φ(z, 0, a) = 1/(1 − z), independent of a (the geometric series and its continuation).
   if (isExactZero(s)) return done(boxed(["Divide", 1, ["Subtract", 1, z.json]]));
-  if (numeric && unreadableNearOne(z)) return undefined;
+  if (numeric && unreadableNearOne(z)) return lerchNearOne(ce, z, s, a);
   // Past |z| = 1 the series stops converging: continue by the integral representation
   // (lerch-phi-continuation.ts), with compute-engine's own upper incomplete Γ. See
   // lerch-phi-continuation.ts for how the rim (|z| = 1) is handled the same way.
@@ -493,6 +509,7 @@ export { stieltjesGammaBall, stieltjesGammaBig } from "../numerics/stieltjes-big
 export { lerchPhi, lerchPhiChecked, lerchPhiReal, lerchPhiWithError } from "../numerics/lerch-phi.ts";
 export { lerchContinued } from "../numerics/lerch-phi-continuation.ts";
 export { lerchPhiBig, lerchPhiBall } from "../numerics/lerch-phi-big.ts";
+export { lerchPhiAboutOne } from "../numerics/lerch-phi-about-one.ts";
 export {
   hurwitzZeta,
   hurwitzZetaChecked,

@@ -76,6 +76,7 @@ export {
   lerchContinued,
   lerchPhiBig,
   lerchPhiBall,
+  lerchPhiAboutOne,
 } from "./patches/lerch-phi.ts";
 export {
   dirichletEta,
