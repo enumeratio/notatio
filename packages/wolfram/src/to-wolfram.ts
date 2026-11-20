@@ -718,3 +718,20 @@ function numberToWolfram(n: number | string): string {
   // Wolfram's exponent marker is `*^`; `1.5e3` would parse as `1.5 * e3`.
   return s.replace(/[eE]\+?/, "*^");
 }
+/**
+ * A decimal literal read inside an `N[x, d]` with `digits` = d past a double's, as the exact
+ * rational it spells (`Rational[-20000000000000001, 10000000000000000]`), or `undefined` when
+ * `digits` is a double's or fewer or `text` is no decimal. A machine number would hold only a
+ * double's digits of the input, and a precision mark loses some to cancellation (Zeta near its
+ * zero at -2 then answers fewer than d); the rational carries as many as the call asks for.
+ */
+export function decimalLiteralToWolfram(text: string, digits: number): string | undefined {
+  if (digits <= 15 || !/[.eE]/.test(text)) return undefined;
+  const m = /^([+-]?)(\d*)\.?(\d*)(?:[eE]([+-]?\d+))?$/.exec(text.trim());
+  if (!m || (m[2] === "" && m[3] === "")) return undefined;
+  const fraction = m[3].replace(/0+$/, "");
+  const exp = Number(m[4] ?? 0) - fraction.length;
+  const mantissa = BigInt(`${m[1] === "-" ? "-" : ""}${m[2]}${fraction}` || "0");
+  if (exp >= 0) return String(mantissa * 10n ** BigInt(exp));
+  return `Rational[${mantissa}, ${10n ** BigInt(-exp)}]`;
+}

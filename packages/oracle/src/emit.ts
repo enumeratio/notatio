@@ -11,6 +11,7 @@ import {
   isWolframHead,
   isWolframOwnName,
   NUMBER_SETS,
+  decimalLiteralToWolfram,
   ringOption,
   SYMBOLS,
   toWolfram,
@@ -377,12 +378,15 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
   let exact = false;
   // The largest d past a double's digits of a nested mpmath N(x, d): the whole expression runs at that precision.
   let nestedDigits = 0;
+  // The digits past a double's of the enclosing Wolfram N(x, d): its decimals are read at that precision.
+  let wolframDigits = 0;
   // Bits for the decimals inside a Sage N(x[, d]) operand: ours reads them as decimals, not as the nearest double.
   let decimalBits = 0;
   const walk = (node: MathJSON): string => {
     // Wolfram's exponent marker is `*^`, and `1e-11` there is `1 * e - 11`.
     if (typeof node === "number") {
-      if (wl) return toWolfram(node);
+      if (wl)
+        return (!Number.isInteger(node) && decimalLiteralToWolfram(String(node), wolframDigits)) || toWolfram(node);
       // Lean reads `f -1` as `f - 1`.
       // Rust values are the prelude's dynamic `V` (rust/src/prelude.rs).
       if (system === "rust") {
@@ -447,7 +451,7 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
     if (!isCall(node)) {
       const value = (node as { num?: unknown }).num;
       if (typeof value === "string") {
-        if (wl) return toWolfram({ num: value });
+        if (wl) return decimalLiteralToWolfram(value, wolframDigits) ?? toWolfram({ num: value });
         if (system === "rust") {
           if (/^-?\d+$/.test(value)) return `big("${value}")`;
           // A double holds a decimal to ~16 digits: one past its range would be infinity or zero, not the number.
@@ -538,9 +542,12 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
         typeof operands[1] === "number" ? Math.ceil(operands[1] * 3.33) + 64 : 0,
       );
     if (system === "mpmath" && head === "N" && typeof operands[1] === "number" && operands[1] > 15) exact = true;
+    const wasDigits = wolframDigits;
+    if (wl && head === "N" && typeof operands[1] === "number" && operands[1] > 15) wolframDigits = operands[1];
     try {
       return walkCall(head, operands);
     } finally {
+      wolframDigits = wasDigits;
       exact = wasExact;
       decimalBits = wasBits;
       for (const v of fresh) bound.delete(v);

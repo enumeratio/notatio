@@ -1,5 +1,5 @@
 import { expect, test } from "vite-plus/test";
-import { isWolframHead, toWolfram } from "../src/to-wolfram.ts";
+import { decimalLiteralToWolfram, isWolframHead, toWolfram } from "../src/to-wolfram.ts";
 
 test("atoms and symbols", () => {
   expect(toWolfram(42)).toBe("42");
@@ -418,4 +418,17 @@ test("the partition number is Count(IntegerPartitions(n))", () => {
 
 test("Over -> QuotientRing(Integers, p) is Modulus -> p", () => {
   expect(toWolfram(["KeyValuePair", "Over", ["QuotientRing", "Integers", 7]])).toBe("Rule[Modulus, 7]");
+});
+
+test("a decimal inside N past a double's digits is the exact rational it spells", () => {
+  expect(decimalLiteralToWolfram("-2.0000000000000001", 30)).toBe("Rational[-20000000000000001, 10000000000000000]");
+  expect(decimalLiteralToWolfram("1e-20", 30)).toBe("Rational[1, 100000000000000000000]");
+  expect(decimalLiteralToWolfram("2.0", 30)).toBe("2");
+  expect(decimalLiteralToWolfram("1.5e3", 30)).toBe("1500");
+  expect(decimalLiteralToWolfram("12", 30)).toBeUndefined();
+});
+
+test("a decimal stays as written at a double's digits or fewer", () => {
+  expect(decimalLiteralToWolfram("-2.0000000000000001", 0)).toBeUndefined();
+  expect(decimalLiteralToWolfram("0.1", 15)).toBeUndefined();
 });

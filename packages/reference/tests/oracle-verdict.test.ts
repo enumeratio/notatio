@@ -29,6 +29,14 @@ test("Wolfram's value agreeing is not enough for N(x, d): its displayed digits m
   expect(verdictOf("wolfram", 0.12, { ...tie, shown: "0.12" }, 0.05, true)).toBe("agree");
 });
 
+test("a Wolfram zero with no digits agrees with an exact zero, and says nothing about a nonzero answer", () => {
+  const accuracyZero = { value: "0``19.8", numeric: "0``19.8", shown: "0." };
+  expect(verdictOf("wolfram", { num: "0.0" }, accuracyZero, undefined, true)).toBe("agree");
+  expect(verdictOf("wolfram", { num: "-8.86e-21" }, accuracyZero, undefined, true)).toBe("inconclusive");
+  expect(verdictOf("wolfram", { num: "-8.86e-21" }, { value: "0`0", numeric: "0`0" })).toBe("inconclusive");
+  expect(verdictOf("wolfram", 0.5, { value: "0.5`20.", numeric: "0.5`20." })).toBe("agree");
+});
+
 test("mpmath's N(x, d) digits must match, and the value must not disagree: sign and exponent are not digits", () => {
   const call = ["N", "x", 4];
   const answer = (value: string) => ({ value });
@@ -220,9 +228,9 @@ test("a Wolfram real is compared within the precision it is tagged with, even pa
   expect(verdictOf("wolfram", 0.2, low)).toBe("disagree");
 });
 
-test("an accuracy-qualified zero is zero within that accuracy, and N(x, d) rows still ask for their digits", () => {
+test("an accuracy-qualified zero bounds the answer but proves nothing about a nonzero one, and N(x, d) rows still ask for their digits", () => {
   const zero = { value: "0``69.3", numeric: "0``69.3", shown: "0." };
-  expect(verdictOf("wolfram", { num: "-2.0e-340" }, zero, undefined, true)).toBe("agree");
+  expect(verdictOf("wolfram", { num: "-2.0e-340" }, zero, undefined, true)).toBe("inconclusive");
   // The accuracy, not the default tolerance, bounds the zero when the tolerance is tighter than it.
   expect(verdictOf("wolfram", 1e-50, zero, 1e-90, true)).toBe("disagree");
   const shown = { value: "0.125`2.", numeric: "0.125`2.", shown: "0.13" };
