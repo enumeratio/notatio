@@ -4,3 +4,4 @@ the-partition-3-3-1-of-7			[DesarrangementTableauCount, [IntegerPartition, [List
 findstat-st000506-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 1]], "'DesarrangementTableauCount'"]	0	0	FindStat St000506	FindStat's value for [1]
 findstat-st000506-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'DesarrangementTableauCount'"]	0	0	FindStat St000506	FindStat's value for [2]
 findstat-st000506-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'DesarrangementTableauCount'"]	0	0	FindStat St000506	FindStat's value for [3]
+exact-10-2		test	[DesarrangementTableauCount, [IntegerPartition, [List, 10, 2]]]	9	9	FindStat St000506	the partition 10 + 2 of 12

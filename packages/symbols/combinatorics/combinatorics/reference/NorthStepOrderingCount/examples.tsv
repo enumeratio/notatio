@@ -4,3 +4,4 @@ the-step-word-uduudd			[NorthStepOrderingCount, [DyckPath, [List, 1, 0, 1, 1, 0,
 findstat-st001786-1	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0]], "'NorthStepOrderingCount'"]	1	1	FindStat St001786	FindStat's value for [1,0]
 findstat-st001786-2	Properties		[CombinatorialStat, [DyckPath, [List, 1, 0, 1, 0]], "'NorthStepOrderingCount'"]	1	1	FindStat St001786	FindStat's value for [1,0,1,0]
 findstat-st001786-3	Properties		[CombinatorialStat, [DyckPath, [List, 1, 1, 0, 0]], "'NorthStepOrderingCount'"]	1	1	FindStat St001786	FindStat's value for [1,1,0,0]
+exact-1-1-1-1-0-1-1-0-1-0-0-0-0-0		test	[NorthStepOrderingCount, [DyckPath, [List, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0]]]	50	50	FindStat St001786	the Dyck path 11110110100000, whose factors are not integers one by one
