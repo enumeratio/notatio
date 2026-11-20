@@ -49,8 +49,12 @@ test(
       for (const key of ["N(x,30)@50", "N(x,30)@machine"])
         expect([row["N@machine"], row["N@50"], "unevaluated"], `${src} ${key}`).toContain(row[key]);
     }
-    // A float a double doesn't hold is no machine 0.5, and 1 - 1e-20 is no exact 0.
-    for (const src of cases.slice(0, 2)) expect(table[src]!["evaluate@50"], src).toBe("unevaluated");
+    // A float a double doesn't hold is no machine 0.5, and 1 + 1e-20 is no exact 0: the polynomial's
+    // bignum recurrence answers both to their digits (mpmath: 0.49999999999999999999, -1e-20).
+    const exact = (src: string): string =>
+      at(50, () => JSON.stringify(ce.box(parseExpression(src).json as never).evaluate().json));
+    expect(exact(cases[0]!)).toBe(JSON.stringify({ num: "0.49999999999999999999" }));
+    expect(exact(cases[1]!)).toBe("-1e-20");
     expect(table["LaguerreL(1, 1)"]!["evaluate@50"]).toBe("0");
     expect(table["LaguerreL(1, 1)"]!["evaluate@machine"]).toBe("0");
     expect(table["LaguerreL(1, 0.50000000000000000001)"]!["evaluate@machine"]).toBe("0.5");
