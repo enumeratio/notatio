@@ -596,8 +596,13 @@ export function declareListHeads(ce: Engine): void {
   // nothing did, once evaluate existed and didn't handle them, regressing
   // `Join(Set(1, 2), Set(3))` and `Join()` to unevaluated. Both are handled in the
   // `evaluate` wrapper below, alongside join-at-level, rather than in canonical.
-  // Admits the trailing integer at boxing, so an unevaluated call keeps its operands as written.
-  widenSignature(ce, "Join", "(any*) -> any");
+  // compute-engine's own overloads, plus a trailing integer level after two to four collections, so an
+  // unevaluated level call keeps its operands as written.
+  widenSignature(
+    ce,
+    "Join",
+    "((T+) -> T where T: string) & ((collection<any>*) -> collection) & ((collection<any>, collection<any>, integer) -> collection) & ((collection<any>, collection<any>, collection<any>, integer) -> collection) & ((collection<any>, collection<any>, collection<any>, collection<any>, integer) -> collection)",
+  );
   // A level deeper than the operands (or below 1) is Wolfram's error and stays unevaluated.
   // This is the one place that decides it: native would append the integer, which would make
   // `Join([[1],[2]], [[3]], 2)` a level join but `Join([1,2], [3], 2)` an append, the reading
