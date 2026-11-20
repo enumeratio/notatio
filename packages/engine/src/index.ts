@@ -121,7 +121,9 @@ const structuralOperands = (ce: ComputeEngine, expr: Expression): readonly Expre
   const head = expr.operator;
   const ops = (expr as { ops?: unknown }).ops;
   if (typeof head !== "string" || !Array.isArray(ops)) return undefined;
-  if (ce.lookupDefinition(head) === undefined || isSymbolicScalar(ce, expr)) return ops as Expression[];
+  // A `List` call is its elements, though it may not be typed a collection yet (before canonicalization).
+  if (head === "List" || ce.lookupDefinition(head) === undefined || isSymbolicScalar(ce, expr))
+    return ops as Expression[];
   return undefined;
 };
 
