@@ -146,6 +146,9 @@ export interface Answer {
 }
 
 /** An example that asks for digits, `N(x, d)`: its answer promises every digit it shows. */
+/** A Wolfram number with no digits of its own: a zero known only to an accuracy (`0``19.8`) or at precision 0 (`0`0`). */
+const hasNoDigits = (text: string): boolean => /^\s*[+-]?0*\.?0*(``[0-9.]*|`0\.?0*)\s*$/.test(text);
+
 export const asksForDigits = (expr: MathJSON): boolean => Array.isArray(expr) && expr[0] === "N" && expr.length === 3;
 
 /** A decimal's significant digits alone -- no sign, point, exponent, or leading and trailing
@@ -343,6 +346,10 @@ function judge(
       const same = sameDigits(expected, result.shown);
       if (same !== undefined) verdict = same ? "agree" : "disagree";
     }
+    // A zero with no digits (`0``19.8`, `0`0`) says only that the value is below its accuracy: it
+    // can't confirm a nonzero answer of ours, though it still agrees with an exact zero.
+    if (verdict === "agree" && hasNoDigits(theirs) && !/^-?0(\.0*)?$/.test(show(expected, false)))
+      verdict = "inconclusive";
   } else if (theirs.startsWith("combination:")) {
     verdict = compareCombination(expected, theirs);
   } else if (theirs.startsWith("combinations:")) {
