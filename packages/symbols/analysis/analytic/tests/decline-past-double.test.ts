@@ -72,6 +72,16 @@ test("LerchPhi next to z = 1 answers from the exact z (the series about z = 1) o
   expect(at(50, ["LerchPhi", near, 1, 1]).re).toBeCloseTo(46.0517018598809, 12);
 });
 
+// A double that rounds to a whole number is still a double: L₁(x) = 1 − x is 1 − 1e-20 here, which no double holds,
+// and the 1 it rounds to is not the exact integer a bignum route would answer.
+test("a double kernel that rounds to a whole number declines at 50 digits and answers the double at machine precision", () => {
+  const call = ["LaguerreL", 1, { num: "1e-20" }];
+  expect(at(50, call).operator).toBe("LaguerreL");
+  const machine = at(undefined, call);
+  expect(machine.operator).not.toBe("LaguerreL");
+  expect(machine.re).toBe(1);
+});
+
 test("a bignum answer past a double's digits is kept", () => {
   expect(at(50, ["PolyGamma", 1, 2.5]).bignumRe?.toString().length).toBeGreaterThan(40);
   expect(at(50, ["HurwitzZeta", ["Complex", 2, 3], 1.5]).operator).not.toBe("HurwitzZeta");

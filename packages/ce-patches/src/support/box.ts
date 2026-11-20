@@ -49,10 +49,18 @@ export const isFiniteNum = (x: Expression): boolean => Number.isFinite(x.re) && 
  */
 const doubleBoxes = new WeakSet<object>();
 
-/** `x`, a number a double kernel produced, recorded as one (`isMachineNumber`). */
+/**
+ * `x`, a number a double kernel produced, recorded as one (`isMachineNumber`). A whole-valued double is boxed
+ * as the float it is (`3.0`): compute-engine shares one exact `3` among every use of it, so recording that one
+ * would make each exact 3 in the engine read as a double. An exact zero is left as the exact zero it is (a kernel's
+ * u = 0 or m = 0 shortcut), and is no double.
+ */
 export const doubleBox = (x: Expression): Expression => {
-  doubleBoxes.add(x);
-  return x;
+  const exact = (x as Partial<{ isExact: boolean }>).isExact === true;
+  if (exact && x.im === 0 && x.re === 0) return x;
+  const boxed = exact && x.im === 0 && Number.isSafeInteger(x.re) ? x.engine.box({ num: `${x.re}.0` } as never) : x;
+  doubleBoxes.add(boxed);
+  return boxed;
 };
 
 /** Did a double kernel box `x`? */

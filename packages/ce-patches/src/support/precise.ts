@@ -59,7 +59,9 @@ function readsAsDouble(part: BigDecimal): boolean {
  * kind wherever the kind can be read: a real with no bignum behind it is compute-engine's own
  * double (`AiryBiPrime(0.7)`), and a number our kernels boxed from a double is recorded as one
  * (`doubleBox`); a precision-honouring head's bignum is neither, however few digits it prints
- * (`1/4`, `-1/64`). Whole numbers are exponents, counts and exact values, so they are left alone.
+ * (`1/4`, `-1/64`). A whole number is decided the same way: one a double kernel boxed, or a float with
+ * no bignum behind it, is a double, and an exact integer (`ce.number(3)` from an exact route, a bignum
+ * integer) is not.
  *
  * Anywhere else the kind is gone, and the print is all there is:
  *  - a bignum part printing a run of a double's digits (15 up to `precision - 10`) is a double's;
@@ -72,10 +74,12 @@ function readsAsDouble(part: BigDecimal): boolean {
  * input, never read by kind, and only a long double-like run of digits in it counts.
  */
 export function isMachineNumber(x: Expression, precision: number, answer = true): boolean {
-  if (!isNumber(x) || (x as Partial<{ isExact: boolean }>).isExact === true) return false;
-  const fractional = (part: number): boolean => Number.isFinite(part) && !Number.isInteger(part);
-  if (answer && x.im === 0 && x.bignumRe === undefined) return fractional(x.re);
-  if (answer && isDoubleBox(x)) return fractional(x.re) || fractional(x.im);
+  if (!isNumber(x)) return false;
+  // A double kernel's answer is a double whatever it rounded to: 1 for a value of 1 + 5e-401 is no exact 1. The kind is
+  // read before exactness, since compute-engine boxes a whole-valued double as the exact integer.
+  if (answer && isDoubleBox(x)) return Number.isFinite(x.re) && Number.isFinite(x.im);
+  if ((x as Partial<{ isExact: boolean }>).isExact === true) return false;
+  if (answer && x.im === 0 && x.bignumRe === undefined) return Number.isFinite(x.re);
   const complex = x.im !== 0;
   return [x.bignumRe, x.bignumIm].some((part) => {
     if (part === undefined || !part.isFinite() || part.isInteger()) return false;
