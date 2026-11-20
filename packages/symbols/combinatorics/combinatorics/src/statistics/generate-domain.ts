@@ -28,14 +28,15 @@ const withWhere = (verdicts: Verdicts, where: unknown): Verdicts => {
   };
 };
 
-/** `compiledDefinitionsFor`, with each definition checked on the subjects of its domain. */
+/** `compiledDefinitionsFor`, with each definition checked on the subjects of its domain; one marked `interpreted` is left out. */
 export function compiledDefinitionsInDomains(
-  definitions: readonly Definition[],
+  all: readonly Definition[],
   shape: string,
   subjectsOf: (ce: Engine, carrier: string) => readonly unknown[],
   verdicts: Verdicts,
   mine: (signature: string) => boolean,
 ): { compiled: CompiledDefinition[]; disagreed: string[] } {
+  const definitions = all.filter((d) => d.interpreted === undefined);
   const whole = compiledDefinitionsFor(
     definitions.filter((d) => d.where === undefined),
     shape,

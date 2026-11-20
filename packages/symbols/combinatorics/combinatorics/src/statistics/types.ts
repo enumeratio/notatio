@@ -45,6 +45,9 @@ export interface Definition {
   /** The largest total of a subject's entries the build's compile cross-check interprets: for a
    *  definition whose interpreted cost grows steeply with the subject's size. */
   readonly checkWeight?: number;
+  /** Never compiled: the reason. For a definition whose compiled code works in doubles and passes 2^53 in an
+   *  intermediate while the result stays under it, so it answers wrong and passes `fromJs`. */
+  readonly interpreted?: string;
   /** The subjects of the carrier `expr` has a value on: a boolean over `_x`, read as `expr` is. Absent
    *  means the whole carrier. Off it the call stays unevaluated (`inDomain`, declare.ts). */
   readonly where?: MathJSON;

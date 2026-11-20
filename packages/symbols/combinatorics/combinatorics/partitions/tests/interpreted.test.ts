@@ -9,7 +9,8 @@ import { COMPILED } from "../src/statistics.compiled.generated.js";
 // definition that lands here is slower than the rest, so it should be a deliberate addition;
 // one that starts compiling should leave the list. A bound value read by `At`, `Count`, `Sum` or
 // `Min` needs a `list<…>` type on its `bind`: the default `collection` is not indexable to the compiler.
-const INTERPRETED: string[] = [];
+// `SmirnovWordCount` is marked `interpreted` (its compiled code passes 2^53 in an intermediate).
+const INTERPRETED: string[] = ["SmirnovWordCount"];
 
 // The compiled file is built, and empty until the package's build has run.
 test.skipIf(Object.keys(COMPILED).length === 0)(

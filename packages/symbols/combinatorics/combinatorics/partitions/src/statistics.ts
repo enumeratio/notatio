@@ -44,6 +44,7 @@ const stat = (
   expr: Definition["expr"],
   note?: string,
   checkWeight?: number,
+  interpreted?: string,
 ): Definition => ({
   head,
   on,
@@ -51,6 +52,7 @@ const stat = (
   expr,
   ...(note ? { note } : {}),
   ...(checkWeight === undefined ? {} : { checkWeight }),
+  ...(interpreted === undefined ? {} : { interpreted }),
 });
 
 /** Interpreting these tables costs seconds per subject past a dozen cells (a 5 x 5 box takes over
@@ -3522,6 +3524,8 @@ export const PARTITION_STATISTICS: readonly Definition[] = [
     ),
     "FindStat's St001097 reads it as a coefficient of the formal group law for linear orders; its description gives the Smirnov words.",
     TABLE_CHECK_WEIGHT,
+    // The alternating sum's terms pass 2^53 (4.6e16 at [3,3,3,3,3,3,3,2]) while the result stays under it.
+    "double intermediates past 2^53",
   ),
   stat(
     "StandardTableauCountWithMajorIndexCongruentToOneModuloSize",
