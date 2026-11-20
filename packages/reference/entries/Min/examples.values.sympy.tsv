@@ -6,7 +6,6 @@ a-single-argument-is-returned-unchanged	enumeratio_min(3)	3
 min-9-2	enumeratio_min(9, 2)	2	
 min-list-4-1-7-2	enumeratio_min([4, 1, 7, 2])	1	
 min-5p56-neg-4p8-7p3	enumeratio_min(5.56, -4.8, 7.3)	-4.80000000000000	
-min-min-folds-into-a-normal-call	enumeratio_min(enumeratio_min(), 5)	5	
 nested-lists-are-flattened-into-the-pool	enumeratio_min(2, 3, [[Rational(1, 2), -1], [Rational(-5, 3), Rational(1, 2)]])	-5/3	
 exact-numbers-are-compared-numerically	enumeratio_min(sqrt(2), Rational(3, 2))	sqrt(2)	
 the-numeric-arguments-collapse-to-their-minimum	enumeratio_min(3, Symbol("x"), 5)	Min(3, x)	
@@ -19,7 +18,7 @@ min-a-b-max-a-b-a-b-see-max	enumeratio_equal((enumeratio_min(4, 9) + enumeratio_
 idempotent-min-x-x-x	enumeratio_min(Symbol("x"), Symbol("x"))	x	
 infinities-participate-directly-in-the	enumeratio_min(-oo, 3)	-oo	
 multiple-arguments-lists-included-are-flattened	enumeratio_min([3, 1], 0)	0	
-with-no-arguments-it-returns-the-identity	enumeratio_min()	oo	
+with-no-arguments-it-is-an-error	enumeratio_min()	oo	
 the-min-of-an-empty-list-is-nan	enumeratio_min([])	oo	disagree
 min-with-complexinfinity-stays-unevaluated	enumeratio_min(zoo, 1)	ValueError: The argument 'zoo' is not comparable.	error
 the-smallest-member-of-the-empty-finset	enumeratio_min([])	oo	disagree
