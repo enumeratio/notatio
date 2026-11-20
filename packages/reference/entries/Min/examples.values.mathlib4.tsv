@@ -18,7 +18,7 @@ min-a-b-max-a-b-a-b-see-max	(decide (((([4, 9] : List ℚ).min?.get (by decide +
 idempotent-min-x-x-x			
 infinities-participate-directly-in-the			
 multiple-arguments-lists-included-are-flattened	(([[3, 1], 0] : List ℚ).min?.get (by decide +kernel))	Application type mismatch: The argument	error
-with-no-arguments-it-is-an-error	(([] : List ℚ).min?.get (by decide +kernel))	Tactic `decide` proved that the proposition	error
+with-no-arguments-it-is-an-error	(([] : List ℚ).min?.get (by decide +kernel))	TimeoutError: over 60 s	error
 the-min-of-an-empty-list-is-nan	(([] : List ℚ).min?.get (by decide +kernel))	Tactic `decide` proved that the proposition	error
 min-with-complexinfinity-stays-unevaluated			
 the-smallest-member-of-the-empty-finset	(Finset.min' (List.toFinset ([] : List ℚ)) (by decide +kernel))	Tactic `decide` proved that the proposition	error

@@ -18,7 +18,7 @@ min-a-b-max-a-b-a-b-see-max	(Plus[Min[4, 9], Max[4, 9]] == Plus[4, 9])	True	\min
 idempotent-min-x-x-x	Min[x, x]	x	\min (x,x)	x	
 infinities-participate-directly-in-the	Min[-Infinity, 3]	-Infinity	\min (-\infty ,3)	-\infty	
 multiple-arguments-lists-included-are-flattened	Min[List[3, 1], 0]	0	\min (\{3,1\},0)	0	
-with-no-arguments-it-is-an-error	Min[]	Infinity	\min ()	\infty	
+with-no-arguments-it-is-an-error	Min[]	Infinity	\min ()	\infty	disagree
 the-min-of-an-empty-list-is-nan	Min[List[]]	Infinity	\min (\{\})	\infty	disagree
 min-with-complexinfinity-stays-unevaluated	Min[ComplexInfinity, 1]	Min[1, ComplexInfinity]	\min (\text{ComplexInfinity},1)	\min (1,\text{ComplexInfinity})	
 the-smallest-member-of-the-empty-finset	Min[List[]]	Infinity	\min (\{\})	\infty	disagree

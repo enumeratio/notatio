@@ -18,7 +18,7 @@ min-a-b-max-a-b-a-b-see-max	enumeratio_equal((enumeratio_min(4, 9) + enumeratio_
 idempotent-min-x-x-x	enumeratio_min(Symbol("x"), Symbol("x"))	x	
 infinities-participate-directly-in-the	enumeratio_min(-oo, 3)	-oo	
 multiple-arguments-lists-included-are-flattened	enumeratio_min([3, 1], 0)	0	
-with-no-arguments-it-is-an-error	enumeratio_min()	oo	
+with-no-arguments-it-is-an-error	enumeratio_min()	oo	disagree
 the-min-of-an-empty-list-is-nan	enumeratio_min([])	oo	disagree
 min-with-complexinfinity-stays-unevaluated	enumeratio_min(zoo, 1)	ValueError: The argument 'zoo' is not comparable.	error
 the-smallest-member-of-the-empty-finset	enumeratio_min([])	oo	disagree
