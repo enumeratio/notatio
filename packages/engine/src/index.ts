@@ -63,6 +63,15 @@ export const collectionElements = (expr: Expression): readonly Expression[] | un
   }
 };
 
+const structuralHeads = new WeakMap<ComputeEngine, Set<string>>();
+
+/** Heads whose call keeps its operands through evaluation, so `partsOf` reads them before it: a carrier's constructor. */
+export function declareStructuralHeads(ce: ComputeEngine, heads: Iterable<string>): void {
+  const known = structuralHeads.get(ce) ?? new Set<string>();
+  for (const head of heads) known.add(head);
+  structuralHeads.set(ce, known);
+}
+
 type TypeLike = { matches: (t: never) => boolean | undefined; type?: unknown };
 
 /** Whether `type` is a number or a boolean, so a value of it can never be a collection. */
@@ -91,7 +100,7 @@ const symbolIsScalar = (ce: ComputeEngine, symbol: Expression): boolean => {
 const isSymbolicScalar = (ce: ComputeEngine, expr: Expression): boolean => {
   if (symbolNameOf(expr) !== undefined) return symbolIsScalar(ce, expr);
   const ops = (expr as { ops?: unknown }).ops;
-  if (isNominalType(ce, expr.type)) return true;
+  if (isNominalType(ce, expr.type)) return structuralHeads.get(ce)?.has(expr.operator) === true;
   if (!isScalarType(ce, expr.type)) return false;
   if (!Array.isArray(ops)) return true;
   return ops.length > 0 && (ops as Expression[]).every((op) => isSymbolicScalar(ce, op));

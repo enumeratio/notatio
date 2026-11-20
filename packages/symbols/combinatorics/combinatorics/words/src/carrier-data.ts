@@ -14,6 +14,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "BinaryWord",
+    readable: false,
     type: "binary_word",
     shape: "list<integer>",
     id: "binary_word",

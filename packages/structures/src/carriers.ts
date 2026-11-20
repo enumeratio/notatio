@@ -10,7 +10,7 @@
 // reject a bare list — and, more usefully, reject a SetPartition.
 
 import { type Expression, type ComputeEngine, isSymbol } from "@cortex-js/compute-engine";
-import { declareCompile, operandsOf } from "@notatio/engine";
+import { declareCompile, declareStructuralHeads, operandsOf } from "@notatio/engine";
 import { carrierNameForType, registerCarrier, registerCollectionCarrier } from "./operations.ts";
 
 /** The structural shape a carrier's values have, as a compute-engine type expression. */
@@ -59,6 +59,13 @@ export interface Carrier {
   readonly carrierParams?: number;
   /** The flat reading compiled code uses in place of the nested shape, where the carrier has one. */
   readonly flat?: FlatCodec;
+  /**
+   * `false` when the constructor's call is not its own parts before evaluation: it also names a conversion
+   * from another carrier (`BinaryTree(DyckPath(…))`), so reading `At(C(args), i)` ahead of evaluating it would
+   * read the argument. Default true: the constructor keeps its operands. `carrier-parts.test.ts` in census holds
+   * the flag to what evaluation does.
+   */
+  readonly readable?: boolean;
 }
 
 /**
@@ -104,6 +111,10 @@ export function declareCarriers(
 
   for (const carrier of ordered) ce.declareType(carrier.type, carrier.shape, { mint: false });
   for (const carrier of ordered) declareConstructor(ce, carrier);
+  declareStructuralHeads(
+    ce,
+    ordered.filter((carrier) => carrier.readable !== false).map((carrier) => carrier.name),
+  );
   for (const carrier of ordered)
     registerCarrier(ce, {
       name: carrier.name,

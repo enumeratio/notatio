@@ -28,6 +28,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "CycleDecomposition",
+    readable: false,
     type: "cycle_decomposition",
     shape: "list<list<integer>>",
     id: "cycle_decomposition",
@@ -77,6 +78,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SubexcedantSeq",
+    readable: false,
     type: "subexcedant_seq",
     shape: "list<integer>",
     id: "subexcedant_seq",
