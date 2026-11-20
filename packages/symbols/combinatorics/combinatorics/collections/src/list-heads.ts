@@ -239,19 +239,11 @@ const levelFits = (lists: readonly Expr[], level: number): boolean =>
         level - 1,
       )));
 
-/** A widening joined to the head's own signature, which stays: a replaced one lets `First(u + v)`
- *  broadcast over the elements of a list-valued sum instead of refusing it. */
-const keepNative = (ce: Engine, head: string, widening: string): string => {
-  const definition = ce.lookupDefinition(head);
-  const native = definition !== undefined && "operator" in definition ? String(definition.operator.signature) : "any";
-  return `(${native}) & (${widening})`;
-};
-
 /** Declare the core list/statistics widenings, overrides and new heads. */
 export function declareListHeads(ce: Engine): void {
   // First(c, default) / Last(c, default): a fallback for an empty collection, which
   // compute-engine doesn't accept a second argument for yet.
-  widenSignature(ce, "First", keepNative(ce, "First", "(any, any?) -> any"));
+  widenSignatureKeepingNative(ce, "First", "(any, any?) -> any");
   wrapOperator(
     ce,
     ["First", 1, 1],
@@ -259,7 +251,7 @@ export function declareListHeads(ce: Engine): void {
     (native) => (ops, options) => (collectionElements(ops[0])?.length === 0 ? ops[1] : native?.([ops[0]], options)),
     2,
   );
-  widenSignature(ce, "Last", keepNative(ce, "Last", "(any, any?) -> any"));
+  widenSignatureKeepingNative(ce, "Last", "(any, any?) -> any");
   wrapOperator(
     ce,
     ["Last", 1, 1],
