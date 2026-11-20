@@ -10,10 +10,10 @@ first-list-x	First[List[], x]	x	\text{First}[\{\},x]	x
 a-second-argument-supplies-a-default-for-an	First[List[], 99]	99	\text{First}[\{\},99]	99	
 of-a-matrix-the-first-row	First[List[List[a, b], List[c, d]]]	{a, b}	\text{First}\left[\left( \begin{array}{cc}  a & b \\  c & d \\ \end{array} \right)\right]	\{a,b\}	
 a-lazy-range-works-too	First[Range[5, 10]]	5	\text{First}[\text{Range}[5,10]]	5	
-first-of-a-call-is-its-first-operand	First[f[a, b]]				
+first-of-a-call-is-its-first-operand	First[f[a, b]]	a	\text{First}[f(a,b)]	a	
 a-default-is-ignored-when-the-collection-has-a	First[List[a, b], x]	a	\text{First}[\{a,b\},x]	a	
 first-sparsearray-range-1-100	First[SparseArray[Range[1, 100]]]	1	\text{First}[\text{SparseArray}[\text{Range}[1,100]]]	1	
 first-c-at-c-1-see-at	(First[List[1, 2, 3]] == Part[List[1, 2, 3], 1])	True	\text{First}[\{1,2,3\}]=\{1,2,3\}[[1]]	\text{True}	
 an-empty-collection-has-no-first-element-compute	First[List[]]	First[{}]	\text{First}[\{\}]	\text{First}[\{\}]	disagree
-any-expression-not-just-a-list-the-first-term-of	First[Plus[a, b]]				
+any-expression-not-just-a-list-the-first-term-of	First[Plus[a, b]]	a	\text{First}[a+b]	a	disagree
 first-a-pow-neg-2	First[Power[a, -2]]	a	\text{First}\left[\frac{1}{a^2}\right]	a	
