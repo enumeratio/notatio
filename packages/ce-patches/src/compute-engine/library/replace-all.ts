@@ -1,4 +1,5 @@
 import { type ComputeEngine, type Expression, isFunction, isSymbol } from "@cortex-js/compute-engine";
+import { declareCompile } from "@notatio/engine";
 
 const operandsOf = (expr: Expression): readonly Expression[] => (isFunction(expr) ? expr.ops : []);
 
@@ -34,6 +35,8 @@ export function replaceAllCompoundPatterns(ce: ComputeEngine): void {
   if (operator === undefined || native === undefined) return;
   const lazy = operator.lazy === true;
 
+  // The compound replacement has no lowering, so ReplaceAll does not compile, as with the override this replaces.
+  declareCompile(ce, "ReplaceAll", undefined);
   (operator as { evaluate: unknown }).evaluate = (
     ops: readonly Expression[],
     options: { numericApproximation?: boolean },
