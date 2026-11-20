@@ -10,9 +10,10 @@ first-list-x			[First, [List], x]	x	An empty list yields the supplied default in
 a-second-argument-supplies-a-default-for-an	Scope		[First, [List], 99]	99	A second argument supplies a default for an empty collection					
 of-a-matrix-the-first-row	Scope		[First, [List, [List, a, b], [List, c, d]]]	[List, a, b]	Of a matrix, the first row					
 a-lazy-range-works-too	Scope		[First, [Range, 5, 10]]	5	A lazy [[Range]] works too					
-any-expression-not-just-a-list-the-first-term-of	Scope		[First, [Add, [Power, a, 2], [Power, b, 2]]]	[Power, a, 2]	Any expression, not just a list: the first term of a sum					
+first-of-a-call-is-its-first-operand	Scope		[First, [f, a, b]]	a	Any expression, not just a list: the first operand of a call					
 a-default-is-ignored-when-the-collection-has-a	Scope		[First, [List, a, b], x]	a	A default is ignored when the collection has a first element					
 first-sparsearray-range-1-100	Scope		[First, [SparseArray, [Range, 1, 100]]]	1						
 first-c-at-c-1-see-at	Properties		[Equal, [First, [List, 1, 2, 3]], [At, [List, 1, 2, 3], 1]]	True	$First(c) = At(c, 1)$. See [[At]]					
 an-empty-collection-has-no-first-element-compute	Possible issues		[First, [List]]	Missing	An empty collection has no first element; compute-engine returns the symbol $Missing$		undefined-form	First of an empty list is the symbol Missing here; Wolfram leaves First[{}] unevaluated (with a First::nofirst message).	convention	The first of an empty collection is Missing in compute-engine; the binding refuses it rather than defaulting, and the bare [] has no element type besides.
-first-a-pow-neg-2	Possible issues		[First, [Power, a, -2]]	a	A power is an expression with parts too: the first part of $a^{-2}$ is its base					
+any-expression-not-just-a-list-the-first-term-of	Possible issues		[First, [Add, [Power, a, 2], [Power, b, 2]]]	[First, [Add, [MatrixPower, a, 2], [MatrixPower, b, 2]]]	A sum may be a list once its symbols are bound, so $First(a^2 + b^2)$ is not read by parts		unevaluated	An untyped symbol may be a list, so ours leaves First(a^2 + b^2) as it is; Wolfram reads the parts of the expression as written.		
+first-a-pow-neg-2	Possible issues		[First, [Power, a, -2]]	[First, [MatrixPower, a, -2]]	A power is an expression with parts too: the first part of $a^{-2}$ is its base		unevaluated	An untyped symbol may be a list, so ours leaves First(a^-2) as it is; Wolfram reads the parts of the expression as written.		

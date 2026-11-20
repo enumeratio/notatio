@@ -9,7 +9,7 @@ signatures:
   - call: First(collection, default)
     description: "`default` when the collection is empty, instead of the first element."
     library: enumeratio-combinatorics
-    type: (any, any?) -> any
+    type: "((xs: indexed_collection<any>) -> any) & ((any, any?) -> any)"
     overrides: compute-engine
   - call: First(expr)
     description: the first operand of any expression, not just a collection.

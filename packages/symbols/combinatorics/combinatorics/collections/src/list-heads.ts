@@ -7,6 +7,7 @@ import {
   integerAt,
   isNumber,
   operandsOf,
+  partsOf,
   refusing,
   stringAt,
   symbolNameOf,
@@ -238,11 +239,19 @@ const levelFits = (lists: readonly Expr[], level: number): boolean =>
         level - 1,
       )));
 
+/** A widening joined to the head's own signature, which stays: a replaced one lets `First(u + v)`
+ *  broadcast over the elements of a list-valued sum instead of refusing it. */
+const keepNative = (ce: Engine, head: string, widening: string): string => {
+  const definition = ce.lookupDefinition(head);
+  const native = definition !== undefined && "operator" in definition ? String(definition.operator.signature) : "any";
+  return `(${native}) & (${widening})`;
+};
+
 /** Declare the core list/statistics widenings, overrides and new heads. */
 export function declareListHeads(ce: Engine): void {
   // First(c, default) / Last(c, default): a fallback for an empty collection, which
   // compute-engine doesn't accept a second argument for yet.
-  widenSignature(ce, "First", "(any, any?) -> any");
+  widenSignature(ce, "First", keepNative(ce, "First", "(any, any?) -> any"));
   wrapOperator(
     ce,
     ["First", 1, 1],
@@ -250,7 +259,7 @@ export function declareListHeads(ce: Engine): void {
     (native) => (ops, options) => (collectionElements(ops[0])?.length === 0 ? ops[1] : native?.([ops[0]], options)),
     2,
   );
-  widenSignature(ce, "Last", "(any, any?) -> any");
+  widenSignature(ce, "Last", keepNative(ce, "Last", "(any, any?) -> any"));
   wrapOperator(
     ce,
     ["Last", 1, 1],
@@ -270,7 +279,7 @@ export function declareListHeads(ce: Engine): void {
     (native) => (ops, options) => {
       const result = native?.(ops, options);
       if (result !== undefined && result.operator !== "Error") return result;
-      const operands = collectionElements(ops[0]);
+      const operands = partsOf(ce, ops[0]);
       if (operands === undefined) return result;
       if (operands.length > 0) return operands[0];
       return ops.length === 2 ? ops[1] : result;
@@ -284,7 +293,7 @@ export function declareListHeads(ce: Engine): void {
     (native) => (ops, options) => {
       const result = native?.(ops, options);
       if (result !== undefined && result.operator !== "Error") return result;
-      const operands = collectionElements(ops[0]);
+      const operands = partsOf(ce, ops[0]);
       if (operands === undefined) return result;
       if (operands.length > 0) return operands[operands.length - 1];
       return ops.length === 2 ? ops[1] : result;

@@ -124,3 +124,49 @@ export function lazyMisfires(
   }
   return misfires.join("\n");
 }
+
+const fn = (body: unknown, ...params: string[]): Json => ["Function", body, ...params];
+const U: Json = ["List", 1, 2];
+const V: Json = ["List", 3, 4];
+
+/** A call over the untyped parameters `u` and `v` inside a lambda, three ways: applied to lists, applied
+ *  from a `Map` lambda, and applied from inside another lambda that binds `u`. A part read from an
+ *  operand that is no list yet (`u + v`) must wait for the binding. */
+const lambdaShapes = (call: Call): Record<string, Call> => ({
+  apply: ["Apply", fn(call, "u", "v"), U, V],
+  map: ["Map", fn(["Apply", fn(call, "u", "v"), "p", V], "p"), ["List", U]],
+  nested: ["Apply", fn(["Apply", fn(call, "v"), V], "u"), U],
+});
+
+const evaluated = (ce: typeof bare, expr: Call): string => {
+  try {
+    return JSON.stringify(ce.box(expr as never).evaluate().json);
+  } catch (error) {
+    return `throws ${(error as Error).message}`;
+  }
+};
+
+/** The lambda-wrapped calls on the sum `u + v` where the declared engine answers differently from the
+ *  native one, errors included, for the heads that read an operand's parts (`heads`). A head that answers
+ *  more than the native one (Length, Append) differs from it there on purpose, so it is not listed. */
+export function shapeMisfires(
+  builders: CallBuilders,
+  heads: readonly string[],
+  { deliberate = [] }: Pick<Options, "deliberate"> = {},
+): string {
+  const misfires: string[] = [];
+  for (const [head, build] of Object.entries(builders)) {
+    if (!heads.includes(head)) continue;
+    for (const call of build(["Add", "u", "v"])) {
+      if (deliberate.some((d) => d.skip(call))) continue;
+      for (const [shape, wrapped] of Object.entries(lambdaShapes(call))) {
+        const native = evaluated(bare, wrapped);
+        const ours = evaluated(declared, wrapped);
+        if (ours !== native) {
+          misfires.push(`${head} ${shape}: ${JSON.stringify(wrapped)}\n    native   ${native}\n    declared ${ours}`);
+        }
+      }
+    }
+  }
+  return misfires.join("\n");
+}

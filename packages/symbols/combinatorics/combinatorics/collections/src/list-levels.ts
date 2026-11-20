@@ -7,6 +7,7 @@ import {
   integerAt,
   isNumber,
   operandsOf,
+  partsOf,
   stringAt,
   symbolNameOf,
   widenSignatureKeepingNative,
@@ -476,7 +477,7 @@ export function declareListLevelHeads(ce: Engine): void {
         }
         const nativeResult = nativeCanonical?.call(nativeOperator, ops, options);
         if (nativeResult !== undefined && nativeResult.isValid !== false) return nativeResult;
-        const items = collectionElements(ops[0]);
+        const items = partsOf(ce, ops[0]);
         if (items === undefined) return nativeResult;
         const index = resolveIndex1Based(integerAt(ops[1])!, items.length);
         return index === undefined ? ce.symbol("NaN") : items[index];
@@ -484,6 +485,23 @@ export function declareListLevelHeads(ce: Engine): void {
       // compile builtin: rewrites operands at canonicalization, before compile sees the expression
       declareCompile(ce, "At", "builtin");
     }
+    // A call native types as valid (`At(f(a, b), 1)`) stays as it is until evaluate, which reads its
+    // parts once its operands are bound; the canonical fallback above answers only a call native
+    // rejects.
+    wrapOperator(
+      ce,
+      ["At", 1, 1],
+      (ops) => ops[0].isCollection !== true && ![undefined, 0].includes(integerAt(ops[1])),
+      (native) => (ops, options) => {
+        const result = native?.(ops, options);
+        if (result !== undefined && result.operator !== "At") return result;
+        const items = partsOf(ce, ops[0]);
+        if (items === undefined) return result;
+        const index = resolveIndex1Based(integerAt(ops[1])!, items.length);
+        return index === undefined ? ce.symbol("NaN") : items[index];
+      },
+      { arity: 2, compile: "builtin" },
+    );
   }
 
   // FirstPosition(collection, value): the position of the first occurrence anywhere in a

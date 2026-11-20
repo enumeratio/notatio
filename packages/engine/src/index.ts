@@ -63,6 +63,51 @@ export const collectionElements = (expr: Expression): readonly Expression[] | un
   }
 };
 
+/** A symbol's definition, as far as `symbolIsNumber` reads it. */
+type ValueDefinitionLike = {
+  value?: { inferredType?: boolean; type?: { matches: (t: unknown) => boolean | undefined } };
+};
+
+/** Whether `symbol` can only ever be a number: it holds a number, or its declared (not inferred) type is one. */
+const symbolIsNumber = (ce: ComputeEngine, symbol: Expression): boolean => {
+  const value = (symbol as { value?: Expression }).value;
+  if (value !== undefined) return value.isCollection !== true && value.type.matches(ce.type("number"));
+  const definition = ce.lookupDefinition(symbolNameOf(symbol)!) as ValueDefinitionLike | undefined;
+  const declared = definition?.value;
+  return declared !== undefined && declared.inferredType !== true && declared.type?.matches(ce.type("number")) === true;
+};
+
+/** Every leaf of `expr` is a number or a symbol that can only be one. */
+const isSymbolicNumber = (ce: ComputeEngine, expr: Expression): boolean => {
+  if (symbolNameOf(expr) !== undefined) return symbolIsNumber(ce, expr);
+  const ops = (expr as { ops?: unknown }).ops;
+  if (!Array.isArray(ops)) return expr.type.matches(ce.type("number"));
+  return ops.length > 0 && (ops as Expression[]).every((op) => isSymbolicNumber(ce, op));
+};
+
+/**
+ * The operands of a non-collection expression, read as its parts (`f(a, b)` has parts `a` and `b`) --
+ * or `undefined` when they may not be its parts once its symbols are bound. Its parts are sound when
+ * either
+ *  - its head is an undeclared symbol, so the call is inert whatever `a` and `b` turn out to be; or
+ *  - its head is declared and every symbol in it is a number: `u + v` is read elementwise once `u`
+ *    and `v` are lists, so an untyped symbol (a lambda's parameter, say) may still make it one.
+ * The expression's own type is no evidence: `u + v` types as a number whatever `u` and `v` are.
+ */
+const structuralOperands = (ce: ComputeEngine, expr: Expression): readonly Expression[] | undefined => {
+  if (expr.isCollection === true) return undefined;
+  const head = expr.operator;
+  const ops = (expr as { ops?: unknown }).ops;
+  if (typeof head !== "string" || !Array.isArray(ops)) return undefined;
+  if (ce.lookupDefinition(head) === undefined || isSymbolicNumber(ce, expr)) return ops as Expression[];
+  return undefined;
+};
+
+/** The parts `First`, `Last` and `At` read: a collection's elements, else a non-collection's operands where
+ *  those are sound (see `structuralOperands`). `undefined` leaves the call as native has it. */
+export const partsOf = (ce: ComputeEngine, expr: Expression): readonly Expression[] | undefined =>
+  expr.isCollection === true ? collectionElements(expr) : structuralOperands(ce, expr);
+
 /** The most elements `collectionElements` lists before it declines: `At(PrimeNumbers, -1)` filled a 4 GB heap without a bound. */
 export const MAX_COLLECTION_ELEMENTS = 1 << 16;
 
