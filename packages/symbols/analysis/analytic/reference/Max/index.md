@@ -16,12 +16,12 @@ signatures:
   - call: Max(a, b, …)
     description: for values of any ordered type, not just numbers -- the join, in a lattice that is not a total order.
     library: enumeratio-structures
-    type: (any*) -> any
+    type: ((any*) -> any) & ((value*) -> number)
     overrides: enumeratio-analytic
   - call: Max(finset)
     description: the largest member of a [[Finset]].
     library: enumeratio-combinatorics
-    type: (any*) -> any
+    type: ((any*) -> any) & ((value*) -> number)
     overrides: enumeratio-structures
     on:
       - Finset

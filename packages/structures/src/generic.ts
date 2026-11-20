@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@notatio/engine";
+import { operandsOf, symbolNameOf, widenSignature, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 import { compare, member } from "./conform.ts";
 
 // The generic heads: compute-engine's own `Min`, `Max`, `Clamp`, `Floor`, `Ceil`, `Round`,
@@ -135,7 +135,9 @@ function round(ce: ComputeEngine, x: Expression): Expression | undefined {
 
 export function declareGenericHeads(ce: ComputeEngine): void {
   // Wide enough to box a non-number; the native handlers still only see what they took.
-  for (const head of ["Min", "Max"]) widenSignature(ce, head, "(any*) -> any");
+  // Min() stays native's missing-argument error, as compute-engine rules it; Max() is native's NaN.
+  widenSignatureKeepingNative(ce, "Min", "(any+) -> any");
+  widenSignatureKeepingNative(ce, "Max", "(any*) -> any");
   for (const head of ["Floor", "Ceil", "Round"]) widenSignature(ce, head, "(any, any?) -> any");
   widenSignature(ce, "Clamp", "(any, any?, any?, any?, any?) -> any");
 

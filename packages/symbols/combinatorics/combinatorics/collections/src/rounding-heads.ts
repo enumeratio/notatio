@@ -1,7 +1,7 @@
 import { type Engine, type Expr, widenSignature, wrapOperator } from "@notatio/engine";
 
 // #113 rounding and clamping widenings: Chop with a tolerance,
-// Clamp with Clip's replacement values, and the empty-call identity elements of Min/Max.
+// and Clamp with Clip's replacement values.
 // Kept apart from list-heads.ts, which packages/symbols/combinatorics/collections' other #113 lane (list items)
 // is editing at the same time.
 
@@ -50,19 +50,5 @@ export function declareRoundingHeads(ce: Engine): void {
       return x;
     },
     { arity: 5, compile: { upTo: 3 } },
-  );
-
-  // Min() -> +∞, the identity element for Min under the pool it flattens; Max already
-  // returns NaN with an accepted divergence note (Wolfram's -∞ isn't pinned as an example).
-  // The native signature requires at least one argument, so it has to widen to admit a
-  // bare `Min()` at boxing at all.
-  widenSignature(ce, "Min", "(any*) -> any");
-  // compile builtin: Min() is +Infinity, as the built-in lowering gives
-  wrapOperator(
-    ce,
-    ["Min"],
-    () => true,
-    () => () => ce.symbol("PositiveInfinity"),
-    { arity: 0, compile: "builtin" },
   );
 }
