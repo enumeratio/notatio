@@ -1,3 +1,4 @@
+// unstable: the Expression and ComputeEngine types, which the nucleus facade doesn't re-export
 import type { Expression, ComputeEngine } from "@notatio/engine/unstable";
 import { isNumber } from "@notatio/engine";
 import { clearKernelZero } from "@notatio/ce-patches";
