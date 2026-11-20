@@ -1,6 +1,7 @@
 import { appendFileSync, readFileSync } from "node:fs";
 import { createEngine } from "@notatio/engine/testing";
 import { BigDecimal } from "@notatio/engine";
+// unstable: the Expression type, which the nucleus facade doesn't re-export
 import type { Expression } from "@notatio/engine/unstable";
 import { MAX_RECURRENCE_ORDER, bigCx, orthogonalRecurrence } from "@notatio/ce-patches";
 import { expect, test } from "vite-plus/test";

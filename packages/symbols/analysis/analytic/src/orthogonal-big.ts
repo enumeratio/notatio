@@ -1,3 +1,4 @@
+// unstable: the Expression and ComputeEngine types, which the nucleus facade doesn't re-export
 import type { Expression, ComputeEngine } from "@notatio/engine/unstable";
 import type { Json } from "@notatio/ce-patches";
 import { type OrthogonalFamily, bigBox, bigCx, isFiniteNum, orthogonalRecurrence } from "@notatio/ce-patches";
