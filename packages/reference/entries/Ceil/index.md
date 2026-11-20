@@ -16,7 +16,7 @@ signatures:
   - call: Ceil(x)
     description: in a floor ring (Mathlib's), the least integer at or above x; in a floor order, the least tick at or above x; in a product order, coordinate by coordinate, so a complex number's real and imaginary parts are rounded up separately.
     library: enumeratio-structures
-    type: (any, any?) -> any
+    type: "((any, any?) -> any) & ((x: real | signed_infinity | ~oo, step: real?) -> real | signed_infinity | ~oo)"
     overrides: enumeratio-analytic
 seeAlso:
   - Floor

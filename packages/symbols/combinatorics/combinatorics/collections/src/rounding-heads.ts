@@ -1,4 +1,4 @@
-import { type Engine, type Expr, widenSignature, wrapOperator } from "@notatio/engine";
+import { type Engine, type Expr, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 
 // #113 rounding and clamping widenings: Chop with a tolerance,
 // and Clamp with Clip's replacement values.
@@ -9,7 +9,7 @@ import { type Engine, type Expr, widenSignature, wrapOperator } from "@notatio/e
 export function declareRoundingHeads(ce: Engine): void {
   // Chop(x, tolerance): the same near-zero cleanup as the 1-argument form, but with the
   // threshold as an argument instead of the fixed ~1e-10.
-  widenSignature(ce, "Chop", "(any, number?) -> any");
+  widenSignatureKeepingNative(ce, "Chop", "(any, number?) -> any");
   // compile builtin up to 1 operand: the tolerance is an operand past the native call
   wrapOperator(
     ce,
@@ -37,7 +37,7 @@ export function declareRoundingHeads(ce: Engine): void {
 
   // Clamp(x, lower, upper, vLower, vUpper): Wolfram's Clip[x, {lower, upper}, {vLower,
   // vUpper}] -- replacement values outside the range, rather than the nearer bound.
-  widenSignature(ce, "Clamp", "(any, any?, any?, any?, any?) -> any");
+  widenSignatureKeepingNative(ce, "Clamp", "(any, any?, any?, any?, any?) -> any");
   // compile builtin up to 3 operands: the replacement values are operands past the native call
   wrapOperator(
     ce,

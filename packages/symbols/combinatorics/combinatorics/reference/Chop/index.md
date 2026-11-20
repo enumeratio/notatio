@@ -9,7 +9,7 @@ signatures:
   - call: Chop(x, tolerance)
     description: 0 if $|x|$ is smaller than `tolerance`, else x unchanged.
     library: enumeratio-combinatorics
-    type: (any, number?) -> any
+    type: "((T) -> T where T: number) & ((any, number?) -> any)"
     overrides: compute-engine
 seeAlso:
   - Round

@@ -1,5 +1,5 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { operandsOf, symbolNameOf, widenSignature, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
+import { operandsOf, symbolNameOf, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 import { compare, member } from "./conform.ts";
 
 // The generic heads: compute-engine's own `Min`, `Max`, `Clamp`, `Floor`, `Ceil`, `Round`,
@@ -138,8 +138,8 @@ export function declareGenericHeads(ce: ComputeEngine): void {
   // Min() stays native's missing-argument error, as compute-engine rules it; Max() is native's NaN.
   widenSignatureKeepingNative(ce, "Min", "(any+) -> any");
   widenSignatureKeepingNative(ce, "Max", "(any*) -> any");
-  for (const head of ["Floor", "Ceil", "Round"]) widenSignature(ce, head, "(any, any?) -> any");
-  widenSignature(ce, "Clamp", "(any, any?, any?, any?, any?) -> any");
+  for (const head of ["Floor", "Ceil", "Round"]) widenSignatureKeepingNative(ce, head, "(any, any?) -> any");
+  widenSignatureKeepingNative(ce, "Clamp", "(any, any?, any?, any?, any?) -> any");
 
   for (const [head, side] of [
     ["Min", -1],
