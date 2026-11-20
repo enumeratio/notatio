@@ -68,6 +68,11 @@ export {
   round as bigRound,
 } from "./compute-engine/numerics/hurwitz-zeta-big.ts";
 export {
+  orthogonalRecurrence,
+  MAX_RECURRENCE_ORDER,
+  type OrthogonalFamily,
+} from "./compute-engine/numerics/orthogonal-recurrence.ts";
+export {
   lerchPhiPatch,
   lerchPhi,
   lerchPhiChecked,
@@ -162,6 +167,7 @@ export {
   underflows,
   inexactComplex,
   doubleBox,
+  bigBox,
   clearKernelZero,
   wantsNumber,
   declined,

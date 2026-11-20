@@ -15,6 +15,7 @@ import {
   type Cx,
 } from "@notatio/ce-patches";
 import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
+import { orthogonalBig } from "./orthogonal-big.ts";
 
 // LaguerreL(n, x) = L_n(x) and LaguerreL(n, a, x) = L_n^(a)(x), one head: the two-argument
 // form is a = 0. Wolfram spells both the same way.
@@ -66,6 +67,7 @@ export function evaluateLaguerreL(
   ce: ComputeEngine,
   ops: readonly Expression[],
   numeric: boolean,
+  big = false,
 ): Expression | undefined {
   const n = ops[0];
   const a = ops.length === 3 ? ops[1] : undefined;
@@ -73,6 +75,8 @@ export function evaluateLaguerreL(
   if (n === undefined || x === undefined || !isRealInt(n) || n.re < 0) return undefined;
   const order = n.re;
   if (order === 0 && allExact([n])) return degreeZero(ce, a === undefined ? [x] : [a, x]);
+  const wide = orthogonalBig(ce, big, "L", order, a, x);
+  if (wide !== undefined) return wide;
   if (numeric && isFiniteNum(x) && (a === undefined || isFiniteNum(a))) {
     if (order > MAX_NUMERIC_ORDER) return undefined;
     const v = laguerreAt(order, a === undefined ? cx(0) : cx(a.re, a.im), cx(x.re, x.im));

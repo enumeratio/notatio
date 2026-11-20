@@ -39,11 +39,6 @@ const routes: [string, unknown[]][] = [
   ["HypergeometricUStar at floats", ["HypergeometricUStar", 0.7, 2.3, 0.4]],
   ["BernoulliB at a float", ["BernoulliB", 2, 0.7]],
   ["BernoulliPolynomial at a float", ["BernoulliPolynomial", 2, 0.7]],
-  ["ChebyshevT at a float", ["ChebyshevT", 2, 0.7]],
-  ["ChebyshevU at a float", ["ChebyshevU", 2, 0.7]],
-  ["HermiteH at a float", ["HermiteH", 2, 0.7]],
-  ["LaguerreL at a float", ["LaguerreL", 2, 0.7]],
-  ["LegendrePolynomial at a float", ["LegendrePolynomial", 2, 0.7]],
   ["NorlundB at a float", ["NorlundB", 2, 0.7]],
   ["TriangleWave at a float", ["TriangleWave", 0.7]],
   ["RiemannSiegelTheta at a float", ["RiemannSiegelTheta", 0.7]],
@@ -72,11 +67,26 @@ test("LerchPhi next to z = 1 answers from the exact z (the series about z = 1) o
   expect(at(50, ["LerchPhi", near, 1, 1]).re).toBeCloseTo(46.0517018598809, 12);
 });
 
-// A double that rounds to a whole number is still a double: L₁(x) = 1 − x is 1 − 1e-20 here, which no double holds,
-// and the 1 it rounds to is not the exact integer a bignum route would answer.
-test("a double kernel that rounds to a whole number declines at 50 digits and answers the double at machine precision", () => {
+// The orthogonal polynomials at an exact degree run the three-term recurrence in bignums from the operand's decimal
+// (orthogonal-recurrence.test.ts), so at 50 digits they answer to them instead of declining a double.
+test.each([
+  ["ChebyshevT", ["ChebyshevT", 2, 0.7], "-0.02"],
+  ["ChebyshevU", ["ChebyshevU", 2, 0.7], "0.96"],
+  ["HermiteH", ["HermiteH", 2, 0.7], "-0.04"],
+  ["LaguerreL", ["LaguerreL", 2, 0.7], "-0.155"],
+  ["LegendrePolynomial", ["LegendrePolynomial", 2, 0.7], "0.235"],
+])("%s at a float answers from its decimal at 50 digits and a double at machine precision", (_name, call, value) => {
+  expect(at(50, call).toString()).toBe(value);
+  const machine = at(undefined, call);
+  expect(machine.operator).not.toBe(call[0]);
+  expect(machine.re).toBeCloseTo(Number(value), 12);
+});
+
+// A double that rounds to a whole number is still a double at machine precision: L₁(x) = 1 − x is 1 − 1e-20 here,
+// which no double holds; at 50 digits the bignum recurrence answers the 1 − 1e-20 itself.
+test("a double kernel that rounds to a whole number answers the double at machine precision, and 50 digits at 50", () => {
   const call = ["LaguerreL", 1, { num: "1e-20" }];
-  expect(at(50, call).operator).toBe("LaguerreL");
+  expect(at(50, call).toString()).toBe("0.99999999999999999999");
   const machine = at(undefined, call);
   expect(machine.operator).not.toBe("LaguerreL");
   expect(machine.re).toBe(1);

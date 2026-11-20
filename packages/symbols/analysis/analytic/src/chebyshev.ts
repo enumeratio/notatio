@@ -15,6 +15,7 @@ import {
   type Cx,
 } from "@notatio/ce-patches";
 import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
+import { orthogonalBig } from "./orthogonal-big.ts";
 
 // ChebyshevT(n, x) / ChebyshevU(n, x): T_0 = 1, T_1 = x, T_k = 2x T_{k-1} − T_{k-2}
 // (U seeded U_0 = 1, U_1 = 2x — the same recurrence, a different start). Wolfram uses
@@ -114,6 +115,7 @@ function evaluate(
   n: Expression,
   x: Expression,
   numeric: boolean,
+  big = false,
 ): Expression | undefined {
   if (!isRealInt(n)) return undefined;
   const { index, negate, zero } = normalizeOrder(n.re, kind);
@@ -121,6 +123,9 @@ function evaluate(
   const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
   if (zero) return finish(box(0));
   if (index === 0 && !negate && allExact([n])) return degreeZero(ce, [x]);
+  // Past a double's digits the recurrence runs in bignums from the exact x, or declines.
+  const wide = orthogonalBig(ce, big, kind, index, undefined, x);
+  if (wide !== undefined) return negate ? wide.neg() : wide;
   if (numeric && isFiniteNum(x)) {
     if (index > MAX_COMPILED_ORDER) return undefined; // the loop's length: past it, decline
     const v = chebyshevAt(index, cx(x.re, x.im), kind);
@@ -168,8 +173,9 @@ export function evaluateChebyshevT(
   n: Expression,
   x: Expression,
   numeric: boolean,
+  big = false,
 ): Expression | undefined {
-  return evaluate(ce, "T", n, x, numeric);
+  return evaluate(ce, "T", n, x, numeric, big);
 }
 
 export function evaluateChebyshevU(
@@ -177,6 +183,7 @@ export function evaluateChebyshevU(
   n: Expression,
   x: Expression,
   numeric: boolean,
+  big = false,
 ): Expression | undefined {
-  return evaluate(ce, "U", n, x, numeric);
+  return evaluate(ce, "U", n, x, numeric, big);
 }

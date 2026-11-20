@@ -81,6 +81,21 @@ export const clearKernelZero = (): void => {
 /** Did a double kernel box a zero since `clearKernelZero`? */
 export const takeKernelZero = (): boolean => kernelZeroBoxed;
 
+/**
+ * Numbers a bignum kernel boxed to the digits asked for. A value with few digits (1 − 1e-20 prints 20) reads like a
+ * double's print, so the kernel that knows it is no double's records it here, by identity.
+ */
+const bigBoxes = new WeakSet<object>();
+
+/** `x`, a number a bignum kernel produced, recorded as one (`isMachineNumber` never reads it as a double's). */
+export const bigBox = (x: Expression): Expression => {
+  bigBoxes.add(x);
+  return x;
+};
+
+/** Did a bignum kernel box `x`? */
+export const isBigBox = (x: Expression): boolean => bigBoxes.has(x);
+
 /** Did a double kernel box `x`? */
 export const isDoubleBox = (x: Expression): boolean => doubleBoxes.has(x);
 

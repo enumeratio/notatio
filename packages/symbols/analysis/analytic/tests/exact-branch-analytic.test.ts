@@ -271,7 +271,10 @@ test.each(UNDERFLOW_CALLS)(
       ce.precision = digits;
       const answer = ce.box(call as never).N();
       if (!answered(answer, head)) continue;
-      expect(answer.re === 0 && answer.im === 0, answer.toString()).toBe(false);
+      // A bignum below the double range (1e-400) is a value whose double is 0.
+      const zero = (part: { bignumRe?: { isZero(): boolean }; re: number }) =>
+        part.bignumRe === undefined ? part.re === 0 : part.bignumRe.isZero();
+      expect(zero(answer) && answer.im === 0, answer.toString()).toBe(false);
       expect(Number.isFinite(answer.re) && Number.isFinite(answer.im), answer.toString()).toBe(true);
     }
   },

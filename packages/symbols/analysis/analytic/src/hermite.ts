@@ -14,6 +14,7 @@ import {
   type Cx,
 } from "@notatio/ce-patches";
 import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
+import { orthogonalBig } from "./orthogonal-big.ts";
 import { coeffsExpr } from "./chebyshev.ts";
 
 // HermiteH(n, x): the physicists' Hermite polynomial, H_0 = 1, H_1 = 2x,
@@ -65,10 +66,13 @@ export function evaluateHermiteH(
   n: Expression,
   x: Expression,
   numeric: boolean,
+  big = false,
 ): Expression | undefined {
   if (!isRealInt(n) || n.re < 0) return undefined;
   const order = n.re;
   if (order === 0 && allExact([n])) return degreeZero(ce, [x]);
+  const wide = orthogonalBig(ce, big, "H", order, undefined, x);
+  if (wide !== undefined) return wide;
   if (numeric && isFiniteNum(x)) {
     if (order > MAX_NUMERIC_ORDER) return undefined;
     const v = hermiteAt(order, cx(x.re, x.im));
