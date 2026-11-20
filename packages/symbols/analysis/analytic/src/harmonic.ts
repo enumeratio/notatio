@@ -66,6 +66,46 @@ const FINITE_SUM_MAX = 4;
 /** Largest k for which H_z^(−k) expands to its Faulhaber polynomial. */
 const FAULHABER_MAX = 20;
 
+/**
+ * Below this |z| the ζ(r) − ζ(r, z+1) difference loses all its digits (z = 1e-20 answers 0 at
+ * 50 digits, the value being about z·ζ(r+1)), so the Taylor series in z takes over.
+ */
+const SERIES_MAX_ARG = 1e-3;
+
+/** Cap on series terms; past it the difference stands. */
+const SERIES_MAX_TERMS = 400;
+
+/** Digits carried beyond the engine's: `numerically` evaluates with this guard and rounds back. */
+const SERIES_GUARD = 14;
+
+/**
+ * H_z^(r) = Σ_{k≥1} (−1)^(k+1) (r)_k/k! ζ(r+k) z^k for |z| < 1 (ζ(r, 1+z)'s expansion at z = 0,
+ * the binomial series of (1+z)^(−s) summed over the Hurwitz terms), as an expression with enough terms for the engine's
+ * digits; undefined where ζ(r+k) has a pole (r a non-positive integer) or the terms don't
+ * shrink within the cap.
+ */
+function smallArgumentSeries(z: Expression, r: Json, order: number, digits: number): Json | undefined {
+  const x = Math.abs(z.re);
+  const target = 10 ** -(digits + SERIES_GUARD + 2);
+  const zJson = z.json as unknown as Json;
+  const terms: Json[] = [];
+  const factors: Json[] = [];
+  let bound = 1; // |(r)_k/k!·z^k|, in doubles
+  const first = x * Math.max(Math.abs(order), 1e-300);
+  for (let k = 1; k <= SERIES_MAX_TERMS; k++) {
+    factors.push(k === 1 ? r : ["Add", r, k - 1]);
+    bound *= (Math.abs(order + k - 1) / k) * x;
+    const coefficient: Json = [
+      "Divide",
+      factors.length === 1 ? factors[0]! : ["Multiply", ...factors],
+      ["Factorial", k],
+    ];
+    terms.push(["Multiply", k % 2 === 1 ? 1 : -1, coefficient, ["Zeta", ["Add", r, k]], ["Power", zJson, k]]);
+    if (bound * 4 < first * target) return ["Add", ...terms];
+  }
+  return undefined;
+}
+
 const isExactRational = (x: Expression): boolean => isNumber(x) && x.isExact && x.im === 0 && !isRealInt(x);
 
 const binomial = (n: number, k: number): bigint => {
@@ -135,6 +175,22 @@ export function evaluateHarmonicNumber(
   // Everything else — non-integer/complex z, or a non-integer order — is the continuation,
   // reached through the native heads it is built from rather than a second numeric kernel.
   if (numeric) {
+    if (
+      isNumber(z) &&
+      z.im === 0 &&
+      Math.abs(z.re) <= SERIES_MAX_ARG &&
+      (r === undefined || (isNumber(r) && r.im === 0))
+    ) {
+      const order = r === undefined ? 1 : r.re;
+      let small: Json | undefined;
+      if (Number.isInteger(order) && order <= 0) {
+        // r = 0, −1, …: H is Faulhaber's polynomial, with no ζ pole in the series to dodge.
+        if (order >= -FAULHABER_MAX) small = faulhaber(-order, z.json as unknown as Json);
+      } else if (Number.isFinite(order)) {
+        small = smallArgumentSeries(z, (r?.json ?? 1) as unknown as Json, order, ce.precision);
+      }
+      if (small !== undefined) return doublesForFloats(ce, ops, options, () => finish(box(small)));
+    }
     const zJson = z.json as unknown as Json;
     const rJson = r?.json as unknown as Json;
     // A complex operand runs ψ and ζ in doubles.

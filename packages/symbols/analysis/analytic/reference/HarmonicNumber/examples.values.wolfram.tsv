@@ -29,6 +29,7 @@ h-2-5-order-2	HarmonicNumber[2.5, 2]	1.3145763107479913		H_{2.5}^{(2)}	1.31458
 h-0-5-order-3	HarmonicNumber[0.5, 3]	0.7876585810424341		H_{0.5}^{(3)}	0.787659	
 n-harmonicnumber-complex-3-plus-2i-order-2	N[HarmonicNumber[Complex[3, 2], 2]]	1.42958870352385 + 0.12181963298746644*I		N\left[H_{3+2 i}^{(2)}\right]	1.42959\, +0.12182 i	
 h-complex-neg1-5-plus-4i-order-3-2	HarmonicNumber[Complex[-1.5, 4], Rational[3, 2]]	2.0059178209155903 + 0.7781594851952996*I		H_{-1.5+4 i}^{\left(\frac{3}{2}\right)}	2.00592\, +0.778159 i	
+n-harmonicnumber-1e-20-order-2-small-argument	N[HarmonicNumber[1*^-20, 2], 30]					
 non-integer-arguments-via-psi-z-1-gamma	HarmonicNumber[0.33]	0.44152364693736357		H_{0.33}	0.441524	
 the-generalized-form-off-the-integers-via-zeta-r	HarmonicNumber[0.8, 3]	0.9401240489487769		H_{0.8}^{(3)}	0.940124	
 complex-arguments	HarmonicNumber[Complex[1.5, 2]]	1.6170494230744867 + 0.7801971357298587*I		H_{1.5\, +2 i}	1.61705\, +0.780197 i	

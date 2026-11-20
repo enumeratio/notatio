@@ -29,6 +29,7 @@ h-2-5-order-2	harmonic(2.5, 2)	harmonic(2.5, 2)
 h-0-5-order-3	harmonic(0.5, 3)	harmonic(0.5, 3)	
 n-harmonicnumber-complex-3-plus-2i-order-2	N(harmonic((3 + 2*I), 2), 30)	1.42958870352384990109492545724 + 0.121819632987466434489258083636*I	
 h-complex-neg1-5-plus-4i-order-3-2	harmonic((-1.5 + 4*I), Rational(3, 2))	harmonic(-1.5 + 4*I, 3/2)	
+n-harmonicnumber-1e-20-order-2-small-argument	N(harmonic(1e-20, 2), 30)		
 non-integer-arguments-via-psi-z-1-gamma	harmonic(0.33)	0.441523646937364	
 the-generalized-form-off-the-integers-via-zeta-r	harmonic(0.8, 3)	harmonic(0.8, 3)	
 complex-arguments	harmonic((1.5 + 2*I))	1.61704942307449 + 0.780197135729859*I	

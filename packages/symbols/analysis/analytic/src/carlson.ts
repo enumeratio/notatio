@@ -99,6 +99,7 @@ export function carlsonRF(x0: Cx, y0: Cx, z0: Cx): Cx {
  * agree. x = y keeps the direct definition, where the identity divides by zero.
  */
 export function carlsonRC(x: Cx, y: Cx): Cx {
+  if (y.re === 0 && y.im === 0) return x.im === 0 && x.re >= 0 ? cx(Infinity) : cx(NaN, NaN); // the pole
   if (y.im === 0 && y.re < 0 && !(x.re === y.re && x.im === 0)) {
     return mul(csqrt(div(x, sub(x, y))), carlsonRC(sub(x, y), cx(-y.re)));
   }
@@ -494,6 +495,17 @@ function equalArguments(
 }
 
 /**
+ * RC(x, 0): the integrand ~ 1/t at t = 0 makes ½∫ dt / [(t+y)√(t+x)] diverge logarithmically as
+ * y → 0 (DLMF 19.2.17-19: RC(x,y) ~ −ln(y)/(2√x)). For real x ≥ 0 it grows without bound
+ * positive (mpmath's elliprc answers +inf); at any other x the direction of the divergence
+ * depends on how y reaches 0, so it is ComplexInfinity.
+ */
+function atPole(ce: ComputeEngine, x: Expression, y: Expression): Expression | undefined {
+  if (!isFiniteNum(x) || !isFiniteNum(y) || y.re !== 0 || y.im !== 0) return undefined;
+  return ce.symbol(x.im === 0 && x.re >= 0 ? "PositiveInfinity" : "ComplexInfinity");
+}
+
+/**
  * Declare `CarlsonRF`, `CarlsonRC`, `CarlsonRD`, `CarlsonRJ`, `CarlsonRG` — Wolfram's own
  * names for these (`CarlsonRF[x,y,z]` etc.), same argument order. Numeric only, apart from
  * equal positive constant arguments (a power, see `equalArguments`): these have no widely
@@ -515,6 +527,8 @@ export function declareCarlson(ce: ComputeEngine): void {
     evaluate: (ops, options) => {
       const [x, y] = ops;
       if (x === undefined || y === undefined) return undefined;
+      const pole = atPole(ce, x, y);
+      if (pole !== undefined) return pole;
       const folded = equalArguments(ce, ops, options, [-1, 2]);
       if (folded !== undefined) return folded;
       if (!wantsNumber(ops, options) || !isFiniteNum(x) || !isFiniteNum(y)) return undefined;

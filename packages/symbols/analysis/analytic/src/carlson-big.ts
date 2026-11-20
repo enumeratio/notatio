@@ -44,7 +44,10 @@ function rc(x: BigDecimal, y: BigDecimal): BigDecimal {
     return round(round(y.sub(x).div(x).sqrt()).atan().div(d.sqrt()));
   }
   const d = x.sub(y);
-  return round(round(d.div(x).sqrt()).atanh().div(d.sqrt()));
+  // atanh(s) for s = √(d/x) is ln(1+s) + ½ln(x/y): atanh itself reads s as 1, an infinity, once
+  // y/x is below the working digits.
+  const s = round(d.div(x).sqrt());
+  return round(big(1).add(s).ln().add(x.div(y).ln().div(2)).div(d.sqrt()));
 }
 
 /** RF and RD at the caller's working precision (`atDigits`), for kernels built on them. */
@@ -153,5 +156,6 @@ export const carlsonRJBig = (x: BigDecimal, y: BigDecimal, z: BigDecimal, p: Big
 export function carlsonRCBig(x: BigDecimal, y: BigDecimal, digits: number): BigDecimal | undefined {
   if (!x.isFinite() || x.isNegative() || !y.isFinite() || y.isZero()) return undefined;
   if (x.isZero() && y.isNegative()) return undefined;
-  return atDigits(digits + GUARD, () => rc(x, y).toPrecision(digits));
+  const value = atDigits(digits + GUARD, () => rc(x, y).toPrecision(digits));
+  return value.isFinite() ? value : undefined; // a finite integral is never answered as ∞
 }
