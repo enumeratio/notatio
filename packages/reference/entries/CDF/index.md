@@ -9,7 +9,7 @@ signatures:
   - call: CDF(distribution, real | signed_infinity) -> nan | real<0..1>
     description: Cumulative distribution function P(X ≤ x) of a distribution.
     library: enumeratio-statistics
-    type: (distribution, list<real> | real | signed_infinity) -> nan | real<0..1>
+    type: ((distribution, list<real> | real | signed_infinity) -> nan | real<0..1>) & ((distribution, real | signed_infinity) -> nan | real<0..1>)
     overrides: compute-engine
 names:
   wolframIdentity: true

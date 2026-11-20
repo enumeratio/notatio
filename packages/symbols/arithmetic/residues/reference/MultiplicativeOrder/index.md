@@ -11,7 +11,7 @@ signatures:
   - call: MultiplicativeOrder(ResidueClass(a, n))
     description: the order of a unit of $\mathbb{Z}/n$
     library: enumeratio-residues
-    type: (value, integer?, list<integer>?) -> integer
+    type: ((integer, integer, list<integer>?) -> integer) & ((value, integer?, list<integer>?) -> integer)
     overrides: compute-engine
 seeAlso:
   - PowerMod

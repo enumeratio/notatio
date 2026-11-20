@@ -7,6 +7,7 @@ import {
   operandsOf,
   threadOverLists,
   widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
   type EvaluateOptions,
   type Engine,
@@ -130,7 +131,7 @@ export function declareResidues(ce: Engine): void {
 
   // MultiplicativeOrder[k, n, {r₁, …}]: the least m > 0 with kᵐ ≡ some rᵢ — a discrete log —
   // is native; the order of a unit of ℤ/m, MultiplicativeOrder(ResidueClass(k, n)), is ours.
-  widenSignature(ce, "MultiplicativeOrder", "(value, integer?, list<integer>?) -> integer", mayBeInteger);
+  widenSignatureKeepingNative(ce, "MultiplicativeOrder", "(value, integer?, list<integer>?) -> integer", mayBeInteger);
   extend(ce, "MultiplicativeOrder", (ops) => {
     const unit = ops.length === 1 ? residueClassOf(ops[0]) : undefined;
     const k = unit?.residue ?? bigIntegerAt(ops[0]);

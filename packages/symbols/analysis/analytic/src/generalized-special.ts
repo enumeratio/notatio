@@ -1,6 +1,6 @@
 import { finish } from "./finish.ts";
 import { type Expression, type ComputeEngine, isNumber } from "@cortex-js/compute-engine";
-import { bigRationalAt, operandsOf, refusing, widenSignature, wrapOperator } from "@notatio/engine";
+import { bigRationalAt, operandsOf, refusing, widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 import { declined, isRealInt } from "@notatio/ce-patches";
 
 type Q = readonly [bigint, bigint];
@@ -76,7 +76,7 @@ const isNaNValue = (r: Expression | undefined): boolean =>
  * numerically for the three-argument call: `B_z(a,b) = I_z(a,b)·B(a,b)`.
  */
 export function declareGeneralizedBeta(ce: ComputeEngine): void {
-  widenSignature(ce, "Beta", "(number, number, number?, number?) -> number");
+  widenSignatureKeepingNative(ce, "Beta", "(number, number, number?, number?) -> number");
   // compile builtin up to 2 operands: adds operands past the native call, or identities and exact folds on it
   wrapOperator(
     ce,
@@ -142,7 +142,7 @@ export function declareGeneralizedBeta(ce: ComputeEngine): void {
  * three-argument handler already answers.
  */
 export function declareGeneralizedBetaRegularized(ce: ComputeEngine): void {
-  widenSignature(ce, "BetaRegularized", "(number, number, number, number?) -> number");
+  widenSignatureKeepingNative(ce, "BetaRegularized", "(number, number, number, number?) -> number");
   // compile builtin up to 3 operands: adds operands past the native call, or identities and exact folds on it
   wrapOperator(
     ce,
@@ -169,7 +169,7 @@ export function declareGeneralizedBetaRegularized(ce: ComputeEngine): void {
  * changes a concrete answer, only fills in what the symbolic evaluator leaves standing).
  */
 export function declareGeneralizedErf(ce: ComputeEngine): void {
-  widenSignature(ce, "Erf", "(number, number?) -> number");
+  widenSignatureKeepingNative(ce, "Erf", "(number, number?) -> number");
   // compile builtin up to 1 operand: adds operands past the native call, or identities and exact folds on it
   wrapOperator(
     ce,
@@ -207,7 +207,7 @@ export function declareGeneralizedErf(ce: ComputeEngine): void {
  * shifted target, plus the odd parity `ErfInv(-x) = -ErfInv(x)`.
  */
 export function declareGeneralizedErfInv(ce: ComputeEngine): void {
-  widenSignature(ce, "ErfInv", "(number, number?) -> number");
+  widenSignatureKeepingNative(ce, "ErfInv", "(number, number?) -> number");
   // compile builtin up to 1 operand: adds operands past the native call, or identities and exact folds on it
   wrapOperator(
     ce,
@@ -242,7 +242,7 @@ export function declareGeneralizedErfInv(ce: ComputeEngine): void {
  * just inserts the implied order 0 ahead of it.
  */
 export function declareOneArgumentPolyGamma(ce: ComputeEngine): void {
-  widenSignature(ce, "PolyGamma", "(number, number?) -> number");
+  widenSignatureKeepingNative(ce, "PolyGamma", "(number, number?) -> number");
   wrapOperator(
     ce,
     ["PolyGamma", 1, 1],
@@ -335,7 +335,7 @@ function nielsenNumeric(n: number, p: number, z: number): number {
 }
 
 export function declareNielsenPolyLog(ce: ComputeEngine): void {
-  widenSignature(ce, "PolyLog", "(number, number, number?) -> number");
+  widenSignatureKeepingNative(ce, "PolyLog", "(number, number, number?) -> number");
   // compile builtin up to 2 operands: adds operands past the native call, or identities and exact folds on it
   wrapOperator(
     ce,

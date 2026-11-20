@@ -9,7 +9,7 @@ signatures:
   - call: BetaRegularized(x, a, b)
     description: The regularized incomplete beta function $I_x(a, b)$, the CDF of the Beta(a, b) distribution and a bridge to the binomial CDF.
     library: enumeratio-analytic
-    type: (number, number, number, number?) -> number
+    type: ((complex | infinity, complex | infinity, complex | infinity) -> number) & ((number, number, number, number?) -> number)
     overrides: compute-engine
 seeAlso:
   - Beta

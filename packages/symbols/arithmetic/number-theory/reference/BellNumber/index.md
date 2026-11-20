@@ -9,7 +9,7 @@ signatures:
   - call: BellNumber(n, x)
     description: the Bell (Touchard) polynomial $B_n(x) = \sum_k S(n,k)\,x^k$, exact for a nonnegative integer n.
     library: enumeratio-number-theory
-    type: (integer, any?) -> any
+    type: ((integer) -> integer) & ((integer, any?) -> any)
     overrides: compute-engine
 seeAlso:
   - StirlingS1

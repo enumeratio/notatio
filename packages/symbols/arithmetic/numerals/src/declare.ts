@@ -9,7 +9,7 @@ import {
   operandsOf,
   stringAt,
   symbolNameOf,
-  widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
   type Engine,
   type Expr,
@@ -271,7 +271,7 @@ export function declareNumerals(ce: Engine): void {
     signature: string,
     answer: (ops: readonly Expr[], system: NumeralSystem) => Expr | undefined,
   ): void => {
-    widenSignature(ce, head, signature);
+    widenSignatureKeepingNative(ce, head, signature);
     const systemIn = (ops: readonly Expr[]): NumeralSystem | undefined =>
       ops[1] === undefined ? undefined : systemOf(ops[1]);
     wrapOperator(
@@ -430,7 +430,7 @@ export function declareNumerals(ce: Engine): void {
   // Wolfram's IntegerString[n, b] and IntegerString[n, b, len]: bigint arithmetic throughout,
   // since the native handler goes through a double and drifts past about 15-16 significant
   // digits (IntegerString(50!, 16) is wrong after ~13 hex digits).
-  widenSignature(
+  widenSignatureKeepingNative(
     ce,
     "IntegerString",
     "(integer, (integer | string)?, integer?) -> string",
@@ -489,7 +489,7 @@ export function declareNumerals(ce: Engine): void {
   // Wolfram's DigitSum[n, b, k]: the sum of the first k base-b digits (most significant
   // first); negative k sums the last |k| instead (least significant first). The sign of n
   // is discarded, as the two-argument form already does.
-  widenSignature(ce, "DigitSum", "(integer, integer?, integer?) -> integer");
+  widenSignatureKeepingNative(ce, "DigitSum", "(integer, integer?, integer?) -> integer");
   wrapOperator(
     ce,
     ["DigitSum", 5, 2],
@@ -510,7 +510,7 @@ export function declareNumerals(ce: Engine): void {
 
   // Wolfram's DigitCount[n, b, digit, len]: a 4th argument widens the digit list to `len`
   // places (leading zeros included) before tallying, so padding zeros count too.
-  widenSignature(
+  widenSignatureKeepingNative(
     ce,
     "DigitCount",
     "(integer, integer?, (integer | list<integer>)?, integer?) -> integer | list<integer>",

@@ -1,6 +1,13 @@
 import { numerically } from "./finish.ts";
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigIntegerAt, bigRationalAt, mayBeInteger, widenSignature, wrapOperator } from "@notatio/engine";
+import {
+  bigIntegerAt,
+  bigRationalAt,
+  mayBeInteger,
+  widenSignature,
+  widenSignatureKeepingNative,
+  wrapOperator,
+} from "@notatio/engine";
 import { wantsNumber } from "@notatio/ce-patches";
 
 // compute-engine's Gamma-built combinatorial heads, widened to the exact values Wolfram gives
@@ -173,7 +180,7 @@ export function declareWidened(ce: ComputeEngine): void {
   );
 
   // Wolfram's BernoulliB[n, x] is the Bernoulli polynomial, which is BernoulliPolynomial here.
-  widenSignature(ce, "BernoulliB", "(integer, number?) -> number");
+  widenSignatureKeepingNative(ce, "BernoulliB", "(integer, number?) -> number");
   // compile builtin: exact folds and identities, and exact operands native rejects (half-integers, negative odd)
   wrapOperator(
     ce,

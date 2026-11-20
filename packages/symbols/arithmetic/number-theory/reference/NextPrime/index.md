@@ -11,7 +11,7 @@ signatures:
   - call: NextPrime(n, k?)
     description: The next prime strictly greater than n, or the kth prime after n.
     library: enumeratio-number-theory
-    type: (number, number?) -> integer
+    type: ((integer, integer?) -> integer) & ((number, number?) -> integer)
     overrides: compute-engine
 seeAlso:
   - NthPrime

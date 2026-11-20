@@ -17,7 +17,7 @@ signatures:
   - call: Gamma(s, z0, z1)
     description: the generalized incomplete gamma $\Gamma(s, z_0) - \Gamma(s, z_1) = \int_{z_0}^{z_1} t^{s-1} e^{-t}\,dt$; at $z_0 = 0$ the LOWER incomplete gamma $\gamma(s, z_1)$.
     library: "@notatio/analytic"
-    type: (complex | infinity, (complex | infinity)?, (complex | infinity)?) -> number
+    type: ((complex | infinity, (complex | infinity)?) -> number) & ((complex | infinity, (complex | infinity)?, (complex | infinity)?) -> number)
     overrides: compute-engine
 seeAlso:
   - Factorial

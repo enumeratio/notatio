@@ -9,7 +9,7 @@ signatures:
   - call: PolyGamma(m, z)
     description: extends the same call to complex $z$, for integer order $m \geq 1$.
     library: enumeratio-analytic
-    type: (number, number?) -> number
+    type: "((number, number?) -> number) & ((order: integer, complex | infinity) -> number)"
     overrides: compute-engine
 seeAlso:
   - Digamma

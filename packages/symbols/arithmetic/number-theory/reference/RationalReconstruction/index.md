@@ -9,7 +9,7 @@ signatures:
   - call: RationalReconstruction(a, m, N, D)
     description: with explicit bounds $|n| \le N$, $0 < d \le D$, and over a list of residues
     library: enumeratio-number-theory
-    type: (integer, integer, integer?, integer?) -> rational
+    type: ((integer, integer) -> rational) & ((integer, integer, integer?, integer?) -> rational)
     overrides: compute-engine
 seeAlso:
   - PowerModList

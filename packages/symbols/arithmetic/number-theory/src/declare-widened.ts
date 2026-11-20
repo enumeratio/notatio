@@ -5,6 +5,7 @@ import {
   operandsOf,
   symbolNameOf,
   widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
   type Engine,
   type Expr,
@@ -52,7 +53,7 @@ export function declareWidened(ce: Engine): void {
   // Wolfram counts a negative prime: NextPrime(n) for n < -2 is -p, the negation of the
   // largest prime p < -n. compute-engine's native handler only knows positive primes and
   // skips straight ahead to 2.
-  widenSignature(ce, "NextPrime", "(number, number?) -> integer", mayBeInteger);
+  widenSignatureKeepingNative(ce, "NextPrime", "(number, number?) -> integer", mayBeInteger);
   // compile builtin: an exact integer or rational operand native does not answer, or a list it threads over
   wrapOperator(
     ce,
@@ -309,7 +310,7 @@ export function declareWidened(ce: Engine): void {
 
   // Wolfram's Mod[m, n, d]: the x ≡ m (mod n) with d ≤ x < d + n. The operand types stay
   // `number` so the Gaussian Mod (declare-gaussian.ts) still reaches its handler.
-  widenSignature(ce, "Mod", "(number, number, number?) -> number");
+  widenSignatureKeepingNative(ce, "Mod", "(number, number, number?) -> number");
   // compile builtin up to 2 operands: an exact integer or rational operand native does not answer, or a list it threads over
   wrapOperator(
     ce,

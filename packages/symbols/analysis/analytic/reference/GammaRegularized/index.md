@@ -9,7 +9,7 @@ signatures:
   - call: GammaRegularized(a, z0, z1)
     description: the regularized difference $(\Gamma(a, z_0) - \Gamma(a, z_1))/\Gamma(a)$; at $z_0 = 0$ the LOWER regularized $P(a, z_1) = 1 - Q(a, z_1)$.
     library: "@notatio/analytic"
-    type: (complex | infinity, complex | infinity, (complex | infinity)?) -> number
+    type: ((complex | infinity, complex | infinity, (complex | infinity)?) -> number) & ((complex | infinity, complex | infinity) -> number)
     overrides: compute-engine
 seeAlso:
   - Gamma
