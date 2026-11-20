@@ -58,12 +58,27 @@ import {
 } from "../../src/statistics/vocabulary.ts";
 
 const on = "Permutation";
+/** The exact counts: an intermediate (a factorial, a product, a power, a quotient) can pass 2^53 on a subject of the carrier, so they compile over BigInts only (`Definition.exact`); the doubles round such an intermediate silently. */
+const EXACT_COUNTS: ReadonlySet<string> = new Set([
+  "LusztigAFunction",
+  "ConjugacyClassSize",
+  "PrefixSumProduct",
+  "LexicographicRank",
+  "DescentWordFiberSize",
+  "FixedPointAgreementCount",
+  "ParkingPermutationPreimageSize",
+  "LabellingPermutationPreimageSize",
+  "MinimalStarTranspositionFactorizationCount",
+  "ScaledReciprocalPositionValueSum",
+]);
+
 const stat = (head: string, summary: string, expr: Definition["expr"], note?: string, result?: string): Definition => ({
   head,
   on,
   summary,
   expr,
   ...(note ? { note } : {}),
+  ...(EXACT_COUNTS.has(head) ? { exact: true as const } : {}),
   ...(result ? { result } : {}),
 });
 
