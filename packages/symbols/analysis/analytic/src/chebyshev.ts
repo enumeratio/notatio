@@ -2,8 +2,10 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import type { Json } from "@notatio/ce-patches";
 import {
   type BoxInput,
+  isExactReal,
   isFiniteNum,
   isRealInt,
+  reEquals,
   numberResult,
   vouchesWhenComplex,
   cx,
@@ -96,11 +98,12 @@ const MAX_EXPANDED_ORDER = 2000;
 /** T_n and U_n at x = 1, −1, 0 for any order: T_n(±1) = (±1)^n, U_n(1) = n + 1, U_n(−1) = (−1)^n (n + 1), and
  * at 0 both are 0 for odd n and (−1)^(n/2) for even n. `undefined` at any other x. */
 function closedValue(n: number, x: Expression, kind: "T" | "U"): number | undefined {
-  if (x.im !== 0 || !Number.isSafeInteger(n + 1)) return undefined;
+  if (!isExactReal(x) || !Number.isSafeInteger(n + 1)) return undefined;
   const parity = n % 2 === 0 ? 1 : -1;
-  if (x.re === 1) return kind === "T" ? 1 : n + 1;
-  if (x.re === -1) return parity * (kind === "T" ? 1 : n + 1);
-  if (x.re === 0) return n % 2 === 0 ? (n % 4 === 0 ? 1 : -1) : 0;
+  // exact points: 1 + 1e-20 is not 1 (T_n there is 1 + n²·1e-20), and 1e-400 is not 0
+  if (reEquals(x, 1)) return kind === "T" ? 1 : n + 1;
+  if (reEquals(x, -1)) return parity * (kind === "T" ? 1 : n + 1);
+  if (reEquals(x, 0)) return n % 2 === 0 ? (n % 4 === 0 ? 1 : -1) : 0;
   return undefined;
 }
 

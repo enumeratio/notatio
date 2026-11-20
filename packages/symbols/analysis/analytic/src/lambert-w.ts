@@ -9,8 +9,11 @@ import {
   div,
   mul,
   sub,
+  isExactZero,
+  isExactly,
   isFiniteNum,
   isRealInt,
+  readsDifferently,
   wantsNumber,
   inexactComplex,
 } from "@notatio/ce-patches";
@@ -26,6 +29,9 @@ import {
 // carries the reversal (see to-wolfram.ts's SPECIAL entry for LambertW).
 
 const MAX_ITER = 100;
+
+/** A z this near −1/e (a few doubles' rounding) with digits past a double's reads as the branch point. */
+const NEAR_BRANCH_POINT = 1e-14;
 const TOL = 1e-15;
 
 /**
@@ -60,12 +66,16 @@ function lambertWBranch(k: number, z: Cx): Cx | undefined {
  * page and this package's examples give: 0, ±1 at 0/-1/e, integer w·e^w, and -ln(k)/k (whose
  * w = -ln k, since e^{-ln k} = 1/k). Returns the exact w expression, or undefined. */
 function exactLambertW(ce: ComputeEngine, zExpr: Expression): Expression | undefined {
-  if (zExpr.re === 0 && zExpr.im === 0) return ce.Zero;
+  if (isExactZero(zExpr)) return ce.Zero;
   if (symbolNameOf(zExpr) === "ExponentialE") return ce.One; // e = 1·e¹
   // -1/e: Negate(Divide(1, ExponentialE)) or the equivalent rational-power forms compute-engine
   // normalizes to — recognize by value: z·e = -1 exactly needs symbolic care, so match structurally.
   const asNegRecipE = ce.box(["Multiply", zExpr, "ExponentialE"]).evaluate();
-  if (asNegRecipE.re === -1 && asNegRecipE.im === 0) return ce.NegativeOne;
+  // A float z is never −1/e (irrational), and its product with e rounds to −1 within the working digits
+  // (W(−1/e + 1e-53) is −1 + 5e-27, not −1): only an exact product is.
+  if (isExactly(asNegRecipE, -1) && (asNegRecipE as Partial<{ isExact: boolean }>).isExact !== false) {
+    return ce.NegativeOne;
+  }
   // n·e^n for a small integer n (either sign): divide z by e^n and check it collapses to n.
   for (let n = -10; n <= 10; n++) {
     if (n === 0 || n === 1 || n === -1) continue; // already covered / trivial
@@ -105,6 +115,11 @@ export function declareLambertW(ce: ComputeEngine): void {
 
       // One-argument: try the native handler first (it already owns 0, real z ≥ -1/e's
       // principal branch numerically); only step in when it declines.
+      // Next to the branch point the value is −1 + √(2e·(z + 1/e)): a z within a double's rounding of −1/e whose
+      // digits go past the double reads as the point (W = −1) in native's, where the value differs at the
+      // 27th digit (W(−1/e + 1e-54) is −1 + 7e-27). The exact z is out of reach of the kernels here: decline.
+      const isFloat = (zExpr as Partial<{ isExact: boolean }>).isExact === false;
+      if (isFloat && readsDifferently(zExpr) && Math.abs(zExpr.re + Math.exp(-1)) < NEAR_BRANCH_POINT) return undefined;
       const r = native?.(ops, options);
       if (r !== undefined && r.operator !== "LambertW") return r;
       const exact = exactLambertW(ce, zExpr);

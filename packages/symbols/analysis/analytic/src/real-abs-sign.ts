@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigRationalAt } from "@notatio/engine";
-import { type EvalOptions, isFiniteNum } from "@notatio/ce-patches";
+import { type EvalOptions, isFiniteNum, reSign } from "@notatio/ce-patches";
 
 // RealAbs(x) and RealSign(x) — Wolfram's real-only Abs and Sign: defined only on the
 // reals, unlike compute-engine's native `Abs`/`Sign`, which are complex-valued. Both
@@ -30,7 +30,7 @@ function evaluateRealSign(ce: ComputeEngine, x: Expression | undefined): Express
   if (q !== undefined) return ce.number(q[0] > 0n ? 1 : q[0] < 0n ? -1 : 0);
   const approx = isFiniteNum(x) ? x : x.N();
   if (!isFiniteNum(approx) || isConcretelyComplex(approx)) return undefined;
-  return ce.number(approx.re > 0 ? 1 : approx.re < 0 ? -1 : 0);
+  return ce.number(reSign(approx)); // from the bignum: 1e-400 is positive, though its double is 0
 }
 
 export function declareRealAbsSign(ce: ComputeEngine): void {

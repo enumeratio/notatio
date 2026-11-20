@@ -1,5 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { bigIntegerAt, operandsOf } from "@notatio/engine";
+import { isExactZero } from "@notatio/ce-patches";
 
 // BellY(n, k, {x1, …, x_{n−k+1}}) — the partial (incomplete) Bell polynomial B_{n,k},
 // by its textbook recurrence (Comtet):
@@ -40,7 +41,7 @@ function bellYExpr(
     const coeff = binom(n - 1, i - 1);
     if (coeff === 0n) continue;
     const inner = bellYExpr(ce, xs, memo, n - i, k - 1);
-    if (inner.re === 0 && inner.im === 0) continue; // a literal zero subterm — drop it
+    if (isExactZero(inner)) continue; // a literal zero subterm — drop it (a product below the double's range is not one)
     const factors: Expression[] = coeff === 1n ? [xs[i - 1], inner] : [bigNumber(ce, coeff), xs[i - 1], inner];
     terms.push(ce.function("Multiply", factors));
   }

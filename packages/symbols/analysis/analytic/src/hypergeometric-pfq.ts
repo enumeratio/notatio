@@ -2,6 +2,8 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { operandsOf } from "@notatio/engine";
 import {
   type EvalOptions,
+  exceedsDoublePrecision,
+  isExactZero,
   isFiniteNum,
   numberResult,
   vouchesWhenComplex,
@@ -25,7 +27,9 @@ const mag = (z: Cx): number => Math.hypot(z.re, z.im);
 const listOf = (expr: Expression | undefined): readonly Expression[] =>
   expr?.operator === "List" ? operandsOf(expr) : [];
 
-const isZero = (x: Expression): boolean => x.re === 0 && x.im === 0;
+// pFq(…; z) is 1 + O(z): the exact 0 gives exactly 1. A z below the double's range reads as 0 in the
+// double series below, which answers a double (1 to its 16 digits, as the value is).
+const isZero = isExactZero;
 
 export function declareHypergeometricPFQ(ce: ComputeEngine): void {
   ce.declare("HypergeometricPFQ", {
@@ -47,6 +51,8 @@ export function declareHypergeometricPFQ(ce: ComputeEngine): void {
       if (isZero(z)) return ce.One; // the series' own leading term — true for any lists
 
       if (!wantsNumber(ops, options)) return undefined;
+      // The series below runs in doubles: past a double's digits it declines rather than print them as more.
+      if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (!isFiniteNum(z) || upper.some((o) => !isFiniteNum(o)) || lower.some((o) => !isFiniteNum(o))) return undefined;
       const upperCx = upper.map((o) => cx(o.re, o.im));
       const lowerCx = lower.map((o) => cx(o.re, o.im));

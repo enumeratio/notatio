@@ -1,6 +1,6 @@
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
-import { bigRationalAt } from "@notatio/engine";
-import { isFiniteNum } from "@notatio/ce-patches";
+import { type BigDecimal, bigRationalAt } from "@notatio/engine";
+import { isExactReal, isFiniteNum } from "@notatio/ce-patches";
 
 // IntegerPart(x) and FractionalPart(x) — truncation toward 0, split into its two halves.
 // Both are new heads: compute-engine's own `Fract` keeps its result in [0, 1) regardless
@@ -17,14 +17,26 @@ import { isFiniteNum } from "@notatio/ce-patches";
 
 const isConcretelyComplex = (x: Expression): boolean => Number.isFinite(x.im) && x.im !== 0;
 
+/** The real part of a float operand with more digits than a double, which a double would round (a decimal with 20 integer digits, or one below the double's range). */
+const bigReal = (x: Expression): BigDecimal | undefined => {
+  const big = x.bignumRe;
+  return big !== undefined && big.isFinite() && isExactReal(x) ? big : undefined;
+};
+
+/** Truncation toward 0 of a bignum. */
+const truncate = (b: BigDecimal): BigDecimal => (b.isNegative() ? b.neg().floor().neg() : b.floor());
+
 function evaluateIntegerPart(ce: ComputeEngine, x: Expression | undefined): Expression | undefined {
   if (x === undefined) return undefined;
   if (x.im === 0) {
     const q = bigRationalAt(x);
     if (q !== undefined) return ce.number(q[0] / q[1]); // BigInt division truncates toward 0
   }
-  const approx = isFiniteNum(x) ? x : x.N();
+  // A float is read as it is; an exact symbolic one (Pi·10^20) is read at the engine's digits, not as its double.
+  const approx = (x as { isExact?: boolean }).isExact === false ? x : x.N();
   if (!isFiniteNum(approx)) return undefined; // no numeric handle — stay symbolic
+  const big = bigReal(approx);
+  if (big !== undefined) return ce.number(truncate(big));
   if (approx.im !== 0) return ce.number({ re: Math.trunc(approx.re), im: Math.trunc(approx.im) });
   return ce.number(Math.trunc(approx.re));
 }
@@ -38,9 +50,13 @@ function evaluateFractionalPart(ce: ComputeEngine, x: Expression | undefined): E
     const n = p / d; // truncated toward 0
     return ce.number([p - n * d, d]);
   }
-  if ((x as { isExact?: boolean }).isExact === false) return ce.number(x.re - Math.trunc(x.re));
+  if ((x as { isExact?: boolean }).isExact === false) {
+    const big = bigReal(x);
+    return ce.number(big !== undefined ? big.sub(truncate(big)) : x.re - Math.trunc(x.re));
+  }
   if (!Number.isFinite(x.re)) return undefined; // a compound exact expression: no handle
-  return ce.function("Subtract", [x, ce.number(Math.trunc(x.re))]).evaluate();
+  const big = bigReal(x.N());
+  return ce.function("Subtract", [x, ce.number(big !== undefined ? truncate(big) : Math.trunc(x.re))]).evaluate();
 }
 
 export function declareIntegerFractionalPart(ce: ComputeEngine): void {

@@ -36,6 +36,7 @@ import { declareHypergeometricU, declareHypergeometricUStar } from "./hypergeome
 import { declareHypergeometric } from "./hypergeometric.ts";
 import { declareLambertW } from "./lambert-w.ts";
 import { declareInverseErfc } from "./inverse-erfc.ts";
+import { declareUnderflowGuard } from "./underflow-guard.ts";
 import { declareInverseGammaRegularized, declareInverseBetaRegularized } from "./inverse-regularized.ts";
 import { declareNorlundB } from "./norlund.ts";
 import { declarePrimeZetaP } from "./prime-zeta.ts";
@@ -272,5 +273,6 @@ export function declareAnalytic(ce: ComputeEngine): void {
   declareHyperbolicHalfPeriod(ce);
   declareComplexZeta(ce);
   declineHurwitzIndeterminate(ce);
+  declareUnderflowGuard(ce);
   declineMachineAnswers(ce);
 }

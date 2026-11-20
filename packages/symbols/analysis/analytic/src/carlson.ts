@@ -6,6 +6,7 @@ import {
   exceedsDoublePrecision,
   isExactReal,
   isExactZero,
+  hasUnreadablePart,
   isFiniteNum,
   numberResult,
   reSign,
@@ -440,6 +441,12 @@ export const carlsonRGReal = (x: number, y: number, z: number): number => carlso
 
 // --- compute-engine declarations -----------------------------------------------------
 
+// The sign, cut and equality tests above (`x.re === y.re`, `p.re < 0`, a zero part) run on the doubles the
+// kernel computes with, so at a double's digits they decide on the operand the kernel is given. Past a double's
+// digits the bignum kernel (carlson-big.ts) tests exact values. What a double cannot carry is a part below
+// its range, which it reads as 0 (RC(1, 1e-400) is a logarithm of 10^400, not RC(1, 0)): the double
+// route declines such a call.
+
 /**
  * Past a double's digits: the bignum kernel over positive reals, else decline (stay symbolic)
  * rather than print a double's digits as more. `undefined` when no more digits were asked for.
@@ -454,7 +461,8 @@ function pastDouble(
   const args = ops.map((op) => bigRealOperand(ce, op));
   if (args.some((a) => a === undefined)) return { value: undefined };
   const value = kernel(args as BigDecimal[], ce.precision);
-  return { value: value === undefined ? undefined : bigResult(ce, value) };
+  // An infinity is the kernel's cancellation (RC(1, 1e-400) takes atanh of a 1 − 1e-400 rounded to 1), not a value.
+  return { value: value === undefined || !value.isFinite() ? undefined : bigResult(ce, value) };
 }
 
 function evaluate3(
@@ -475,6 +483,7 @@ function evaluate3(
   if (declines?.(cx(x.re, x.im), cx(y.re, y.im), cx(z.re, z.im))) return undefined;
   const past = pastDouble(ce, ops, options, big);
   if (past !== undefined) return past.value;
+  if (ops.some(hasUnreadablePart)) return undefined;
   return numberResult(ce, kernel(cx(x.re, x.im), cx(y.re, y.im), cx(z.re, z.im)), {
     vouchesImaginary: vouchesImaginary && vouchesWhenComplex(ops).vouchesImaginary,
   });
@@ -539,6 +548,7 @@ export function declareCarlson(ce: ComputeEngine): void {
       if (!wantsNumber(ops, options) || !isFiniteNum(x) || !isFiniteNum(y)) return undefined;
       const past = pastDouble(ce, ops, options, ([a, b], d) => carlsonRCBig(a!, b!, d));
       if (past !== undefined) return past.value;
+      if (ops.some(hasUnreadablePart)) return undefined;
       return numberResult(ce, carlsonRC(cx(x.re, x.im), cx(y.re, y.im)));
     },
   });
@@ -564,6 +574,7 @@ export function declareCarlson(ce: ComputeEngine): void {
       if (carlsonRJDeclines(xc, yc, zc, pc)) return undefined; // stays symbolic — see there
       const past = pastDouble(ce, ops, options, ([a, b, c, d], digits) => carlsonRJBig(a!, b!, c!, d!, digits));
       if (past !== undefined) return past.value;
+      if (ops.some(hasUnreadablePart)) return undefined;
       const value = carlsonRJOrDecline(xc, yc, zc, pc);
       return value === undefined ? undefined : numberResult(ce, value);
     },

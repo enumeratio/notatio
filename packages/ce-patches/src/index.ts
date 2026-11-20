@@ -136,6 +136,19 @@ export {
   casin,
 } from "./compute-engine/numerics/complex-arithmetic.ts";
 export {
+  reEquals,
+  imEquals,
+  isExactly,
+  isExactZero,
+  isExactReal,
+  reSign,
+  imSign,
+  reExceeds,
+  hasUnreadablePart,
+  readsDifferently,
+  UNDERFLOW_SAFE_DIGITS,
+} from "./support/exact-parts.ts";
+export {
   type BoxInput,
   type NativeEval,
   type EvalOptions,
