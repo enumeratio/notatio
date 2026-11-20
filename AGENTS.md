@@ -213,6 +213,10 @@ kernel, the network or hand curation stays committed.
   - a float operand gives a float result;
   - the type handler never claims `real` on a branch cut or at a pole;
   - past the double range a value is carried scaled or stays symbolic.
+
+  The rule governs the heads we declare or re-declare. A head that is compute-engine's, with
+  nothing of ours in the route, answers as compute-engine does, and its gaps go upstream.
+
 - **A family's Epsil definition is its meaning; a hand-written TS kernel is only its optional
   `fast` path**, same order, answering while the fiber has at most `FAST_LIMIT` members.
   `tests/fast-kernels.test.ts` holds the two together; a TS kernel that lists members in another
