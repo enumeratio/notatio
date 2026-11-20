@@ -12,6 +12,7 @@ import {
   sub,
   type Cx,
 } from "@notatio/ce-patches";
+import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
 
 // LegendrePolynomial(n, x): P_0 = 1, P_1 = x, (k+1) P_{k+1} = (2k+1) x P_k − k P_{k−1}.
 // Fungrim's name; Wolfram's is `LegendreP` (bridged in the wolfram package's HEADS map,
@@ -116,8 +117,11 @@ export function evaluateLegendreP(
   const index = n.re >= 0 ? n.re : -n.re - 1; // P_{−n} = P_{n−1}, n ≥ 1
   const box = (expr: Json) => ce.box(expr as unknown as BoxInput);
   const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
+  if (index === 0 && allExact([n])) return degreeZero(ce, [x]);
   if (numeric && isFiniteNum(x)) {
-    return numberResult(ce, legendreAt(index, cx(x.re, x.im)), vouchesWhenComplex([x]));
+    const value = numberResult(ce, legendreAt(index, cx(x.re, x.im)), vouchesWhenComplex([x]));
+    // A 0 on exact operands is confirmed by the exact polynomial; on a float it is a double's and stays so.
+    if (keepsKernelValue(value, [n, x], true)) return value;
   }
   return finish(box(coeffsExpr(coeffs(index), x.json as unknown as Json)));
 }

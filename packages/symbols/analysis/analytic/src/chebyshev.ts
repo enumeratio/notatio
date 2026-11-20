@@ -14,6 +14,7 @@ import {
   sub,
   type Cx,
 } from "@notatio/ce-patches";
+import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
 
 // ChebyshevT(n, x) / ChebyshevU(n, x): T_0 = 1, T_1 = x, T_k = 2x T_{k-1} − T_{k-2}
 // (U seeded U_0 = 1, U_1 = 2x — the same recurrence, a different start). Wolfram uses
@@ -119,10 +120,13 @@ function evaluate(
   const box = (expr: Json) => ce.box(expr as unknown as BoxInput);
   const finish = (expr: Expression) => (numeric ? expr.N() : expr.evaluate());
   if (zero) return finish(box(0));
+  if (index === 0 && !negate && allExact([n])) return degreeZero(ce, [x]);
   if (numeric && isFiniteNum(x)) {
     if (index > MAX_COMPILED_ORDER) return undefined; // the loop's length: past it, decline
     const v = chebyshevAt(index, cx(x.re, x.im), kind);
-    return numberResult(ce, negate ? { re: -v.re, im: -v.im } : v, vouchesWhenComplex([x]));
+    const value = numberResult(ce, negate ? { re: -v.re, im: -v.im } : v, vouchesWhenComplex([x]));
+    // A 0 on exact operands is confirmed by the exact polynomial; on a float it is a double's and stays so.
+    if (keepsKernelValue(value, [n, x], index <= MAX_EXPANDED_ORDER)) return value;
   }
   if (index > MAX_EXPANDED_ORDER) {
     const closed = closedValue(index, x, kind);

@@ -2,6 +2,7 @@ import { ComputeEngine } from "@cortex-js/compute-engine";
 import { expect, test } from "vite-plus/test";
 import {
   applyAllPatches,
+  declineMachineAnswer,
   doubleBox,
   evaluateHurwitz,
   evaluatePolygamma,
@@ -73,6 +74,15 @@ test("a short bignum answer still answers at 50 digits through the wrapped nativ
   const exact = atPrecision(50, () => ce.box(["HurwitzZeta", -2, ["Divide", 1, 4]] as never).N());
   expect(exact.operator).not.toBe("HurwitzZeta");
   expect(exact.re).toBe(-0.015625);
+});
+
+test("declineMachineAnswer declines a zero a double kernel boxed past a double's digits, and keeps an exact route's", () => {
+  const ask = (digits: number, compute: () => ReturnType<typeof ce.number>) =>
+    atPrecision(digits, () => declineMachineAnswer(ce, true, compute));
+  expect(ask(50, () => doubleBox(ce.number(0)))).toBeUndefined();
+  expect(ask(50, () => ce.number(0))?.re).toBe(0);
+  // a machine-precision call keeps the double kernel's zero
+  expect(declineMachineAnswer(ce, true, () => doubleBox(ce.number(0)))?.re).toBe(0);
 });
 
 test("isMachineNumber reads a double by kind and a short bignum by what it is", () => {

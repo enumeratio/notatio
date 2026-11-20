@@ -13,6 +13,7 @@ import {
   sub,
   type Cx,
 } from "@notatio/ce-patches";
+import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
 import { coeffsExpr } from "./chebyshev.ts";
 
 // HermiteH(n, x): the physicists' Hermite polynomial, H_0 = 1, H_1 = 2x,
@@ -67,11 +68,15 @@ export function evaluateHermiteH(
 ): Expression | undefined {
   if (!isRealInt(n) || n.re < 0) return undefined;
   const order = n.re;
+  if (order === 0 && allExact([n])) return degreeZero(ce, [x]);
   if (numeric && isFiniteNum(x)) {
     if (order > MAX_NUMERIC_ORDER) return undefined;
     const v = hermiteAt(order, cx(x.re, x.im));
     // The recurrence overflowing is not a value.
-    return Number.isFinite(v.re) && Number.isFinite(v.im) ? numberResult(ce, v, vouchesWhenComplex([x])) : undefined;
+    if (!Number.isFinite(v.re) || !Number.isFinite(v.im)) return undefined;
+    const value = numberResult(ce, v, vouchesWhenComplex([x]));
+    // A 0 on exact operands is confirmed by the exact polynomial; on a float it is a double's and stays so.
+    if (keepsKernelValue(value, [n, x], order <= MAX_EXACT_ORDER)) return value;
   }
   if (order > MAX_EXACT_ORDER) return undefined;
   const expr = ce.box(coeffsExpr(coeffs(order), x.json as unknown as Json) as unknown as BoxInput);

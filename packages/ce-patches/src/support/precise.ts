@@ -1,5 +1,5 @@
 import { type BigDecimal, type Expression, ComputeEngine, isNumber } from "@cortex-js/compute-engine";
-import { doubleBox, inexactComplex, isDoubleBox } from "./box.ts";
+import { clearKernelZero, doubleBox, inexactComplex, isDoubleBox, takeKernelZero } from "./box.ts";
 
 /** Above this many digits a double is no longer the limiting factor — and neither should we be. */
 export const DOUBLE_DIGITS = 15;
@@ -123,8 +123,11 @@ export function declineMachineAnswer(
   numericApproximation: boolean | undefined,
   compute: () => Expression | undefined,
 ): Expression | undefined {
+  clearKernelZero();
   const value = compute();
   if (value === undefined || !exceedsDoublePrecision(ce, numericApproximation)) return value;
+  // A double kernel's 0 is a double's: LaguerreL(1, 1 + 1e-20) is -1e-20, which the kernel reads as 1 - 1.
+  if (isNumber(value) && value.re === 0 && value.im === 0 && takeKernelZero()) return undefined;
   return isMachineNumber(value, ce.precision) ? undefined : value;
 }
 
@@ -134,7 +137,9 @@ export const hasComplexOperand = (ops: readonly Expression[]): boolean =>
 
 /** An operand written as a machine float (`2.5`, not `5/2`): the caller asked for a float answer. */
 export const hasFloatOperand = (ops: readonly Expression[]): boolean =>
-  ops.some((op) => (op as Partial<{ isExact: boolean }>).isExact === false);
+  ops.some(
+    (op) => (op as Partial<{ isExact: boolean }>).isExact === false && Number.isFinite(op.re) && Number.isFinite(op.im),
+  );
 
 /**
  * `value` as the machine number it really is. Arithmetic over a double kernel's output

@@ -7,6 +7,8 @@ import {
   exceedsDoublePrecision,
   isFiniteNum,
   numberResult,
+  asDouble,
+  hasFloatOperand,
   REAL_COLLAPSE_RELATIVE,
   periodsExceedDouble,
   wantsNumber,
@@ -326,7 +328,12 @@ function declarePQ(ce: ComputeEngine, head: string, p: PQLetter, q: PQLetter): v
       if (head === "JacobiSN" && isOneExpr(m) && !isZeroExpr(u)) return finish(ce.function("Tanh", [u]), options);
 
       const exact = exactSCDN(ce, u, m);
-      if (exact !== undefined) return finish(ce.function("Divide", [exact[p], exact[q]]), options);
+      if (exact !== undefined) {
+        const value = finish(ce.function("Divide", [exact[p], exact[q]]), options);
+        // The closed form is exact for exact operands (dn(u | 0) = 1) and a float for a float one, however it was
+        // reached: under `N()` the operands are numericized and a written float is still told by its kind.
+        return hasFloatOperand(ops) && isFiniteNum(value) ? asDouble(ce, value) : value;
+      }
 
       // sn, cn and dn are periodic for 0 < m < 1, so at an infinite argument (u = EllipticK(1) + …) they have no
       // limit: NaN, not a call left standing for Multiply to fold away beside a 0.

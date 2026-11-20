@@ -14,6 +14,7 @@ import {
   sub,
   type Cx,
 } from "@notatio/ce-patches";
+import { allExact, degreeZero, keepsKernelValue } from "./degree-zero.ts";
 
 // LaguerreL(n, x) = L_n(x) and LaguerreL(n, a, x) = L_n^(a)(x), one head: the two-argument
 // form is a = 0. Wolfram spells both the same way.
@@ -71,11 +72,15 @@ export function evaluateLaguerreL(
   const x = ops.length === 3 ? ops[2] : ops[1];
   if (n === undefined || x === undefined || !isRealInt(n) || n.re < 0) return undefined;
   const order = n.re;
+  if (order === 0 && allExact([n])) return degreeZero(ce, a === undefined ? [x] : [a, x]);
   if (numeric && isFiniteNum(x) && (a === undefined || isFiniteNum(a))) {
     if (order > MAX_NUMERIC_ORDER) return undefined;
     const v = laguerreAt(order, a === undefined ? cx(0) : cx(a.re, a.im), cx(x.re, x.im));
     // The recurrence overflowing is not a value.
-    return Number.isFinite(v.re) && Number.isFinite(v.im) ? numberResult(ce, v, vouchesWhenComplex([a, x])) : undefined;
+    if (!Number.isFinite(v.re) || !Number.isFinite(v.im)) return undefined;
+    const value = numberResult(ce, v, vouchesWhenComplex([a, x]));
+    // A 0 on exact operands is confirmed by the exact sum; on a float it is a double's and stays so.
+    if (keepsKernelValue(value, [n, a ?? n, x], order <= MAX_EXACT_ORDER)) return value;
   }
   if (order > MAX_EXACT_ORDER) return undefined;
   const expr = ce.box(sumJson(order, (a?.json ?? 0) as Json, x.json as Json) as unknown as BoxInput);
