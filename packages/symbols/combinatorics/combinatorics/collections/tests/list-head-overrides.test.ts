@@ -98,11 +98,11 @@ const DELIBERATE: readonly { readonly why: string; readonly skip: (call: Call) =
     skip: (call) => call[0] === "At" && Array.isArray(call[2]),
   },
   {
-    why: "a trailing integer is Join's level, which a List operand takes",
+    why: "a trailing integer is Wolfram's Join level; the native has no level and joins the integer as one more element",
     skip: (call) => call[0] === "Join" && call.length === 4 && (call[1] as Call)[0] === "List",
   },
   {
-    why: "Rank is Wolfram's ArrayDepth: a string is 0 and a ragged list is a vector",
+    why: "Rank carries Wolfram's ArrayDepth for now (a string is 0, a ragged list a vector); the override audit on the wiki's Compute-Engine-Overrides recommends moving that to a head named ArrayDepth and returning Rank to compute-engine's tensor rank, still open",
     skip: (call) => call[0] === "Rank" && (typeof call[1] === "string" || (call[1] as Call)[0] === "List"),
   },
   {
@@ -179,12 +179,13 @@ test("an overridden head answers a lazy collection as it answers the list of its
       const listCalls = build(asList);
       build(operand).forEach((call, i) => {
         if (DELIBERATE.some((d) => d.skip(call))) return;
-        // The native At, or First without a default, of an empty lazy collection is NaN, and of an empty list Missing.
+        // Ours follows native: At, or First/Last without a default, of an empty collection is NaN for a
+        // numeric element type (an empty lazy `Take` of a numeric list) and Missing otherwise (`[]` has none).
         if (name.startsWith("empty") && (head === "At" || ((head === "First" || head === "Last") && call.length === 2)))
           return;
         const reference = answer(declared, listCalls[i]);
         const ours = answer(declared, call);
-        if (reference !== undefined && ours !== undefined && !same(head, reference, ours)) {
+        if (reference !== undefined && ours !== undefined && ours !== reference) {
           misfires.push(`${head} ${name}: ${JSON.stringify(call)}\n    list     ${reference}\n    declared ${ours}`);
         }
       });
