@@ -93,6 +93,42 @@ test("Subsets of a sum of untyped symbols stays unevaluated, and so does a Sum o
   expect(run(["Sum", ["Subsets", ["Multiply", "a", "b", "c", "d", "k"], ["List", 3]]])).toContain('"Subsets"');
 });
 
+// A lambda body is never rewritten before its parameters are bound: the lambda answers as the call
+// evaluated on the values (the lambdas thread over list arguments, so elementwise), or waits. Level and
+// ReplacePart read parts, FreeQ, MatchQ, ReplaceAll and Same answer at evaluate on evaluated operands,
+// and Thread waits on a symbol.
+const bound = (j: unknown, u: unknown, v: unknown): unknown =>
+  j === "u" ? u : j === "v" ? v : Array.isArray(j) ? j.map((x) => bound(x, u, v)) : j;
+const bodies: [string, unknown, number[], number[]][] = [
+  ["Level", ["Level", ["Add", "u", "v"], 1], [1, 2], [3, 4]],
+  ["ReplacePart", ["ReplacePart", ["Add", "u", "v"], ["Rule", 1, 9]], [1, 2], [3, 4]],
+  ["FreeQ", ["FreeQ", ["Add", "u", "v"], 3], [1], [2]],
+  ["MatchQ", ["MatchQ", ["Add", "u", "v"], 3], [1], [2]],
+  ["ReplaceAll", ["ReplaceAll", ["Add", "u", "v"], ["Rule", 3, 0]], [1], [2]],
+  ["Same", ["Same", "u", "v"], [1, 2], [1, 2]],
+  ["Thread", ["Thread", ["f", "u", "v"]], [1, 2], [3, 4]],
+];
+for (const [name, body, U, V] of bodies) {
+  test(`${name} in a lambda answers as the call on the bound values, in all three shapes`, () => {
+    const fn = (b: unknown, ...p: string[]) => ["Function", b, ...p];
+    const L = (xs: number[]) => ["List", ...xs];
+    const at = (u: number, v: number) => run(bound(body, u, v));
+    const apply = `["List",${U.map((u, i) => at(u, V[i]!)).join(",")}]`;
+    const nested = `["List",${U.map((u) => `["List",${V.map((v) => at(u, v)).join(",")}]`).join(",")}]`;
+    expect(run(["Apply", fn(body, "u", "v"), L(U), L(V)])).toBe(apply);
+    expect(run(["Apply", fn(["Apply", fn(body, "v"), L(V)], "u"), L(U)])).toBe(nested);
+    const mapped = run(["Map", fn(["Apply", fn(body, "u", "v"), "p", L(V)], "p"), ["List", L(U)]]);
+    expect(mapped === `["List",${apply}]` || mapped.startsWith('["Map"')).toBe(true);
+  });
+}
+
+test("an inert operand is read by Level and ReplacePart, and Thread waits on a symbol", () => {
+  expect(run(["Level", ["f", "a", "b"], 1])).toBe('["List","a","b"]');
+  expect(run(["ReplacePart", ["f", "a", "b"], ["Rule", 2, 9]])).toBe('["f","a",9]');
+  expect(JSON.parse(run(["Thread", ["f", ["List", 1, 2], "v"]]))[0]).toBe("Thread");
+  expect(run(["Thread", ["f", ["List", 1, 2], 3]])).toBe('["List",["f",1,3],["f",2,3]]');
+});
+
 test("the same sum is read once its symbols are declared numbers", () => {
   const typed = createEngine(declareCollections);
   for (const name of ["a", "b", "c", "d"]) typed.declare(name, "real");

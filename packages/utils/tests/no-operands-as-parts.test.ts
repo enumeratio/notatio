@@ -90,3 +90,19 @@ test("no collection handler reads the first operand's operands except through pa
   // A stale entry would let a future read through.
   expect(allowed.filter((key) => !found.some((hit) => hit.endsWith(key)))).toEqual([]);
 });
+
+// Heads that match or rewrite an expression's tree as written stay outside partsOf, on the condition that
+// none answers at canonicalization: a lambda body is never rewritten before its parameters are bound. They
+// answer at evaluate, on evaluated operands. `parts-readers.test.ts` holds each against the lambda shapes.
+const TREE_HEADS: Record<string, string> = {
+  FreeQ: "matches the tree as written, at evaluate only",
+  MatchQ: "matches the tree as written, at evaluate only",
+  ReplaceAll: "rewrites the tree as written, at evaluate only",
+  Same: "compares evaluated operands, at evaluate only",
+};
+
+test("the tree-literal heads answer at evaluate, never at canonicalization", () => {
+  const source = readFileSync(join(COLLECTIONS, "expression-ops.ts"), "utf8");
+  expect(source).not.toMatch(/\.canonical\s*=|\bcanonical\s*:\s*\(/);
+  for (const head of Object.keys(TREE_HEADS)) expect(source).toContain(`"${head}"`);
+});
