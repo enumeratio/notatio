@@ -194,6 +194,16 @@ test("an overridden head answers a lazy collection as it answers the list of its
   expect(misfires.join("\n")).toBe("");
 });
 
+test("Join's trailing integer is a level: past the operands' depth the call stays unevaluated", () => {
+  // `answer` is undefined for a call that stays unevaluated (not the native append).
+  for (const level of [7, 2, 0]) {
+    expect(answer(declared, ["Join", ["List", 1, 2], ["List", 3], level])).toBeUndefined();
+  }
+  expect(answer(declared, ["Join", ["List", ["List", 1], ["List", 2]], ["List", ["List", 3]], 2])).toBe(
+    '["List",["List",1,3],["List",2]]',
+  );
+});
+
 test("Ordering reads a lazy collection's elements", () => {
   expect(answer(declared, ["Ordering", range(4, 1, -1)])).toBe('["List",4,3,2,1]');
   expect(answer(declared, ["Ordering", ["Take", ["List", 9, 8, 7], 2]])).toBe('["List",2,1]');

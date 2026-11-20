@@ -224,6 +224,17 @@ const joinAtLevel = (ce: Engine, lists: readonly Expr[], level: number): Expr =>
   return ce.box(["List", ...merged]);
 };
 
+/** Whether `level` is a valid `Join` level: at least 1, and every operand is a list that deep
+ *  (each element joined at level > 1 is itself a list). */
+const levelFits = (lists: readonly Expr[], level: number): boolean =>
+  level >= 1 &&
+  (level === 1 ||
+    (lists.every((list) => operandsOf(list).every((cell) => cell.operator === "List")) &&
+      levelFits(
+        lists.flatMap((list) => operandsOf(list)),
+        level - 1,
+      )));
+
 /** Declare the core list/statistics widenings, overrides and new heads. */
 export function declareListHeads(ce: Engine): void {
   // First(c, default) / Last(c, default): a fallback for an empty collection, which
@@ -589,15 +600,25 @@ export function declareListHeads(ce: Engine): void {
   // nothing did, once evaluate existed and didn't handle them, regressing
   // `Join(Set(1, 2), Set(3))` and `Join()` to unevaluated. Both are handled in the
   // `evaluate` wrapper below, alongside join-at-level, rather than in canonical.
+  // compute-engine's own overloads, plus a trailing integer level after two to four collections, so an
+  // unevaluated level call keeps its operands as written.
+  widenSignature(
+    ce,
+    "Join",
+    "((T+) -> T where T: string) & ((collection<any>*) -> collection) & ((collection<any>, collection<any>, integer) -> collection) & ((collection<any>, collection<any>, collection<any>, integer) -> collection) & ((collection<any>, collection<any>, collection<any>, collection<any>, integer) -> collection)",
+  );
+  // A level deeper than the operands (or below 1) is Wolfram's error and stays unevaluated.
+  // This is the one place that decides it: native would append the integer, which would make
+  // `Join([[1],[2]], [[3]], 2)` a level join but `Join([1,2], [3], 2)` an append, the reading
+  // switching on depth. If the level reading is ever replaced by compute-engine's, change it here.
   const joinsAtLevel = (
     ops: readonly Expr[],
-  ): { readonly lists: readonly Expr[]; readonly level: number } | undefined => {
+  ): { readonly lists: readonly Expr[]; readonly level: number; readonly declined: boolean } | undefined => {
     if (ops.length < 3) return undefined;
     const level = integerAt(ops[ops.length - 1]);
     const lists = ops.slice(0, -1);
-    return level !== undefined && level >= 1 && lists.every((op) => op.operator === "List")
-      ? { lists, level }
-      : undefined;
+    if (level === undefined || !lists.every((op) => op.operator === "List")) return undefined;
+    return { lists, level, declined: !levelFits(lists, level) };
   };
   // Join(a, b, …): any head, as long as every argument shares it — not just List or Set. A
   // bare symbol's `.operator` is the pseudo-head `"Symbol"`, shared by every free variable,
@@ -617,7 +638,7 @@ export function declareListHeads(ce: Engine): void {
         ops.every((op) => op.operator === ops[0].operator)),
     () => (ops) => {
       const join = joinsAtLevel(ops);
-      if (join !== undefined) return joinAtLevel(ce, join.lists, join.level);
+      if (join !== undefined) return join.declined ? undefined : joinAtLevel(ce, join.lists, join.level);
       if (ops.length === 0) return ce.box(["List"]);
       return ce.box([ops[0].operator, ...ops.flatMap((op) => operandsOf(op))]);
     },
@@ -646,6 +667,7 @@ export function declareListHeads(ce: Engine): void {
       nativeOperator.canonical = nativeCanonical;
       operator.canonical = (ops, options) => {
         const join = joinsAtLevel(ops);
+        if (join?.declined) return ce.function("Join", [...ops], { form: "raw" });
         return join !== undefined
           ? joinAtLevel(ce, join.lists, join.level)
           : nativeCanonical?.call(nativeOperator, ops, options);

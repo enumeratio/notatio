@@ -9,7 +9,7 @@ signatures:
   - call: Join(a, b, …, n)
     description: corresponding sublists n-1 levels down joined pairwise, instead of the top level.
     library: enumeratio-combinatorics
-    type: "((T+) -> T where T: string) & ((collection<any>*) -> collection)"
+    type: "((T+) -> T where T: string) & ((collection<any>*) -> collection) & ((collection<any>, collection<any>, integer) -> collection) & ((collection<any>, collection<any>, collection<any>, integer) -> collection) & ((collection<any>, collection<any>, collection<any>, collection<any>, integer) -> collection)"
     overrides: compute-engine
 seeAlso:
   - Flatten
