@@ -42,15 +42,6 @@ export const sourceLanguages: readonly SourceLanguageMeta[] = [
     sample: "(x^2 + 1) / Sqrt(y)",
   },
   {
-    id: "numpy",
-    title: "NumPy",
-    form: "python",
-    system: "NumPy",
-    blurb:
-      "Python/NumPy source, via compute-engine's Python target. Numeric and function expressions translate into the np namespace; symbolic-only heads have no NumPy form.",
-    sample: "Exp(-x^2) * Cos(x)",
-  },
-  {
     id: "javascript",
     title: "JavaScript",
     form: "javascript",
@@ -115,26 +106,6 @@ const mathml: readonly SourceRow[] = [
   },
 ];
 
-const numpy: readonly SourceRow[] = [
-  arith,
-  trig,
-  { expr: ["Abs", "x"], label: "np.abs" },
-  { expr: ["Max", "a", "b"], label: "Max → np.maximum (element-wise)" },
-  { expr: ["Floor", "x"], label: "np.floor" },
-  { expr: ["Exp", "x"], note: "Emitted as np.e ** x, not np.exp(x) — equal, but not the ufunc." },
-  { expr: ["Sqrt", "x"], note: "np.emath.sqrt (complex-capable), not np.sqrt." },
-  { expr: ["Gamma", "x"], note: "Special functions pull in SciPy: scipy.special.gamma(x)." },
-  {
-    expr: ["Rational", 1, 2],
-    label: "exact rational",
-    divergence: "NumPy has no rationals: 1/2 compiles to the float 0.5 — exactness is lost.",
-  },
-  {
-    expr: ["Binomial", "n", "k"],
-    note: "No NumPy form — the Python target can't compile Binomial.",
-  },
-];
-
 const shader: readonly SourceRow[] = [
   arith,
   trig,
@@ -168,7 +139,6 @@ const javascript: readonly SourceRow[] = [
 export const sourceRows: Record<string, readonly SourceRow[]> = {
   wolfram,
   mathml,
-  numpy,
   javascript,
   glsl: shader,
 };

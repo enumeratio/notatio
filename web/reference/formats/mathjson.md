@@ -29,8 +29,9 @@ or **StandardForm**/**TeXForm** to see it typeset.
   π; a literal word is `["String", "Pi"]`. Bare `"2"` is _not_ the number 2 —
   numbers are JSON numbers, so write `2`.
 - **Rationals stay exact.** `["Rational", 1, 2]` is ½, not `0.5`. Writing `0.5`
-  gives a float. This matters downstream: the [NumPy](/reference/formats/output/numpy)
-  target has no rationals and collapses `["Rational",1,2]` to `0.5`.
+  gives a float. This matters downstream: the code forms
+  ([JavaScript](/reference/formats/output/javascript), [GLSL](/reference/formats/output/glsl))
+  have no rationals and collapse `["Rational",1,2]` to `0.5`.
 - **Function heads are capitalised.** It's `["Sin", "x"]`, not `["sin","x"]`.
 - **Lists are a head too.** `["List", 1, 2, 3]`, not a bare JSON array at the top
   level — the outermost array is always `[head, ...args]`.

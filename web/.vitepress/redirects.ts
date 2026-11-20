@@ -83,13 +83,16 @@ const retiredStubs: [string, string][] = Object.entries({
   SquareRoot: "SquarePartRoot",
 }).map(([old, head]) => [`/reference/symbol/${old}`, `/reference/symbol/${head}`]);
 
+// A code output form that was dropped leads to the output forms.
+const retiredForms: [string, string][] = [["/reference/formats/output/numpy", "/reference/formats/output/"]];
+
 /**
  * Every redirect, one rule per source. A source ending in `/` answers with and without it: a
  * directory page was served either way, and Pages does not match a rule across the slash.
  */
 export function redirects(): Redirect[] {
   const rules = new Map<string, string>();
-  for (const [from, to] of [...moved(), ...renamedSymbols, ...retiredStubs]) {
+  for (const [from, to] of [...moved(), ...renamedSymbols, ...retiredStubs, ...retiredForms]) {
     rules.set(from, to);
     if (from.length > 1 && from.endsWith("/")) rules.set(from.slice(0, -1), to);
   }
