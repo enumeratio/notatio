@@ -11,6 +11,11 @@ signatures:
     library: enumeratio-combinatorics
     type: (any, any+) -> any
     overrides: compute-engine
+  - call: ReplaceAll(any, any+) -> any
+    description: a rule with a compound left side applies wherever it matches, top-down, the first matching rule winning at each part (the ce-patches ReplaceAll patch).
+    library: enumeratio-evaluation
+    type: (any, any+) -> any
+    overrides: compute-engine
 stub: engine
 attributes:
   - HoldAll

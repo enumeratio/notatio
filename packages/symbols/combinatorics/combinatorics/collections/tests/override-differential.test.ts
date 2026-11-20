@@ -94,7 +94,7 @@ const DELIBERATE: readonly Deliberate[] = [
     skip: (call) => call[0] === "Sort" && call.length === 3,
   },
   {
-    why: "a compound left side replaces any part of the expression, as /. does; the native replaces a symbol or the whole",
+    why: "a compound left side replaces any part of the expression, as /. does (the ce-patches ReplaceAll patch, applied by declareExpressionOps); the bare native head, which the patch's upstream pull request would change, replaces a symbol or the whole",
     skip: (call) => call[0] === "ReplaceAll",
   },
 ];

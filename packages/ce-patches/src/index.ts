@@ -5,6 +5,7 @@ import { seriesInverseFunctions } from "./patches/series-inverse-functions.ts";
 import { seriesHypergeometricAtZeroPatch } from "./patches/series-hypergeometric-at-zero.ts";
 import { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 import { steppedIterator } from "./patches/stepped-iterator.ts";
+import { replaceAllCompoundPatternsPatch } from "./patches/replace-all-compound-patterns.ts";
 import { agmComplex } from "./patches/agm-complex.ts";
 import { betaAtPole } from "./patches/beta-at-pole.ts";
 import { ellipticOverflow } from "./patches/elliptic-overflow.ts";
@@ -105,6 +106,7 @@ export { solveDomains, evaluateSolveDomains } from "./patches/solve-domains.ts";
 export { integratePolynomialPowers, integrateExpandsPolynomials } from "./patches/integrate-polynomial-powers.ts";
 export { iteratorUpperBound } from "./patches/iterator-upper-bound.ts";
 export { steppedIterator } from "./patches/stepped-iterator.ts";
+export { replaceAllCompoundPatternsPatch } from "./patches/replace-all-compound-patterns.ts";
 export { shapeOfUnknownElements, evaluateShapeOfUnknownElements } from "./patches/shape-of-unknown-elements.ts";
 export { dictionaryOf, entriesOf } from "./compute-engine/library/core.ts";
 export { matrixRankCompiles, compileMatrixRank, matrixRank } from "./patches/matrix-rank-compiles.ts";
@@ -246,6 +248,7 @@ export function applyNativeHeadPatches(ce: ComputeEngine): void {
     solveDomains,
     iteratorUpperBound,
     steppedIterator,
+    replaceAllCompoundPatternsPatch,
     shapeOfUnknownElements,
     matrixRankCompiles,
     integratePolynomialPowers,
