@@ -1,6 +1,7 @@
 import {
   declareCompile,
   applyFunction,
+  collectionElements,
   type Engine,
   type Expr,
   integerAt,
@@ -289,8 +290,10 @@ export function declareListHeads(ce: Engine): void {
       ops.length === 1 ||
       (ops.length === 2 && orderingSpecOf(ops[1]) !== undefined) ||
       (ops.length === 3 && symbolNameOf(ops[1]) === "All" && symbolNameOf(ops[2]) === "Greater"),
-    () => (ops) => {
-      const items = operandsOf(ops[0]);
+    (native) => (ops, options) => {
+      // The elements, not the call's arguments: `Ordering(Range(4, 1, -1))` orders four elements.
+      const items = collectionElements(ops[0]);
+      if (items === undefined) return native?.(ops, options);
       const full = fullOrdering(items);
       if (ops.length === 3) {
         const reversed = [...full];
