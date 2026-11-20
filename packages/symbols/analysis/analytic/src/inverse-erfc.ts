@@ -4,7 +4,7 @@ import {
   type EvalOptions,
   isExactReal,
   isExactZero,
-  isExactly,
+  isExactlyReal,
   isFiniteNum,
   reExceeds,
   wantsNumber,
@@ -47,8 +47,8 @@ export function declareInverseErfc(ce: ComputeEngine): void {
       // The special points are exact: a decimal 1e-20 from 1 is not 1, and one below the double's
       // range is not 0.
       if (isExactZero(s)) return ce.symbol("PositiveInfinity");
-      if (isExactly(s, 1)) return ce.Zero;
-      if (isExactly(s, 2)) return ce.symbol("NegativeInfinity");
+      if (isExactlyReal(s, 1)) return ce.Zero;
+      if (isExactlyReal(s, 2)) return ce.symbol("NegativeInfinity");
       if (!wantsNumber(ops, options) || !isFiniteNum(s) || !isExactReal(s)) return undefined;
       // erfc(−y) = 2 − erfc(y), so InverseErfc(s) = −InverseErfc(2 − s) for s > 3/2, which keeps the
       // subtraction's argument small there; ErfInv(1 − s) applies directly everywhere else.

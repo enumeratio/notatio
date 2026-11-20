@@ -10,7 +10,7 @@ import {
   mul,
   sub,
   isExactZero,
-  isExactly,
+  isExactlyReal,
   isFiniteNum,
   isRealInt,
   readsDifferently,
@@ -73,7 +73,7 @@ function exactLambertW(ce: ComputeEngine, zExpr: Expression): Expression | undef
   const asNegRecipE = ce.box(["Multiply", zExpr, "ExponentialE"]).evaluate();
   // A float z is never −1/e (irrational), and its product with e rounds to −1 within the working digits
   // (W(−1/e + 1e-53) is −1 + 5e-27, not −1): only an exact product is.
-  if (isExactly(asNegRecipE, -1) && (asNegRecipE as Partial<{ isExact: boolean }>).isExact !== false) {
+  if (isExactlyReal(asNegRecipE, -1) && (asNegRecipE as Partial<{ isExact: boolean }>).isExact !== false) {
     return ce.NegativeOne;
   }
   // n·e^n for a small integer n (either sign): divide z by e^n and check it collapses to n.

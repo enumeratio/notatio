@@ -26,6 +26,7 @@ const READS_DOUBLES = [
   "Gudermannian",
   "HarmonicNumber",
   "HermiteH",
+  "HypergeometricPFQ",
   "JacobiAmplitude",
   "JacobiCD",
   "JacobiCN",

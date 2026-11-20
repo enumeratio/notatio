@@ -2,7 +2,6 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { operandsOf } from "@notatio/engine";
 import {
   type EvalOptions,
-  exceedsDoublePrecision,
   isExactZero,
   isFiniteNum,
   numberResult,
@@ -51,8 +50,6 @@ export function declareHypergeometricPFQ(ce: ComputeEngine): void {
       if (isZero(z)) return ce.One; // the series' own leading term — true for any lists
 
       if (!wantsNumber(ops, options)) return undefined;
-      // The series below runs in doubles: past a double's digits it declines rather than print them as more.
-      if (exceedsDoublePrecision(ce, options.numericApproximation)) return undefined;
       if (!isFiniteNum(z) || upper.some((o) => !isFiniteNum(o)) || lower.some((o) => !isFiniteNum(o))) return undefined;
       const upperCx = upper.map((o) => cx(o.re, o.im));
       const lowerCx = lower.map((o) => cx(o.re, o.im));

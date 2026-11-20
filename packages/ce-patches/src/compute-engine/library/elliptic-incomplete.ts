@@ -1,8 +1,16 @@
 import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
 import { ellipticFarFromReal, LARGE_IMAGINARY } from "../numerics/elliptic-incomplete.ts";
 import { wantsBigDigits } from "../../support/precise.ts";
-import { hasUnreadablePart, isExactZero, UNDERFLOW_SAFE_DIGITS } from "../../support/exact-parts.ts";
-import { type EvalOptions, isFiniteNum, type NativeEval, numberResult, wantsNumber } from "../../support/box.ts";
+import {
+  type EvalOptions,
+  hasUnreadablePart,
+  isExactZero,
+  isFiniteNum,
+  type NativeEval,
+  numberResult,
+  UNDERFLOW_SAFE_DIGITS,
+  wantsNumber,
+} from "../../support/box.ts";
 
 // EllipticF(φ, m) and the two-operand EllipticE(φ, m) at a φ far from the real axis. Native's
 // Carlson forms overflow there (EllipticF(0.3 + 400i, 0.5) is ComplexInfinity, where the value is

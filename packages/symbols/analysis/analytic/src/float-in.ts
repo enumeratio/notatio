@@ -78,6 +78,7 @@ const DOUBLE_KERNEL_HEADS = [
   "RisingFactorial",
   "IncompleteEllipticE",
   "IncompleteEllipticF",
+  "HypergeometricPFQ",
 ] as const;
 
 /** Past a double's digits these heads leave a call unevaluated where their kernel answers with a double. */
