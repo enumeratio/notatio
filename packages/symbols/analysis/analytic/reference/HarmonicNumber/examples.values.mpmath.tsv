@@ -29,6 +29,7 @@ h-2-5-order-2	(harmonic(2.5) if (2) == 1 else zeta(2) - zeta(2, (2.5) + 1))	1.31
 h-0-5-order-3	(harmonic(0.5) if (3) == 1 else zeta(3) - zeta(3, (0.5) + 1))	0.787658581042434287601571030931	
 n-harmonicnumber-complex-3-plus-2i-order-2	((harmonic(mpc(3, 2)) if (2) == 1 else zeta(2) - zeta(2, (mpc(3, 2)) + 1)))	(1.42958870352384990109492545724 + 0.121819632987466434489258083636j)	
 h-complex-neg1-5-plus-4i-order-3-2	(harmonic(mpc(-1.5, 4)) if ((mpf(3)/2)) == 1 else zeta((mpf(3)/2)) - zeta((mpf(3)/2), (mpc(-1.5, 4)) + 1))	(2.00591782091559039955796096051 + 0.778159485195299601757922651828j)	
+n-harmonicnumber-1e-20-order-2-small-argument	enumeratio_n(lambda: ((harmonic(mpf("1e-20")) if (2) == 1 else zeta(2) - zeta(2, (mpf("1e-20")) + 1))), 30)		
 non-integer-arguments-via-psi-z-1-gamma	harmonic(0.33)	0.441523646937363545197516675785	
 the-generalized-form-off-the-integers-via-zeta-r	(harmonic(0.8) if (3) == 1 else zeta(3) - zeta(3, (0.8) + 1))	0.940124048948776996526100912956	
 complex-arguments	harmonic(mpc(1.5, 2))	(1.61704942307448654051315835004 + 0.780197135729858677447653395167j)	

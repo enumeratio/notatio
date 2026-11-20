@@ -29,6 +29,7 @@ h-2-5-order-2	generalized_harmonic(x(2.5), n(2))	panic: an integer, not 2.5	erro
 h-0-5-order-3	generalized_harmonic(x(0.5), n(3))	panic: an integer, not 0.5	error
 n-harmonicnumber-complex-3-plus-2i-order-2			
 h-complex-neg1-5-plus-4i-order-3-2			
+n-harmonicnumber-1e-20-order-2-small-argument	nf(generalized_harmonic(x(1e-20), n(2)))		
 non-integer-arguments-via-psi-z-1-gamma	harmonic(x(0.33))	panic: an integer, not 0.33	error
 the-generalized-form-off-the-integers-via-zeta-r	generalized_harmonic(x(0.8), n(3))	panic: an integer, not 0.8	error
 complex-arguments			

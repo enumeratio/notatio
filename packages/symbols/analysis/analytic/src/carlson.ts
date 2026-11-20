@@ -4,8 +4,11 @@ import {
   bigRealOperand,
   bigResult,
   exceedsDoublePrecision,
+  isExactReal,
+  isExactZero,
   isFiniteNum,
   numberResult,
+  reSign,
   vouchesWhenComplex,
   wantsNumber,
   abs,
@@ -99,6 +102,7 @@ export function carlsonRF(x0: Cx, y0: Cx, z0: Cx): Cx {
  * agree. x = y keeps the direct definition, where the identity divides by zero.
  */
 export function carlsonRC(x: Cx, y: Cx): Cx {
+  if (y.re === 0 && y.im === 0) return x.im === 0 && x.re >= 0 ? cx(Infinity) : cx(NaN, NaN); // the pole
   if (y.im === 0 && y.re < 0 && !(x.re === y.re && x.im === 0)) {
     return mul(csqrt(div(x, sub(x, y))), carlsonRC(sub(x, y), cx(-y.re)));
   }
@@ -494,6 +498,19 @@ function equalArguments(
 }
 
 /**
+ * RC(x, 0): the integrand ~ 1/t at t = 0 makes ½∫ dt / [(t+y)√(t+x)] diverge logarithmically as
+ * y → 0 (DLMF 19.2.17-19: RC(x,y) ~ ln(4x/y)/(2√x)). The logarithm's real part dominates, so the
+ * value runs off along 1/√x whichever way y arrives: +∞ for real x ≥ 0 (mpmath's elliprc agrees;
+ * Wolfram writes ComplexInfinity), +i∞ or −i∞ for x < 0 by the side of the cut, and the direction
+ * of 1/√x for complex x. No directed infinity names those, so they are ComplexInfinity (mpmath's
+ * +inf there is its convention for the pole). y is read exactly: 1e-400 is not the pole.
+ */
+function atPole(ce: ComputeEngine, x: Expression, y: Expression): Expression | undefined {
+  if (!isFiniteNum(x) || !isFiniteNum(y) || !isExactZero(y)) return undefined;
+  return ce.symbol(isExactReal(x) && reSign(x) >= 0 ? "PositiveInfinity" : "ComplexInfinity");
+}
+
+/**
  * Declare `CarlsonRF`, `CarlsonRC`, `CarlsonRD`, `CarlsonRJ`, `CarlsonRG` — Wolfram's own
  * names for these (`CarlsonRF[x,y,z]` etc.), same argument order. Numeric only, apart from
  * equal positive constant arguments (a power, see `equalArguments`): these have no widely
@@ -515,6 +532,8 @@ export function declareCarlson(ce: ComputeEngine): void {
     evaluate: (ops, options) => {
       const [x, y] = ops;
       if (x === undefined || y === undefined) return undefined;
+      const pole = atPole(ce, x, y);
+      if (pole !== undefined) return pole;
       const folded = equalArguments(ce, ops, options, [-1, 2]);
       if (folded !== undefined) return folded;
       if (!wantsNumber(ops, options) || !isFiniteNum(x) || !isFiniteNum(y)) return undefined;
