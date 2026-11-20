@@ -391,7 +391,7 @@ outside-the-unit-disk-with-a-large-s	lerchphi((-1.2 + 0.7*I), 100, 3)	lerchphi(-
 n-lerch-phi-1-minus-1e-20-1-1-d30	N(lerchphi(Float("0.99999999999999999999", 50), 1, 1), 30)		
 n-lerch-phi-0-2-plus-1e-20-neg-half-d30	N(lerchphi(0, Float("2.00000000000000000001", 50), Rational(-1, 2)), 30)		
 n-lerch-phi-1-minus-1e-20-2-1-d30	N(lerchphi(Float("0.99999999999999999999", 50), 2, 1), 30)		
-n-lerch-phi-1-plus-1e-12-1-plus-i-quarter-d30	N(lerchphi(1.000000000001, (1 + 1*I), Rational(1, 4)), 30)		
+n-lerch-phi-1-plus-1e-12-1-plus-i-quarter-d30	N(lerchphi(Float("1.000000000001", 50), (1 + 1*I), Rational(1, 4)), 30)	0.9833011478576726792956182131 + 2.89102534377361326028657470604*I	
 n-lerch-phi-1-minus-1e-30-3-quarter-d30	N(lerchphi(Float("0.999999999999999999999999999999", 50), 3, Rational(1, 4)), 30)		
 past-the-unit-disk-by-the-integral	N(lerchphi((1 + 2*I), (3 + -1*I), (4 + 2*I)), 30)	0.00202500995700990860053946871764 + 0.00332789753681355880743808908022*I	
 inexact-arguments-should-evaluate-numerically	lerchphi(0.5, 2, 3.5)	lerchphi(0.5, 2, 3.5)	
