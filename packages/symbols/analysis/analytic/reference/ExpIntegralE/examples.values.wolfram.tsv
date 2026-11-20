@@ -31,5 +31,5 @@ e-n-0-1-n-1-for-n-1	ExpIntegralE[2, 0]	1		E_2(0)	1
 e-0-x-e-x-x	ExpIntegralE[0, x]	1/(E^x*x)		E_0(x)	\frac{e^{-x}}{x}	
 expintegrale-0-0	ExpIntegralE[0, 0]	ComplexInfinity		E_0(0)	\text{ComplexInfinity}	
 expintegrale-3-0	ExpIntegralE[3, 0]	1/2		E_3(0)	\frac{1}{2}	
-n-expintegrale-1-1e-400-d30	N[ExpIntegralE[1, Power[10, -400]], 30]					
+n-expintegrale-1-1e-400-d30	N[ExpIntegralE[1, Power[10, -400]], 30]	920.4568215327167407465900697836632806094`30.	920.456821532716740746590069784	N\left[E_1\left(\frac{1}{10^{400}}\right),30\right]	920.456821532716740746590069784	
 functionexpand-expintegrale-2-over-3-z	FunctionExpand[ExpIntegralE[Rational[2, 3], z]]					
