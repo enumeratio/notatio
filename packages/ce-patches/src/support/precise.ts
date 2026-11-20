@@ -117,15 +117,19 @@ export const wantsBigDigits = (
  * digits than a double's were asked for (`exceedsDoublePrecision`) and the answer carries no more
  * than a double's, in which case the call stays unevaluated. A bignum answer, an exact one and a
  * machine-precision call pass through. (A machine double is what `isMachineNumber` reads.)
+ *
+ * `evaluate()` with a float operand is a numeric call at the engine's precision, the same as `.N()`, so
+ * it declines alike when `ops` holds a float: `LaguerreL(1, 0.50000000000000000001)` is no machine 0.5.
  */
 export function declineMachineAnswer(
   ce: ComputeEngine,
   numericApproximation: boolean | undefined,
   compute: () => Expression | undefined,
+  ops: readonly Expression[] = [],
 ): Expression | undefined {
   clearKernelZero();
   const value = compute();
-  if (value === undefined || !exceedsDoublePrecision(ce, numericApproximation)) return value;
+  if (value === undefined || !exceedsDoublePrecision(ce, numericApproximation || hasFloatOperand(ops))) return value;
   // A double kernel's 0 is a double's: LaguerreL(1, 1 + 1e-20) is -1e-20, which the kernel reads as 1 - 1.
   if (isNumber(value) && value.re === 0 && value.im === 0 && takeKernelZero()) return undefined;
   return isMachineNumber(value, ce.precision) ? undefined : value;
