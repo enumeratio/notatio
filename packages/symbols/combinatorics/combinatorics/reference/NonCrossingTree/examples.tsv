@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[NonCrossingTree, [List, 3, 0, 0, 3, 0, 0, 0]]	[NonCrossingTree, [List, 3, 0, 0, 3, 0, 0, 0]]	The constructor on one of its elements

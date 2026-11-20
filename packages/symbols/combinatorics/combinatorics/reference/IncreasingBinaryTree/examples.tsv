@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[IncreasingBinaryTree, [List, 1, 0, [List, 2, 0, 0]]]	[IncreasingBinaryTree, [List, 1, 0, [List, 2, 0, 0]]]	The constructor on one of its elements

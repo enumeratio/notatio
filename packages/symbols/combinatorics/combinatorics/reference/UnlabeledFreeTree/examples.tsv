@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[UnlabeledFreeTree, [List, 0, 1, 1]]	[UnlabeledFreeTree, [List, 0, 1, 1]]	The constructor on one of its elements

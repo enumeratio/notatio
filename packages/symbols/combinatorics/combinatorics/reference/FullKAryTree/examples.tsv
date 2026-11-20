@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[FullKAryTree, [List, 0, [List, 0, [List, 0, 0]]]]	[FullKAryTree, [List, 0, [List, 0, [List, 0, 0]]]]	The constructor on one of its elements

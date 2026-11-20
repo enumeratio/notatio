@@ -27,6 +27,7 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Multiset",
+    readable: true,
     type: "multiset",
     // Params first — see Finset above.
     shape: "tuple<integer, list<integer>>",

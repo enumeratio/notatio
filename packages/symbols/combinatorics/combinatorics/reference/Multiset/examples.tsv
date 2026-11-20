@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+constructor-example		test	[Multiset, [Tuple, 3, [List, 1, 2]]]	[Multiset, [Tuple, 3, [List, 1, 2]]]	The constructor on one of its elements
