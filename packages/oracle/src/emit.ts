@@ -219,6 +219,16 @@ const BROADCAST_HEADS = new Set(["Add", "Subtract", "Multiply", "Divide", "Power
 /** Bits for a decimal read inside N(…): the 200 at which Sage matches ours to 20 digits near a pole. */
 const SAGE_DECIMAL_BITS = 200;
 
+/** Digits of a decimal's text, leading zeros and the exponent aside. */
+const significantDigits = (text: string): number =>
+  text.replace(/e.*$/i, "").replace(/\D/g, "").replace(/^0+/, "").length;
+
+/** Sage bits for a decimal read at d digits, with a guard. */
+const sageBits = (digits: number): number => Math.ceil(digits * 3.33) + 64;
+
+/** SymPy precision for a decimal read inside N(x, d): the 50 a long literal already gets, or more for a larger d. */
+const sympyWidePrecision = (digits: number): number => Math.max(50, digits + 20);
+
 /** Whether a decimal's text is a double exactly (0.25, not 0.1): its fraction is k/2^m. */
 const isDyadic = (text: string): boolean => {
   const [, digits = "", fraction = ""] = /^-?(\d*)\.?(\d*)$/.exec(text) ?? [];
@@ -382,6 +392,8 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
   let wolframDigits = 0;
   // Bits for the decimals inside a Sage N(x[, d]) operand: ours reads them as decimals, not as the nearest double.
   let decimalBits = 0;
+  // The d past a double's digits of the enclosing N(x, d), for SymPy and Sage: a decimal there is read as the decimal it spells.
+  let wideDigits = 0;
   const walk = (node: MathJSON): string => {
     // Wolfram's exponent marker is `*^`, and `1e-11` there is `1 * e - 11`.
     if (typeof node === "number") {
@@ -398,6 +410,8 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
       if (system === "mpmath" && exact && !Number.isInteger(node)) return `mpf(${JSON.stringify(String(node))})`;
       if (system === "sage" && decimalBits > 0 && !Number.isInteger(node) && !isDyadic(String(node)))
         return `RealField(${decimalBits})(${JSON.stringify(String(node))})`;
+      if (system === "sympy" && wideDigits > 0 && !Number.isInteger(node) && !isDyadic(String(node)))
+        return `Float(${JSON.stringify(String(node))}, ${sympyWidePrecision(wideDigits)})`;
       if (system === "julia" && (!Number.isInteger(node) || /e/i.test(String(node))))
         return `enumeratio_decimal(${JSON.stringify(String(node))})`;
       return system === "mathlib4" && node < 0 ? `(${node})` : String(node);
@@ -462,6 +476,17 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
           }
           return rustFloat(read);
         }
+        // Sage's preparser reads a literal at the precision of its digits (a 21-digit one at ~70 bits), a double's for a short one.
+        if (
+          system === "sage" &&
+          /[.e]/i.test(value) &&
+          !isDyadic(value) &&
+          (wideDigits > 0 || significantDigits(value) > 15)
+        )
+          return `RealField(${Math.max(decimalBits, sageBits(significantDigits(value)))})(${JSON.stringify(value)})`;
+        // Inside an N(x, d) past a double's digits a short decimal such as 0.1 is no more a double than a long one.
+        if (system === "sympy" && wideDigits > 0 && /[.e]/i.test(value) && !isDyadic(value))
+          return `Float(${JSON.stringify(value)}, ${sympyWidePrecision(Math.max(wideDigits, significantDigits(value)))})`;
         // A Python float literal holds 53 bits; SymPy keeps every digit of a longer decimal.
         if (system === "sympy" && /[.e]/i.test(value) && value.replace(/e.*$/i, "").replace(/\D/g, "").length > 15)
           return `Float(${JSON.stringify(value)}, 50)`;
@@ -502,7 +527,15 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
     // Below the answer, N(x, d) is the number rounded to d significant digits, so a comparison around it sees them.
     const digits = head === "N" && operands.length === 2 && !answers.has(node) ? operands[1] : undefined;
     const nested = typeof digits === "number";
-    if (nested && system === "sympy") return `N(${walk(operands[0] as MathJSON)}, ${digits})`;
+    if (nested && system === "sympy") {
+      const wasWide = wideDigits;
+      if (digits > 15) wideDigits = Math.max(wideDigits, digits);
+      try {
+        return `N(${walk(operands[0] as MathJSON)}, ${digits})`;
+      } finally {
+        wideDigits = wasWide;
+      }
+    }
     if (nested && system === "rust") return `nfd(${walk(operands[0] as MathJSON)}, ${digits})`;
     if (system === "mpmath") {
       if (head === "List" && answers.has(node)) for (const entry of operands) answers.add(entry as MathJSON);
@@ -537,17 +570,23 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
     const wasExact = exact;
     const wasBits = decimalBits;
     if (system === "sage" && head === "N")
-      decimalBits = Math.max(
-        SAGE_DECIMAL_BITS,
-        typeof operands[1] === "number" ? Math.ceil(operands[1] * 3.33) + 64 : 0,
-      );
+      decimalBits = Math.max(SAGE_DECIMAL_BITS, typeof operands[1] === "number" ? sageBits(operands[1]) : 0);
     if (system === "mpmath" && head === "N" && typeof operands[1] === "number" && operands[1] > 15) exact = true;
+    const wasWide = wideDigits;
+    if (
+      (system === "sympy" || system === "sage") &&
+      head === "N" &&
+      typeof operands[1] === "number" &&
+      operands[1] > 15
+    )
+      wideDigits = Math.max(wideDigits, operands[1]);
     const wasDigits = wolframDigits;
     if (wl && head === "N" && typeof operands[1] === "number" && operands[1] > 15) wolframDigits = operands[1];
     try {
       return walkCall(head, operands);
     } finally {
       wolframDigits = wasDigits;
+      wideDigits = wasWide;
       exact = wasExact;
       decimalBits = wasBits;
       for (const v of fresh) bound.delete(v);

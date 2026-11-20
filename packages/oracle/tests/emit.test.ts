@@ -308,6 +308,24 @@ test("inside an mpmath N(x, d) past a double's digits every decimal is read from
   expect(emit(["Sin", 0.1], "mpmath")).toEqual({ ok: true, source: "sin(0.1)" });
 });
 
+test("Sage and SymPy read a decimal inside N(x, d) past a double's digits as the decimal it spells", () => {
+  const lit = "1.00000000000000000001";
+  const laguerre = ["N", ["LaguerreL", 1, { num: lit }], 50] as const;
+  expect(emit(laguerre, "sage")).toMatchObject({
+    ok: true,
+    source: `enumeratio_n(laguerre(1, RealField(231)("${lit}")), 50)`,
+  });
+  expect(emit(laguerre, "sympy")).toMatchObject({ ok: true, source: `N(laguerre(1, Float("${lit}", 70)), 30)` });
+  // A short non-dyadic decimal is no double there either; a dyadic one, and a machine-precision N, stay as written.
+  expect(emit(["N", ["Sin", { num: "0.1" }], 50], "sage")).toMatchObject({
+    source: 'enumeratio_n(sin(RealField(231)("0.1")), 50)',
+  });
+  expect(emit(["N", ["Sin", { num: "0.1" }], 50], "sympy")).toMatchObject({ source: 'N(sin(Float("0.1", 70)), 30)' });
+  expect(emit(["N", ["Sin", { num: "0.5" }], 50], "sympy")).toMatchObject({ source: "N(sin(0.5), 30)" });
+  expect(emit(["N", ["Sin", { num: "0.1" }], 10], "sympy")).toMatchObject({ source: "N(sin(0.1), 30)" });
+  expect(emit(["Sin", { num: "0.1" }], "sage")).toMatchObject({ source: "sin(0.1)" });
+});
+
 test("an mpmath comparison around a nested N(x, d) past a double's digits runs at that precision", () => {
   expect(emit(["LessEqual", "Pi", ["N", "Pi", 40]], "mpmath")).toEqual({
     ok: true,
