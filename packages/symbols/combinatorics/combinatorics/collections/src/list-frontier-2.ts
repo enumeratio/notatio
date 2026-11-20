@@ -39,9 +39,8 @@ function declareThread(ce: Engine): void {
       const f = expr.operator;
       // Each operand is evaluated first, as `f(…)` would be; a lazy ordered collection
       // (`Tuples(…)`, `Range(…)`) stands for the `List` it evaluates to in Wolfram.
-      const operands = partsOf(ce, expr);
-      if (operands === undefined) return undefined;
-      const args = operands.map((a) => a.evaluate());
+      // The operands are the threaded arguments; each must be settled (below) before it is read.
+      const args = operandsOf(expr).map((a) => a.evaluate());
       const parts = args.map((a) =>
         a.operator === headName
           ? operandsOf(a)
