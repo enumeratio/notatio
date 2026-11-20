@@ -5,6 +5,7 @@
 
 import { bareEngine } from "@notatio/engine/testing";
 import { operandsOf } from "@notatio/engine";
+import { definitionHash } from "@notatio/engine/compiled";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
 import { COMPILED } from "../../src/statistics/compiled.ts";
@@ -73,6 +74,44 @@ test("each bounded head is a graph statistic with a bound, and every head over t
 
 test("a graph on 7 vertices (21 edges at most) is in every table head's domain", () => {
   for (const head of tableHeads) expect(inside(head, complete(7)), head).toBe(true);
+});
+
+// A definition whose source changed has a stale verdict row until it is collected again, and the build then leaves it out of
+// the compiled table, so it runs interpreted (seconds a call).
+test("the faster definitions and the six spectrum heads are in the compiled table, with the current source", () => {
+  const heads = [
+    "Girth",
+    "MaximumDistance",
+    "MinimumEccentricity",
+    "TriangleFreeEdgeDeletionNumber",
+    "DistinguishingNumber",
+    "DistinctEigenvalueCount",
+    "MaximumEigenvalueMultiplicity",
+    "DistinctLaplacianEigenvalueCount",
+    "MaximumLaplacianEigenvalueMultiplicity",
+    "DistinctDistanceLaplacianEigenvalueCount",
+    "MaximumDistanceLaplacianEigenvalueMultiplicity",
+  ];
+  for (const head of heads) {
+    const definition = definitionOf(head);
+    expect(COMPILED[signatureOf(definition)]?.hash, head).toBe(definitionHash(definition.expr));
+  }
+});
+
+test("TriangleFreeEdgeDeletionNumber and DistinguishingNumber answer at their bound by closed forms", () => {
+  const value = (head: string, g: Graph) => ce.box(call(head, g) as never).evaluate().re;
+  // Turan: a complete graph keeps floor(n^2 / 4) edges.
+  for (let n = 3; n <= 7; n++) {
+    expect(value("TriangleFreeEdgeDeletionNumber", complete(n)), `K${n}`).toBe(
+      (n * (n - 1)) / 2 - Math.floor((n * n) / 4),
+    );
+    expect(value("TriangleFreeEdgeDeletionNumber", bipartite(n)), `bipartite ${n}`).toBe(0);
+  }
+  // Every vertex of an edgeless or a complete graph needs a color of its own; a cycle or a path on 6 or more vertices needs 2.
+  expect(value("DistinguishingNumber", edgeless(7))).toBe(7);
+  expect(value("DistinguishingNumber", complete(7))).toBe(7);
+  expect(value("DistinguishingNumber", cycle(7))).toBe(2);
+  expect(value("DistinguishingNumber", path(7))).toBe(2);
 });
 
 test("a vertex fold is in its domain at its bound and out of it one vertex past", () => {
@@ -288,24 +327,20 @@ const POLYNOMIAL = [
   "NullspaceDistinctColumnCount",
   "GraphSignature",
   "NegativeEigenvaluePairGap",
-  "DistinctEigenvalueCount",
   "GraphEulerCharacteristic",
   "SzegedWienerGap",
   "PadmakarIvanIndex",
 ];
 /**
- * Statistics that take over 2.5 s on a graph of fewer than 7 vertices (the FindStat crawl's largest are 7) or over
- * 21 edges, so a bound by the rule would put crawl rows off the domain; they are left unbounded for the maintainers
- * (measured compiled, the worst of the eight graphs: `Girth` 1.8 s on a path of 4 and 3.9 s of 5, `MaximumDistance`
- * 1.6 s on 4 vertices and 3.3 s on 6, `MinimumEccentricity` 2.0 s on 4 and 2.6 s on 5, all on a graph with more than
- * one component or no cycle; `TriangleFreeEdgeDeletionNumber` 1.5 s at 15 edges, 2.7 s at 16, and more than a minute on K7).
+ * Statistics that take seconds on a graph of a few vertices (the FindStat crawl's largest have 7), so a bound by the rule
+ * would put crawl rows off the domain; they are left unbounded for the maintainers. The cause is not the definition: the
+ * compiled code answers in a millisecond, with `Infinity` where the graph has no cycle (`Girth`) or no path between two
+ * vertices, and `fromJs` has no MathJSON for `Infinity`, so `compiledRun` returns `undefined` and the call is interpreted.
+ * Measured compiled-or-fallen-back, the worst of the eight graphs: `Girth` 1.8 s on a path of 4 and 3.9 s of 5,
+ * `MaximumDistance` 1.6 s on the edgeless graph on 4 and 3.3 s on 6, `MinimumEccentricity` 2.0 s on 4 and 2.6 s on 5; a
+ * graph with a cycle, or a connected one, takes a millisecond.
  */
-const UNBOUNDED_FOR_THE_MAINTAINERS = [
-  "Girth",
-  "MaximumDistance",
-  "MinimumEccentricity",
-  "TriangleFreeEdgeDeletionNumber",
-];
+const UNBOUNDED_FOR_THE_MAINTAINERS = ["Girth", "MaximumDistance", "MinimumEccentricity"];
 
 test("every graph statistic is bounded, listed as polynomial or listed as left unbounded", () => {
   const heads = GRAPH_STATISTICS.map((d) => d.head);

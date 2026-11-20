@@ -1785,8 +1785,9 @@ const PERMUTATION_FOLDS: ReadonlySet<string> = new Set([
  * The vertices a head that folds over the vertex orders answers through (n! orders a call): the largest size at which
  * the slowest of the edgeless, complete, complete bipartite, triangle, edge, cycle and path graphs takes about 2 s
  * compiled, and the independent reading has been run and agrees. One size more takes 2.4 s (a pattern, 9) to 95 s
- * (`AutomorphismBaseSize`, 9). `DistinguishingNumber` colors k^n times and takes 9.5 s on the edgeless graph on 6
- * vertices; `DistinguishingIndex` colors k^m times and takes 48 s on the complete graph on 7.
+ * (`AutomorphismBaseSize`, 9). `DistinguishingNumber` checks Bell(n) colorings against n! automorphisms: 0.65 s on the
+ * edgeless and the complete graph on 7 vertices, 30 s on 8; `DistinguishingIndex` colors k^m times and takes 48 s on the
+ * complete graph on 7.
  */
 export const VERTEX_LIMITS: Readonly<Record<string, number>> = {
   AutomorphismGroupSize: 9,
@@ -1797,7 +1798,7 @@ export const VERTEX_LIMITS: Readonly<Record<string, number>> = {
   AutomorphismBaseSize: 7,
   AutomorphismGroupFactorCount: 7,
   DistinguishingIndex: 6,
-  DistinguishingNumber: 5,
+  DistinguishingNumber: 7,
   MinimumForestPatternOccurrenceCount: 8,
   MinimumStarPatternOccurrenceCount: 8,
   MinimumPathPatternOccurrenceCount: 8,
@@ -1935,16 +1936,25 @@ export const SUBSET_LIMITS: Readonly<Record<string, number>> = {
   // Paths: 12 takes 8.7 s.
   MaximumSimplePathCount: 11,
   ShortestMaximalPathLength: 11,
-  // These answer in milliseconds, then one size more does not finish within 30 s on the complete graph (the distance
-  // Laplacian's counts: on a path of 10); the bound is the size before.
+  // These answer in milliseconds, then one size more does not finish within 30 s on the complete graph; the bound is the
+  // size before.
   LaplacianPositiveEigenvalueCount: 12,
-  DistinctLaplacianEigenvalueCount: 12,
-  MaximumLaplacianEigenvalueMultiplicity: 12,
   AltshulerSteinbergDeterminant: 11,
   AltshulerSteinbergQuarter: 11,
-  DistinctDistanceLaplacianEigenvalueCount: 9,
-  MaximumDistanceLaplacianEigenvalueMultiplicity: 9,
-  MaximumEigenvalueMultiplicity: 19,
+  // The six spectrum heads read the characteristic polynomial modulo the 80 primes of `SPECTRUM_PRIMES` (0.5 s or less on
+  // the eight worst graphs at their bounds), and the bound is the largest size at which those primes certainly cover it:
+  // `overPrimes` needs 25 * 80 = 2000 >= n (n - 1) bits + 1, `bits` the ceiling of log2 of the Gershgorin radius 2 rho, whose
+  // greatest value is 2 (n - 1) for the adjacency matrix (6 bits: n = 18 needs 1837, 19 needs 2053), 4 (n - 1) for the
+  // Laplacian (6 bits: 17 needs 1633; 18 has 7 bits and needs 2143) and 2 n (n - 1) for the distance Laplacian of a path
+  // (9 bits: 15 needs 1891, 16 needs 2161). Past it the integer route answers, which overflows.
+  DistinctEigenvalueCount: 18,
+  MaximumEigenvalueMultiplicity: 18,
+  DistinctLaplacianEigenvalueCount: 17,
+  MaximumLaplacianEigenvalueMultiplicity: 17,
+  DistinctDistanceLaplacianEigenvalueCount: 15,
+  MaximumDistanceLaplacianEigenvalueMultiplicity: 15,
+  // 3^k deletions for an answer of k edges: the complete graph on 7 vertices takes 0.13 s, on 8 5 s.
+  TriangleFreeEdgeDeletionNumber: 7,
   DistanceMatrixDeterminant: 21,
   // n! orientations of the complete graph: 11 takes 2.7 s.
   AcyclicOrientationCount: 10,
@@ -1965,6 +1975,237 @@ const bounded = (definition: Definition): Definition => {
   if (bound === undefined) return definition;
   return { ...definition, where: definition.where === undefined ? bound : ["And", bound, definition.where] };
 };
+
+/**
+ * The fewest edges that meet every triangle, searched by the size of the set. A set of deleted edges is the bitmask of
+ * their indices in `edges` (`n` vertices have at most 45 edges at 10 vertices, far below 2^53). Level d holds every
+ * mask that deletes one edge of the first triangle it has not yet met, d times: an answer of k edges takes 3^k masks,
+ * not the 2^m subsets of the edges. Pass `depth` of the fold reads level depth - 1; a level with a mask that meets every
+ * triangle ends the search, and the answer, depth - 1, is kept as the negative first entry -depth so the remaining passes
+ * do nothing.
+ */
+const triangleFreeDeletion: MathJSON = (() => {
+  const edgeCount = length("edges");
+  /** The a-th, b-th or c-th vertex of the triple coded by `r` (base n digits). */
+  const digit = (position: number): MathJSON => add(["Mod", quotient("r", ["Power", "n", position]), "n"], 1);
+  const edgeIndex = (u: MathJSON, w: MathJSON): MathJSON => entry("index", u, w);
+  /** Triples a < b < c of vertices whose three edges all exist, as codes. */
+  const triangleCodes: MathJSON = [
+    "Filter",
+    ["Range", 0, subtract(["Power", "n", 3], 1)],
+    [
+      "Function",
+      bind(
+        "a",
+        digit(0),
+        bind(
+          "b",
+          digit(1),
+          bind(
+            "c",
+            digit(2),
+            [
+              "And",
+              less("a", "b"),
+              less("b", "c"),
+              greater(edgeIndex("a", "b"), 0),
+              greater(edgeIndex("a", "c"), 0),
+              greater(edgeIndex("b", "c"), 0),
+            ],
+            "integer",
+          ),
+          "integer",
+        ),
+        "integer",
+      ),
+      "r",
+    ],
+  ];
+  /** The index of the edge of each triangle joining its two lowest, outer and two highest vertices. */
+  const sideOf = (u: number, w: number): MathJSON =>
+    forEach(
+      "codes",
+      bind(
+        "a",
+        digit(0),
+        bind(
+          "b",
+          digit(1),
+          bind("c", digit(2), edgeIndex(["a", "b", "c"][u]!, ["a", "b", "c"][w]!), "integer"),
+          "integer",
+        ),
+        "integer",
+      ),
+      "r",
+    );
+  const met = (mask: MathJSON, side: string, triangle: MathJSON): MathJSON => one(hasBit(mask, at(triangle, side)));
+  /** The first triangle the mask does not meet, 0 when it meets them all. */
+  const firstUnmet = (mask: MathJSON): MathJSON =>
+    typedFolding(
+      [
+        "If",
+        greater("found", 0),
+        "found",
+        [
+          "If",
+          equals(add(add(met(mask, "sideAB", "t"), met(mask, "sideAC", "t")), met(mask, "sideBC", "t")), 0),
+          "t",
+          0,
+        ],
+      ],
+      "found",
+      "t",
+      0,
+      ["Range", 1, length("codes")],
+      "integer",
+    );
+  /** The masks one level deeper: each of the three edges of the first unmet triangle, for every mask. */
+  const deeper: MathJSON = bindList("unmet", forEach("level", firstUnmet("m"), "m"), [
+    "If",
+    equals(["Min", "unmet"], 0),
+    ["List", subtract(0, "depth")],
+    [
+      "Join",
+      ...["sideAB", "sideAC", "sideBC"].map((side) =>
+        forEach(["Range", 1, length("level")], add(at("j", "level"), wholeBit(at(at("j", "unmet"), side))), "j"),
+      ),
+    ],
+  ]);
+  return [
+    "If",
+    equals(edgeCount, 0),
+    0,
+    bindList(
+      "index",
+      forEach(
+        vertices,
+        forEach(
+          vertices,
+          floored(
+            sumOver(
+              ["Range", 1, edgeCount],
+              times("k", times(one(equals(lower(at("k", "edges")), "a")), one(equals(upper(at("k", "edges")), "b")))),
+              "k",
+            ),
+          ),
+          "b",
+        ),
+        "a",
+      ),
+      bindList("codes", triangleCodes, [
+        "If",
+        equals(length("codes"), 0),
+        0,
+        bindList(
+          "sideAB",
+          sideOf(0, 1),
+          bindList(
+            "sideAC",
+            sideOf(0, 2),
+            bindList(
+              "sideBC",
+              sideOf(1, 2),
+              subtract(
+                0,
+                add(
+                  at(
+                    1,
+                    typedFolding(
+                      ["If", less(at(1, "level"), 0), "level", deeper],
+                      "level",
+                      "depth",
+                      ["List", 0],
+                      ["Range", 1, add(edgeCount, 1)],
+                      "list<integer>",
+                    ),
+                  ),
+                  1,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ]),
+      "list<list<integer>>",
+    ),
+  ];
+})();
+
+/**
+ * The fewest blocks of a restricted growth string of the n vertices that no nontrivial automorphism preserves. A string
+ * is the packed state blocks + (n + 1) * code, `code` its digits in base n; level i appends digit i (at most `blocks`,
+ * the largest digit so far plus one), the n * (states) candidates kept where valid. The trivial group needs 1 color.
+ */
+const distinguishingColoring: MathJSON = (() => {
+  const base = add("n", 1);
+  const child: MathJSON = bind(
+    "s",
+    at(add(quotient("j", "n"), 1), "states"),
+    bind(
+      "blocks",
+      ["Mod", "s", base],
+      bind(
+        "t",
+        ["Mod", "j", "n"],
+        [
+          "If",
+          atMostValue("t", "blocks"),
+          add(["Max", "blocks", add("t", 1)], times(base, add(quotient("s", base), times(["Power", "n", "i"], "t")))),
+          -1,
+        ],
+        "integer",
+      ),
+      "integer",
+    ),
+    "integer",
+  );
+  const levels: MathJSON = typedFolding(
+    [
+      "Filter",
+      forEach(["Range", 0, subtract(times("n", length("states")), 1)], child, "j"),
+      ["Function", atLeastValue("x", 0), "x"],
+    ],
+    "states",
+    "i",
+    ["List", 1],
+    ["Range", 1, subtract("n", 1)],
+    "list<integer>",
+  );
+  /** The number of blocks of the state `s` when no automorphism but the identity preserves its coloring, else n. */
+  const blocksIfDistinguishing: MathJSON = bind(
+    "code",
+    quotient("s", base),
+    bindList("colors", forEach(vertices, ["Mod", quotient("code", ["Power", "n", subtract("w", 1)]), "n"], "w"), [
+      "If",
+      equals(
+        floored(
+          sumOver(
+            ["Range", 2, length("auts")],
+            one(
+              equals(
+                floored(
+                  sumOver(vertices, one(notEqual(at("w", "colors"), at(at("w", at("q", "auts")), "colors"))), "w"),
+                ),
+                0,
+              ),
+            ),
+            "q",
+          ),
+        ),
+        0,
+      ),
+      ["Mod", "s", base],
+      "n",
+    ]),
+    "integer",
+  );
+  return [
+    "If",
+    equals(length("auts"), 1),
+    1,
+    bindList("states", levels, ["Min", forEach("states", blocksIfDistinguishing, "s")]),
+  ];
+})();
 
 export const GRAPH_STATISTICS: readonly Definition[] = [
   stat("GraphEdgeCount", "The edges of the graph.", length(at(2)), `FindStat's St000081. ${NO_VERTICES}`),
@@ -3574,70 +3815,7 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "TriangleFreeEdgeDeletionNumber",
     "The fewest edges whose deletion leaves a graph with no triangle.",
-    withGraph([
-      "If",
-      equals(length("edges"), 0),
-      0,
-      bindList(
-        "index",
-        forEach(
-          vertices,
-          forEach(
-            vertices,
-            floored(
-              sumOver(
-                ["Range", 1, length("edges")],
-                times("k", times(one(equals(lower(at("k", "edges")), "a")), one(equals(upper(at("k", "edges")), "b")))),
-                "k",
-              ),
-            ),
-            "b",
-          ),
-          "a",
-        ),
-        [
-          "Min",
-          forEach(
-            ["Range", 0, subtract(["Power", 2, length("edges")], 1)],
-            [
-              "If",
-              equals(
-                floored(
-                  sumOver(
-                    vertices,
-                    floored(
-                      sumOver(
-                        vertices,
-                        floored(
-                          sumOver(
-                            vertices,
-                            times(
-                              one(hasBit("m", entry("index", "a", "b"))),
-                              times(
-                                one(hasBit("m", entry("index", "a", "c"))),
-                                one(hasBit("m", entry("index", "b", "c"))),
-                              ),
-                            ),
-                            "c",
-                          ),
-                        ),
-                        "b",
-                      ),
-                    ),
-                    "a",
-                  ),
-                ),
-                0,
-              ),
-              subtract(length("edges"), floored(sumOver(["Range", 1, length("edges")], one(hasBit("m", "k")), "k"))),
-              length("edges"),
-            ],
-            "m",
-          ),
-        ],
-        "list<list<integer>>",
-      ),
-    ]),
+    withGraph(triangleFreeDeletion),
     `FindStat's St001573: the edges less the most edges of a set with no triangle. A triangle is three vertices a < b < c whose three edges are all in the set. ${NO_VERTICES}`,
   ),
   stat(
@@ -3861,66 +4039,8 @@ export const GRAPH_STATISTICS: readonly Definition[] = [
   stat(
     "DistinguishingNumber",
     "The fewest colors of the vertices such that no nontrivial automorphism preserves every color.",
-    withAutomorphisms(
-      typedFolding(
-        [
-          "If",
-          greater("best", 0),
-          "best",
-          [
-            "If",
-            greater(
-              typedFolding(
-                [
-                  "If",
-                  greater("seen", 0),
-                  "seen",
-                  [
-                    "If",
-                    equals(
-                      floored(
-                        sumOver(
-                          "auts",
-                          times(
-                            isNontrivial,
-                            one(
-                              equals(
-                                floored(
-                                  sumOver(vertices, one(notEqual(colorOf("c", "w"), colorOf("c", at("w", "p")))), "w"),
-                                ),
-                                0,
-                              ),
-                            ),
-                          ),
-                          "p",
-                        ),
-                      ),
-                      0,
-                    ),
-                    1,
-                    0,
-                  ],
-                ],
-                "seen",
-                "c",
-                0,
-                ["Range", 0, subtract(["Power", "k", "n"], 1)],
-                "integer",
-              ),
-              0,
-            ),
-            "k",
-            0,
-          ],
-        ],
-        "best",
-        "k",
-        0,
-        vertices,
-        "integer",
-      ),
-    ),
-    `FindStat's St000469. A coloring is read as the digits of c in base k, vertex v the digit at position v - 1; k = n always works, so the search ends. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row. The k^n colorings take 9.5 s for the edgeless graph on 6 vertices, so a graph of 6 or more vertices (every row FindStat holds on 6 and 7) is left unevaluated.`,
+    withAutomorphisms(distinguishingColoring),
+    `FindStat's St000469. A coloring is read as a restricted growth string (the digits of c in base n, vertex v the digit at position v - 1, each digit at most one more than the largest before it): renaming colors never changes which automorphisms preserve it, so these Bell(n) colorings stand for all of them, and the fewest colors is the fewest blocks of one that no nontrivial automorphism preserves; all n blocks always works. A graph with no nontrivial automorphism needs 1 color. The graph with no vertices gives 0, a convention and not a FindStat row.`,
   ),
   stat(
     "OddAutomorphismCount",
