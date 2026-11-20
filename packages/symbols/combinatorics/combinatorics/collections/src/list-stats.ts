@@ -1,6 +1,7 @@
 import {
   declareCompile,
   applyFunction,
+  collectionElements,
   type Engine,
   type Expr,
   integerAt,
@@ -91,8 +92,9 @@ export function declareListStats(ce: Engine): void {
     ce,
     ["Commonest", 1, 1],
     (ops) => ops.length === 2 && commonestCount(ops[1]) !== undefined,
-    () => (ops) => {
-      const items = operandsOf(ops[0]);
+    (native) => (ops, options) => {
+      const items = collectionElements(ops[0]);
+      if (items === undefined) return native?.(ops, options);
       const n = commonestCount(ops[1])!;
       const tally: { value: Expr; count: number }[] = [];
       for (const item of items) {
@@ -266,7 +268,8 @@ export function declareListStats(ce: Engine): void {
       if (test.operator !== "Function" && symbolNameOf(test) === undefined) {
         return native?.(ops, options);
       }
-      const items = operandsOf(ops[0]);
+      const items = collectionElements(ops[0]);
+      if (items === undefined) return native?.(ops, options);
       const kept: Expr[] = [];
       for (const item of items) {
         const isDuplicate = kept.some((k) => symbolNameOf(applyFunction(ce, test, [k, item])) === "True");

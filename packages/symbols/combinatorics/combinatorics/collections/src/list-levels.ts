@@ -283,7 +283,10 @@ export function declareListLevelHeads(ce: Engine): void {
       const scalarOffset = integerAt(ops[2]);
       const offsets =
         scalarOffset !== undefined ? sizes.map(() => scalarOffset) : operandsOf(ops[2]).map((op) => integerAt(op)!);
-      return partitionBlocks(ce, ops[0], sizes, offsets);
+      // The blocks are cut from a nested List, so a lazy collection is read as the List of its elements.
+      const elements = ops[0].isLazyCollection ? collectionElements(ops[0]) : undefined;
+      if (ops[0].isLazyCollection && elements === undefined) return undefined;
+      return partitionBlocks(ce, elements === undefined ? ops[0] : ce.function("List", [...elements]), sizes, offsets);
     },
   );
 
@@ -349,8 +352,13 @@ export function declareListLevelHeads(ce: Engine): void {
     // `Flatten(array)`, for a free `array`, stays unevaluated (see `Accumulate`'s note in
     // list-frontier.ts). A lazy collection (`Map`, `Take`, `Range`) is flattened natively:
     // `Flatten(Map(f, xs))` splices the lists `f` returns, not nested `Map`s.
+    // An atom (a string, a number) has no operands to splice.
     (ops) =>
-      ops.length === 1 && ops[0].operator !== "List" && symbolNameOf(ops[0]) === undefined && !ops[0].isLazyCollection,
+      ops.length === 1 &&
+      ops[0].operator !== "List" &&
+      symbolNameOf(ops[0]) === undefined &&
+      !ops[0].isLazyCollection &&
+      operandsOf(ops[0]).length > 0,
     () => (ops) => flattenSameHead(ce, ops[0]),
   );
 
@@ -468,7 +476,8 @@ export function declareListLevelHeads(ce: Engine): void {
         }
         const nativeResult = nativeCanonical?.call(nativeOperator, ops, options);
         if (nativeResult !== undefined && nativeResult.isValid !== false) return nativeResult;
-        const items = operandsOf(ops[0]);
+        const items = collectionElements(ops[0]);
+        if (items === undefined) return nativeResult;
         const index = resolveIndex1Based(integerAt(ops[1])!, items.length);
         return index === undefined ? ce.symbol("NaN") : items[index];
       };

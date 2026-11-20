@@ -162,7 +162,9 @@ const columnsOf = (rows: readonly Expr[]): Expr[][] => {
 const threadOverColumns =
   (ce: Engine, head: string) =>
   (matrix: Expr): Expr | undefined => {
-    const columns = columnsOf(collectionElements(matrix) ?? []);
+    const rows = collectionElements(matrix);
+    if (rows === undefined) return undefined;
+    const columns = columnsOf(rows);
     const results = columns.map((column) => ce.function(head, [ce.box(["List", ...column])]).evaluate());
     return results.some((r) => r === undefined) ? undefined : ce.box(["List", ...(results as Expr[])]);
   };
