@@ -31,4 +31,5 @@ e-n-0-1-n-1-for-n-1	expint(2, 0)	1.0
 e-0-x-e-x-x			
 expintegrale-0-0	expint(0, 0)	+inf	disagree
 expintegrale-3-0	expint(3, 0)	0.5	
+n-expintegrale-1-1e-400-d30	enumeratio_n(lambda: (expint(1, enumeratio_pow(10, -400))), 30)	920.456821532716740746590069784	
 functionexpand-expintegrale-2-over-3-z			

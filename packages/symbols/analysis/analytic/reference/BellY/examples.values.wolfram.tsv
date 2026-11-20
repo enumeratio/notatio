@@ -4,6 +4,7 @@ belly-5-3-list-1-2-3	BellY[5, 3, List[1, 2, 3]]	90	Y_{5,3}(1,2,3)	90
 belly-6-2-list-2-3-5-7-11	BellY[6, 2, List[2, 3, 5, 7, 11]]	697	Y_{6,2}(2,3,5,7,11)	697
 belly-7-4-list-1-1-2-5	BellY[7, 4, List[1, 1, 2, 5]]	700	Y_{7,4}(1,1,2,5)	700
 belly-4-2-list-x-1-x-2-x-3	BellY[4, 2, List[Subscript[x, 1], Subscript[x, 2], Subscript[x, 3]]]	3*Subscript[x, 2]^2 + 4*Subscript[x, 1]*Subscript[x, 3]	Y_{4,2}\left(x_1,x_2,x_3\right)	3 x_2^2+4 x_1 x_3
+n-belly-2-2-list-1e-400-d30	N[BellY[2, 2, List[Power[10, -400]]], 30]			
 belly-6-2-array-x-6	BellY[6, 2, Array[x, 6]]	10*x[3]^2 + 15*x[2]*x[4] + 6*x[1]*x[5]	\text{BellY}[6,2,\text{Array}[x,6]]	10 x(3)^2+15 x(2) x(4)+6 x(1) x(5)
 all-ones-arguments-give-stirling-6-2	BellY[6, 2, List[1, 1, 1, 1, 1]]	31	Y_{6,2}(1,1,1,1,1)	31
 x-j-j-gives-the-lah-number-l-4-2	BellY[4, 2, List[1, 2, 6]]	36	Y_{4,2}(1,2,6)	36

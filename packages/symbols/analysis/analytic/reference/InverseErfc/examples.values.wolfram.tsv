@@ -3,6 +3,7 @@ erfc-1-1-2-erf-1-1-2	InverseErfc[0.5]	0.47693627620446993		\text{erfc}^{-1}(0.5)
 erfc-1-1-0	InverseErfc[1]	0		\text{erfc}^{-1}(1)	0	
 argument-1-7	InverseErfc[1.7]	-0.732869077959217		\text{erfc}^{-1}(1.7)	-0.732869	
 deep-tail-0-001	InverseErfc[0.001]	2.3267537655135246		\text{erfc}^{-1}(0.001)	2.32675	
+n-inverseerfc-1-plus-1e-20-d30	N[InverseErfc[1.00000000000000000001], 30]					
 erfc-1-0-infty	InverseErfc[0]	Infinity		\text{erfc}^{-1}(0)	\infty	
 erfc-1-2-infty	InverseErfc[2]	-Infinity		\text{erfc}^{-1}(2)	-\infty	
 arguments-in-1-2-give-negative-values	InverseErfc[1.5]	-0.47693627620446993		\text{erfc}^{-1}(1.5)	-0.476936	

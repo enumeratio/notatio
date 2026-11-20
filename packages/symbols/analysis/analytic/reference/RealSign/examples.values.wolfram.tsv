@@ -3,6 +3,7 @@ realsign-neg-3	RealSign[-3]	-1	\text{sgn}(-3)	-1
 realsign-0	RealSign[0]	0	\text{sgn}(0)	0	
 realsign-2p5	RealSign[2.5]	1	\text{sgn}(2.5)	1	
 realsign-2	RealSign[2]	1	\text{sgn}(2)	1	
+n-realsign-1e-400-d30	N[RealSign[Power[10, -400]], 30]				
 threads-element-wise-over-a-list	RealSign[List[-2, 0, 5]]	{-1, 0, 1}	\text{sgn}(\{-2,0,5\})	\{-1,0,1\}	
 decides-the-sign-of-an-exact-numeric-expression	RealSign[Subtract[Sqrt[2], 2]]	-1	\text{sgn}\left(\sqrt{2}-2\right)	-1	
 realsign-list-list-1-over-2-neg-1-list-0-neg-1	RealSign[List[List[Rational[1, 2], -1], List[0, Rational[-1, 2]]]]	{{1, -1}, {0, -1}}	\text{sgn}\left(\left( \begin{array}{cc}  \frac{1}{2} & -1 \\  0 & -\frac{1}{2} \\ \end{array} \right)\right)	\left( \begin{array}{cc}  1 & -1 \\  0 & -1 \\ \end{array} \right)	
