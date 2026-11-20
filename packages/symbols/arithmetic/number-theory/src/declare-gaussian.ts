@@ -12,6 +12,7 @@ import {
   optionsOf,
   takeOptionsAsRules,
   widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 import { factorInteger, gcd as bigGcd } from "@notatio/residues";
@@ -126,7 +127,7 @@ export function declareGaussian(ce: Engine): void {
   const list = (items: readonly Expr[]): Expr => ce.function("List", items);
   const g = (z: Gaussian | undefined): Expr | undefined => (z === undefined ? undefined : gaussianExpression(ce, z));
 
-  widenSignature(ce, "Mod", "(number, number) -> number");
+  widenSignatureKeepingNative(ce, "Mod", "(number, number) -> number");
   // compile builtin: a Gaussian integer or rational operand: the built-in lowering handles complex operands
   wrapOperator(
     ce,

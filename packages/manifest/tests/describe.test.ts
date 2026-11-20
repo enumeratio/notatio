@@ -10,6 +10,7 @@ import {
   describeNow,
   manifestRegistry,
   parseParameters,
+  widestMember,
   pinOf,
 } from "../src/index.ts";
 
@@ -35,8 +36,10 @@ test("a head we know: its summary, page, every overload, and the one it is decla
     documented: ["analytic"],
   });
   expect(sin.overloads?.map((o) => o.package).toSorted()).toEqual(["analytic", "compute-engine"]);
-  // The replacement chain ends at structures, whatever order the overloads are in.
-  expect((await describe("Floor")).signature).toBe("(any, any?) -> any");
+  // Our overload is added to the native one, whatever order the overloads are in.
+  expect((await describe("Floor")).signature).toBe(
+    "((any, any?) -> any) & ((x: real | signed_infinity | ~oo, step: real?) -> real | signed_infinity | ~oo)",
+  );
   expect(await describe("Pi")).toMatchObject({ kind: "constant", type: expect.stringMatching(/^real/) });
 });
 
@@ -65,6 +68,18 @@ test("parseParameters reads names, unions, nested types and repeats", () => {
     { name: "f", type: "(number) -> number", optional: false, variadic: false },
   ]);
   expect(parseParameters("real")).toBeUndefined();
+});
+
+test("an intersection of overloads reads as its widest member", () => {
+  const gamma =
+    "((complex | infinity, (complex | infinity)?) -> number) & ((complex | infinity, (complex | infinity)?, (complex | infinity)?) -> number)";
+  expect(widestMember(gamma)).toBe("(complex | infinity, (complex | infinity)?, (complex | infinity)?) -> number");
+  expect(parseParameters(gamma)?.map((p) => [p.type, p.optional])).toEqual([
+    ["complex | infinity", false],
+    ["(complex | infinity)", true],
+    ["(complex | infinity)", true],
+  ]);
+  expect(widestMember("(integer) -> integer")).toBe("(integer) -> integer");
 });
 
 test("FindStat ids and the example count come with it", async () => {

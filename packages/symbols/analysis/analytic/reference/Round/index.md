@@ -16,7 +16,7 @@ signatures:
   - call: Round(x, a?)
     description: with midpoints between ticks, the nearest tick, a tie going to the even tick when the ticks have a parity, else up; in a floor ring without them, Mathlib's `round` (ties up). In a product order, coordinate by coordinate, so a complex number's parts are rounded separately.
     library: enumeratio-structures
-    type: (any, any?) -> any
+    type: "((any, any?) -> any) & ((x: real | signed_infinity | ~oo, step: real?) -> real | signed_infinity | ~oo)"
     overrides: enumeratio-analytic
 seeAlso:
   - Floor

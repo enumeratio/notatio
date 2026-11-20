@@ -13,7 +13,7 @@ signatures:
   - call: IntegerDigits(n, system)
     description: digits in any of the systems below
     library: enumeratio-numerals
-    type: (integer, any?, integer?) -> list<integer>
+    type: ((integer, any?, integer?) -> list<integer>) & ((integer, integer?, integer?) -> list<integer>)
     overrides: compute-engine
   - call: IntegerDigits(n, system, width)
     description: left-padded with zeros to `width` digits

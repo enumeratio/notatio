@@ -13,7 +13,7 @@ signatures:
   - call: Erf(z)
     description: The Gauss error function $\operatorname{erf}(z) = \frac{2}{\sqrt\pi}\int_0^z e^{-t^2}\,dt$, the shape behind the normal distribution's CDF.
     library: enumeratio-analytic
-    type: (number, number?) -> number
+    type: ((complex | signed_infinity) -> complex) & ((number, number?) -> number)
     overrides: compute-engine
 seeAlso:
   - Erfc

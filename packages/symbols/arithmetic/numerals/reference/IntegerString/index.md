@@ -11,7 +11,7 @@ signatures:
   - call: IntegerString(n, base, length)
     description: padded with leading zeros to exactly `length` digits, or cut to the last `length`.
     library: enumeratio-numerals
-    type: (integer, (integer | string)?, integer?) -> string
+    type: ((integer, (integer | string)?, integer?) -> string) & ((integer, integer?) -> string)
     overrides: compute-engine
   - call: IntegerString(n, "Roman")
     description: the Roman numeral for n, same as [[RomanNumeral]].

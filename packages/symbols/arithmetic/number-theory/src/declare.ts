@@ -17,6 +17,7 @@ import {
   refusing,
   threadOverLists,
   widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
   type Overload,
   type Engine,
@@ -134,7 +135,12 @@ export function declareNumberTheory(ce: Engine): void {
   );
 
   // Native takes (a, m); the explicit numerator and denominator bounds are ours.
-  widenSignature(ce, "RationalReconstruction", "(integer, integer, integer?, integer?) -> rational", mayBeInteger);
+  widenSignatureKeepingNative(
+    ce,
+    "RationalReconstruction",
+    "(integer, integer, integer?, integer?) -> rational",
+    mayBeInteger,
+  );
   wrapOperator(
     ce,
     ["RationalReconstruction"],
@@ -453,7 +459,7 @@ function declareCombinatoricsGamma113(ce: Engine): void {
       ...row,
     });
   };
-  widenSignature(ce, "BellNumber", "(integer, any?) -> any", isInteger);
+  widenSignatureKeepingNative(ce, "BellNumber", "(integer, any?) -> any", isInteger);
 
   // Fibonacci and Lucas at a real (non-integer) index, via Binet's formula: with
   // φ = (1+√5)/2, F_ν = (φ^ν - cos(πν) φ^{-ν}) / √5 and L_ν = φ^ν + cos(πν) φ^{-ν}.

@@ -13,7 +13,7 @@ signatures:
   - call: DigitCount(n, base, digit(s), width)
     description: counted over exactly `width` digits, padded or truncated to fit.
     library: enumeratio-numerals
-    type: (integer, integer?, (integer | list<integer>)?, integer?) -> integer | list<integer>
+    type: ((integer, integer?, (integer | list<integer>)?, integer?) -> integer | list<integer>) & ((integer, integer?, integer?) -> integer | list<integer>)
     overrides: compute-engine
 seeAlso:
   - IntegerDigits

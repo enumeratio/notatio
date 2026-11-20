@@ -9,7 +9,7 @@ signatures:
   - call: PolyLog(s, z)
     description: extends the same call to non-integer and complex order $s$, for $|z| \leq 1$.
     library: enumeratio-analytic
-    type: (number, number, number?) -> number
+    type: ((complex | infinity, complex | infinity) -> number) & ((number, number, number?) -> number)
     overrides: compute-engine
 seeAlso:
   - LerchPhi

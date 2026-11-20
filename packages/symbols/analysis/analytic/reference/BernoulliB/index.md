@@ -9,7 +9,7 @@ signatures:
   - call: BernoulliB(n, x)
     description: the Bernoulli polynomial $B_n(x)$.
     library: "@notatio/analytic"
-    type: (integer, number?) -> number
+    type: ((integer) -> rational) & ((integer, number?) -> number)
     overrides: compute-engine
 references:
   - system: wikipedia

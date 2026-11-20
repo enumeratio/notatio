@@ -9,7 +9,7 @@ signatures:
   - call: Mod(a, b, d)
     description: the $x \equiv a \pmod b$ with $d \le x < d + b$.
     library: enumeratio-number-theory
-    type: (number, number, number?) -> number
+    type: ((number, number) -> number) & ((real, real) -> real) & ((number, number, number?) -> number)
     overrides: enumeratio-residues
   - call: Mod(z, m)
     description: 'for Gaussian integers, $z - m\,\mathrm{Quotient}(z, m)$: the remainder in the box around 0'

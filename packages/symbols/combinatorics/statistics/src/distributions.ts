@@ -13,7 +13,7 @@ import {
   seedRandom,
   symbolNameOf,
   uniform01 as engineUniform01,
-  widenSignature,
+  widenSignatureKeepingNative,
 } from "@notatio/engine";
 
 // The Wolfram-frontier distribution heads: Distributed, RandomVariate, EmpiricalDistribution,
@@ -150,7 +150,11 @@ const empiricalData = (dist: Expr): readonly Expr[] | undefined => {
  * their own native handlers are untouched and already correct once they see two reals.
  */
 function extendUniformDistribution(ce: Engine): void {
-  widenSignature(ce, "UniformDistribution", "((list<real> | real)?, real?) -> expression<UniformDistribution>");
+  widenSignatureKeepingNative(
+    ce,
+    "UniformDistribution",
+    "((list<real> | real)?, real?) -> expression<UniformDistribution>",
+  );
   // A pass-through `evaluate` never runs for this constructor — same gotcha `list-stats.ts`
   // hit with Take/Tabulate (both answered through a protocol other than `evaluate`): the
   // fix there, and here, is `canonical`, which DOES get called for every construction.
@@ -409,7 +413,7 @@ function extendDistributionStats(ce: Engine): void {
   // distribution is univariate.
   for (const name of ["PDF", "CDF"] as const) {
     const returnType = name === "PDF" ? "nan | real<0..>" : "nan | real<0..1>";
-    widenSignature(ce, name, `(distribution, real | signed_infinity | list<real>) -> ${returnType}`);
+    widenSignatureKeepingNative(ce, name, `(distribution, real | signed_infinity | list<real>) -> ${returnType}`);
   }
 
   attach("PDF", (ops, options) => pdfOf(ce, ops[0], ops[1], options), 2);

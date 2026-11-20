@@ -342,7 +342,7 @@ export function declareListHeads(ce: Engine): void {
 
   // Clamp(x): defaults to Wolfram's Clip[x] range, [-1, 1]. All three arguments were
   // required before.
-  widenSignature(
+  widenSignatureKeepingNative(
     ce,
     "Clamp",
     "(real | signed_infinity, (real | signed_infinity)?, (real | signed_infinity)?) -> real | signed_infinity",

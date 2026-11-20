@@ -23,6 +23,7 @@ export {
   matching,
   noteDescription,
   parseParameters,
+  widestMember,
   winningOverload,
 } from "./describe.ts";
 

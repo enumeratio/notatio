@@ -61,6 +61,50 @@ function splitTopLevel(text: string): string[] {
   return parts.map((p) => p.trim()).filter((p) => p !== "");
 }
 
+const GENERAL = new Set(["any", "value", "number", "real", "complex", "expression"]);
+
+/**
+ * The function type that stands for a signature: a head with several overloads is an
+ * intersection, `((a) -> r) & ((a, b?) -> r)`, and this is its member taking the most
+ * parameters, then the most optional or repeating ones, then the most general ones (`any`, `number`,
+ * `value`), the first on a tie: the loosest reading, as our overload added to the native one.
+ * A plain function type is itself.
+ */
+export function widestMember(type: string): string {
+  const members: string[] = [];
+  let depth = 0;
+  let from = 0;
+  for (let i = 0; i < type.length; i++) {
+    const c = type[i]!;
+    if ("<([{".includes(c)) depth++;
+    else if (">)]}".includes(c) && !(c === ">" && type[i - 1] === "-")) depth--;
+    else if (c === "&" && depth === 0) {
+      members.push(type.slice(from, i));
+      from = i + 1;
+    }
+  }
+  members.push(type.slice(from));
+  if (members.length < 2) return type;
+  const unwrapped = members.map((m) => {
+    const t = m.trim();
+    return t.startsWith("((") && t.endsWith(")") ? t.slice(1, -1) : t;
+  });
+  if (!unwrapped.every((m) => m.startsWith("("))) return type;
+  const breadth = (m: string): number[] => {
+    const parameters = parseParameters(m) ?? [];
+    return [
+      parameters.length,
+      parameters.filter((p) => p.optional).length,
+      parameters.filter((p) => GENERAL.has(p.type)).length,
+    ];
+  };
+  const wider = (a: number[], b: number[]): boolean => {
+    const at = a.findIndex((n, i) => n !== b[i]);
+    return at >= 0 && a[at]! > b[at]!;
+  };
+  return unwrapped.reduce((best, m) => (wider(breadth(m), breadth(best)) ? m : best));
+}
+
 /**
  * The parameters of a function type, `(x: integer, any?, list<integer>*) -> any`: each one's
  * name (the type's own, else `names`' by position), type, and whether it is optional or
@@ -68,6 +112,8 @@ function splitTopLevel(text: string): string[] {
  */
 export function parseParameters(type: string, names: readonly string[] = []): Parameter[] | undefined {
   if (!type.startsWith("(")) return undefined;
+  const member = widestMember(type);
+  if (member !== type) return parseParameters(member, names);
   let depth = 0;
   let close = -1;
   for (let i = 0; i < type.length && close < 0; i++) {

@@ -1,6 +1,6 @@
 import type { ComputeEngine } from "@cortex-js/compute-engine";
 import { registerNotation } from "@notatio/boxes";
-import { widenSignature, wrapOperator } from "@notatio/engine";
+import { widenSignatureKeepingNative, wrapOperator } from "@notatio/engine";
 import { applyNativeHeadPatches, applyPatch, lerchPhiPatch, valuesAtZero } from "@notatio/ce-patches";
 import { evaluateIncompleteGamma } from "./incomplete-gamma.ts";
 import { ANALYTIC_NOTATION } from "./notation.ts";
@@ -159,7 +159,7 @@ export function declareAnalytic(ce: ComputeEngine): void {
     ["GammaRegularized", true],
   ] as const) {
     const z = "complex | infinity";
-    widenSignature(ce, head, `(${z}, (${z})${secondRequired ? "" : "?"}, (${z})?) -> number`);
+    widenSignatureKeepingNative(ce, head, `(${z}, (${z})${secondRequired ? "" : "?"}, (${z})?) -> number`);
     // compile builtin up to two operands: a third operand, or a complex or exact one native declines: a real call of up to two is native's
     wrapOperator(
       ce,

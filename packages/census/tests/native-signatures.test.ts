@@ -10,42 +10,11 @@ import { expect, test } from "vite-plus/test";
 import { plainlyWidenedHeads } from "@notatio/engine";
 import { bindings, fullEngine } from "../src/engine.ts";
 
-const ARGUMENTS = "an extra optional argument, as Wolfram's head takes";
 const DOMAIN = "a wider operand domain (any number, a carrier or a complex value) than the native integer or real";
 const COLLECTIONS = "Wolfram's wider collection and result shapes";
 
 /** Heads whose widening still replaces the native signature, and why. Only ever shrinks. */
 const NOT_YET_KEPT: Readonly<Record<string, string>> = Object.fromEntries([
-  ...[
-    "BellNumber",
-    "BernoulliB",
-    "Beta",
-    "BetaRegularized",
-    "Erf",
-    "ErfInv",
-    "Gamma",
-    "GammaRegularized",
-    "PolyGamma",
-    "PolyLog",
-    "DigitCount",
-    "DigitSum",
-    "IntegerDigits",
-    "IntegerString",
-    "FromDigits",
-    "Mod",
-    "RationalReconstruction",
-    "MultiplicativeOrder",
-    "NextPrime",
-    "CDF",
-    "PDF",
-    "Covariance",
-    "UniformDistribution",
-    "Floor",
-    "Ceil",
-    "Round",
-    "Clamp",
-    "Chop",
-  ].map((head) => [head, ARGUMENTS]),
   ...[
     "CatalanNumber",
     "Factorial2",

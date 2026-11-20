@@ -9,7 +9,7 @@ signatures:
   - call: Beta(a, b)
     description: Euler's beta function $B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, a bridge between [[Gamma]] and [[Binomial]] and the normalizing constant behind the beta distribution.
     library: enumeratio-analytic
-    type: (number, number, number?, number?) -> number
+    type: ((complex | infinity, complex | infinity) -> number) & ((number, number, number?, number?) -> number)
     overrides: enumeratio-evaluation
   - call: Beta(a, b)
     description: Euler's beta function $B(a, b) = \Gamma(a)\Gamma(b)/\Gamma(a+b)$, a bridge between [[Gamma]] and [[Binomial]] and the normalizing constant behind the beta distribution.

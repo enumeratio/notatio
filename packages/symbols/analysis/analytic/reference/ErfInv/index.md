@@ -9,7 +9,7 @@ signatures:
   - call: ErfInv(x)
     description: 'The inverse error function: $\operatorname{erfinv}(x)$ solves $\operatorname{erf}(y) = x$ for $-1 < x < 1$.'
     library: enumeratio-analytic
-    type: (number, number?) -> number
+    type: ((complex | infinity) -> number) & ((number, number?) -> number)
     overrides: compute-engine
 seeAlso:
   - Erf

@@ -5,7 +5,7 @@ import {
   integerAt,
   operandsOf,
   symbolNameOf,
-  widenSignature,
+  widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
 import { bindingOf, finish, mentions, normal01, numAt, uniform01 } from "./distributions.ts";
@@ -870,7 +870,7 @@ function extendStats6(ce: Engine): void {
  *  `wrapOperator`ed at arity 1 so the native two-collection (or one-collection-of-pairs) call
  *  is untouched. */
 function extendCovariance6(ce: Engine): void {
-  widenSignature(
+  widenSignatureKeepingNative(
     ce,
     "Covariance",
     "(collection<any> | distribution, collection<any>?) -> nan | real | list<list<real>>",

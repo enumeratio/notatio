@@ -11,7 +11,7 @@ signatures:
   - call: DigitSum(n, base, k)
     description: sum of just the first $k$ digits (most significant first); a negative $k$ sums the last $|k|$ instead (least significant first).
     library: enumeratio-numerals
-    type: (integer, integer?, integer?) -> integer
+    type: ((integer, integer?) -> integer) & ((integer, integer?, integer?) -> integer)
     overrides: compute-engine
 seeAlso:
   - DigitCount

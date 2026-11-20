@@ -9,7 +9,7 @@ signatures:
   - call: Clamp(x)
     description: x clamped to the default range $[-1, 1]$, Wolfram's Clip[x].
     library: enumeratio-combinatorics
-    type: (any, any?, any?, any?, any?) -> any
+    type: ((real | signed_infinity, (real | signed_infinity)?, (real | signed_infinity)?) -> real | signed_infinity) & ((real | signed_infinity, real | signed_infinity, real | signed_infinity) -> real | signed_infinity) & ((any, any?, any?, any?, any?) -> any)
     overrides: compute-engine
   - call: Clamp(x, lower, upper, vLower, vUpper)
     description: "Wolfram's Clip[x, {lower, upper}, {vLower, vUpper}]: a replacement value outside the range, rather than the nearer bound."
@@ -17,7 +17,7 @@ signatures:
   - call: Clamp(x, lower, upper)
     description: in any lattice, $\mathrm{Max}(\mathrm{lower}, \mathrm{Min}(x, \mathrm{upper}))$.
     library: enumeratio-structures
-    type: (any, any?, any?, any?, any?) -> any
+    type: ((real | signed_infinity, (real | signed_infinity)?, (real | signed_infinity)?) -> real | signed_infinity) & ((real | signed_infinity, real | signed_infinity, real | signed_infinity) -> real | signed_infinity) & ((any, any?, any?, any?, any?) -> any) & ((any, any?, any?, any?, any?) -> any)
     overrides: enumeratio-combinatorics
 seeAlso:
   - Min

@@ -9,7 +9,7 @@ signatures:
   - call: UniformDistribution(real, real) -> expression<UniformDistribution>
     description: Continuous uniform distribution on the interval [a, b].
     library: enumeratio-statistics
-    type: ((list<real> | real)?, real?) -> expression<UniformDistribution>
+    type: (((list<real> | real)?, real?) -> expression<UniformDistribution>) & ((real, real) -> expression<UniformDistribution>)
     overrides: compute-engine
 names:
   wolframIdentity: true
