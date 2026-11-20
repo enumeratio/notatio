@@ -97,10 +97,6 @@ const DELIBERATE: readonly Deliberate[] = [
     why: "a compound left side replaces any part of the expression, as /. does; the native replaces a symbol or the whole",
     skip: (call) => call[0] === "ReplaceAll",
   },
-  {
-    why: "Rationalize(x, 0) is the exact rational of a machine double, as Wolfram's; the native reads the shortest decimal",
-    skip: (call) => call[0] === "Rationalize" && call[2] === 0,
-  },
 ];
 
 const files: Record<string, { builders: CallBuilders; skipOperand?: Options["skipOperand"] }> = {
