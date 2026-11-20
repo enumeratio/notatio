@@ -12,7 +12,7 @@ import { applyAllPatches, bigCx, evaluateZeta, hurwitzZetaBig } from "../src/ind
 //   Zeta(2, 1e-400) is about 1e800 (the k = 0 term a^(−s)) and was ζ(2) (a = 1e-400 is the double 0).
 // Values are mpmath's lerchphi and zeta at 100 digits (scripts/collect-lerch-zeta-branches-mpmath.py), and the
 // answer is held to relative error 10^(1 − digits) in each part, or the call stays unevaluated: a decline is
-// allowed, a wrong digit is not. Φ near z = 1 declines (no kernel reads z there): the grid says so.
+// allowed, a wrong digit is not. Φ near z = 1 is the series about z = 1 (lerch-near-one.test.ts holds its grid), read from the exact z.
 
 interface Row {
   z?: [string, string];

@@ -61,9 +61,12 @@ for (const [name, call] of routes) {
   });
 }
 
-test("LerchPhi next to z = 1 answers through PolyLog's bignum kernel or not at all, never with a double at 50 digits", () => {
+test("LerchPhi next to z = 1 answers from the exact z (the series about z = 1) or not at all, never with a double at 50 digits", () => {
   const near = { num: "0.99999999999999999999" };
-  expect(at(50, ["LerchPhi", near, 2, 1]).operator).toBe("LerchPhi");
+  const answer = at(50, ["LerchPhi", near, 2, 1]);
+  // mpmath: lerchphi(1 - 1e-20, 2, 1) = 1.644934066848226436018347488715698316773207500064088…
+  expect(answer.operator).not.toBe("LerchPhi");
+  expect(answer.bignumRe?.toString().startsWith("1.644934066848226436018347488715698316773207500064")).toBe(true);
   expect(at(undefined, ["LerchPhi", near, 2, 1]).re).toBeCloseTo(1.6449340668482264, 14);
   // Li_1 is -ln(1 - z), which the bignum reads exactly.
   expect(at(50, ["LerchPhi", near, 1, 1]).re).toBeCloseTo(46.0517018598809, 12);
