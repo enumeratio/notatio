@@ -1,4 +1,7 @@
+import { bareEngine, createEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
+import { declareCombinatorics } from "../../src/index.ts";
+import { interpretDefinition } from "../../src/statistics/declare.ts";
 import { PARTITION_STATISTICS } from "../src/statistics.ts";
 import { COMPILED } from "../src/statistics.compiled.generated.js";
 
@@ -18,3 +21,21 @@ test.skipIf(Object.keys(COMPILED).length === 0)(
     expect(interpreted.toSorted()).toEqual(INTERPRETED);
   },
 );
+
+// The interpreter is the definition's meaning, and the library's head overrides must not change it: on the
+// engine every page uses it answers as on a bare one (`Ordering` once read the arguments of a lazy
+// collection, not its elements).
+test("a definition interpreted on the declared engine answers as on a bare one", () => {
+  const declared = createEngine(declareCombinatorics);
+  const bare = bareEngine();
+  const definition = PARTITION_STATISTICS.find((d) => d.head === "SingletonRefinementCount")!;
+  for (const [parts, count] of [
+    [[4, 2, 1], 5],
+    [[3, 3, 1], 2],
+    [[3], 1],
+  ] as const) {
+    const subject = ["List", ...parts];
+    for (const ce of [declared, bare])
+      expect(interpretDefinition(ce, definition, ce.box(subject as never)).json).toBe(count);
+  }
+});

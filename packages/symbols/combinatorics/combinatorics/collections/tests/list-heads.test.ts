@@ -15,6 +15,12 @@ test("Ordering(c, n) agrees with the first n of Ordering(c)", () => {
   }
 });
 
+// A lazy collection's elements, not its call's arguments: Range(4, 1, -1) has four.
+test("Ordering reads the elements of a lazy collection", () => {
+  expect(run(["Ordering", ["Range", 4, 1, -1]])).toEqual(["List", 4, 3, 2, 1]);
+  expect(run(["Ordering", ["Take", ["List", 9, 8, 7], 2]])).toEqual(["List", 2, 1]);
+});
+
 // Lane B-35 regression: notatio's editor flagged the 1-argument form as a type error before
 // this widening landed. Pin that boxing produces no `Error` node -- what notatio's type
 // check marks red -- not just that evaluation happens to still work.
