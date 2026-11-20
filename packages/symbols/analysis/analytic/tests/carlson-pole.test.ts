@@ -22,3 +22,14 @@ test("RC at a y far below the working digits stays finite (mpmath elliprc(2, 1e-
   const value = ce.box(["N", ["CarlsonRC", 2, { num: "1e-100" }], 30] as never).evaluate();
   expect((value.json as { num: string }).num).toBe("82.1438702833587526244470415676");
 });
+
+test("y below the double's range is not the pole: RC(2, 1e-400) is finite or declines", () => {
+  // mpmath elliprc(2, 1e-400) = 326.3735… ; the double of 1e-400 is 0, the bignum is not.
+  for (const call of [
+    ["CarlsonRC", 2, { num: "1e-400" }],
+    ["N", ["CarlsonRC", 2, { num: "1e-400" }], 30],
+  ]) {
+    const json = JSON.stringify(ce.box(call as never).evaluate().json);
+    expect(json).not.toContain("Infinity");
+  }
+});

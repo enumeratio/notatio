@@ -4,8 +4,11 @@ import {
   bigRealOperand,
   bigResult,
   exceedsDoublePrecision,
+  isExactReal,
+  isExactZero,
   isFiniteNum,
   numberResult,
+  reSign,
   vouchesWhenComplex,
   wantsNumber,
   abs,
@@ -496,13 +499,15 @@ function equalArguments(
 
 /**
  * RC(x, 0): the integrand ~ 1/t at t = 0 makes ½∫ dt / [(t+y)√(t+x)] diverge logarithmically as
- * y → 0 (DLMF 19.2.17-19: RC(x,y) ~ −ln(y)/(2√x)). For real x ≥ 0 it grows without bound
- * positive (mpmath's elliprc answers +inf); at any other x the direction of the divergence
- * depends on how y reaches 0, so it is ComplexInfinity.
+ * y → 0 (DLMF 19.2.17-19: RC(x,y) ~ ln(4x/y)/(2√x)). The logarithm's real part dominates, so the
+ * value runs off along 1/√x whichever way y arrives: +∞ for real x ≥ 0 (mpmath's elliprc agrees;
+ * Wolfram writes ComplexInfinity), +i∞ or −i∞ for x < 0 by the side of the cut, and the direction
+ * of 1/√x for complex x. No directed infinity names those, so they are ComplexInfinity (mpmath's
+ * +inf there is its convention for the pole). y is read exactly: 1e-400 is not the pole.
  */
 function atPole(ce: ComputeEngine, x: Expression, y: Expression): Expression | undefined {
-  if (!isFiniteNum(x) || !isFiniteNum(y) || y.re !== 0 || y.im !== 0) return undefined;
-  return ce.symbol(x.im === 0 && x.re >= 0 ? "PositiveInfinity" : "ComplexInfinity");
+  if (!isFiniteNum(x) || !isFiniteNum(y) || !isExactZero(y)) return undefined;
+  return ce.symbol(isExactReal(x) && reSign(x) >= 0 ? "PositiveInfinity" : "ComplexInfinity");
 }
 
 /**
