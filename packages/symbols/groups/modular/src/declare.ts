@@ -152,11 +152,15 @@ export function declareModular(ce: Engine): void {
 
   const matrixType = ce.type("matrix");
 
+  // Native keeps its signature, so an untyped symbol reaches it as a union type that no
+  // `matches` gate admits (`Dot(q, Transpose(q))`); it refuses only what is ours.
+  const notModular = (op: Expr): boolean => !isModularOperand(op);
+
   widenSignatureKeepingNative(
     ce,
     "Dot",
     "(matrix | tuple | vector | expression<ModularMatrix> | string, matrix | tuple | vector | expression<ModularMatrix> | string) -> matrix | vector | number | expression<ModularMatrix>",
-    (op) => op.type.matches(ce.type("matrix | tuple | vector")),
+    notModular,
   );
   // compile builtin: fires only on a modular matrix or word, which compiled numeric code never holds
   wrapOperator(
@@ -174,7 +178,7 @@ export function declareModular(ce: Engine): void {
     ce,
     "MatrixPower",
     "(matrix | real | expression<ModularMatrix> | string, real) -> matrix | real | expression<ModularMatrix>",
-    (op) => op.type.matches(matrixType) || op.type.matches(ce.type("real")),
+    notModular,
   );
   // compile builtin: fires only on a modular matrix or word, which compiled numeric code never holds
   wrapOperator(
