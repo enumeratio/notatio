@@ -12,7 +12,9 @@ const INTERPRETED: string[] = [];
 test.skipIf(Object.keys(COMPILED).length === 0)(
   "exactly these permutation definitions fall back to the interpreter",
   () => {
-    const interpreted = PERMUTATION_STATISTICS.filter((d) => !(`${d.head}@${d.on}` in COMPILED)).map((d) => d.head);
+    const interpreted = PERMUTATION_STATISTICS.filter(
+      (d) => d.exact !== true && !(`${d.head}@${d.on}` in COMPILED),
+    ).map((d) => d.head);
     expect(interpreted.toSorted()).toEqual(INTERPRETED);
   },
 );

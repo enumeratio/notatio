@@ -9,7 +9,7 @@
 //
 // `Height` is also defined on binary and ordered trees (trees' own kernel), so its record is
 // hand-written (`curatedHeads`): this generator only merges in `details`/`examples`. `Hills` is
-// also defined on Schroeder paths, with its examples written by hand, so it is curated too.
+// also defined on Schroeder paths, with its examples written by hand, so it is curated too; so is `NorthStepOrderingCount`, whose hand-written test example pins a path whose factors are not integers.
 // `SymmetryDegree` is also defined on binary words, so its record is curated the same way.
 
 import { fileURLToPath } from "node:url";
@@ -33,7 +33,7 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: LATTICE_PATHS_FRONTIER,
   samples: SAMPLES,
   declareArea: declareLatticePaths,
-  curatedHeads: ["Height", "Hills", "SymmetryDegree"],
+  curatedHeads: ["Height", "Hills", "NorthStepOrderingCount", "SymmetryDegree"],
   dir: REFERENCE_DIR,
   omitHeads: ["MajorIndex", "Peaks", "Valleys"],
 });

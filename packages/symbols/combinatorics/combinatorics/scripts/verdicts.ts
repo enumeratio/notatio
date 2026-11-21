@@ -16,6 +16,8 @@ export const checkers = {
   maps: ["scripts/compile-maps.ts"],
   /** The statistics areas' shared `agrees`. */
   statistics: ["src/statistics/generate-compiled.ts"],
+  /** The exact counts' `agrees`, over BigInts (compile-exact.ts). */
+  exact: ["src/statistics/generate-exact.ts"],
   /** The families' `disagreements`, and the Epsil it reads them through (epsil.ts and what it
    *  imports locally). A family is read only through its own fields, which its verdict is keyed
    *  on, so an edit to one family's file leaves the others' verdicts; `familySourceHash` covers

@@ -51,6 +51,10 @@ export interface Definition {
   /** The subjects of the carrier `expr` has a value on: a boolean over `_x`, read as `expr` is. Absent
    *  means the whole carrier. Off it the call stays unevaluated (`inDomain`, declare.ts). */
   readonly where?: MathJSON;
+  /** An exact count: an intermediate of its definition (a factorial, a product of hook lengths) can pass 2^53 while the
+   *  answer stays under it, which doubles round silently. It compiles over BigInts only (`compile-exact`), with every
+   *  division exact; a call the BigInt code declines is interpreted, and the doubles' code is never built for it. */
+  readonly exact?: true;
 }
 
 /** `head` at `carrier`, the key a signature-addressed lookup uses. */

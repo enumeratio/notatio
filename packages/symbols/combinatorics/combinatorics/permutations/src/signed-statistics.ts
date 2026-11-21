@@ -28,12 +28,16 @@ import {
   x,
 } from "../../src/statistics/vocabulary.ts";
 
+/** The exact counts: an intermediate (a factorial, a product, a power, a quotient) can pass 2^53 on a subject of the carrier, so they compile over BigInts only (`Definition.exact`); the doubles round such an intermediate silently. */
+const EXACT_COUNTS: ReadonlySet<string> = new Set(["SignedConjugacyClassSize"]);
+
 const signed = (head: string, summary: string, expr: MathJSON, note?: string): Definition => ({
   head,
   on: "SignedPermutation",
   summary,
   expr,
   ...(note ? { note } : {}),
+  ...(EXACT_COUNTS.has(head) ? { exact: true as const } : {}),
 });
 
 const n = length();

@@ -36,12 +36,22 @@ import {
 } from "../../src/statistics/vocabulary.ts";
 
 const on = "DyckPath";
+/** The exact counts: a product of quotients whose partial results are not integers, so the doubles round them (`Definition.exact`). */
+const EXACT_COUNTS: ReadonlySet<string> = new Set([
+  "NorthStepOrderingCount",
+  "DownStepHeightProduct",
+  "BoxWeight",
+  "ParkingFunctionCount",
+  "SimpleProjectiveDimensionProduct",
+]);
+
 const stat = (head: string, summary: string, expr: Definition["expr"], note?: string): Definition => ({
   head,
   on,
   summary,
   expr,
   ...(note ? { note } : {}),
+  ...(EXACT_COUNTS.has(head) ? { exact: true as const } : {}),
 });
 
 const step = (i: MathJSON): MathJSON => at(i);
@@ -2559,25 +2569,26 @@ export const DYCK_STATISTICS: readonly Definition[] = [
     atLeast(
       4,
       bindList("us", forEach(upTo(semilength), subtract(at("k", where(positions, isDown("i"))), "k"), "k"), [
-        "Product",
-        forEach(
-          ["Range", 1, subtract(semilength, 1)],
-          [
-            "Divide",
-            subtract(at("k", "us"), subtract("k", 1)),
+        // One division, last: the quotient of the two products is the count, while a factor's own quotient is not an integer.
+        "Divide",
+        ["Product", forEach(["Range", 1, subtract(semilength, 1)], subtract(at("k", "us"), subtract("k", 1)), "k")],
+        [
+          "Product",
+          forEach(
+            ["Range", 1, subtract(semilength, 1)],
             bindList(
               "t",
               ["If", equals("k", 1), at(1, "us"), subtract(at("k", "us"), at(subtract("k", 1), "us"))],
               factorialOf("t"),
               "integer",
             ),
-          ],
-          "k",
-        ),
+            "k",
+          ),
+        ],
       ]),
       1,
     ),
-    "The coefficient of z_1^a_1 ... z_n^a_n in the product of (z_1 + ... + z_k), by Stanley's product formula: each factor is the height before a down step over the factorial of the up steps since the last one.",
+    "The coefficient of z_1^a_1 ... z_n^a_n in the product of (z_1 + ... + z_k), by Stanley's product formula: the product of the heights before the down steps over the product of the factorials of the up steps since the last one.",
   ),
   stat(
     "ThreeCatalanPathCount",
