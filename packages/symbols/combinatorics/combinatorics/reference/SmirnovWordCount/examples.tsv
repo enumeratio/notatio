@@ -5,4 +5,3 @@ the-partition-3-3-3-3-3-3-3-2		test	[SmirnovWordCount, [IntegerPartition, [List,
 findstat-st001097-1	Properties		[CombinatorialStat, [IntegerPartition, [List, 2]], "'SmirnovWordCount'"]	0	0	FindStat St001097	FindStat's value for [2]
 findstat-st001097-2	Properties		[CombinatorialStat, [IntegerPartition, [List, 3]], "'SmirnovWordCount'"]	0	0	FindStat St001097	FindStat's value for [3]
 findstat-st001097-3	Properties		[CombinatorialStat, [IntegerPartition, [List, 4]], "'SmirnovWordCount'"]	0	0	FindStat St001097	FindStat's value for [4]
-exact-3-3-3-3-3-3-3-2		test	[SmirnovWordCount, [IntegerPartition, [List, 3, 3, 3, 3, 3, 3, 3, 2]]]	6231814263722880			the partition 3^7 + 2 of 23: a factorial in the sum passes 2^53 while the count, 6231814263722880 by Carlitz's formula in integers, does not
