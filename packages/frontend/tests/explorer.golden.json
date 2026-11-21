@@ -311,7 +311,7 @@
     },
     "columns": [],
     "derived": true,
-    "statistics": 3
+    "statistics": 0
   },
   "CousinPrimes": {
     "expr": "Take(CousinPrimes, 20)",
@@ -449,7 +449,7 @@
       "max": 6,
       "start": 4
     },
-    "columns": [],
+    "columns": ["FixedPoints"],
     "derived": true,
     "statistics": 1
   },
@@ -1081,7 +1081,7 @@
       "max": 6,
       "start": 4
     },
-    "columns": ["Ascents", "CriticalLeftToRightMaxima", "Deficiencies", "InitialIncreasingSegmentLength"],
+    "columns": ["Ascents", "CriticalLeftToRightMaxima", "Deficiencies", "FixedPoints"],
     "derived": true,
     "statistics": 17
   },
@@ -1271,7 +1271,7 @@
       "start": 4
     },
     "glyph": "set-partition",
-    "columns": [],
+    "columns": ["BlocksWithEvenMinimum", "BlocksWithOddMinimum", "CrossingNumber", "Crossings"],
     "derived": true,
     "statistics": 111
   },
@@ -1674,7 +1674,7 @@
       "start": 4
     },
     "glyph": "set-composition",
-    "columns": [],
+    "columns": ["LargestBlock", "LastBlockSize", "SmallestBlock"],
     "derived": true,
     "statistics": 3
   },
