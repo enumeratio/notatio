@@ -1,4 +1,4 @@
-// Two inventories of the catalogue's statistic and map names, written as TSV (default `~/jobs/logs/`):
+// Two inventories of the catalogue's statistic and map names, written as TSV (to the directory given by `--out`):
 //
 //   A  gxksum-names.tsv    a catalogued statistic or map whose name is also a compute-engine head
 //                          (`Sum`, `Conjugate`): one row per carrier, with what ours means (the
@@ -7,23 +7,23 @@
 //                          (`Blocks`): one row per carrier, with the count name the `…Count` rule gives
 //                          (`BlockCount`); naming.ts has the rule.
 //
-//   node packages/symbols/combinatorics/combinatorics/scripts/collect-name-inventories.ts [--out <dir>]
+//   node packages/census/scripts/collect-name-inventories.ts --out <dir>
 //
 // The names come from the records (`statOn`/`mapOn`, which the catalog is folded from), the engine's
 // own heads from a bare compute-engine, result types from the manifest, FindStat ids from each record's
 // `catalog` rows and their titles from findstat/data. Nothing here is a hand-kept list.
 
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { homedir } from "node:os";
 import { join } from "node:path";
 import { bareEngine } from "@notatio/engine/testing";
 import { recordDirs, readEntries } from "@notatio/entry/node";
 import { SYMBOLS } from "@notatio/manifest";
 
 const flag = process.argv.indexOf("--out");
-const outDir = flag >= 0 ? process.argv[flag + 1]! : join(homedir(), "jobs", "logs");
+if (flag < 0 || process.argv[flag + 1] === undefined) throw new Error("usage: collect-name-inventories.ts --out <dir>");
+const outDir = process.argv[flag + 1]!;
 
-const packagesRoot = new URL("../../../../", import.meta.url).pathname;
+const packagesRoot = new URL("../../", import.meta.url).pathname;
 const entries = recordDirs(packagesRoot).flatMap((dir) =>
   readEntries(dir.dir).map((entry) => ({ entry, package: dir.package })),
 );
@@ -31,7 +31,9 @@ const entries = recordDirs(packagesRoot).flatMap((dir) =>
 /** FindStat's title for an id (`St000165`, `Mp00041`), from the crawl the package carries. */
 const titles = new Map<string, string>();
 for (const file of ["statistics.json", "maps.json"]) {
-  const data = JSON.parse(readFileSync(new URL(`../findstat/data/${file}`, import.meta.url), "utf8")) as {
+  const data = JSON.parse(
+    readFileSync(new URL(`../../symbols/combinatorics/combinatorics/findstat/data/${file}`, import.meta.url), "utf8"),
+  ) as {
     items: Record<string, { title?: string; domain?: string }>;
   };
   for (const [id, item] of Object.entries(data.items)) titles.set(id, item.title ?? "");
