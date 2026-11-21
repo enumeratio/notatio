@@ -122,6 +122,24 @@
     ],
     "reason": "the complex plot cannot lower AiryBiPrime"
   },
+  "AlgebraNorm": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "AlgebraNorm(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "AlgebraNorm(x)"
+      }
+    ]
+  },
   "AlgebraicNumberNorm": {
     "axis": {
       "name": "x",
