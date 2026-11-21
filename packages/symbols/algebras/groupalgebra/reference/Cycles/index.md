@@ -27,11 +27,6 @@ names:
   wolframIdentity: true
 mapOn:
   - Permutation
-catalog:
-  - system: findstat
-    identity: St000031
-    url: https://www.findstat.org/St000031
-    on: Permutation
 bindings:
   - origin: mapped
     form: sage
