@@ -11,8 +11,8 @@ signatures:
     library: enumeratio-combinatorics
     type: (standard_tableau) -> standard_tableau
     overrides: compute-engine
-    types:
-      - standard_tableau
+    on:
+      - StandardTableau
 names:
   wolframIdentity: true
 stub: engine

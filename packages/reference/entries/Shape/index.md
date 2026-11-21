@@ -21,10 +21,10 @@ signatures:
     library: enumeratio-combinatorics
     type: ((semistandard_tableau) -> integer_partition) & ((set_partition) -> integer_partition) & ((standard_tableau) -> integer_partition)
     overrides: enumeratio-evaluation
-    types:
-      - semistandard_tableau
-      - set_partition
-      - standard_tableau
+    on:
+      - SemistandardTableau
+      - SetPartition
+      - StandardTableau
 names:
   wolfram: Dimensions
 stub: engine
