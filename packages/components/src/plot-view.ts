@@ -28,6 +28,7 @@ import {
   diagramBoxOf,
   followsClock,
   gestureHandlingOf,
+  graphicsBoxOfSettings,
   pageClock,
   type PlotFrame,
   plotBoxOfSamples,
@@ -197,6 +198,7 @@ export class PlotView {
     const head = Array.isArray(plain) ? plain[0] : undefined;
     const chart = chartBoxOfSettings(settings);
     if (chart !== undefined) return this.#chart(chart as BoxNode);
+    if (head === "Graphics") return this.#graphics(settings);
     try {
       if (typeof head === "string" && POLAR.has(head)) await this.#polarize(head, settings, generation);
       else if (typeof head === "string" && FIELD.has(head)) await this.#vectorize(settings, generation);
@@ -219,6 +221,23 @@ export class PlotView {
     this.#xAt = () => Number.NaN;
     this.#svg = renderChart(box);
     this.#finish();
+  }
+
+  /** A `Graphics`: its primitives in a frame of their own, which the reader can zoom and pan. */
+  #graphics(settings: Readonly<Record<string, string>>): void {
+    this.#unzoomable();
+    this.#series = [];
+    const whole = graphicsBoxOfSettings(settings) as BoxNode | undefined;
+    if (whole === undefined) return this.#clear();
+    const drawIn = (window: PlotWindow | undefined): void => {
+      this.#box = window === undefined ? whole : (graphicsBoxOfSettings(settings, window) as BoxNode);
+      this.#draw();
+    };
+    this.#field = true;
+    this.#plane = true;
+    this.#home = this.#windowOf(whole);
+    this.#redo = drawIn;
+    drawIn(this.#window);
   }
 
   #clear(): void {

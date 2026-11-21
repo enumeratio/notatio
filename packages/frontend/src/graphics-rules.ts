@@ -174,15 +174,39 @@ export const NAMED_COLORS: Readonly<Record<string, string>> = {
   Pink: "#ff8fab",
 };
 
-/** A color from `Red`, `"#ff8800"`, `RGBColor(r, g, b)` or `GrayLevel(g)`, each in [0, 1]. */
+/** Hue, saturation and brightness, each in [0, 1] (the hue cyclic), as RGB. */
+function hsbToRgb(h: number, s: number, v: number): [number, number, number] {
+  const k = (n: number): number => {
+    const t = (n + (((h % 1) + 1) % 1) * 6) % 6;
+    return v - v * s * Math.max(0, Math.min(t, 4 - t, 1));
+  };
+  return [k(5), k(3), k(1)];
+}
+
+/**
+ * A color from `Red`, `"#ff8800"`, `RGBColor(r, g, b)`, `RGBColor("#ff8800")`, `GrayLevel(g)` or
+ * `Hue(h)` / `Hue(h, s, b)`, each number in [0, 1].
+ */
 export function colorOf(json: Json): string | undefined {
   const s = stringOf(json);
   if (s !== undefined) return NAMED_COLORS[s] ?? (/^#[0-9a-f]{6}$/i.test(s) ? s.toLowerCase() : undefined);
+  const head = headOf(json);
   const args = argsOf(json).map((v) => numberOf(v, Number.NaN));
-  if (headOf(json) === "RGBColor" && args.slice(0, 3).every(Number.isFinite))
+  if (head === "RGBColor" && args.length === 1) return colorOf(stringOf(argsOf(json)[0]));
+  if (head === "RGBColor" && args.length >= 3 && args.slice(0, 3).every(Number.isFinite))
     return rgbToHex([args[0]!, args[1]!, args[2]!]);
-  if (headOf(json) === "GrayLevel" && Number.isFinite(args[0])) return rgbToHex([args[0]!, args[0]!, args[0]!]);
+  if (head === "GrayLevel" && Number.isFinite(args[0])) return rgbToHex([args[0]!, args[0]!, args[0]!]);
+  if (head === "Hue" && Number.isFinite(args[0])) {
+    const [sat = 1, bright = 1] = args.slice(1);
+    if (Number.isFinite(sat) && Number.isFinite(bright)) return rgbToHex(hsbToRgb(args[0]!, sat, bright));
+  }
   return undefined;
+}
+
+/** The opacity a color head carries as its last argument: `RGBColor(r, g, b, a)`, `GrayLevel(g, a)`, `Hue(h, s, b, a)`. */
+function alphaOf(json: Json): number {
+  const at = { RGBColor: 3, GrayLevel: 1, Hue: 3 }[headOf(json) ?? ""];
+  return at === undefined ? 1 : numberOf(argsOf(json)[at], 1);
 }
 
 /** Wolfram's names for what a gradient does past its two ends (`LinearGradientFilling`'s padding). */
@@ -263,7 +287,7 @@ export function paintOf(json: Json): { paint: Paint; opacity: number } | undefin
   const scheme = schemeOf(json);
   if (scheme) return { paint: scheme, opacity: 1 };
   const color = colorOf(json);
-  return color === undefined ? undefined : { paint: color, opacity: 1 };
+  return color === undefined ? undefined : { paint: color, opacity: alphaOf(json) };
 }
 
 // ── Rules ────────────────────────────────────────────────────────────────────────────────

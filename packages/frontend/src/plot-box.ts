@@ -27,12 +27,12 @@ import {
 } from "@notatio/boxes";
 import type { Edge } from "./graphics-rules.ts";
 import { categoryColors, type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
-import type { Primitive } from "./primitives.ts";
+import { type GraphicsLook, pixels } from "./directives.ts";
+import type { Point, Primitive } from "./primitives.ts";
 import { isLinear, scale } from "./scales.ts";
 import { svg } from "./svg-draw.ts";
 import type { DisplayList, GraphicsPrimitive, MarkItem } from "./tiles-canvas.ts";
 
-const ACCENT = "var(--notatio-accent, var(--vp-c-brand-1, #d97706))";
 const AXIS = "var(--notatio-border, var(--vp-c-divider, currentColor))";
 const FG = "var(--notatio-fg, currentColor)";
 const BG = "var(--notatio-bg, var(--vp-c-bg, #ffffff))";
@@ -83,6 +83,10 @@ export interface PlotOptions extends ColorOptions {
   colorBy?: "x" | "y";
   /** `PlotRangePadding -> None`: the window is the data's own extent, to the pixel, as a terminal labels it. */
   tight?: boolean;
+  /** `Frame -> True`: a box around the plot area in place of the zero-axes. */
+  frame?: boolean;
+  /** `PlotStyle`: each series' look in order, cycled; what a look leaves out is the series' own. */
+  styles?: readonly GraphicsLook[];
 }
 
 /**
@@ -180,32 +184,67 @@ const stroke = (color: string, width: number, opacity = 1, dashing: readonly num
 /** A mark's box: `look` is its `StyleBox`, `role` its `TagBox` (what draws it where). */
 const item = (prim: Box, role: string, look: Options): Box => style(tag(prim, role), look);
 
-/** The boxes of Wolfram-style primitives (a plot's `Prolog` or `Epilog`), in data coordinates. */
+/** A line's `EdgeForm` from a look: its color, thickness, opacity and dashes, over the drawer's own. */
+const strokeOf = (look: GraphicsLook, ink: string, width: number): OptionValue =>
+  stroke(
+    look.color ?? ink,
+    look.thickness ? pixels(look.thickness) : width,
+    look.opacity ?? 1,
+    (look.dashing ?? []).map(pixels),
+  );
+
+/**
+ * A filled primitive's `StyleBox` options, as Wolfram draws it: the color in force, opaque unless
+ * `Opacity` says, outlined only by an `EdgeForm`. `FaceForm()` leaves the inside empty.
+ */
+function faceOf(look: GraphicsLook, ink: string, edge: number): Options {
+  const face = look.face === null ? undefined : { ...look, ...look.face };
+  return {
+    ...(face && { FaceForm: face.color ?? ink, Opacity: face.opacity ?? 1 }),
+    ...(look.edge && { EdgeForm: strokeOf({ ...look, ...look.edge }, ink, edge) }),
+  };
+}
+
+/**
+ * The boxes of Wolfram-style primitives (a plot's `Prolog` or `Epilog`), in data coordinates, each
+ * drawn with its look (`primitivesOf`).
+ */
 function primitiveBoxes(primitives: readonly Primitive[], role: string): Box[] {
   const out: Box[] = [];
-  const ink = ACCENT;
+  // With no directive in force a primitive is the page's foreground, as Wolfram's is black.
+  const ink = FG;
   for (const p of primitives) {
+    const look = p.look ?? {};
+    const color = look.color ?? ink;
     switch (p.kind) {
       case "point":
-        out.push(item(point({ Points: p.points.map(pair) }), role, { FaceForm: ink }));
+        out.push(
+          item(point({ Points: p.points.map(pair) }), role, {
+            FaceForm: color,
+            ...(look.opacity !== undefined && { Opacity: look.opacity }),
+            ...(look.pointSize && { PointSize: pixels(look.pointSize) }),
+          }),
+        );
         break;
       case "line":
         if (p.points.length >= 2)
-          out.push(item(line({ Points: p.points.map(pair) }), role, { EdgeForm: stroke(ink, 1.5) }));
+          out.push(item(line({ Points: p.points.map(pair) }), role, { EdgeForm: strokeOf(look, ink, 1.5) }));
         break;
       case "arrow":
         if (p.points.length >= 2)
-          out.push(item(arrow({ Points: p.points.map(pair) }), role, { EdgeForm: stroke(ink, 1.5), FaceForm: ink }));
+          out.push(
+            item(
+              arrow({
+                Points: p.points.map(pair),
+                ...(look.arrowheads !== undefined && { Arrowheads: look.arrowheads }),
+              }),
+              role,
+              { EdgeForm: strokeOf(look, ink, 1.5), FaceForm: color },
+            ),
+          );
         break;
       case "polygon":
-        if (p.points.length >= 3)
-          out.push(
-            item(polygon({ Points: p.points.map(pair) }), role, {
-              FaceForm: ink,
-              Opacity: 0.25,
-              EdgeForm: stroke(ink, 1),
-            }),
-          );
+        if (p.points.length >= 3) out.push(item(polygon({ Points: p.points.map(pair) }), role, faceOf(look, ink, 1)));
         break;
       case "circle": {
         // Sampled in data space, so it follows the axes when they are scaled apart.
@@ -214,10 +253,11 @@ function primitiveBoxes(primitives: readonly Primitive[], role: string): Box[] {
           return [p.center[0] + p.r * Math.cos(a), p.center[1] + p.r * Math.sin(a)];
         });
         out.push(
-          item(polygon({ Points: ring }), role, {
-            EdgeForm: stroke(ink, 1.5),
-            ...(p.filled && { FaceForm: ink, Opacity: 0.35 }),
-          }),
+          item(
+            polygon({ Points: ring }),
+            role,
+            p.filled ? faceOf(look, ink, 1.5) : { EdgeForm: strokeOf(look, ink, 1.5) },
+          ),
         );
         break;
       }
@@ -233,12 +273,17 @@ function primitiveBoxes(primitives: readonly Primitive[], role: string): Box[] {
               ],
             }),
             role,
-            { FaceForm: ink, Opacity: 0.2, EdgeForm: stroke(ink, 1) },
+            faceOf(look, ink, 1),
           ),
         );
         break;
       case "text":
-        out.push(item(inset(p.text, { Center: pair(p.at), Size: 10 }), role, { FaceForm: ink }));
+        out.push(
+          item(inset(p.text, { Center: pair(p.at), Size: look.fontSize ?? 10 }), role, {
+            FaceForm: color,
+            ...(look.opacity !== undefined && { Opacity: look.opacity }),
+          }),
+        );
         break;
     }
   }
@@ -258,6 +303,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
   const options: Record<string, OptionValue> = {
     ImageSize: [opts.width ?? WIDTH, opts.height ?? HEIGHT],
     Axes: opts.axes !== false,
+    ...(opts.frame && { Frame: true }),
     ScalingFunctions: [opts.xScale ?? "linear", opts.yScale ?? "linear"],
     ViewKind: "fixed",
     ...(opts.gridLines && { GridLines: true }),
@@ -350,7 +396,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
   };
 
   const palette = plotPalette(opts);
-  const seriesColors = categoryColors(palette, series.length);
+  const seriesColors = [...categoryColors(palette, series.length)];
   // ColorFunction: a position normalized to the window, on the gradient.
   const rampAt = (p: PlotPoint): number =>
     opts.colorBy === "x" ? (X.fwd(p.x) - txmin) / (txmax - txmin || 1) : (Y.fwd(p.y) - tymin) / (tymax - tymin || 1);
@@ -359,7 +405,9 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
   const fills: Box[] = [];
   const curves: Box[] = [];
   series.forEach((s, k) => {
-    const color = seriesColors[k]!;
+    const styled = opts.styles?.length ? opts.styles[k % opts.styles.length]! : {};
+    const color = styled.color ?? seriesColors[k]!;
+    seriesColors[k] = color;
     if (s.style === "points") {
       const dots = s.points.filter(visible);
       curves.push(
@@ -369,7 +417,11 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
             ...(opts.colorBy && { PointColors: dots.map((p) => rampColor(palette, rampAt(p))) }),
           }),
           "Series",
-          { FaceForm: color },
+          {
+            FaceForm: color,
+            ...(styled.opacity !== undefined && { Opacity: styled.opacity }),
+            ...(styled.pointSize && { PointSize: pixels(styled.pointSize) }),
+          },
         ),
       );
       return;
@@ -404,7 +456,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
           ...(opts.colorBy && { SegmentColors: pairColors }),
         }),
         "Series",
-        { EdgeForm: stroke(color, CURVE_WIDTH) },
+        { EdgeForm: strokeOf(styled, color, CURVE_WIDTH) },
       ),
     );
   });
@@ -421,6 +473,84 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     ],
     options,
   );
+}
+
+/** What a `Graphics` says about its frame. */
+export interface GraphicsOptions {
+  width?: number;
+  /** The window, `[[xmin, xmax], [ymin, ymax]]`; the primitives' own extent, padded, when left out. */
+  plotRange?: readonly [readonly [number, number], readonly [number, number]];
+  /** The plot area's height over its width; the window's own shape when left out (`AspectRatio -> Automatic`). */
+  aspect?: number;
+  axes?: boolean;
+  frame?: boolean;
+  gridLines?: boolean;
+  xLabel?: string;
+  yLabel?: string;
+  title?: string;
+}
+
+/** The share of a `Graphics`' extent left clear around it. */
+const GRAPHICS_PADDING = 0.04;
+/** The tallest and the flattest a `Graphics` is drawn, as height over width. */
+const [ASPECT_MIN, ASPECT_MAX] = [0.2, 2];
+
+/** Every point a primitive reaches, for the window that holds it. */
+function extentOf(p: Primitive): Point[] {
+  switch (p.kind) {
+    case "circle":
+      return [
+        [p.center[0] - p.r, p.center[1] - p.r],
+        [p.center[0] + p.r, p.center[1] + p.r],
+      ];
+    case "rectangle":
+      return [p.min, p.max];
+    case "text":
+      return [p.at];
+    default:
+      return p.points;
+  }
+}
+
+/**
+ * Wolfram's `Graphics(primitives)` as a `GraphicsBox`: the primitives in a frame of their own, each
+ * with its look. No axes unless asked, and one unit of x as long as one of y unless `AspectRatio` says.
+ */
+export function graphicsMarksBox(primitives: readonly Primitive[], opts: GraphicsOptions = {}): Box {
+  const reached = primitives.flatMap(extentOf).filter((q) => q.every(Number.isFinite));
+  const bound = (axis: 0 | 1): [number, number] => {
+    const given = opts.plotRange?.[axis];
+    if (given && given[0] < given[1]) return [given[0], given[1]];
+    if (reached.length === 0) return [-1, 1];
+    let [lo, hi] = [Math.min(...reached.map((q) => q[axis])), Math.max(...reached.map((q) => q[axis]))];
+    if (lo === hi) [lo, hi] = [lo - 1, hi + 1];
+    const pad = (hi - lo) * GRAPHICS_PADDING;
+    return [lo - pad, hi + pad];
+  };
+  let [x, y] = [bound(0), bound(1)];
+  if (opts.aspect === undefined && opts.plotRange === undefined) {
+    // Keep true scale inside the limits on the figure's shape by widening the shorter axis.
+    const widen = ([lo, hi]: [number, number], to: number): [number, number] => {
+      const mid = (lo + hi) / 2;
+      return [mid - to / 2, mid + to / 2];
+    };
+    const [dx, dy] = [x[1] - x[0], y[1] - y[0]];
+    if (dy / dx < ASPECT_MIN) y = widen(y, dx * ASPECT_MIN);
+    else if (dy / dx > ASPECT_MAX) x = widen(x, dy / ASPECT_MAX);
+  }
+  const aspect = opts.aspect ?? Math.min(ASPECT_MAX, Math.max(ASPECT_MIN, (y[1] - y[0]) / (x[1] - x[0])));
+  const titled = opts.title !== undefined && opts.title !== "";
+  return graphics(primitiveBoxes(primitives, "Graphics"), {
+    ImageSize: fieldImageSize({ ...(opts.width !== undefined && { width: opts.width }), titled }, aspect),
+    Axes: opts.axes === true,
+    ...(opts.frame && { Frame: true }),
+    ScalingFunctions: ["linear", "linear"],
+    ViewKind: "fixed",
+    PlotRange: [x, y],
+    ...(opts.gridLines && { GridLines: true }),
+    ...((opts.xLabel || opts.yLabel) && { AxesLabel: [opts.xLabel ?? null, opts.yLabel ?? null] }),
+    ...(titled && { PlotLabel: opts.title! }),
+  });
 }
 
 // ── Drawing ──────────────────────────────────────────────────────────────────────────────
@@ -599,10 +729,16 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
       }
       case "PointBox": {
         const colors = Array.isArray(p.PointColors) ? (p.PointColors as string[]) : undefined;
+        // `PointSize` is a point's diameter in px.
+        const size = typeof look.PointSize === "number" ? look.PointSize / 2 : undefined;
         pointsOf(prim).forEach((q, i) =>
           push(
-            { head: "Disk", radius: clipped ? DOT_RADIUS : MARK_RADIUS, center: px(q) },
-            { ...((colors?.[i] ?? color) && { color: colors?.[i] ?? color }), edges: [] },
+            { head: "Disk", radius: size ?? (clipped ? DOT_RADIUS : MARK_RADIUS), center: px(q) },
+            {
+              ...((colors?.[i] ?? color) && { color: colors?.[i] ?? color }),
+              ...(opacity !== undefined && { opacity }),
+              edges: [],
+            },
             clipped,
           ),
         );
@@ -646,7 +782,7 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
         if (c && typeof prim[1] === "string" && color)
           push(
             { head: "Text", text: prim[1], size: Number(p.Size), at: px(c), look: { anchor: "middle" } },
-            { color, edges: [] },
+            { color, ...(opacity !== undefined && { opacity }), edges: [] },
           );
         return;
       }
@@ -681,7 +817,8 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
   }
 
   for (const { role, prim, look } of items) if (role === "Fill") mark(prim, look, true);
-  for (const { role, prim, look } of items) if (role === "Series" || role === "Boundary") mark(prim, look, true);
+  for (const { role, prim, look } of items)
+    if (role === "Series" || role === "Boundary" || role === "Graphics") mark(prim, look, true);
   for (const { role, prim, look } of items) if (role === "Epilog") mark(prim, look, false);
 
   if (bar) {

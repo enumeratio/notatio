@@ -13,6 +13,7 @@ import {
   CHART_HEADS,
   chartBoxOfSettings,
   FIELD_PLOT_HEADS,
+  graphicsBoxOfSettings,
   fieldBoxOfData,
   PLOT_HEADS,
   plotDataSeries,
@@ -47,6 +48,7 @@ const plotRule =
       const points = polarPointsOf(data, t0, t1);
       return polarPlotBox(points ?? [], { markers: true });
     }
+    if (head === "Graphics") return graphicsBoxOfSettings(settings) ?? unsampledBox(head, expr);
     if (FIELD_PLOT_HEADS.includes(head)) return fieldBoxOfData(head, settings) ?? unsampledBox(head, expr);
     const series = plotDataSeries(settings);
     return series === undefined ? unsampledBox(head, expr) : plotBox(series, plotOptionsOf(settings));

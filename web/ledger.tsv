@@ -3065,6 +3065,7 @@ symbol	/reference/symbol/GraphSignature
 symbol	/reference/symbol/GraphTwoLimitedPackingNumber
 symbol	/reference/symbol/GraphVertexConnectivity
 symbol	/reference/symbol/GraphemeClusters
+symbol	/reference/symbol/Graphics
 symbol	/reference/symbol/Graphics3D
 symbol	/reference/symbol/Graphics3DBox
 symbol	/reference/symbol/GraphicsBox

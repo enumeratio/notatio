@@ -6,16 +6,25 @@
 // expression it came from (an `InterpretationBox`) and `Producer -> head`, and an environment that
 // can sample asks for the marks (`plotBoxOfSamples`). Sampling stays with that environment.
 
-import { type Box, graphics, graphicsOf, interpretation } from "@notatio/boxes";
+import { type Box, type BoxNode, graphics, graphicsOf, interpretation, optionsOfBox } from "@notatio/boxes";
 import { chartBox, type ChartBoxOptions, isChartKind, isNumber } from "./chart.ts";
 import { autoLevels, type ContourOptions, contourPlotBox, implicitPlotBox, LINE_WIDTH } from "./contour.ts";
 import { type DensityOptions, densityPlotBox } from "./densityplot.ts";
 import { DIAGRAM_HEADS } from "./diagram-lowering.ts";
 import type { FieldPaints } from "./field-shader.ts";
 import { colorMixingOf, colorOf, paintOf } from "./graphics-rules.ts";
-import { type PlotOptions, type PlotPoint, type PlotSeries, plotBox } from "./plot-box.ts";
+import { type GraphicsLook, lookOf } from "./directives.ts";
+import {
+  graphicsMarksBox,
+  type GraphicsOptions,
+  plotArea,
+  type PlotOptions,
+  type PlotPoint,
+  type PlotSeries,
+  plotBox,
+} from "./plot-box.ts";
 import { categoryColors, plotPalette } from "./plot-color.ts";
-import type { Primitive } from "./primitives.ts";
+import { type Primitive, primitivesOf } from "./primitives.ts";
 import type { PolarPoint } from "./polarplot.ts";
 import {
   BOUNDARY_WIDTH,
@@ -43,6 +52,7 @@ export const FIELD_PLOT_HEADS: readonly string[] = [
 
 /** The heads whose plots and diagrams are `GraphicsBox`es, drawn by `<graphics-box>`. */
 export const PLOT_HEADS: readonly string[] = [
+  "Graphics",
   "Plot",
   "ParametricPlot",
   "PolarPlot",
@@ -140,6 +150,52 @@ export function spanOf(text: string | undefined): [number, number] | undefined {
   return Number.isFinite(a) && Number.isFinite(b) ? [a!, b!] : undefined;
 }
 
+/**
+ * `PlotStyle` as looks: a list is one style per curve, in order; anything else (a color, a
+ * `Directive`) is the one style every curve takes. A style that does not read leaves its curve's own.
+ */
+export function plotStylesOf(written: string | undefined): GraphicsLook[] | undefined {
+  const style = jsonOf(written);
+  if (style === undefined) return undefined;
+  const each = Array.isArray(style) && style[0] === "List" ? style.slice(1) : [style];
+  return each.map((entry) => lookOf(entry) ?? {});
+}
+
+/** What a `Graphics`' settings say about its frame. */
+export function graphicsOptionsOf(settings: PlotSettings): GraphicsOptions {
+  const [x, y] = [spanOf(settings["plot-x-range"]), spanOf(settings["plot-range"])];
+  const aspect = Number(settings["aspect"]);
+  return {
+    ...(x && y && { plotRange: [x, y] as const }),
+    ...(aspect > 0 && { aspect }),
+    axes: on(settings["axes"]),
+    frame: on(settings["frame"]),
+    gridLines: on(settings["grid"]),
+    xLabel: settings["x-label"] || undefined,
+    yLabel: settings["y-label"] || undefined,
+    title: settings["label"] || undefined,
+  };
+}
+
+/**
+ * A `Graphics` as a `GraphicsBox`, or undefined when it has no primitives to read. A `window` is a
+ * zoomed view: the same primitives over that range, in the whole figure's shape.
+ */
+export function graphicsBoxOfSettings(
+  settings: PlotSettings,
+  window?: { readonly x: readonly [number, number]; readonly y?: readonly [number, number] },
+): Box | undefined {
+  const written = jsonOf(settings["primitives"]);
+  if (written === undefined) return undefined;
+  const primitives = primitivesOf(written as never);
+  const options = graphicsOptionsOf(settings);
+  const whole = graphicsMarksBox(primitives, options);
+  if (window?.y === undefined) return whole;
+  const [width, height] = optionsOfBox(whole as BoxNode).ImageSize as [number, number];
+  const { plotW, plotH } = plotArea(width, height, options.title !== undefined);
+  return graphicsMarksBox(primitives, { ...options, plotRange: [window.x, window.y], aspect: plotH / plotW });
+}
+
 /** What a plot's settings say about how to draw it: the chrome, the scales, the colors. */
 export function plotOptionsOf(
   settings: PlotSettings,
@@ -153,9 +209,12 @@ export function plotOptionsOf(
 ): PlotOptions {
   return {
     axes: settings["axes"] !== "false",
+    frame: on(settings["frame"]),
+    styles: plotStylesOf(settings["plot-style"]),
     xScale: settings["x-scale"],
     yScale: settings["y-scale"],
     plotRange: spanOf(settings["plot-range"]),
+    xRange: spanOf(settings["plot-x-range"]),
     gridLines: on(settings["grid"]),
     fill: on(settings["fill"]),
     legend: on(settings["legend"]),
