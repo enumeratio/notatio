@@ -47,6 +47,10 @@
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "ConnectedPermutations(_size)"
   },
+  "CorePartitions": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "CorePartitions(2, _n)"
+  },
   "CyclicPermutations": {
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "CyclicPermutations(_size)"

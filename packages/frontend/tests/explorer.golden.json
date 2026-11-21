@@ -300,7 +300,19 @@
     "statistics": 354
   },
   "ContinuedFractions": null,
-  "CorePartitions": null,
+  "CorePartitions": {
+    "expr": "CorePartitions(2, 4)",
+    "template": "CorePartitions(2, {size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 3
+  },
   "CousinPrimes": {
     "expr": "Take(CousinPrimes, 20)",
     "columns": ["DigitCount", "DigitSum", "DivisorSum"],
