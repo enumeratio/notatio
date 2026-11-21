@@ -1,2 +1,5 @@
 id	in
 a-factorization-as-data	List[List[2, 3], List[3, 1]]
+factorization-of-an-integer	360
+factorization-of-a-prime	97
+factorization-of-a-negative	-12

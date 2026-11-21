@@ -7,7 +7,11 @@ signatures:
   - call: Factorization(bases, exponents)
     description: a factorization as parallel `bases`/`exponents` lists
     library: enumeratio-number-theory
-    type: (tuple<list<number>, list<integer>>) -> factorization
+    type: ((integer) -> factorization) & ((tuple<list<number>, list<integer>>) -> factorization)
+  - call: Factorization(n)
+    description: the prime factorization of the integer `n`, as `FactorInteger` finds it, in the form above
+    library: enumeratio-number-theory
 seeAlso:
+  - FactorInteger
   - IntegerFactorization
 ---
