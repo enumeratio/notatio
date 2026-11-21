@@ -10,6 +10,7 @@ import {
   describeNow,
   manifestRegistry,
   parseParameters,
+  integerMember,
   widestMember,
   pinOf,
 } from "../src/index.ts";
@@ -80,6 +81,13 @@ test("an intersection of overloads reads as its widest member", () => {
     ["(complex | infinity)", true],
   ]);
   expect(widestMember("(integer) -> integer")).toBe("(integer) -> integer");
+});
+
+test("an integer member of an intersection is found, a plain or all-general one is not", () => {
+  expect(integerMember("((integer) -> integer) & ((number) -> number)")).toBe("(integer) -> integer");
+  expect(integerMember("((number) -> number) & ((any) -> any)")).toBeUndefined();
+  expect(integerMember("(integer) -> integer")).toBe("(integer) -> integer");
+  expect(integerMember("((integer, any*) -> integer) & ((number) -> number)")).toBeUndefined();
 });
 
 test("FindStat ids and the example count come with it", async () => {

@@ -5,7 +5,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseExpression } from "@notatio/formats/expression";
-import { parseParameters, SYMBOLS, widestMember, winningOverload } from "@notatio/manifest";
+import { integerMember, parseParameters, SYMBOLS, widestMember, winningOverload } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
 import { functionViewOf, type FunctionSignature, type FunctionView, returnTypeOf } from "../src/function-view.ts";
 import { inferPlotOver, numericDomainOf } from "../src/infer-controls.ts";
@@ -14,7 +14,7 @@ import { inferPlotOver, numericDomainOf } from "../src/infer-controls.ts";
 const views = new Map<string, FunctionView>();
 for (const info of Object.values(SYMBOLS)) {
   const wide = winningOverload(info.overloads)?.type;
-  const type = wide === undefined ? undefined : widestMember(wide);
+  const type = wide === undefined ? undefined : (integerMember(wide) ?? widestMember(wide));
   const parameters = type === undefined ? undefined : parseParameters(type, info.params);
   if (type === undefined || parameters === undefined) continue;
   const signature: FunctionSignature = {

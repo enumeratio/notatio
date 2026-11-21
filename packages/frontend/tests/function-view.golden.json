@@ -325,6 +325,24 @@
       }
     ]
   },
+  "BellNumber": {
+    "axis": {
+      "name": "n",
+      "position": 0
+    },
+    "axisDomain": "integer",
+    "window": [-10, 10],
+    "body": "BellNumber(n)",
+    "params": "",
+    "views": [
+      {
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "BellNumber(n)"
+      }
+    ]
+  },
   "BellY": {
     "axis": {
       "name": "n",
@@ -652,19 +670,19 @@
   },
   "CatalanNumber": {
     "axis": {
-      "name": "x",
+      "name": "n",
       "position": 0
     },
-    "axisDomain": "real",
+    "axisDomain": "integer",
     "window": [-10, 10],
-    "body": "CatalanNumber(x)",
+    "body": "CatalanNumber(n)",
     "params": "",
     "views": [
       {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "CatalanNumber(x)"
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "CatalanNumber(n)"
       }
     ]
   },
@@ -1274,19 +1292,19 @@
   },
   "DivisorSigma": {
     "axis": {
-      "name": "x",
+      "name": "n",
       "position": 1
     },
-    "axisDomain": "real",
+    "axisDomain": "integer",
     "window": [-10, 10],
-    "body": "DivisorSigma(k, x)",
-    "params": "{{k, 1}, -10, 10, 0.05, Slider}",
+    "body": "DivisorSigma(k, n)",
+    "params": "{{k, 1}, -10, 10, 1, Slider}",
     "views": [
       {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "DivisorSigma(k, x)"
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "DivisorSigma(k, n)"
       }
     ]
   },
@@ -3720,19 +3738,19 @@
   },
   "ModularInverse": {
     "axis": {
-      "name": "x",
+      "name": "n",
       "position": 1
     },
-    "axisDomain": "real",
+    "axisDomain": "integer",
     "window": [-10, 10],
-    "body": "ModularInverse(a, x)",
-    "params": "{{a, 1}, -10, 10, 0.05, Slider}",
+    "body": "ModularInverse(a, n)",
+    "params": "{{a, 1}, -10, 10, 1, Slider}",
     "views": [
       {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "ModularInverse(a, x)"
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "ModularInverse(a, n)"
       }
     ]
   },
@@ -3774,19 +3792,19 @@
   },
   "MoebiusMu": {
     "axis": {
-      "name": "x",
+      "name": "n",
       "position": 0
     },
-    "axisDomain": "real",
+    "axisDomain": "integer",
     "window": [-10, 10],
-    "body": "MoebiusMu(x)",
+    "body": "MoebiusMu(n)",
     "params": "",
     "views": [
       {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "MoebiusMu(x)"
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "MoebiusMu(n)"
       }
     ]
   },
@@ -4293,19 +4311,19 @@
   },
   "PrimeNu": {
     "axis": {
-      "name": "x",
+      "name": "n",
       "position": 0
     },
-    "axisDomain": "real",
+    "axisDomain": "integer",
     "window": [-10, 10],
-    "body": "PrimeNu(x)",
+    "body": "PrimeNu(n)",
     "params": "",
     "views": [
       {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "PrimeNu(x)"
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "PrimeNu(n)"
       }
     ]
   },
@@ -4329,19 +4347,19 @@
   },
   "PrimeOmega": {
     "axis": {
-      "name": "x",
+      "name": "n",
       "position": 0
     },
-    "axisDomain": "real",
+    "axisDomain": "integer",
     "window": [-10, 10],
-    "body": "PrimeOmega(x)",
+    "body": "PrimeOmega(n)",
     "params": "",
     "views": [
       {
-        "head": "Plot",
-        "variable": "x",
-        "window": "{x, -10, 10}",
-        "body": "PrimeOmega(x)"
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "PrimeOmega(n)"
       }
     ]
   },
@@ -5211,6 +5229,24 @@
         "variable": "n",
         "window": "{n, -10, 10}",
         "body": "StirlingS2(p1, n)"
+      }
+    ]
+  },
+  "Subfactorial": {
+    "axis": {
+      "name": "n",
+      "position": 0
+    },
+    "axisDomain": "integer",
+    "window": [-10, 10],
+    "body": "Subfactorial(n)",
+    "params": "",
+    "views": [
+      {
+        "head": "DiscretePlot",
+        "variable": "n",
+        "window": "{n, -10, 10}",
+        "body": "Subfactorial(n)"
       }
     ]
   },

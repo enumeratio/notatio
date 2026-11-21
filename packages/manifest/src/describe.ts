@@ -64,13 +64,10 @@ function splitTopLevel(text: string): string[] {
 const GENERAL = new Set(["any", "value", "number", "real", "complex", "expression"]);
 
 /**
- * The function type that stands for a signature: a head with several overloads is an
- * intersection, `((a) -> r) & ((a, b?) -> r)`, and this is its member taking the most
- * parameters, then the most optional or repeating ones, then the most general ones (`any`, `number`,
- * `value`), the first on a tie: the loosest reading, as our overload added to the native one.
- * A plain function type is itself.
+ * The function types an intersection signature is made of, unwrapped; a single type, or
+ * an intersection with a member that is not a function type, comes back whole.
  */
-export function widestMember(type: string): string {
+function intersectionMembers(type: string): string[] {
   const members: string[] = [];
   let depth = 0;
   let from = 0;
@@ -84,12 +81,24 @@ export function widestMember(type: string): string {
     }
   }
   members.push(type.slice(from));
-  if (members.length < 2) return type;
+  if (members.length < 2) return [type];
   const unwrapped = members.map((m) => {
     const t = m.trim();
     return t.startsWith("((") && t.endsWith(")") ? t.slice(1, -1) : t;
   });
-  if (!unwrapped.every((m) => m.startsWith("("))) return type;
+  return unwrapped.every((m) => m.startsWith("(")) ? unwrapped : [type];
+}
+
+/**
+ * The function type that stands for a signature: a head with several overloads is an
+ * intersection, `((a) -> r) & ((a, b?) -> r)`, and this is its member taking the most
+ * parameters, then the most optional or repeating ones, then the most general ones (`any`, `number`,
+ * `value`), the first on a tie: the loosest reading, as our overload added to the native one.
+ * A plain function type is itself.
+ */
+export function widestMember(type: string): string {
+  const unwrapped = intersectionMembers(type);
+  if (unwrapped.length < 2) return type;
   const breadth = (m: string): number[] => {
     const parameters = parseParameters(m) ?? [];
     return [
@@ -103,6 +112,16 @@ export function widestMember(type: string): string {
     return at >= 0 && a[at]! > b[at]!;
   };
   return unwrapped.reduce((best, m) => (wider(breadth(m), breadth(best)) ? m : best));
+}
+
+/**
+ * The member of an intersection that is an integer function, `(integer) -> integer`: a head
+ * that answers for integers is a sequence even where a wider overload also takes any number.
+ */
+export function integerMember(type: string): string | undefined {
+  return intersectionMembers(type).find(
+    (m) => /->\s*integer$/.test(m) && (parseParameters(m) ?? []).every((p) => p.type === "integer" && !p.optional),
+  );
 }
 
 /**
