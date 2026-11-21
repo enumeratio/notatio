@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[BSplineCurve, [List, [Tuple, 0, 0], [Tuple, 1, 2], [Tuple, 2, -2], [Tuple, 3, 0]]]	[BSplineCurve, [List, [Tuple, 0, 0], [Tuple, 1, 2], [Tuple, 2, -2], [Tuple, 3, 0]]]	A spline by its control points
+in-graphics	Basic		[Graphics, [List, [BSplineCurve, [List, [Tuple, 0, 0], [Tuple, 1, 2], [Tuple, 2, -2], [Tuple, 3, 0]]]]]	[Graphics, [List, [BSplineCurve, [List, [Tuple, 0, 0], [Tuple, 1, 2], [Tuple, 2, -2], [Tuple, 3, 0]]]]]	Drawn

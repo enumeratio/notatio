@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Directive, Red, Thick, Dashed]	[Directive, Red, Thick, Dashed]	Three directives as one
+in-graphics	Basic		[Graphics, [List, [Directive, Red, Thick, Dashed], [Line, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	[Graphics, [List, [Directive, Red, Thick, Dashed], [Line, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	A line drawn with all three

@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[AbsolutePointSize, 8]	[AbsolutePointSize, 8]	A point size in pixels
+in-graphics	Basic		[Graphics, [List, [AbsolutePointSize, 8], [Point, [List, [Tuple, 0, 0], [Tuple, 1, 1]]]]]	[Graphics, [List, [AbsolutePointSize, 8], [Point, [List, [Tuple, 0, 0], [Tuple, 1, 1]]]]]	Two points 8 pixels across

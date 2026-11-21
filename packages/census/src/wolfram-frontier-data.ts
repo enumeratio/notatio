@@ -21,22 +21,6 @@ export interface FrontierEntry {
 
 export const FRONTIER: readonly FrontierEntry[] = [
   {
-    head: "Directive",
-    uses: 479,
-  },
-  {
-    head: "RGBColor",
-    uses: 445,
-  },
-  {
-    head: "PointSize",
-    uses: 432,
-  },
-  {
-    head: "Opacity",
-    uses: 338,
-  },
-  {
     head: "GeometricTransformationBox",
     uses: 296,
   },
@@ -53,48 +37,24 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 242,
   },
   {
-    head: "Hue",
-    uses: 232,
-  },
-  {
     head: "NCache",
     uses: 224,
-  },
-  {
-    head: "EdgeForm",
-    uses: 221,
   },
   {
     head: "HighlightGraph",
     uses: 210,
   },
   {
-    head: "Arrowheads",
-    uses: 207,
-  },
-  {
     head: "Scaled",
     uses: 151,
-  },
-  {
-    head: "GrayLevel",
-    uses: 141,
   },
   {
     head: "Callout",
     uses: 131,
   },
   {
-    head: "Dashing",
-    uses: 123,
-  },
-  {
     head: "ImageScaled",
     uses: 103,
-  },
-  {
-    head: "AbsoluteThickness",
-    uses: 94,
   },
   {
     head: "Darker",
@@ -137,24 +97,12 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 66,
   },
   {
-    head: "FaceForm",
-    uses: 64,
-  },
-  {
     head: "VectorGreaterEqual",
     uses: 62,
   },
   {
-    head: "GraphicsComplex",
-    uses: 61,
-  },
-  {
     head: "Indexed",
     uses: 61,
-  },
-  {
-    head: "Thickness",
-    uses: 60,
   },
   {
     head: "Inactive",
@@ -178,10 +126,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
   },
   {
     head: "AnnotationValue",
-    uses: 46,
-  },
-  {
-    head: "Rotate",
     uses: 46,
   },
   {
@@ -447,10 +391,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
   {
     head: "TruncateSum",
     uses: 18,
-  },
-  {
-    head: "AbsolutePointSize",
-    uses: 17,
   },
   {
     head: "Convolve",
@@ -725,10 +665,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 10,
   },
   {
-    head: "BezierCurve",
-    uses: 10,
-  },
-  {
     head: "Clear",
     uses: 10,
   },
@@ -990,10 +926,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
   },
   {
     head: "BorelTannerDistribution",
-    uses: 7,
-  },
-  {
-    head: "BSplineCurve",
     uses: 7,
   },
   {
@@ -1481,10 +1413,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 5,
   },
   {
-    head: "AbsoluteDashing",
-    uses: 4,
-  },
-  {
     head: "AiryBiZero",
     uses: 4,
   },
@@ -1786,10 +1714,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
   },
   {
     head: "ToeplitzMatrix",
-    uses: 4,
-  },
-  {
-    head: "Translate",
     uses: 4,
   },
   {

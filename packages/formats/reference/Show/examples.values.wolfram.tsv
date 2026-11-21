@@ -1,3 +1,3 @@
 id	in
 cell-diagram	
-plots-and-graphics	Show[Plot[List[Sin[x], Cos[x]], List[x, 0, 6.283], Rule[PlotStyle, List[enumeratio`Red, enumeratio`Directive[enumeratio`Blue, enumeratio`Dashed]]]], Graphics[List[enumeratio`PointSize[0.03], Point[List[List[0.785, 0.707], List[3.927, -0.707]]]]], Rule[Frame, True]]
+plots-and-graphics	Show[Plot[List[Sin[x], Cos[x]], List[x, 0, 6.283], Rule[PlotStyle, List[enumeratio`Red, Directive[enumeratio`Blue, enumeratio`Dashed]]]], Graphics[List[PointSize[0.03], Point[List[List[0.785, 0.707], List[3.927, -0.707]]]]], Rule[Frame, True]]

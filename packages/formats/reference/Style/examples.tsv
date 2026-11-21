@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Style, [Disk, [Tuple, 0, 0], 1], Red]	[Style, [Disk, [Tuple, 0, 0], 1], Red]	A disk styled on its own
+in-graphics	Basic		[Graphics, [List, [Style, [Disk, [Tuple, 0, 0], 1], Red], [Circle, [Tuple, 2.5, 0], 1]]]	[Graphics, [List, [Style, [Disk, [Tuple, 0, 0], 1], Red], [Circle, [Tuple, 2.5, 0], 1]]]	The style ends with its primitive: the circle is not red

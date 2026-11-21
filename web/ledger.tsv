@@ -1922,7 +1922,10 @@ symbol	/reference/symbol/AboveAverageDegreeVertexCount
 symbol	/reference/symbol/Abs
 symbol	/reference/symbol/AbsArg
 symbol	/reference/symbol/AbsoluteAdjacencyDeterminant
+symbol	/reference/symbol/AbsoluteDashing
 symbol	/reference/symbol/AbsoluteOrderCoverCount
+symbol	/reference/symbol/AbsolutePointSize
+symbol	/reference/symbol/AbsoluteThickness
 symbol	/reference/symbol/AbsoluteTiming
 symbol	/reference/symbol/AbsoluteVariation
 symbol	/reference/symbol/Abundance
@@ -2010,6 +2013,7 @@ symbol	/reference/symbol/Animator
 symbol	/reference/symbol/AnimatorBox
 symbol	/reference/symbol/AnnihilationNumber
 symbol	/reference/symbol/Annotated
+symbol	/reference/symbol/Annulus
 symbol	/reference/symbol/Antiexcedances
 symbol	/reference/symbol/Antipode
 symbol	/reference/symbol/Antisingletons
@@ -2052,6 +2056,7 @@ symbol	/reference/symbol/Array
 symbol	/reference/symbol/ArrayPlot
 symbol	/reference/symbol/Arrow
 symbol	/reference/symbol/ArrowBox
+symbol	/reference/symbol/Arrowheads
 symbol	/reference/symbol/Arsech
 symbol	/reference/symbol/Arsinh
 symbol	/reference/symbol/Artanh
@@ -2091,6 +2096,7 @@ symbol	/reference/symbol/AvogadroConstant
 symbol	/reference/symbol/Avoiding132Permutation
 symbol	/reference/symbol/Avoiding312Permutation
 symbol	/reference/symbol/Avoiding321Permutation
+symbol	/reference/symbol/BSplineCurve
 symbol	/reference/symbol/BabsonSteingrimssonStatistic
 symbol	/reference/symbol/BabsonSteingrimssonStatisticDoublePrime
 symbol	/reference/symbol/BabsonSteingrimssonStatisticPrime
@@ -2128,6 +2134,7 @@ symbol	/reference/symbol/Beta
 symbol	/reference/symbol/BetaDistribution
 symbol	/reference/symbol/BetaInvariant
 symbol	/reference/symbol/BetaRegularized
+symbol	/reference/symbol/BezierCurve
 symbol	/reference/symbol/BicoloredMotzkinHeight
 symbol	/reference/symbol/BicoloredMotzkinLevelSteps
 symbol	/reference/symbol/BigAscents
@@ -2553,6 +2560,7 @@ symbol	/reference/symbol/D
 symbol	/reference/symbol/DMS
 symbol	/reference/symbol/DSolve
 symbol	/reference/symbol/DSolveValue
+symbol	/reference/symbol/Dashing
 symbol	/reference/symbol/DeBruijnMorselt
 symbol	/reference/symbol/DecimalRepresentation
 symbol	/reference/symbol/DecimalRepresentationWithLeadingOne
@@ -2655,6 +2663,7 @@ symbol	/reference/symbol/Dinv
 symbol	/reference/symbol/DinvDeficit
 symbol	/reference/symbol/DiracDelta
 symbol	/reference/symbol/DirectedEdge
+symbol	/reference/symbol/Directive
 symbol	/reference/symbol/DirichletBeta
 symbol	/reference/symbol/DirichletCharacter
 symbol	/reference/symbol/DirichletDistribution
@@ -2760,6 +2769,7 @@ symbol	/reference/symbol/DysonRank
 symbol	/reference/symbol/EarlyCloserPairCount
 symbol	/reference/symbol/Echo
 symbol	/reference/symbol/EdgeCount
+symbol	/reference/symbol/EdgeForm
 symbol	/reference/symbol/EdgeList
 symbol	/reference/symbol/EdgeOrbitCount
 symbol	/reference/symbol/EgyptianFraction
@@ -2846,6 +2856,7 @@ symbol	/reference/symbol/ExtendedRealNumbers
 symbol	/reference/symbol/ExteriorLength
 symbol	/reference/symbol/ExternalPathLength
 symbol	/reference/symbol/Extract
+symbol	/reference/symbol/FaceForm
 symbol	/reference/symbol/Factor
 symbol	/reference/symbol/FactorInteger
 symbol	/reference/symbol/FactoradicNumeral
@@ -3069,6 +3080,7 @@ symbol	/reference/symbol/Graphics
 symbol	/reference/symbol/Graphics3D
 symbol	/reference/symbol/Graphics3DBox
 symbol	/reference/symbol/GraphicsBox
+symbol	/reference/symbol/GraphicsComplex
 symbol	/reference/symbol/GraphicsComplex3DBox
 symbol	/reference/symbol/GraphicsComplexBox
 symbol	/reference/symbol/GrassmannAlgebra
@@ -3076,6 +3088,7 @@ symbol	/reference/symbol/GrassmannianPermutations
 symbol	/reference/symbol/GravitationalConstant
 symbol	/reference/symbol/GrayCodeSubsets
 symbol	/reference/symbol/GrayCodes
+symbol	/reference/symbol/GrayLevel
 symbol	/reference/symbol/GrayNext
 symbol	/reference/symbol/GrayPrevious
 symbol	/reference/symbol/Greater
@@ -3171,6 +3184,7 @@ symbol	/reference/symbol/HosoyaIndex
 symbol	/reference/symbol/Hsl
 symbol	/reference/symbol/Hsv
 symbol	/reference/symbol/HuangRhoadesMajorIndex
+symbol	/reference/symbol/Hue
 symbol	/reference/symbol/HurwitzNumber
 symbol	/reference/symbol/HurwitzZeta
 symbol	/reference/symbol/HyperWienerIndex
@@ -4176,6 +4190,7 @@ symbol	/reference/symbol/OnesMatrix
 symbol	/reference/symbol/OnesMinusZeros
 symbol	/reference/symbol/OnesOnMainDiagonal
 symbol	/reference/symbol/OnesToLeading
+symbol	/reference/symbol/Opacity
 symbol	/reference/symbol/Open
 symbol	/reference/symbol/OpenerBeforeCloserPairs
 symbol	/reference/symbol/Optional
@@ -4367,6 +4382,7 @@ symbol	/reference/symbol/Point
 symbol	/reference/symbol/Point3DBox
 symbol	/reference/symbol/PointBox
 symbol	/reference/symbol/PointList
+symbol	/reference/symbol/PointSize
 symbol	/reference/symbol/PointX
 symbol	/reference/symbol/PointY
 symbol	/reference/symbol/PointZ
@@ -4523,6 +4539,7 @@ symbol	/reference/symbol/QuiverPath
 symbol	/reference/symbol/QuiverPathEnd
 symbol	/reference/symbol/Quotient
 symbol	/reference/symbol/QuotientRing
+symbol	/reference/symbol/RGBColor
 symbol	/reference/symbol/RSolve
 symbol	/reference/symbol/RademacherPhi
 symbol	/reference/symbol/RademacherSymbol
@@ -4702,6 +4719,7 @@ symbol	/reference/symbol/RootedLabeledTrees
 symbol	/reference/symbol/RootedTreeCountWithNoLeafOfItsParentsColor
 symbol	/reference/symbol/RootedUnlabeledTree
 symbol	/reference/symbol/RootedUnlabeledTrees
+symbol	/reference/symbol/Rotate
 symbol	/reference/symbol/RotateLeft
 symbol	/reference/symbol/RotateRight
 symbol	/reference/symbol/RotateSkewPartition
@@ -4746,6 +4764,7 @@ symbol	/reference/symbol/SameNeighborhoodPairCount
 symbol	/reference/symbol/Sandwich
 symbol	/reference/symbol/SawtoothWave
 symbol	/reference/symbol/ScalarProduct
+symbol	/reference/symbol/Scale
 symbol	/reference/symbol/ScaledReciprocalPositionValueSum
 symbol	/reference/symbol/Scan
 symbol	/reference/symbol/SchroederNumbers
@@ -5035,6 +5054,7 @@ symbol	/reference/symbol/StrongFixedPoints
 symbol	/reference/symbol/StrongRecordCount
 symbol	/reference/symbol/StrongRecordPositionSum
 symbol	/reference/symbol/StudentTDistribution
+symbol	/reference/symbol/Style
 symbol	/reference/symbol/StyleBox
 symbol	/reference/symbol/SubexcedantSeq
 symbol	/reference/symbol/SubexcedantSeqs
@@ -5130,6 +5150,7 @@ symbol	/reference/symbol/Text
 symbol	/reference/symbol/TextBox
 symbol	/reference/symbol/TextCell
 symbol	/reference/symbol/TextData
+symbol	/reference/symbol/Thickness
 symbol	/reference/symbol/Third
 symbol	/reference/symbol/ThirdPositiveWeylFussCatalanNumber
 symbol	/reference/symbol/ThirdWeylFussCatalanNumber
@@ -5194,6 +5215,7 @@ symbol	/reference/symbol/Trace
 symbol	/reference/symbol/Traits
 symbol	/reference/symbol/TransformedDistribution
 symbol	/reference/symbol/TransitiveMonotoneFactorizationCount
+symbol	/reference/symbol/Translate
 symbol	/reference/symbol/Transpose
 symbol	/reference/symbol/TransposeAlternatingSignMatrix
 symbol	/reference/symbol/TransposeComposition

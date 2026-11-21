@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[RGBColor, 0.2, 0.4, 0.8]	[RGBColor, 0.2, 0.4, 0.8]	A color by its parts
+in-graphics	Basic		[Graphics, [List, [RGBColor, 0.2, 0.4, 0.8], [Disk, [Tuple, 0, 0], 1]]]	[Graphics, [List, [RGBColor, 0.2, 0.4, 0.8], [Disk, [Tuple, 0, 0], 1]]]	A disk in that color

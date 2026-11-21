@@ -1,0 +1,3 @@
+id	in
+one	GrayLevel[0.5]
+in-graphics	Graphics[List[GrayLevel[0.5], Disk[List[0, 0], 1]]]

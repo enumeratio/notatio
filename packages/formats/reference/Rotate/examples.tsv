@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Rotate, [Rectangle, [Tuple, 0, 0], [Tuple, 2, 1]], 0.5]	[Rotate, [Rectangle, [Tuple, 0, 0], [Tuple, 2, 1]], 0.5]	A rectangle turned half a radian
+in-graphics	Basic		[Graphics, [List, [Rotate, [Rectangle, [Tuple, 0, 0], [Tuple, 2, 1]], 0.5]]]	[Graphics, [List, [Rotate, [Rectangle, [Tuple, 0, 0], [Tuple, 2, 1]], 0.5]]]	Drawn

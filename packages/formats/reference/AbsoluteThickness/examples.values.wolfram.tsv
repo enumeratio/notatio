@@ -1,0 +1,3 @@
+id	in
+one	AbsoluteThickness[3]
+in-graphics	Graphics[List[AbsoluteThickness[3], Line[List[List[0, 0], List[2, 1]]]]]

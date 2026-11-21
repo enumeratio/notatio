@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[PointSize, 0.03]	[PointSize, 0.03]	A point size alone
+in-graphics	Basic		[Graphics, [List, [PointSize, 0.03], [Point, [List, [Tuple, 0, 0], [Tuple, 1, 1]]]]]	[Graphics, [List, [PointSize, 0.03], [Point, [List, [Tuple, 0, 0], [Tuple, 1, 1]]]]]	Two large points
