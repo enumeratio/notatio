@@ -5,6 +5,9 @@ signature: GraphPlot(...)
 summary: Wolfram's own GraphPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Directed
+  - PlotLabel
 optionValues:
   Directed:
     - true

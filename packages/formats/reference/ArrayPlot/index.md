@@ -5,6 +5,11 @@ signature: ArrayPlot(...)
 summary: Wolfram's own ArrayPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - BoundaryStyle
+  - ColorFunction
+  - ColorMixing
+  - ColorRules
 signatures:
   - call: ArrayPlot(...)
     description: Wolfram's own ArrayPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

@@ -5,6 +5,12 @@ signature: BarChart3D(...)
 summary: Wolfram's own BarChart3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Axes
+  - ColorFunction
+  - PlotLabel
+  - PlotLegends
+  - ScalingFunctions
 signatures:
   - call: BarChart3D(...)
     description: Wolfram's own BarChart3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

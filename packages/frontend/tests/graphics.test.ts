@@ -2,12 +2,21 @@
 // plot reads the same way.
 
 import { type BoxNode, optionsOfBox } from "@notatio/boxes";
+import { GRAPHICS_HEADS } from "@notatio/formats";
+import { declaredOptions } from "@notatio/formats/graphics-options";
 import { expect, test } from "vite-plus/test";
 import { colorOf } from "../src/graphics-rules.ts";
 import { plotBox } from "../src/plot-box.ts";
 import { graphicsBoxOfSettings, holdsPlaneShow, layerStylesOf, plotOptionsOf } from "../src/plot-lowering.ts";
 import { primitivesOf } from "../src/primitives.ts";
-import { planeShowOf, plotOfText, plotSettingsOf } from "../src/symbols.ts";
+import {
+  DRAWING_SYMBOLS,
+  GRAPHICS_3D_SETTINGS,
+  PLOT_SETTINGS,
+  planeShowOf,
+  plotOfText,
+  plotSettingsOf,
+} from "../src/symbols.ts";
 
 const at = (x: unknown, y: unknown): unknown[] => ["Tuple", x, y];
 const rule = (name: string, value: unknown): unknown[] => ["Rule", name, value];
@@ -182,4 +191,16 @@ test("each layer's PlotStyle is cycled over its own curves", () => {
     undefined,
   ]);
   expect(looks[4]).toEqual({ thickness: { px: 2.5 } });
+});
+
+test("every option a head's lowering reads is one its record declares", () => {
+  const undeclared: string[] = [];
+  // The heads formats declares: a library's head (`TestResultObject`) declares its options in its own records.
+  const ours = [...DRAWING_SYMBOLS, ...PLOT_SETTINGS, ...GRAPHICS_3D_SETTINGS].filter((symbol) =>
+    GRAPHICS_HEADS.includes(symbol.head),
+  );
+  for (const symbol of ours)
+    for (const name of Object.keys(symbol.options ?? {}))
+      if (!declaredOptions(symbol.head).has(name)) undeclared.push(`${symbol.head}: ${name}`);
+  expect([...new Set(undeclared)]).toEqual([]);
 });

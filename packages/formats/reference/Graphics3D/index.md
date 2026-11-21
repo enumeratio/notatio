@@ -5,6 +5,15 @@ signature: Graphics3D(primitives..., options...)
 summary: Wolfram's own Graphics3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Axes
+  - Clock
+  - Closed
+  - ColorFunction
+  - PlotLabel
+  - PlotLegends
+  - ScalingFunctions
+  - Torus
 signatures:
   - call: Graphics3D(primitives..., options...)
     description: Wolfram's own Graphics3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

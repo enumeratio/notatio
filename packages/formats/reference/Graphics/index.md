@@ -7,6 +7,15 @@ names:
   wolframIdentity: true
 attributes:
   - HoldAll
+options:
+  - AspectRatio
+  - Axes
+  - AxesLabel
+  - Frame
+  - FrameLabel
+  - GridLines
+  - PlotLabel
+  - PlotRange
 seeAlso:
   - Show
   - Plot

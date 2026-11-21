@@ -5,6 +5,8 @@ signature: TreeGraph(...)
 summary: Wolfram's own TreeGraph, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - PlotLabel
 signatures:
   - call: TreeGraph(...)
     description: Wolfram's own TreeGraph, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

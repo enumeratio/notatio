@@ -5,6 +5,8 @@ signature: ListPolarPlot(...)
 summary: Wolfram's own ListPolarPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Closed
 optionValues:
   Closed:
     - true

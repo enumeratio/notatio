@@ -5,6 +5,9 @@ signature: DynamicModule(...)
 summary: Wolfram's own DynamicModule, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Evaluator
+  - TrackedSymbols
 signatures:
   - call: DynamicModule(...)
     description: Wolfram's own DynamicModule, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

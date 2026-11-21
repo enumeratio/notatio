@@ -5,6 +5,15 @@ signature: ListContourPlot(...)
 summary: Wolfram's own ListContourPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - ColorFunction
+  - ContourShading
+  - Contours
+  - FrameLabel
+  - PlotLabel
+  - RegionFunction
+  - XLabel
+  - YLabel
 signatures:
   - call: ListContourPlot(...)
     description: Wolfram's own ListContourPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
