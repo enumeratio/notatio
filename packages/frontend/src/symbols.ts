@@ -7,7 +7,7 @@ import {
   paramsOf,
   type PlotChoice,
 } from "./infer-controls.ts";
-import { CHART_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
+import { CHART_HEADS, PLANE_LAYER_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";
 import { type MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 import {
@@ -854,6 +854,31 @@ export function plotSettingsOf(expr: Json): Record<string, string> | undefined {
   return head === "Chart" ? chosenType(settings) : settings;
 }
 
+/** One layer of a `Show` of the plane: its head and the settings it lowers to. */
+export interface PlaneLayer {
+  readonly head: string;
+  readonly settings: Record<string, string>;
+}
+
+/**
+ * A `Show` of plots and graphics: its layers in order, and the frame's settings its own options give
+ * (they stand over the first layer's, as in Wolfram). Undefined when a layer is not of the plane.
+ */
+export function planeShowOf(expr: Json): { layers: PlaneLayer[]; frame: Record<string, string> } | undefined {
+  if (headOf(expr) !== "Show") return undefined;
+  const { ops, options } = optionsOf(expr);
+  const layers: PlaneLayer[] = [];
+  for (const op of ops) {
+    const head = headOf(op);
+    const settings = head !== undefined && PLANE_LAYER_HEADS.includes(head) ? plotSettingsOf(op) : undefined;
+    if (head === undefined || settings === undefined) return undefined;
+    layers.push({ head, settings });
+  }
+  if (layers.length === 0) return undefined;
+  const rules = { options: { ...FRAME_OPTIONS, AxesLabel: axesLabel, FrameLabel: frameLabel } };
+  return { layers, frame: lowerOptions(rules, options).attributes };
+}
+
 /**
  * What a plot element (`<graphics-box value>`) makes of its text: the expression as plain MathJSON
  * and its settings, or undefined when the text does not parse or is no plot head.
@@ -961,7 +986,10 @@ export const VISUAL_SYMBOLS: readonly VisualSymbol[] = [
     // The height it will take, so the page lays out before the element is defined.
     attributes: (ops) => ({
       value: epsil(["Show", ...ops] as Json),
-      style: `display:block;min-height:${showHeight(ops)}px`,
+      // A `Show` of plots and graphics is as tall as a plot, which sizes itself.
+      ...(!PLANE_LAYER_HEADS.includes(headOf(ops[0]) ?? "") && {
+        style: `display:block;min-height:${showHeight(ops)}px`,
+      }),
     }),
   },
   // A polytope displays as its faces under a camera, as Wolfram's `Polyhedron` displays as

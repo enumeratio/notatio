@@ -28,7 +28,9 @@ import {
   diagramBoxOf,
   followsClock,
   gestureHandlingOf,
+  type GraphicsLook,
   graphicsBoxOfSettings,
+  layerStylesOf,
   pageClock,
   type PlotFrame,
   plotBoxOfSamples,
@@ -56,6 +58,7 @@ import {
   vectorPlotBox,
   wheelZooms,
 } from "@notatio/frontend/core";
+import type { PlaneLayer } from "@notatio/frontend/symbols";
 import { compilePlotText, type LoadedPlot, plotFunctions, readEpsil } from "./plot-kernel.ts";
 
 const log = debug("plot");
@@ -91,6 +94,12 @@ interface FieldShader {
   readonly paints: FieldPaints;
   /** The wildcards the functions take, in argument order. */
   readonly params: readonly string[];
+}
+
+/** A curve plot's series: over its whole domain, and over a window when sampled from an expression. */
+interface Curves {
+  readonly series: PlotSeries[];
+  readonly inWindow?: (window: PlotWindow | undefined) => PlotSeries[];
 }
 
 /** A plot box with its frame and no marks: what is drawn over a shader's canvas. */
@@ -182,7 +191,7 @@ export class PlotView {
   async recompute(): Promise<void> {
     const generation = ++this.#generation;
     const text = this.host.value.trim();
-    const { plotOfText } = await import("@notatio/frontend/symbols");
+    const { plotOfText, planeShowOf } = await import("@notatio/frontend/symbols");
     const plot = plotOfText(text);
     if (generation !== this.#generation) return;
     if (plot === undefined) return this.#clear();
@@ -199,8 +208,10 @@ export class PlotView {
     const chart = chartBoxOfSettings(settings);
     if (chart !== undefined) return this.#chart(chart as BoxNode);
     if (head === "Graphics") return this.#graphics(settings);
+    const show = planeShowOf(plain);
     try {
-      if (typeof head === "string" && POLAR.has(head)) await this.#polarize(head, settings, generation);
+      if (show !== undefined) await this.#layers(show, generation);
+      else if (typeof head === "string" && POLAR.has(head)) await this.#polarize(head, settings, generation);
       else if (typeof head === "string" && FIELD.has(head)) await this.#vectorize(settings, generation);
       else if (typeof head === "string" && FIELD_PLOT_HEADS.includes(head))
         await this.#rasterize(head, settings, generation);
@@ -304,60 +315,139 @@ export class PlotView {
     if (followsClock(settings)) this.#unwatch = pageClock().watch((tick) => draw(tick.phase));
   }
 
+  /**
+   * A curve plot's series over its whole domain, and over a window when they are sampled from an
+   * expression. Undefined when there is nothing to draw, or a newer plot has taken over; the view
+   * then says why, or is left to the newer one.
+   */
+  async #curves(settings: Readonly<Record<string, string>>, generation: number): Promise<Curves | undefined> {
+    const data = plotDataSeries(settings);
+    if (data !== undefined) return { series: data };
+    const raw = settings["value"]?.trim();
+    if (!raw) {
+      this.#clear();
+      return undefined;
+    }
+    const loaded = await plotFunctions(raw, { each: true });
+    if (generation !== this.#generation) return undefined;
+    const { plot, samplers } = loaded;
+    // The Manipulate parameters fill the wildcard slots (`_a`); the plot variable is whatever
+    // free symbol remains.
+    const scope = loaded.scope();
+    Object.assign(scope, this.host.bindings);
+    const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
+    // A symbol that is neither the plot variable nor bound would sample to nothing: say so.
+    const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
+    if (unbound.length > 0) {
+      this.#clear();
+      const names = unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
+      this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${unbound.length > 1 ? "have" : "has"} no value.</span>`;
+      this.host.requestUpdate();
+      return undefined;
+    }
+    // Each curve is code the kernel compiled, sampled per t: vastly faster than a subs()+N()
+    // per sample, so a 1000-point sweep or an animated slider stays smooth.
+    const at =
+      (k: number) =>
+      (t: number): number => {
+        scope[variable] = t;
+        return samplers[k]!(scope);
+      };
+    const options = {
+      domain: spanOf(settings["domain"]) ?? ([-6.283185, 6.283185] as const),
+      samples: Number(settings["samples"]) || 160,
+      mode: settings["mode"],
+      adaptive: settings["adaptive"] !== "false",
+      parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
+    };
+    return {
+      series: plotSeries(plot.items, at, options),
+      // A zoomed view asks the same compiled code again, over the window and at the pixels' density.
+      inWindow: (window) => plotSeriesIn(plot.items, at, options, window, this.#pixels()),
+    };
+  }
+
   async #sample(settings: Readonly<Record<string, string>>, generation: number): Promise<void> {
     const marks = await this.#readMarks(settings);
-    const data = plotDataSeries(settings);
-    if (data === undefined) {
-      const raw = settings["value"]?.trim();
-      if (!raw) return this.#clear();
-      const loaded = await plotFunctions(raw, { each: true });
-      if (generation !== this.#generation) return;
-      const { plot, samplers } = loaded;
-      // The Manipulate parameters fill the wildcard slots (`_a`); the plot variable is whatever
-      // free symbol remains.
-      const scope = loaded.scope();
-      Object.assign(scope, this.host.bindings);
-      const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
-      // A symbol that is neither the plot variable nor bound would sample to nothing: say so.
-      const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
-      if (unbound.length > 0) {
-        this.#clear();
-        const names = unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
-        this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${unbound.length > 1 ? "have" : "has"} no value.</span>`;
-        this.host.requestUpdate();
-        return;
-      }
-      // Each curve is code the kernel compiled, sampled per t: vastly faster than a subs()+N()
-      // per sample, so a 1000-point sweep or an animated slider stays smooth.
-      const at =
-        (k: number) =>
-        (t: number): number => {
-          scope[variable] = t;
-          return samplers[k]!(scope);
-        };
-      const options = {
-        domain: spanOf(settings["domain"]) ?? ([-6.283185, 6.283185] as const),
-        samples: Number(settings["samples"]) || 160,
-        mode: settings["mode"],
-        adaptive: settings["adaptive"] !== "false",
-        parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
-      };
-      this.#series = plotSeries(plot.items, at, options);
-      // A zoomed view asks the same compiled code again, over the window and at the pixels' density.
+    const curves = await this.#curves(settings, generation);
+    if (curves === undefined) return;
+    this.#series = curves.series;
+    const { inWindow } = curves;
+    if (inWindow)
       this.#redo = (window) => {
-        this.#series = plotSeriesIn(plot.items, at, options, window, this.#pixels());
+        this.#series = inWindow(window);
         this.#rebuild();
       };
-    } else {
-      this.#series = data;
-      this.#unzoomable();
-    }
+    else this.#unzoomable();
     this.#marked = marks;
+    this.#styles = undefined;
     this.#polar = undefined;
     this.#field = false;
     this.#rebuild(true);
     if (this.#window !== undefined) this.#redo?.(this.#window);
   }
+
+  /**
+   * A `Show` of plots and graphics: every layer in one frame, the first plot's window and frame
+   * options unless the `Show` gives its own. A `Graphics` before the first plot is drawn under the
+   * curves, and one after it over them; each sampled layer is sampled again when the reader zooms.
+   */
+  async #layers(
+    show: { readonly layers: readonly PlaneLayer[]; readonly frame: Readonly<Record<string, string>> },
+    generation: number,
+  ): Promise<void> {
+    const sampled: Curves[] = [];
+    const styled: { style: string | undefined; count: number }[] = [];
+    const marks: { epilog: Primitive[]; prolog: Primitive[] } = { epilog: [], prolog: [] };
+    let first: Readonly<Record<string, string>> | undefined;
+    for (const { head, settings } of show.layers) {
+      if (head === "Graphics") {
+        const written = settings["primitives"];
+        const primitives = written === undefined ? [] : primitivesOf(JSON.parse(written) as MathJsonExpression);
+        (sampled.length === 0 ? marks.prolog : marks.epilog).push(...primitives);
+        continue;
+      }
+      const own = await this.#readMarks(settings);
+      const curves = await this.#curves(settings, generation);
+      if (curves === undefined) return;
+      first ??= settings;
+      sampled.push(curves);
+      styled.push({ style: settings["plot-style"], count: curves.series.length });
+      marks.prolog.push(...(own.prolog ?? []));
+      marks.epilog.push(...(own.epilog ?? []));
+    }
+    if (generation !== this.#generation) return;
+    // Graphics alone: one `Graphics` of them all, in the `Show`'s frame.
+    if (first === undefined) {
+      const all = show.layers.flatMap(({ settings }) =>
+        settings["primitives"] === undefined ? [] : [JSON.parse(settings["primitives"]) as unknown],
+      );
+      return this.#graphics({
+        ...show.layers[0]!.settings,
+        ...show.frame,
+        primitives: JSON.stringify(["List", ...all]),
+      });
+    }
+    this.#settings = { ...first, ...show.frame };
+    this.#styles = layerStylesOf(styled);
+    this.#marked = marks;
+    const seriesIn = (window: PlotWindow | undefined): PlotSeries[] =>
+      sampled.flatMap((layer) => (window === undefined || !layer.inWindow ? layer.series : layer.inWindow(window)));
+    this.#series = seriesIn(undefined);
+    if (sampled.some((layer) => layer.inWindow))
+      this.#redo = (window) => {
+        this.#series = seriesIn(window);
+        this.#rebuild();
+      };
+    else this.#unzoomable();
+    this.#polar = undefined;
+    this.#field = false;
+    this.#rebuild(true);
+    if (this.#window !== undefined) this.#redo?.(this.#window);
+  }
+
+  /** Each series' look, when the series come from the layers of a `Show`. */
+  #styles: GraphicsLook[] | undefined;
 
   #marked: { epilog?: Primitive[]; prolog?: Primitive[] } = {};
 
@@ -658,6 +748,7 @@ export class PlotView {
     const w = whole ? undefined : this.#window;
     this.#box = plotBoxOfSamples(this.#settings, this.#series, {
       ...this.#marked,
+      ...(this.#styles && { styles: this.#styles }),
       ...(w && { xRange: w.x, ...(w.y && { plotRange: w.y }) }),
     }) as BoxNode;
     if (w === undefined) this.#home = this.#windowOf(this.#box);

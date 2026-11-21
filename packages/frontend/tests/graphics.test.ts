@@ -5,9 +5,9 @@ import { type BoxNode, optionsOfBox } from "@notatio/boxes";
 import { expect, test } from "vite-plus/test";
 import { colorOf } from "../src/graphics-rules.ts";
 import { plotBox } from "../src/plot-box.ts";
-import { graphicsBoxOfSettings, plotOptionsOf } from "../src/plot-lowering.ts";
+import { graphicsBoxOfSettings, holdsPlaneShow, layerStylesOf, plotOptionsOf } from "../src/plot-lowering.ts";
 import { primitivesOf } from "../src/primitives.ts";
-import { plotSettingsOf } from "../src/symbols.ts";
+import { planeShowOf, plotSettingsOf } from "../src/symbols.ts";
 
 const at = (x: unknown, y: unknown): unknown[] => ["Tuple", x, y];
 const rule = (name: string, value: unknown): unknown[] => ["Rule", name, value];
@@ -143,4 +143,37 @@ test("Axes -> False reaches a plot, and PlotStyle styles its curves in turn", ()
   expect(strokes[1]).toEqual([colorOf("Blue"), 3, 1, [6, 4]]);
   // The styles are cycled.
   expect(strokes[2]![0]).toBe(colorOf("Red"));
+});
+
+test("a Show of plots and graphics is of the plane: its layers' settings, and its own frame over them", () => {
+  const show = planeShowOf([
+    "Show",
+    ["Plot", ["Sin", "x"], at("x", 0), rule("PlotStyle", "Red")],
+    ["Graphics", ["List", "Blue", ["Point", at(1, 1)]]],
+    ["ListPlot", ["List", 1, 2, 3]],
+    rule("Frame", "True"),
+    rule("PlotRange", at(-2, 2)),
+  ] as never)!;
+  expect(show.layers.map((layer) => layer.head)).toEqual(["Plot", "Graphics", "ListPlot"]);
+  expect(show.frame).toEqual({ frame: "true", "plot-range": "-2,2" });
+  expect(holdsPlaneShow("Show(Plot(Sin(x), (x, 0, 6)), Graphics(Point((1, 1))))")).toBe(true);
+  // A figure's layers are not the plane's: that `Show` is drawn as before.
+  expect(planeShowOf(["Show", ["LatticeTiles", "GaussianIntegers"]] as never)).toBeUndefined();
+  expect(holdsPlaneShow("Show(LatticeTiles(GaussianIntegers))")).toBe(false);
+});
+
+test("each layer's PlotStyle is cycled over its own curves", () => {
+  const looks = layerStylesOf([
+    { style: '["List","Red","Blue"]', count: 3 },
+    { style: undefined, count: 1 },
+    { style: '"Thick"', count: 1 },
+  ]);
+  expect(looks.map((look) => look.color)).toEqual([
+    colorOf("Red"),
+    colorOf("Blue"),
+    colorOf("Red"),
+    undefined,
+    undefined,
+  ]);
+  expect(looks[4]).toEqual({ thickness: { px: 2.5 } });
 });
