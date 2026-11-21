@@ -2,7 +2,8 @@ import { ComputeEngine, version } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { expect, test } from "vite-plus/test";
 import { CHECKED_COMPUTE_ENGINE, functionNodePrototype, libraryOperator, shadowsLibrary } from "../src/ce-internals.ts";
-import { extendHead } from "../src/index.ts";
+import { isCompileDecline } from "../src/compiled.ts";
+import { extendHead, refusing, wrapOperator } from "../src/index.ts";
 
 // The compile stance reads two things from compute-engine's internals (ce-internals.ts). A bump of
 // compute-engine fails here until someone has checked both still hold and moved CHECKED_COMPUTE_ENGINE on.
@@ -80,4 +81,37 @@ test("a declared symbol's definition reports inferredType false, an inferred one
   expect(valueOf("declared")?.inferredType).toBe(false);
   expect(valueOf("assigned")?.inferredType).toBe(true);
   expect(ce.lookupDefinition("mentioned")).toBeUndefined();
+});
+
+// isCompileDecline tells a decline by message for the kinds compute-engine doesn't type; a reworded
+// message fails here at the bump, not as a warning in every kernel answer.
+test("compile declines of each kind classify as declines, and an ordinary error does not", () => {
+  const ce = new ComputeEngine();
+  extendHead(ce, "Sin", { broadcastable: true });
+  wrapOperator(
+    ce,
+    ["Sin", 1],
+    () => false,
+    () => () => undefined,
+    {
+      arity: 1,
+      compile: refusing(() => true, "held"),
+    },
+  );
+  const thrown = (json: unknown): unknown => {
+    try {
+      new JavaScriptTarget().compile(ce.box(json as never), { fallback: false });
+    } catch (error) {
+      return error;
+    }
+    throw new Error(`${JSON.stringify(json)} compiled`);
+  };
+  for (const json of [
+    ["NotAHeadAnywhere", 1], // an unknown operator
+    ["Sin", "x"], // a refusing() head
+    ["Pi"], // an invalid expression
+    ["Equal", "x", 1], // an untyped input: a typed decline
+  ])
+    expect(isCompileDecline(thrown(json)), JSON.stringify(json)).toBe(true);
+  expect(isCompileDecline(new Error("boom"))).toBe(false);
 });

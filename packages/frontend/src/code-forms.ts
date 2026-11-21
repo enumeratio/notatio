@@ -5,6 +5,7 @@
 
 import { type ComputeEngine, compile, type Expression, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine";
 import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
+import { isCompileDecline } from "@notatio/engine/compiled";
 import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
 import { toGlslFn } from "./plot-compile.ts";
@@ -27,13 +28,25 @@ export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<Code
       // this target can't compile this expression
     }
   }
-  try {
-    const code = (compile(json as never, { engine: ce } as never) as { code?: unknown } | undefined)?.code;
-    if (typeof code === "string") out.javascript = code;
-  } catch {
-    // not compilable to JavaScript
-  }
+  const javascript = javascriptSource(ce, json);
+  if (javascript !== undefined) out.javascript = javascript;
   return out;
+}
+
+/**
+ * `json` compiled to JavaScript source, or undefined. A decline is expected here (a list or a held
+ * head like `Factorization` has no source) and stays silent: `fallback: false` keeps compute-engine
+ * from logging each one. Any other failure is still warned about.
+ */
+export function javascriptSource(ce: ComputeEngine, json: unknown): string | undefined {
+  try {
+    const code = (compile(json as never, { engine: ce, fallback: false } as never) as { code?: unknown } | undefined)
+      ?.code;
+    return typeof code === "string" ? code : undefined;
+  } catch (error) {
+    if (!isCompileDecline(error)) console.warn("JavaScript code form failed:", error);
+    return undefined;
+  }
 }
 
 /**

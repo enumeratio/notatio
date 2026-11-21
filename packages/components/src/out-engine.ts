@@ -146,7 +146,7 @@ export const oneLine = (json: MathJsonExpression): string =>
 // Code forms whose source comes from a compute-engine compilation TARGET (via
 // `target.compileToSource`). The map is `form -> target export name`; held as a
 // value so the classes aren't tree-shaken out of the bundle. JavaScript is a
-// code form too but uses the free `compile().code` path (see #codeSources).
+// code form too, through `javascriptSource`.
 const CODE_TARGETS = {
   python: "PythonTarget",
   glsl: "GLSLTarget",
@@ -173,15 +173,10 @@ export async function codeSources(engine: ComputeEngine, json: unknown): Promise
       }
     }
     // JavaScript uses the free compile() path; its result carries `.code`.
-    try {
-      const compileFn = (mod as unknown as { compile?: (e: unknown, o: unknown) => unknown }).compile;
-      const res = compileFn?.(json, { engine });
-      const code = (res as { code?: unknown } | undefined)?.code;
-      if (typeof code === "string") out.javascript = code;
-    } catch {
-      // not compilable to JavaScript
-    }
-    out.gpushader = (await import("@notatio/frontend/kernel-host")).gpuShader(expr);
+    const host = await import("@notatio/frontend/kernel-host");
+    const javascript = host.javascriptSource(engine, json);
+    if (javascript !== undefined) out.javascript = javascript;
+    out.gpushader = host.gpuShader(expr);
   } catch {
     // compute-engine module unavailable
   }
