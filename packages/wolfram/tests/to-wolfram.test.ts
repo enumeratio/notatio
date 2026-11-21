@@ -1,5 +1,7 @@
 import { expect, test } from "vite-plus/test";
-import { decimalLiteralToWolfram, isWolframHead, toWolfram } from "../src/to-wolfram.ts";
+import { DIRECTIVE_NAMES } from "../src/directive-names.ts";
+import { isSystemName } from "../src/system-names.ts";
+import { decimalLiteralToWolfram, isWolframHead, isWolframOwnName, toWolfram } from "../src/to-wolfram.ts";
 
 test("atoms and symbols", () => {
   expect(toWolfram(42)).toBe("42");
@@ -431,4 +433,11 @@ test("a decimal inside N past a double's digits is the exact rational it spells"
 test("a decimal stays as written at a double's digits or fewer", () => {
   expect(decimalLiteralToWolfram("-2.0000000000000001", 0)).toBeUndefined();
   expect(decimalLiteralToWolfram("0.1", 15)).toBeUndefined();
+});
+
+test("the named colors and style words are Wolfram's own names, and each is a System symbol", () => {
+  expect(DIRECTIVE_NAMES.filter((name) => !isSystemName(name))).toEqual([]);
+  for (const name of ["Red", "LightBlue", "Thick", "Dashed", "Large"]) expect(isWolframOwnName(name)).toBe(true);
+  // A color of ours that Wolfram does not name stays ours.
+  expect(isWolframOwnName("Teal")).toBe(false);
 });
