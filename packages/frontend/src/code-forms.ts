@@ -5,6 +5,7 @@
 
 import { type ComputeEngine, compile, type Expression, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine";
 import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
+import { isCompileDecline } from "@notatio/engine/compiled";
 import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
 import { toGlslFn } from "./plot-compile.ts";
@@ -32,10 +33,6 @@ export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<Code
   return out;
 }
 
-/** A decline of the compiler by design (a head with no lowering, or one that refuses), not a failure. */
-const isDecline = (error: unknown): boolean =>
-  error instanceof Error && /^(Unknown operator|no \w+ lowering|Could not compile)/.test(error.message);
-
 /**
  * `json` compiled to JavaScript source, or undefined. A decline is expected here (a list or a held
  * head like `Factorization` has no source) and stays silent: `fallback: false` keeps compute-engine
@@ -47,7 +44,7 @@ export function javascriptSource(ce: ComputeEngine, json: unknown): string | und
       ?.code;
     return typeof code === "string" ? code : undefined;
   } catch (error) {
-    if (!isDecline(error)) console.warn("JavaScript code form failed:", error);
+    if (!isCompileDecline(error)) console.warn("JavaScript code form failed:", error);
     return undefined;
   }
 }

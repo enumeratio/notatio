@@ -124,6 +124,18 @@ export function compileTyped(
   }
 }
 
+/**
+ * Whether `error`, thrown by a compile with `fallback: false`, is the compiler declining an
+ * expression it has no lowering for, not a failure. compute-engine types some declines (a
+ * `diagnostic` on the error); an unknown operator, our `refusing` guards and an invalid
+ * expression are plain errors told by message, held by `tests/ce-internals.test.ts`.
+ */
+export function isCompileDecline(error: unknown): boolean {
+  if (!(error instanceof Error)) return false;
+  if ("diagnostic" in error) return true;
+  return /^(Unknown operator|no \w+ lowering|Could not compile)/.test(error.message);
+}
+
 /** `expr` compiled to a plain JS function of its free variables, or undefined when the compiler
  *  has no lowering for something in it. For a hot loop that would otherwise `subs` and `N` per
  *  point; the caller keeps the symbolic route as its fallback. */
