@@ -1,1 +1,204 @@
-{}
+{
+  "CloserBeforeLargerPairs@SetPartition St000577 n=8 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. The rows past size 7 are a sample, e.g. {{1,2,3,4,5,6},{7,8}}: ours 2, FindStat 7. Reproduced on all 1200 rows by reading the pair (a,b) as the set's order.",
+    "ours": {
+      "1": 13,
+      "2": 6,
+      "3": 4,
+      "4": 3,
+      "5": 2,
+      "6": 1,
+      "8": 1
+    },
+    "theirs": {
+      "2": 6,
+      "3": 5,
+      "4": 4,
+      "5": 3,
+      "6": 8,
+      "7": 3,
+      "13": 1
+    }
+  },
+  "OccurrencesOf1Over2Over3Openers3Closers12@SetPartition St000583 n=8 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. Sizes up to 7 agree on all 1155 rows; the pattern's points taken in set order reproduce 1395 of the 1503 rows, so not fully emulated without Sage.",
+    "ours": {
+      "0": 32,
+      "1": 24,
+      "2": 6,
+      "3": 7,
+      "4": 3
+    },
+    "theirs": {
+      "0": 5,
+      "1": 23,
+      "2": 14,
+      "3": 10,
+      "4": 13,
+      "5": 4,
+      "6": 2,
+      "7": 1
+    }
+  },
+  "OccurrencesOf1Over2Over3Openers3Closers12@SetPartition St000583 n=9 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. Sizes up to 7 agree on all 1155 rows; the pattern's points taken in set order reproduce 1395 of the 1503 rows, so not fully emulated without Sage.",
+    "ours": {
+      "0": 2
+    },
+    "theirs": {
+      "1": 2
+    }
+  },
+  "OccurrencesOf1Over2Over3Openers3Closers12@SetPartition St000583 n=10 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. Sizes up to 7 agree on all 1155 rows; the pattern's points taken in set order reproduce 1395 of the 1503 rows, so not fully emulated without Sage.",
+    "ours": {
+      "0": 6,
+      "1": 4,
+      "2": 3,
+      "3": 6,
+      "4": 3,
+      "5": 2,
+      "6": 6,
+      "7": 4,
+      "8": 2,
+      "9": 2,
+      "10": 2
+    },
+    "theirs": {
+      "1": 1,
+      "2": 2,
+      "4": 2,
+      "5": 1,
+      "6": 2,
+      "7": 4,
+      "8": 1,
+      "9": 6,
+      "10": 3,
+      "11": 2,
+      "12": 4,
+      "13": 1,
+      "14": 3,
+      "15": 1,
+      "16": 2,
+      "17": 1,
+      "19": 2,
+      "20": 1,
+      "23": 1
+    }
+  },
+  "OccurrencesOf1Over2Over3Openers3Closers12@SetPartition St000583 n=12 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. Sizes up to 7 agree on all 1155 rows; the pattern's points taken in set order reproduce 1395 of the 1503 rows, so not fully emulated without Sage.",
+    "ours": {
+      "0": 6,
+      "1": 5,
+      "2": 4,
+      "3": 8,
+      "4": 6,
+      "5": 3,
+      "6": 10,
+      "7": 7,
+      "8": 5,
+      "9": 8,
+      "10": 9,
+      "11": 6,
+      "12": 10,
+      "13": 10,
+      "14": 5,
+      "15": 5,
+      "16": 7,
+      "17": 5,
+      "18": 2,
+      "19": 3,
+      "20": 2
+    },
+    "theirs": {
+      "1": 3,
+      "3": 2,
+      "6": 2,
+      "8": 3,
+      "9": 4,
+      "10": 7,
+      "11": 2,
+      "12": 9,
+      "13": 8,
+      "14": 4,
+      "15": 3,
+      "16": 11,
+      "17": 3,
+      "18": 1,
+      "19": 5,
+      "20": 10,
+      "21": 6,
+      "22": 2,
+      "23": 5,
+      "24": 6,
+      "25": 2,
+      "26": 6,
+      "27": 3,
+      "28": 2,
+      "30": 5,
+      "32": 3,
+      "33": 3,
+      "34": 1,
+      "37": 2,
+      "38": 1,
+      "40": 2
+    }
+  },
+  "SetPartitionDimension@SetPartition St000728 n=8 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. FindStat's displayed code is sum(max(B) - min(B)), which is never negative; the stored -2 is the sum of the arcs j - i over blocks in set order (reproduced on all 1200 rows).",
+    "ours": {
+      "6": 1,
+      "8": 1,
+      "9": 1,
+      "10": 1,
+      "11": 1,
+      "12": 2
+    },
+    "theirs": {
+      "0": 1,
+      "1": 1,
+      "2": 1,
+      "3": 1,
+      "4": 2,
+      "-2": 1
+    }
+  },
+  "MinimalArcLength@SetPartition St000729 n=8 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. Reproduced on all 1200 rows as the minimum of j - i over arcs of the blocks in set order.",
+    "ours": {
+      "1": 7
+    },
+    "theirs": {
+      "-1": 1,
+      "-7": 1,
+      "-6": 1,
+      "-5": 1,
+      "-4": 1,
+      "-3": 1,
+      "-2": 1
+    }
+  },
+  "MaximalArcLength@SetPartition St000730 n=8 objects": {
+    "kind": "unclassified",
+    "note": "FindStat's stored values here are those of its own code run on the blocks (and the triple or pair of points) in CPython set-iteration order, which is ascending only below 8 (a set {k,8} iterates 8 first): {1,8} is the arc (8,1), length -7. Reproduced on all 1200 rows as the maximum of j - i over arcs of the blocks in set order.",
+    "ours": {
+      "3": 1,
+      "4": 1,
+      "5": 1,
+      "6": 1,
+      "7": 1
+    },
+    "theirs": {
+      "1": 1,
+      "2": 4
+    }
+  }
+}
