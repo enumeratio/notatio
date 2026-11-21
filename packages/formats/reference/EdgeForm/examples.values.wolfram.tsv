@@ -1,3 +1,3 @@
 id	in
-one	EdgeForm[enumeratio`Black]
-in-graphics	Graphics[List[EdgeForm[enumeratio`Black], enumeratio`Yellow, Disk[List[0, 0], 1]]]
+one	EdgeForm[Black]
+in-graphics	Graphics[List[EdgeForm[Black], Yellow, Disk[List[0, 0], 1]]]

@@ -5,6 +5,7 @@
 // dependency, so it ports cleanly into a compute-engine LanguageTarget later.
 
 import { isSystemName } from "./system-names.ts";
+import { DIRECTIVE_NAMES } from "./directive-names.ts";
 import { ATTRIBUTE_NAMES, FORM_NAMES, OPTION_NAMES } from "./vocabulary.ts";
 import { WOLFRAM_NAMES } from "./wolfram-names-data.ts";
 
@@ -77,8 +78,16 @@ export const STRUCTURAL: Record<string, string> = {
   Clip: "Clamp",
 };
 
-/** Wolfram vocabulary: attributes, option keys and format symbols, as the kernel lists them. */
-const VOCABULARY: ReadonlySet<string> = new Set([...ATTRIBUTE_NAMES, ...OPTION_NAMES, ...FORM_NAMES]);
+/**
+ * Wolfram vocabulary: attributes, option keys and format symbols, as the kernel lists them, and the
+ * named colors and style words a graphics directive is written with.
+ */
+const VOCABULARY: ReadonlySet<string> = new Set([
+  ...ATTRIBUTE_NAMES,
+  ...OPTION_NAMES,
+  ...FORM_NAMES,
+  ...DIRECTIVE_NAMES,
+]);
 
 /** The infinities' own spellings, which `fromWolfram` reads back (`DirectedInfinity[1]`). */
 const INFINITIES: ReadonlySet<string> = new Set(["Infinity", "DirectedInfinity"]);

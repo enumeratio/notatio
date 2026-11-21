@@ -1,3 +1,3 @@
 id	in
-one	Directive[enumeratio`Red, enumeratio`Thick, enumeratio`Dashed]
-in-graphics	Graphics[List[Directive[enumeratio`Red, enumeratio`Thick, enumeratio`Dashed], Line[List[List[0, 0], List[2, 1]]]]]
+one	Directive[Red, Thick, Dashed]
+in-graphics	Graphics[List[Directive[Red, Thick, Dashed], Line[List[List[0, 0], List[2, 1]]]]]
