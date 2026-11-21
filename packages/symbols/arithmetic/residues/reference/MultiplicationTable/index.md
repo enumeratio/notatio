@@ -26,6 +26,8 @@ bindings:
     form: wolfram
     counterpart: false
     note: "Wolfram has no ring tables: GroupMultiplicationTable tabulates a group, and ℤ/n under multiplication is not one."
+options:
+  - ElementOrder
 ---
 
 - The units' rows and columns form a Latin square: the multiplication table of the unit group

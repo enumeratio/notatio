@@ -23,6 +23,8 @@ seeAlso:
   - GraphDistance
 names:
   wolframIdentity: true
+options:
+  - EdgeWeight
 ---
 
 - Inert — `Graph(...)` holds exactly as written; it never reduces to anything else. Every query head ([[VertexList]], [[EdgeList]], [[VertexCount]], …) reads it directly.

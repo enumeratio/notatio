@@ -20,6 +20,30 @@ test("an arrow on a library's head is its option only with the library's table",
   expect(read).toEqual(["TestResultObject", ["Rule", "ExpectedOutput", 2], ["To", "x", 0]]);
 });
 
+test.each([
+  ["IsPrime", "Over"],
+  ["FactorInteger", "Over"],
+  ["Divisors", "Over"],
+  ["PrimeNu", "Over"],
+  ["PrimeOmega", "Over"],
+  ["MoebiusMu", "Over"],
+  ["IsSquareFree", "Over"],
+  ["DivisorSigma", "Over"],
+  ["AdditionTable", "ElementOrder"],
+  ["MultiplicationTable", "ElementOrder"],
+  ["Graph", "EdgeWeight"],
+  ["Fourier", "FourierParameters"],
+  ["InverseFourier", "FourierParameters"],
+  ["VerificationTest", "SameTest"],
+  ["VerificationTest", "TimeConstraint"],
+  ["VerificationTest", "MemoryConstraint"],
+  ["VerificationTest", "TestID"],
+])("%s reads %s as a Rule", (head, option) => {
+  const read: unknown[] = [head, 1, ["To", option, 2]];
+  rulesInCalls(read as never, libraryOptionsOf);
+  expect(read).toEqual([head, 1, ["Rule", option, 2]]);
+});
+
 test("parseExpression takes the table", () => {
   const { json, errors } = parseExpression("Plot(Sin(x), (x, 0, 6), Axes -> False)", { optionsOf: libraryOptionsOf });
   expect(errors).toEqual([]);

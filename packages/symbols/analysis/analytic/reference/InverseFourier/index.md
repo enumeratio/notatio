@@ -22,6 +22,8 @@ seeAlso:
   - InverseFourierTransform
 names:
   wolframIdentity: true
+options:
+  - FourierParameters
 ---
 
 - Everything [[Fourier]]'s own details say about numeric-only evaluation, the separable 2D case, and $O(n^2)$ summation applies here too — this head is that same kernel with the parameters negated.

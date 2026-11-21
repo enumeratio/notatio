@@ -18,6 +18,11 @@ names:
   wolframIdentity: true
 attributes:
   - HoldAll
+options:
+  - MemoryConstraint
+  - SameTest
+  - TestID
+  - TimeConstraint
 ---
 
 - Held: input does not evaluate until the constraints (TimeConstraint, MemoryConstraint) are in place around it.

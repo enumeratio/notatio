@@ -23,6 +23,8 @@ seeAlso:
   - FourierTransform
 names:
   wolframIdentity: true
+options:
+  - FourierParameters
 ---
 
 - Always numeric, matching Wolfram exactly — even an all-exact input like `Fourier({0, 0, 0})` comes back as machine floats there, never a symbolic or exact result, so this declines (stays unevaluated) rather than fabricate an exact answer for anything that isn't already a concrete numeric list or matrix.
