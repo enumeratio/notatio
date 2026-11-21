@@ -1,5 +1,5 @@
-id	section	role	expr	expected	caption
-a-factorization-as-data	Basic		[Factorization, [Tuple, [List, 2, 3], [List, 3, 1]]]	[Factorization, [Tuple, [List, 2, 3], [List, 3, 1]]]	$2^3 \cdot 3^1$ as parallel base and exponent lists
-factorization-of-an-integer	Basic		[Factorization, 360]	[Factorization, [Tuple, [List, 2, 3, 5], [List, 3, 2, 1]]]	$360 = 2^3 \cdot 3^2 \cdot 5$, as FactorInteger finds it
-factorization-of-a-prime	Basic		[Factorization, 97]	[Factorization, [Tuple, [List, 97], [List, 1]]]	a prime is its own single factor
-factorization-of-a-negative	Basic		[Factorization, -12]	[Factorization, [Tuple, [List, -1, 2, 3], [List, 1, 2, 1]]]	the sign is the factor $-1$
+id	section	role	expr	expected	caption	mathlib4.kind	mathlib4.note	rust.kind	rust.note
+a-factorization-as-data	Basic		[Factorization, [Tuple, [List, 2, 3], [List, 3, 1]]]	[Factorization, [Tuple, [List, 2, 3], [List, 3, 1]]]	$2^3 \cdot 3^1$ as parallel base and exponent lists				
+factorization-of-an-integer	Basic		[Factorization, 360]	[Factorization, [Tuple, [List, 2, 3, 5], [List, 3, 2, 1]]]	$360 = 2^3 \cdot 3^2 \cdot 5$, as FactorInteger finds it				
+factorization-of-a-prime	Basic		[Factorization, 97]	[Factorization, [Tuple, [List, 97], [List, 1]]]	a prime is its own single factor				
+factorization-of-a-negative	Basic		[Factorization, -12]	[Factorization, [Tuple, [List, -1, 2, 3], [List, 1, 2, 1]]]	the sign is the factor $-1$	domain	Nat.primeFactorsList is defined on natural numbers, so a negative n does not elaborate (no Neg instance on ℕ); FactorInteger extends to the integers with the unit -1	domain	the crate's factor_integer takes an unsigned integer and panics on -12; FactorInteger extends to the integers with the unit -1
