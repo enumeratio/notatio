@@ -53,15 +53,17 @@ const MAX_RATIO = 1.3;
 test("the list is a set of (definition, subject) rows on definitions the sweep knows", () => {
   const known = new Set(sweepTargets().map((target) => target.key));
   const seen = new Set<string>();
+  // One assertion over every row: an `expect` per row (about 140,000 of them) took the test past 5 s on a runner.
+  const problems: string[] = [];
   for (const row of listed) {
-    expect(known.has(row.key), row.key).toBe(true);
     const id = `${row.key}\0${JSON.stringify(row.subject)}`;
-    expect(seen.has(id), id).toBe(false);
+    if (!known.has(row.key)) problems.push(`unknown definition: ${row.key}`);
+    if (seen.has(id)) problems.push(`duplicate row: ${id}`);
     seen.add(id);
-    expect(row.declaredMs).toBeGreaterThan(0);
-    expect(row.bareMs).toBeGreaterThan(0);
-    expect(Math.max(row.declaredMs, row.bareMs)).toBeLessThanOrEqual(1000);
+    if (!(row.declaredMs > 0 && row.bareMs > 0)) problems.push(`time not positive: ${id}`);
+    if (Math.max(row.declaredMs, row.bareMs) > 1000) problems.push(`over a second: ${id}`);
   }
+  expect(problems.slice(0, 10)).toEqual([]);
   expect(listed.length).toBeGreaterThan(20_000);
 });
 
