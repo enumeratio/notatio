@@ -1,3 +1,4 @@
+import { nativeEvaluate, wrapOperator } from "@notatio/engine";
 import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { declareCollections } from "../src/library.ts";
@@ -70,6 +71,52 @@ test("a Map lambda's parameter is typed from its collection, as natively", () =>
   const declared = run(call);
   expect(hasError(declared)).toBe(false);
   expect(declared).toEqual(native.box(call as never).evaluate({ materialization: true }).json);
+});
+
+test("Map, Fold and Filter keep compute-engine's lack of a handler, so they stay lazy collections", () => {
+  for (const head of ["Map", "Fold", "Filter"]) {
+    expect(nativeEvaluate(native, head)).toBeUndefined();
+    expect(nativeEvaluate(ce, head), head).toBeUndefined();
+  }
+});
+
+// The engine as it was when `declareOperatorForms` gave each of the three a handler that only declined: a
+// one-operand call answers and compiles as it did, and a call of any other shape as natively.
+const handled = bareEngine();
+declareCollections(handled);
+for (const head of ["Map", "Fold", "Filter"])
+  wrapOperator(
+    handled,
+    [head],
+    () => true,
+    () => () => undefined,
+    1,
+  );
+
+test("a one-operand Map, Fold or Filter is a valid call that stays unevaluated, as with a declining handler", () => {
+  for (const call of [
+    ["Map", "f"],
+    ["Fold", "f"],
+    ["Filter", "IsEven"],
+  ]) {
+    const mine = ce.box(call as never);
+    const old = handled.box(call as never);
+    expect(mine.isValid, JSON.stringify(call)).toBe(true);
+    expect(mine.isValid).toBe(old.isValid);
+    expect(mine.evaluate().json).toEqual(old.evaluate().json);
+    expect(mine.evaluate().json).toEqual(call);
+  }
+});
+
+test("Map, Fold and Filter still fail to compile, as when a package replaced their handler without a lowering", () => {
+  type Lowering = (args: unknown[], compile: unknown, context: { language: string }) => unknown;
+  const lowering = (engine: typeof ce, head: string): Lowering | undefined =>
+    (engine.lookupDefinition(head) as { operator: { compile?: Lowering } }).operator.compile;
+  for (const head of ["Map", "Fold", "Filter"]) {
+    const mine = lowering(ce, head);
+    expect(typeof mine, head).toBe(typeof lowering(handled, head));
+    expect(() => mine?.([], () => "", { language: "javascript" }), head).toThrow(/no javascript lowering/);
+  }
 });
 
 test("Map, Fold and Filter keep compute-engine's signatures and add only the operator form", () => {
