@@ -23,6 +23,10 @@ on:
         description: Run only this daily job (its id); empty runs them all
         type: string
         default: ""
+      sweep_all:
+        description: Run all seven slices of the interpreter sweep, not tonight's
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -287,6 +291,36 @@ jobs:
           dist-key: ${{ needs.changes.outputs.dist_key }}
           artifact: "true"
       - run: pnpm --filter @notatio/combinatorics exec vp test run tests/verdict-snapshot.test.ts
+
+  # The interpreter sweep (packages/census/tests/interpreter-sweep.test.ts): every statistic and map definition on
+  # the committed list of rows (tests/fixtures/interpreter-sweep.tsv), the engine with every library declared against
+  # a bare one, and the declared interpreter against the compiled code. Each night runs one of seven slices of the
+  # list, chosen by the day of the year (NIGHTLY_SLICE overrides); `sweep_all` runs all seven. A slice measured
+  # about 10 minutes on two workers here, so about 40 on a runner; it is split into 8 parts that each take their
+  # eighth of the selected rows (about 5 minutes of sweep a part, and about 35 for all seven slices). Each side of
+  # a row is capped at 10 s, never raised.
+  # Advisory like the other sweeps: a red job is read by the nightly-fixup routine.
+  deep-interpreter-sweep:
+    name: deep interpreter sweep ${{ matrix.part }}/8
+    needs: [changes, dist]
+    if: ${{ !cancelled() && needs.changes.result == 'success' && contains(fromJSON('["success","skipped"]'), needs.dist.result) && ((github.event_name != 'schedule' || github.event.schedule == '5 4 * * *') && (!inputs.only || inputs.only == 'deep-interpreter-sweep')) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [1, 2, 3, 4, 5, 6, 7, 8]
+    env:
+      DEEP_TESTS: "1"
+      SWEEP_SHARD: ${{ matrix.part }}/8
+      SWEEP_SLICES: ${{ inputs.sweep_all && 'all' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup
+        with:
+          dist-key: ${{ needs.changes.outputs.dist_key }}
+          artifact: "true"
+      - run: pnpm --filter @notatio/census exec vp test run tests/interpreter-sweep.test.ts
 
   # The review backlog's machine-checkable claims (`expect:` bullets exported to
   # packages/reference/review-claims.tsv), evaluated against the current engine. A claim that stops
@@ -795,6 +829,7 @@ jobs:
       - deep-tests-compiled
       - deep-tests-reference
       - deep-crosschecks
+      - deep-interpreter-sweep
       - review-claims
       - component-stories
       - component-stories-gpu
