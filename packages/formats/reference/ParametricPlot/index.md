@@ -8,14 +8,17 @@ names:
 options:
   - AspectRatio
   - Axes
+  - AxesOrigin
   - Epilog
   - Frame
   - GridLines
   - PlotLabel
   - PlotPoints
   - PlotRange
+  - PlotRangePadding
   - PlotStyle
   - Prolog
+  - Ticks
 signatures:
   - call: ParametricPlot(...)
     description: Wolfram's own ParametricPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

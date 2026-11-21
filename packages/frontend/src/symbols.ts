@@ -7,7 +7,7 @@ import {
   paramsOf,
   type PlotChoice,
 } from "./infer-controls.ts";
-import { CHART_HEADS, PLANE_LAYER_HEADS, PLOT_HEADS } from "./plot-lowering.ts";
+import { CHART_HEADS, PLANE_LAYER_HEADS, type PlaneLayer, type PlaneShow, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";
 import { type MathJsonExpression } from "@cortex-js/compute-engine/epsil";
 import {
@@ -632,13 +632,53 @@ const aspectRatio = (value: Json): Record<string, string> => {
   return text !== undefined && Number(text) > 0 ? { aspect: text } : {};
 };
 
+/** A list's or a tuple's entries, or undefined for anything else. */
+const entriesOf = (value: Json): readonly Json[] | undefined =>
+  tupleOf(value) ?? (headOf(value) === "List" ? opsOf(value) : undefined);
+
+/**
+ * `GridLines -> True | Automatic` rules both directions at nice positions, and `[xs, ys]` each its
+ * own: a list of positions, `Automatic`, or `None`. `None` or `False` for the whole draws none.
+ */
+const gridLines = (value: Json): Record<string, string> => {
+  const word = symOf(value) ?? strOf(value);
+  if (word === "True" || word === "Automatic" || word === "true") return { grid: "true" };
+  const pair = entriesOf(value);
+  if (pair?.length !== 2) return {};
+  const spec = (node: Json): string => {
+    const positions = entriesOf(node);
+    return positions ? positions.map(clean).join(",") : symOf(node) === "Automatic" ? "auto" : "";
+  };
+  return { "grid-x": spec(pair[0]!), "grid-y": spec(pair[1]!) };
+};
+
+/** `Ticks -> None` leaves the axes without numbers. */
+const ticksOption = (value: Json): Record<string, string> =>
+  symOf(value) === "None" || symOf(value) === "False" ? { ticks: "false" } : {};
+
+/** `AxesOrigin -> (x, y)`: where the axes cross. */
+const axesOrigin = (value: Json): Record<string, string> => {
+  const at = entriesOf(value);
+  return at?.length === 2 ? { "axes-origin": at.map(clean).join(",") } : {};
+};
+
+/** `PlotRangePadding -> None`, or the share of the range left clear around it. */
+const rangePadding = (value: Json): Record<string, string> => {
+  if (symOf(value) === "None") return { "range-padding": "0" };
+  const text = symOf(value) === undefined ? clean(value) : undefined;
+  return text !== undefined && Number(text) >= 0 ? { "range-padding": text } : {};
+};
+
 /** The frame's options every 2-D plot and `Graphics` read alike. */
 const FRAME_OPTIONS = {
   Axes: axesOption,
+  AxesOrigin: axesOrigin,
   Frame: "frame",
+  Ticks: ticksOption,
   PlotLabel: "label",
-  GridLines: "grid",
+  GridLines: gridLines,
   PlotRange: plotRange,
+  PlotRangePadding: rangePadding,
   AspectRatio: aspectRatio,
 } satisfies VisualSymbol["options"];
 
@@ -854,17 +894,13 @@ export function plotSettingsOf(expr: Json): Record<string, string> | undefined {
   return head === "Chart" ? chosenType(settings) : settings;
 }
 
-/** One layer of a `Show` of the plane: its head and the settings it lowers to. */
-export interface PlaneLayer {
-  readonly head: string;
-  readonly settings: Record<string, string>;
-}
+export type { PlaneLayer };
 
 /**
  * A `Show` of plots and graphics: its layers in order, and the frame's settings its own options give
  * (they stand over the first layer's, as in Wolfram). Undefined when a layer is not of the plane.
  */
-export function planeShowOf(expr: Json): { layers: PlaneLayer[]; frame: Record<string, string> } | undefined {
+export function planeShowOf(expr: Json): PlaneShow | undefined {
   if (headOf(expr) !== "Show") return undefined;
   const { ops, options } = optionsOf(expr);
   const layers: PlaneLayer[] = [];

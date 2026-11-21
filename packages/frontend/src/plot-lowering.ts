@@ -17,6 +17,7 @@ import { type GraphicsLook, lookOf } from "./directives.ts";
 import {
   graphicsMarksBox,
   type GraphicsOptions,
+  type GridSpec,
   plotArea,
   type PlotOptions,
   type PlotPoint,
@@ -185,6 +186,91 @@ export function layerStylesOf(
   });
 }
 
+/** One direction's grid lines as its setting writes them: positions, `auto`, or nothing. */
+const gridSpecOf = (text: string | undefined): GridSpec =>
+  text === "auto" ? "Automatic" : text ? text.split(",").map(Number).filter(Number.isFinite) : null;
+
+/** The grid, the ticks, the axes' crossing and the padding a frame's settings ask for. */
+function chromeOf(
+  settings: PlotSettings,
+): Pick<PlotOptions, "gridLines" | "gridAt" | "ticks" | "axesOrigin" | "padding"> {
+  const listed = settings["grid-x"] !== undefined || settings["grid-y"] !== undefined;
+  const origin = spanOf(settings["axes-origin"]);
+  const padding = Number(settings["range-padding"]);
+  return {
+    gridLines: on(settings["grid"]),
+    ...(listed && { gridAt: [gridSpecOf(settings["grid-x"]), gridSpecOf(settings["grid-y"])] as const }),
+    ...(settings["ticks"] === "false" && { ticks: false }),
+    ...(origin && { axesOrigin: origin }),
+    ...(settings["range-padding"] !== undefined && padding >= 0 && { padding }),
+  };
+}
+
+/** One layer of a `Show` of the plane: its head and the settings it lowers to. */
+export interface PlaneLayer {
+  readonly head: string;
+  readonly settings: Record<string, string>;
+}
+
+/** A `Show` of plots and graphics: its layers in order, and the frame its own options give. */
+export interface PlaneShow {
+  readonly layers: readonly PlaneLayer[];
+  readonly frame: Readonly<Record<string, string>>;
+}
+
+/**
+ * How a `Show` of the plane is drawn, once its plots are sampled (`seriesOf`, by layer): every
+ * series in layer order, each with its layer's `PlotStyle`; the first plot's settings under the
+ * `Show`'s own frame; a `Graphics` before the first plot under the curves, and one after it over
+ * them. A `Show` of `Graphics` alone is one `Graphics` (`graphics`). Undefined when a plot has
+ * no series.
+ */
+export function planeShowPlan(
+  show: PlaneShow,
+  seriesOf: (layer: PlaneLayer, index: number) => readonly PlotSeries[] | undefined,
+):
+  | {
+      readonly settings: PlotSettings;
+      readonly series: PlotSeries[];
+      readonly styles: GraphicsLook[];
+      readonly marks: { readonly prolog: Primitive[]; readonly epilog: Primitive[] };
+    }
+  | { readonly graphics: PlotSettings }
+  | undefined {
+  const series: PlotSeries[] = [];
+  const styled: { style: string | undefined; count: number }[] = [];
+  const marks = { prolog: [] as Primitive[], epilog: [] as Primitive[] };
+  const written: unknown[] = [];
+  let first: PlotSettings | undefined;
+  for (const [index, layer] of show.layers.entries()) {
+    if (layer.head === "Graphics") {
+      const primitives = jsonOf(layer.settings["primitives"]);
+      if (primitives === undefined) continue;
+      written.push(primitives);
+      (first === undefined ? marks.prolog : marks.epilog).push(...primitivesOf(primitives as never));
+      continue;
+    }
+    const sampled = seriesOf(layer, index);
+    if (sampled === undefined) return undefined;
+    first ??= layer.settings;
+    series.push(...sampled);
+    styled.push({ style: layer.settings["plot-style"], count: sampled.length });
+  }
+  if (first === undefined)
+    return {
+      graphics: { ...show.layers[0]?.settings, ...show.frame, primitives: JSON.stringify(["List", ...written]) },
+    };
+  return { settings: { ...first, ...show.frame }, series, styles: layerStylesOf(styled), marks };
+}
+
+/** A `Show` of the plane as a `GraphicsBox`, its plots sampled by `seriesOf`; undefined when one has no series. */
+export function planeShowBox(show: PlaneShow, seriesOf: Parameters<typeof planeShowPlan>[1]): Box | undefined {
+  const plan = planeShowPlan(show, seriesOf);
+  if (plan === undefined) return undefined;
+  if ("graphics" in plan) return graphicsBoxOfSettings(plan.graphics);
+  return plotBoxOfSamples(plan.settings, plan.series, { ...plan.marks, styles: plan.styles });
+}
+
 /** What a `Graphics`' settings say about its frame. */
 export function graphicsOptionsOf(settings: PlotSettings): GraphicsOptions {
   const [x, y] = [spanOf(settings["plot-x-range"]), spanOf(settings["plot-range"])];
@@ -194,7 +280,7 @@ export function graphicsOptionsOf(settings: PlotSettings): GraphicsOptions {
     ...(aspect > 0 && { aspect }),
     axes: on(settings["axes"]),
     frame: on(settings["frame"]),
-    gridLines: on(settings["grid"]),
+    ...chromeOf(settings),
     xLabel: settings["x-label"] || undefined,
     yLabel: settings["y-label"] || undefined,
     title: settings["label"] || undefined,
@@ -241,7 +327,7 @@ export function plotOptionsOf(
     yScale: settings["y-scale"],
     plotRange: spanOf(settings["plot-range"]),
     xRange: spanOf(settings["plot-x-range"]),
-    gridLines: on(settings["grid"]),
+    ...chromeOf(settings),
     fill: on(settings["fill"]),
     legend: on(settings["legend"]),
     xLabel: settings["x-label"] || undefined,

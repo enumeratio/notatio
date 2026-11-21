@@ -8,13 +8,16 @@ names:
 options:
   - AspectRatio
   - Axes
+  - AxesOrigin
   - Epilog
   - Frame
   - GridLines
   - PlotLabel
   - PlotRange
+  - PlotRangePadding
   - PlotStyle
   - Prolog
+  - Ticks
 signatures:
   - call: ListLinePlot(...)
     description: Wolfram's own ListLinePlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

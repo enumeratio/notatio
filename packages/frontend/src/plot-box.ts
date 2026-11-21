@@ -50,6 +50,12 @@ export interface PlotSeries {
   label?: string;
 }
 
+/** One direction's grid lines: where they are, at nice positions (`Automatic`), or none. */
+export type GridSpec = readonly number[] | "Automatic" | null;
+
+/** The share of a plot's y range left clear around it when `PlotRangePadding` gives none. */
+const RANGE_PADDING = 0.06;
+
 export interface PlotOptions extends ColorOptions {
   width?: number;
   height?: number;
@@ -85,6 +91,14 @@ export interface PlotOptions extends ColorOptions {
   tight?: boolean;
   /** `Frame -> True`: a box around the plot area in place of the zero-axes. */
   frame?: boolean;
+  /** `Ticks -> None`: the axes carry no numbers. */
+  ticks?: boolean;
+  /** `AxesOrigin -> (x, y)`: where the axes cross; where zero is, or the frame's corner, when left out. */
+  axesOrigin?: readonly [number, number];
+  /** `GridLines -> [xs, ys]`: the lines of each direction, at the positions listed or at nice ones. */
+  gridAt?: readonly [GridSpec, GridSpec];
+  /** `PlotRangePadding -> p`: the share of the y range left clear above and below it. */
+  padding?: number;
   /** `PlotStyle`: each series' look in order, cycled; what a look leaves out is the series' own. */
   styles?: readonly GraphicsLook[];
 }
@@ -290,6 +304,20 @@ function primitiveBoxes(primitives: readonly Primitive[], role: string): Box[] {
   return out;
 }
 
+/** The grid, the ticks and the axes' crossing as a `GraphicsBox`'s options. */
+const chromeOptions = (opts: {
+  gridLines?: boolean;
+  gridAt?: readonly [GridSpec, GridSpec];
+  ticks?: boolean;
+  axesOrigin?: readonly [number, number];
+}): Record<string, OptionValue> => ({
+  ...(opts.gridAt
+    ? { GridLines: opts.gridAt.map((spec): OptionValue => (Array.isArray(spec) ? [...spec] : spec)) }
+    : opts.gridLines && { GridLines: true }),
+  ...(opts.ticks === false && { Ticks: false }),
+  ...(opts.axesOrigin && { AxesOrigin: [opts.axesOrigin[0], opts.axesOrigin[1]] }),
+});
+
 /**
  * Sampled data as a `GraphicsBox`. Curves break at poles, at samples far outside the window and
  * at jumps wider than the window; the window is `PlotRange` or the 2nd–98th percentile of y, so a
@@ -306,7 +334,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     ...(opts.frame && { Frame: true }),
     ScalingFunctions: [opts.xScale ?? "linear", opts.yScale ?? "linear"],
     ViewKind: "fixed",
-    ...(opts.gridLines && { GridLines: true }),
+    ...chromeOptions(opts),
     ...((opts.xLabel || opts.yLabel) && { AxesLabel: [opts.xLabel ?? null, opts.yLabel ?? null] }),
     ...(opts.title && { PlotLabel: opts.title }),
     ...(opts.tight && { PlotRangePadding: "None" }),
@@ -358,7 +386,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
       tymin -= 1;
       tymax += 1;
     }
-    const pad = (tymax - tymin) * 0.06;
+    const pad = (tymax - tymin) * (opts.padding ?? RANGE_PADDING);
     tymin -= pad;
     tymax += pad;
   }
@@ -485,6 +513,11 @@ export interface GraphicsOptions {
   axes?: boolean;
   frame?: boolean;
   gridLines?: boolean;
+  ticks?: boolean;
+  axesOrigin?: readonly [number, number];
+  gridAt?: readonly [GridSpec, GridSpec];
+  /** `PlotRangePadding -> p`: the share of the primitives' extent left clear around it. */
+  padding?: number;
   xLabel?: string;
   yLabel?: string;
   title?: string;
@@ -524,7 +557,7 @@ export function graphicsMarksBox(primitives: readonly Primitive[], opts: Graphic
     if (reached.length === 0) return [-1, 1];
     let [lo, hi] = [Math.min(...reached.map((q) => q[axis])), Math.max(...reached.map((q) => q[axis]))];
     if (lo === hi) [lo, hi] = [lo - 1, hi + 1];
-    const pad = (hi - lo) * GRAPHICS_PADDING;
+    const pad = (hi - lo) * (opts.padding ?? GRAPHICS_PADDING);
     return [lo - pad, hi + pad];
   };
   let [x, y] = [bound(0), bound(1)];
@@ -547,7 +580,7 @@ export function graphicsMarksBox(primitives: readonly Primitive[], opts: Graphic
     ScalingFunctions: ["linear", "linear"],
     ViewKind: "fixed",
     PlotRange: [x, y],
-    ...(opts.gridLines && { GridLines: true }),
+    ...chromeOptions(opts),
     ...((opts.xLabel || opts.yLabel) && { AxesLabel: [opts.xLabel ?? null, opts.yLabel ?? null] }),
     ...(titled && { PlotLabel: opts.title! }),
   });
@@ -690,17 +723,35 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
     toData: (px, py) => [xAt(px), Y.inv(tymax - ((py - mT) / plotH) * (tymax - tymin))],
     toPixel: (x, y) => [sx(x), sy(y)],
   };
-  const xZero = isLinear(xs) && txmin <= 0 && 0 <= txmax ? sx(0) : mL;
-  const yZero = isLinear(ys) && tymin <= 0 && 0 <= tymax ? syT(0) : H - mB;
+  // The axes cross at `AxesOrigin` where it is in view, else at zero, else at the frame's corner.
+  const origin = numbers(o.AxesOrigin);
+  const within = (t: number, lo: number, hi: number): boolean => lo <= t && t <= hi;
+  const xZero = origin
+    ? within(X.fwd(origin[0]!), txmin, txmax)
+      ? sx(origin[0]!)
+      : mL
+    : isLinear(xs) && within(0, txmin, txmax)
+      ? sx(0)
+      : mL;
+  const yZero = origin
+    ? within(Y.fwd(origin[1]!), tymin, tymax)
+      ? sy(origin[1]!)
+      : H - mB
+    : isLinear(ys) && within(0, tymin, tymax)
+      ? syT(0)
+      : H - mB;
   const px = (p: readonly number[]): [number, number] => at(sx(p[0]!), sy(p[1]!));
   const stripe = (x1: number, y1: number, x2: number, y2: number, edge: Edge): void =>
     push({ head: "Line", points: [at(x1, y1), at(x2, y2)] }, { edges: [edge] });
 
-  if (o.GridLines === true) {
-    const grid = solid(AXIS, 0.5, 0.25);
-    for (const tx of niceTicks(X.inv(txmin), X.inv(txmax))) stripe(sx(tx), mT, sx(tx), H - mB, grid);
-    for (const ty of niceTicks(Y.inv(tymin), Y.inv(tymax))) stripe(mL, sy(ty), W - mR, sy(ty), grid);
-  }
+  // `GridLines`: `true` rules both directions at nice positions; a pair says each direction's own.
+  const [gridX, gridY] =
+    o.GridLines === true ? ["Automatic", "Automatic"] : Array.isArray(o.GridLines) ? o.GridLines : [];
+  const linesOf = (spec: unknown, lo: number, hi: number): number[] =>
+    spec === "Automatic" ? niceTicks(lo, hi) : (numbers(spec) ?? []).filter((v) => v >= lo && v <= hi);
+  const grid = solid(AXIS, 0.5, 0.25);
+  for (const tx of linesOf(gridX, X.inv(txmin), X.inv(txmax))) stripe(sx(tx), mT, sx(tx), H - mB, grid);
+  for (const ty of linesOf(gridY, Y.inv(tymin), Y.inv(tymax))) stripe(mL, sy(ty), W - mR, sy(ty), grid);
 
   const items = plotItems(box);
   const pointsOf = (prim: BoxNode): number[][] => pointList(optionsOfBox(prim).Points);
@@ -806,10 +857,12 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
       stripe(xZero, mT, xZero, H - mB, axis);
     }
     const tick = { opacity: 0.6, mono: true };
-    text(mL, H - 6, "start", label(X.inv(txmin)), 10, tick);
-    text(W - mR, H - 6, "end", label(X.inv(txmax)), 10, tick);
-    text(mL - 4, mT + 6, "end", label(Y.inv(tymax)), 10, tick);
-    text(mL - 4, H - mB, "end", label(Y.inv(tymin)), 10, tick);
+    if (o.Ticks !== false) {
+      text(mL, H - 6, "start", label(X.inv(txmin)), 10, tick);
+      text(W - mR, H - 6, "end", label(X.inv(txmax)), 10, tick);
+      text(mL - 4, mT + 6, "end", label(Y.inv(tymax)), 10, tick);
+      text(mL - 4, H - mB, "end", label(Y.inv(tymin)), 10, tick);
+    }
     const [xl, yl] = Array.isArray(o.AxesLabel) ? o.AxesLabel : [];
     const caption = { opacity: 0.75, mono: true, italic: true };
     if (typeof xl === "string") text(W - mR, mT + 10, "end", xl, 10, caption);
