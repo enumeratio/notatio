@@ -32,6 +32,8 @@ import { PROSE_NOTATION } from "./notation-prose.ts";
 import type { Notation, Writer } from "./notation.ts";
 
 // Binding strength, loosest to tightest. A node binding at `ATOM` never needs parens.
+// A rule is looser than logic and relations (Wolfram: Rule 120, Equal 290) and right-associative.
+const RULE = 0;
 const OR = 1;
 const AND = 2;
 const NOT = 3;
@@ -654,6 +656,16 @@ function makeFunction(head: string, ops: unknown[]): Made {
       const level = head === "And" ? AND : OR;
       const parts = ops.map((op) => atom(paren(make(op), level + 1)));
       return { box: row(list(parts, head === "And" ? "∧" : "∨")), prec: level };
+    }
+    // `a → b → c` is `a → (b → c)`: the left operand is fenced against a rule, the right is not.
+    case "Rule":
+    case "RuleDelayed": {
+      if (ops.length !== 2) return makeCall(head, ops);
+      const [key, value] = ops;
+      return {
+        box: row([paren(make(key), RULE + 1), head === "Rule" ? "→" : "⧴", paren(make(value), RULE)]),
+        prec: RULE,
+      };
     }
     case "Not":
       return { box: row(["¬", paren(make(ops[0]), NOT + 1)]), prec: NOT };

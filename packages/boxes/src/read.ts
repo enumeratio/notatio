@@ -347,9 +347,19 @@ class Reader {
 
   list(): Json[] {
     const out: Json[] = [];
-    do out.push(this.logic());
+    do out.push(this.rule());
     while (this.eat(","));
     return out;
+  }
+
+  /** `a → b` (or `a -> b`), looser than logic and right-associative: `a → b → c` is `a → (b → c)`. */
+  rule(): Json {
+    const key = this.logic();
+    const op = this.peek();
+    const head = op === "→" || op === "->" ? "Rule" : op === "⧴" || op === ":>" ? "RuleDelayed" : undefined;
+    if (head === undefined) return key;
+    this.pos++;
+    return [head, key, this.rule()] as Json;
   }
 
   logic(): Json {

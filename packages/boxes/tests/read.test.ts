@@ -498,3 +498,29 @@ test("wedge and vee are written ⋀ and ⋁ and read back as themselves", () => 
   ] as MathJsonExpression[])
     expect(roundTrip(json), JSON.stringify(json)).toBe("exact");
 });
+
+test("a rule is written a → b, looser than logic and right-associative, and reads back", () => {
+  const read = (...items: string[]) => makeExpression(row(items.map((t) => (t.length > 1 ? row(t.split(" ")) : t))));
+  expect(read("a", "→", "b")).toEqual(["Rule", "a", "b"]);
+  expect(makeExpression(row(["a", "->", "b"]))).toEqual(["Rule", "a", "b"]);
+  expect(makeExpression(row(["a", ":>", "b"]))).toEqual(["RuleDelayed", "a", "b"]);
+  expect(read("a", "⧴", "b")).toEqual(["RuleDelayed", "a", "b"]);
+  expect(read("a", "→", "b", "→", "c")).toEqual(["Rule", "a", ["Rule", "b", "c"]]);
+  expect(read("(", "a", "→", "b", ")", "→", "c")).toEqual(["Rule", ["Rule", "a", "b"], "c"]);
+  expect(read("a", "=", "b", "→", "c", "∨", "d")).toEqual(["Rule", ["Equal", "a", "b"], ["Or", "c", "d"]]);
+  expect(read("x", "→", "a", "+", "b")).toEqual(["Rule", "x", ["Add", "a", "b"]]);
+  for (const json of [
+    ["Rule", "a", "b"],
+    ["Rule", "Axes", "True"],
+    ["RuleDelayed", "a", "b"],
+    ["Rule", "a", ["Rule", "b", "c"]],
+    ["Rule", ["Rule", "a", "b"], "c"],
+    ["Rule", ["Equal", "a", "b"], ["Or", "c", "d"]],
+    ["Equal", "a", ["Rule", "b", "c"]],
+    ["Or", ["Rule", "a", "b"], "c"],
+    ["Add", "a", ["Rule", "b", "c"]],
+    ["Rule", "x", ["Add", "a", 1]],
+    ["Plot", "x", ["Rule", "PlotRange", "All"], ["Rule", "Axes", "True"]],
+  ] as MathJsonExpression[])
+    expect(roundTrip(json), JSON.stringify(json)).toBe("exact");
+});
