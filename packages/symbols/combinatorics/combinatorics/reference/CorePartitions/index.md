@@ -7,7 +7,7 @@ signatures:
   - call: CorePartitions(t, n)
     description: the partitions of $n$ none of whose hook lengths is divisible by $t$, in the order of IntegerPartitions.
     library: enumeratio-combinatorics
-    type: (integer<1..>, integer<0..>) -> indexed_collection<core_partition>
+    type: (integer<0..>, integer<0..>) -> indexed_collection<core_partition>
 seeAlso:
   - IntegerPartitions
   - TransposePartition
