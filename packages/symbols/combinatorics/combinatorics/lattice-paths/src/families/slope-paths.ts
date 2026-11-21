@@ -3,6 +3,7 @@
 // parameter, and take Dyck's tokens: 1 is the step up (or north), 0 the step down (or east), tried
 // first and second, so k = 1 and a = b = n give DyckPaths(n) word for word.
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
+import type { Declared } from "../../../collections/src/families/types.ts";
 import { add, mul } from "../../../collections/src/families/tables.ts";
 import { completionsOf, completionsTable, type Step, walkFamily } from "./walks.ts";
 
@@ -15,10 +16,12 @@ const slopeWalk = (
   cap: unknown,
   steps: readonly Step[],
   slope: unknown,
+  declared: Declared,
 ): EpsilFamily =>
   walkFamily({
     head,
     carrier,
+    declared,
     params,
     width,
     steps,
@@ -39,6 +42,14 @@ export const kDyckPaths = slopeWalk(
     { token: 0, rise: -1, width: 1 },
   ],
   1,
+  {
+    carrier: "KDyckPath",
+    params: [
+      { name: "n", role: "axis", min: 0 },
+      { name: "k", role: "param", min: 1 },
+    ],
+    cost: { count: "polynomial", unrank: "polynomial", rank: "polynomial", valid: "polynomial" },
+  },
 );
 
 /** The rational Dyck paths of (a, b): a steps east (0) and b north (1) that stay weakly above the
@@ -56,6 +67,14 @@ export const rationalDyckPaths = slopeWalk(
     { token: 0, rise: ["Negate", "_b"], direction: -1, width: 1 },
   ],
   "_b",
+  {
+    carrier: "RationalDyckPath",
+    params: [
+      { name: "a", role: "axis", min: 1 },
+      { name: "b", role: "param", min: 1 },
+    ],
+    cost: { count: "polynomial", unrank: "polynomial", rank: "polynomial", valid: "polynomial" },
+  },
 );
 
 export const entries = [kDyckPaths, rationalDyckPaths];

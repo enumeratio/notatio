@@ -19,7 +19,7 @@ grades:
   - name: a
     role: axis
   - name: b
-    role: axis
+    role: param
 carrier: RationalDyckPath
 ---
 

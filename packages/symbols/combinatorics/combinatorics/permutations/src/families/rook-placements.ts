@@ -8,6 +8,7 @@
 // A row with m rows after it and c columns free has f(m, c) placements with no rook there and
 // f(m, c − 1) for each free column.
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
+import type { Declared } from "../../../collections/src/families/types.ts";
 import {
   add,
   and,
@@ -135,10 +136,17 @@ const distinctRooks = (() => {
   return equal(at(marked, add(N, 1)), 0);
 })();
 
+const declared: Declared = {
+  carrier: "RookPlacement",
+  params: [{ name: "n", role: "axis", min: 0 }],
+  cost: { count: "polynomial", unrank: "polynomial", rank: "polynomial", valid: "polynomial" },
+};
+
 export const rookPlacements: EpsilFamily = {
   head: "RookPlacements",
   carrier: "RookPlacement",
   paramCount: 1,
+  declared,
   kind: "ints",
   params: [N],
   epsil: {

@@ -6,6 +6,7 @@
 // table; membership is the walk alone.
 
 import type { EpsilFamily, FastKernel } from "../../../collections/src/families/epsil.ts";
+import type { Declared } from "../../../collections/src/families/types.ts";
 import {
   add,
   and,
@@ -42,6 +43,8 @@ export interface Walk {
   readonly head: string;
   readonly carrier: string;
   readonly params: readonly string[];
+  /** What the family tells Plausible about itself. */
+  readonly declared?: Declared;
   /** The total width. */
   readonly width: MathJSON;
   readonly steps: readonly Step[];
@@ -213,6 +216,7 @@ export const walkFamily = (walk: Walk): EpsilFamily => ({
   paramCount: walk.params.length as 1 | 2,
   kind: "ints",
   params: walk.params,
+  ...(walk.declared === undefined ? {} : { declared: walk.declared }),
   ...(walk.declinePastDoubles === undefined ? {} : { declinePastDoubles: true as const }),
   ...(walk.fast === undefined ? {} : { fast: walk.fast }),
   ...(walk.fastCount === undefined ? {} : { fastCount: walk.fastCount }),

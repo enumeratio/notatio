@@ -21,7 +21,7 @@ grades:
   - name: n
     role: axis
   - name: k
-    role: axis
+    role: param
 carrier: KDyckPath
 ---
 

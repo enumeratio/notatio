@@ -6,6 +6,7 @@
 // ends in 0 over one of n/2, or in 2 over one of n/2 − 1, so b(2m) = b(m) + b(m − 1), b(2m + 1) = b(m).
 // The words are listed by their last digit first, 0 before 1 before 2, and then by the rest.
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
+import type { Declared } from "../../../collections/src/families/types.ts";
 import {
   add,
   and,
@@ -103,10 +104,17 @@ const rank = at(
 const digits = fold(and("vok", ["LessEqual", 0, "vd"], ["LessEqual", "vd", 2]), "vok", "vd", "True", "_x");
 const value = fold(add(mul(2, "vv"), "vw"), "vv", "vw", 0, "_x");
 
+const declared: Declared = {
+  carrier: "HyperbinaryWord",
+  params: [{ name: "n", role: "axis", min: 0 }],
+  cost: { count: "polynomial", unrank: "polynomial", rank: "polynomial", valid: "polynomial" },
+};
+
 export const hyperbinaryWords: EpsilFamily = {
   head: "HyperbinaryWords",
   carrier: "HyperbinaryWord",
   paramCount: 1,
+  declared,
   kind: "ints",
   params: [N],
   epsil: {
