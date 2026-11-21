@@ -13,14 +13,13 @@ catalog:
     url: https://www.findstat.org/St001863
     on: SignedPermutation
 statOn:
-  - DecoratedPermutation
   - Permutation
   - SignedPermutation
 signatures:
   - call: WeakExcedances(p)
     description: Positions with p(i) >= i.
     library: enumeratio-combinatorics
-    type: (permutation) -> number
+    type: ((permutation) -> number) & ((signed_permutation) -> number)
 bindings:
   - origin: mapped
     form: sage

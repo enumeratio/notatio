@@ -7,7 +7,7 @@ signatures:
   - call: FixedPoints(p)
     description: the fixed-point count of a one-line permutation $p$
     library: enumeratio-combinatorics
-    type: (permutation) -> integer
+    type: ((endofunction) -> integer) & ((parking_function) -> integer) & ((permutation) -> integer) & ((signed_permutation) -> integer)
 seeAlso:
   - Derangements
   - CycleCount
@@ -27,7 +27,6 @@ catalog:
     url: https://www.findstat.org/St001903
     on: ParkingFunction
 statOn:
-  - DecoratedPermutation
   - Endofunction
   - ParkingFunction
   - Permutation

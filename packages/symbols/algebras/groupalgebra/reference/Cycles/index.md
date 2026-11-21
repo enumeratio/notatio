@@ -25,8 +25,6 @@ references:
     identity: PermutationCycle
 names:
   wolframIdentity: true
-mapOn:
-  - Permutation
 catalog:
   - system: findstat
     identity: St000031
