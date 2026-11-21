@@ -28,6 +28,10 @@
       "types": "./dist/sampleable.d.mts",
       "import": "./dist/sampleable.mjs"
     },
+    "./sweep": {
+      "types": "./dist/sweep.d.mts",
+      "import": "./dist/sweep.mjs"
+    },
     "./notation": {
       "types": "./dist/notation.d.mts",
       "import": "./dist/notation.mjs"

@@ -11,6 +11,7 @@ export default defineConfig({
       notation: "src/notation.ts",
       findstat: "findstat/src/findstat-data.ts",
       sampleable: "collections/scripts/sampleable.ts",
+      sweep: "src/sweep.ts",
     },
     deps: { resolveDepSubpath: true },
     dts: { generator: "tsgo", tsconfig: "tsconfig.dts.json" },
