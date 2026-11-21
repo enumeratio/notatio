@@ -16,25 +16,7 @@ signatures:
     library: enumeratio-analytic
     type: "((T) -> T where T: number) & ((value) -> value)"
     overrides: compute-engine
-catalog:
-  - system: findstat
-    identity: Mp00041
-    url: https://www.findstat.org/Mp00041
-    on: IntegerComposition
-  - system: findstat
-    identity: Mp00202
-    url: https://www.findstat.org/Mp00202
-    on: IntegerPartition
-  - system: sage
-    identity: "Partitions(n).map(lambda p: p.conjugate())"
-    url: https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/partition.html
-    note: real running construction, not just the bare Partition.conjugate property; verified live n=4 term-for-term against integer_partitions' own conjugate map
-    on: IntegerPartition
 stub: engine
-mapOn:
-  - IntegerComposition
-  - CorePartition
-  - IntegerPartition
 names:
   wolfram: Conjugate
 bindings:
@@ -46,7 +28,7 @@ bindings:
     checked:
       version: 1.14.0
       on: 2026-10-14
-    note: The complex conjugate only; the record's mapOn partition meanings have no SymPy counterpart.
+    note: The complex conjugate only.
   - origin: mapped
     form: mpmath
     template: conj($1)

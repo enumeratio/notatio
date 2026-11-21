@@ -8,6 +8,11 @@ catalog:
     identity: Mp00044
     url: https://www.findstat.org/Mp00044
     on: IntegerPartition
+  - system: sage
+    identity: "Partitions(n).map(lambda p: p.conjugate())"
+    url: https://doc.sagemath.org/html/en/reference/combinat/sage/combinat/partition.html
+    note: real running construction, not just the bare Partition.conjugate property; verified live n=4 term-for-term against integer_partitions' own conjugate map
+    on: IntegerPartition
 mapOn:
   - IntegerPartition
 signatures:
