@@ -1194,6 +1194,9 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
+      '@notatio/combinatorics':
+        specifier: workspace:*
+        version: link:../../combinatorics/combinatorics
       '@notatio/config':
         specifier: workspace:*
         version: link:../../../config

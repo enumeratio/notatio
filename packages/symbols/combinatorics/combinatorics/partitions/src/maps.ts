@@ -85,24 +85,34 @@ const rotatedInner: MathJSON = forEach(
   "r",
 );
 
+/** Column i of the diagram has as many cells as there are parts of at least i. The empty
+ *  partition is its own case: `Max` of no parts is not a bound for `Range`. */
+const transposed: MathJSON = [
+  "If",
+  ["Equal", ["Length", "_raw"], 0],
+  ["List"],
+  forEach(
+    ["Range", 1, ["Max", "_raw"], 1],
+    ["Count", ["Filter", "_raw", ["Function", ["GreaterEqual", "p", "i"], "p"]]],
+  ),
+];
+
 export const PARTITIONS_MAPS: readonly CombinatorialMap[] = [
   {
     name: "TransposePartition",
     from: "integer_partition",
     to: "integer_partition",
-    // Column i of the diagram has as many cells as there are parts of at least i. The empty
-    // partition is its own case: `Max` of no parts is not a bound for `Range`.
-    body: [
-      "If",
-      ["Equal", ["Length", "_raw"], 0],
-      ["List"],
-      forEach(
-        ["Range", 1, ["Max", "_raw"], 1],
-        ["Count", ["Filter", "_raw", ["Function", ["GreaterEqual", "p", "i"], "p"]]],
-      ),
-    ],
+    body: transposed,
     summary: "The conjugate partition: column i of the Ferrers diagram becomes row i.",
     note: "Entry i of the result counts the parts that are at least i, so it is its own inverse and swaps the number of parts with the largest part. Combinatorica's TransposePartition; FindStat's Mp00044, \"conjugate\". Wolfram's Conjugate is the complex conjugate, not this map.",
+  },
+  {
+    name: "TransposePartition",
+    from: "core_partition",
+    to: "core_partition",
+    body: transposed,
+    summary: "The conjugate of a core: a core's transpose is a core, of the same t.",
+    note: "A hook of the conjugate is a hook of the partition turned over, with the same length, so a partition has a hook divisible by t exactly when its conjugate does. The map is the one on integer partitions, answering in the carrier of cores.",
   },
   {
     name: "RemoveFirstPart",

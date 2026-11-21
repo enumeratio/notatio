@@ -15,6 +15,7 @@ import {
   rotatedRight,
   runLengths,
 } from "../../src/map-helpers.ts";
+import { conjugateComposition } from "@notatio/structures";
 import { foataInversionsToMajorBody, foataMajorToInversionsBody } from "../../permutations/src/foata-bijection.ts";
 
 const upTo = (k: MathJSON): MathJSON => ["Range", 1, k, 1];
@@ -106,6 +107,7 @@ export const COMPOSITIONS_MAPS: readonly CombinatorialMap[] = [
     from: "composition",
     to: "composition",
     composedOf: ["Complement", "Reverse"],
+    kernel: conjugateComposition as (raw: never) => unknown,
     summary: "The conjugate composition: its ribbon shape transposed, the complement of the reverse.",
     note: "FindStat's \"conjugate\" on compositions, named for TransposePartition and TransposeTableau: Conjugate is already the complex conjugate. hopf's ConjugateComposition is the same operation on a plain list of parts.",
   },

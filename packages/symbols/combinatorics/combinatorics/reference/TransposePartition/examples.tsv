@@ -1,2 +1,3 @@
 id	section	role	expr	expected	caption
 the-partition-4-2-1			[TransposePartition, [IntegerPartition, [List, 4, 2, 1]]]	[IntegerPartition, [List, 3, 2, 1, 1]]	the partition $4 + 2 + 1$
+the-3-core-4-2			[TransposePartition, [CorePartition, [List, 4, 2]]]	[CorePartition, [List, 2, 2, 1, 1]]	the 3-core $4 + 2$

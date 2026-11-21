@@ -22,6 +22,7 @@
 // home of quasi-symmetric generating functions for P-partitions and descent sets. They are
 // the bases the subject is actually written in.
 
+import { conjugateComposition as conjugate } from "@notatio/structures";
 import { type Composition, compositionKey, combine, type Element, basis, fromKey } from "./hopf.ts";
 
 /** The partial sums of a composition, as the subset of {1, …, n−1} it encodes. */
@@ -141,23 +142,8 @@ export function ribbonProduct(a: Composition, b: Composition): Element {
   ]);
 }
 
-/**
- * The conjugate (transpose) composition: reverse the composition and swap refinement for
- * coarsening — concretely, complement the descent set inside {1, …, n−1} and reverse.
- *
- * It is the transpose of the ribbon's skew shape, which is why the antipode below is a
- * single term: transposing a ribbon diagram is a genuine involution on compositions.
- */
-export function conjugateComposition(a: Composition): Composition {
-  const total = a.reduce((x, y) => x + y, 0);
-  if (total === 0) return [];
-  const held = new Set(descentSet(a));
-  const complement = Array.from({ length: total - 1 }, (_, i) => i + 1)
-    .filter((x) => !held.has(x))
-    .map((x) => total - x)
-    .toSorted((x, y) => x - y);
-  return fromDescentSet(complement, total) as Composition;
-}
+/** The conjugate (transpose) composition, the one `@notatio/structures` holds; transposing a ribbon is an involution on compositions. */
+export const conjugateComposition = (a: Composition): Composition => conjugate(a) as Composition;
 
 /**
  * The antipode on a ribbon: S(R_α) = (−1)^{|α|} R_{α*}, for α* the conjugate composition.

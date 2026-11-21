@@ -18,7 +18,7 @@ import { declareMaps as declareMapsGeneric, evaluateDefinition, type Law } from 
 import { CARRIERS } from "./carriers.ts";
 import { COMPILED_MAPS } from "./compiled-maps.generated.js";
 import { FLAT } from "./flat.ts";
-import { composedDefinition, compositionSteps, fastDefinition, mapKey } from "./compiled.ts";
+import { composedDefinition, compositionSteps, fastDefinition, fromJs, mapKey, toJs } from "./compiled.ts";
 import type { CombinatorialMap } from "./map-helpers.ts";
 import { MAP_LAWS } from "./maps-laws.generated.ts";
 import { COMPOSITIONS_MAPS } from "../compositions/src/maps.ts";
@@ -114,8 +114,21 @@ export function declareMaps(
     // Compiled where compute-engine's compiler takes it, memoized; the interpreter otherwise.
     definitionFor: (map) => {
       // A composition runs as one chain where every step has compiled code, else through its steps.
-      if (map.composedOf !== undefined)
-        return composedDefinition({ ce, steps: compositionSteps(maps, map), generated: COMPILED_MAPS[mapKey(map)] });
+      if (map.composedOf !== undefined) {
+        const chain = composedDefinition({
+          ce,
+          steps: compositionSteps(maps, map),
+          generated: COMPILED_MAPS[mapKey(map)],
+        });
+        const { kernel } = map;
+        if (kernel === undefined) return chain;
+        // A kernel answers over the plain contents; declining (undefined) falls to the chain.
+        return (contents) => {
+          const raw = toJs(contents);
+          const answer = raw === undefined ? undefined : kernel(raw as never);
+          return answer === undefined ? chain?.(contents) : fromJs(answer);
+        };
+      }
       if (map.body === undefined) return undefined;
       return fastDefinition({
         ce,
