@@ -4,11 +4,7 @@ domain: Combinatorial maps
 signature: ToPermutation(StandardTableauPair)
 summary: "The permutation an RSK pair comes from: inverse RSK."
 mapOn:
-  - AffinePermutation
-  - IncreasingBinaryTree
   - PermutationCycles
-  - PermutationInversion
-  - SignedPermutation
   - StandardTableauPair
 signatures:
   - call: ToPermutation(StandardTableauPair)

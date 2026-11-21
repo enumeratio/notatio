@@ -24,7 +24,7 @@ signatures:
   - call: Nestings(p)
     description: "SetPartition: pairs of arcs a < b < c < d with a~d and b~c. Permutation: pairs i, j with j < i < p(i) < p(j) or p(j) < p(i) <= i < j."
     library: enumeratio-combinatorics
-    type: (permutation | set_partition) -> number
+    type: ((perfect_matching) -> number) & ((permutation | set_partition) -> number)
 ---
 
 - Defined over `SetPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

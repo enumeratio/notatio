@@ -16,6 +16,15 @@ signatures:
     library: enumeratio-evaluation
     type: (any, tuple*) -> number
     overrides: compute-engine
+  - call: Sum(any, tuple*) -> number
+    description: "`Sum(f, [a, b])` computes the sum of `f` from `a` to `b`; `Sum(L)` sums the elements of a collection `L`"
+    library: enumeratio-combinatorics
+    type: ((parking_function) -> integer) & ((permutation_inversion) -> integer) & ((subexcedant_seq) -> integer)
+    overrides: enumeratio-analytic
+    types:
+      - parking_function
+      - permutation_inversion
+      - subexcedant_seq
 names:
   wolframIdentity: true
 bindings:

@@ -16,6 +16,15 @@ signatures:
     library: enumeratio-evaluation
     type: (value) -> tuple
     overrides: compute-engine
+  - call: Shape(value) -> tuple
+    description: Return the shape tuple of an expression.
+    library: enumeratio-combinatorics
+    type: ((semistandard_tableau) -> integer_partition) & ((set_partition) -> integer_partition) & ((standard_tableau) -> integer_partition)
+    overrides: enumeratio-evaluation
+    types:
+      - semistandard_tableau
+      - set_partition
+      - standard_tableau
 names:
   wolfram: Dimensions
 stub: engine
@@ -33,7 +42,6 @@ catalog:
     url: https://www.findstat.org/Mp00083
     on: StandardTableau
 mapOn:
-  - PlanePartition
   - SemistandardTableau
   - SetPartition
   - StandardTableau

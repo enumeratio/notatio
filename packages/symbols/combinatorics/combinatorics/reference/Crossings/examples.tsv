@@ -3,6 +3,7 @@ the-partition-1-3-mid-2			[Crossings, [SetPartition, [List, [List, 1, 3], [List,
 the-partition-1-mid-2-4-mid-3			[Crossings, [SetPartition, [List, [List, 1], [List, 2, 4], [List, 3]]]]	0			the partition $\{1\} \mid \{2,4\} \mid \{3\}$
 the-one-line-word-312			[Crossings, [Permutation, [List, 3, 1, 2]]]	0			the one-line word $312$
 the-one-line-word-2413			[Crossings, [Permutation, [List, 2, 4, 1, 3]]]	1			the one-line word $2413$
+bare-head-on-the-perfect-matching-13-25-46		test	[Crossings, [PerfectMatching, [List, [List, 1, 3], [List, 2, 5], [List, 4, 6]]]]	2			the perfect matching $13\,25\,46$, by the bare head
 findstat-st000232-1	Properties		[CombinatorialStat, [SetPartition, [List, [List, 1]]], "'Crossings'"]	0	0	FindStat St000232	FindStat's value for {{1}}
 findstat-st000232-2	Properties		[CombinatorialStat, [SetPartition, [List, [List, 1, 2]]], "'Crossings'"]	0	0	FindStat St000232	FindStat's value for {{1,2}}
 findstat-st000232-3	Properties		[CombinatorialStat, [SetPartition, [List, [List, 1, 2, 3]]], "'Crossings'"]	0	0	FindStat St000232	FindStat's value for {{1,2,3}}

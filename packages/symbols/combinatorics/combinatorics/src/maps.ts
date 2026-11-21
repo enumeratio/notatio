@@ -16,6 +16,7 @@ import type { Engine } from "@notatio/engine";
 import { symbolInfo } from "@notatio/manifest";
 import { declareMaps as declareMapsGeneric, evaluateDefinition, type Law } from "@notatio/structures";
 import { CARRIERS } from "./carriers.ts";
+import { declareTableRow, type TableRow } from "./carrier-rows.ts";
 import { COMPILED_MAPS } from "./compiled-maps.generated.js";
 import { FLAT } from "./flat.ts";
 import { composedDefinition, compositionSteps, fastDefinition, mapKey } from "./compiled.ts";
@@ -64,6 +65,44 @@ export { evaluateDefinition };
 // still carries `laws` inline for a map with no record to hold it (`Permutation`, see
 // `permutations/src/maps.ts`), which this merge leaves alone since `MAP_LAWS` has no entry for it.
 const withLaws = (map: CombinatorialMap): CombinatorialMap => ({ ...map, ...MAP_LAWS[`${map.name}@${map.from}`] });
+
+/**
+ * Heads compute-engine owns whose notion a carrier's map is the same one at another type: the head
+ * takes the carrier as a row of its own and answers as the map does.
+ * `Shape` is the outline as a tuple of lengths in compute-engine, and here the outline as a partition;
+ * `Reverse` of a set partition reads it from the other end, which relabels i as n + 1 - i (FindStat's Mp00112).
+ */
+export const HEAD_ROWS: readonly TableRow[] = [
+  {
+    head: "Shape",
+    carrier: "StandardTableau",
+    via: "CombinatorialMap",
+    name: "TableauShape",
+    returns: "integer_partition",
+  },
+  {
+    head: "Shape",
+    carrier: "SemistandardTableau",
+    via: "CombinatorialMap",
+    name: "SemistandardTableauShape",
+    returns: "integer_partition",
+  },
+  {
+    head: "Shape",
+    carrier: "SetPartition",
+    via: "CombinatorialMap",
+    name: "BlockSizePartition",
+    returns: "integer_partition",
+  },
+  {
+    head: "Transpose",
+    carrier: "StandardTableau",
+    via: "CombinatorialMap",
+    name: "TransposeTableau",
+    returns: "standard_tableau",
+  },
+  { head: "Reverse", carrier: "SetPartition", via: "CombinatorialMap", name: "Complement", returns: "set_partition" },
+];
 
 export const MAPS: readonly CombinatorialMap[] = [
   ...PERMUTATIONS_MAPS,
@@ -145,4 +184,5 @@ export function declareMaps(
   });
   // Overloads across the carrier boundary, which need both heads declared: after the maps.
   declareCycleConversions(ce);
+  for (const row of HEAD_ROWS) declareTableRow(ce, row);
 }

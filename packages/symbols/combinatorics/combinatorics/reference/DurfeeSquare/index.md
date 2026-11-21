@@ -14,7 +14,6 @@ catalog:
     url: https://www.findstat.org/St000183
     on: IntegerPartition
 statOn:
-  - CorePartition
   - IntegerPartition
 signatures:
   - call: DurfeeSquare(partition)

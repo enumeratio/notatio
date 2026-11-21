@@ -10,7 +10,6 @@ catalog:
     on: Permutation
 mapOn:
   - Permutation
-  - StandardTableau
 signatures:
   - call: DescentComposition(Permutation)
     description: The composition of n cut at the descent positions.

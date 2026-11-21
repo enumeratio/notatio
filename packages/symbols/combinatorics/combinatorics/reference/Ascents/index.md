@@ -7,7 +7,7 @@ signatures:
   - call: Ascents(p)
     description: the ascent count of a one-line permutation $p$
     library: enumeratio-combinatorics
-    type: (binary_word | composition | list | permutation) -> integer | number
+    type: ((arrangement) -> integer) & ((binary_word | composition | list | permutation) -> integer | number) & ((parking_function) -> integer) & ((word) -> integer)
 seeAlso:
   - Descents
   - SymmetricGroup
@@ -35,7 +35,6 @@ catalog:
     on: ParkingFunction
 statOn:
   - Arrangement
-  - AscentSequence
   - BinaryWord
   - IntegerComposition
   - ParkingFunction

@@ -15,7 +15,7 @@ signatures:
   - call: LargestBlock(partition)
     description: The size of the largest block.
     library: enumeratio-combinatorics
-    type: (set_partition) -> number
+    type: ((set_composition) -> number) & ((set_partition) -> number)
 bindings:
   - origin: mapped
     form: sage

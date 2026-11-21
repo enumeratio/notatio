@@ -24,7 +24,7 @@ signatures:
   - call: Successions(p)
     description: "Permutation: positions i with p(i+1) = p(i) + 1. SetPartition: elements i with i + 1 in the same block."
     library: enumeratio-combinatorics
-    type: (list<integer> | permutation | set_partition) -> number
+    type: ((list<integer> | permutation | set_partition) -> number) & ((perfect_matching) -> number)
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

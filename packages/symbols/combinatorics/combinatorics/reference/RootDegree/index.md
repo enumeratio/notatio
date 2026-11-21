@@ -5,7 +5,6 @@ signature: RootDegree(tree)
 summary: The number of children of the root.
 statOn:
   - OrderedTree
-  - PlaneTree
 catalog:
   - system: findstat
     identity: St000084

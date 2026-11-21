@@ -28,34 +28,15 @@
     "ZeroDivisorCount on Poset"
   ],
   "untested": [
-    "AlgebraNorm on GaussianInteger",
-    "AlgebraNorm on Multicomplex",
     "Area on PythagoreanTriple",
-    "Ascents on AscentSequence",
     "Collections on Text",
     "Contains on Text",
     "Denominator on RationalNumber",
-    "Descents on DecoratedPermutation",
-    "DistinctParts on CorePartition",
     "DivisorSum on IntegerFactorization",
-    "DurfeeSquare on CorePartition",
-    "Excedances on DecoratedPermutation",
-    "FixedPoints on DecoratedPermutation",
-    "Height on ColoredMotzkinPath",
-    "Height on KDyckPath",
-    "Height on KMotzkinPath",
-    "Height on PlaneTree",
     "Inversions on PermutationCycles",
-    "LargestPart on CorePartition",
-    "Leaves on PlaneTree",
+    "Norm on GaussianInteger",
+    "Norm on Multicomplex",
     "Numerator on RationalNumber",
-    "Peaks on ColoredMotzkinPath",
-    "Peaks on KDyckPath",
-    "Peaks on KMotzkinPath",
-    "Returns on ColoredMotzkinPath",
-    "Returns on KDyckPath",
-    "RootDegree on PlaneTree",
-    "Traits on Text",
-    "WeakExcedances on DecoratedPermutation"
+    "Traits on Text"
   ]
 }
