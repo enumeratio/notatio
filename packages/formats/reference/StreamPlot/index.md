@@ -5,6 +5,11 @@ signature: StreamPlot(...)
 summary: Wolfram's own StreamPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - ColorFunction
+  - PlotLabel
+  - XLabel
+  - YLabel
 signatures:
   - call: StreamPlot(...)
     description: Wolfram's own StreamPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

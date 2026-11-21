@@ -363,6 +363,12 @@ export interface ReferenceEntry {
    */
   readonly plot?: { readonly axis?: string; readonly window?: readonly number[] };
   /**
+   * The options the head declares, by name (`Axes`, `PlotStyle`). An argument `Name -> v` is an
+   * option of the head exactly when `Name` is listed here; any other rule is an argument. A reader
+   * tells an option from an arrow by this list, so it is the whole list, not a sample.
+   */
+  readonly options?: readonly string[];
+  /**
    * The values an option may take, where the set is finite, by option key (`GridLines: [true,
    * false]`, `ScalingFunctions: [Linear, Log]`). Options are trailing rules, not positional
    * parameters, so the signature's types cannot say it. Booleans are `True`/`False`, strings

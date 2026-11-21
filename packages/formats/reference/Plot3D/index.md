@@ -5,6 +5,13 @@ signature: Plot3D(...)
 summary: Wolfram's own Plot3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Axes
+  - ColorFunction
+  - Gpu
+  - PlotLabel
+  - PlotLegends
+  - ScalingFunctions
 signatures:
   - call: Plot3D(...)
     description: Wolfram's own Plot3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

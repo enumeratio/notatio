@@ -19,6 +19,7 @@ import {
   resolveLibraryNames,
   serializeEpsil,
 } from "@cortex-js/compute-engine/epsil";
+import { declaredOptions } from "./graphics-options.ts";
 
 let sharedEngine: ComputeEngine | undefined;
 /** A standard-library engine for callers that don't pass their own. */
@@ -55,6 +56,12 @@ export interface ParseExpressionOptions {
    * without one, a shared standard-library engine resolves the names.
    */
   ce?: ComputeEngine;
+  /**
+   * The options a head declares, by which a LaTeX `Name \to v` in its arguments is read as the
+   * option `Name -> v` and not as an arrow (`rulesInCalls`). Left out, it is the graphics heads'
+   * own (`declaredOptions`); pass one to add the heads of a library.
+   */
+  optionsOf?: (head: string) => ReadonlySet<string>;
 }
 
 export interface ParseExpressionResult {
@@ -135,13 +142,41 @@ function resolveRuleKeys(json: MathJsonExpression, src: string, ce: ComputeEngin
  * dictionary-entry constructor, which compute-engine canonicalises to a `Tuple` that broadcast
  * threads over; an option is a `Rule`. A pair directly inside a `Dictionary` (`{a -> 1}`) or `Association` is
  * data and stays, as does a bare top-level pair.
+ *
+ * LaTeX's `a \to b` parses to `To(a, b)`, which is also a limit's arrow and a function type's. It
+ * is a `Rule` only where `a` is an option its enclosing head declares (`optionsOf`), and then in
+ * that option's value too, for a rule or a list of rules (`ColorRules \to [IsPrime \to Teal]`).
+ * Any other `To` stays.
  */
-export function rulesInCalls(json: MathJsonExpression): void {
-  const visit = (node: unknown, inCall: boolean): void => {
+export function rulesInCalls(
+  json: MathJsonExpression,
+  optionsOf: (head: string) => ReadonlySet<string> = declaredOptions,
+): void {
+  const callOf = (node: unknown): unknown[] | undefined => {
     const fn = Array.isArray(node) ? node : (node as { fn?: unknown[] })?.fn;
-    if (!Array.isArray(fn)) return;
+    return Array.isArray(fn) ? fn : undefined;
+  };
+  const isArrow = (fn: unknown[] | undefined): boolean => fn?.[0] === "To" && fn.length === 3;
+  // An option's value: a rule, or rules in a list at any depth of lists, not inside another call.
+  const rules = (node: unknown): void => {
+    const fn = callOf(node);
+    if (fn === undefined) return;
+    if (isArrow(fn)) fn[0] = "Rule";
+    else if (fn[0] === "List") for (const entry of fn.slice(1)) rules(entry);
+  };
+  const visit = (node: unknown, inCall: boolean): void => {
+    const fn = callOf(node);
+    if (fn === undefined) return;
     const head = fn[0];
     if (inCall && head === "KeyValuePair") fn[0] = "Rule";
+    const options = typeof head === "string" ? optionsOf(head) : undefined;
+    if (options?.size)
+      for (const child of fn.slice(1)) {
+        const arrow = callOf(child);
+        if (arrow === undefined || !isArrow(arrow) || !options.has(symOf(arrow[1]) ?? "")) continue;
+        arrow[0] = "Rule";
+        rules(arrow[2]);
+      }
     for (const child of fn.slice(1)) visit(child, head !== "Dictionary" && head !== "Association");
   };
   visit(json, false);
@@ -165,7 +200,7 @@ export function parseExpression(src: string, options?: ParseExpressionOptions): 
   const json = withoutProgramBlock(parsed);
   resolveLibraryNames(json, src, options?.ce ?? libraryEngine());
   resolveRuleKeys(json, src, options?.ce ?? libraryEngine());
-  rulesInCalls(json);
+  rulesInCalls(json, options?.optionsOf);
   const found: ExpressionDiagnostic[] = diagnostics
     .filter((d) => d.severity === "error")
     .map((d) => ({ message: diagText(d.message), ...(d.range ? { range: [d.range[0], d.range[1]] } : {}) }));

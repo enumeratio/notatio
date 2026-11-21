@@ -5,6 +5,8 @@ signature: ComplexPlot(...)
 summary: Wolfram's own ComplexPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - ColorFunction
 signatures:
   - call: ComplexPlot(...)
     description: Wolfram's own ComplexPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

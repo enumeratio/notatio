@@ -637,6 +637,9 @@ importers:
       '@cortex-js/compute-engine':
         specifier: ^0.187.1
         version: 0.187.1
+      '@notatio/entry':
+        specifier: workspace:*
+        version: link:../entry
       '@notatio/manifest':
         specifier: workspace:*
         version: link:../manifest

@@ -5,6 +5,17 @@ signature: RegionPlot(pred, (x, xmin, xmax), (y, ymin, ymax))
 summary: "Wolfram's RegionPlot, held inert: the region of the plane where a predicate holds, filled, with its boundary drawn."
 names:
   wolframIdentity: true
+options:
+  - BoundaryStyle
+  - ColorFunction
+  - ColorMixing
+  - FrameLabel
+  - PlotLabel
+  - PlotPoints
+  - PlotStyle
+  - RegionFunction
+  - XLabel
+  - YLabel
 optionValues:
   ColorMixing:
     - Normal

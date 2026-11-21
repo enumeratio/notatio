@@ -308,6 +308,7 @@ export const REFERENCE_ENTRY_SCHEMA: JsonSchema = {
       },
       additionalProperties: false,
     },
+    options: { type: "array", items: { type: "string" } },
     optionValues: {
       type: "object",
       additionalProperties: {

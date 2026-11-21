@@ -3,6 +3,11 @@ name: TorusSquare
 domain: Graphics
 signature: TorusSquare(p, q)
 summary: The torus as a square with its opposite edges glued, and the torus knot T(p, q) on it as a straight line of slope q/p; held inert and drawn as a diagram `GraphicsBox`.
+options:
+  - Clock
+  - ColorFunction
+  - Dials
+  - PlotLabel
 signatures:
   - call: TorusSquare(p, q)
     description: held inert; drawn as the glued square with T(p, q) on it, two dials counting the windings, and a point that travels on the page's clock

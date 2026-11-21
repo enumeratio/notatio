@@ -5,6 +5,12 @@ signature: ListPlot3D(...)
 summary: Wolfram's own ListPlot3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - Axes
+  - ColorFunction
+  - PlotLabel
+  - PlotLegends
+  - ScalingFunctions
 signatures:
   - call: ListPlot3D(...)
     description: Wolfram's own ListPlot3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

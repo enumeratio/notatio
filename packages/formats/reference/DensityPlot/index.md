@@ -5,6 +5,16 @@ signature: DensityPlot(...)
 summary: Wolfram's own DensityPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
 names:
   wolframIdentity: true
+options:
+  - ColorFunction
+  - FrameLabel
+  - PlotLabel
+  - PlotLegends
+  - PlotPoints
+  - PlotRange
+  - RegionFunction
+  - XLabel
+  - YLabel
 signatures:
   - call: DensityPlot(...)
     description: Wolfram's own DensityPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).

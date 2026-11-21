@@ -2,7 +2,7 @@
 // the rules that style it, the frame's furniture (grid, axes, locators). Engine-free and DOM-free,
 // so the lowering to a `GraphicsBox` (`show-box.ts`) and the web element read it the same way.
 
-import { GRAPHICS_OPTIONS } from "@notatio/formats/graphics-options";
+import { declaredOptions } from "@notatio/formats/graphics-options";
 import { FIGURE_DEFAULTS, FIGURE_HEADS, type FigureHead } from "./figure-frames.ts";
 import { argsOf, headOf, type Json } from "./frame-json.ts";
 import {
@@ -20,7 +20,7 @@ import type { Vec2 } from "./lattice.ts";
 import type { LineStyle } from "./tiles-canvas.ts";
 
 /** The options `head` declares, as a set. */
-export const declared = (head: string): ReadonlySet<string> => new Set(GRAPHICS_OPTIONS[head] ?? []);
+export const declared = declaredOptions;
 export const stringOf = (json: Json): string | undefined =>
   typeof json === "string" ? json.replace(/^'([\s\S]*)'$/, "$1") : (json as { str?: string } | undefined)?.str;
 export const numberOf = (json: Json, fallback: number): number => {

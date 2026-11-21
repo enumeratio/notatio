@@ -5,6 +5,28 @@ signature: Show(layers..., options...)
 summary: "Wolfram's Show: layers drawn in one coordinate frame, sharing one view. Held as written, so a layer's ColorRules name the properties it publishes rather than compute-engine's heads."
 names:
   wolframIdentity: true
+options:
+  - AspectRatio
+  - Axes
+  - AxesLabel
+  - AxesStyle
+  - Frame
+  - FrameLabel
+  - GestureHandling
+  - GridLines
+  - GridLinesStyle
+  - ImageSize
+  - Magnification
+  - PlotLabel
+  - PlotRange
+  - ProjectionMatrix
+  - Selection
+  - SphericalRegion
+  - Ticks
+  - ViewAngle
+  - ViewCenter
+  - ViewPoint
+  - ViewVertical
 signatures:
   - call: Show(layers..., options...)
     description: the layers in one frame, sharing one view

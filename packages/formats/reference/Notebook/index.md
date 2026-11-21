@@ -5,6 +5,9 @@ signature: Notebook(...)
 summary: Wolfram's own Notebook, mapped through for the transpiler and the oracle but not yet written up here.
 names:
   wolframIdentity: true
+options:
+  - Evaluator
+  - TrackedSymbols
 signatures:
   - call: Notebook(...)
     description: Wolfram's own Notebook, mapped through for the transpiler and the oracle but not yet written up here.

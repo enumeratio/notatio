@@ -76,7 +76,12 @@ registerFileFormat({
   binary: false,
   // TeXForm is the TeX of TraditionalForm; heads with no traditional notation are unchanged.
   encode: (v) => portableTeX(asExpr(v).toLatex({ traditional: true })),
-  decode: (d, o) => engine(o).parse(text(d)).json,
+  // `Name \\to v` in a head's arguments is its option where the head declares `Name` (`rulesInCalls`).
+  decode: (d, o) => {
+    const json = structuredClone(engine(o).parse(text(d)).json);
+    rulesInCalls(json);
+    return json;
+  },
 });
 
 // Presentation MathML. `opts.display` / `opts.fragment` pass through on the way out.

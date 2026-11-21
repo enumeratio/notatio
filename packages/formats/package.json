@@ -58,7 +58,7 @@
     "./package.json": "./package.json"
   },
   "scripts": {
-    "build": "vp pack src/index.ts src/node.ts src/expression.ts src/inputform.ts src/asciimath.ts src/mathml.ts src/tex.ts src/typeset.ts src/markup.ts src/fullform.ts src/graphics-options.ts && enumeratio-collect-declares .",
+    "build": "node scripts/build-graphics-options.ts && vp pack src/index.ts src/node.ts src/expression.ts src/inputform.ts src/asciimath.ts src/mathml.ts src/tex.ts src/typeset.ts src/markup.ts src/fullform.ts src/graphics-options.ts && enumeratio-collect-declares .",
     "dev": "vp pack --watch",
     "test": "vp test",
     "check": "vp check"
@@ -74,6 +74,7 @@
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
+    "@notatio/entry": "workspace:*",
     "@notatio/manifest": "workspace:*",
     "@types/node": "^24",
     "typescript": "^7.0.2",
@@ -90,5 +91,8 @@
     ],
     "declare": "declareGraphics",
     "declares": "./declares.json"
-  }
+  },
+  "generated": [
+    "generated/graphics-options.json"
+  ]
 }

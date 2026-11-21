@@ -113,6 +113,11 @@ so a page reads the same on GitHub and on the site.
   are fine; `node packages/reference/scripts/format-records.ts` tidies them. A TSV cell is
   its text as written; one that can't sit in a row as written (a tab or line break, a
   leading `"`, the empty string) is a JSON string.
+- A head's options are its record's `options:` list, the whole list: a reader tells an option from
+  an arrow by it (`rulesInCalls`), and formats builds its table of graphics options from it. Add
+  an option to the record when the lowering starts to read it;
+  `packages/frontend/tests/graphics.test.ts` and `packages/formats/tests/declared-options.test.ts`
+  hold the two together.
 - An example with `known` (and its `source`) is held to it by `tests/known.test.ts`: never
   "fix" a failing known check by rewriting `expected`.
 - An example whose value draws (`Plot`, `BarChart`, a control) may state a `boxes` shape: the head
