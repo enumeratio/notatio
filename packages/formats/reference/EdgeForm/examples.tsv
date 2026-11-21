@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[EdgeForm, Black]	[EdgeForm, Black]	An outline alone
+in-graphics	Basic		[Graphics, [List, [EdgeForm, Black], Yellow, [Disk, [Tuple, 0, 0], 1]]]	[Graphics, [List, [EdgeForm, Black], Yellow, [Disk, [Tuple, 0, 0], 1]]]	A yellow disk outlined in black

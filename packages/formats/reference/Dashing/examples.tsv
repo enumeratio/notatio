@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Dashing, [List, 0.02, 0.01]]	[Dashing, [List, 0.02, 0.01]]	A dash and a gap
+in-graphics	Basic		[Graphics, [List, [Dashing, [List, 0.02, 0.01]], [Line, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	[Graphics, [List, [Dashing, [List, 0.02, 0.01]], [Line, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	A dashed line

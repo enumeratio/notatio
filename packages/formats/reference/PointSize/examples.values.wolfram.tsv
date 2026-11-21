@@ -1,0 +1,3 @@
+id	in
+one	PointSize[0.03]
+in-graphics	Graphics[List[PointSize[0.03], Point[List[List[0, 0], List[1, 1]]]]]

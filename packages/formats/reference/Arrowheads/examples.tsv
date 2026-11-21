@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Arrowheads, 0.06]	[Arrowheads, 0.06]	A head size alone
+in-graphics	Basic		[Graphics, [List, [Arrowheads, 0.06], [Arrow, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	[Graphics, [List, [Arrowheads, 0.06], [Arrow, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	An arrow with a larger head

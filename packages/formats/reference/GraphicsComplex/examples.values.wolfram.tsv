@@ -1,0 +1,3 @@
+id	in
+one	GraphicsComplex[List[List[0, 0], List[2, 0], List[1, 1.5]], Line[List[1, 2, 3, 1]]]
+in-graphics	Graphics[List[GraphicsComplex[List[List[0, 0], List[2, 0], List[1, 1.5]], Line[List[1, 2, 3, 1]]]]]

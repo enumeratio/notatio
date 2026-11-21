@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[AbsoluteThickness, 3]	[AbsoluteThickness, 3]	A thickness in pixels
+in-graphics	Basic		[Graphics, [List, [AbsoluteThickness, 3], [Line, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	[Graphics, [List, [AbsoluteThickness, 3], [Line, [List, [Tuple, 0, 0], [Tuple, 2, 1]]]]]	A line 3 pixels thick

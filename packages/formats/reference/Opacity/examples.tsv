@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Opacity, 0.4]	[Opacity, 0.4]	An opacity alone
+in-graphics	Basic		[Graphics, [List, Red, [Disk, [Tuple, 0, 0], 1], [Opacity, 0.4], Blue, [Disk, [Tuple, 1, 0], 1]]]	[Graphics, [List, Red, [Disk, [Tuple, 0, 0], 1], [Opacity, 0.4], Blue, [Disk, [Tuple, 1, 0], 1]]]	A translucent disk over an opaque one

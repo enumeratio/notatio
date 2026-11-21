@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[FaceForm, Red]	[FaceForm, Red]	A face alone
+in-graphics	Basic		[Graphics, [List, [FaceForm, Red], [EdgeForm, Black], [Disk, [Tuple, 0, 0], 1]]]	[Graphics, [List, [FaceForm, Red], [EdgeForm, Black], [Disk, [Tuple, 0, 0], 1]]]	A red face with a black outline

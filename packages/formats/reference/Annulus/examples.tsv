@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Annulus, [Tuple, 0, 0], [Tuple, 0.5, 1]]	[Annulus, [Tuple, 0, 0], [Tuple, 0.5, 1]]	An annulus by center and radii
+in-graphics	Basic		[Graphics, [List, [Annulus, [Tuple, 0, 0], [Tuple, 0.5, 1]]]]	[Graphics, [List, [Annulus, [Tuple, 0, 0], [Tuple, 0.5, 1]]]]	Drawn

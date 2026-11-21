@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Scale, [Circle, [Tuple, 0, 0], 1], [Tuple, 2, 1]]	[Scale, [Circle, [Tuple, 0, 0], 1], [Tuple, 2, 1]]	A circle stretched to an ellipse
+in-graphics	Basic		[Graphics, [List, [Scale, [Circle, [Tuple, 0, 0], 1], [Tuple, 2, 1]]]]	[Graphics, [List, [Scale, [Circle, [Tuple, 0, 0], 1], [Tuple, 2, 1]]]]	Drawn

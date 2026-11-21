@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+one	Basic		[Translate, [Circle, [Tuple, 0, 0], 1], [Tuple, 3, 0]]	[Translate, [Circle, [Tuple, 0, 0], 1], [Tuple, 3, 0]]	A circle moved three to the right
+in-graphics	Basic		[Graphics, [List, [Circle, [Tuple, 0, 0], 1], [Translate, [Circle, [Tuple, 0, 0], 1], [Tuple, 3, 0]]]]	[Graphics, [List, [Circle, [Tuple, 0, 0], 1], [Translate, [Circle, [Tuple, 0, 0], 1], [Tuple, 3, 0]]]]	A circle and its copy
