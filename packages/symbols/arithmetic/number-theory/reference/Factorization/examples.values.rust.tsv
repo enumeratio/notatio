@@ -1,5 +1,5 @@
 id	in
 a-factorization-as-data	
-factorization-of-an-integer	n(360)
-factorization-of-a-prime	n(97)
-factorization-of-a-negative	n(-12)
+factorization-of-an-integer	factor_integer(n(360))
+factorization-of-a-prime	factor_integer(n(97))
+factorization-of-a-negative	factor_integer(n(-12))

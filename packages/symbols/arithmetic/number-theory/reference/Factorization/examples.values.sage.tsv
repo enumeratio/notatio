@@ -1,5 +1,5 @@
 id	in
 a-factorization-as-data	
-factorization-of-an-integer	360
-factorization-of-a-prime	97
-factorization-of-a-negative	-12
+factorization-of-an-integer	enumeratio_factor_integer(360)
+factorization-of-a-prime	enumeratio_factor_integer(97)
+factorization-of-a-negative	enumeratio_factor_integer(-12)

@@ -329,3 +329,18 @@ test("a row whose known is 0 holds ours and theirs each to 0, the known check's 
   // A known other than 0 compares the values relative to their own size.
   expect(judged(-2.5e-16, "1.3e-16", "mpmath", 1)).toBe("disagree");
 });
+
+test("Factorization(n) of an integer is read as the (base, exponent) pairs each system's factoring answers", () => {
+  const call = ["Factorization", -12] as never;
+  const ours = ["Factorization", ["Tuple", ["List", -1, 2, 3], ["List", 1, 2, 1]]] as never;
+  const wolfram = "List[List[-1, 1], List[2, 2], List[3, 1]]";
+  expect(verdictOf("wolfram", ours, { value: wolfram, numeric: wolfram }, undefined, false, call)).toBe("agree");
+  expect(verdictOf("sympy", ours, { value: "[(-1, 1), (2, 2), (3, 1)]" }, undefined, false, call)).toBe("agree");
+  expect(verdictOf("sympy", ours, { value: "[(-1, 1), (2, 1), (3, 2)]" }, undefined, false, call)).toBe("disagree");
+  // A system that answers the bare -12 has not factored it.
+  expect(verdictOf("sympy", ours, { value: "-12" }, undefined, false, call)).not.toBe("agree");
+  // The data form is the carrier, compared as the pair of lists.
+  const data = ["Factorization", ["Tuple", ["List", 2, 3], ["List", 3, 1]]] as never;
+  const lists = "List[List[2, 3], List[3, 1]]";
+  expect(verdictOf("wolfram", data, { value: lists, numeric: lists }, undefined, false, data)).toBe("agree");
+});

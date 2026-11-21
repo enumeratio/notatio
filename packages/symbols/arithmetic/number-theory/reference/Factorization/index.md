@@ -14,4 +14,35 @@ signatures:
 seeAlso:
   - FactorInteger
   - IntegerFactorization
+bindings:
+  - origin: mapped
+    form: sage
+    template: enumeratio_factor_integer($1)
+    arity: 1
+    note: The integer overload only, Sage's own `factor` read as (base, exponent) pairs with the unit first, as FactorInteger's row; the oracle reads our factorization as those pairs. `Factorization(Tuple(bases, exponents))` is the carrier and has no row.
+  - origin: mapped
+    form: sympy
+    template: sorted(factorint($1).items())
+    arity: 1
+    note: The integer overload only, SymPy's `factorint` as (base, exponent) pairs. A negative integer's -1 comes first as ours does (sorted); SymPy has no factor for 1, which ours gives as 1^1.
+  - origin: mapped
+    form: julia
+    template: enumeratio_factor_integer($1)
+    arity: 1
+    note: The integer overload only; Nemo's factorization read as (base, exponent) pairs, as FactorInteger's row.
+  - origin: mapped
+    form: rust
+    template: factor_integer($1)
+    arity: 1
+    note: The integer overload only; positive operands, as FactorInteger's row.
+  - origin: mapped
+    form: mathlib4
+    template: "(let n : ℕ := $1; (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])"
+    arity: 1
+    note: The integer overload only; natural n, as FactorInteger's row.
+  - origin: mapped
+    form: mpmath
+    counterpart: false
+    arity: 1
+    note: mpmath has no integer factoring (its number theory is special functions and primes' counts), so the integer overload gets no mpmath row.
 ---

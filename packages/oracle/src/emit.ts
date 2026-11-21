@@ -1103,7 +1103,20 @@ export function emit(expr: MathJSON, system: System, extra: readonly Mapping[] =
       const inner = (head === "Max" || head === "Min") && operands.length === 1 ? finset(operands[0]) : undefined;
       if (inner !== undefined) return `(Finset.${head === "Max" ? "max'" : "min'"} ${inner} (by decide +kernel))`;
     }
-    const mapping = mappingFor(head, operands.length, extra, system);
+    // Factorization(n) of an integer is the system's own factoring: Wolfram's `FactorInteger`, or the row the
+    // head's record maps. A system with no such row gets none, where the carrier unwrap below would send the
+    // bare `n` and set it against our factors. `Factorization(Tuple(bases, exponents))` is the carrier itself.
+    const factorsInteger =
+      head === "Factorization" &&
+      operands.length === 1 &&
+      !(isCall(operands[0] as MathJSON) && (operands[0] as readonly MathJSON[])[0] === "Tuple");
+    if (factorsInteger && wl) return `FactorInteger[${walk(operands[0] as MathJSON)}]`;
+    if (factorsInteger && mappingFor(head, 1, extra, system) === undefined) {
+      missing.push("Factorization/integer");
+      return "0";
+    }
+    const mapping =
+      head === "Factorization" && !factorsInteger ? undefined : mappingFor(head, operands.length, extra, system);
     let template = mapping?.emit[system];
     if (system === "sympy" && template !== undefined) {
       const first = operands[0] as MathJSON;
