@@ -69,8 +69,7 @@ const withLaws = (map: CombinatorialMap): CombinatorialMap => ({ ...map, ...MAP_
 /**
  * Heads compute-engine owns whose notion a carrier's map is the same one at another type: the head
  * takes the carrier as a row of its own and answers as the map does.
- * `Shape` is the outline as a tuple of lengths in compute-engine, and here the outline as a partition;
- * `Reverse` of a set partition reads it from the other end, which relabels i as n + 1 - i (FindStat's Mp00112).
+ * `Shape` is the outline as a tuple of lengths in compute-engine, and here the outline as a partition.
  */
 export const HEAD_ROWS: readonly TableRow[] = [
   {
@@ -101,7 +100,6 @@ export const HEAD_ROWS: readonly TableRow[] = [
     name: "TransposeTableau",
     returns: "standard_tableau",
   },
-  { head: "Reverse", carrier: "SetPartition", via: "CombinatorialMap", name: "Complement", returns: "set_partition" },
 ];
 
 export const MAPS: readonly CombinatorialMap[] = [
