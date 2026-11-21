@@ -5,6 +5,7 @@
 // DiscretePlot), in Wolfram's names; the other arguments are `inferControl`s.
 
 import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
+import { integerMember, parseParameters, widestMember, winningOverload, type SymbolInfo } from "@notatio/manifest";
 import {
   controllableType,
   inferControl,
@@ -281,4 +282,31 @@ export function plotSectionOf(
   const panels = viewPanels(view);
   if (panels.length === 0 && view.reason === undefined) return undefined;
   return { panels, ...(view.reason === undefined ? {} : { reason: view.reason }) };
+}
+
+/**
+ * The function view of a manifest symbol: its winning overload read as one function type (an
+ * integer member where there is one, else the widest), then `functionViewOf`. The site and the
+ * golden test both build views through this.
+ */
+export function functionViewOfSymbol(info: SymbolInfo, ctx?: FunctionViewContext): FunctionView | undefined {
+  const type = winningOverload(info.overloads)?.type;
+  const member = type === undefined ? undefined : (integerMember(type) ?? widestMember(type));
+  const parameters = member === undefined ? undefined : parseParameters(member, info.params);
+  if (member === undefined || parameters === undefined) return undefined;
+  const returns = returnTypeOf(member);
+  return functionViewOf(
+    {
+      head: info.name,
+      parameters: parameters.map(({ name, type, optional, variadic }) => ({
+        ...(name === undefined ? {} : { name }),
+        type,
+        optional,
+        variadic,
+      })),
+      ...(returns === undefined ? {} : { returns }),
+    },
+    info,
+    ctx,
+  );
 }

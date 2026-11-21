@@ -5,29 +5,21 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseExpression } from "@notatio/formats/expression";
-import { integerMember, parseParameters, SYMBOLS, widestMember, winningOverload } from "@notatio/manifest";
+import { SYMBOLS } from "@notatio/manifest";
 import { expect, test } from "vite-plus/test";
-import { functionViewOf, type FunctionSignature, type FunctionView, returnTypeOf } from "../src/function-view.ts";
+import {
+  functionViewOf,
+  functionViewOfSymbol,
+  type FunctionSignature,
+  type FunctionView,
+  returnTypeOf,
+} from "../src/function-view.ts";
 import { inferPlotOver, numericDomainOf } from "../src/infer-controls.ts";
 
 /** Every head with a numeric result: its view, or none where it has no numeric argument. */
 const views = new Map<string, FunctionView>();
 for (const info of Object.values(SYMBOLS)) {
-  const wide = winningOverload(info.overloads)?.type;
-  const type = wide === undefined ? undefined : (integerMember(wide) ?? widestMember(wide));
-  const parameters = type === undefined ? undefined : parseParameters(type, info.params);
-  if (type === undefined || parameters === undefined) continue;
-  const signature: FunctionSignature = {
-    head: info.name,
-    parameters: parameters.map(({ name, type, optional, variadic }) => ({
-      ...(name === undefined ? {} : { name }),
-      type,
-      optional,
-      variadic,
-    })),
-    ...(returnTypeOf(type) === undefined ? {} : { returns: returnTypeOf(type) }),
-  };
-  const view = functionViewOf(signature, info);
+  const view = functionViewOfSymbol(info);
   if (view !== undefined) views.set(info.name, view);
 }
 
@@ -36,7 +28,11 @@ const updating = process.env.UPDATE_FUNCTION_VIEW === "1";
 
 test("the function view of each numeric head", () => {
   const fresh = Object.fromEntries([...views].toSorted(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)));
-  if (updating) writeFileSync(GOLDEN, `${JSON.stringify(fresh, null, 2)}\n`);
+  // Number arrays stay on one line, as the formatter leaves them, so a regeneration diff is only what changed.
+  const text = JSON.stringify(fresh, null, 2).replace(/\[[\d\s,.-]+\]/g, (a) =>
+    a.replace(/\s+/g, " ").replace("[ ", "[").replace(" ]", "]"),
+  );
+  if (updating) writeFileSync(GOLDEN, `${text}\n`);
   expect(fresh).toEqual(JSON.parse(readFileSync(GOLDEN, "utf8")));
 });
 
