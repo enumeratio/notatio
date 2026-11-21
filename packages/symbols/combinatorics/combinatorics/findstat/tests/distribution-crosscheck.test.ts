@@ -42,3 +42,20 @@ test.skipIf(!DEEP)(
     expectPinned(report);
   },
 );
+
+// The distributions stop at DEEP_SIZE and a size the crawl holds in part is skipped, so the rows past it (a set partition's size 8
+// is 46 of 4140; a matching's 8 points are all 105) are read here one by one, as the graphs are.
+test.skipIf(!DEEP)(
+  "set partitions and perfect matchings past the size cap, object by object, against FindStat's rows",
+  () => {
+    const report = sweep(undefined, false, true);
+    console.info(
+      `findstat past the cap: ${report.compared.length} compared, ${Object.keys(report.disagreements).length} disagree, ${report.objects} objects read`,
+    );
+    if (process.env.UPDATE_FINDSTAT_DISTRIBUTIONS === "1") {
+      updateGolden(report);
+      return;
+    }
+    expectPinned(report);
+  },
+);

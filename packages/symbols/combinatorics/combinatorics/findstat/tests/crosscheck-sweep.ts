@@ -76,6 +76,12 @@ const COLLECTION_WISE: Readonly<Record<string, { standard: number; deep: number 
 };
 const objectCap = (carrier: string, collection: string): number =>
   (COLLECTION_WISE[collection] ?? OBJECT_WISE[carrier]!)[DEEP ? "deep" : "standard"];
+/**
+ * Carriers whose rows past the size cap are also compared object by object (`sweep`'s `beyond`). Past the cap the crawl holds
+ * only part of a size, so no distribution is compared, and FindStat writes its objects in the order of a hash set (a matching's
+ * pair `(8,5)`), which a distribution never reads: only the object-by-object run reaches both.
+ */
+const BEYOND_CARRIERS: readonly string[] = ["SetPartition", "PerfectMatching"];
 type Kind = "unclassified" | "emit" | "convention" | "ours";
 interface Disagreement {
   readonly kind: Kind;
@@ -178,7 +184,8 @@ export interface Report {
   readonly disagreements: Golden;
 }
 
-export function sweep(only?: readonly string[], objectWise = true): Report {
+/** With `beyond`, only `BEYOND_CARRIERS` are read, each object past the size cap and one by one, whatever the rows cover of its size. */
+export function sweep(only?: readonly string[], objectWise = true, beyond = false): Report {
   const compared: string[] = [];
   const skipped: string[] = [];
   const disagreements: Golden = {};
@@ -186,8 +193,10 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
   const tallies = new Map<string, { given: number; declined: number }>();
   let objectsRead = 0;
   for (const match of findstat) {
-    if (OBJECT_WISE[match.on] ? !objectWise : !LEVELLED(match.on)) continue;
+    if (beyond ? !BEYOND_CARRIERS.includes(match.on) : OBJECT_WISE[match.on] ? !objectWise : !LEVELLED(match.on))
+      continue;
     if (only && !only.includes(`${match.head}@${match.on}`)) continue;
+    const wise = beyond || OBJECT_WISE[match.on] !== undefined;
     for (const id of match.findstat) {
       const bySize = new Map<string, { level: readonly number[]; objects: Map<string, number> }>();
       const entry = snapshot.items[id];
@@ -195,7 +204,7 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
       for (const [object, v] of pairsOf(id)) {
         const size = objectSize(match.on, object);
         const cap = OBJECT_WISE[match.on] ? objectCap(match.on, entry.collection) : MAX_SIZE;
-        if (size === undefined || size > cap || typeof v !== "number") continue;
+        if (size === undefined || typeof v !== "number" || (beyond ? size <= cap : size > cap)) continue;
         const level = objectLevel(match.on, object) ?? [size];
         const group = bySize.get(level.join(",")) ?? { level, objects: new Map<string, number>() };
         bySize.set(level.join(","), group);
@@ -216,11 +225,11 @@ export function sweep(only?: readonly string[], objectWise = true): Report {
           tally.given += objects.size;
           tally.declined += off.size;
         }
-        if (off.size > 0 && !OBJECT_WISE[match.on]) {
+        if (off.size > 0 && !wise) {
           skipped.push(`${label}: ${off.size} of ${objects.size} objects declined`);
           continue;
         }
-        if (OBJECT_WISE[match.on]) {
+        if (wise) {
           const ours: Record<string, number> = {};
           const theirs: Record<string, number> = {};
           const wrong: string[] = [];
