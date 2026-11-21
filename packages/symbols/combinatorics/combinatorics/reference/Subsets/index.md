@@ -13,7 +13,7 @@ signatures:
     description: the subsets of any finite collection.
     library: enumeratio-combinatorics
   - call: Subsets(f(a, b, …))
-    description: for any other head, its operands are the elements and each subset is built under the same head, as in $Subsets(a + b + c)$.
+    description: for any other head, its operands are the elements and each subset is built under the same head, as in $Subsets(f(a, b, c))$; a sum of untyped symbols stays unevaluated.
     library: enumeratio-combinatorics
   - call: Subsets(n, k)
     description: the subsets of $\{1, …, n\}$ of size at most $k$.

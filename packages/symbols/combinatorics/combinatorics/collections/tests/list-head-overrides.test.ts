@@ -134,7 +134,7 @@ test("an overridden head answers a lazy collection as it answers the list of its
 
 // An operand that may still become a list (`u + v` over a lambda's parameters) is not read by parts.
 test("an overridden head answers a lambda's untyped sum as the native head does", () => {
-  expect(shapeMisfires(calls, ["First", "Last", "At"], { deliberate: DELIBERATE })).toBe("");
+  expect(shapeMisfires(calls, ["First", "Last", "At", "Append"], { deliberate: DELIBERATE })).toBe("");
 });
 
 test("Join's trailing integer is a level: past the operands' depth the call stays unevaluated", () => {

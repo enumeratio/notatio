@@ -170,3 +170,33 @@ export function shapeMisfires(
   }
   return misfires.join("\n");
 }
+
+const asInert = (json: unknown): unknown =>
+  Array.isArray(json) ? (json[0] === "Add" && json[1] === "u" ? ["f", "u", "v"] : json.map(asInert)) : json;
+
+/** The lambda-wrapped calls on `u + v` where the declared engine reads a parameter as a part: the answer
+ *  is not the native one, does not keep `u + v` as written, and is what the same call answers on the
+ *  inert `f(u, v)`, whose operands are parts (unbound at the top, where any answer is a read). Unlike
+ *  `shapeMisfires`, a head that answers more than the native one is judged too, so it covers Length and
+ *  Append. */
+export function parameterReads(
+  builders: CallBuilders,
+  heads: readonly string[],
+  { deliberate = [] }: Pick<Options, "deliberate"> = {},
+): string {
+  const reads: string[] = [];
+  for (const [head, build] of Object.entries(builders)) {
+    if (!heads.includes(head)) continue;
+    for (const call of build(["Add", "u", "v"])) {
+      if (deliberate.some((d) => d.skip(call))) continue;
+      for (const [shape, wrapped] of Object.entries({ ...lambdaShapes(call), top: call })) {
+        const ours = evaluated(declared, wrapped);
+        if (ours.includes('["Add","u","v"]') || ours === evaluated(bare, wrapped)) continue;
+        if (shape === "top" || ours === evaluated(declared, asInert(wrapped) as Call)) {
+          reads.push(`${head} ${shape}: ${JSON.stringify(wrapped)}\n    declared ${ours}`);
+        }
+      }
+    }
+  }
+  return reads.join("\n");
+}

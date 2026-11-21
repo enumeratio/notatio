@@ -1,6 +1,6 @@
 import {
   applyFunction,
-  collectionElements,
+  partsOf,
   type Engine,
   type Expr,
   integerAt,
@@ -39,14 +39,23 @@ function declareThread(ce: Engine): void {
       const f = expr.operator;
       // Each operand is evaluated first, as `f(…)` would be; a lazy ordered collection
       // (`Tuples(…)`, `Range(…)`) stands for the `List` it evaluates to in Wolfram.
+      // The operands are the threaded arguments; each must be settled (below) before it is read.
       const args = operandsOf(expr).map((a) => a.evaluate());
       const parts = args.map((a) =>
         a.operator === headName
           ? operandsOf(a)
           : headName === "List" && a.isIndexedCollection === true && stringAt(a) === undefined
-            ? collectionElements(a)
+            ? partsOf(ce, a)
             : undefined,
       );
+      // An untyped symbol or a pending call may still be an `h` list once bound: the call waits.
+      const settled = (a: Expr, i: number): boolean =>
+        parts[i] !== undefined ||
+        isNumber(a) ||
+        a.operator === "String" ||
+        ["True", "False"].includes(symbolNameOf(a) ?? "") ||
+        (symbolNameOf(a) === undefined && partsOf(ce, a) !== undefined);
+      if (!args.every(settled)) return undefined;
       const threadAt = parts.map((p, i) => (p !== undefined ? i : -1)).filter((i) => i >= 0);
       if (threadAt.length === 0) return expr;
       const lengths = new Set(threadAt.map((i) => parts[i]!.length));

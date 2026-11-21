@@ -7,7 +7,7 @@ signatures:
   - call: Length(collection)
     description: the number of elements in the collection.
   - call: Length(expr)
-    description: the number of top-level operands of any expression, not just a collection.
+    description: "the number of top-level operands of a call, not just a collection: `Length(f(a, b))` is 2. A sum or product of untyped symbols stays unevaluated, as the symbols may be lists."
     library: enumeratio-combinatorics
     type: (any) -> infinity | integer
     overrides: compute-engine
@@ -52,6 +52,6 @@ bindings:
 - Works on any collection head, not just $List$ — e.g. $Set$.
 - Additive over concatenation: $Length(Join(A, B)) = Length(A) + Length(B)$. See [[Join]].
 - An atom has no parts, so its length is 0 — it isn't a type error.
-- Any other expression's length is its number of top-level operands, e.g. the number of terms in a sum.
+- A call's length is its number of top-level operands, e.g. `Length(f(a, b, c))` is 3. A sum of untyped symbols stays as it is, as it may be a list once its symbols are bound.
 - See [[Count]] to count occurrences of a specific value instead of every element.
 - A [[Finset]] is read as the subset it is, so its length is its number of members. compute-engine has no `Cardinality` head, so this is its cardinality.

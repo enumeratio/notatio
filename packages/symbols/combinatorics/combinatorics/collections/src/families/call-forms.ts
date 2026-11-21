@@ -34,6 +34,8 @@ import {
   integerAt,
   isNumber,
   operandsOf,
+  partsOf,
+  stringAt,
   symbolNameOf,
   widenSignature,
   wrapOperator,
@@ -89,21 +91,24 @@ function polyCollection<E>(
   decode: (b: Boxed) => unknown,
   resolve: (ops: readonly Expr[]) => Resolved<E> | undefined,
   own?: CollectionHandlers,
+  declines: (ops: readonly Expr[]) => boolean = () => false,
 ): CollectionHandlers {
   const opsOf = (c: Expr) => operandsOf(c);
   const element = (res: Resolved<E>, i: number): Expr => ce.box((res.encode ?? encode)(res.unrank(i)) as BoxInput);
   return {
     // A double past 2^53 is rounded: unknown to the engine, never a wrong count.
     count: (c) => {
+      if (declines(opsOf(c))) return undefined;
       const total = resolve(opsOf(c))?.count ?? 0;
       return total > Number.MAX_SAFE_INTEGER ? undefined : total;
     },
-    isFinite: () => true,
+    // A call whose parts are not sound yet has no known size: it is neither empty nor finite.
+    isFinite: (c) => !declines(opsOf(c)),
     isLazy: () => true,
-    isEnumerable: () => true,
-    isEmpty: (c) => (resolve(opsOf(c))?.count ?? 0) === 0,
+    isEnumerable: (c) => !declines(opsOf(c)),
+    isEmpty: (c) => !declines(opsOf(c)) && (resolve(opsOf(c))?.count ?? 0) === 0,
     iterator: (c) => {
-      const res = resolve(opsOf(c));
+      const res = declines(opsOf(c)) ? undefined : resolve(opsOf(c));
       const total = res?.count ?? 0;
       let i = 0;
       return {
@@ -441,6 +446,7 @@ function sizesInRange(kmin: number, kmax: number, step: number): number[] {
  *  list otherwise. A list's own subsets are over its positions 1..n, printed as the list's
  *  elements, and stay unwrapped: they are the original list's values, not a Finset's 1..n. */
 function resolveSubsets(
+  ce: Engine,
   kernels: SubsetKernels,
   ops: readonly Expr[],
   wrapElement: (n: number, idxs: number[]) => unknown,
@@ -449,8 +455,11 @@ function resolveSubsets(
   // is rebuilt under `f` (`Add()` for the empty one), as Wolfram's `Subsets[f[a, b, c]]` does.
   const listed = elementsOf(ops[0]);
   const call = ops[0];
-  const operands = listed === undefined && call !== undefined && !isNumber(call) ? operandsOf(call) : [];
-  const elements = listed ?? (operands.length > 0 ? operands : undefined);
+  const operands =
+    listed === undefined && call !== undefined && !isNumber(call) && stringAt(call) === undefined
+      ? partsOf(ce, call)
+      : undefined;
+  const elements = listed ?? (operands !== undefined && operands.length > 0 ? operands : undefined);
   const n = elements !== undefined ? elements.length : integerAt(ops[0]);
   if (n === undefined) return undefined;
   const subsetHead = listed === undefined ? call?.operator : "List";
@@ -569,8 +578,20 @@ export function declareCallForms(ce: Engine): void {
             ? (b.ops![0]!.ops![b.ops![0]!.ops!.length - 1]! as Boxed)
             : b) as never,
         ),
-      (ops) => resolveSubsets(kernels, ops, wrapSubset),
+      (ops) => resolveSubsets(ce, kernels, ops, wrapSubset),
       own,
+      // `Subsets(a + b)`: the operands of a sum of untyped symbols are not elements yet.
+      (ops) => {
+        const call = ops[0];
+        return (
+          call !== undefined &&
+          !isNumber(call) &&
+          stringAt(call) === undefined &&
+          call.isCollection !== true &&
+          Array.isArray((call as { ops?: unknown }).ops) &&
+          partsOf(ce, call) === undefined
+        );
+      },
     ),
   );
 
@@ -593,7 +614,7 @@ export function declareCallForms(ce: Engine): void {
   // above decline there, and these two forms know the exact count.
   const BIG = BigInt(Number.MAX_SAFE_INTEGER);
   const exactSubsets = (call: Expr): bigint | undefined => {
-    const exact = resolveSubsets(kernels, operandsOf(call), wrapSubset)?.exact;
+    const exact = resolveSubsets(ce, kernels, operandsOf(call), wrapSubset)?.exact;
     return exact !== undefined && exact > BIG ? exact : undefined;
   };
   // Permutations of a list of distinct elements (or a Range): n!.

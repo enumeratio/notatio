@@ -1,4 +1,4 @@
-import { type Engine, type Expr, integerAt, operandsOf, stringAt, wrapOperator } from "@notatio/engine";
+import { type Engine, type Expr, integerAt, operandsOf, partsOf, stringAt, wrapOperator } from "@notatio/engine";
 import { matches } from "./expression-ops.ts";
 import { integerGraph } from "./graphs.ts";
 import { rngFor } from "./list-frontier.ts";
@@ -70,10 +70,11 @@ function hilbertMatrix(ce: Engine, m: number, n: number): Expr | undefined {
 
 /** Navigate `path` (top-down, Wolfram 1-based-or-negative indices) into `expr`'s nested
  *  operands, `undefined` if any step is out of range or drills into a leaf. */
-function atPath(expr: Expr, path: readonly number[]): Expr | undefined {
+function atPath(ce: Engine, expr: Expr, path: readonly number[]): Expr | undefined {
   let node = expr;
   for (const step of path) {
-    const ops = operandsOf(node);
+    const ops = stringAt(node) === undefined ? partsOf(ce, node) : undefined;
+    if (ops === undefined) return undefined;
     const index = normalizePosition(step, ops.length) - 1;
     const next = ops[index];
     if (next === undefined) return undefined;
@@ -112,12 +113,12 @@ function declareExtract(ce: Engine): void {
       if (isListOfPaths(pos)) {
         const paths = operandsOf(pos).map(pathOf);
         if (paths.some((p) => p === undefined)) return undefined;
-        const parts = paths.map((p) => atPath(expr, p!));
+        const parts = paths.map((p) => atPath(ce, expr, p!));
         if (parts.some((part) => part === undefined)) return undefined;
         return ce.function("List", parts as Expr[]);
       }
       const path = pathOf(pos);
-      return path === undefined ? undefined : atPath(expr, path);
+      return path === undefined ? undefined : atPath(ce, expr, path);
     },
   });
 }
@@ -137,8 +138,12 @@ function declareDeleteCases(ce: Engine): void {
       const listExpr = ops[0]?.evaluate();
       const pattern = ops[1];
       if (listExpr === undefined || pattern === undefined) return undefined;
-      const kept = operandsOf(listExpr).filter((item) => !matches(item, pattern));
-      return ce.function(listExpr.operator as never, kept);
+      const items = stringAt(listExpr) === undefined ? partsOf(ce, listExpr) : undefined;
+      if (items === undefined) return undefined;
+      return ce.function(
+        listExpr.operator as never,
+        items.filter((item) => !matches(item, pattern)),
+      );
     },
   });
 }

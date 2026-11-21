@@ -1,7 +1,7 @@
 import {
   declareCompile,
   applyFunction,
-  collectionElements,
+  partsOf,
   type Engine,
   type Expr,
   integerAt,
@@ -58,7 +58,7 @@ export function declareListStats(ce: Engine): void {
     (ops) =>
       ops.length === 1 &&
       ops[0].operator === "List" &&
-      !isMatrixLike(ops[0]) &&
+      !isMatrixLike(ce, ops[0]) &&
       operandsOf(ops[0]).length > 0 &&
       !operandsOf(ops[0]).every(isNumberLiteral),
     () => (ops) => symbolicMean(ce, operandsOf(ops[0])),
@@ -73,7 +73,7 @@ export function declareListStats(ce: Engine): void {
     (ops) =>
       ops.length === 1 &&
       ops[0].operator === "List" &&
-      !isMatrixLike(ops[0]) &&
+      !isMatrixLike(ce, ops[0]) &&
       operandsOf(ops[0]).length > 0 &&
       !operandsOf(ops[0]).every(isNumberLiteral) &&
       operandsOf(ops[0]).every((x) => x.isNumber === true),
@@ -94,7 +94,7 @@ export function declareListStats(ce: Engine): void {
     ["Commonest", 1, 1],
     (ops) => ops.length === 2 && commonestCount(ops[1]) !== undefined,
     (native) => (ops, options) => {
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return native?.(ops, options);
       const n = commonestCount(ops[1])!;
       const tally: { value: Expr; count: number }[] = [];
@@ -269,7 +269,7 @@ export function declareListStats(ce: Engine): void {
       if (test.operator !== "Function" && symbolNameOf(test) === undefined) {
         return native?.(ops, options);
       }
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return native?.(ops, options);
       const kept: Expr[] = [];
       for (const item of items) {

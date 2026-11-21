@@ -1,7 +1,6 @@
 import {
   declareCompile,
   applyFunction,
-  collectionElements,
   type Engine,
   type Expr,
   integerAt,
@@ -13,6 +12,7 @@ import {
   widenSignatureKeepingNative,
   wrapOperator,
 } from "@notatio/engine";
+import { treeParts } from "./expression-ops.ts";
 
 // Level-aware and structural list operations compute-engine doesn't answer yet: Partition's
 // multi-dimensional block form and its wraparound/padded overhangs, Flatten's infinite
@@ -29,20 +29,26 @@ const resolveIndex1Based = (index: number, length: number): number | undefined =
 };
 
 /** The elements of `expr` at exactly Wolfram level `level` (level 0 is `expr` itself, level
- *  1 its direct operands, level 2 their operands, and so on) — descending only through
- *  `List` nodes, since anything else has no further "parts" to speak of at this level. */
-const elementsAtExactLevel = (expr: Expr, level: number): readonly Expr[] => {
+ *  1 its direct parts, level 2 their parts, and so on) -- or `undefined` where a part of the
+ *  walk is a call whose operands may not be its parts (see `partsOf`). An atom has no parts. */
+const elementsAtExactLevel = (ce: Engine, expr: Expr, level: number): readonly Expr[] | undefined => {
   if (level === 0) return [expr];
-  if (expr.operator !== "List") return [];
-  const items = operandsOf(expr);
-  return level === 1 ? items : items.flatMap((item) => elementsAtExactLevel(item, level - 1));
+  const items = treeParts(ce, expr);
+  if (items === undefined) return undefined;
+  if (level === 1) return items;
+  const deeper = items.map((item) => elementsAtExactLevel(ce, item, level - 1));
+  return deeper.some((d) => d === undefined) ? undefined : deeper.flatMap((d) => d!);
 };
 
 /** The elements of `expr` at every level from 1 through `maxLevel` — Wolfram's shorthand
  *  for a bare integer level spec, as opposed to `{n}` (level `n` only). */
-const elementsUpToLevel = (expr: Expr, maxLevel: number): readonly Expr[] => {
+const elementsUpToLevel = (ce: Engine, expr: Expr, maxLevel: number): readonly Expr[] | undefined => {
   const acc: Expr[] = [];
-  for (let level = 1; level <= maxLevel; level++) acc.push(...elementsAtExactLevel(expr, level));
+  for (let level = 1; level <= maxLevel; level++) {
+    const at = elementsAtExactLevel(ce, expr, level);
+    if (at === undefined) return undefined;
+    acc.push(...at);
+  }
   return acc;
 };
 
@@ -67,8 +73,8 @@ const levelSpecOf = (spec: Expr): LevelSpec | undefined => {
   }
   return undefined;
 };
-const elementsAtLevelSpec = (expr: Expr, spec: LevelSpec): readonly Expr[] =>
-  spec.kind === "upTo" ? elementsUpToLevel(expr, spec.n) : elementsAtExactLevel(expr, spec.n);
+const elementsAtLevelSpec = (ce: Engine, expr: Expr, spec: LevelSpec): readonly Expr[] | undefined =>
+  spec.kind === "upTo" ? elementsUpToLevel(ce, expr, spec.n) : elementsAtExactLevel(ce, expr, spec.n);
 
 /** The rectangular shape of a nested `List` — the length at each level, stopping at the
  *  first level that isn't itself a uniform `List` of `List`s. Only as many dimensions as
@@ -98,15 +104,19 @@ const elementAt = (list: Expr, indices: readonly number[]): Expr => {
 
 /** `Flatten(f(a, f(b, f(c))))`: splice in the operands of any nested call to the SAME head,
  *  not just `List` — compute-engine's Flatten is List-only. */
-const flattenSameHead = (ce: Engine, expr: Expr): Expr => {
+const flattenSameHead = (ce: Engine, expr: Expr): Expr | undefined => {
   const head = expr.operator;
   const flat: Expr[] = [];
+  let sound = true;
   const visit = (e: Expr): void => {
-    if (e.operator === head) operandsOf(e).forEach(visit);
+    const parts = e.operator === head ? partsOf(ce, e) : undefined;
+    if (parts !== undefined) parts.forEach(visit);
+    else if (e.operator === head) sound = false;
     else flat.push(e);
   };
-  operandsOf(expr).forEach(visit);
-  return ce.function(head, flat);
+  const top = partsOf(ce, expr);
+  top?.forEach(visit);
+  return top === undefined || !sound ? undefined : ce.function(head, flat);
 };
 
 /** `Flatten(list, {{p1}, {p2}, …})`: a list-of-levels spec that's a permutation of
@@ -232,7 +242,7 @@ const overhangWindows = (
  *  Wolfram's order: a node, then its head (position `…0`), then its parts left to right. With
  *  `first`, stops at the first. `undefined` when a lazy collection runs past the iteration
  *  budget part-way, or never ends, rather than answering from a shorter walk. */
-export const positionsOf = (expr: Expr, value: Expr, first = false): number[][] | undefined => {
+export const positionsOf = (ce: Engine, expr: Expr, value: Expr, first = false): number[][] | undefined => {
   const found: number[][] = [];
   const walk = (node: Expr, path: readonly number[]): boolean => {
     if (node.isEqual(value) === true) {
@@ -246,7 +256,7 @@ export const positionsOf = (expr: Expr, value: Expr, first = false): number[][] 
       found.push([...path, 0]);
       if (first) return true;
     }
-    const parts = collectionElements(node);
+    const parts = partsOf(ce, node);
     if (parts === undefined) throw new RangeError("collection past the iteration budget");
     return parts.some((part, i) => walk(part, [...path, i + 1]));
   };
@@ -285,7 +295,7 @@ export function declareListLevelHeads(ce: Engine): void {
       const offsets =
         scalarOffset !== undefined ? sizes.map(() => scalarOffset) : operandsOf(ops[2]).map((op) => integerAt(op)!);
       // The blocks are cut from a nested List, so a lazy collection is read as the List of its elements.
-      const elements = ops[0].isLazyCollection ? collectionElements(ops[0]) : undefined;
+      const elements = ops[0].isLazyCollection ? partsOf(ce, ops[0]) : undefined;
       if (ops[0].isLazyCollection && elements === undefined) return undefined;
       return partitionBlocks(ce, elements === undefined ? ops[0] : ce.function("List", [...elements]), sizes, offsets);
     },
@@ -310,7 +320,7 @@ export function declareListLevelHeads(ce: Engine): void {
       integerAt(ops[2]) !== undefined &&
       overhangKs(ops[3]) !== undefined,
     () => (ops) => {
-      const items = collectionElements(ops[0]);
+      const items = partsOf(ce, ops[0]);
       if (items === undefined) return undefined;
       const n = integerAt(ops[1])!;
       const d = integerAt(ops[2])!;
@@ -358,48 +368,29 @@ export function declareListLevelHeads(ce: Engine): void {
       ops.length === 1 &&
       ops[0].operator !== "List" &&
       symbolNameOf(ops[0]) === undefined &&
+      stringAt(ops[0]) === undefined &&
       !ops[0].isLazyCollection &&
-      operandsOf(ops[0]).length > 0,
+      (partsOf(ce, ops[0])?.length ?? 0) > 0,
     () => (ops) => flattenSameHead(ce, ops[0]),
   );
 
   // Count(collection, value, level): a bare integer counts matches at every level from 1
   // through it; `{level}` counts that level only. See `levelSpecOf`.
   //
-  // A 3rd operand is arity compute-engine's native Count rejects outright at BOX time
-  // ("unexpected-argument"), replacing it with an error carrying only its PRINTED form —
-  // not the original boxed expression — before `evaluate` (or even `wrapOperator`'s
-  // `applies` gate) ever runs. Patched on `operator.canonical` instead, the same technique
-  // `list-heads.ts` uses for `Join`/`Append`'s own box-time folding: our 3-operand case is
-  // resolved to its answer directly in canonical, and everything else defers to the native
-  // fold via a `canonical`-pinned stand-in that breaks the self-recursion (see the `Join`
-  // override's own note on why).
-  {
-    const definition = ce.lookupDefinition("Count");
-    const operator =
-      definition !== undefined && "operator" in definition
-        ? (
-            definition as {
-              operator: {
-                canonical?: (ops: readonly Expr[], options: unknown) => Expr | undefined;
-              };
-            }
-          ).operator
-        : undefined;
-    if (operator !== undefined) {
-      const nativeCanonical = operator.canonical;
-      const nativeOperator = Object.create(operator) as typeof operator;
-      nativeOperator.canonical = nativeCanonical;
-      operator.canonical = (ops, options) => {
-        const spec = ops.length === 3 ? levelSpecOf(ops[2]) : undefined;
-        return spec !== undefined
-          ? ce.number(countMatches(ce, elementsAtLevelSpec(ops[0], spec), ops[1]))
-          : nativeCanonical?.call(nativeOperator, ops, options);
-      };
-      // compile builtin: rewrites operands at canonicalization, before compile sees the expression
-      declareCompile(ce, "Count", "builtin");
-    }
-  }
+  // A 3rd operand is arity compute-engine's native Count rejects, so the signature takes it. The count
+  // is read at evaluate, once the operands are values; parts that may change once symbols are bound
+  // leave the call as it is.
+  widenSignatureKeepingNative(ce, "Count", "(any, any, any) -> integer");
+  wrapOperator(
+    ce,
+    ["Count", 1, 1],
+    (ops) => ops.length === 3 && levelSpecOf(ops[2]) !== undefined,
+    () => (ops) => {
+      const elements = elementsAtLevelSpec(ce, ops[0], levelSpecOf(ops[2])!);
+      return elements === undefined ? undefined : ce.number(countMatches(ce, elements, ops[1]));
+    },
+    3,
+  );
 
   // All(collection, predicate, level) / Any(collection, predicate, level): test the
   // elements at exactly that level, delegating the actual True/False decision to the
@@ -428,8 +419,10 @@ export function declareListLevelHeads(ce: Engine): void {
     operator.canonical = (ops, options) => {
       const level = ops.length === 3 ? integerAt(ops[2]) : undefined;
       if (level === undefined) return nativeCanonical?.call(nativeOperator, ops, options);
-      const elements = elementsAtExactLevel(ops[0], level);
-      return ce.function(head, [ce.function("List", elements), ops[1]]).evaluate();
+      const elements = elementsAtExactLevel(ce, ops[0], level);
+      return elements === undefined
+        ? ce.function(head, [...ops], { form: "raw" })
+        : ce.function(head, [ce.function("List", elements), ops[1]]).evaluate();
     };
     // compile builtin: rewrites operands at canonicalization, before compile sees the expression
     declareCompile(ce, head, "builtin");
@@ -512,7 +505,7 @@ export function declareListLevelHeads(ce: Engine): void {
     signature: "(any, any) -> list<integer>",
     evaluate: (ops: readonly Expr[]): Expr | undefined => {
       if (ops[0] === undefined || ops[1] === undefined) return undefined;
-      const found = positionsOf(ops[0], ops[1], true);
+      const found = positionsOf(ce, ops[0], ops[1], true);
       if (found === undefined) return undefined;
       return ce.box(["List", ...(found[0] ?? [])]);
     },

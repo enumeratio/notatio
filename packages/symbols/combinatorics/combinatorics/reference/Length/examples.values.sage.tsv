@@ -9,7 +9,6 @@ an-atom-has-no-parts-so-its-length-is-0	enumeratio_length(5)	0
 the-empty-list-has-length-0	enumeratio_length([])	0	
 of-a-matrix-the-number-of-rows	enumeratio_length([[1, 2], [3, 4], [5, 6]])	3	
 a-set-holds-each-element-once-so-a-repeated			
-any-expression-the-number-of-terms-in-a-sum	enumeratio_length((SR.var("a") + SR.var("b") + SR.var("c") + SR.var("d")))	4	
 the-number-of-arguments-of-a-call-counting-only			
 a-symbol-such-as-pi-is-an-atom-of-length-0	enumeratio_length(pi)	0	
 a-lazy-range-is-counted-without-being			
@@ -20,11 +19,13 @@ length-3-plus-i	enumeratio_length((3 + 1*I))	0
 length-string	enumeratio_length("string")	0	
 the-cardinality-of-a-finset	enumeratio_length([1, 3, 4])	3	
 the-empty-finset-has-no-members	enumeratio_length([])	0	
-length-x-pow-9-plus-x-pow-2-plus-x-plus-1	enumeratio_length((((SR.var("x"))^9) + ((SR.var("x"))^2) + SR.var("x") + 1))	4	
+length-of-a-call-is-its-operand-count			
 length-integerdigits-1-000-factorial	enumeratio_length((Integer(abs(enumeratio_factorial(1000))).digits(10) or [0])[::-1])	2568	
 map-length-list-list-a-b-list-a-b-c-list-x			
 length-list-list-a-b-c-list-d-k-f	enumeratio_length([[SR.var("a"), SR.var("b"), SR.var("c")], [SR.var("d"), SR.var("k"), SR.var("f")]])	2	
 length-join-a-b-length-a-length-b-see-join			
+any-expression-the-number-of-terms-in-a-sum	enumeratio_length((SR.var("a") + SR.var("b") + SR.var("c") + SR.var("d")))	4	
+length-x-pow-9-plus-x-pow-2-plus-x-plus-1	enumeratio_length((((SR.var("x"))^9) + ((SR.var("x"))^2) + SR.var("x") + 1))	4	
 length-filter-issquarefree-past-iteration-budget			
 length-1-over-3	enumeratio_length((1/3))	0	
 length-2-plus-i	enumeratio_length((2 + 1*I))	0	
