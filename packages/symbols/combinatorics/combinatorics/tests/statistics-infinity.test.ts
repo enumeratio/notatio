@@ -304,15 +304,16 @@ test("the statistics that write an infinity, and the rule each fails", () => {
     .filter(([, verdict]) => !("failed" in verdict) || verdict.failed !== 2)
     .map(([signature, verdict]) => [signature, "failed" in verdict ? verdict.failed : verdict.signs.join(", ")]);
   // The three graph statistics pass the rules (the build then flags those with an infinite subject); the Dyck-path ones
-  // divide, ProtectionNumber's flat alternative uses a head that is not classified, and the ordered-tree counts fail rule 4
-  // (they are not compiled, so nothing rides on it).
+  // divide, ProtectionNumber's flat alternative uses a head that is not classified, and the two protected-node counts
+  // carry a count beside a distance seeded with the infinity, so their count component is clean (they are not compiled,
+  // and their answer is a count that is never infinite, so the build gives them no flag).
   expect(Object.fromEntries(verdicts)).toEqual({
     "CornerAlgebraDominantDimension@DyckPath": 3,
     "CyclicNakayamaGlobalDimension@DyckPath": 3,
     "CyclicNakayamaDominantDimension@DyckPath": 3,
     "ProtectionNumber@OrderedTree": 3,
-    "OneProtectedNodeCount@OrderedTree": 4,
-    "TwoProtectedNodeCount@OrderedTree": 4,
+    "OneProtectedNodeCount@OrderedTree": "PositiveInfinity",
+    "TwoProtectedNodeCount@OrderedTree": "PositiveInfinity",
     "MaximumDistance@LabeledGraph": "PositiveInfinity",
     "MinimumEccentricity@LabeledGraph": "PositiveInfinity",
     "Girth@LabeledGraph": "PositiveInfinity",
