@@ -51,6 +51,8 @@ export interface SymbolInfo {
   readonly maxSize?: number;
   /** How it is drawn over its numeric argument, where a record says (the function view's axis and window). */
   readonly plot?: PlotHints;
+  /** The options it declares, by name, where a record says (`ReferenceEntry.options`). */
+  readonly options?: readonly string[];
   /** The values each option may take, where a record says the set is finite. */
   readonly optionValues?: OptionValues;
   readonly attributes?: readonly SymbolAttribute[];
@@ -100,6 +102,8 @@ export interface Description {
   readonly maxSize?: number;
   /** How it is drawn over its numeric argument (see `SymbolInfo`). */
   readonly plot?: PlotHints;
+  /** The options it declares (see `SymbolInfo`). */
+  readonly options?: readonly string[];
   /** The values each option may take (see `SymbolInfo`). */
   readonly optionValues?: OptionValues;
   readonly attributes?: readonly string[];

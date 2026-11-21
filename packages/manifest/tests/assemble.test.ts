@@ -54,6 +54,15 @@ test("a record's optionValues reach the head's info", () => {
   expect(assembleManifest([pkg], engine).symbols.Big!.optionValues).toEqual({ Grid: [true, false] });
 });
 
+test("a head's options are every package's record's, together", () => {
+  const pkg = (name: string, options: string[]): PackageIndex => ({
+    package: name,
+    records: [{ record: { name: "Big", summary: "Big.", options }, examples: 0 }],
+  });
+  const { symbols } = assembleManifest([pkg("a", ["Over", "Grid"]), pkg("b", ["Depth", "Grid"])], engine);
+  expect(symbols.Big!.options).toEqual(["Depth", "Grid", "Over"]);
+});
+
 test("a record's plot hints are the head's: the first package to give them wins", () => {
   const pkg = (name: string, plot?: { axis?: string; window?: number[] }): PackageIndex => ({
     package: name,

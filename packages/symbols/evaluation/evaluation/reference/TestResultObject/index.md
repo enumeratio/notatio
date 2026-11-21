@@ -5,6 +5,10 @@ signature: TestResultObject(...)
 summary: Wolfram's own TestResultObject, mapped through for the transpiler and the oracle but not yet written up here.
 names:
   wolframIdentity: true
+options:
+  - AbsoluteTimeUsed
+  - ActualOutput
+  - ExpectedOutput
 stub: carrier
 signatures:
   - call: TestResultObject(...)

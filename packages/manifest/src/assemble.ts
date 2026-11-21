@@ -40,6 +40,8 @@ export interface IndexedRecord {
   readonly maxSize?: number;
   /** How it is drawn over its numeric argument (`ReferenceEntry.plot`). */
   readonly plot?: PlotHints;
+  /** The options it declares, by name. */
+  readonly options?: readonly string[];
   /** The finite values of its options, by key. */
   readonly optionValues?: OptionValues;
   readonly references?: readonly { readonly system: string; readonly identity: string; readonly on?: string }[];
@@ -103,6 +105,7 @@ export function assembleManifest(indexes: readonly PackageIndex[], engine: Engin
       attributes: Set<SymbolAttribute>;
       maxSize?: number;
       plot?: PlotHints;
+      options: Set<string>;
       optionValues?: Record<string, OptionValues[string]>;
       findstat: Map<string, FindStatId>;
     }
@@ -110,7 +113,10 @@ export function assembleManifest(indexes: readonly PackageIndex[], engine: Engin
   const entry = (name: string) => {
     let info = byName.get(name);
     if (info === undefined)
-      byName.set(name, (info = { documented: [], overloads: [], attributes: new Set(), findstat: new Map() }));
+      byName.set(
+        name,
+        (info = { documented: [], overloads: [], attributes: new Set(), options: new Set(), findstat: new Map() }),
+      );
     return info;
   };
 
@@ -132,6 +138,8 @@ export function assembleManifest(indexes: readonly PackageIndex[], engine: Engin
     info.plot ??= record.plot;
     // The first package to state an option's values wins; a head's records agree in practice.
     for (const [key, values] of Object.entries(record.optionValues ?? {})) (info.optionValues ??= {})[key] ??= values;
+    // Every package's record may add options: a head's options are all of them.
+    for (const option of record.options ?? []) info.options.add(option);
     for (const row of [...(record.references ?? []), ...(record.catalog ?? [])])
       if (row.system === "findstat")
         info.findstat.set(`${row.identity}@${row.on ?? ""}`, {
@@ -168,6 +176,7 @@ export function assembleManifest(indexes: readonly PackageIndex[], engine: Engin
       ...(info.params !== undefined ? { params: info.params } : {}),
       ...(info.maxSize !== undefined ? { maxSize: info.maxSize } : {}),
       ...(info.plot !== undefined ? { plot: info.plot } : {}),
+      ...(info.options.size > 0 ? { options: [...info.options].toSorted(cmp) } : {}),
       ...(info.optionValues !== undefined ? { optionValues: info.optionValues } : {}),
       ...(info.attributes.size > 0 ? { attributes: [...info.attributes].toSorted(cmp) } : {}),
       ...(info.findstat.size > 0
