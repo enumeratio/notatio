@@ -131,6 +131,7 @@ const graphOf = (n: number, pairs: readonly (readonly [number, number])[]): unkn
 
 /** Further subjects of a graph map, each pinning a labeling the default sample does not reach. */
 const EXTRA_SAMPLES: Record<string, { contents: unknown; caption: string }[]> = {
+  "TransposePartition@core_partition": [{ contents: ["List", 4, 2], caption: "the 3-core $4 + 2$" }],
   "BlockCutTree@labeled_graph": [
     {
       contents: graphOf(6, [

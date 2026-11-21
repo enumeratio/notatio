@@ -30,6 +30,7 @@ bindings:
     arity: 1
 ---
 
-- Takes an `IntegerPartition` or a `CorePartition` and returns the same carrier — a typed map, so a wrong carrier is a type error rather than a wrong answer.
+- Takes a `IntegerPartition` and returns a `IntegerPartition` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
 - Entry i of the result counts the parts that are at least i, so it is its own inverse and swaps the number of parts with the largest part. Combinatorica's TransposePartition; FindStat's Mp00044, "conjugate". Wolfram's Conjugate is the complex conjugate, not this map.
-- The conjugate of a core is a core of the same t, since a hook and its mirror have the same length: `CorePartition` is the same map with its answer kept in the carrier of cores.
+- Also takes a `CorePartition`, returning a `CorePartition`: The conjugate of a core: a core's transpose is a core, of the same t.
+- A hook of the conjugate is a hook of the partition turned over, with the same length, so a partition has a hook divisible by t exactly when its conjugate does. The map is the one on integer partitions, answering in the carrier of cores.

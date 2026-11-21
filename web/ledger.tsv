@@ -5765,3 +5765,4 @@ symbol	/reference/symbol/SublatticeCount
 symbol	/reference/symbol/UncomplementedElementCount
 symbol	/reference/symbol/ZeroDivisorCount
 symbol	/reference/symbol/AlgebraNorm
+map	/reference/map/CorePartition/TransposePartition
