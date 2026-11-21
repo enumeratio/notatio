@@ -41,7 +41,6 @@ mapOn:
   - PerfectMatching
   - Permutation
   - SetComposition
-  - SetPartition
   - SignedPermutation
 signatures:
   - call: Reverse(Permutation)

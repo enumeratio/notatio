@@ -7,7 +7,6 @@ statOn:
   - BinaryTree
   - LabeledTree
   - OrderedTree
-  - PlaneTree
 catalog:
   - system: findstat
     identity: St000201

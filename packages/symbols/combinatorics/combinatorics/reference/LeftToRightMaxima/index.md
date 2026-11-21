@@ -15,7 +15,7 @@ signatures:
   - call: LeftToRightMaxima(p)
     description: Positions larger than everything before them.
     library: enumeratio-combinatorics
-    type: (list<integer> | permutation) -> number
+    type: ((arrangement) -> number) & ((list<integer> | permutation) -> number)
 bindings:
   - origin: mapped
     form: sage

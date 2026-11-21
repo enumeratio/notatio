@@ -10,7 +10,7 @@ signatures:
   - call: LongestRun(p)
     description: The length of the longest run of consecutive increases.
     library: enumeratio-combinatorics
-    type: (list<integer> | permutation) -> number
+    type: ((list<integer> | permutation) -> number) & ((word) -> number)
 ---
 
 - Defined over `Permutation` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

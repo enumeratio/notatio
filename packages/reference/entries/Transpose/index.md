@@ -6,6 +6,13 @@ summary: Transpose a matrix or swap two tensor axes.
 signatures:
   - call: "Transpose(value, axis1: integer?, axis2: integer?) -> value"
     description: as compute-engine declares it
+  - call: "Transpose(value, axis1: integer?, axis2: integer?) -> value"
+    description: Transpose a matrix or swap two tensor axes.
+    library: enumeratio-combinatorics
+    type: (standard_tableau) -> standard_tableau
+    overrides: compute-engine
+    on:
+      - StandardTableau
 names:
   wolframIdentity: true
 stub: engine
@@ -15,7 +22,6 @@ catalog:
     url: https://www.findstat.org/Mp00084
     on: StandardTableau
 mapOn:
-  - PlanePartition
   - StandardTableau
 bindings:
   - origin: mapped

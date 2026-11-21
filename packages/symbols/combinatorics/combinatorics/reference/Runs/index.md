@@ -15,7 +15,7 @@ signatures:
   - call: Runs(p)
     description: Maximal increasing runs — one more than the number of descents.
     library: enumeratio-combinatorics
-    type: (list<integer> | permutation) -> number
+    type: ((binary_word) -> number) & ((list<integer> | permutation) -> number)
 bindings:
   - origin: mapped
     form: combinatorica

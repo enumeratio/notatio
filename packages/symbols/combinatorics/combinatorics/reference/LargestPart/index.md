@@ -17,7 +17,6 @@ catalog:
     url: https://www.findstat.org/St000147
     on: IntegerPartition
 statOn:
-  - CorePartition
   - IntegerComposition
   - IntegerPartition
   - PlanePartition
@@ -26,7 +25,7 @@ signatures:
   - call: LargestPart(partition)
     description: The largest part.
     library: enumeratio-combinatorics
-    type: (composition | integer_partition | plane_partition) -> number
+    type: ((composition | integer_partition | plane_partition) -> number) & ((weak_composition) -> number)
 bindings:
   - origin: mapped
     form: sage
