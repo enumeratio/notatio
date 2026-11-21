@@ -66,6 +66,8 @@ bindings:
     template: "(decide (Squarefree ($1 : ℕ)))"
     arity: 1
     note: Squarefree on the natural numbers, so Squarefree 0 is false and a negative n fails to typecheck.
+options:
+  - Over
 ---
 
 - An integer is squarefree if it is divisible by no perfect square other than 1.

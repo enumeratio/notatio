@@ -64,6 +64,8 @@ bindings:
     template: (ArithmeticFunction.cardDistinctFactors $1)
     arity: 1
     note: "ArithmeticFunction.cardDistinctFactors, omega(n): distinct prime factors, omega(0) = 0; natural n only."
+options:
+  - Over
 ---
 
 - Counts distinct primes only -- $\nu(2^5)=1$, not 5.

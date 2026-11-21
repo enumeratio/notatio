@@ -63,6 +63,8 @@ bindings:
     template: (ArithmeticFunction.cardFactors $1)
     arity: 1
     note: "ArithmeticFunction.cardFactors, Omega(n): prime factors with multiplicity, Omega(0) = 0; natural n only."
+options:
+  - Over
 ---
 
 - Counts every prime factor with multiplicity -- $\Omega(2^5)=5$, unlike [[PrimeNu]]'s 1.

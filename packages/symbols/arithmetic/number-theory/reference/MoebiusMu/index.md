@@ -56,6 +56,8 @@ bindings:
     template: (ArithmeticFunction.moebius $1)
     arity: 1
     threadArg: 1
+options:
+  - Over
 ---
 
 - $\mu(n)=0$ if $n$ has a squared prime factor; otherwise $\mu(n)=(-1)^{\omega(n)}$ for $\omega(n)$ distinct prime factors.

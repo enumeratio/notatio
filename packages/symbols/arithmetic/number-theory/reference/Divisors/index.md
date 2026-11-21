@@ -54,6 +54,8 @@ bindings:
     template: (Finset.sort (Nat.divisors $1))
     arity: 1
     note: Nat.divisors sorted ascending into a list; natural n only, with divisors 0 = the empty list.
+options:
+  - Over
 ---
 
 - Includes both 1 and $n$ itself; a prime's only divisors are those two.

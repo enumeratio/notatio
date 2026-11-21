@@ -26,6 +26,8 @@ bindings:
     form: wolfram
     counterpart: false
     note: Wolfram's GroupMultiplicationTable[CyclicGroup[n]] tabulates the same group, by element indices in GroupElements' order rather than by residues.
+options:
+  - ElementOrder
 ---
 
 - A circulant: each row is the one above shifted by one place, so every value appears once in each row and column
