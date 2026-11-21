@@ -55,7 +55,7 @@ import {
 } from "@notatio/oracle";
 import { isSettled, orderImplementations, type SystemImplementation } from "@notatio/entry";
 import { updateHead } from "@notatio/entry/node";
-import { ownEngineEntries, ownEngineOf, referenceData, referenceEntries } from "../src/node.ts";
+import { mapEntries, ownEngineEntries, ownEngineOf, referenceData, referenceEntries } from "../src/node.ts";
 import { libraryRecords } from "./library-records.ts";
 import { evaluateOwn } from "./own-engines.ts";
 import { showsPicture } from "./wolfram-examples.ts";
@@ -119,13 +119,13 @@ const newOnly = args.includes("--new-only");
 const accept = args.includes("--accept");
 const wired = library === undefined ? wiredSystems() : wiredSystems().filter((s) => library.targets.includes(s));
 const systems = (digestOnly ? [] : requested.length > 0 ? requested : wired) as System[];
-// `--ids` also reaches OWN_ENGINE heads, which a full scan leaves out (their `expected` is evaluated in `cases`).
+// `--ids` also reaches OWN_ENGINE and map heads, which a full scan leaves out (their `expected` is evaluated in `cases`).
 const scannedEntries =
   library !== undefined
     ? library.heads.map((h) => h.entry)
     : idFilter === undefined
       ? referenceEntries(data)
-      : [...referenceEntries(data), ...ownEngineEntries(data)];
+      : [...referenceEntries(data), ...ownEngineEntries(data), ...mapEntries(data)];
 
 // Every settled example (not aspirational, not in triage), UNFILTERED — the authority for "does
 // this example still exist" (the write-out loop's deletion guard, below), so a partial

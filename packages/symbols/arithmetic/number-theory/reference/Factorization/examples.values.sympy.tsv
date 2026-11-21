@@ -1,5 +1,5 @@
-id	in
-a-factorization-as-data	
-factorization-of-an-integer	sorted(factorint(360).items())
-factorization-of-a-prime	sorted(factorint(97).items())
-factorization-of-a-negative	sorted(factorint(-12).items())
+id	in	out
+a-factorization-as-data		
+factorization-of-an-integer	sorted(factorint(360).items())	[(2, 3), (3, 2), (5, 1)]
+factorization-of-a-prime	sorted(factorint(97).items())	[(97, 1)]
+factorization-of-a-negative	sorted(factorint(-12).items())	[(-1, 1), (2, 2), (3, 1)]

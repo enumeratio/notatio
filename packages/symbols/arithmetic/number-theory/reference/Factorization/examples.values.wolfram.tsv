@@ -1,5 +1,5 @@
-id	in
-a-factorization-as-data	List[List[2, 3], List[3, 1]]
-factorization-of-an-integer	FactorInteger[360]
-factorization-of-a-prime	FactorInteger[97]
-factorization-of-a-negative	FactorInteger[-12]
+id	in	out	tex.in	tex.out
+a-factorization-as-data	List[List[2, 3], List[3, 1]]	{{2, 3}, {3, 1}}	\left( \begin{array}{cc}  2 & 3 \\  3 & 1 \\ \end{array} \right)	\left( \begin{array}{cc}  2 & 3 \\  3 & 1 \\ \end{array} \right)
+factorization-of-an-integer	FactorInteger[360]	{{2, 3}, {3, 2}, {5, 1}}	\text{FactorInteger}[360]	\left( \begin{array}{cc}  2 & 3 \\  3 & 2 \\  5 & 1 \\ \end{array} \right)
+factorization-of-a-prime	FactorInteger[97]	{{97, 1}}	\text{FactorInteger}[97]	\left( \begin{array}{cc}  97 & 1 \\ \end{array} \right)
+factorization-of-a-negative	FactorInteger[-12]	{{-1, 1}, {2, 2}, {3, 1}}	\text{FactorInteger}[-12]	\left( \begin{array}{cc}  -1 & 1 \\  2 & 2 \\  3 & 1 \\ \end{array} \right)

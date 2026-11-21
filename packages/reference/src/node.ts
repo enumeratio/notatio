@@ -365,6 +365,11 @@ export function ownEngineEntries(data: ReferenceData = referenceData()): readonl
   return data.entries.filter((entry) => ownEngineOf(entry.name, data) !== undefined);
 }
 
+/** The `MAP_HEADS` entries: scanned only when asked for by id, since their examples hold carriers the bare engine can't read. */
+export function mapEntries(data: ReferenceData = referenceData()): readonly ReferenceEntry[] {
+  return data.entries.filter((entry) => MAP_HEADS.has(entry.name));
+}
+
 /** One package's own entries (by directory name), as that package's tests run them. */
 export function packageEntries(pkg: string, data: ReferenceData = referenceData()): readonly ReferenceEntry[] {
   return data.heads.filter((h) => h.package === pkg).map((h) => h.entry);

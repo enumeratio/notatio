@@ -1,5 +1,5 @@
-id	in
-a-factorization-as-data	
-factorization-of-an-integer	(let n : ℕ := 360; (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])
-factorization-of-a-prime	(let n : ℕ := 97; (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])
-factorization-of-a-negative	(let n : ℕ := (-12); (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])
+id	in	out	verdict
+a-factorization-as-data			
+factorization-of-an-integer	(let n : ℕ := 360; (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])	[[2, 3], [3, 2], [5, 1]]	
+factorization-of-a-prime	(let n : ℕ := 97; (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])	[[97, 1]]	
+factorization-of-a-negative	(let n : ℕ := (-12); (Nat.primeFactorsList n).eraseDups.map fun p => [p, (Nat.primeFactorsList n).count p])	failed to synthesize instance of type class	error
