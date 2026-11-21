@@ -1,27 +1,10 @@
 // A head's function view for its reference page, from the manifest's typed signature and the
 // record's `plot:` hint. Build time (Node): the page carries the small result, not the manifest.
 
-import { functionViewOf, returnTypeOf, type FunctionView } from "@notatio/frontend/function-view";
-import { parseParameters, SYMBOLS, widestMember, winningOverload } from "@notatio/manifest";
+import { functionViewOfSymbol, type FunctionView } from "@notatio/frontend/function-view";
+import { SYMBOLS } from "@notatio/manifest";
 
 export function functionViewFor(head: string): FunctionView | undefined {
   const info = Object.hasOwn(SYMBOLS, head) ? SYMBOLS[head] : undefined;
-  const type = info === undefined ? undefined : winningOverload(info.overloads)?.type;
-  const member = type === undefined ? undefined : widestMember(type);
-  const parameters = info === undefined || type === undefined ? undefined : parseParameters(member!, info.params);
-  if (info === undefined || type === undefined || parameters === undefined) return undefined;
-  const returns = returnTypeOf(member!);
-  return functionViewOf(
-    {
-      head,
-      parameters: parameters.map(({ name, type, optional, variadic }) => ({
-        ...(name === undefined ? {} : { name }),
-        type,
-        optional,
-        variadic,
-      })),
-      ...(returns === undefined ? {} : { returns }),
-    },
-    info,
-  );
+  return info === undefined ? undefined : functionViewOfSymbol(info);
 }

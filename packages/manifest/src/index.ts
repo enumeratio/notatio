@@ -22,6 +22,7 @@ export {
   loadSummaries,
   matching,
   noteDescription,
+  integerMember,
   parseParameters,
   widestMember,
   winningOverload,
