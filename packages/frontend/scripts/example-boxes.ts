@@ -19,13 +19,16 @@ import {
   FIELD_PLOT_HEADS,
   fieldAxes,
   fieldBoxOfGrids,
+  planeShowBox,
   plotBoxOfSamples,
+  plotDataSeries,
   regionFunctionVars,
   spanOf,
   unsampledPlot,
   vectorOptionsOf,
 } from "../src/plot-lowering.ts";
 import { PLOT_NOTATION } from "../src/plot-notation.ts";
+import type { PlotSeries } from "../src/plot-box.ts";
 import { plotSeries } from "../src/plot.ts";
 import { polarPlotBox, samplePolar } from "../src/polarplot.ts";
 import { FIGURE_NOTATION } from "../src/show-box.ts";
@@ -35,6 +38,7 @@ import {
   complexPlot3dSettingsOf,
   complexPlotSettingsOf,
   graphics3dSettingsOf,
+  planeShowOf,
   plotSettingsOf,
 } from "../src/symbols.ts";
 import { complexSurfaceBox, parseComplexDomain, sampleComplexSurface } from "../src/complex-plot-3d.ts";
@@ -166,31 +170,46 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
       options,
     );
   }
+  if (held[0] !== "PolarPlot") return plotBoxOfSamples(settings, curveSeries(ce, body, settings));
+  const { free, items } = samplers(ce, body);
+  const variable = settings["var"] || settings["tvar"] || free[0] || "theta";
+  const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
+  const n = Math.max(2, Math.min(2000, Number(settings["n"]) || 240));
+  return polarPlotBox(
+    samplePolar((t) => items[0]!({ [variable]: t }), t0, t1, n),
+    {
+      axes: settings["axes"] !== "false",
+      closed: on(settings["closed"]),
+      filled: on(settings["filled"]),
+      markers: on(settings["markers"]),
+      max: Number(settings["max"]) > 0 ? Number(settings["max"]) : undefined,
+      title: settings["label"] || undefined,
+    },
+  );
+}
+
+/** A curve plot's series: its expression compiled and sampled over its domain. */
+function curveSeries(ce: ComputeEngine, body: unknown, settings: Record<string, string>): PlotSeries[] {
   const { compiled, free, items } = samplers(ce, body);
-  const variable = settings["var"] || settings["tvar"] || free[0] || (held[0] === "PolarPlot" ? "theta" : "x");
-  if (held[0] === "PolarPlot") {
-    const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
-    const n = Math.max(2, Math.min(2000, Number(settings["n"]) || 240));
-    return polarPlotBox(
-      samplePolar((t) => items[0]!({ [variable]: t }), t0, t1, n),
-      {
-        axes: settings["axes"] !== "false",
-        closed: on(settings["closed"]),
-        filled: on(settings["filled"]),
-        markers: on(settings["markers"]),
-        max: Number(settings["max"]) > 0 ? Number(settings["max"]) : undefined,
-        title: settings["label"] || undefined,
-      },
-    );
-  }
-  const series = plotSeries(compiled, (k) => (t) => items[k]!({ [variable]: t }), {
+  const variable = settings["var"] || free[0] || "x";
+  return plotSeries(compiled, (k) => (t) => items[k]!({ [variable]: t }), {
     domain: spanOf(settings["domain"]) ?? [-6.283185, 6.283185],
     samples: Number(settings["samples"]) || 160,
     mode: settings["mode"],
     adaptive: settings["adaptive"] !== "false",
     parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
   });
-  return plotBoxOfSamples(settings, series);
+}
+
+/** A `Show` of plots and graphics: each plot sampled as `sampled` samples one, in one frame. */
+function sampledShow(ce: ComputeEngine, held: readonly unknown[]): Box | undefined {
+  const show = planeShowOf(held as never);
+  if (show === undefined) return undefined;
+  const layers = held.slice(1).filter((op) => Array.isArray(op) && op[0] !== "Rule") as unknown[][];
+  return planeShowBox(
+    show,
+    (layer, index) => plotDataSeries(layer.settings) ?? curveSeries(ce, layers[index]![1], layer.settings),
+  );
 }
 
 /**
@@ -200,6 +219,8 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
  */
 export function boxOfExample(ce: ComputeEngine, expr: MathJSON): Box {
   const value = plainJson(ce.box(expr as never).evaluate().json as Json);
+  const shown = Array.isArray(value) && value[0] === "Show" ? sampledShow(ce, value) : undefined;
+  if (shown !== undefined) return shown;
   const notation = { ...notationOf(ce), ...FIGURE_NOTATION, ...PLOT_NOTATION };
   const box = makeBoxes(value as never, notation);
   const held = unsampledPlot(box) as readonly unknown[] | undefined;

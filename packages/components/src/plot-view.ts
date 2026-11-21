@@ -30,7 +30,7 @@ import {
   gestureHandlingOf,
   type GraphicsLook,
   graphicsBoxOfSettings,
-  layerStylesOf,
+  planeShowPlan,
   pageClock,
   type PlotFrame,
   plotBoxOfSamples,
@@ -396,45 +396,33 @@ export class PlotView {
     show: { readonly layers: readonly PlaneLayer[]; readonly frame: Readonly<Record<string, string>> },
     generation: number,
   ): Promise<void> {
-    const sampled: Curves[] = [];
-    const styled: { style: string | undefined; count: number }[] = [];
-    const marks: { epilog: Primitive[]; prolog: Primitive[] } = { epilog: [], prolog: [] };
-    let first: Readonly<Record<string, string>> | undefined;
-    for (const { head, settings } of show.layers) {
-      if (head === "Graphics") {
-        const written = settings["primitives"];
-        const primitives = written === undefined ? [] : primitivesOf(JSON.parse(written) as MathJsonExpression);
-        (sampled.length === 0 ? marks.prolog : marks.epilog).push(...primitives);
-        continue;
-      }
-      const own = await this.#readMarks(settings);
+    // Sample every plot first: the plan below is the same one a build draws from.
+    const sampled = new Map<number, Curves>();
+    const own: { epilog: Primitive[]; prolog: Primitive[] } = { epilog: [], prolog: [] };
+    for (const [index, { head, settings }] of show.layers.entries()) {
+      if (head === "Graphics") continue;
+      const marks = await this.#readMarks(settings);
       const curves = await this.#curves(settings, generation);
       if (curves === undefined) return;
-      first ??= settings;
-      sampled.push(curves);
-      styled.push({ style: settings["plot-style"], count: curves.series.length });
-      marks.prolog.push(...(own.prolog ?? []));
-      marks.epilog.push(...(own.epilog ?? []));
+      sampled.set(index, curves);
+      own.prolog.push(...(marks.prolog ?? []));
+      own.epilog.push(...(marks.epilog ?? []));
     }
     if (generation !== this.#generation) return;
-    // Graphics alone: one `Graphics` of them all, in the `Show`'s frame.
-    if (first === undefined) {
-      const all = show.layers.flatMap(({ settings }) =>
-        settings["primitives"] === undefined ? [] : [JSON.parse(settings["primitives"]) as unknown],
-      );
-      return this.#graphics({
-        ...show.layers[0]!.settings,
-        ...show.frame,
-        primitives: JSON.stringify(["List", ...all]),
-      });
-    }
-    this.#settings = { ...first, ...show.frame };
-    this.#styles = layerStylesOf(styled);
-    this.#marked = marks;
+    const plan = planeShowPlan(show, (_, index) => sampled.get(index)?.series);
+    if (plan === undefined) return this.#clear();
+    if ("graphics" in plan) return this.#graphics(plan.graphics);
+    this.#settings = plan.settings;
+    this.#styles = plan.styles;
+    this.#marked = {
+      prolog: [...plan.marks.prolog, ...own.prolog],
+      epilog: [...plan.marks.epilog, ...own.epilog],
+    };
+    const layers = [...sampled.values()];
     const seriesIn = (window: PlotWindow | undefined): PlotSeries[] =>
-      sampled.flatMap((layer) => (window === undefined || !layer.inWindow ? layer.series : layer.inWindow(window)));
-    this.#series = seriesIn(undefined);
-    if (sampled.some((layer) => layer.inWindow))
+      layers.flatMap((layer) => (window === undefined || !layer.inWindow ? layer.series : layer.inWindow(window)));
+    this.#series = plan.series;
+    if (layers.some((layer) => layer.inWindow))
       this.#redo = (window) => {
         this.#series = seriesIn(window);
         this.#rebuild();

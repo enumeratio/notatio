@@ -9,6 +9,7 @@ options:
   - AspectRatio
   - Axes
   - AxesLabel
+  - AxesOrigin
   - AxesStyle
   - Frame
   - FrameLabel
@@ -19,6 +20,7 @@ options:
   - Magnification
   - PlotLabel
   - PlotRange
+  - PlotRangePadding
   - ProjectionMatrix
   - Selection
   - SphericalRegion

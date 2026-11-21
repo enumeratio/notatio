@@ -9,6 +9,7 @@ options:
   - AspectRatio
   - Axes
   - AxesLabel
+  - AxesOrigin
   - ColorFunction
   - Epilog
   - Filling
@@ -18,9 +19,11 @@ options:
   - PlotLegends
   - PlotPoints
   - PlotRange
+  - PlotRangePadding
   - PlotStyle
   - Prolog
   - ScalingFunctions
+  - Ticks
 optionValues:
   ScalingFunctions:
     - Linear

@@ -7,7 +7,15 @@ import { declaredOptions } from "@notatio/formats/graphics-options";
 import { expect, test } from "vite-plus/test";
 import { colorOf } from "../src/graphics-rules.ts";
 import { plotBox } from "../src/plot-box.ts";
-import { graphicsBoxOfSettings, holdsPlaneShow, layerStylesOf, plotOptionsOf } from "../src/plot-lowering.ts";
+import {
+  graphicsBoxOfSettings,
+  holdsPlaneShow,
+  layerStylesOf,
+  planeShowBox,
+  planeShowPlan,
+  plotDataSeries,
+  plotOptionsOf,
+} from "../src/plot-lowering.ts";
 import { primitivesOf } from "../src/primitives.ts";
 import {
   DRAWING_SYMBOLS,
@@ -203,4 +211,56 @@ test("every option a head's lowering reads is one its record declares", () => {
     for (const name of Object.keys(symbol.options ?? {}))
       if (!declaredOptions(symbol.head).has(name)) undeclared.push(`${symbol.head}: ${name}`);
   expect([...new Set(undeclared)]).toEqual([]);
+});
+
+test("Ticks, AxesOrigin, GridLines by direction and PlotRangePadding reach the box", () => {
+  const box = boxOf(
+    ["Circle", at(1, 1), 1],
+    rule("Axes", "True"),
+    rule("AxesOrigin", at(1, 1)),
+    rule("Ticks", "None"),
+    rule("GridLines", ["List", ["List", 0, 1, 2], "Automatic"]),
+    rule("PlotRangePadding", 0.5),
+  );
+  const o = optionsOfBox(box);
+  expect(o).toMatchObject({ AxesOrigin: [1, 1], Ticks: false, GridLines: [[0, 1, 2], "Automatic"] });
+  // Half the extent again on each side of the circle's [0, 2].
+  expect((o.PlotRange as number[][])[0]).toEqual([-1, 3]);
+  const plot = plotOptionsOf(
+    plotSettingsOf([
+      "Plot",
+      ["Sin", "x"],
+      at("x", 0),
+      rule("GridLines", "Automatic"),
+      rule("PlotRangePadding", "None"),
+    ] as never)!,
+  );
+  expect(plot).toMatchObject({ gridLines: true, padding: 0 });
+  expect(plot.gridAt).toBeUndefined();
+});
+
+test("a Show's plan: series in layer order with their styles, graphics under or over by position", () => {
+  const show = planeShowOf([
+    "Show",
+    ["Graphics", ["Disk"]],
+    ["ListLinePlot", ["List", 1, 2, 3], rule("PlotStyle", "Red")],
+    ["Graphics", ["Point", at(1, 1)]],
+    ["ListPlot", ["List", 3, 2, 1]],
+    rule("Frame", "True"),
+  ] as never)!;
+  const plan = planeShowPlan(show, (layer) => plotDataSeries(layer.settings));
+  if (plan === undefined || "graphics" in plan) throw new Error("a plan of plots");
+  expect(plan.series).toHaveLength(2);
+  expect(plan.styles).toEqual([{ color: colorOf("Red") }, {}]);
+  expect([plan.marks.prolog.length, plan.marks.epilog.length]).toEqual([1, 1]);
+  expect(plan.settings["frame"]).toBe("true");
+  const box = planeShowBox(show, (layer) => plotDataSeries(layer.settings)) as BoxNode;
+  expect(marksOf(box).map((m) => m.prim[0])).toEqual(["PolygonBox", "LineBox", "PointBox", "PointBox"]);
+  // Graphics alone is one Graphics; a plot with no series leaves the Show undrawn.
+  const alone = planeShowPlan(
+    planeShowOf(["Show", ["Graphics", ["Disk"]], ["Graphics", ["Circle"]]] as never)!,
+    () => [],
+  );
+  expect(alone && "graphics" in alone).toBe(true);
+  expect(planeShowBox(show, () => undefined)).toBeUndefined();
 });

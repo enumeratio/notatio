@@ -11,11 +11,14 @@ options:
   - AspectRatio
   - Axes
   - AxesLabel
+  - AxesOrigin
   - Frame
   - FrameLabel
   - GridLines
   - PlotLabel
   - PlotRange
+  - PlotRangePadding
+  - Ticks
 seeAlso:
   - Show
   - Plot
@@ -35,4 +38,4 @@ The primitives are `Point`, `Line`, `Arrow`, `Polygon`, `Triangle`, `Rectangle`,
 
 A directive in a list styles every primitive after it in that list and in the lists inside it, and ends where its list ends. `Style(primitive, directive, …)` styles one primitive, and `Directive(…)` groups several. The directives are the colors (`Red`, `"#rrggbb"`, `RGBColor`, `GrayLevel`, `Hue`), `Opacity`, `Thickness` and `AbsoluteThickness` (and `Thin`, `Thick`), `Dashing` and `AbsoluteDashing` (and `Dashed`, `Dotted`, `DotDashed`), `PointSize` and `AbsolutePointSize`, `Arrowheads`, `EdgeForm` and `FaceForm`. A size given as a fraction is of the figure's width; the `Absolute` forms are pixels. With no directive in force a primitive is drawn in the page's text color, a filled one opaque and without an outline.
 
-Draws as a `GraphicsBox` in the primitives' own coordinates, one unit of x as long as one of y. The window is `PlotRange -> ((xmin, xmax), (ymin, ymax))`, or the primitives' extent. `Axes -> True` and `Frame -> True` draw the axes or a frame, `AxesLabel` and `FrameLabel` caption them, `GridLines -> True` rules the plane, `AspectRatio -> r` sets the figure's shape, and `PlotLabel` titles it. A plot's `Epilog` and `Prolog` are read the same way.
+Draws as a `GraphicsBox` in the primitives' own coordinates, one unit of x as long as one of y. The window is `PlotRange -> ((xmin, xmax), (ymin, ymax))`, or the primitives' extent. `Axes -> True` and `Frame -> True` draw the axes or a frame, `AxesLabel` and `FrameLabel` caption them, `GridLines -> True` rules the plane, `AspectRatio -> r` sets the figure's shape, and `PlotLabel` titles it. `AxesOrigin -> (x, y)` says where the axes cross, `Ticks -> None` leaves them without numbers, `GridLines -> [xs, ys]` lists each direction's lines (or `Automatic`, or `None`), and `PlotRangePadding -> p` is the share of the extent left clear around it. A plot's `Epilog` and `Prolog` are read the same way.
