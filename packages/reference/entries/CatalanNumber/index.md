@@ -9,12 +9,12 @@ signatures:
   - call: CatalanNumber(n)
     description: The nth Catalan number $C_n$, counting balanced bracket sequences, binary trees, polygon triangulations, and many other structures of size n.
     library: enumeratio-analytic
-    type: (number) -> number
+    type: ((integer) -> integer) & ((number) -> number)
     overrides: compute-engine
   - call: CatalanNumber(n)
     description: The nth Catalan number $C_n$, counting balanced bracket sequences, binary trees, polygon triangulations, and many other structures of size n.
     library: enumeratio-number-theory
-    type: (any) -> any
+    type: ((integer) -> integer) & ((number) -> number) & ((any) -> any)
     overrides: enumeratio-analytic
 seeAlso:
   - Binomial

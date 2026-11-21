@@ -189,7 +189,8 @@ export function ensureRandom(ce: ComputeEngine): void {
   });
   const operator = operatorOf(ce, "Random");
   if (operator === undefined) return;
-  (operator as { signature: unknown }).signature = ce.type(ARMS.join(" & "));
+  // Native's own signature stays as an arm, after ours.
+  (operator as { signature: unknown }).signature = ce.type(`${ARMS.join(" & ")} & (${String(operator.signature)})`);
   operator.evaluate = (ops: readonly Expression[]) => {
     if (ops.length === 0) return ce.number(uniform01(ce));
     const domain = ops[0];

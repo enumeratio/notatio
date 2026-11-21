@@ -14,7 +14,7 @@ signatures:
   - call: Factorial2(n)
     description: The double factorial $n!!$, the product of every second integer from n down to 1 or 2.
     library: enumeratio-number-theory
-    type: (any) -> any
+    type: ((any) -> any) & ((complex | infinity) -> number)
     overrides: compute-engine
 seeAlso:
   - Factorial

@@ -7,7 +7,7 @@ signatures:
   - call: MatrixPower(m, k)
     description: $m$ raised to the integer power $k$, in $\mathrm{PSL}(2,\mathbb{Z})$
     library: enumeratio-modular
-    type: (expression<ModularMatrix> | matrix | real | string, real) -> expression<ModularMatrix> | matrix | real
+    type: ((expression<ModularMatrix> | matrix | real | string, real) -> expression<ModularMatrix> | matrix | real) & ((matrix, real) -> matrix)
     overrides: compute-engine
 seeAlso:
   - ModularMatrix

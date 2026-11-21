@@ -10,39 +10,14 @@ import { expect, test } from "vite-plus/test";
 import { plainlyWidenedHeads } from "@notatio/engine";
 import { bindings, fullEngine } from "../src/engine.ts";
 
-const DOMAIN = "a wider operand domain (any number, a carrier or a complex value) than the native integer or real";
-const COLLECTIONS = "Wolfram's wider collection and result shapes";
-
 /** Heads whose widening still replaces the native signature, and why. Only ever shrinks. */
 const NOT_YET_KEPT: Readonly<Record<string, string>> = Object.fromEntries([
-  ...[
-    "CatalanNumber",
-    "Factorial2",
-    "Subfactorial",
-    "Multinomial",
-    "ModularInverse",
-    "PowerMod",
-    "PowerModList",
-    "DivisorSigma",
-    "Divisors",
-    "FactorInteger",
-    "IsComposite",
-    "IsPrime",
-    "IsSquareFree",
-    "MoebiusMu",
-    "PrimeNu",
-    "PrimeOmega",
-    "Numerator",
-    "Denominator",
-    "ExtendedGCD",
-    "Conjugate",
-    "Rationalize",
-    "Dot",
-    "MatrixPower",
+  // A statistic's carrier joins the one-argument arm as a union, not an overload set: an overload
+  // set turns away what the native arm took (`Sign(NaN)` stops matching either arm).
+  [
     "Sign",
-    "Tanh",
-  ].map((head) => [head, DOMAIN]),
-  ...["Histogram", "Random"].map((head) => [head, COLLECTIONS]),
+    "adds a permutation to the native one-argument arm as a union; an overload set stops `Sign(NaN)` matching either arm",
+  ],
 ]);
 
 interface Parameter {

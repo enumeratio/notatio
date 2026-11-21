@@ -6,7 +6,6 @@ import {
   extendHead,
   operandsOf,
   threadOverLists,
-  widenSignature,
   widenSignatureKeepingNative,
   wrapOperator,
   type EvaluateOptions,
@@ -97,7 +96,7 @@ export function declareResidues(ce: Engine): void {
   const mayBeInteger = (op: Expr): boolean => op.isInteger !== false;
 
   // Wolfram's PowerModList[a, s/r, m]. Threads over lists, as Wolfram's does.
-  widenSignature(ce, "PowerModList", "(number, number, number) -> list<number>", mayBeRational);
+  widenSignatureKeepingNative(ce, "PowerModList", "(number, number, number) -> list<number>", mayBeRational);
   threadOverLists(ce, ["PowerModList"]);
   extend(
     ce,
@@ -113,7 +112,7 @@ export function declareResidues(ce: Engine): void {
 
   // PowerMod with Wolfram's rational exponent — `PowerMod(a, 1/r, m)` is the least r-th
   // root — and a rational base.
-  widenSignature(ce, "PowerMod", "(number, number, number) -> number", mayBeRational);
+  widenSignatureKeepingNative(ce, "PowerMod", "(number, number, number) -> number", mayBeRational);
   threadOverLists(ce, ["PowerMod"]);
   extend(
     ce,

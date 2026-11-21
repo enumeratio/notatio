@@ -9,7 +9,7 @@ signatures:
   - call: PrimeNu(n)
     description: The number of distinct prime factors of n.
     library: enumeratio-number-theory
-    type: (number | quadratic_integer, any*) -> integer
+    type: ((integer) -> integer) & ((number, any*) -> integer) & ((quadratic_integer, any*) -> integer)
     overrides: compute-engine
 seeAlso:
   - PrimeOmega

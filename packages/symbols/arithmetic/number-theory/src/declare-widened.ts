@@ -4,7 +4,6 @@ import {
   mayBeInteger,
   operandsOf,
   symbolNameOf,
-  widenSignature,
   widenSignatureKeepingNative,
   wrapOperator,
   type Engine,
@@ -223,7 +222,7 @@ export function declareWidened(ce: Engine): void {
   // extraction are handled by its own `polynomialGCDMulti`/`PolynomialGCD` machinery, not
   // reimplemented here.
   // The variable stays `expression`: typed `symbol`, it clashes with the same symbol inside the polynomial.
-  widenSignature(ce, "IsSquareFree", "(expression, expression?) -> boolean");
+  widenSignatureKeepingNative(ce, "IsSquareFree", "(expression, expression?) -> boolean");
   // compile builtin: an exact integer or rational operand native does not answer, or a list it threads over
   wrapOperator(
     ce,
@@ -362,7 +361,7 @@ export function declareWidened(ce: Engine): void {
   // two-argument case already documents. Gaussian integers stay declare-gaussian.ts's: this
   // only fires when every operand reads as a plain bigint.
   // One argument is its own gcd (ExtendedGCD(12) = (12, 1)); all zeros take zero coefficients.
-  widenSignature(ce, "ExtendedGCD", "(number, number*) -> tuple");
+  widenSignatureKeepingNative(ce, "ExtendedGCD", "(number, number*) -> tuple");
   // compile builtin: an exact integer or rational operand native does not answer, or a list it threads over
   wrapOperator(
     ce,
