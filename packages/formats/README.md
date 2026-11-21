@@ -25,6 +25,7 @@ notation and need it back as an expression.
   uncanonical MathJSON. Wolfram's FullForm is the `WL` format.
 - `./tex` — `portableTeX`: compute-engine's LaTeX rewritten for a document (amsmath/amssymb
   macros in place of MathLive-only commands like `\imaginaryI`).
+- `./typeset` — `typeset` (TeX to KaTeX HTML) and `renderSummary`, below.
 - `./mathml`, `./asciimath` — MathMLForm and AsciiMath, in and out. Writing is built on
   [`boxes`](../boxes/README.md)'s presentation tree. `fromAsciiMath` reads AsciiMath by way
   of TeX (asciimath2tex, then compute-engine's LaTeX parser), so it reads what that TeX
@@ -46,6 +47,28 @@ fileFormat("out/plot.png")?.name; // "PNG"
 A format name resolves case-insensitively and by alias (`numpy` → `Python`,
 `WolframLanguage` → `WL`). Text formats consume a boxed compute-engine expression; image
 formats consume an SVG string — the registry stays value-agnostic about which.
+
+## Rendering a record's summary
+
+A record's `summary` (and a caption) is markdown with `$…$` TeX islands. `renderSummary` turns one
+into an HTML string, the function notatio's own site uses:
+
+```ts
+import { renderSummary } from "@notatio/formats/typeset";
+
+renderSummary("The subsets of $\\{1, \\dots, n\\}$, see [[Subsets]] and `Count`.", {
+  link: (head) => `/reference/${head}/`, // optional: without it `[[Head]]` stays text
+});
+```
+
+Islands are typeset by KaTeX (strict, with notatio's Unicode allowances); the text around them is
+escaped, and code spans, emphasis and links are read. It is synchronous and needs no DOM, so it
+runs the same in Node and in a browser, and it never throws: an island KaTeX cannot parse comes
+out as its source in a `katex-error` span.
+
+The HTML carries KaTeX's class names, so the page needs KaTeX's stylesheet and fonts, which ship
+with the `katex` package: `import "katex/dist/katex.min.css"` (or link `dist/katex.min.css`
+beside its `fonts/` directory).
 
 ## Graphics as values
 
