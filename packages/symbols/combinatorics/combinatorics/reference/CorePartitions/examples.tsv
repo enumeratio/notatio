@@ -1,0 +1,10 @@
+id	section	role	expr	expected	caption
+the-3-cores-of-8			[CorePartitions, 3, 8]	[List, [CorePartition, [List, 4, 2, 1, 1]]]	the one 3-core of 8
+the-4-cores-of-7			[CorePartitions, 4, 7]	[List, [CorePartition, [List, 5, 2]], [CorePartition, [List, 4, 1, 1, 1]], [CorePartition, [List, 2, 2, 1, 1, 1]]]	the 4-cores of 7, in the order of IntegerPartitions
+the-2-core-of-6			[CorePartitions, 2, 6]	[List, [CorePartition, [List, 3, 2, 1]]]	a 2-core is a staircase
+no-2-core-of-5			[Count, [CorePartitions, 2, 5]]	0	no staircase has 5 cells
+the-3-cores-of-16			[Count, [CorePartitions, 3, 16]]	3	the 3-cores of 16, A033687
+a-3-core-is-a-member	Properties		[Element, [CorePartition, [List, 4, 2, 1, 1]], [CorePartitions, 3, 8]]	True	the hooks of $(4, 2, 1, 1)$ are 7, 4, 2, 1 / 4, 1 / 2 / 1, and none is a multiple of 3
+a-hook-of-3-is-not	Properties		[Element, [CorePartition, [List, 4, 4]], [CorePartitions, 3, 8]]	False	$(4, 4)$ has a hook of length 3
+n-below-t-takes-every-partition	Properties		[Count, [CorePartitions, 9, 5]]	7	for $n < t$ every partition of $n$ is a $t$-core, so this is $p(5)$
+the-only-1-core-is-empty	Properties		[Count, [CorePartitions, 1, 6]]	0	every cell has a hook divisible by 1, so a 1-core has no cell
