@@ -81,6 +81,7 @@ const retiredStubs: [string, string][] = Object.entries({
   ToCycleNotation: "CycleDecomposition",
   BinaryWeight: "DigitCount",
   SquareRoot: "SquarePartRoot",
+  NaturalNumbers: "NonNegativeIntegers",
 }).map(([old, head]) => [`/reference/symbol/${old}`, `/reference/symbol/${head}`]);
 
 /**

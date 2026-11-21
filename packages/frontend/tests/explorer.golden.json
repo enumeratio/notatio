@@ -1011,7 +1011,6 @@
     "derived": false,
     "statistics": 3
   },
-  "NaturalNumbers": null,
   "NonCrossingCycleSupportPermutations": {
     "expr": "NonCrossingCycleSupportPermutations(4)",
     "glyph": "permutation",
