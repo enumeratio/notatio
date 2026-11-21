@@ -107,6 +107,10 @@
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "GrayCodes(_n)"
   },
+  "HyperbinaryWords": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "HyperbinaryWords(_n)"
+  },
   "IncreasingBinaryTrees": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "IncreasingBinaryTrees(_n)"
@@ -126,6 +130,10 @@
   "KDescentPermutations": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "KDescentPermutations(_n, 2)"
+  },
+  "KDyckPaths": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "KDyckPaths(_n, 2)"
   },
   "KInversionPermutations": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
@@ -283,6 +291,10 @@
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "PruferSequences(_n)"
   },
+  "RationalDyckPaths": {
+    "params": "{{a, 4}, 1, 6, 1, Slider}",
+    "value": "RationalDyckPaths(_a, 2)"
+  },
   "RecursiveTrees": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "RecursiveTrees(_n)"
@@ -294,6 +306,10 @@
   "RiordanPaths": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "RiordanPaths(_n)"
+  },
+  "RookPlacements": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "RookPlacements(_n)"
   },
   "RootedForests": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",

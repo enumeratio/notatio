@@ -72,7 +72,11 @@
     "GelfandTsetlinPattern": null,
     "GlyphKind": null,
     "GoldbachPartition": null,
-    "HyperbinaryWord": null,
+    "HyperbinaryWord": {
+      "collection": "HyperbinaryWords",
+      "template": "HyperbinaryWords({size})",
+      "maxSize": 6
+    },
     "HypernumeraryWord": null,
     "IncreasingBinaryTree": {
       "collection": "IncreasingBinaryTrees",
@@ -169,7 +173,11 @@
     "PythagoreanTriple": null,
     "RationalDyckPath": null,
     "RationalNumber": null,
-    "RookPlacement": null,
+    "RookPlacement": {
+      "collection": "RookPlacements",
+      "template": "RookPlacements({size})",
+      "maxSize": 6
+    },
     "RootedForest": {
       "collection": "RootedForests",
       "template": "RootedForests({size})",

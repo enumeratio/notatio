@@ -193,7 +193,13 @@
   },
   "HyperbinaryWord": {
     "carrier": "HyperbinaryWord",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "HyperbinaryWords",
+    "template": "HyperbinaryWords({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "HypernumeraryWord": {
     "carrier": "HypernumeraryWord",
@@ -429,7 +435,13 @@
   },
   "RookPlacement": {
     "carrier": "RookPlacement",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "RookPlacements",
+    "template": "RookPlacements({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "RootedForest": {
     "carrier": "RootedForest",
