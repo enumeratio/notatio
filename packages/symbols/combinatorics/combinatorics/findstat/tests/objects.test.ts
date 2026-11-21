@@ -69,6 +69,30 @@ test("a perfect matching is read as its pairs", () => {
   expect(readObject("PerfectMatching", "[(1,4),(2,3)]")).toEqual(["PerfectMatching", L(L(1, 4), L(2, 3))]);
 });
 
+// St000043's size-8 rows write a pair with 8 first, `(8,5)` for `{5,8}`; the matching is the same, and so is the value.
+test("a perfect matching's pairs written descending or out of order are the same matching", () => {
+  expect(readObject("PerfectMatching", "[(1,2),(3,4),(8,5),(6,7)]")).toEqual(
+    readObject("PerfectMatching", "[(1,2),(3,4),(5,8),(6,7)]"),
+  );
+  expect(readObject("PerfectMatching", "[(1,2),(3,4),(8,7),(5,6)]")).toEqual(
+    readObject("PerfectMatching", "[(1,2),(3,4),(5,6),(7,8)]"),
+  );
+  const crossingsPlusTwiceNestings = (text: string): unknown =>
+    ce
+      .box(["CombinatorialStat", readObject("PerfectMatching", text), "'CrossingsPlusTwiceNestings'"] as never)
+      .evaluate().json;
+  // Rows of the crawl's St000043 at size 8.
+  const rows: [string, number][] = [
+    ["[(1,2),(3,4),(8,5),(6,7)]", 2],
+    ["[(1,2),(3,4),(8,7),(5,6)]", 0],
+    ["[(1,2),(3,5),(8,4),(6,7)]", 3],
+    ["[(1,2),(3,5),(8,7),(4,6)]", 1],
+    ["[(1,3),(2,7),(8,6),(4,5)]", 4],
+    ["[(1,4),(2,7),(8,5),(3,6)]", 6],
+  ];
+  for (const [text, value] of rows) expect(crossingsPlusTwiceNestings(text), text).toBe(value);
+});
+
 test("a text that isn't the carrier's throws, and an unread carrier is undefined", () => {
   expect(() => readObject("BinaryWord", "012")).toThrow();
   expect(() => readObject("BinaryTree", "[.,.")).toThrow();

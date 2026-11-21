@@ -15,9 +15,18 @@ const count = (text: string, pattern: RegExp): number => text.match(pattern)?.le
 const blocks = (text: string): MathJSON =>
   list((JSON.parse(text.replace(/\{/g, "[").replace(/\}/g, "]")) as number[][]).map((block) => list(block)));
 
-/** `[(1,2),(3,4)]` as the 2-element blocks `[[1,2],[3,4]]`. */
+/**
+ * `[(1,2),(3,4)]` as the 2-element blocks `[[1,2],[3,4]]`, each pair ascending and the pairs by their openers: a matching is
+ * a set of unordered pairs, and FindStat writes one in the order of a hash set of its points, `(8,5)` for `{5,8}` and `(8,7)`
+ * before `(5,6)`, where our statistics read `[a, b]` as the opener a < the closer b and the pairs in order.
+ */
 const pairs = (text: string): MathJSON =>
-  list((JSON.parse(text.replace(/\(/g, "[").replace(/\)/g, "]")) as number[][]).map((pair) => list(pair)));
+  list(
+    (JSON.parse(text.replace(/\(/g, "[").replace(/\)/g, "]")) as number[][])
+      .map((pair) => pair.toSorted((a, b) => a - b))
+      .toSorted((a, b) => a[0]! - b[0]!)
+      .map((pair) => list(pair)),
+  );
 
 /** `[.,[.,.]]`: `.` is the empty tree, `[L,R]` a node with its left and right subtrees. */
 function binaryTree(text: string): MathJSON {
