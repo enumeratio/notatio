@@ -11,6 +11,7 @@ import { necklaceCountExact } from "../../../collections/src/families/exact-coun
 import { lyndonWordCountExact } from "../../../collections/src/families/exact-classes.ts";
 import { binaryWordsByWeight, fibStrings, lucasStrings } from "./epsil.ts";
 import type { EpsilFamily } from "../../../collections/src/families/epsil.ts";
+import { hyperbinaryWords } from "./hyperbinary.ts";
 import type { Declared, NumberKernel } from "../../../collections/src/families/types.ts";
 
 export const normRank = (r: number, total: number): number => (total > 0 ? modRank(Math.trunc(r), total) : 0);
@@ -254,6 +255,7 @@ const binaryPalindromesFamily = binaryPalindromes({
 });
 
 export const entries: (NumberKernel | EpsilFamily)[] = [
+  hyperbinaryWords,
   binaryWords,
   binaryWordsByWeight,
   wordsFamily,

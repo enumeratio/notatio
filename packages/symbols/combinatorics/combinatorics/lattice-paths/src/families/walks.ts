@@ -26,7 +26,10 @@ type MathJSON = unknown;
 
 export interface Step {
   readonly token: number;
-  readonly rise: -1 | 0 | 1;
+  /** The height it adds: −1, 0 or 1, or an expression in the params (a slope) with its sign in `direction`. */
+  readonly rise: MathJSON;
+  /** The sign of `rise`; read from it when it is a number. */
+  readonly direction?: -1 | 0 | 1;
   readonly width: 1 | 2;
   /** Taken only above the ground: a level step at height 0 is not a step of the walk. */
   readonly aboveGround?: true;
@@ -51,6 +54,7 @@ export interface Walk {
     readonly initial: MathJSON;
     readonly after: (reached: MathJSON, y: MathJSON, rise: -1 | 0 | 1) => MathJSON;
   };
+
   /** A condition on the highest height a member reaches. */
   readonly top?: (top: MathJSON) => MathJSON;
   /** A condition on the flag a member ends with; membership then walks the flag too. */
@@ -64,6 +68,10 @@ export interface Walk {
   readonly bigSamples?: EpsilFamily["bigSamples"];
 }
 
+/** The sign of a step's rise. */
+const directionOf = (step: Step): -1 | 0 | 1 =>
+  typeof step.rise === "number" ? (Math.sign(step.rise) as -1 | 0 | 1) : (step.direction ?? 1);
+
 const flagAfter = (walk: Walk, reached: MathJSON, y: MathJSON, rise: -1 | 0 | 1): MathJSON =>
   walk.flag === undefined ? 1 : walk.flag.after(reached, y, rise);
 
@@ -76,7 +84,11 @@ function choice(walk: Walk, i: number, w: MathJSON, y: MathJSON, reached: MathJS
     ["GreaterEqual", landing, 0],
     ...(aboveGround ? [["GreaterEqual", y, 1]] : []),
   );
-  return iff(fits, walk.completions(sub(w, width), landing, flagAfter(walk, reached, landing, rise)), 0);
+  return iff(
+    fits,
+    walk.completions(sub(w, width), landing, flagAfter(walk, reached, landing, directionOf(walk.steps[i]))),
+    0,
+  );
 }
 
 /**
@@ -120,7 +132,13 @@ function unrank(walk: Walk): MathJSON {
         const { token, rise, width } = walk.steps[i];
         return [
           "Join",
-          ["List", sub(r, before), add(y, rise), sub(w, width), flagAfter(walk, reached, add(y, rise), rise)],
+          [
+            "List",
+            sub(r, before),
+            add(y, rise),
+            sub(w, width),
+            flagAfter(walk, reached, add(y, rise), directionOf(walk.steps[i])),
+          ],
           ["Drop", state, 4],
           ["List", token],
         ];
@@ -145,7 +163,13 @@ function rank(walk: Walk): MathJSON {
     (i) => equal("rx", walk.steps[i].token),
     (i, before) => {
       const { rise, width } = walk.steps[i];
-      return ["List", add(r, before), add(y, rise), sub(w, width), flagAfter(walk, reached, add(y, rise), rise)];
+      return [
+        "List",
+        add(r, before),
+        add(y, rise),
+        sub(w, width),
+        flagAfter(walk, reached, add(y, rise), directionOf(walk.steps[i])),
+      ];
     },
   );
   return at(fold(step, state, "rx", ["List", 0, 0, walk.width, walk.flag?.initial ?? 1], "_x"), 1);
@@ -165,7 +189,7 @@ function valid(walk: Walk): MathJSON {
       y,
       add(at(state, 2), width),
       ["Max", at(state, 3), y],
-      ...(tracked ? [flagAfter(walk, at(state, 4), y, rise)] : []),
+      ...(tracked ? [flagAfter(walk, at(state, 4), y, directionOf(walk.steps[i]))] : []),
     ];
     return iff(equal("vx", token), ["List", ...next], byToken(i + 1));
   };
@@ -207,9 +231,15 @@ export const walkFamily = (walk: Walk): EpsilFamily => ({
 /**
  * T(w, y) for w = 0..total and y = 0..cap: the walks of width w from height y down to 0 with
  * these steps, never above `cap`. T(0, y) is 1 at y = 0; past that a walk can't come down from
- * above its width.
+ * above its width (or, where a down step is steeper, above its width times `slope`).
  */
-export function completionsTable(tag: string, steps: readonly Step[], total: MathJSON, cap: MathJSON): MathJSON {
+export function completionsTable(
+  tag: string,
+  steps: readonly Step[],
+  total: MathJSON,
+  cap: MathJSON,
+  slope: MathJSON = 1,
+): MathJSON {
   return rowTable(
     tag,
     add(total, 1),
@@ -217,16 +247,18 @@ export function completionsTable(tag: string, steps: readonly Step[], total: Mat
     (y) => iff(equal(y, 0), 1, 0),
     (prev, w, y) =>
       iff(
-        less(w, y),
+        less(slope === 1 ? w : mul(w, slope), y),
         0,
         add(
-          ...steps.map(({ rise, width, aboveGround }) => {
+          ...steps.map((step) => {
+            const { rise, width, aboveGround } = step;
+            const direction = directionOf(step);
             const landing = add(y, rise);
             const fits = [
               ...(width === 2 ? [["GreaterEqual", w, 2]] : []),
               ...(aboveGround ? [["GreaterEqual", y, 1]] : []),
-              ...(rise < 0 ? [["GreaterEqual", landing, 0]] : []),
-              ...(rise > 0 ? [["LessEqual", landing, cap]] : []),
+              ...(direction < 0 ? [["GreaterEqual", landing, 0]] : []),
+              ...(direction > 0 ? [["LessEqual", landing, cap]] : []),
             ];
             const read = prev(sub(w, width), landing);
             return fits.length === 0 ? read : iff(and(...fits), read, 0);

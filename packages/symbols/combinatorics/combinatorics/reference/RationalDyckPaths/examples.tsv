@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-for-3-2	Basic		[RationalDyckPaths, 3, 2]	[List, [RationalDyckPath, [List, 1, 1, 0, 0, 0]], [RationalDyckPath, [List, 1, 0, 1, 0, 0]]]	the two paths for $(3, 2)$, $\frac{1}{5}\binom{5}{2}$ of them
+count-5-3	Basic		[Count, [RationalDyckPaths, 5, 3]]	7	$\frac{1}{8}\binom{8}{3}$
+not-coprime-4-2	Properties		[RationalDyckPaths, 4, 2]	[List, [RationalDyckPath, [List, 1, 1, 0, 0, 0, 0]], [RationalDyckPath, [List, 1, 0, 1, 0, 0, 0]], [RationalDyckPath, [List, 1, 0, 0, 1, 0, 0]]]	when $a$ and $b$ share a factor the paths may touch the line, so there are more than $\frac{1}{6}\binom{6}{2}$
+square-is-dyck	Properties		[Count, [RationalDyckPaths, 4, 4]]	14	$a = b$ is the Dyck paths, the Catalan number
+a-member	Properties		[Element, [RationalDyckPath, [List, 1, 0, 1, 0, 0]], [RationalDyckPaths, 3, 2]]	True	north, east, north, east, east stays above the line
+below-the-line	Properties		[Element, [RationalDyckPath, [List, 0, 1, 1, 0, 0]], [RationalDyckPaths, 3, 2]]	False	the first step east is already below the line

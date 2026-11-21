@@ -67,6 +67,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "RookPlacement",
+    readable: true,
     type: "rook_placement",
     shape: "list<integer>",
     id: "rook_placement",

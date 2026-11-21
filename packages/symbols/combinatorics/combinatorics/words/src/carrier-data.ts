@@ -29,6 +29,7 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "HyperbinaryWord",
+    readable: true,
     type: "hyperbinary_word",
     shape: "list<integer>",
     id: "hyperbinary_word",

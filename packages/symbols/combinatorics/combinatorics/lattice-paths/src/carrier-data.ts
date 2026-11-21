@@ -30,6 +30,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "KDyckPath",
+    readable: true,
     type: "k_dyck_path",
     shape: "list<integer>",
     id: "k_dyck_path",
@@ -60,6 +61,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "RationalDyckPath",
+    readable: true,
     type: "rational_dyck_path",
     shape: "list<integer>",
     id: "rational_dyck_path",
