@@ -35,7 +35,8 @@ export function declareTableRow(ce: Engine, { head, carrier, via, name, returns 
     package: "combinatorics",
     signature,
     arity: 1,
-    types: [type],
+    // By the operand's head, which costs a string compare; a type test on a hot head (`Descents`) costs a millisecond.
+    on: [carrier],
     evaluate: ([subject]) => {
       if (subject === undefined) return undefined;
       const answer = ce.function(via, [subject, ce.string(name)]).evaluate();

@@ -21,10 +21,10 @@ signatures:
     library: enumeratio-combinatorics
     type: ((parking_function) -> integer) & ((permutation_inversion) -> integer) & ((subexcedant_seq) -> integer)
     overrides: enumeratio-analytic
-    types:
-      - parking_function
-      - permutation_inversion
-      - subexcedant_seq
+    on:
+      - ParkingFunction
+      - PermutationInversion
+      - SubexcedantSeq
 names:
   wolframIdentity: true
 bindings:
