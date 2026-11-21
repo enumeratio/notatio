@@ -2,7 +2,7 @@
 
 Hypercomplex-number extensions for compute-engine: multicomplex, split/perplex, dual and
 Clifford unit families as ordinary subscripted symbols, wired into `+ - × ÷`, integer
-powers, `Norm` and `Conjugate` with exact coefficients. Background and the family grid are
+powers, `AlgebraNorm` and `Conjugate` with exact coefficients. Background and the family grid are
 in [the guide](docs/hypercomplex-algebras.md); finite-quotient arithmetic (units mod n) is in
 [its own page](docs/finite.md).
 
@@ -35,7 +35,7 @@ plus `BicomplexNumbers`, `TricomplexNumbers`, `SplitComplexNumbers` and `DualNum
   [`DualAlgebra`](https://notatio.app/reference/symbol/DualAlgebra),
   [`MulticomplexAlgebra`](https://notatio.app/reference/symbol/MulticomplexAlgebra)
 - **Arithmetic** — [`Expand`](https://notatio.app/reference/symbol/Expand),
-  [`Norm`](https://notatio.app/reference/symbol/Norm)
+  [`AlgebraNorm`](https://notatio.app/reference/symbol/AlgebraNorm)
 
 `src/modular.ts` also exports the number-theoretic side of the units mod $n$ —
 `imaginaryUnitsMod`, `splitUnitsMod`, `factorize` — used by the finite guide.

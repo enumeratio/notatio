@@ -118,7 +118,7 @@ function declareOrderedJuxtaposition(ce: Engine): void {
  * The generators are plain subscripted symbols, so nothing needs declaring for the
  * NOTATION — `1 + 2i_1 - 3i_1i_2` already parses. What this adds is the ALGEBRA:
  * `+ - × ÷` and integer powers reduce to a canonical blade form, plus `Conjugate`
- * (every generator ↦ its negative) and `Norm` (the algebra norm — the determinant of
+ * (every generator ↦ its negative) and `AlgebraNorm` (the algebra norm — the determinant of
  * multiplication-by-z; commuting families only).
  *
  * compute-engine's own `i` is untouched and stays a scalar: it is a number literal
@@ -137,6 +137,30 @@ const GENERATORS = refusing(
 /** `hasGenerator` for Add and Multiply, which run on every sum and product: a generator
  * under a non-arithmetic head can't be read as a multivector anyway, so don't look. */
 const reachesAnyGenerator = (ops: readonly Expr[]): boolean => ops.some(reachesGenerator);
+
+const isNumberLiteral = (expr: Expr): boolean => (expr as { isNumberLiteral?: boolean }).isNumberLiteral === true;
+
+/**
+ * The determinant of multiplication by `operand` over the algebra its units generate: a
+ * hypercomplex element through its blade form, a compute-engine complex literal as a² + b²
+ * (z·z̄, exact), a real literal as itself (the norm over ℝ). `undefined` when no answer is
+ * justified: an anticommuting element, a symbolic operand, or a complex coefficient beside a
+ * generator, whose ambient algebra is then ℂ[i_k] and not what the blades say.
+ */
+function algebraNormOf(ce: Engine, operand: Expr): Expr | undefined {
+  if (containsGenerator(operand)) {
+    const mv = toMultivector(ce, operand);
+    if (mv === undefined) return undefined;
+    for (const term of mv.terms.values()) {
+      if (isNumberLiteral(term.coefficient) && term.coefficient.im !== 0) return undefined;
+    }
+    return normMultivector(ce, mv);
+  }
+  if (!isNumberLiteral(operand)) return undefined;
+  if (operand.im === 0) return operand;
+  const conjugate = ce.box(["Conjugate", operand]).evaluate();
+  return operand.mul(conjugate).evaluate();
+}
 
 export function declareHypercomplex(ce: Engine): void {
   registerNotation(ce, HYPERCOMPLEX_NOTATION);
@@ -246,13 +270,14 @@ export function declareHypercomplex(ce: Engine): void {
     return mv === undefined ? native?.(ops, options) : toExpression(ce, mv);
   });
 
-  wrapOperator(
-    ce,
-    ["Norm", "x"],
-    hasGenerator,
-    () => (ops) => linear(ops, ([mv]) => (mv === undefined ? undefined : normMultivector(ce, mv))),
-    { arity: 1, compile: GENERATORS },
-  );
+  // The algebra norm is ours alone: `Norm` stays compute-engine's modulus (`Norm(3 + 4i)` is 5).
+  ce.declare("AlgebraNorm", {
+    signature: "(number) -> number",
+    evaluate: (ops: readonly Expr[]) => {
+      const operand = ops[0];
+      return operand === undefined ? undefined : algebraNormOf(ce, operand);
+    },
+  });
 
   // `\overline{z}` parses to OverBar, which has no definition of its own — give it
   // the conjugation, so the usual notation for it works. Non-hypercomplex operands

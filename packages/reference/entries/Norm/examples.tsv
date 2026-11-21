@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+the-modulus-of-a-complex-number			[Norm, [Complex, 3, 4]]	5	the modulus, where `AlgebraNorm(3 + 4i)` is 25
+the-length-of-a-vector			[Norm, [List, 3, 4]]	5	the Euclidean length

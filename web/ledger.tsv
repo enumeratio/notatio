@@ -5764,3 +5764,4 @@ symbol	/reference/symbol/ShortestSmallIntervalChainCount
 symbol	/reference/symbol/SublatticeCount
 symbol	/reference/symbol/UncomplementedElementCount
 symbol	/reference/symbol/ZeroDivisorCount
+symbol	/reference/symbol/AlgebraNorm

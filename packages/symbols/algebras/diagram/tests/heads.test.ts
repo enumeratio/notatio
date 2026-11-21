@@ -98,7 +98,7 @@ test("the hypercomplex library still answers alongside this one", () => {
   same(["Basis", "Quaternions"], ["List", 1, "f_1", "f_2", ["Multiply", "f_1", "f_2"]]);
   same(["Element", ["Multiply", "f_1", "f_2"], "Quaternions"], "True");
   same(["NonCommutativeMultiply", "e_2", "e_1"], ["Negate", ["Multiply", "e_1", "e_2"]]);
-  same(["Norm", ["Add", 3, ["Multiply", 4, "i_1"]]], 25);
+  same(["AlgebraNorm", ["Add", 3, ["Multiply", 4, "i_1"]]], 25);
   // ...and native arithmetic is still native.
   same(["Add", 2, 3], 5);
   same(["Element", 2, "Integers"], "True");

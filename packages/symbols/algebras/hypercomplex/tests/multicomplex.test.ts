@@ -16,7 +16,7 @@ const same = (input: Expr, expected: Expr) =>
 const sameLatex = (latex: string, expected: Expr) =>
   expect(ce.parse(latex).evaluate().json).toEqual(ce.box(expected).evaluate().json);
 
-const norm = (input: Expr): Expr => ["Norm", input];
+const norm = (input: Expr): Expr => ["AlgebraNorm", input];
 
 // ── the defining relations ──────────────────────────────────────────────────────
 
@@ -119,9 +119,9 @@ test("the norm is multiplicative on a fixed unit set", () => {
 test("the norm depends on the ambient algebra: N_{n+1} = N_n²", () => {
   // Each factor has norm 2 over ℂ_1, but 2² = 4 over ℂ_2, so the ℂ_2 norm of the
   // product is 4·4 = 16 — not 2·2. Adjoining a generator squares the determinant.
-  sameLatex("\\operatorname{Norm}(1+i_1)", 2);
-  sameLatex("\\operatorname{Norm}(1+i_2)", 2);
-  sameLatex("\\operatorname{Norm}((1+i_1)(1+i_2))", 16);
+  sameLatex("\\operatorname{AlgebraNorm}(1+i_1)", 2);
+  sameLatex("\\operatorname{AlgebraNorm}(1+i_2)", 2);
+  sameLatex("\\operatorname{AlgebraNorm}((1+i_1)(1+i_2))", 16);
 });
 
 // ── units, zero divisors, idempotents ───────────────────────────────────────────
@@ -134,7 +134,7 @@ test("inverse round-trips, exactly", () => {
 });
 
 test("1 + i_1i_2 is a zero divisor: norm 0, no inverse, and it annihilates", () => {
-  sameLatex("\\operatorname{Norm}(1+i_1i_2)", 0);
+  sameLatex("\\operatorname{AlgebraNorm}(1+i_1i_2)", 0);
   sameLatex("(1+i_1i_2)(1-i_1i_2)", 0);
   // Not invertible, so Divide is left standing rather than answered.
   expect(ce.parse("\\frac{1}{1+i_1i_2}").evaluate().operator).toBe("Divide");

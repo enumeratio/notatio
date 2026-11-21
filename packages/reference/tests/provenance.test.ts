@@ -321,7 +321,6 @@ const OVERRIDDEN = [
   // Our N rounds to the requested digits; a bare `N(Pi, 30)` prints 34.
   "N",
   "NextPrime",
-  "Norm",
   // Not itself overridden -- Normal of our Series at infinity, which a bare engine leaves held.
   "Normal",
   // The two `Over` rows: ours reads the ring (`Over -> QuotientRing(Integers, p)`), compute-engine ignores the option.
@@ -485,6 +484,7 @@ const NOVEL = [
   "AdjacentTranspositionInvolutions",
   "AlexanderPolynomial",
   "AlgebraDimension",
+  "AlgebraNorm",
   "AlgebraSignature",
   "AlgebraicIntegers",
   "AlgebraicOrder",

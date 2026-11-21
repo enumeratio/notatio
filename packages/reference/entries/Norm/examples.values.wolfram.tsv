@@ -1,0 +1,3 @@
+id	in
+the-modulus-of-a-complex-number	Norm[Complex[3, 4]]
+the-length-of-a-vector	Norm[List[3, 4]]
