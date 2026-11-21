@@ -36,7 +36,8 @@ export const generated: { standard: GeneratedEntries; curated: GeneratedEntries 
   frontier: GRAPHS_FRONTIER,
   samples: SAMPLES,
   // `AutomorphismGroupSize` is also the tree statistic: the record stays the trees' own, and takes the graphs' notes and examples.
-  curatedHeads: ["AutomorphismGroupSize"],
+  // `Girth`, `MaximumDistance` and `MinimumEccentricity` keep their hand-written `known` examples (an infinite answer).
+  curatedHeads: ["AutomorphismGroupSize", "Girth", "MaximumDistance", "MinimumEccentricity"],
   declareArea: declareGraphsArea,
   carrierNames: { LabeledGraph: { subjectName: "graph", domain: "Graph statistics" } },
   dir: REFERENCE_DIR,

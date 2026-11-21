@@ -27,6 +27,8 @@ import { type Definition, definitionKey, SUBJECT, signatureOf, whereSignatureOf 
 
 interface CompiledEntry {
   readonly hash: string;
+  /** The infinities the definition writes and the build vouched for (infinity.ts): the only ones `compiledRun` reads. */
+  readonly infinite?: readonly ("PositiveInfinity" | "NegativeInfinity")[];
   readonly run: (sys: never, vars: Record<string, unknown>) => unknown;
 }
 
@@ -57,7 +59,7 @@ export function compiledStatistic(
     const held = COMPILED[whereSignatureOf(definition)];
     if (held === undefined || definition.where === undefined || held.hash !== definitionHash(definition.where))
       return undefined;
-    return compiledRun(ce, held.run, undefined);
+    return compiledRun(ce, held.run, undefined, undefined);
   }
   // An exact count has BigInt code or none: its doubles' code (a stale build's) is never used.
   if (definition.exact === true) {
@@ -72,7 +74,7 @@ export function compiledStatistic(
   if (!flat && entry.hash !== definitionHash(definition.expr)) return undefined;
   const codec = flat ? FLAT[definition.on] : undefined;
   if (flat && codec === undefined) return undefined;
-  return compiledRun(ce, entry.run, codec);
+  return compiledRun(ce, entry.run, codec, entry.infinite);
 }
 
 /** BigInt code run over the subject as bigints: an answer past the safe range, or a division that leaves a remainder,
@@ -94,6 +96,7 @@ function compiledRun(
   ce: Engine,
   run: CompiledEntry["run"],
   codec: (typeof FLAT)[string] | undefined,
+  infinite: CompiledEntry["infinite"],
 ): (subject: unknown) => MathJSON | undefined {
   const sys = runtimeHelpers(ce);
   return (subject) => {
@@ -101,7 +104,11 @@ function compiledRun(
     const value = codec === undefined || nested === undefined ? nested : codec.encode(nested);
     if (value === undefined) return undefined;
     try {
-      return fromJs(run(sys as never, { [SUBJECT]: value }));
+      const answer = run(sys as never, { [SUBJECT]: value });
+      // A JS infinity is an answer only for a definition that writes it on purpose; any other declines.
+      if (answer === Infinity && infinite?.includes("PositiveInfinity")) return "PositiveInfinity";
+      if (answer === -Infinity && infinite?.includes("NegativeInfinity")) return "NegativeInfinity";
+      return fromJs(answer);
     } catch {
       return undefined;
     }

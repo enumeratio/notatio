@@ -9,7 +9,7 @@ import { type CompiledDefinition, compiledDefinitionsFor, type Verdicts } from "
 import { type Definition, isTrue, SUBJECT } from "./types.ts";
 
 /** Whether `subject` (MathJSON) is in `definition`'s domain, by the interpreter: what the compiled code is held to. */
-function inDomain(ce: Engine, definition: Definition, subject: unknown): boolean {
+export function inDomain(ce: Engine, definition: Definition, subject: unknown): boolean {
   try {
     return isTrue(evaluateEpsil(ce, definition.where, { [SUBJECT]: subject }));
   } catch {
@@ -18,7 +18,7 @@ function inDomain(ce: Engine, definition: Definition, subject: unknown): boolean
 }
 
 /** `verdicts` with `where` in every part and source it is given. */
-const withWhere = (verdicts: Verdicts, where: unknown): Verdicts => {
+export const withWhere = (verdicts: Verdicts, where: unknown): Verdicts => {
   const named = (value: unknown): unknown => ({ ...(value as object), where });
   return {
     sourceOnly: verdicts.sourceOnly,

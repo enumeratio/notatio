@@ -3,8 +3,11 @@
 // across processes (shards.ts).
 
 import { fileURLToPath } from "node:url";
-import { type CompiledDefinition, renderCompiled } from "../src/statistics/generate-compiled.ts";
-import { compiledDefinitionsInDomains } from "../src/statistics/generate-domain.ts";
+import {
+  compiledDefinitionsWithInfinity,
+  type FlaggedDefinition,
+  renderCompiledTable,
+} from "../src/statistics/infinity.ts";
 import { type Definition, signatureOf } from "../src/statistics/types.ts";
 import { smallElements } from "./samples.ts";
 import { sharded } from "./shards.ts";
@@ -26,12 +29,12 @@ export async function compileArea(
   // An exact count compiles over BigInts (compile-exact.ts), never as doubles.
   const compiled = definitions.filter((d) => d.exact !== true);
   const run = await sharded(script, step, checkers.statistics, compiled.map(signatureOf), (verdicts, mine) =>
-    compiledDefinitionsInDomains(compiled, shape, subjects, verdicts, mine),
+    compiledDefinitionsWithInfinity(compiled, shape, subjects, verdicts, mine),
   );
   if (run === undefined) return;
-  const entries: CompiledDefinition[] = run.results.flatMap((r) => r.compiled).toSorted(bySignature);
+  const entries: FlaggedDefinition[] = run.results.flatMap((r) => r.compiled).toSorted(bySignature);
   const disagreed = run.results.flatMap((r) => r.disagreed).toSorted();
-  writeGenerated(fileURLToPath(new URL(output, script)), renderCompiled(entries));
+  writeGenerated(fileURLToPath(new URL(output, script)), renderCompiledTable(entries));
   run.verdicts.save();
   console.log(`${entries.length} of ${compiled.length} definitions compiled`);
   for (const signature of disagreed)

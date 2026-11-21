@@ -39,7 +39,7 @@ export async function sharded<T>(
   const costs: Record<string, number> = {};
   for (const row of readSnapshot())
     if (row.step === step && row.seconds !== undefined) {
-      const key = row.signature.replace(/ \((flat|composition)\)$/, "");
+      const key = row.signature.replace(/ \((flat|composition|infinite)\)$/, "");
       costs[key] = (costs[key] ?? 0) + row.seconds;
     }
   const split = (shards: number) => assignShards(keys, shards, costs);

@@ -3,18 +3,20 @@
 // the value of its definition (the independent reading, where one is cheap enough), one size past it the call stays
 // unevaluated on every route, promptly, with the compiled code present and absent.
 
+import { applyPatch, matrixRankCompiles } from "@notatio/ce-patches";
 import { bareEngine } from "@notatio/engine/testing";
 import { operandsOf } from "@notatio/engine";
-import { definitionHash } from "@notatio/engine/compiled";
+import { compileTyped, definitionHash } from "@notatio/engine/compiled";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
-import { COMPILED } from "../../src/statistics/compiled.ts";
+import { COMPILED, compiledStatistic } from "../../src/statistics/compiled.ts";
 import { applyDefinition, inDomain } from "../../src/statistics/declare.ts";
 import { bySignature, signatureOf, whereSignatureOf } from "../../src/statistics/types.ts";
 import {
   EDGE_TABLE_HEADS,
   EDGE_TABLE_LIMIT,
   GRAPH_STATISTICS,
+  INTERMEDIATE_PROBES,
   SUBSET_LIMITS,
   VERTEX_LIMITS,
 } from "../src/statistics.ts";
@@ -95,6 +97,81 @@ test("the faster definitions and the six spectrum heads are in the compiled tabl
   for (const head of heads) {
     const definition = definitionOf(head);
     expect(COMPILED[signatureOf(definition)]?.hash, head).toBe(definitionHash(definition.expr));
+  }
+});
+
+// No timing: the compiled entry itself carries the infinity, so the answer never falls back to the interpreter, which takes
+// seconds on these graphs. Each answers a forest or a disconnected graph as `PositiveInfinity` and a graph without that
+// case as a number, from the compiled code alone.
+test("Girth, MaximumDistance and MinimumEccentricity answer compiled on a forest and on a disconnected graph", () => {
+  const forests = [
+    edgeless(5),
+    path(6),
+    matching(6),
+    {
+      n: 5,
+      edges: [
+        [1, 2],
+        [3, 4],
+      ] as [number, number][],
+    },
+  ];
+  const disconnected = [
+    edgeless(4),
+    matching(6),
+    triangles(6),
+    {
+      n: 5,
+      edges: [
+        [1, 2],
+        [3, 4],
+      ] as [number, number][],
+    },
+  ];
+  const cases: [string, Graph[], Graph[]][] = [
+    ["Girth", forests, [complete(5), cycle(6), triangles(6)]],
+    ["MaximumDistance", disconnected, [path(6), complete(5), cycle(6)]],
+    ["MinimumEccentricity", disconnected, [path(6), complete(5), cycle(6)]],
+  ];
+  for (const [head, infinite, finite] of cases) {
+    const definition = definitionOf(head);
+    expect(COMPILED[signatureOf(definition)]?.infinite, head).toEqual(["PositiveInfinity"]);
+    const compiled = compiledStatistic(ce, definition)!;
+    expect(compiled, head).toBeDefined();
+    for (const g of infinite) expect(compiled(contents(g)), `${head} ${JSON.stringify(g)}`).toBe("PositiveInfinity");
+    for (const g of finite) {
+      const answer = compiled(contents(g));
+      expect(typeof answer, `${head} ${JSON.stringify(g)}`).toBe("number");
+      expect(answer, `${head} ${JSON.stringify(g)}`).toBe(reading(head)(g));
+    }
+  }
+});
+
+// A definition's `intermediates` waives the overflow walk of the compiled infinity (infinity.ts, rule 4), so the statement is
+// run, not trusted: the probe is the definition's own table, compiled, on the worst subject at the bound.
+const WORST_AT_THE_BOUND: Record<string, Graph> = { Girth: complete(12) };
+const compiling = bareEngine();
+applyPatch(compiling, matrixRankCompiles);
+
+test("a definition's intermediates statement holds: its largest intermediate at the bound is the stated figure, under 2^53", () => {
+  const stated = GRAPH_STATISTICS.filter((d) => d.intermediates !== undefined);
+  expect(stated.length).toBeGreaterThan(0);
+  for (const definition of stated) {
+    const { head } = definition;
+    const worst = WORST_AT_THE_BOUND[head];
+    const entry = INTERMEDIATE_PROBES[head];
+    expect(worst, `${head} has intermediates and no worst subject`).toBeDefined();
+    expect(entry, `${head} has intermediates and no probe`).toBeDefined();
+    expect(definition.where, head).toBeDefined();
+    expect(worst!.n, head).toBe(LIMITS[head]);
+    expect(inside(head, worst!), `${head}: the worst subject is inside the domain`).toBe(true);
+    // The engine the build compiles on: the combinatorics heads declared on `ce` change how the compiler reads the table.
+    const code = compileTyped(compiling, entry!.probe as never, { _x: "tuple<integer, list<list<integer>>>" });
+    expect(code, head).toBeDefined();
+    const largest = code!.run({ _x: [worst!.n, worst!.edges] }) as number;
+    expect(largest, head).toBe(entry!.figure);
+    expect(largest, head).toBeLessThan(2 ** 53);
+    expect(definition.intermediates, head).toContain(entry!.figure.toLocaleString("en-US"));
   }
 });
 
@@ -212,6 +289,12 @@ const CLOSED_FORMS: Record<string, ClosedForm> = {
     complete: (n) => n - 1,
     path: (n) => (n % 2 === 0 ? 1 : 0),
     why: "the absolute value of the adjacency determinant's closed form",
+  },
+  Girth: {
+    reads: 9,
+    complete: (n) => (n >= 3 ? 3 : Infinity),
+    path: () => Infinity,
+    why: "K_n has a triangle from 3 vertices; a path is a forest, which has no cycle",
   },
   GraphLongestCycleLength: {
     reads: 9,
@@ -332,21 +415,18 @@ const POLYNOMIAL = [
   "PadmakarIvanIndex",
 ];
 /**
- * Statistics that take seconds on a graph of a few vertices (the FindStat crawl's largest have 7), so a bound by the rule
- * would put crawl rows off the domain; they are left unbounded for the maintainers. The cause is not the definition: the
- * compiled code answers in a millisecond, with `Infinity` where the graph has no cycle (`Girth`) or no path between two
- * vertices, and `fromJs` has no MathJSON for `Infinity`, so `compiledRun` returns `undefined` and the call is interpreted.
- * Measured compiled-or-fallen-back, the worst of the eight graphs: `Girth` 1.8 s on a path of 4 and 3.9 s of 5,
- * `MaximumDistance` 1.6 s on the edgeless graph on 4 and 3.3 s on 6, `MinimumEccentricity` 2.0 s on 4 and 2.6 s on 5; a
- * graph with a cycle, or a connected one, takes a millisecond.
+ * `MaximumDistance` and `MinimumEccentricity` write `PositiveInfinity` for a graph with two components, and `Girth` for a
+ * forest (a bounded head, above). The compiled code answers each in milliseconds: Floyd-Warshall is n^3 with an
+ * intermediate of at most 4n (the 2n of a pair with no path, and sums of two), neither walks subsets, and their definitions
+ * carry the compiled infinity flag, so they need no bound.
  */
-const UNBOUNDED_FOR_THE_MAINTAINERS = ["Girth", "MaximumDistance", "MinimumEccentricity"];
+const POLYNOMIAL_WITH_INFINITY = ["MaximumDistance", "MinimumEccentricity"];
 
-test("every graph statistic is bounded, listed as polynomial or listed as left unbounded", () => {
+test("every graph statistic is bounded or listed as polynomial", () => {
   const heads = GRAPH_STATISTICS.map((d) => d.head);
-  const known = new Set([...capped, ...POLYNOMIAL, ...UNBOUNDED_FOR_THE_MAINTAINERS]);
+  const known = new Set([...capped, ...POLYNOMIAL, ...POLYNOMIAL_WITH_INFINITY]);
   expect(heads.filter((head) => !known.has(head))).toEqual([]);
-  for (const head of [...POLYNOMIAL, ...UNBOUNDED_FOR_THE_MAINTAINERS]) {
+  for (const head of [...POLYNOMIAL, ...POLYNOMIAL_WITH_INFINITY]) {
     expect(heads, head).toContain(head);
     expect(capped, head).not.toContain(head);
   }
@@ -357,6 +437,12 @@ test(`the polynomial statistics answer on ${DEEP ? "the complete and the edgeles
   const started = performance.now();
   for (const head of POLYNOMIAL)
     for (const g of graphs) expect(Number.isFinite(ce.box(call(head, g) as never).evaluate().re), head).toBe(true);
+  // A graph with two components has an infinite diameter and radius; the call still answers.
+  for (const head of POLYNOMIAL_WITH_INFINITY)
+    for (const g of graphs) {
+      const answer = ce.box(call(head, g) as never).evaluate().re;
+      expect(g.edges.length === 0 ? answer === Infinity : Number.isFinite(answer), head).toBe(true);
+    }
   expect(performance.now() - started).toBeLessThan(DEEP ? 15_000 : 5_000);
 });
 
