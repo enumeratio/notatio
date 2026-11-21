@@ -315,7 +315,8 @@ jobs:
   preview:
     name: preview (Cloudflare Pages)
     needs: site
-    if: needs.site.result == 'success' && github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository)
+    # `!cancelled()`: without a status function a skipped `dist` (warm cache) skips this job too.
+    if: ${{ !cancelled() && needs.site.result == 'success' && github.event_name != 'schedule' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
