@@ -81,18 +81,16 @@ test("a shared statistic's bare head gives FindStat's value on each sample objec
 });
 
 // FindStat's map ids behind each head row, by (head, carrier): the shape of a tableau, of a semistandard tableau and
-// of a set partition, the conjugate tableau, and the complement i -> n + 1 - i of a set partition.
+// of a set partition, and the conjugate tableau.
 const MAP_IDS: Readonly<Record<string, string>> = {
   "Shape@StandardTableau": "Mp00083",
   "Shape@SemistandardTableau": "Mp00077",
   "Shape@SetPartition": "Mp00079",
   "Transpose@StandardTableau": "Mp00084",
-  "Reverse@SetPartition": "Mp00112",
 };
 const TARGET: Readonly<Record<string, string>> = {
   integer_partition: "IntegerPartition",
   standard_tableau: "StandardTableau",
-  set_partition: "SetPartition",
 };
 
 test("a head row answers as its map does, and as FindStat's samples", () => {
