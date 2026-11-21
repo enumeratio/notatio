@@ -408,6 +408,26 @@ export function compareTrees(ours: Tree, theirs: Tree, tolerance = 1e-9): Verdic
   return a === b ? "agree" : "disagree";
 }
 
+/**
+ * Our answer to `Factorization(n)` of an integer, read as the `(base, exponent)` pairs every system's own
+ * factoring answers (`FactorInteger`, `factorint`, Sage's `factor`): `Factorization(Tuple(List(2, 3), List(3, 1)))`
+ * is `List(Tuple(2, 3), Tuple(3, 1))`. The data form `Factorization(Tuple(bases, exponents))` is the carrier
+ * itself, sent and compared as it is, and anything that is not a matched pair of lists is left alone.
+ */
+export function factorizationAsPairs(call: MathJSON | undefined, expected: MathJSON): MathJSON {
+  if (!Array.isArray(call) || call[0] !== "Factorization" || call.length !== 2) return expected;
+  const given = call[1] as MathJSON;
+  if (Array.isArray(given) && given[0] === "Tuple") return expected;
+  if (!Array.isArray(expected) || expected[0] !== "Factorization" || expected.length !== 2) return expected;
+  const lists = expected[1] as MathJSON;
+  if (!Array.isArray(lists) || lists[0] !== "Tuple" || lists.length !== 3) return expected;
+  const [bases, exponents] = [lists[1], lists[2]] as MathJSON[];
+  if (!Array.isArray(bases) || !Array.isArray(exponents) || bases[0] !== "List" || exponents[0] !== "List")
+    return expected;
+  if (bases.length !== exponents.length) return expected;
+  return ["List", ...bases.slice(1).map((base, i) => ["Tuple", base, exponents[i + 1]])] as MathJSON;
+}
+
 /** Whether a numeric leaf agrees with 0 (`agreesWithZero`); `undefined` for a leaf that is no number. */
 export function agreesWithZeroLeaf(leaf: Tree, tolerance = 1e-9): boolean | undefined {
   if (typeof leaf === "number") return agreesWithZero(tolerance, Math.abs(leaf));

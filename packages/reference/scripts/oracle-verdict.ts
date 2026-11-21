@@ -17,6 +17,7 @@ import {
   compareTrees,
   echoedPart,
   echoesInput,
+  factorizationAsPairs,
   isWolframFamily,
   type Leaf,
   leavesCall,
@@ -287,6 +288,7 @@ function judge(
   /** The example's `known`: exactly 0 makes it the reference for both sides. */
   known?: MathJSON,
 ): Verdict {
+  expected = factorizationAsPairs(call, expected);
   const atZero = known === 0 ? againstZero(system, expected, result, tolerance) : undefined;
   if (atZero !== undefined) return atZero;
   // A measurement agrees with a value its error bar holds.

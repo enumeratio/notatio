@@ -430,6 +430,20 @@ test("a binding's threadArgOnly threads for its own system alone", () => {
   });
 });
 
+test("Factorization(n) of an integer is each system's own factoring; a system with none has no row", () => {
+  const integer: MathJSON = ["Factorization", 360];
+  expect(emit(integer, "wolfram")).toEqual({ ok: true, source: "FactorInteger[360]" });
+  expect(emit(integer, "sympy")).toEqual({ ok: true, source: "sorted(factorint(360).items())" });
+  expect(emit(integer, "sage")).toEqual({ ok: true, source: "enumeratio_factor_integer(360)" });
+  expect(emit(integer, "rust")).toEqual({ ok: true, source: "factor_integer(n(360))" });
+  // mpmath has no factoring, and oscar's is not mapped: the row is absent, not the bare 360.
+  for (const system of ["mpmath", "oscar"] as const)
+    expect(emit(integer, system)).toEqual({ ok: false, missing: ["Factorization/integer"] });
+  // The carrier's data form is not a factoring: it is sent as the pair of lists.
+  const data: MathJSON = ["Factorization", ["Tuple", ["List", 2, 3], ["List", 3, 1]]];
+  expect(emit(data, "wolfram")).toEqual({ ok: true, source: "List[List[2, 3], List[3, 1]]" });
+});
+
 test("a SymPy Sum takes its iterator as a tuple over a bound Symbol, from 1 when the start is left out", () => {
   const sum = (iterator: MathJSON): string | undefined => {
     const out = emit(["Sum", "k", iterator] as MathJSON, "sympy");

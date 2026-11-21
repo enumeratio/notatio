@@ -54,6 +54,7 @@ export {
   type Approximate,
   agreesWithZeroLeaf,
   compareTrees,
+  factorizationAsPairs,
   isNumericValue,
   type Leaf,
   reduce,
