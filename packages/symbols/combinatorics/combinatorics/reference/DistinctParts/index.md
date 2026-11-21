@@ -22,7 +22,6 @@ catalog:
     url: https://www.findstat.org/St001453
     on: PlanePartition
 statOn:
-  - CorePartition
   - IntegerComposition
   - IntegerPartition
   - PlanePartition

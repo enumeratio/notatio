@@ -10,7 +10,7 @@ signatures:
   - call: LastBlockSize(partition)
     description: The size of the final block.
     library: enumeratio-combinatorics
-    type: (set_partition) -> number
+    type: ((set_composition) -> number) & ((set_partition) -> number)
 ---
 
 - Defined over `SetPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

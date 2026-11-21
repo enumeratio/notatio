@@ -30,11 +30,8 @@ catalog:
     url: https://www.findstat.org/St001068
     on: DyckPath
 statOn:
-  - ColoredMotzkinPath
   - DyckPath
   - IntegerComposition
-  - KDyckPath
-  - KMotzkinPath
   - MotzkinPath
   - Permutation
   - SchroederPath

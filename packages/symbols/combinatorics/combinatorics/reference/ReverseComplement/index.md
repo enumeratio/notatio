@@ -13,7 +13,6 @@ catalog:
     on: DyckPath
 mapOn:
   - DyckPath
-  - MotzkinPath
   - Permutation
 signatures:
   - call: ReverseComplement(Permutation)

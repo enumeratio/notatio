@@ -7,6 +7,7 @@
 import { type Engine, operandsOf } from "@notatio/engine";
 import type { MathJSON } from "./types.ts";
 import { type Operation, operationOf, registerOperation } from "@notatio/structures";
+import { declareTableRow } from "../carrier-rows.ts";
 
 type Subject = Parameters<NonNullable<Operation["definition"]>>[0];
 
@@ -73,6 +74,14 @@ const EXPRESSIONS: readonly { name: string; expression: MathJSON; carriers: read
   { name: "Sum", expression: ["Sum", "_x"], carriers: ["ParkingFunction", "PermutationInversion", "SubexcedantSeq"] },
 ];
 
+/** Every (head, carrier) the bare head takes through a row of its own, as `declareSharedStatistics` declares them. */
+export const SHARED_ROWS: readonly { readonly head: string; readonly carrier: string }[] = [
+  ...SHARED.flatMap(({ to }) =>
+    Object.entries(to).flatMap(([carrier, names]) => names.map((head) => ({ head, carrier }))),
+  ),
+  ...EXPRESSIONS.flatMap(({ name, carriers }) => carriers.map((carrier) => ({ head: name, carrier }))),
+];
+
 /** File the shared statistics in their carriers' `CombinatorialStat` tables, once every area has declared. */
 export function declareSharedStatistics(ce: Engine): void {
   for (const { from, to } of SHARED)
@@ -91,6 +100,14 @@ export function declareSharedStatistics(ce: Engine): void {
           ...(kernel === undefined ? {} : { kernel: (subject) => kernel(contents(subject)) }),
           ...(source.epsil === undefined ? {} : { epsil: source.epsil }),
         });
+        // The bare head takes the carrier too, as the table does.
+        declareTableRow(ce, {
+          head: name,
+          carrier,
+          via: "CombinatorialStat",
+          name,
+          returns: source.type ?? "number",
+        });
       }
   for (const { name, expression, carriers } of EXPRESSIONS)
     for (const carrier of carriers)
@@ -106,6 +123,9 @@ export function declareSharedStatistics(ce: Engine): void {
             .evaluate();
         },
       });
+  for (const { name, carriers } of EXPRESSIONS)
+    for (const carrier of carriers)
+      declareTableRow(ce, { head: name, carrier, via: "CombinatorialStat", name, returns: "integer" });
   // A subset packs its size ahead of its members; a bare member list has no size.
   registerOperation(ce, "CombinatorialStat", "Finset", {
     name: "Sum",

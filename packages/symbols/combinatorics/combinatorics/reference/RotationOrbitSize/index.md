@@ -29,7 +29,7 @@ signatures:
   - call: RotationOrbitSize(partition)
     description: The number of distinct partitions rotation i -> i + 1 (mod n) makes of this one.
     library: enumeratio-combinatorics
-    type: (composition | set_partition) -> number
+    type: ((binary_word) -> number) & ((composition | set_partition) -> number) & ((perfect_matching) -> number)
 ---
 
 - Defined over `SetPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

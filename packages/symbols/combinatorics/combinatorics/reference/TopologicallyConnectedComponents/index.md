@@ -19,7 +19,7 @@ signatures:
   - call: TopologicallyConnectedComponents(partition)
     description: "The topologically connected components of the arc diagram: blocks joined when an arc of one crosses an arc of the other."
     library: enumeratio-combinatorics
-    type: (set_partition) -> number
+    type: ((perfect_matching) -> number) & ((set_partition) -> number)
 ---
 
 - Defined over `SetPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

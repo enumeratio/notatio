@@ -12,6 +12,9 @@ the-binary-word-10100			[CombinatorialStat, [BinaryWord, [List, 1, 0, 1, 0, 0]],
 the-arrangement-314			[CombinatorialStat, [Arrangement, [List, 3, 1, 4]], "'Descents'"]	1			the arrangement $314$
 the-parking-function-211			[CombinatorialStat, [ParkingFunction, [List, 2, 1, 1]], "'Descents'"]	1			the parking function $211$
 the-surjection-2121			[CombinatorialStat, [Surjection, [List, 2, 1, 2, 1]], "'Descents'"]	2			the surjection $2121$
+bare-head-on-the-word-1332		test	[Descents, [Word, [List, 1, 3, 3, 2]]]	1			the word $1332$, by the bare head
+bare-head-on-the-binary-word-10100		test	[Descents, [BinaryWord, [List, 1, 0, 1, 0, 0]]]	2			the binary word $10100$, by the bare head
+bare-head-on-the-parking-function-211		test	[Descents, [ParkingFunction, [List, 2, 1, 1]]]	1			the parking function $211$, by the bare head
 descents-and-ascents-partition-the-n-1-steps	Properties		[Equal, [Add, [Descents, [List, 3, 1, 2]], [Ascents, [List, 3, 1, 2]]], 2]	True			descents and ascents partition the $n - 1$ steps
 findstat-st000021-1	Properties		[CombinatorialStat, [Permutation, [List, 1]], "'Descents'"]	0	0	FindStat St000021	FindStat's value for [1]
 findstat-st000021-2	Properties		[CombinatorialStat, [Permutation, [List, 1, 2]], "'Descents'"]	0	0	FindStat St000021	FindStat's value for [1,2]

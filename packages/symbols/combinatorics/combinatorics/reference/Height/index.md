@@ -18,13 +18,9 @@ catalog:
     on: DyckPath
 statOn:
   - BinaryTree
-  - ColoredMotzkinPath
   - DyckPath
-  - KDyckPath
-  - KMotzkinPath
   - MotzkinPath
   - OrderedTree
-  - PlaneTree
   - SchroederPath
 signatures:
   - call: Height(path)
