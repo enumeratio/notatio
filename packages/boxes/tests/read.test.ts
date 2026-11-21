@@ -37,21 +37,12 @@ function roundTrip(json: MathJsonExpression): "exact" | "equivalent" | "declined
 }
 
 // What the reader cannot recover from the boxes, because the notation gives two heads one
-// spelling (`[0, 1]` is an interval and a list; `a ∧ b` a wedge and a conjunction) or the
+// spelling (`[0, 1]` is an interval and a list), a dropped operand (`Vee`'s algebra) or the
 // boxes do not say (a matrix's grid with no fence). `sum canonical` is the writer unwrapping the
 // `Function(Block(…))` summand that compute-engine rejects as an argument. A change here is a fix
 // or a regression.
 const DECLINED = ["matrix no delimiters", "delimiter brackets", "error", "dictionary"];
-const MISMATCHED = [
-  "product with a reciprocal",
-  "superscript",
-  "sum canonical",
-  "derivative default order",
-  "wedge",
-  "wedge three",
-  "vee",
-  "wedge of sum",
-];
+const MISMATCHED = ["product with a reciprocal", "superscript", "sum canonical", "derivative default order", "vee"];
 
 test("round trip: makeBoxes then makeExpression reads the corpus back", () => {
   const rows: Record<string, string[]> = { exact: [], equivalent: [], declined: [], mismatched: [] };
@@ -342,6 +333,17 @@ const SET_OPERATORS: Record<string, MathJsonExpression> = {
   "set minus of a product": ["SetMinus", ["Multiply", "a", "b"], "c"],
   "symmetric difference under a relation": ["Equal", ["SymmetricDifference", "a", "b"], "c"],
   "symmetric difference of sums": ["SymmetricDifference", ["Add", "a", "b"], "c"],
+  "union then intersection": ["Union", "a", ["Intersection", "b", "c"]],
+  "intersection then union": ["Intersection", "a", ["Union", "b", "c"]],
+  "union then symmetric difference": ["Union", "a", ["SymmetricDifference", "b", "c"]],
+  "symmetric difference then union": ["SymmetricDifference", "a", ["Union", "b", "c"]],
+  "mixed run to the right": ["Union", "a", ["Intersection", "b", ["SymmetricDifference", "c", "d"]]],
+  "mixed last operand": ["Union", "a", "b", ["Intersection", "c", "d"]],
+  "mixed on the left": ["Union", ["Intersection", "a", "b"], "c"],
+  "symmetric difference on the left": ["Intersection", ["SymmetricDifference", "a", "b"], "c"],
+  "mixed in the middle": ["Union", "a", ["SymmetricDifference", "b", "c"], "d"],
+  "set minus under a symmetric difference": ["SymmetricDifference", "a", ["SetMinus", "b", "c"]],
+  "set minus operand of a set minus": ["SetMinus", "a", ["SetMinus", "b", "c"], "d"],
   "integers and naturals": ["Union", "Integers", "NonNegativeIntegers"],
   "open and half-open intervals": ["Union", ["Interval", ["Open", 0], ["Open", 1]], ["Interval", 2, ["Open", 3]]],
   "a member of a union of intervals": [
@@ -380,6 +382,17 @@ test("set operators read from the glyphs written as text, chained as compute-eng
   expect(read("a", "∪", "(", "b", "∪", "c", ")")).toEqual(["Union", "a", ["Union", "b", "c"]]);
   expect(read("a", "∖", "b", "∖", "c")).toEqual(["SetMinus", "a", "b", "c"]);
   expect(read("a", "△", "b", "△", "c")).toEqual(["SymmetricDifference", "a", "b", "c"]);
+  // `△` shares the level, so the three nest to the right as compute-engine reads them.
+  expect(read("a", "△", "b", "∪", "c")).toEqual(["SymmetricDifference", "a", ["Union", "b", "c"]]);
+  expect(read("a", "∪", "b", "△", "c")).toEqual(["Union", "a", ["SymmetricDifference", "b", "c"]]);
+  expect(read("a", "∪", "b", "∩", "c", "△", "d")).toEqual([
+    "Union",
+    "a",
+    ["Intersection", "b", ["SymmetricDifference", "c", "d"]],
+  ]);
+  // `a ∖ (b ∖ c)` keeps its inner call; only an unfenced run is the chain.
+  expect(read("a", "∖", "(", "b", "∖", "c", ")")).toEqual(["SetMinus", "a", ["SetMinus", "b", "c"]]);
+  expect(read("(", "a", "∖", "b", ")", "∖", "c")).toEqual(["SetMinus", ["SetMinus", "a", "b"], "c"]);
   expect(makeExpression(superscript("a", "∁"))).toEqual(["Complement", "a"]);
   expect(makeExpression(row([superscript(row(["(", "a", "∪", "b", ")"]), "∁"), "∩", "c"]))).toEqual([
     "Intersection",
@@ -407,11 +420,8 @@ test("set operators bind between a sum and a product, and tighter than a relatio
     ["Intersection", "c", "d"],
   ]);
   expect(read("a", "△", "b", "=", "c")).toEqual(["Equal", ["SymmetricDifference", "a", "b"], "c"]);
-  expect(read("a", "+", "b", "△", "c", "+", "d")).toEqual([
-    "SymmetricDifference",
-    ["Add", "a", "b"],
-    ["Add", "c", "d"],
-  ]);
+  // `△` binds like `∪`, tighter than a sum.
+  expect(read("a", "+", "b", "△", "c", "+", "d")).toEqual(["Add", "a", ["SymmetricDifference", "b", "c"], "d"]);
   // A sign belongs to its own term.
   expect(read("−", "a", "∪", "b")).toEqual(["Union", ["Negate", "a"], "b"]);
 });
@@ -456,4 +466,35 @@ test("an integer range is ⟦a, b⟧ when it counts up, and reads back", () => {
   expect(toLatex(makeBoxes(["Add", 2, ["Range", 1, 3]]))).toBe("2+(1..3)");
   expect(ce.parse("1..10", { form: "raw" }).json).toEqual(["Range", 1, 10]);
   expect(toAscii(makeBoxes(["Range", 1, 10]))).toBe("Range(1, 10)");
+});
+
+test("wedge and vee are written ⋀ and ⋁ and read back as themselves", () => {
+  const read = (...items: string[]) => makeExpression(row(items));
+  expect(toText(makeBoxes(["Wedge", "a", "b", "c"]))).toBe("a ⋀ b ⋀ c");
+  expect(toText(makeBoxes(["Vee", "a", "b", "algebra"]))).toBe("a ⋁ b");
+  expect(toLatex(makeBoxes(["Wedge", "a", "b"]))).toBe("a\\wedge b");
+  expect(toLatex(makeBoxes(["Vee", "a", "b", "algebra"]))).toBe("a\\vee b");
+  // The conjunction and disjunction keep their glyphs.
+  expect(read("a", "∧", "b")).toEqual(["And", "a", "b"]);
+  expect(read("a", "∨", "b")).toEqual(["Or", "a", "b"]);
+  expect(read("a", "⋀", "b", "⋀", "c")).toEqual(["Wedge", "a", "b", "c"]);
+  expect(read("a", "⋁", "b")).toEqual(["Vee", "a", "b"]);
+  // Tighter than a product, with the wedge tighter than the vee.
+  expect(read("a", "×", "b", "⋀", "c")).toEqual(["Multiply", "a", ["Wedge", "b", "c"]]);
+  expect(read("a", "⋀", "b", "⋁", "c")).toEqual(["Vee", ["Wedge", "a", "b"], "c"]);
+  expect(read("a", "⋁", "b", "⋀", "c")).toEqual(["Vee", "a", ["Wedge", "b", "c"]]);
+  for (const json of [
+    ["Wedge", "a", "b"],
+    ["Wedge", "a", "b", "c"],
+    ["Wedge", ["Add", "a", 1], "b"],
+    ["Wedge", ["Multiply", "a", "b"], "c"],
+    ["Multiply", "a", ["Wedge", "b", "c"]],
+    ["Vee", "a", "b"],
+    ["Vee", ["Wedge", "a", "b"], "c"],
+    ["Vee", "a", ["Wedge", "b", "c"]],
+    ["Wedge", ["Vee", "a", "b"], "c"],
+    ["Vee", ["Vee", "a", "b"], "c"],
+    ["And", ["Wedge", "a", "b"], "c"],
+  ] as MathJsonExpression[])
+    expect(roundTrip(json), JSON.stringify(json)).toBe("exact");
 });

@@ -35,6 +35,8 @@ const COMMANDS: Record<string, string> = {
   "→": "\\to",
   "∧": "\\land",
   "∨": "\\lor",
+  "⋀": "\\wedge",
+  "⋁": "\\vee",
   "¬": "\\lnot",
   "⇒": "\\Rightarrow",
   "⇔": "\\Leftrightarrow",

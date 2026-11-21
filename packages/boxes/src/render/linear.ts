@@ -37,6 +37,8 @@ const ASCII: Readonly<Record<string, string>> = {
   "∖": "\\\\",
   "∧": "^^",
   "∨": "vv",
+  "⋀": "^^",
+  "⋁": "vv",
   "¬": "not",
   "∀": "AA",
   "∃": "EE",

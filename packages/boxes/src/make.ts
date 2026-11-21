@@ -36,12 +36,14 @@ const OR = 1;
 const AND = 2;
 const NOT = 3;
 const RELATION = 4;
-const SYMMETRIC_DIFFERENCE = 5;
-const ADD = 6;
-const UNION = 7;
-const MULTIPLY = 8;
-const SET_MINUS = 9;
-const ATOM = 10;
+const ADD = 5;
+const UNION = 6;
+const MULTIPLY = 7;
+// Wolfram sets the Wedge and Vee products with its other algebra products, above Times; Wedge binds tighter, as And does over Or.
+const VEE = 8;
+const WEDGE = 9;
+const SET_MINUS = 10;
+const ATOM = 11;
 
 interface Made {
   box: Box;
@@ -628,23 +630,23 @@ function makeFunction(head: string, ops: unknown[]): Made {
       return atom(row([paren(make(fn), ATOM), APPLY_FUNCTION, fenced("(", list(args.map(make)), ")")]));
     }
 
-    // `Wedge(a, b, …)` -- the outer product from `@notatio/geometric`; associative
-    // like `Multiply`, so nesting needs no parens, but not commutative.
+    // `Wedge(a, b, …)` -- the outer product from `@notatio/geometric`, written ⋀ (\[Wedge]), not the
+    // conjunction ∧. Associative like `Multiply`, so a nested wedge needs no parens, but not commutative.
     case "Wedge":
       return {
         box: row(
           list(
-            ops.map((op) => atom(paren(make(op), MULTIPLY))),
-            "∧",
+            ops.map((op) => atom(headOf(op) === "Wedge" ? make(op).box : paren(make(op), WEDGE + 1))),
+            "⋀",
           ),
         ),
-        prec: MULTIPLY,
+        prec: WEDGE,
       };
-    // `Vee(a, b, algebra)` -- the regressive product; the third operand is the ambient
+    // `Vee(a, b, algebra)` -- the regressive product, written ⋁ (\[Vee]); the third operand is the ambient
     // algebra, not a factor, so only the first two print.
     case "Vee": {
-      const [a, b] = ops.map((op) => paren(make(op), MULTIPLY));
-      return { box: row([a, "∨", b]), prec: MULTIPLY };
+      const [a, b] = ops.map((op) => paren(make(op), VEE + 1));
+      return { box: row([a, "⋁", b]), prec: VEE };
     }
 
     case "And":
@@ -661,15 +663,14 @@ function makeFunction(head: string, ops: unknown[]): Made {
       return { box: row(list(parts, head === "Implies" ? "⇒" : "⇔")), prec: OR };
     }
 
-    // Set operators, at compute-engine's precedences: `∪` and `∩` between a sum and a product, `∖` above a
-    // product, `△` above a relation. Operands are fenced against their own kind, so a chain is one call.
+    // Set operators, at compute-engine's precedences: `∪`, `∩` and `△` share a level between a sum and a
+    // product, `∖` is above a product. Operands are fenced against their own kind, so a chain is one call.
     case "Union":
     case "Intersection":
-      return setOperator(head, ops, head === "Union" ? "∪" : "∩", UNION);
+    case "SymmetricDifference":
+      return setOperator(head, ops, SET_GLYPHS[head]!, UNION);
     case "SetMinus":
       return setOperator(head, ops, "∖", SET_MINUS);
-    case "SymmetricDifference":
-      return setOperator(head, ops, "△", SYMMETRIC_DIFFERENCE);
     // `A^∁`, as compute-engine writes `A^\complement`; a relative complement keeps its call.
     case "Complement":
       return ops.length === 1 ? atom(superscript(paren(make(ops[0]), ATOM), "∁")) : makeCall(head, ops);
@@ -697,13 +698,24 @@ function makeFunction(head: string, ops: unknown[]): Made {
   }
 }
 
-/** `a ∪ b ∪ c`: two or more operands, each bound tighter than the operator. */
+const SET_GLYPHS: Record<string, string> = { Union: "∪", Intersection: "∩", SymmetricDifference: "△" };
+
+/**
+ * `a ∪ b ∪ c`: two or more operands, each bound tighter than the operator. A different operator at the
+ * union level reads as right-nested (compute-engine's), so only the last operand may be one unfenced:
+ * `a ∪ b ∩ c` is `Union(a, Intersection(b, c))`, and the left nesting is fenced.
+ */
 function setOperator(head: string, ops: unknown[], glyph: string, level: number): Made {
   if (ops.length < 2) return makeCall(head, ops);
+  const last = ops.length - 1;
+  const bare = (op: unknown, i: number) => {
+    const inner = headOf(op);
+    return level === UNION && i === last && inner !== undefined && inner !== head && inner in SET_GLYPHS;
+  };
   return {
     box: row(
       list(
-        ops.map((op) => atom(paren(make(op), level + 1))),
+        ops.map((op, i) => atom(bare(op, i) ? make(op).box : paren(make(op), level + 1))),
         glyph,
       ),
     ),
