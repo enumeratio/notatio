@@ -1926,9 +1926,10 @@ export const SUBSET_LIMITS: Readonly<Record<string, number>> = {
   GraphCycleCount: 12,
   HamiltonianCycleCount: 12,
   GraphLongestCycleLength: 12,
-  // The same path table as the cycle heads, and the fold over every subset takes the same time whatever the answer is
-  // (Infinity for a forest included): 1.2 s on the complete graph on 12 vertices, 1.1 s on a cycle, a path and the edgeless
-  // graph; 13 takes 3.7 to 4.2 s on the heads over this table. The counts stay under 2^53 until 20 vertices (see `INTERMEDIATES`).
+  // Two limits, the first binding: 12 vertices by time, the same path table as the cycle heads, and the fold over every
+  // subset takes the same time whatever the answer is (Infinity for a forest included): 1.2 s on the complete graph on 12
+  // vertices, 1.1 s on a cycle, a path and the edgeless graph; 13 takes 3.7 to 4.2 s on the heads over this table. And 20
+  // vertices, where the path counts pass 2^53 (see `INTERMEDIATES`), eight past the bound, so it binds nothing.
   Girth: 12,
   // The call takes 0.5 s at 12 but the reading reaches 12 (11 for the next three), and its value past that is not held to
   // anything.
@@ -1977,6 +1978,33 @@ export const SUBSET_LIMITS: Readonly<Record<string, number>> = {
 const INTERMEDIATES: Readonly<Record<string, string>> = {
   Girth:
     "at 12 vertices, 11! = 39,916,800 cycles through the full set of the complete graph, the table index 12 * 4095 + 13 and the mask 2^12",
+};
+
+/**
+ * For each head in `INTERMEDIATES`, the number its statement puts first (`figure`) and `probe`, the definition's own path
+ * table with its result replaced by the largest entry or cycle count over every subset. The graph statistics' caps test runs
+ * the probe, compiled, on the worst graph at the bound and holds it to the figure.
+ */
+export const INTERMEDIATE_PROBES: Readonly<Record<string, { figure: number; probe: MathJSON }>> = {
+  Girth: {
+    figure: 39_916_800,
+    probe: withPaths(
+      true,
+      bindList(
+        "largest",
+        [
+          "Max",
+          forEach(
+            masksFromOne,
+            ["Max", cyclesTwice("s"), ["Max", forEach(vertices, at(pathAt("s", "e"), "paths"), "e")]],
+            "s",
+          ),
+        ],
+        "largest",
+        "integer",
+      ),
+    ),
+  },
 };
 
 /** `definition` with the size bound of its head as its `where`, ahead of the condition it has. */

@@ -98,6 +98,76 @@ test("rule 4: a product or power that can grow without limit turns the flag off"
   expect(flagged(["Product", ["Range", 1, first]])).toMatchObject({ signs: [], failed: 4 });
 });
 
+test("rule 4: an Add or Subtract of two operands that derive from the accumulator or a recursive result turns the flag off", () => {
+  // Add(acc, acc) doubles each step: 2^1024 is past the doubles.
+  expect(flagged(folded(["Add", "a", "a"]))).toMatchObject({ signs: [], failed: 4 });
+  expect(flagged(folded(["Add", ["Min", "a", "b"], "a"]))).toMatchObject({ signs: [], failed: 4 });
+  expect(flagged(folded(["Subtract", "a", ["Negate", "a"]]))).toMatchObject({ signs: [], failed: 4 });
+  expect(flagged(folded(["Subtract", "a", "a"]))).toMatchObject({ signs: [], failed: 4 });
+  const doubled = ["Add", ["self", "self", ["Subtract", "t", 1]], ["self", "self", ["Subtract", "t", 2]]];
+  const recursive = [
+    ["Function", ["If", ["Less", "t", 1], INF, doubled], "self", "t"],
+    ["Function", ["If", ["Less", "t", 1], INF, doubled], "self", "t"],
+    first,
+  ];
+  expect(flagged(recursive)).toMatchObject({ signs: [], failed: 4 });
+  // One tainted operand beside others that are not is a step by a bounded amount.
+  expect(flagged(folded(["Add", "a", "b"]))).toEqual({ signs: [INF] });
+  expect(flagged(folded(["Add", 1, ["Subtract", "a", "b"]]))).toEqual({ signs: [INF] });
+});
+
+/** A fold over the entries of `_x` seeded with `seed`, whose step is `step` of the accumulator `a` and the entry `b`. */
+const seeded = (seed: number, step: unknown) => [
+  "Fold",
+  ["Function", step, "a", "b"],
+  seed,
+  ["Map", ["Function", "i", "i"], "_x"],
+];
+
+test("rule 4: a sum of accumulator reads under a Min beside a direct read of the accumulator keeps the flag, for +Infinity only", () => {
+  // Min(t, x) <= t: the accumulator's largest entry never rises.
+  expect(flagged(folded(["Min", "a", ["Add", "a", "a"]]))).toEqual({ signs: [INF] });
+  expect(flagged(folded(["Min", ["Subtract", "a", "a"], "a"]))).toEqual({ signs: [INF] });
+  // The step of Floyd-Warshall: an element of the accumulator beside a sum of two.
+  const matrix = [
+    "Fold",
+    [
+      "Function",
+      ["Min", ["At", ["At", "a", 1], 2], ["Add", ["At", ["At", "a", 1], 3], ["At", ["At", "a", 3], 2]]],
+      "a",
+      "k",
+    ],
+    ["List", ["List", 1]],
+    ["Range", 1, 3],
+  ];
+  expect(flagged(matrix)).toEqual({ signs: [INF] });
+  // Neither operand is a direct read, or the read is of something computed from the accumulator.
+  const sum = ["Add", "a", "a"];
+  expect(flagged(folded(["Min", sum, ["Add", "a", ["Negate", "a"]]]))).toMatchObject({ signs: [], failed: 4 });
+  expect(flagged(folded(["Min", ["Add", "a", "a"], ["Add", "a", "a"]]))).toMatchObject({ signs: [], failed: 4 });
+  expect(flagged(folded(["Min", ["Negate", "a"], sum]))).toMatchObject({ signs: [], failed: 4 });
+  expect(flagged(folded(["Max", "a", sum]))).toMatchObject({ signs: [], failed: 4 });
+  // A definition that writes both signs gets no exemption.
+  const both = probe(
+    "P",
+    ["If", ["Less", first, 0], "PositiveInfinity", "NegativeInfinity"],
+    folded(["Min", "a", sum]),
+  );
+  expect(infiniteAnswers(ce, both)).toMatchObject({ signs: [], failed: 4 });
+});
+
+test("a Min(d, d + d) fold seeded with -1 doubles down to -Infinity, which the flag does not list and compiled code declines", () => {
+  const definition = probe("ProbeInfinityMin", INF, seeded(-1, ["Min", "a", ["Add", "a", "a"]]));
+  const verdict = infiniteAnswers(ce, definition);
+  expect(verdict).toEqual({ signs: [INF] });
+  const run = compiledAnswers(definition, "signs" in verdict ? verdict.signs : undefined);
+  expect(run(list())).toBe("PositiveInfinity");
+  expect(run(list(...Array.from({ length: 4 }, () => 1)))).toBe(-16);
+  // 1100 doublings overflow the doubles: the JS -Infinity is unlisted, so the call declines.
+  expect(run(list(...Array.from({ length: 1100 }, () => 1)))).toBeUndefined();
+  delete COMPILED[signatureOf(definition)];
+});
+
 test("rule 4: what cannot grow keeps the flag", () => {
   const entries = (v: unknown) => expect(flagged(v)).toEqual({ signs: [INF] });
   entries(["Multiply", 2, ["Length", "_x"]]);
@@ -233,15 +303,16 @@ test("the statistics that write an infinity, and the rule each fails", () => {
   const verdicts = ALL_STATISTICS.map((d) => [signatureOf(d), infiniteAnswers(ce, d)] as const)
     .filter(([, verdict]) => !("failed" in verdict) || verdict.failed !== 2)
     .map(([signature, verdict]) => [signature, "failed" in verdict ? verdict.failed : verdict.signs.join(", ")]);
-  // The three graph statistics and the two ordered-tree counts pass the rules (the build then flags those with an infinite
-  // subject); the Dyck-path ones divide, and ProtectionNumber's flat alternative uses a head that is not classified.
+  // The three graph statistics pass the rules (the build then flags those with an infinite subject); the Dyck-path ones
+  // divide, ProtectionNumber's flat alternative uses a head that is not classified, and the ordered-tree counts fail rule 4
+  // (they are not compiled, so nothing rides on it).
   expect(Object.fromEntries(verdicts)).toEqual({
     "CornerAlgebraDominantDimension@DyckPath": 3,
     "CyclicNakayamaGlobalDimension@DyckPath": 3,
     "CyclicNakayamaDominantDimension@DyckPath": 3,
     "ProtectionNumber@OrderedTree": 3,
-    "OneProtectedNodeCount@OrderedTree": "PositiveInfinity",
-    "TwoProtectedNodeCount@OrderedTree": "PositiveInfinity",
+    "OneProtectedNodeCount@OrderedTree": 4,
+    "TwoProtectedNodeCount@OrderedTree": 4,
     "MaximumDistance@LabeledGraph": "PositiveInfinity",
     "MinimumEccentricity@LabeledGraph": "PositiveInfinity",
     "Girth@LabeledGraph": "PositiveInfinity",

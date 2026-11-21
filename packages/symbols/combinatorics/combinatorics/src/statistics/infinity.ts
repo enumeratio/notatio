@@ -18,8 +18,14 @@
 //        - a `Multiply` has at most one factor that is neither a literal nor a 0/1 indicator (`If(..., 1, 0)`, a
 //          `Boole`, a comparison, a product of indicators), and when that factor is tainted as above, every other
 //          factor is an indicator;
-//        - `Add`, `Subtract`, `Min`, `Max`, `Mod` and comparisons are allowed anywhere (`Mod` by 0 is `NaN`, which
-//          declines). A recursive result may be combined by `Add`, `Min`, `Max` and comparisons only.
+//        - an `Add` or `Subtract` has at most one operand that derives from a fold's accumulator or a recursive result
+//          (`Add(acc, acc)` doubles each step and overflows after 1024);
+//          unless it is a direct operand of a `Min` whose other operand is a direct read of the accumulator (itself, or an
+//          element of it): `Min(t, x) <= t`, so the accumulator's largest entry never rises. Floyd-Warshall's
+//          `Min(d[i][j], d[i][k] + d[k][j])` is that. The exemption is for a definition that writes only
+//          `PositiveInfinity`; a compiled `-Infinity` is then unlisted and declines;
+//        - `Min`, `Max`, `Mod` and comparisons are allowed anywhere (`Mod` by 0 is `NaN`, which declines). A recursive
+//          result may be combined by `Add`, `Min`, `Max` and comparisons only.
 //      A definition with a `where` and an `intermediates` statement (types.ts) holds its intermediates under 2^53 by
 //      that bound, which is far below the doubles' range, so it needs no walk for rule 4.
 //
@@ -147,6 +153,9 @@ export function infiniteAnswers(ce: Engine, definition: Definition): InfinityVer
   for (const expression of [definition.expr, ...(definition.flat === undefined ? [] : [definition.flat as MathJSON])]) {
     const failure = firstFailure(expression, {
       bounded: definition.where !== undefined && definition.intermediates !== undefined,
+      positiveOnly: written.length === 1 && written[0] === "PositiveInfinity",
+      accumulators: new Set(),
+      exempt: new Set(),
     });
     if (failure !== undefined) return refuse(failure.rule, failure.why);
   }
@@ -226,7 +235,19 @@ function growth(head: string, operands: readonly unknown[], tainted: ReadonlySet
 interface Walk {
   /** `where` and `intermediates` keep every intermediate under 2^53: rule 4 holds by that bound. */
   readonly bounded: boolean;
+  /** The definition's signs are exactly `PositiveInfinity`: the `Min` exemption of rule 4 holds for that sign only. */
+  readonly positiveOnly: boolean;
+  /** The parameters that are a fold's accumulator, in scope. */
+  readonly accumulators: ReadonlySet<string>;
+  /** The `Add` and `Subtract` nodes exempt from the two-tainted-operands rule: a direct operand of a `Min` that also holds a direct read. */
+  readonly exempt: ReadonlySet<unknown>;
 }
+
+/** Whether `node` is a fold's accumulator or an element of it (`At` of a direct read), not an expression computed from it. */
+const isDirectRead = (node: unknown, accumulators: ReadonlySet<string>): boolean =>
+  typeof node === "string"
+    ? accumulators.has(node)
+    : Array.isArray(node) && node[0] === "At" && isDirectRead(node[1], accumulators);
 
 /**
  * The first head or symbol of `node` that breaks rule 3 or 4, with the reason. `tainted` are the names that hold a
@@ -240,9 +261,9 @@ function firstFailure(
   if (typeof node === "string") return NOT_A_NUMBER.has(node) ? { rule: 3, why: `the symbol ${node}` } : undefined;
   if (!Array.isArray(node)) return undefined;
   const [head, ...operands] = node;
-  const each = (children: readonly unknown[], names: ReadonlySet<string>) => {
+  const each = (children: readonly unknown[], names: ReadonlySet<string>, within: Walk = walk) => {
     for (const child of children) {
-      const failure = firstFailure(child, walk, names);
+      const failure = firstFailure(child, within, names);
       if (failure !== undefined) return failure;
     }
     return undefined;
@@ -260,12 +281,36 @@ function firstFailure(
     if (head === "Multiply" || head === "Power") {
       const why = walk.bounded ? undefined : growth(head, operands, tainted);
       if (why !== undefined) return { rule: 4, why };
+    } else if (head === "Add" || head === "Subtract") {
+      if (
+        !walk.bounded &&
+        !walk.exempt.has(node) &&
+        operands.filter((operand) => isTainted(operand, tainted)).length > 1
+      )
+        return {
+          rule: 4,
+          why: `${head} has more than one operand derived from a fold's accumulator or a recursive result`,
+        };
     } else if (WIDE_ARITHMETIC.has(head)) {
       if (!walk.bounded) return { rule: 4, why: `${head} is integer arithmetic beyond Add, Subtract, Min, Max, Mod` };
     } else if (!EXACT.has(head)) return { rule: 3, why: `${head} is not classified` };
     // A fold's accumulator is its function's first parameter.
-    if (head === "Fold" && Array.isArray(operands[0]) && operands[0][0] === "Function")
-      return each(operands, extend([parameterName(operands[0][2])]));
+    if (head === "Fold" && Array.isArray(operands[0]) && operands[0][0] === "Function") {
+      const accumulator = parameterName(operands[0][2]);
+      const within =
+        accumulator === undefined ? walk : { ...walk, accumulators: new Set([...walk.accumulators, accumulator]) };
+      return each(operands, extend([accumulator]), within);
+    }
+    // `Min(t, x) <= t` for a direct read `t` of the accumulator, so an `Add` beside it never raises the accumulator's largest entry.
+    if (head === "Min" && walk.positiveOnly) {
+      const sums = operands.filter(
+        (operand, i) =>
+          Array.isArray(operand) &&
+          (operand[0] === "Add" || operand[0] === "Subtract") &&
+          operands.some((other, j) => j !== i && isDirectRead(other, walk.accumulators)),
+      );
+      if (sums.length > 0) return each(operands, tainted, { ...walk, exempt: new Set([...walk.exempt, ...sums]) });
+    }
     if (head === "Apply" && Array.isArray(operands[0]) && operands[0][0] === "Function")
       return applied(operands[0], operands.slice(1));
     return each(operands, tainted);

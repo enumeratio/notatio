@@ -3,9 +3,10 @@
 // the value of its definition (the independent reading, where one is cheap enough), one size past it the call stays
 // unevaluated on every route, promptly, with the compiled code present and absent.
 
+import { applyPatch, matrixRankCompiles } from "@notatio/ce-patches";
 import { bareEngine } from "@notatio/engine/testing";
 import { operandsOf } from "@notatio/engine";
-import { definitionHash } from "@notatio/engine/compiled";
+import { compileTyped, definitionHash } from "@notatio/engine/compiled";
 import { expect, test } from "vite-plus/test";
 import { declareCombinatorics } from "../../src/index.ts";
 import { COMPILED, compiledStatistic } from "../../src/statistics/compiled.ts";
@@ -15,6 +16,7 @@ import {
   EDGE_TABLE_HEADS,
   EDGE_TABLE_LIMIT,
   GRAPH_STATISTICS,
+  INTERMEDIATE_PROBES,
   SUBSET_LIMITS,
   VERTEX_LIMITS,
 } from "../src/statistics.ts";
@@ -142,6 +144,34 @@ test("Girth, MaximumDistance and MinimumEccentricity answer compiled on a forest
       expect(typeof answer, `${head} ${JSON.stringify(g)}`).toBe("number");
       expect(answer, `${head} ${JSON.stringify(g)}`).toBe(reading(head)(g));
     }
+  }
+});
+
+// A definition's `intermediates` waives the overflow walk of the compiled infinity (infinity.ts, rule 4), so the statement is
+// run, not trusted: the probe is the definition's own table, compiled, on the worst subject at the bound.
+const WORST_AT_THE_BOUND: Record<string, Graph> = { Girth: complete(12) };
+const compiling = bareEngine();
+applyPatch(compiling, matrixRankCompiles);
+
+test("a definition's intermediates statement holds: its largest intermediate at the bound is the stated figure, under 2^53", () => {
+  const stated = GRAPH_STATISTICS.filter((d) => d.intermediates !== undefined);
+  expect(stated.length).toBeGreaterThan(0);
+  for (const definition of stated) {
+    const { head } = definition;
+    const worst = WORST_AT_THE_BOUND[head];
+    const entry = INTERMEDIATE_PROBES[head];
+    expect(worst, `${head} has intermediates and no worst subject`).toBeDefined();
+    expect(entry, `${head} has intermediates and no probe`).toBeDefined();
+    expect(definition.where, head).toBeDefined();
+    expect(worst!.n, head).toBe(LIMITS[head]);
+    expect(inside(head, worst!), `${head}: the worst subject is inside the domain`).toBe(true);
+    // The engine the build compiles on: the combinatorics heads declared on `ce` change how the compiler reads the table.
+    const code = compileTyped(compiling, entry!.probe as never, { _x: "tuple<integer, list<list<integer>>>" });
+    expect(code, head).toBeDefined();
+    const largest = code!.run({ _x: [worst!.n, worst!.edges] }) as number;
+    expect(largest, head).toBe(entry!.figure);
+    expect(largest, head).toBeLessThan(2 ** 53);
+    expect(definition.intermediates, head).toContain(entry!.figure.toLocaleString("en-US"));
   }
 });
 
