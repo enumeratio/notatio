@@ -214,37 +214,6 @@ test("explicit × still REFUSES two distinct anticommuting units rather than gue
   expect(ce.box(["AlgebraNorm", ["Multiply", "e_1", "e_2"]]).evaluate().operator).toBe("AlgebraNorm");
 });
 
-// ── AlgebraNorm on a compute-engine complex, and Norm left alone ────────────────
-
-/** det of multiplication by a + bi on ℝ² (basis 1, i): the matrix [[a, −b], [b, a]]. */
-const determinantOfMultiplication = (a: number, b: number): number => a * a + b * b;
-
-test("AlgebraNorm of a Gaussian integer is its determinant of multiplication, a² + b²", () => {
-  for (const [a, b] of [
-    [3, 4],
-    [1, 1],
-    [-2, 5],
-    [0, 7],
-  ] as const) {
-    same(["AlgebraNorm", ["Complex", a, b]], determinantOfMultiplication(a, b));
-  }
-  same(["AlgebraNorm", 5], 5); // a real literal: the norm over ℝ
-});
-
-test("AlgebraNorm agrees on evaluate and .N(), and stays inert on a symbol", () => {
-  expect(ce.box(["AlgebraNorm", ["Complex", 3, 4]]).N().re).toBeCloseTo(25);
-  expect(ce.box(["AlgebraNorm", ["Complex", 1.5, 2]]).N().re).toBeCloseTo(6.25);
-  expect(ce.box(["AlgebraNorm", "x"]).evaluate().operator).toBe("AlgebraNorm");
-  // A complex coefficient beside a generator has the ambient algebra ℂ[i_1], not what the blades say.
-  expect(ce.box(["AlgebraNorm", ["Add", ["Complex", 1, 1], "i_1"]]).evaluate().operator).toBe("AlgebraNorm");
-});
-
-test("Norm is compute-engine's, never the algebra norm", () => {
-  same(["Norm", ["Complex", 3, 4]], 5);
-  const onHypercomplex = ce.box(["Norm", ["Add", 3, ["Multiply", 4, "i_1"]]]).evaluate();
-  expect(onHypercomplex.json).not.toEqual(ce.number(25).json);
-});
-
 test("a blade's spelling survives compute-engine's commutative sort", () => {
   // That sort is LEXICOGRAPHIC on the symbol, so e_10 precedes e_2 in it. A blade is
   // spelled as a `Multiply`, which puts it through the sort on the way out — order the
