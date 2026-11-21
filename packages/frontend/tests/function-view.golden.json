@@ -650,6 +650,24 @@
       }
     ]
   },
+  "CatalanNumber": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "CatalanNumber(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "CatalanNumber(x)"
+      }
+    ]
+  },
   "CenteredInterval": {
     "axis": {
       "name": "x",
@@ -1030,6 +1048,24 @@
         "variable": "x",
         "window": "{x, -10, 10}",
         "body": "Degrees(x)"
+      }
+    ]
+  },
+  "Denominator": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "Denominator(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "Denominator(x)"
       }
     ]
   },
@@ -1720,6 +1756,26 @@
         "note": "real slice"
       }
     ]
+  },
+  "Factorial2": {
+    "axis": {
+      "name": "z",
+      "position": 0
+    },
+    "axisDomain": "complex",
+    "window": [-4, 4, -4, 4],
+    "body": "Factorial2(z)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -4, 4}",
+        "body": "Re(Factorial2(x))",
+        "note": "real slice"
+      }
+    ],
+    "reason": "the complex plot cannot lower Factorial2"
   },
   "FactorialMoment": {
     "axis": {
@@ -3716,6 +3772,24 @@
       }
     ]
   },
+  "MoebiusMu": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "MoebiusMu(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "MoebiusMu(x)"
+      }
+    ]
+  },
   "Moment": {
     "axis": {
       "name": "n",
@@ -3906,6 +3980,24 @@
         "variable": "x",
         "window": "{x, -10, 10}",
         "body": "NumberFieldDiscriminant(x)"
+      }
+    ]
+  },
+  "Numerator": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "Numerator(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "Numerator(x)"
       }
     ]
   },
@@ -4199,6 +4291,24 @@
       }
     ]
   },
+  "PrimeNu": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "PrimeNu(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "PrimeNu(x)"
+      }
+    ]
+  },
   "PrimeNumber": {
     "axis": {
       "name": "n",
@@ -4214,6 +4324,24 @@
         "variable": "n",
         "window": "{n, -10, 10}",
         "body": "PrimeNumber(n)"
+      }
+    ]
+  },
+  "PrimeOmega": {
+    "axis": {
+      "name": "x",
+      "position": 0
+    },
+    "axisDomain": "real",
+    "window": [-10, 10],
+    "body": "PrimeOmega(x)",
+    "params": "",
+    "views": [
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -10, 10}",
+        "body": "PrimeOmega(x)"
       }
     ]
   },
@@ -5101,6 +5229,31 @@
         "variable": "x",
         "window": "{x, -10, 10}",
         "body": "Surd(p1, x)"
+      }
+    ]
+  },
+  "Tanh": {
+    "axis": {
+      "name": "z",
+      "position": 0
+    },
+    "axisDomain": "complex",
+    "window": [-4, 4, -4, 4],
+    "body": "Tanh(z)",
+    "params": "",
+    "views": [
+      {
+        "head": "ComplexPlot",
+        "variable": "z",
+        "window": "{z, -4 - 4*I, 4 + 4*I}",
+        "body": "Tanh(z)"
+      },
+      {
+        "head": "Plot",
+        "variable": "x",
+        "window": "{x, -4, 4}",
+        "body": "Re(Tanh(x))",
+        "note": "real slice"
       }
     ]
   },
