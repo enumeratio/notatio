@@ -35,7 +35,7 @@ must follow, each short, with a link where the wiki explains it:
 entries, tests, git, code), [CI-and-Deployment](https://github.com/enumeratio/notatio/wiki/CI-and-Deployment) the workflows, and
 [Lanes](https://github.com/enumeratio/notatio/wiki/Lanes) parallel work across sessions;
 [Names](https://github.com/enumeratio/notatio/wiki/Names) defines the names, [Roadmap](https://github.com/enumeratio/notatio/wiki/Roadmap)
-is the vision and [Sites](https://github.com/enumeratio/notatio/wiki/Sites) the plan for the site. When a rule here changes, change it there
+is the vision and [Sites](https://github.com/enumeratio/notatio/wiki/Sites) what each of the two sites serves and what a URL promises. When a rule here changes, change it there
 too; when the wiki grows a rule an agent must follow, add its one line here.
 
 User-facing docs are not design docs: they ship with their package, as its `README.md` (the
