@@ -1,4 +1,5 @@
 id	in	out	tex.in	tex.out	verdict
+shape-plane-partition-2-1-1-1	Dimensions[List[List[2, 1], List[1]]]				
 shape-list-list-list-list-a-b	Dimensions[List[List[List[List[a, b]]]]]	{1, 1, 1, 2}	\text{Dimensions}\left[\left( \begin{array}{c}  \left( \begin{array}{cc}  a & b \\ \end{array} \right) \\ \end{array} \right)\right]	\{1,1,1,2\}	
 shape-1	Dimensions[1]	{}	\text{Dimensions}[1]	\{\}	
 shape-list-1-2	Dimensions[List[1, 2]]	{2}	\text{Dimensions}[\{1,2\}]	\{2\}	

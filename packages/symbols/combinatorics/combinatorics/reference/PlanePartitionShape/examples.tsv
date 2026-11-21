@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption
+the-plane-partition-with-rows-21-and-1			[PlanePartitionShape, [PlanePartition, [List, [List, 2, 1], [List, 1]]]]	[IntegerPartition, [List, 2, 1]]	the plane partition with rows $21$ and $1$

@@ -66,6 +66,12 @@ const stripSizes = (text: string): number[] => {
 export const BATCH_TWENTYONE_READINGS: Readonly<Record<string, Reading>> = {
   "IntegerPartition@PlanePartition": (p) =>
     list((JSON.parse(p) as number[][]).map((row) => row.reduce((sum, value) => sum + value, 0))),
+  // Mp00177 is the array transposed; the support's shape has no FindStat map, so it has no reading to check.
+  "TransposePlanePartition@PlanePartition": (p) => {
+    const array = JSON.parse(p) as number[][];
+    const columns = (array[0] ?? []).map((_, j) => array.flatMap((row) => (j < row.length ? [row[j]!] : [])));
+    return `[${columns.map(list).join(",")}]`;
+  },
   "CliqueSizePartition@LabeledGraph": (g) => list(maximalCliqueSizes(g)),
   "HorizontalStripSizes@StandardTableau": (t) => list(stripSizes(t)),
 };
@@ -73,6 +79,7 @@ export const BATCH_TWENTYONE_READINGS: Readonly<Record<string, Reading>> = {
 /** Each reading's FindStat map. */
 export const BATCH_TWENTYONE_IDS: Readonly<Record<string, string>> = {
   "IntegerPartition@PlanePartition": "Mp00311",
+  "TransposePlanePartition@PlanePartition": "Mp00177",
   "CliqueSizePartition@LabeledGraph": "Mp00251",
   "HorizontalStripSizes@StandardTableau": "Mp00207",
 };

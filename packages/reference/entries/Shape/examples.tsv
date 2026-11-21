@@ -1,4 +1,5 @@
 id	section	role	expr	expected	caption	wolfram.kind	wolfram.note
+shape-plane-partition-2-1-1-1			[Shape, [PlanePartition, [List, [List, 2, 1], [List, 1]]]]	[IntegerPartition, [List, 2, 1]]	the shape of the support of the plane partition with rows $2\,1$ and $1$		
 shape-list-list-list-list-a-b	Scope		[Shape, [List, [List, [List, [List, a, b]]]]]	[Tuple, 1, 1, 1, 2]	Four nested levels, with length 2 innermost		
 shape-1	Properties		[Shape, 1]	[Tuple]	A scalar has an empty shape		
 shape-list-1-2	Properties		[Shape, [List, 1, 2]]	[Tuple, 2]	A flat list has a one-entry shape, its length		
