@@ -45,6 +45,7 @@ import {
   partitionsExact,
   partitionsIntoPartsExact,
 } from "../../../collections/src/families/exact-classes.ts";
+import { corePartitions } from "./cores.ts";
 import { distinctPartitions, integerPartitions, partitionsIntoKParts, partitionsMaxPart } from "./walks.ts";
 
 const integerPartitionsFast: FastKernel = {
@@ -184,4 +185,4 @@ const partitionsInBox: EpsilFamily = {
   },
 };
 
-export const epsilEntries: readonly EpsilFamily[] = [partitionsInBox];
+export const epsilEntries: readonly EpsilFamily[] = [partitionsInBox, corePartitions];

@@ -24,6 +24,8 @@ signatures:
 laws:
   - inverse: TransposePartition
     on: integer_partition
+  - inverse: TransposePartition
+    on: core_partition
 bindings:
   - origin: mapped
     form: combinatorica

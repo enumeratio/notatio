@@ -795,6 +795,7 @@ const NOVEL = [
   "PartSizeBoundedCompositions",
   "PartitionAlgebra",
   "PartitionMobius",
+  "CorePartitions",
   "PartitionsInBox",
   "PartitionsIntoKParts",
   "PartitionsMaxPart",
