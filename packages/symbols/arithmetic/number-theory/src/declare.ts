@@ -30,6 +30,7 @@ import { NUMBER_THEORY_CARRIERS } from "./carrier-data.ts";
 import { declareAlgebraic } from "./declare-algebraic.ts";
 import { declareBacklog } from "./declare-backlog.ts";
 import { declareDivisorParts } from "./declare-divisor-parts.ts";
+import { declareFactorization } from "./declare-factorization.ts";
 import { declareFastFactorial } from "./declare-fast-factorial.ts";
 import { declareFastGcd } from "./declare-fast-gcd.ts";
 import { declareFastPrimes } from "./declare-fast-primes.ts";
@@ -59,6 +60,7 @@ export function declareNumberTheory(ce: Engine): void {
   // `GaussianIntegers` as `set<gaussian_integer>` right away no longer breaks anything reading
   // it as a bare option tag.
   declareCarriers(ce, NUMBER_THEORY_CARRIERS);
+  declareFactorization(ce);
   // QuadraticInteger(d, x, y) spelled out, beside the carrier's packed QuadraticInteger((d, x, y)).
   widenSignature(ce, "QuadraticInteger", "(integer, integer, integer) -> quadratic_integer");
   // A ring for `Over`, one per d; held, as a carrier's plural is.
