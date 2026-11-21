@@ -23,3 +23,5 @@ draws the primes of ℤ[√−5] over a grid every 10 units along each axis of t
 `BoundaryStyle`; its options are Wolfram's (`GridLines`, `Axes`, `AspectRatio`, `ImageSize`) with
 `Selection` and `GestureHandling` added. The wiki's
 [Figures](https://github.com/enumeratio/notatio/wiki/Figures) page has the whole design.
+
+A `Show` whose first layer is a plot or a `Graphics` draws its layers in one plot frame: `Plot`, `ParametricPlot`, `ListPlot`, `ListLinePlot` and `Graphics`, in order. The window and the frame's options are the first plot's unless the `Show` gives its own (`PlotRange`, `Axes`, `Frame`, `AxesLabel`, `FrameLabel`, `GridLines`, `PlotLabel`). A `Graphics` before the first plot is drawn under the curves and one after it over them, and each layer keeps its own `PlotStyle`. Zooming samples every plot again over the shared window. Such a `Show` does not also hold tiles or diagrams.

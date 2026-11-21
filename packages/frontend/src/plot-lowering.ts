@@ -96,8 +96,19 @@ const SAMPLED_VALUE = valueOf(
   PLOT_HEADS.filter((head) => !DIAGRAM_HEADS.includes(head) && !FIELD_PLOT_HEADS.includes(head)),
 );
 
-/** Whether `value` is a plot, a chart or a diagram (`Plot(…)`, `BarChart([…])`), which `<graphics-box>` draws as one. */
-export const holdsPlot = (value: string | undefined): boolean => PLOT_VALUE.test(value ?? "");
+/** The heads a `Show` draws together in one plane: the curve plots, and `Graphics`. */
+export const PLANE_LAYER_HEADS: readonly string[] = ["Graphics", "Plot", "ParametricPlot", "ListPlot", "ListLinePlot"];
+// A `Show` is of the plane when its first layer is; its other layers are a figure's (tiles, diagrams).
+const PLANE_SHOW = new RegExp(`^\\s*Show\\s*\\(\\s*(?:${PLANE_LAYER_HEADS.join("|")})\\s*\\(`);
+
+/** Whether `value` is a `Show` of plots and graphics, drawn in one plot frame. */
+export const holdsPlaneShow = (value: string | undefined): boolean => PLANE_SHOW.test(value ?? "");
+
+/**
+ * Whether `value` is a plot, a chart or a diagram (`Plot(…)`, `BarChart([…])`), or a `Show` of plots
+ * and graphics, which `<graphics-box>` draws as one.
+ */
+export const holdsPlot = (value: string | undefined): boolean => PLOT_VALUE.test(value ?? "") || holdsPlaneShow(value);
 
 /** Whether `value` is a plot or a chart the build can draw: a diagram, like a `Show`, is drawn live. */
 export const holdsPrerenderedPlot = (value: string | undefined): boolean => SAMPLED_VALUE.test(value ?? "");
@@ -161,6 +172,19 @@ export function plotStylesOf(written: string | undefined): GraphicsLook[] | unde
   return each.map((entry) => lookOf(entry) ?? {});
 }
 
+/**
+ * The looks of a `Show`'s series, layer by layer: each layer's `PlotStyle` cycled over its own
+ * curves, and a layer with none leaving its curves their own.
+ */
+export function layerStylesOf(
+  layers: readonly { readonly style: string | undefined; readonly count: number }[],
+): GraphicsLook[] {
+  return layers.flatMap(({ style, count }) => {
+    const styles = plotStylesOf(style);
+    return Array.from({ length: count }, (_, k): GraphicsLook => (styles?.length ? styles[k % styles.length]! : {}));
+  });
+}
+
 /** What a `Graphics`' settings say about its frame. */
 export function graphicsOptionsOf(settings: PlotSettings): GraphicsOptions {
   const [x, y] = [spanOf(settings["plot-x-range"]), spanOf(settings["plot-range"])];
@@ -205,6 +229,8 @@ export function plotOptionsOf(
     hover?: number;
     xRange?: readonly [number, number];
     plotRange?: readonly [number, number];
+    /** Each series' look, where the series come from several layers with a `PlotStyle` each. */
+    styles?: readonly GraphicsLook[];
   } = {},
 ): PlotOptions {
   return {
