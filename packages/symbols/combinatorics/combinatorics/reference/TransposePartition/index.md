@@ -22,7 +22,8 @@ signatures:
     library: enumeratio-combinatorics
     type: ((core_partition) -> core_partition) & ((integer_partition) -> integer_partition)
 laws:
-  - involution
+  - inverse: TransposePartition
+    on: integer_partition
 bindings:
   - origin: mapped
     form: combinatorica
