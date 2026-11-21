@@ -15,6 +15,7 @@ export const COMPOSITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "OrderedFactorization",
+    readable: true,
     type: "ordered_factorization",
     shape: "list<integer>",
     id: "ordered_factorization",

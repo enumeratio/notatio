@@ -198,6 +198,7 @@ compile-families	AlternatingPermutations	c336c3c797d3c92ea96cb523	4d22cb1f52dfc0
 compile-families	AlternatingSignMatrices	886ca3b1344418b00116782e	d21e56abe73135d936f2b6fd	agrees	2.63
 compile-families	Arrangements	9046310496f8ac9200f9cd93	e0eda340d401c015630e43d5	agrees	0.56
 compile-families	Arrangements (BigInt)	c087b529e3fed1089056d06d	e0eda340d401c015630e43d5	agrees	1.54
+compile-families	AscentSequences	90781faab9a695844025abed	c459cf722a5dec3c730d0230	agrees	0.72
 compile-families	BallotSequences	e6b712bea23aa49e4e3385e9	9b52ab6cf4754011e752a890	agrees	0.46
 compile-families	BallotSequences (BigInt)	201de68ad80b2a9a62b68bf0	9b52ab6cf4754011e752a890	agrees	4.22
 compile-families	BellNumbers	a0169f58675862e5e9bdfb41	12a47447fbedaa783d2777a3	agrees	2.44
@@ -225,6 +226,7 @@ compile-families	ConnectedPermutations	8ef735158843758d19f1b535	8504f56ec26ea940
 compile-families	CorePartitions	866f5e26a732f26d30fdb3a1	ce5bfa9e9bb3f9eabcaf6bcd	agrees	42.7
 compile-families	CubeNumbers	5fb48a5748238ed3bd4c31ff	170a43ee5dc79a0779d9bd5d	agrees	0.36
 compile-families	CyclicPermutations	d210ecfa3816f5124ec74ecf	59476230da29cafbb74eee1f	agrees	2.91
+compile-families	DecoratedPermutations	32d0e7e8bd58c87a977eb90e	96d799e6c1125b8072f0d292	agrees	0.63
 compile-families	DeficientNumbers	176ad7487cb6d93f796f49b2	8b92d261e5775d53f9b89c30	agrees	3.46
 compile-families	DelannoyPaths	4a439c5635214019c7acb93b	7363fec78883b3c7042048be	agrees	0.72
 compile-families	Derangements	80cdba80f8db1157b7ce166b	cbb6d375d79c3642e497db75	agrees	1.38
@@ -286,6 +288,7 @@ compile-families	MotzkinNumbers	c5ff5766e98919dfdfe93da5	b6501d13e2d145de05406df
 compile-families	MotzkinPaths	a8962a5ffeb8cb561d6fc5eb	573ad5b3c627b0a6b3f87d25	agrees	0.77
 compile-families	MotzkinPaths (BigInt)	d58615bbed236e869ffbeefc	573ad5b3c627b0a6b3f87d25	agrees	7.04
 compile-families	MotzkinPathsByPeaks	bcbb25abf2edc0025e2115bb	1da6b3f7cbf58e3e28f8318b	agrees	2.57
+compile-families	MultiplicativePartitions	dc47314fefc8795b1f08a46f	f55efcca6ecd9dfb09663237	agrees	0.19
 compile-families	Multisets	8e834202c8e246b09f93d24d	06a1d841d6513a749818e107	agrees	1.39
 compile-families	NonCrossingCycleSupportPermutations	dcc4a5fa3c441304f8435551	375a6f503e8411bb34a17ea8	agrees	14.1
 compile-families	NonCrossingMatchings	12818b76ff527204a71dcb38	79fc263cd9398ad02c8e24a1	agrees	1.03
@@ -303,6 +306,7 @@ compile-families	OddCompositions	16c1071b2cdfe121ad32811e	e1f6b2234e19cabe565832
 compile-families	OddPartitions	0ce347488983db1b7e0e7b72	416f9feb2161c5d1da958d0e	agrees	0.52
 compile-families	OddSubsets	66e6d5a772c7562b371cce15	a263f3655dfcd1d79bc7d09e	agrees	0.36
 compile-families	OdiousNumbers	c12ea67acb68af88cab6cb5f	4cc506f68227cc1418a9e1b4	agrees	2.09
+compile-families	OrderedFactorizations	b8befd788607da0b08a1d94c	fc0eb2b093f690bf186b1d14	agrees	0.2
 compile-families	OrderedTrees	98c4cb75de4d65b059ba9c10	9e100e24c9eed08d937875c7	agrees	0.76
 compile-families	PadovanSequence	cd067e1fadd6effd1f941f5a	52ebbe2515d08b2bce9e7662	agrees	1.79
 compile-families	PalindromicCompositions	51b694bb614c60f656b6cb2f	c68c815cf842a5e010d5317e	agrees	0.38

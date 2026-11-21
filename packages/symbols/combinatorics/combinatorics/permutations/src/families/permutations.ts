@@ -11,6 +11,7 @@ import { mahonianNumber } from "../mahonian.ts";
 import { arrangements, evenPermutations, lehmerCodes, subexcedantSeqs } from "./closed-forms.ts";
 import { kCyclePermutations } from "./core.ts";
 import { permutationsAsCycles } from "./cycles.ts";
+import { decoratedPermutations } from "./decorated-permutations.ts";
 import { rookPlacements } from "./rook-placements.ts";
 import {
   alternatingPermutations,
@@ -120,6 +121,7 @@ export const entries: (NumberKernel | EpsilFamily)[] = [
   permutationsAsCycles,
   lehmerCodes,
   subexcedantSeqs,
+  decoratedPermutations,
   rookPlacements,
   alternatingPermutations,
   connectedPermutations,

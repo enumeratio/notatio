@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-for-n-3	Basic		[AscentSequences, 3]	[List, [AscentSequence, [List, 0, 0, 0]], [AscentSequence, [List, 0, 0, 1]], [AscentSequence, [List, 0, 1, 0]], [AscentSequence, [List, 0, 1, 1]], [AscentSequence, [List, 0, 1, 2]]]	the five, lexicographically
+count-n-6	Basic		[Count, [AscentSequences, 6]]	217	the Fishburn number at 6, A022493
+empty	Properties		[Count, [AscentSequences, 0]]	1	the empty sequence
+a-member	Properties		[Element, [AscentSequence, [List, 0, 1, 0, 2]], [AscentSequences, 4]]	True	$2 \le 1 + 1$, the one ascent $0 < 1$ before it
+too-big	Properties		[Element, [AscentSequence, [List, 0, 0, 2]], [AscentSequences, 3]]	False	no ascent yet, so at most 1
+wrong-start	Properties		[Element, [AscentSequence, [List, 1, 0, 0]], [AscentSequences, 3]]	False	an ascent sequence starts at 0

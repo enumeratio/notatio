@@ -1,0 +1,3 @@
+id	in
+swap-and-fix	list(vec![n(2), n(1), n(-3)])
+constructor-example	list(vec![n(-1), n(3), n(2)])

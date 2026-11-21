@@ -15,6 +15,7 @@
 // PartitionsInBox, all in ./core.ts) — each one's own record says so ("Catalogued as an alias
 // of ..." in its summary). No kernel here.
 import type { EpsilFamily, FastKernel } from "../../../collections/src/families/epsil.ts";
+import { multiplicativePartitions } from "./multiplicative-partitions.ts";
 import { modRank } from "../../../collections/src/families/kernels.ts";
 import {
   PartitionsMaxPartCount,
@@ -179,4 +180,5 @@ export const entries: EpsilFamily[] = [
   restricted(squarePartitions, squarePart, isSquare, PASSES_2_53.squarePartitions),
   restricted(triangularPartitions, triangularPart, isTriangular, PASSES_2_53.triangularPartitions),
   { ...largestPartPartitions, fast: largestPartFast },
+  multiplicativePartitions,
 ];

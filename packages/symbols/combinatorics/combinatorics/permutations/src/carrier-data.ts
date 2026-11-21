@@ -37,6 +37,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "DecoratedPermutation",
+    readable: true,
     type: "decorated_permutation",
     shape: "list<integer>",
     id: "decorated_permutation",
