@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+north-east	Basic		[RationalDyckPath, [List, 1, 0, 1, 0, 0]]	[RationalDyckPath, [List, 1, 0, 1, 0, 0]]	North, east, north, east, east: a path for $(3, 2)$
+constructor-example		test	[RationalDyckPath, [List, 1, 1, 0, 0, 0]]	[RationalDyckPath, [List, 1, 1, 0, 0, 0]]	The constructor on a path for $(3, 2)$

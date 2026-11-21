@@ -17,7 +17,6 @@ const UNRECORDED = new Set([
   "Factoradic",
   "PrimorialRadix",
   "Zeckendorf",
-  "HyperbinaryWords",
   "HypernumeraryWords",
   // Hypercomplex algebras' names and the quaternion symbol.
   "BicomplexNumbers",

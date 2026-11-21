@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-for-n-2	Basic		[RookPlacements, 2]	[List, [RookPlacement, [List, 0, 0]], [RookPlacement, [List, 0, 1]], [RookPlacement, [List, 0, 2]], [RookPlacement, [List, 1, 0]], [RookPlacement, [List, 1, 2]], [RookPlacement, [List, 2, 0]], [RookPlacement, [List, 2, 1]]]	the seven placements on a $2 \times 2$ board, lexicographically
+count-n-4	Basic		[Count, [RookPlacements, 4]]	209	$\sum_k \binom{4}{k}^2 k!$, A002720
+no-board	Properties		[Count, [RookPlacements, 0]]	1	the empty placement
+a-member	Properties		[Element, [RookPlacement, [List, 2, 0, 1]], [RookPlacements, 3]]	True	rooks at column 2 of row 1 and column 1 of row 3
+a-column-twice	Properties		[Element, [RookPlacement, [List, 2, 2, 0]], [RookPlacements, 3]]	False	two rooks in column 2 attack each other
+column-off-the-board	Properties		[Element, [RookPlacement, [List, 1, 4, 0]], [RookPlacements, 3]]	False	column 4 is not on a $3 \times 3$ board

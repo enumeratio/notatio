@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+up-twice	Basic		[KDyckPath, [List, 1, 0, 1, 0, 0, 0]]	[KDyckPath, [List, 1, 0, 1, 0, 0, 0]]	A 2-Dyck path: up by 2, down by 1, up by 2, then three steps down
+constructor-example		test	[KDyckPath, [List, 1, 1, 0, 0, 0, 0]]	[KDyckPath, [List, 1, 1, 0, 0, 0, 0]]	The constructor on a 2-Dyck path of semilength 2

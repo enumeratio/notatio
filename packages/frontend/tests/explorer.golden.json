@@ -650,6 +650,19 @@
     "statistics": 3
   },
   "HyperbinaryRepresentations": null,
+  "HyperbinaryWords": {
+    "expr": "HyperbinaryWords(4)",
+    "template": "HyperbinaryWords({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "Hypernumerary": null,
   "IdonealNumbers": {
     "expr": "Take(IdonealNumbers, 20)",
@@ -755,7 +768,19 @@
     "derived": true,
     "statistics": 354
   },
-  "KDyckPaths": null,
+  "KDyckPaths": {
+    "expr": "KDyckPaths(4, 2)",
+    "template": "KDyckPaths({size}, 2)",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "KFreeIntegers": {
     "expr": "Take(KFreeIntegers(3), 20)",
     "columns": ["DigitCount", "DigitSum", "DivisorSum"],
@@ -1541,7 +1566,19 @@
     "statistics": 0
   },
   "PythagoreanTriples": null,
-  "RationalDyckPaths": null,
+  "RationalDyckPaths": {
+    "expr": "RationalDyckPaths(4, 2)",
+    "template": "RationalDyckPaths({size}, 2)",
+    "size": {
+      "name": "a",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "RationalNumbers": null,
   "RecursiveTrees": {
     "expr": "RecursiveTrees(4)",
@@ -1584,7 +1621,19 @@
     "derived": true,
     "statistics": 2
   },
-  "RookPlacements": null,
+  "RookPlacements": {
+    "expr": "RookPlacements(4)",
+    "template": "RookPlacements({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "RootedForests": {
     "expr": "RootedForests(4)",
     "template": "RootedForests({size})",
