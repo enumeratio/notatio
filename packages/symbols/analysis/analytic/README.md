@@ -20,98 +20,98 @@ HurwitzZeta(2, 1)
 
 ## Heads
 
-**Zeta and Dirichlet family** — [`Zeta`](https://enumeratio.dev/reference/symbol/Zeta),
-[`HurwitzZeta`](https://enumeratio.dev/reference/symbol/HurwitzZeta),
-[`LerchPhi`](https://enumeratio.dev/reference/symbol/LerchPhi),
-[`PolyLog`](https://enumeratio.dev/reference/symbol/PolyLog),
-[`DirichletL`](https://enumeratio.dev/reference/symbol/DirichletL),
-[`DirichletEta`](https://enumeratio.dev/reference/symbol/DirichletEta),
-[`DirichletBeta`](https://enumeratio.dev/reference/symbol/DirichletBeta),
-[`DirichletCharacter`](https://enumeratio.dev/reference/symbol/DirichletCharacter),
-[`StieltjesGamma`](https://enumeratio.dev/reference/symbol/StieltjesGamma),
-[`PrimeZetaP`](https://enumeratio.dev/reference/symbol/PrimeZetaP),
-[`MultiZetaValue`](https://enumeratio.dev/reference/symbol/MultiZetaValue),
-[`RiemannSiegelZ`](https://enumeratio.dev/reference/symbol/RiemannSiegelZ),
-[`RiemannSiegelTheta`](https://enumeratio.dev/reference/symbol/RiemannSiegelTheta),
-[`RiemannZetaZero`](https://enumeratio.dev/reference/symbol/RiemannZetaZero),
-[`KeiperLiLambda`](https://enumeratio.dev/reference/symbol/KeiperLiLambda),
-[`ClausenCl`](https://enumeratio.dev/reference/symbol/ClausenCl).
+**Zeta and Dirichlet family** — [`Zeta`](https://notatio.app/reference/symbol/Zeta),
+[`HurwitzZeta`](https://notatio.app/reference/symbol/HurwitzZeta),
+[`LerchPhi`](https://notatio.app/reference/symbol/LerchPhi),
+[`PolyLog`](https://notatio.app/reference/symbol/PolyLog),
+[`DirichletL`](https://notatio.app/reference/symbol/DirichletL),
+[`DirichletEta`](https://notatio.app/reference/symbol/DirichletEta),
+[`DirichletBeta`](https://notatio.app/reference/symbol/DirichletBeta),
+[`DirichletCharacter`](https://notatio.app/reference/symbol/DirichletCharacter),
+[`StieltjesGamma`](https://notatio.app/reference/symbol/StieltjesGamma),
+[`PrimeZetaP`](https://notatio.app/reference/symbol/PrimeZetaP),
+[`MultiZetaValue`](https://notatio.app/reference/symbol/MultiZetaValue),
+[`RiemannSiegelZ`](https://notatio.app/reference/symbol/RiemannSiegelZ),
+[`RiemannSiegelTheta`](https://notatio.app/reference/symbol/RiemannSiegelTheta),
+[`RiemannZetaZero`](https://notatio.app/reference/symbol/RiemannZetaZero),
+[`KeiperLiLambda`](https://notatio.app/reference/symbol/KeiperLiLambda),
+[`ClausenCl`](https://notatio.app/reference/symbol/ClausenCl).
 
-**Gamma-adjacent** — [`Gamma`](https://enumeratio.dev/reference/symbol/Gamma),
-[`GammaLn`](https://enumeratio.dev/reference/symbol/GammaLn),
-[`GammaRegularized`](https://enumeratio.dev/reference/symbol/GammaRegularized) /
-[`InverseGammaRegularized`](https://enumeratio.dev/reference/symbol/InverseGammaRegularized),
-[`Beta`](https://enumeratio.dev/reference/symbol/Beta) /
-[`BetaRegularized`](https://enumeratio.dev/reference/symbol/BetaRegularized) /
-[`InverseBetaRegularized`](https://enumeratio.dev/reference/symbol/InverseBetaRegularized),
-[`Digamma`](https://enumeratio.dev/reference/symbol/Digamma),
-[`PolyGamma`](https://enumeratio.dev/reference/symbol/PolyGamma),
-[`BarnesG`](https://enumeratio.dev/reference/symbol/BarnesG) /
-[`LogBarnesG`](https://enumeratio.dev/reference/symbol/LogBarnesG),
-[`BernoulliB`](https://enumeratio.dev/reference/symbol/BernoulliB),
-[`HarmonicNumber`](https://enumeratio.dev/reference/symbol/HarmonicNumber),
-[`Pochhammer`](https://enumeratio.dev/reference/symbol/Pochhammer) /
-[`RisingFactorial`](https://enumeratio.dev/reference/symbol/RisingFactorial),
-[`Hyperfactorial`](https://enumeratio.dev/reference/symbol/Hyperfactorial),
-[`NorlundB`](https://enumeratio.dev/reference/symbol/NorlundB),
-[`BellY`](https://enumeratio.dev/reference/symbol/BellY).
+**Gamma-adjacent** — [`Gamma`](https://notatio.app/reference/symbol/Gamma),
+[`GammaLn`](https://notatio.app/reference/symbol/GammaLn),
+[`GammaRegularized`](https://notatio.app/reference/symbol/GammaRegularized) /
+[`InverseGammaRegularized`](https://notatio.app/reference/symbol/InverseGammaRegularized),
+[`Beta`](https://notatio.app/reference/symbol/Beta) /
+[`BetaRegularized`](https://notatio.app/reference/symbol/BetaRegularized) /
+[`InverseBetaRegularized`](https://notatio.app/reference/symbol/InverseBetaRegularized),
+[`Digamma`](https://notatio.app/reference/symbol/Digamma),
+[`PolyGamma`](https://notatio.app/reference/symbol/PolyGamma),
+[`BarnesG`](https://notatio.app/reference/symbol/BarnesG) /
+[`LogBarnesG`](https://notatio.app/reference/symbol/LogBarnesG),
+[`BernoulliB`](https://notatio.app/reference/symbol/BernoulliB),
+[`HarmonicNumber`](https://notatio.app/reference/symbol/HarmonicNumber),
+[`Pochhammer`](https://notatio.app/reference/symbol/Pochhammer) /
+[`RisingFactorial`](https://notatio.app/reference/symbol/RisingFactorial),
+[`Hyperfactorial`](https://notatio.app/reference/symbol/Hyperfactorial),
+[`NorlundB`](https://notatio.app/reference/symbol/NorlundB),
+[`BellY`](https://notatio.app/reference/symbol/BellY).
 
 **Elliptic and modular** — the Jacobi elliptic functions
-([`JacobiSN`](https://enumeratio.dev/reference/symbol/JacobiSN), …),
-[`EllipticTheta`](https://enumeratio.dev/reference/symbol/EllipticTheta),
-[`IncompleteEllipticPi`](https://enumeratio.dev/reference/symbol/IncompleteEllipticPi),
-[`ModularJ`](https://enumeratio.dev/reference/symbol/ModularJ) /
-[`KleinInvariantJ`](https://enumeratio.dev/reference/symbol/KleinInvariantJ),
-[`EisensteinG`](https://enumeratio.dev/reference/symbol/EisensteinG), the Carlson
+([`JacobiSN`](https://notatio.app/reference/symbol/JacobiSN), …),
+[`EllipticTheta`](https://notatio.app/reference/symbol/EllipticTheta),
+[`IncompleteEllipticPi`](https://notatio.app/reference/symbol/IncompleteEllipticPi),
+[`ModularJ`](https://notatio.app/reference/symbol/ModularJ) /
+[`KleinInvariantJ`](https://notatio.app/reference/symbol/KleinInvariantJ),
+[`EisensteinG`](https://notatio.app/reference/symbol/EisensteinG), the Carlson
 symmetric forms
-([`CarlsonRF`](https://enumeratio.dev/reference/symbol/CarlsonRF),
+([`CarlsonRF`](https://notatio.app/reference/symbol/CarlsonRF),
 `RC`, `RD`, `RG`, `RJ`).
 
-**Hypergeometric** — [`HypergeometricPFQ`](https://enumeratio.dev/reference/symbol/HypergeometricPFQ),
-[`HypergeometricU`](https://enumeratio.dev/reference/symbol/HypergeometricU),
-[`Hypergeometric0F1`](https://enumeratio.dev/reference/symbol/Hypergeometric0F1) and the
+**Hypergeometric** — [`HypergeometricPFQ`](https://notatio.app/reference/symbol/HypergeometricPFQ),
+[`HypergeometricU`](https://notatio.app/reference/symbol/HypergeometricU),
+[`Hypergeometric0F1`](https://notatio.app/reference/symbol/Hypergeometric0F1) and the
 regularized `1F1`/`2F1`/`3F2` forms,
-[`MeijerG`](https://enumeratio.dev/reference/symbol/MeijerG),
-[`LambertW`](https://enumeratio.dev/reference/symbol/LambertW),
-[`ChebyshevT`](https://enumeratio.dev/reference/symbol/ChebyshevT) /
-[`ChebyshevU`](https://enumeratio.dev/reference/symbol/ChebyshevU),
-[`HermiteH`](https://enumeratio.dev/reference/symbol/HermiteH),
-[`LaguerreL`](https://enumeratio.dev/reference/symbol/LaguerreL),
-[`LegendrePolynomial`](https://enumeratio.dev/reference/symbol/LegendrePolynomial),
-[`ExpIntegralE`](https://enumeratio.dev/reference/symbol/ExpIntegralE),
-[`BesselJZero`](https://enumeratio.dev/reference/symbol/BesselJZero).
+[`MeijerG`](https://notatio.app/reference/symbol/MeijerG),
+[`LambertW`](https://notatio.app/reference/symbol/LambertW),
+[`ChebyshevT`](https://notatio.app/reference/symbol/ChebyshevT) /
+[`ChebyshevU`](https://notatio.app/reference/symbol/ChebyshevU),
+[`HermiteH`](https://notatio.app/reference/symbol/HermiteH),
+[`LaguerreL`](https://notatio.app/reference/symbol/LaguerreL),
+[`LegendrePolynomial`](https://notatio.app/reference/symbol/LegendrePolynomial),
+[`ExpIntegralE`](https://notatio.app/reference/symbol/ExpIntegralE),
+[`BesselJZero`](https://notatio.app/reference/symbol/BesselJZero).
 
-**Transforms and signals** — [`FourierTransform`](https://enumeratio.dev/reference/symbol/FourierTransform) /
-[`InverseFourierTransform`](https://enumeratio.dev/reference/symbol/InverseFourierTransform),
-[`LaplaceTransform`](https://enumeratio.dev/reference/symbol/LaplaceTransform) /
-[`InverseLaplaceTransform`](https://enumeratio.dev/reference/symbol/InverseLaplaceTransform),
-[`MellinTransform`](https://enumeratio.dev/reference/symbol/MellinTransform) /
-[`InverseMellinTransform`](https://enumeratio.dev/reference/symbol/InverseMellinTransform),
-[`HankelTransform`](https://enumeratio.dev/reference/symbol/HankelTransform),
-[`FourierSeries`](https://enumeratio.dev/reference/symbol/FourierSeries),
-[`UnitStep`](https://enumeratio.dev/reference/symbol/UnitStep),
-[`DiscreteDelta`](https://enumeratio.dev/reference/symbol/DiscreteDelta) /
-[`DiracDelta`](https://enumeratio.dev/reference/symbol/DiracDelta),
-[`SquareWave`](https://enumeratio.dev/reference/symbol/SquareWave) /
-[`SawtoothWave`](https://enumeratio.dev/reference/symbol/SawtoothWave) /
-[`TriangleWave`](https://enumeratio.dev/reference/symbol/TriangleWave).
+**Transforms and signals** — [`FourierTransform`](https://notatio.app/reference/symbol/FourierTransform) /
+[`InverseFourierTransform`](https://notatio.app/reference/symbol/InverseFourierTransform),
+[`LaplaceTransform`](https://notatio.app/reference/symbol/LaplaceTransform) /
+[`InverseLaplaceTransform`](https://notatio.app/reference/symbol/InverseLaplaceTransform),
+[`MellinTransform`](https://notatio.app/reference/symbol/MellinTransform) /
+[`InverseMellinTransform`](https://notatio.app/reference/symbol/InverseMellinTransform),
+[`HankelTransform`](https://notatio.app/reference/symbol/HankelTransform),
+[`FourierSeries`](https://notatio.app/reference/symbol/FourierSeries),
+[`UnitStep`](https://notatio.app/reference/symbol/UnitStep),
+[`DiscreteDelta`](https://notatio.app/reference/symbol/DiscreteDelta) /
+[`DiracDelta`](https://notatio.app/reference/symbol/DiracDelta),
+[`SquareWave`](https://notatio.app/reference/symbol/SquareWave) /
+[`SawtoothWave`](https://notatio.app/reference/symbol/SawtoothWave) /
+[`TriangleWave`](https://notatio.app/reference/symbol/TriangleWave).
 
-**Symbolic and solving** — [`FullSimplify`](https://enumeratio.dev/reference/symbol/FullSimplify),
-[`FunctionExpand`](https://enumeratio.dev/reference/symbol/FunctionExpand),
-[`PowerExpand`](https://enumeratio.dev/reference/symbol/PowerExpand),
-[`TrigFactor`](https://enumeratio.dev/reference/symbol/TrigFactor),
-[`Refine`](https://enumeratio.dev/reference/symbol/Refine) under
-[`Assuming`](https://enumeratio.dev/reference/symbol/Assuming),
-[`Inequality`](https://enumeratio.dev/reference/symbol/Inequality),
-[`FindInstance`](https://enumeratio.dev/reference/symbol/FindInstance),
-[`DSolveValue`](https://enumeratio.dev/reference/symbol/DSolveValue),
-[`DifferenceRoot`](https://enumeratio.dev/reference/symbol/DifferenceRoot) /
-[`DifferentialRoot`](https://enumeratio.dev/reference/symbol/DifferentialRoot),
-[`SeriesCoefficient`](https://enumeratio.dev/reference/symbol/SeriesCoefficient),
-[`NSum`](https://enumeratio.dev/reference/symbol/NSum),
-[`Minimize`](https://enumeratio.dev/reference/symbol/Minimize) /
-[`Maximize`](https://enumeratio.dev/reference/symbol/Maximize), and the
-[`FunctionDomain`](https://enumeratio.dev/reference/symbol/FunctionDomain) family of
+**Symbolic and solving** — [`FullSimplify`](https://notatio.app/reference/symbol/FullSimplify),
+[`FunctionExpand`](https://notatio.app/reference/symbol/FunctionExpand),
+[`PowerExpand`](https://notatio.app/reference/symbol/PowerExpand),
+[`TrigFactor`](https://notatio.app/reference/symbol/TrigFactor),
+[`Refine`](https://notatio.app/reference/symbol/Refine) under
+[`Assuming`](https://notatio.app/reference/symbol/Assuming),
+[`Inequality`](https://notatio.app/reference/symbol/Inequality),
+[`FindInstance`](https://notatio.app/reference/symbol/FindInstance),
+[`DSolveValue`](https://notatio.app/reference/symbol/DSolveValue),
+[`DifferenceRoot`](https://notatio.app/reference/symbol/DifferenceRoot) /
+[`DifferentialRoot`](https://notatio.app/reference/symbol/DifferentialRoot),
+[`SeriesCoefficient`](https://notatio.app/reference/symbol/SeriesCoefficient),
+[`NSum`](https://notatio.app/reference/symbol/NSum),
+[`Minimize`](https://notatio.app/reference/symbol/Minimize) /
+[`Maximize`](https://notatio.app/reference/symbol/Maximize), and the
+[`FunctionDomain`](https://notatio.app/reference/symbol/FunctionDomain) family of
 function-analysis predicates (`FunctionContinuous`, `FunctionMonotonicity`,
 `FunctionSingularities`, …).
 
@@ -123,6 +123,6 @@ the upstreaming model. (`round-places`, `zeta-hurwitz`, `polylog-order` and
 
 ## Explore
 
-- [`/explore/zeta`](https://enumeratio.dev/explore/zeta/) — `Zeta`/`HurwitzZeta`
-- [`/explore/lerchphi`](https://enumeratio.dev/explore/lerchphi/) — `LerchPhi`
-- [`/explore/polylog`](https://enumeratio.dev/explore/polylog/) — `PolyLog`
+- [`/explore/zeta`](https://notatio.app/explore/zeta/) — `Zeta`/`HurwitzZeta`
+- [`/explore/lerchphi`](https://notatio.app/explore/lerchphi/) — `LerchPhi`
+- [`/explore/polylog`](https://notatio.app/explore/polylog/) — `PolyLog`

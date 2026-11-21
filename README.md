@@ -2,7 +2,7 @@
 
 Two projects in one repository. **enumeratio** is the catalogue of mathematical objects, combinatorial
 ones first: a record and a permanent address for each, and the checking that keeps the records true, so
-each can be explored now and cited for good ([enumeratio.dev](https://enumeratio.dev)). **notatio** is how
+each can be explored now and cited for good ([notatio.app](https://notatio.app)). **notatio** is how
 an expression is written and shown: boxes, graphics, controls, the vdom and its markup, and the notebook,
 worksheet, CLI and REPL built from them. Both sit on the
 [Cortex compute-engine](https://cortexjs.io/compute-engine/), which computes, and on
@@ -34,7 +34,7 @@ a claim can be computed ([Examples as Data](https://github.com/enumeratio/notati
 | `packages/symbols/*/`  | the symbol libraries, grouped by area: `combinatorics`, `arithmetic`, `analysis`, `algebras`, `groups`, `evaluation`                                                                                                                                                                                  |
 | `packages/`            | shared machinery: reference data (`entry`, `reference`, `catalog`, `manifest`), cross-checking (`oracle`, `census`, `plausible`, `bench`), structure (`structures`), output (`formats`, `boxes`, `wolfram`, `raster`), presentation (`frontend`, `components`, `cli`) and helpers (`engine`, `utils`) |
 | `packages/ce-patches/` | fixes and heads offered to compute-engine, applied as patches until they land ([README](packages/ce-patches/README.md))                                                                                                                                                                               |
-| `web/`                 | the [enumeratio.dev](https://enumeratio.dev) site: the catalogue's reference pages and guides, and for now notatio's component stories, worksheet and notebook                                                                                                                                        |
+| `web/`                 | the [notatio.app](https://notatio.app) site: the catalogue's reference pages and guides, and for now notatio's component stories, worksheet and notebook                                                                                                                                              |
 | `tools/`               | CI tooling (`perf`)                                                                                                                                                                                                                                                                                   |
 
 Each package's `package.json` `description` says what it holds;

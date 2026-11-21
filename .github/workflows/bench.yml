@@ -83,7 +83,7 @@ jobs:
             const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
             const drift = JSON.parse(fs.readFileSync('drift.json', 'utf8'))
             const ms = (ns) => (ns / 1e6).toFixed(2)
-            const link = (n) => `[${n}](https://enumeratio.dev/reference/symbol/${n.replace('/', '#example/')})`
+            const link = (n) => `[${n}](https://notatio.app/reference/symbol/${n.replace('/', '#example/')})`
             const lost = drift.filter(d => d.status !== undefined)
             const slower = drift.filter(d => d.status === undefined)
             const lostRows = lost.slice(0, 30).map(d =>
@@ -109,7 +109,7 @@ jobs:
                 rows,
                 ``,
               ]),
-              `Hosted runners wobble; check the trend at https://enumeratio.dev/bench/ before treating one run as a regression.`,
+              `Hosted runners wobble; check the trend at https://notatio.app/bench/ before treating one run as a regression.`,
             ].join('\n')
             try {
               await github.rest.issues.createLabel({ ...context.repo, name: 'nightly-fixup', color: 'fbca04',

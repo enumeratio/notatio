@@ -46,9 +46,9 @@ import "@notatio/components";
 
 ## Where to go next
 
-- [`/reference/component/`](https://enumeratio.dev/reference/component/) — every element's props, generated from
+- [`/reference/component/`](https://notatio.app/reference/component/) — every element's props, generated from
   these sources so the reference can't drift from the code.
-- [Components, one at a time](https://enumeratio.dev/docs/components/overview) — each component demoed live; `reference/*.stories.yaml`
+- [Components, one at a time](https://notatio.app/docs/components/overview) — each component demoed live; `reference/*.stories.yaml`
   in this package back those pages.
 - [`frontend`](../frontend/README.md) — the symbol map, the vdom, and the Vue/React wrappers.
 - [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom) — the design

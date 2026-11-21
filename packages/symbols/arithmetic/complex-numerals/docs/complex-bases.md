@@ -106,8 +106,8 @@ The **settings** box holds the current system as a sentence, such as
 The sentences follow [TheGrayCuber's imaginary-bases page](https://thegraycuber.com/imaginary_bases/),
 which inspired this one. The caption's menu also lists the favorites viewers sent there, each
 credited as submitted. (On that page, here, and in the
-[quadratic integers](https://enumeratio.dev/docs/number-theory/quadratic-integers) guide,
+[quadratic integers](https://notatio.app/docs/number-theory/quadratic-integers) guide,
 $\omega = e^{2\pi i/3}$, so $\omega^2 = -1 - \omega$.)
 
 The full explorer, with every control, is on the
-[complex bases](https://enumeratio.dev/explore/complex-bases/) exploration.
+[complex bases](https://notatio.app/explore/complex-bases/) exploration.

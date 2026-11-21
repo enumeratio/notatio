@@ -9,7 +9,7 @@
         "bullets": [
           {
             "key": "link",
-            "value": "https://enumeratio.dev/reference/symbol/Primes"
+            "value": "https://notatio.app/reference/symbol/Primes"
           },
           {
             "key": "pr",
@@ -25,7 +25,7 @@
           }
         ],
         "feedback": "Looks solid overall.\n\nSecond paragraph of feedback.",
-        "link": "https://enumeratio.dev/reference/symbol/Primes",
+        "link": "https://notatio.app/reference/symbol/Primes",
         "pr": "#86 · collections · open PR",
         "check": "What to look at and what a good answer looks like.",
         "note": "optional"
@@ -37,7 +37,7 @@
         "bullets": [
           {
             "key": "link",
-            "value": "https://enumeratio.dev/reference/symbol/Foo"
+            "value": "https://notatio.app/reference/symbol/Foo"
           },
           {
             "key": "pr",
@@ -49,7 +49,7 @@
           }
         ],
         "feedback": "",
-        "link": "https://enumeratio.dev/reference/symbol/Foo",
+        "link": "https://notatio.app/reference/symbol/Foo",
         "pr": "#90 · analytic · merged",
         "check": "check this"
       },
@@ -60,7 +60,7 @@
         "bullets": [
           {
             "key": "link",
-            "value": "https://enumeratio.dev/x"
+            "value": "https://notatio.app/x"
           },
           {
             "key": "pr",
@@ -76,7 +76,7 @@
           }
         ],
         "feedback": "",
-        "link": "https://enumeratio.dev/x",
+        "link": "https://notatio.app/x",
         "pr": "#91 · misc · open PR",
         "check": "whatever"
       },
@@ -87,7 +87,7 @@
         "bullets": [
           {
             "key": "link",
-            "value": "https://enumeratio.dev/y"
+            "value": "https://notatio.app/y"
           },
           {
             "key": "pr",
@@ -99,14 +99,14 @@
           }
         ],
         "feedback": "One paragraph already here.",
-        "link": "https://enumeratio.dev/y",
+        "link": "https://notatio.app/y",
         "pr": "#92 · misc · open PR",
         "check": "whatever else"
       }
     ]
   },
   "status-change": {
-    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [x] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://enumeratio.dev/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://enumeratio.dev/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n",
+    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [x] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://notatio.app/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://notatio.app/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n",
     "item": {
       "id": "pr86-numeric-sets-indexed",
       "title": "Numeric sets as indexed collections",
@@ -114,7 +114,7 @@
       "bullets": [
         {
           "key": "link",
-          "value": "https://enumeratio.dev/reference/symbol/Primes"
+          "value": "https://notatio.app/reference/symbol/Primes"
         },
         {
           "key": "pr",
@@ -130,14 +130,14 @@
         }
       ],
       "feedback": "Looks solid overall.\n\nSecond paragraph of feedback.",
-      "link": "https://enumeratio.dev/reference/symbol/Primes",
+      "link": "https://notatio.app/reference/symbol/Primes",
       "pr": "#86 · collections · open PR",
       "check": "What to look at and what a good answer looks like.",
       "note": "optional"
     }
   },
   "feedback-empty-to-text": {
-    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\nNice work, ship it.\n\n### [!] Third item {#third-id}\n- link: https://enumeratio.dev/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://enumeratio.dev/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n",
+    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\nNice work, ship it.\n\n### [!] Third item {#third-id}\n- link: https://notatio.app/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://notatio.app/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n",
     "item": {
       "id": "second-id",
       "title": "Second item",
@@ -145,7 +145,7 @@
       "bullets": [
         {
           "key": "link",
-          "value": "https://enumeratio.dev/reference/symbol/Foo"
+          "value": "https://notatio.app/reference/symbol/Foo"
         },
         {
           "key": "pr",
@@ -157,13 +157,13 @@
         }
       ],
       "feedback": "Nice work, ship it.",
-      "link": "https://enumeratio.dev/reference/symbol/Foo",
+      "link": "https://notatio.app/reference/symbol/Foo",
       "pr": "#90 · analytic · merged",
       "check": "check this"
     }
   },
   "feedback-text-to-text": {
-    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://enumeratio.dev/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://enumeratio.dev/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nReplaced entirely.\n\n",
+    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://notatio.app/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://notatio.app/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nReplaced entirely.\n\n",
     "item": {
       "id": "fourth-id",
       "title": "Fourth item",
@@ -171,7 +171,7 @@
       "bullets": [
         {
           "key": "link",
-          "value": "https://enumeratio.dev/y"
+          "value": "https://notatio.app/y"
         },
         {
           "key": "pr",
@@ -183,13 +183,13 @@
         }
       ],
       "feedback": "Replaced entirely.",
-      "link": "https://enumeratio.dev/y",
+      "link": "https://notatio.app/y",
       "pr": "#92 · misc · open PR",
       "check": "whatever else"
     }
   },
   "feedback-multi-paragraph": {
-    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://enumeratio.dev/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://enumeratio.dev/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nFirst paragraph.\n\nSecond paragraph.\n\nThird.\n\n",
+    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://notatio.app/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://notatio.app/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nFirst paragraph.\n\nSecond paragraph.\n\nThird.\n\n",
     "item": {
       "id": "fourth-id",
       "title": "Fourth item",
@@ -197,7 +197,7 @@
       "bullets": [
         {
           "key": "link",
-          "value": "https://enumeratio.dev/y"
+          "value": "https://notatio.app/y"
         },
         {
           "key": "pr",
@@ -209,13 +209,13 @@
         }
       ],
       "feedback": "First paragraph.\n\nSecond paragraph.\n\nThird.",
-      "link": "https://enumeratio.dev/y",
+      "link": "https://notatio.app/y",
       "pr": "#92 · misc · open PR",
       "check": "whatever else"
     }
   },
   "feedback-inserted": {
-    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://enumeratio.dev/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n#### Feedback\n\nNow reviewed.\n\n\n### [ ] Fourth item {#fourth-id}\n- link: https://enumeratio.dev/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n",
+    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://notatio.app/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n#### Feedback\n\nNow reviewed.\n\n\n### [ ] Fourth item {#fourth-id}\n- link: https://notatio.app/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n",
     "item": {
       "id": "third-id",
       "title": "Third item",
@@ -223,7 +223,7 @@
       "bullets": [
         {
           "key": "link",
-          "value": "https://enumeratio.dev/x"
+          "value": "https://notatio.app/x"
         },
         {
           "key": "pr",
@@ -239,15 +239,15 @@
         }
       ],
       "feedback": "Now reviewed.",
-      "link": "https://enumeratio.dev/x",
+      "link": "https://notatio.app/x",
       "pr": "#91 · misc · open PR",
       "check": "whatever"
     }
   },
-  "serialize-with-feedback": "### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n",
-  "serialize-empty-feedback": "### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n",
+  "serialize-with-feedback": "### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n",
+  "serialize-empty-feedback": "### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n",
   "upsert-append": {
-    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://enumeratio.dev/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://enumeratio.dev/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://enumeratio.dev/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://enumeratio.dev/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n\n### [ ] Arccos · example-19 {#adhoc-new-item}\n- link: https://enumeratio.dev/reference/symbol/Arccos#example-19\n\n#### Feedback\n\n",
+    "raw": "# Review backlog\n\nSome intro text.\n\nMore intro, on its own paragraph.\n\n### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}\n- link: https://notatio.app/reference/symbol/Primes\n- pr: #86 · collections · open PR\n- check: What to look at and what a good answer looks like.\n- note: optional\n\n#### Feedback\n\nLooks solid overall.\n\nSecond paragraph of feedback.\n\n### [x] Second item {#second-id}\n- link: https://notatio.app/reference/symbol/Foo\n- pr: #90 · analytic · merged\n- check: check this\n\n#### Feedback\n\n### [!] Third item {#third-id}\n- link: https://notatio.app/x\n- pr: #91 · misc · open PR\n- check: whatever\n- custom: an unknown bullet key\n\n### [ ] Fourth item {#fourth-id}\n- link: https://notatio.app/y\n- pr: #92 · misc · open PR\n- check: whatever else\n\n#### Feedback\n\nOne paragraph already here.\n\n### [ ] Arccos · example-19 {#adhoc-new-item}\n- link: https://notatio.app/reference/symbol/Arccos#example-19\n\n#### Feedback\n\n",
     "item": {
       "id": "adhoc-new-item",
       "title": "Arccos · example-19",
@@ -255,11 +255,11 @@
       "bullets": [
         {
           "key": "link",
-          "value": "https://enumeratio.dev/reference/symbol/Arccos#example-19"
+          "value": "https://notatio.app/reference/symbol/Arccos#example-19"
         }
       ],
       "feedback": "",
-      "link": "https://enumeratio.dev/reference/symbol/Arccos#example-19"
+      "link": "https://notatio.app/reference/symbol/Arccos#example-19"
     }
   }
 }

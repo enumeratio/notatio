@@ -33,14 +33,14 @@ FactorInteger(360)         // [[2, 3], [3, 2], [5, 1]]
 
 **Modular arithmetic**
 
-- [`ChineseRemainder`](https://enumeratio.dev/reference/symbol/ChineseRemainder) — CRT, also over [`ResidueClass`](https://enumeratio.dev/reference/symbol/ResidueClass) classes
-- [`ResidueClass`](https://enumeratio.dev/reference/symbol/ResidueClass) — compute-engine's element of $\mathbb{Z}/m$, after Sage's `Mod(a, m)`: arithmetic stays inside one ring, and classes of different moduli never combine
-- [`IntegerMod`](https://enumeratio.dev/reference/symbol/IntegerMod) — the same class with Sage's coercion: classes of different moduli combine in $\mathbb{Z}/\gcd(m, n)$
-- [`QuotientRing`](https://enumeratio.dev/reference/symbol/QuotientRing)`(Integers, m)` — compute-engine's $\mathbb{Z}/m\mathbb{Z}$, made the collection of its `ResidueClass` classes (`IntegerModRing(m)` is its old spelling)
-- [`PowerMod`](https://enumeratio.dev/reference/symbol/PowerMod) — modular exponentiation, widened to a rational exponent `s/r` (the least r-th root) and a rational base
-- [`PowerModList`](https://enumeratio.dev/reference/symbol/PowerModList) — every r-th root of $a^s$ mod $m$
-- [`MultiplicativeOrder`](https://enumeratio.dev/reference/symbol/MultiplicativeOrder) — the order of $a$ mod $n$, widened to a discrete log against a target list
-- [`PrimitiveRootList`](https://enumeratio.dev/reference/symbol/PrimitiveRootList) — the primitive roots of a cyclic $(\mathbb{Z}/n)^×$
+- [`ChineseRemainder`](https://notatio.app/reference/symbol/ChineseRemainder) — CRT, also over [`ResidueClass`](https://notatio.app/reference/symbol/ResidueClass) classes
+- [`ResidueClass`](https://notatio.app/reference/symbol/ResidueClass) — compute-engine's element of $\mathbb{Z}/m$, after Sage's `Mod(a, m)`: arithmetic stays inside one ring, and classes of different moduli never combine
+- [`IntegerMod`](https://notatio.app/reference/symbol/IntegerMod) — the same class with Sage's coercion: classes of different moduli combine in $\mathbb{Z}/\gcd(m, n)$
+- [`QuotientRing`](https://notatio.app/reference/symbol/QuotientRing)`(Integers, m)` — compute-engine's $\mathbb{Z}/m\mathbb{Z}$, made the collection of its `ResidueClass` classes (`IntegerModRing(m)` is its old spelling)
+- [`PowerMod`](https://notatio.app/reference/symbol/PowerMod) — modular exponentiation, widened to a rational exponent `s/r` (the least r-th root) and a rational base
+- [`PowerModList`](https://notatio.app/reference/symbol/PowerModList) — every r-th root of $a^s$ mod $m$
+- [`MultiplicativeOrder`](https://notatio.app/reference/symbol/MultiplicativeOrder) — the order of $a$ mod $n$, widened to a discrete log against a target list
+- [`PrimitiveRootList`](https://notatio.app/reference/symbol/PrimitiveRootList) — the primitive roots of a cyclic $(\mathbb{Z}/n)^×$
 
 Also declared without a reference page yet: `discreteLog`, `primitiveRoots`,
 `primitiveRootCount`, `unitsMod`, and `rootsInCyclicGroup` (baby-step giant-step over a generic

@@ -18,13 +18,13 @@ declareQuiver(ce);
 
 ## Heads
 
-- **Quivers** — [`Quiver`](https://enumeratio.dev/reference/symbol/Quiver),
-  [`LinearQuiver`](https://enumeratio.dev/reference/symbol/LinearQuiver),
-  [`QuiverIsAcyclic`](https://enumeratio.dev/reference/symbol/QuiverIsAcyclic)
-- **Paths** — [`QuiverPath`](https://enumeratio.dev/reference/symbol/QuiverPath),
-  [`QuiverPathEnd`](https://enumeratio.dev/reference/symbol/QuiverPathEnd),
-  [`QuiverCompose`](https://enumeratio.dev/reference/symbol/QuiverCompose)
-- **The algebra** — [`PathAlgebra`](https://enumeratio.dev/reference/symbol/PathAlgebra)
+- **Quivers** — [`Quiver`](https://notatio.app/reference/symbol/Quiver),
+  [`LinearQuiver`](https://notatio.app/reference/symbol/LinearQuiver),
+  [`QuiverIsAcyclic`](https://notatio.app/reference/symbol/QuiverIsAcyclic)
+- **Paths** — [`QuiverPath`](https://notatio.app/reference/symbol/QuiverPath),
+  [`QuiverPathEnd`](https://notatio.app/reference/symbol/QuiverPathEnd),
+  [`QuiverCompose`](https://notatio.app/reference/symbol/QuiverCompose)
+- **The algebra** — [`PathAlgebra`](https://notatio.app/reference/symbol/PathAlgebra)
 
 `src/quiver.ts` also exports `jordanQuiver` and `kroneckerQuiver` (the single-loop and
 two-parallel-arrow quivers used to illustrate finite vs. infinite dimension), plus

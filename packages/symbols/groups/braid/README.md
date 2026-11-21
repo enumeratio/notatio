@@ -20,35 +20,35 @@ declareBraid(ce);
 
 ## Heads
 
-- **The group** — [`Braid`](https://enumeratio.dev/reference/symbol/Braid),
-  [`BraidProduct`](https://enumeratio.dev/reference/symbol/BraidProduct),
-  [`BraidInverse`](https://enumeratio.dev/reference/symbol/BraidInverse),
-  [`BraidPower`](https://enumeratio.dev/reference/symbol/BraidPower),
-  [`BraidPermutation`](https://enumeratio.dev/reference/symbol/BraidPermutation),
-  [`BraidStrands`](https://enumeratio.dev/reference/symbol/BraidStrands),
-  [`BraidCrossings`](https://enumeratio.dev/reference/symbol/BraidCrossings),
-  [`BraidIsPositive`](https://enumeratio.dev/reference/symbol/BraidIsPositive),
-  [`BraidWrithe`](https://enumeratio.dev/reference/symbol/BraidWrithe)
-- **Closure and invariants** — [`BraidIsKnot`](https://enumeratio.dev/reference/symbol/BraidIsKnot),
-  [`BraidComponents`](https://enumeratio.dev/reference/symbol/BraidComponents),
-  [`BurauMatrix`](https://enumeratio.dev/reference/symbol/BurauMatrix),
-  [`AlexanderPolynomial`](https://enumeratio.dev/reference/symbol/AlexanderPolynomial),
-  [`SeifertGenus`](https://enumeratio.dev/reference/symbol/SeifertGenus)
-- **Jones/Kauffman** — [`KauffmanBracket`](https://enumeratio.dev/reference/symbol/KauffmanBracket),
-  [`BracketInvariant`](https://enumeratio.dev/reference/symbol/BracketInvariant),
-  [`JonesPolynomial`](https://enumeratio.dev/reference/symbol/JonesPolynomial)
-- **Named knots** — [`TorusKnot`](https://enumeratio.dev/reference/symbol/TorusKnot),
-  [`TorusBraid`](https://enumeratio.dev/reference/symbol/TorusBraid),
-  [`FigureEightKnot`](https://enumeratio.dev/reference/symbol/FigureEightKnot),
-  [`TwistKnot`](https://enumeratio.dev/reference/symbol/TwistKnot),
-  [`PretzelKnot`](https://enumeratio.dev/reference/symbol/PretzelKnot)
-- **Lorenz / modular geodesics** — [`LorenzBraid`](https://enumeratio.dev/reference/symbol/LorenzBraid),
-  [`LorenzPermutation`](https://enumeratio.dev/reference/symbol/LorenzPermutation),
-  [`PositivePermutationBraid`](https://enumeratio.dev/reference/symbol/PositivePermutationBraid),
-  [`TripNumber`](https://enumeratio.dev/reference/symbol/TripNumber)
-- **Curves** — [`KnotCurve`](https://enumeratio.dev/reference/symbol/KnotCurve),
-  [`LorenzCurve`](https://enumeratio.dev/reference/symbol/LorenzCurve),
-  [`ParametricCurve`](https://enumeratio.dev/reference/symbol/ParametricCurve)
+- **The group** — [`Braid`](https://notatio.app/reference/symbol/Braid),
+  [`BraidProduct`](https://notatio.app/reference/symbol/BraidProduct),
+  [`BraidInverse`](https://notatio.app/reference/symbol/BraidInverse),
+  [`BraidPower`](https://notatio.app/reference/symbol/BraidPower),
+  [`BraidPermutation`](https://notatio.app/reference/symbol/BraidPermutation),
+  [`BraidStrands`](https://notatio.app/reference/symbol/BraidStrands),
+  [`BraidCrossings`](https://notatio.app/reference/symbol/BraidCrossings),
+  [`BraidIsPositive`](https://notatio.app/reference/symbol/BraidIsPositive),
+  [`BraidWrithe`](https://notatio.app/reference/symbol/BraidWrithe)
+- **Closure and invariants** — [`BraidIsKnot`](https://notatio.app/reference/symbol/BraidIsKnot),
+  [`BraidComponents`](https://notatio.app/reference/symbol/BraidComponents),
+  [`BurauMatrix`](https://notatio.app/reference/symbol/BurauMatrix),
+  [`AlexanderPolynomial`](https://notatio.app/reference/symbol/AlexanderPolynomial),
+  [`SeifertGenus`](https://notatio.app/reference/symbol/SeifertGenus)
+- **Jones/Kauffman** — [`KauffmanBracket`](https://notatio.app/reference/symbol/KauffmanBracket),
+  [`BracketInvariant`](https://notatio.app/reference/symbol/BracketInvariant),
+  [`JonesPolynomial`](https://notatio.app/reference/symbol/JonesPolynomial)
+- **Named knots** — [`TorusKnot`](https://notatio.app/reference/symbol/TorusKnot),
+  [`TorusBraid`](https://notatio.app/reference/symbol/TorusBraid),
+  [`FigureEightKnot`](https://notatio.app/reference/symbol/FigureEightKnot),
+  [`TwistKnot`](https://notatio.app/reference/symbol/TwistKnot),
+  [`PretzelKnot`](https://notatio.app/reference/symbol/PretzelKnot)
+- **Lorenz / modular geodesics** — [`LorenzBraid`](https://notatio.app/reference/symbol/LorenzBraid),
+  [`LorenzPermutation`](https://notatio.app/reference/symbol/LorenzPermutation),
+  [`PositivePermutationBraid`](https://notatio.app/reference/symbol/PositivePermutationBraid),
+  [`TripNumber`](https://notatio.app/reference/symbol/TripNumber)
+- **Curves** — [`KnotCurve`](https://notatio.app/reference/symbol/KnotCurve),
+  [`LorenzCurve`](https://notatio.app/reference/symbol/LorenzCurve),
+  [`ParametricCurve`](https://notatio.app/reference/symbol/ParametricCurve)
 
 ## Usage
 

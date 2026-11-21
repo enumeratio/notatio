@@ -1,6 +1,6 @@
 # web
 
-The [enumeratio.dev](https://enumeratio.dev) site, built with [VitePress](https://vitepress.dev/):
+The [notatio.app](https://notatio.app) site, built with [VitePress](https://vitepress.dev/):
 guides, the generated reference pages, the worksheet and notebook, explorations, and the
 benchmark and review pages.
 

@@ -3,21 +3,21 @@ import { resolveReviewLink, splitHash } from "./link.ts";
 
 describe("resolveReviewLink", () => {
   test("rewrites the production host to a local path", () => {
-    expect(resolveReviewLink("https://enumeratio.dev/reference/symbol/Primes")).toEqual({
+    expect(resolveReviewLink("https://notatio.app/reference/symbol/Primes")).toEqual({
       kind: "local",
       path: "/reference/symbol/Primes",
     });
   });
 
   test("keeps search and hash from the production host", () => {
-    expect(resolveReviewLink("https://enumeratio.dev/reference/symbol/Primes?x=1#example-2")).toEqual({
+    expect(resolveReviewLink("https://notatio.app/reference/symbol/Primes?x=1#example-2")).toEqual({
       kind: "local",
       path: "/reference/symbol/Primes?x=1#example-2",
     });
   });
 
   test("rewrites a Cloudflare Pages preview host to a local path", () => {
-    expect(resolveReviewLink("https://a1b2c3d.enumeratio.pages.dev/guide/")).toEqual({
+    expect(resolveReviewLink("https://a1b2c3d.notatio.pages.dev/guide/")).toEqual({
       kind: "local",
       path: "/guide/",
     });
@@ -25,16 +25,16 @@ describe("resolveReviewLink", () => {
 
   test("rejects a preview-looking host with the wrong shape", () => {
     // 6 hex digits, not 7 -- must not match.
-    expect(resolveReviewLink("https://a1b2c3.enumeratio.pages.dev/guide/")).toEqual({
+    expect(resolveReviewLink("https://a1b2c3.notatio.pages.dev/guide/")).toEqual({
       kind: "external",
-      href: "https://a1b2c3.enumeratio.pages.dev/guide/",
+      href: "https://a1b2c3.notatio.pages.dev/guide/",
     });
   });
 
   test("rejects a preview host with non-hex characters", () => {
-    expect(resolveReviewLink("https://zzzzzzz.enumeratio.pages.dev/guide/")).toEqual({
+    expect(resolveReviewLink("https://zzzzzzz.notatio.pages.dev/guide/")).toEqual({
       kind: "external",
-      href: "https://zzzzzzz.enumeratio.pages.dev/guide/",
+      href: "https://zzzzzzz.notatio.pages.dev/guide/",
     });
   });
 

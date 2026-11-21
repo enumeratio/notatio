@@ -20,40 +20,40 @@ declareModular(ce);
 
 ## Heads
 
-- **The group** — [`ModularMatrix`](https://enumeratio.dev/reference/symbol/ModularMatrix),
-  [`ModularSTWord`](https://enumeratio.dev/reference/symbol/ModularSTWord),
-  [`ModularWord`](https://enumeratio.dev/reference/symbol/ModularWord),
-  [`ModularFromSTWord`](https://enumeratio.dev/reference/symbol/ModularFromSTWord),
-  [`ModularTrace`](https://enumeratio.dev/reference/symbol/ModularTrace),
-  [`ModularKind`](https://enumeratio.dev/reference/symbol/ModularKind)
-- **Continued fractions** — [`ContinuedFraction`](https://enumeratio.dev/reference/symbol/ContinuedFraction),
-  [`ContinuedFractionK`](https://enumeratio.dev/reference/symbol/ContinuedFractionK),
-  [`Convergents`](https://enumeratio.dev/reference/symbol/Convergents),
-  [`SternBrocotPath`](https://enumeratio.dev/reference/symbol/SternBrocotPath),
-  [`FromSternBrocotPath`](https://enumeratio.dev/reference/symbol/FromSternBrocotPath),
-  [`FareyNeighbours`](https://enumeratio.dev/reference/symbol/FareyNeighbours),
-  [`PellSolution`](https://enumeratio.dev/reference/symbol/PellSolution)
-- **Quadratic forms** — [`QuadraticForm`](https://enumeratio.dev/reference/symbol/QuadraticForm),
-  [`FormDiscriminant`](https://enumeratio.dev/reference/symbol/FormDiscriminant),
-  [`FormAction`](https://enumeratio.dev/reference/symbol/FormAction),
-  [`ReduceForm`](https://enumeratio.dev/reference/symbol/ReduceForm),
-  [`IsReducedForm`](https://enumeratio.dev/reference/symbol/IsReducedForm),
-  [`FormCycle`](https://enumeratio.dev/reference/symbol/FormCycle),
-  [`ReducedForms`](https://enumeratio.dev/reference/symbol/ReducedForms),
-  [`FormClasses`](https://enumeratio.dev/reference/symbol/FormClasses),
-  [`FormClassNumber`](https://enumeratio.dev/reference/symbol/FormClassNumber),
-  [`IsPrimitiveClass`](https://enumeratio.dev/reference/symbol/IsPrimitiveClass),
-  [`IsIndefinite`](https://enumeratio.dev/reference/symbol/IsIndefinite),
-  [`IsQuadraticIrrational`](https://enumeratio.dev/reference/symbol/IsQuadraticIrrational),
-  [`FormAutomorph`](https://enumeratio.dev/reference/symbol/FormAutomorph),
-  [`FormRho`](https://enumeratio.dev/reference/symbol/FormRho)
-- **Conjugacy and Rademacher** — [`ModularClass`](https://enumeratio.dev/reference/symbol/ModularClass),
-  [`ModularClasses`](https://enumeratio.dev/reference/symbol/ModularClasses),
-  [`RademacherSymbol`](https://enumeratio.dev/reference/symbol/RademacherSymbol),
-  [`RademacherPhi`](https://enumeratio.dev/reference/symbol/RademacherPhi),
-  [`DedekindSum`](https://enumeratio.dev/reference/symbol/DedekindSum),
-  [`LinkingWithTrefoil`](https://enumeratio.dev/reference/symbol/LinkingWithTrefoil)
-- **Number theory** — [`KroneckerSymbol`](https://enumeratio.dev/reference/symbol/KroneckerSymbol)
+- **The group** — [`ModularMatrix`](https://notatio.app/reference/symbol/ModularMatrix),
+  [`ModularSTWord`](https://notatio.app/reference/symbol/ModularSTWord),
+  [`ModularWord`](https://notatio.app/reference/symbol/ModularWord),
+  [`ModularFromSTWord`](https://notatio.app/reference/symbol/ModularFromSTWord),
+  [`ModularTrace`](https://notatio.app/reference/symbol/ModularTrace),
+  [`ModularKind`](https://notatio.app/reference/symbol/ModularKind)
+- **Continued fractions** — [`ContinuedFraction`](https://notatio.app/reference/symbol/ContinuedFraction),
+  [`ContinuedFractionK`](https://notatio.app/reference/symbol/ContinuedFractionK),
+  [`Convergents`](https://notatio.app/reference/symbol/Convergents),
+  [`SternBrocotPath`](https://notatio.app/reference/symbol/SternBrocotPath),
+  [`FromSternBrocotPath`](https://notatio.app/reference/symbol/FromSternBrocotPath),
+  [`FareyNeighbours`](https://notatio.app/reference/symbol/FareyNeighbours),
+  [`PellSolution`](https://notatio.app/reference/symbol/PellSolution)
+- **Quadratic forms** — [`QuadraticForm`](https://notatio.app/reference/symbol/QuadraticForm),
+  [`FormDiscriminant`](https://notatio.app/reference/symbol/FormDiscriminant),
+  [`FormAction`](https://notatio.app/reference/symbol/FormAction),
+  [`ReduceForm`](https://notatio.app/reference/symbol/ReduceForm),
+  [`IsReducedForm`](https://notatio.app/reference/symbol/IsReducedForm),
+  [`FormCycle`](https://notatio.app/reference/symbol/FormCycle),
+  [`ReducedForms`](https://notatio.app/reference/symbol/ReducedForms),
+  [`FormClasses`](https://notatio.app/reference/symbol/FormClasses),
+  [`FormClassNumber`](https://notatio.app/reference/symbol/FormClassNumber),
+  [`IsPrimitiveClass`](https://notatio.app/reference/symbol/IsPrimitiveClass),
+  [`IsIndefinite`](https://notatio.app/reference/symbol/IsIndefinite),
+  [`IsQuadraticIrrational`](https://notatio.app/reference/symbol/IsQuadraticIrrational),
+  [`FormAutomorph`](https://notatio.app/reference/symbol/FormAutomorph),
+  [`FormRho`](https://notatio.app/reference/symbol/FormRho)
+- **Conjugacy and Rademacher** — [`ModularClass`](https://notatio.app/reference/symbol/ModularClass),
+  [`ModularClasses`](https://notatio.app/reference/symbol/ModularClasses),
+  [`RademacherSymbol`](https://notatio.app/reference/symbol/RademacherSymbol),
+  [`RademacherPhi`](https://notatio.app/reference/symbol/RademacherPhi),
+  [`DedekindSum`](https://notatio.app/reference/symbol/DedekindSum),
+  [`LinkingWithTrefoil`](https://notatio.app/reference/symbol/LinkingWithTrefoil)
+- **Number theory** — [`KroneckerSymbol`](https://notatio.app/reference/symbol/KroneckerSymbol)
 
 ## Usage
 

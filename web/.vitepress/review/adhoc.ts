@@ -7,13 +7,13 @@
 // migration may replace them with something else entirely (e.g. `#example/<id>`),
 // with no redirects, so nothing here may assume digits, dashes, or any particular
 // pattern. An ad-hoc item's `- link:` is built the same way an existing item's is
-// (an absolute `https://enumeratio.dev/...#anchor` URL), so a later relink pass can
+// (an absolute `https://notatio.app/...#anchor` URL), so a later relink pass can
 // rewrite it exactly like any other item.
 import type { BacklogItem, Bullet } from "./backlog.ts";
 
-const PROD_ORIGIN = "https://enumeratio.dev";
+const PROD_ORIGIN = "https://notatio.app";
 
-/** `https://enumeratio.dev<path>#<anchor>` -- the same absolute form existing items'
+/** `https://notatio.app<path>#<anchor>` -- the same absolute form existing items'
  * `- link:` lines use (see backlog.golden.json), regardless of the host the reviewer
  * is actually browsing from (localhost, a CF preview, prod itself). */
 export function buildProdLink(path: string, anchor: string): string {

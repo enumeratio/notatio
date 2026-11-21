@@ -37,32 +37,32 @@ IntegerDigits(-3, BalancedNumerals(3))   // balanced ternary spells the sign in 
 
 **Numeral systems** (values for the base slot)
 
-- [`Radix`](https://enumeratio.dev/reference/symbol/Radix) / [`PositionalNumerals`](https://enumeratio.dev/reference/symbol/PositionalNumerals) — ordinary base $b$, as a system value
-- [`BalancedNumerals`](https://enumeratio.dev/reference/symbol/BalancedNumerals) / [`BalancedRadix`](https://enumeratio.dev/reference/symbol/BalancedRadix) — signless negatives, digits $-(b-1)/2 \ldots (b-1)/2$
-- [`NegativeNumerals`](https://enumeratio.dev/reference/symbol/NegativeNumerals) / [`NegativeRadix`](https://enumeratio.dev/reference/symbol/NegativeRadix) — signless negatives over base $-b$
-- [`BijectiveNumerals`](https://enumeratio.dev/reference/symbol/BijectiveNumerals) / [`BijectiveRadix`](https://enumeratio.dev/reference/symbol/BijectiveRadix) — digits $1\ldots k$, no zero (spreadsheet columns)
-- [`FactorialNumerals`](https://enumeratio.dev/reference/symbol/FactorialNumerals) — place $k$ holds at most $k$ (the Lehmer code)
-- [`PrimorialNumerals`](https://enumeratio.dev/reference/symbol/PrimorialNumerals) — factoradic with primes
-- [`CombinatorialNumerals`](https://enumeratio.dev/reference/symbol/CombinatorialNumerals) / [`CombinatorialSystem`](https://enumeratio.dev/reference/symbol/CombinatorialSystem) — a strictly decreasing $k$-tuple (subset unranking)
-- [`ResidueNumerals`](https://enumeratio.dev/reference/symbol/ResidueNumerals) / [`ResidueSystem`](https://enumeratio.dev/reference/symbol/ResidueSystem) — independent residues, no place values at all
-- [`ZeckendorfNumerals`](https://enumeratio.dev/reference/symbol/ZeckendorfNumerals) — Fibonacci place values, no two adjacent ones
-- [`OstrowskiNumerals`](https://enumeratio.dev/reference/symbol/OstrowskiNumerals) — digits over a continued fraction, generalises Zeckendorf
-- [`AdicNumerals`](https://enumeratio.dev/reference/symbol/AdicNumerals) — fixed-width $b$-adic digits, negatives are all nines
+- [`Radix`](https://notatio.app/reference/symbol/Radix) / [`PositionalNumerals`](https://notatio.app/reference/symbol/PositionalNumerals) — ordinary base $b$, as a system value
+- [`BalancedNumerals`](https://notatio.app/reference/symbol/BalancedNumerals) / [`BalancedRadix`](https://notatio.app/reference/symbol/BalancedRadix) — signless negatives, digits $-(b-1)/2 \ldots (b-1)/2$
+- [`NegativeNumerals`](https://notatio.app/reference/symbol/NegativeNumerals) / [`NegativeRadix`](https://notatio.app/reference/symbol/NegativeRadix) — signless negatives over base $-b$
+- [`BijectiveNumerals`](https://notatio.app/reference/symbol/BijectiveNumerals) / [`BijectiveRadix`](https://notatio.app/reference/symbol/BijectiveRadix) — digits $1\ldots k$, no zero (spreadsheet columns)
+- [`FactorialNumerals`](https://notatio.app/reference/symbol/FactorialNumerals) — place $k$ holds at most $k$ (the Lehmer code)
+- [`PrimorialNumerals`](https://notatio.app/reference/symbol/PrimorialNumerals) — factoradic with primes
+- [`CombinatorialNumerals`](https://notatio.app/reference/symbol/CombinatorialNumerals) / [`CombinatorialSystem`](https://notatio.app/reference/symbol/CombinatorialSystem) — a strictly decreasing $k$-tuple (subset unranking)
+- [`ResidueNumerals`](https://notatio.app/reference/symbol/ResidueNumerals) / [`ResidueSystem`](https://notatio.app/reference/symbol/ResidueSystem) — independent residues, no place values at all
+- [`ZeckendorfNumerals`](https://notatio.app/reference/symbol/ZeckendorfNumerals) — Fibonacci place values, no two adjacent ones
+- [`OstrowskiNumerals`](https://notatio.app/reference/symbol/OstrowskiNumerals) — digits over a continued fraction, generalises Zeckendorf
+- [`AdicNumerals`](https://notatio.app/reference/symbol/AdicNumerals) — fixed-width $b$-adic digits, negatives are all nines
 
 **b-adic values**
 
-- [`AdicNumeral`](https://enumeratio.dev/reference/symbol/AdicNumeral) — the $b$-adic value, exact or truncated to a precision
-- [`AdicExpansion`](https://enumeratio.dev/reference/symbol/AdicExpansion) / [`AdicDigits`](https://enumeratio.dev/reference/symbol/AdicDigits) — its digit string
-- [`AdicValuation`](https://enumeratio.dev/reference/symbol/AdicValuation) / [`AdicUnitPart`](https://enumeratio.dev/reference/symbol/AdicUnitPart) — the power of $b$ dividing it, and what's left after dividing it out
-- [`AdicSqrt`](https://enumeratio.dev/reference/symbol/AdicSqrt) / [`HenselLift`](https://enumeratio.dev/reference/symbol/HenselLift) — square roots and Newton lifting in $\mathbb{Z}_b$
+- [`AdicNumeral`](https://notatio.app/reference/symbol/AdicNumeral) — the $b$-adic value, exact or truncated to a precision
+- [`AdicExpansion`](https://notatio.app/reference/symbol/AdicExpansion) / [`AdicDigits`](https://notatio.app/reference/symbol/AdicDigits) — its digit string
+- [`AdicValuation`](https://notatio.app/reference/symbol/AdicValuation) / [`AdicUnitPart`](https://notatio.app/reference/symbol/AdicUnitPart) — the power of $b$ dividing it, and what's left after dividing it out
+- [`AdicSqrt`](https://notatio.app/reference/symbol/AdicSqrt) / [`HenselLift`](https://notatio.app/reference/symbol/HenselLift) — square roots and Newton lifting in $\mathbb{Z}_b$
 
 **Digits and strings**
 
-- [`IntegerDigits`](https://enumeratio.dev/reference/symbol/IntegerDigits) / [`FromDigits`](https://enumeratio.dev/reference/symbol/FromDigits) — compute-engine's own heads, widened to take a system in the base slot
-- [`RealDigits`](https://enumeratio.dev/reference/symbol/RealDigits) — digits of a rational, including the repeating part
-- [`DigitCount`](https://enumeratio.dev/reference/symbol/DigitCount) / [`DigitSum`](https://enumeratio.dev/reference/symbol/DigitSum) / [`IntegerLength`](https://enumeratio.dev/reference/symbol/IntegerLength) / [`IntegerReverse`](https://enumeratio.dev/reference/symbol/IntegerReverse) — per-digit statistics and reversal
-- [`IntegerString`](https://enumeratio.dev/reference/symbol/IntegerString) / [`RomanNumeral`](https://enumeratio.dev/reference/symbol/RomanNumeral) — string spellings
-- [`NumberExpand`](https://enumeratio.dev/reference/symbol/NumberExpand) / [`NumeralSystemShape`](https://enumeratio.dev/reference/symbol/NumeralSystemShape) / [`Fraction`](https://enumeratio.dev/reference/symbol/Fraction) — expanding a number over a system, and describing a system's shape
+- [`IntegerDigits`](https://notatio.app/reference/symbol/IntegerDigits) / [`FromDigits`](https://notatio.app/reference/symbol/FromDigits) — compute-engine's own heads, widened to take a system in the base slot
+- [`RealDigits`](https://notatio.app/reference/symbol/RealDigits) — digits of a rational, including the repeating part
+- [`DigitCount`](https://notatio.app/reference/symbol/DigitCount) / [`DigitSum`](https://notatio.app/reference/symbol/DigitSum) / [`IntegerLength`](https://notatio.app/reference/symbol/IntegerLength) / [`IntegerReverse`](https://notatio.app/reference/symbol/IntegerReverse) — per-digit statistics and reversal
+- [`IntegerString`](https://notatio.app/reference/symbol/IntegerString) / [`RomanNumeral`](https://notatio.app/reference/symbol/RomanNumeral) — string spellings
+- [`NumberExpand`](https://notatio.app/reference/symbol/NumberExpand) / [`NumeralSystemShape`](https://notatio.app/reference/symbol/NumeralSystemShape) / [`Fraction`](https://notatio.app/reference/symbol/Fraction) — expanding a number over a system, and describing a system's shape
 
 ## See also
 

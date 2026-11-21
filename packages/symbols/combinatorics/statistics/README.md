@@ -23,16 +23,16 @@ CDF(ExponentialDistribution(2), 1)       // 1 - e^-2
 
 ## Heads
 
-**Distributions.** [`ProbabilityDistribution`](https://enumeratio.dev/reference/symbol/ProbabilityDistribution),
+**Distributions.** [`ProbabilityDistribution`](https://notatio.app/reference/symbol/ProbabilityDistribution),
 the named laws (`BinomialDistribution`, `GammaDistribution`, `HypergeometricDistribution`,
 `WeibullDistribution`, …), and transforms (`MixtureDistribution`, `TransformedDistribution`,
 `MarginalDistribution`).
 
-**Functions of a distribution.** [`Expectation`](https://enumeratio.dev/reference/symbol/Expectation),
-[`Probability`](https://enumeratio.dev/reference/symbol/Probability),
-[`Moment`](https://enumeratio.dev/reference/symbol/Moment), `Cumulant`, `Median`,
+**Functions of a distribution.** [`Expectation`](https://notatio.app/reference/symbol/Expectation),
+[`Probability`](https://notatio.app/reference/symbol/Probability),
+[`Moment`](https://notatio.app/reference/symbol/Moment), `Cumulant`, `Median`,
 `CharacteristicFunction`, `MomentGeneratingFunction`,
-[`RandomVariate`](https://enumeratio.dev/reference/symbol/RandomVariate).
+[`RandomVariate`](https://notatio.app/reference/symbol/RandomVariate).
 
 **Processes.** `PoissonProcess`, `WienerProcess`, …
 

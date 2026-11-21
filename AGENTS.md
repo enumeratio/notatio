@@ -35,13 +35,13 @@ must follow, each short, with a link where the wiki explains it:
 entries, tests, git, code), [CI-and-Deployment](https://github.com/enumeratio/notatio/wiki/CI-and-Deployment) the workflows, and
 [Lanes](https://github.com/enumeratio/notatio/wiki/Lanes) parallel work across sessions;
 [Names](https://github.com/enumeratio/notatio/wiki/Names) defines the names, [Roadmap](https://github.com/enumeratio/notatio/wiki/Roadmap)
-is the vision and [Sites](https://github.com/enumeratio/notatio/wiki/Sites) the plan for the two sites. When a rule here changes, change it there
+is the vision and [Sites](https://github.com/enumeratio/notatio/wiki/Sites) the plan for the site. When a rule here changes, change it there
 too; when the wiki grows a rule an agent must follow, add its one line here.
 
 User-facing docs are not design docs: they ship with their package, as its `README.md` (the
 landing page) and `docs/**/*.md` (further pages, `order` in front matter), and the site serves
 them under `/docs/<package>/`, never copied into `web/`. A guide is a package doc page. Link
-another package's docs by relative file path and the site absolutely (`https://enumeratio.dev/…`),
+another package's docs by relative file path and the site absolutely (`https://notatio.app/…`),
 so a page reads the same on GitHub and on the site.
 
 ## Names
@@ -255,10 +255,10 @@ kernel, the network or hand curation stays committed.
     config, CI or the engine selects all packages.
   - The nightly (`ci.yml`'s schedule, also `workflow_dispatch`) tests every package and all of combinatorics, and files a
     rolling `nightly-fixup` issue on failure. Main never cancels an in-progress run.
-- **Production** ships from Cloudflare Pages on merge to `main`; `ci.yml` deploys the one site build to two
-  projects, `enumeratio` (`enumeratio.dev`) and `notatio` (`notatio.app`), while both hosts serve the same site.
-  Every build also goes up as a preview at `<sha7>.enumeratio.pages.dev` and `<sha7>.notatio.pages.dev`; the PR's
-  sticky `<!-- cf-preview -->` comment carries both URLs, and review links go below its first
+- **Production** ships from Cloudflare Pages on merge to `main`; `ci.yml` deploys the one site build to the
+  one Pages project, `notatio` (`notatio.app`); enumeratio.dev is a separate site in its own repository.
+  Every build also goes up as a preview at `<sha7>.notatio.pages.dev`; the PR's
+  sticky `<!-- cf-preview -->` comment carries that URL, and review links go below its first
   two lines, which each push rewrites.
 - **Advisory sweeps** (Plausible on main and nightly, the nightly and weekly oracle rescans, the nightly tarball check) are never
   required checks. A lane fails when an answered row changes verdict, classification or input, not on

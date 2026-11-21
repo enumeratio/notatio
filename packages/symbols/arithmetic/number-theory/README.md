@@ -34,38 +34,38 @@ HermiteDecomposition([[1, 2], [3, 4]])      // the unimodular u and Hermite form
 
 **Primes and factoring**
 
-- [`FactorInteger`](https://enumeratio.dev/reference/symbol/FactorInteger) / [`Divisors`](https://enumeratio.dev/reference/symbol/Divisors) — prime factorization and the divisor list
-- [`IsPrime`](https://enumeratio.dev/reference/symbol/IsPrime) / [`IsPrimePower`](https://enumeratio.dev/reference/symbol/IsPrimePower) / [`IsSquareFree`](https://enumeratio.dev/reference/symbol/IsSquareFree)
-- [`NextPrime`](https://enumeratio.dev/reference/symbol/NextPrime) / [`NthPrime`](https://enumeratio.dev/reference/symbol/NthPrime) / [`PrimePi`](https://enumeratio.dev/reference/symbol/PrimePi)
+- [`FactorInteger`](https://notatio.app/reference/symbol/FactorInteger) / [`Divisors`](https://notatio.app/reference/symbol/Divisors) — prime factorization and the divisor list
+- [`IsPrime`](https://notatio.app/reference/symbol/IsPrime) / [`IsPrimePower`](https://notatio.app/reference/symbol/IsPrimePower) / [`IsSquareFree`](https://notatio.app/reference/symbol/IsSquareFree)
+- [`NextPrime`](https://notatio.app/reference/symbol/NextPrime) / [`NthPrime`](https://notatio.app/reference/symbol/NthPrime) / [`PrimePi`](https://notatio.app/reference/symbol/PrimePi)
 
 **Divisor and multiplicative functions**
 
-- [`DivisorSigma`](https://enumeratio.dev/reference/symbol/DivisorSigma) / [`DivisorSum`](https://enumeratio.dev/reference/symbol/DivisorSum) / [`Totient`](https://enumeratio.dev/reference/symbol/Totient) / [`CarmichaelLambda`](https://enumeratio.dev/reference/symbol/CarmichaelLambda)
-- [`MoebiusMu`](https://enumeratio.dev/reference/symbol/MoebiusMu) / [`MangoldtLambda`](https://enumeratio.dev/reference/symbol/MangoldtLambda) / [`LiouvilleLambda`](https://enumeratio.dev/reference/symbol/LiouvilleLambda)
-- [`PrimeNu`](https://enumeratio.dev/reference/symbol/PrimeNu) / [`PrimeOmega`](https://enumeratio.dev/reference/symbol/PrimeOmega) — distinct and with-multiplicity prime counts
-- [`IsPerfect`](https://enumeratio.dev/reference/symbol/IsPerfect) / [`PerfectNumber`](https://enumeratio.dev/reference/symbol/PerfectNumber) / [`MersennePrimeExponent`](https://enumeratio.dev/reference/symbol/MersennePrimeExponent)
-- [`Abundance`](https://enumeratio.dev/reference/symbol/Abundance) / [`AliquotSum`](https://enumeratio.dev/reference/symbol/AliquotSum) — $\sigma(n)-2n$ and $\sigma(n)-n$
-- [`SquareFreePart`](https://enumeratio.dev/reference/symbol/SquareFreePart) / [`SquarePartRoot`](https://enumeratio.dev/reference/symbol/SquarePartRoot) — $q$ and $s$ in $n=\pm s^2q$ with $q$ square-free
+- [`DivisorSigma`](https://notatio.app/reference/symbol/DivisorSigma) / [`DivisorSum`](https://notatio.app/reference/symbol/DivisorSum) / [`Totient`](https://notatio.app/reference/symbol/Totient) / [`CarmichaelLambda`](https://notatio.app/reference/symbol/CarmichaelLambda)
+- [`MoebiusMu`](https://notatio.app/reference/symbol/MoebiusMu) / [`MangoldtLambda`](https://notatio.app/reference/symbol/MangoldtLambda) / [`LiouvilleLambda`](https://notatio.app/reference/symbol/LiouvilleLambda)
+- [`PrimeNu`](https://notatio.app/reference/symbol/PrimeNu) / [`PrimeOmega`](https://notatio.app/reference/symbol/PrimeOmega) — distinct and with-multiplicity prime counts
+- [`IsPerfect`](https://notatio.app/reference/symbol/IsPerfect) / [`PerfectNumber`](https://notatio.app/reference/symbol/PerfectNumber) / [`MersennePrimeExponent`](https://notatio.app/reference/symbol/MersennePrimeExponent)
+- [`Abundance`](https://notatio.app/reference/symbol/Abundance) / [`AliquotSum`](https://notatio.app/reference/symbol/AliquotSum) — $\sigma(n)-2n$ and $\sigma(n)-n$
+- [`SquareFreePart`](https://notatio.app/reference/symbol/SquareFreePart) / [`SquarePartRoot`](https://notatio.app/reference/symbol/SquarePartRoot) — $q$ and $s$ in $n=\pm s^2q$ with $q$ square-free
 
 **GCD, modular and symbols**
 
-- [`GCD`](https://enumeratio.dev/reference/symbol/GCD) / [`LCM`](https://enumeratio.dev/reference/symbol/LCM) / [`ExtendedGCD`](https://enumeratio.dev/reference/symbol/ExtendedGCD) / [`IsCoprime`](https://enumeratio.dev/reference/symbol/IsCoprime)
-- [`ModularInverse`](https://enumeratio.dev/reference/symbol/ModularInverse) / [`IntegerExponent`](https://enumeratio.dev/reference/symbol/IntegerExponent) / [`Quotient`](https://enumeratio.dev/reference/symbol/Quotient)
-- [`JacobiSymbol`](https://enumeratio.dev/reference/symbol/JacobiSymbol) / [`KroneckerSymbol`](https://enumeratio.dev/reference/symbol/KroneckerSymbol) / [`LegendreSymbol`](https://enumeratio.dev/reference/symbol/LegendreSymbol)
+- [`GCD`](https://notatio.app/reference/symbol/GCD) / [`LCM`](https://notatio.app/reference/symbol/LCM) / [`ExtendedGCD`](https://notatio.app/reference/symbol/ExtendedGCD) / [`IsCoprime`](https://notatio.app/reference/symbol/IsCoprime)
+- [`ModularInverse`](https://notatio.app/reference/symbol/ModularInverse) / [`IntegerExponent`](https://notatio.app/reference/symbol/IntegerExponent) / [`Quotient`](https://notatio.app/reference/symbol/Quotient)
+- [`JacobiSymbol`](https://notatio.app/reference/symbol/JacobiSymbol) / [`KroneckerSymbol`](https://notatio.app/reference/symbol/KroneckerSymbol) / [`LegendreSymbol`](https://notatio.app/reference/symbol/LegendreSymbol)
 
 **Sequences and combinatorial number theory**
 
-- [`Fibonacci`](https://enumeratio.dev/reference/symbol/Fibonacci) / [`LucasL`](https://enumeratio.dev/reference/symbol/LucasL) — fast doubling, and continuous on the profinite integers `@notatio/adeles` adds
-- [`BellNumber`](https://enumeratio.dev/reference/symbol/BellNumber) / [`CatalanNumber`](https://enumeratio.dev/reference/symbol/CatalanNumber) / [`Stirling`](https://enumeratio.dev/reference/symbol/Stirling) / [`StirlingS1`](https://enumeratio.dev/reference/symbol/StirlingS1) / [`Multinomial`](https://enumeratio.dev/reference/symbol/Multinomial) / [`Subfactorial`](https://enumeratio.dev/reference/symbol/Subfactorial)
-- [`PartitionsQ`](https://enumeratio.dev/reference/symbol/PartitionsQ) / [`SquaresR`](https://enumeratio.dev/reference/symbol/SquaresR) / [`PowersRepresentations`](https://enumeratio.dev/reference/symbol/PowersRepresentations) / [`RamanujanTau`](https://enumeratio.dev/reference/symbol/RamanujanTau)
-- [`FrobeniusNumber`](https://enumeratio.dev/reference/symbol/FrobeniusNumber) / [`FrobeniusSolve`](https://enumeratio.dev/reference/symbol/FrobeniusSolve) — the largest non-representable value, and every representation, for a coin-problem instance
-- [`EulerE`](https://enumeratio.dev/reference/symbol/EulerE) at an integer index
+- [`Fibonacci`](https://notatio.app/reference/symbol/Fibonacci) / [`LucasL`](https://notatio.app/reference/symbol/LucasL) — fast doubling, and continuous on the profinite integers `@notatio/adeles` adds
+- [`BellNumber`](https://notatio.app/reference/symbol/BellNumber) / [`CatalanNumber`](https://notatio.app/reference/symbol/CatalanNumber) / [`Stirling`](https://notatio.app/reference/symbol/Stirling) / [`StirlingS1`](https://notatio.app/reference/symbol/StirlingS1) / [`Multinomial`](https://notatio.app/reference/symbol/Multinomial) / [`Subfactorial`](https://notatio.app/reference/symbol/Subfactorial)
+- [`PartitionsQ`](https://notatio.app/reference/symbol/PartitionsQ) / [`SquaresR`](https://notatio.app/reference/symbol/SquaresR) / [`PowersRepresentations`](https://notatio.app/reference/symbol/PowersRepresentations) / [`RamanujanTau`](https://notatio.app/reference/symbol/RamanujanTau)
+- [`FrobeniusNumber`](https://notatio.app/reference/symbol/FrobeniusNumber) / [`FrobeniusSolve`](https://notatio.app/reference/symbol/FrobeniusSolve) — the largest non-representable value, and every representation, for a coin-problem instance
+- [`EulerE`](https://notatio.app/reference/symbol/EulerE) at an integer index
 
 **Past the integers**
 
-- [`GaussianIntegers`](https://enumeratio.dev/reference/symbol/GaussianIntegers) — $\mathbb{Z}[i]$; `PowerMod`, `PowerModList`, `GCD`, `LCM`, `IntegerExponent` and `Divisors` all reach into it when an operand is genuinely complex
-- [`RationalReconstruction`](https://enumeratio.dev/reference/symbol/RationalReconstruction) — the rational nearest a residue mod $m$
-- [`HermiteDecomposition`](https://enumeratio.dev/reference/symbol/HermiteDecomposition) — unimodular $u$ with $um$ in Hermite normal form; backs `@notatio/adeles`' strong approximation
+- [`GaussianIntegers`](https://notatio.app/reference/symbol/GaussianIntegers) — $\mathbb{Z}[i]$; `PowerMod`, `PowerModList`, `GCD`, `LCM`, `IntegerExponent` and `Divisors` all reach into it when an operand is genuinely complex
+- [`RationalReconstruction`](https://notatio.app/reference/symbol/RationalReconstruction) — the rational nearest a residue mod $m$
+- [`HermiteDecomposition`](https://notatio.app/reference/symbol/HermiteDecomposition) — unimodular $u$ with $um$ in Hermite normal form; backs `@notatio/adeles`' strong approximation
 
 ## See also
 

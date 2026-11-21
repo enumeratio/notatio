@@ -48,14 +48,14 @@ package rather than its own:
   entry there.
 
 A representative few, each with its own reference page:
-[SymmetricGroup](https://enumeratio.dev/reference/symbol/SymmetricGroup),
-[KSubsets](https://enumeratio.dev/reference/symbol/KSubsets),
-[IntegerPartitions](https://enumeratio.dev/reference/symbol/IntegerPartitions),
-[SetPartitions](https://enumeratio.dev/reference/symbol/SetPartitions),
-[DyckPaths](https://enumeratio.dev/reference/symbol/DyckPaths),
-[BinaryTrees](https://enumeratio.dev/reference/symbol/BinaryTrees),
-[SemistandardTableaux](https://enumeratio.dev/reference/symbol/SemistandardTableaux),
-[Graph](https://enumeratio.dev/reference/symbol/Graph).
+[SymmetricGroup](https://notatio.app/reference/symbol/SymmetricGroup),
+[KSubsets](https://notatio.app/reference/symbol/KSubsets),
+[IntegerPartitions](https://notatio.app/reference/symbol/IntegerPartitions),
+[SetPartitions](https://notatio.app/reference/symbol/SetPartitions),
+[DyckPaths](https://notatio.app/reference/symbol/DyckPaths),
+[BinaryTrees](https://notatio.app/reference/symbol/BinaryTrees),
+[SemistandardTableaux](https://notatio.app/reference/symbol/SemistandardTableaux),
+[Graph](https://notatio.app/reference/symbol/Graph).
 
 ## Commands
 

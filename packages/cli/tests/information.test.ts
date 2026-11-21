@@ -12,7 +12,7 @@ test("?Name: the kind, summary, signature and page", async () => {
   expect(text).toContain(
     "(binary_word | composition | dyck_path | list | permutation | standard_tableau) -> integer | number",
   );
-  expect(text).toContain("https://enumeratio.dev/reference/symbol/MajorIndex");
+  expect(text).toContain("https://notatio.app/reference/symbol/MajorIndex");
   expect(text).not.toContain("overloads");
 });
 
