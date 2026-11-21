@@ -18,11 +18,21 @@ const OLD = "https://enumeratio.dev";
 const NEW = "https://notatio.app";
 const check = process.argv.includes("--check");
 
-const files = execFileSync("git", ["grep", "-lI", "-F", OLD, "--", ".", ":!pnpm-lock.yaml", ":!tools/codemods"], {
-  encoding: "utf8",
-})
-  .split("\n")
-  .filter(Boolean);
+/** Tracked text files naming the old origin; none on a tree already ported (git grep then exits 1). */
+function filesNamingOld(): string[] {
+  try {
+    return execFileSync("git", ["grep", "-lI", "-F", OLD, "--", ".", ":!pnpm-lock.yaml", ":!tools/codemods"], {
+      encoding: "utf8",
+    })
+      .split("\n")
+      .filter(Boolean);
+  } catch (error) {
+    if ((error as { status?: number }).status === 1) return [];
+    throw error;
+  }
+}
+
+const files = filesNamingOld();
 
 for (const file of files) {
   const text = readFileSync(file, "utf8");
