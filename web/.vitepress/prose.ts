@@ -1,33 +1,20 @@
 // Record prose (summaries, details, captions, notes) through the prose boxes
 // (https://github.com/enumeratio/notatio/wiki/Boxes): markdown read into boxes, then HTML, with `$…$`
 // typeset from its TeX as written. Synchronous, so the same call renders at build
-// and in the browser.
+// and in the browser. A line of prose is `renderSummary` from `@notatio/formats/typeset`, the
+// function the published package exports; the block forms here are the site's own.
 
 import { type Box } from "@notatio/boxes";
-import { readInlineMarkdown, readMarkdown, toHtml } from "@notatio/boxes/render";
-import { typeset as typesetTeX } from "@notatio/formats/typeset";
+import { readMarkdown, toHtml } from "@notatio/boxes/render";
+import { type ProseOptions, renderSummary, typesetProse } from "@notatio/formats/typeset";
 
-const typeset = new Map<string, string>();
+export type { ProseOptions };
 
 /** HTML for TeX, memoised: a page repeats its formulas, and the site repeats its pages. */
-export function tex(latex: string, display: boolean): string {
-  const key = `${display ? "D" : "I"}${latex}`;
-  let html = typeset.get(key);
-  if (html === undefined) {
-    html = typesetTeX(latex, { display });
-    typeset.set(key, html);
-  }
-  return html;
-}
-
-export interface ProseOptions {
-  /** The href for `[[Head]]`, or `undefined` to leave the name as text. */
-  readonly link?: (head: string) => string | undefined;
-}
+export const tex = typesetProse;
 
 /** One line of prose (a summary, a caption) as inline HTML. */
-export const renderInline = (markdown: string, options: ProseOptions = {}): string =>
-  toHtml(readInlineMarkdown(markdown), { tex, ...options });
+export const renderInline = renderSummary;
 
 /** Prose as block HTML; a single paragraph stays inline, for a list item or a table cell. */
 export function renderBlock(markdown: string, options: ProseOptions = {}): string {
