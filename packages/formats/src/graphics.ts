@@ -156,6 +156,8 @@ export const GRAPHICS_HEADS: readonly string[] = [
   "Tooltip",
   "PaneSelector",
   "Labeled",
+  // `Graphics(primitives, options)`: primitives in a frame of their own.
+  "Graphics",
   // Graphics primitives: marks a plot draws in its own coordinates (`Epilog -> Point(…)`).
   "Point",
   "Line",
@@ -186,7 +188,7 @@ export function declareHistogram(ce: ComputeEngine): void {
 }
 
 /** Graphics heads whose arguments are held as written, not canonicalised: see `declareGraphics`. */
-const HELD_GRAPHICS: ReadonlySet<string> = new Set(["Show", "Variable"]);
+const HELD_GRAPHICS: ReadonlySet<string> = new Set(["Show", "Variable", "Graphics"]);
 
 /**
  * Left undeclared: structures' `Midpoint` of two points reads the type an undeclared `Point`

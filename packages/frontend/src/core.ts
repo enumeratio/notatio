@@ -31,6 +31,7 @@ export * from "./manipulate.ts";
 export * from "./infer-controls.ts";
 export * from "./orbit.ts";
 export * from "./gestures.ts";
+export * from "./directives.ts";
 export * from "./graphics-rules.ts";
 export * from "./tiles-canvas.ts";
 export * from "./graphics-box.ts";

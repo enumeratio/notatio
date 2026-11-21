@@ -513,6 +513,9 @@ const regionFunction = (value: Json): Record<string, string> => {
   };
 };
 
+/** `AxesLabel -> [x, y]`, or one label for the x axis: read as `FrameLabel` is. */
+const axesLabel = frameLabel;
+
 /** The 2-D vector plots' options: the axis captions, and the gradient their values are drawn from. */
 const VECTOR_OPTIONS = { ...AXES_LABEL_OPTIONS, PlotLabel: "label", ColorFunction: colorFunction };
 
@@ -522,10 +525,13 @@ const VECTOR_OPTIONS = { ...AXES_LABEL_OPTIONS, PlotLabel: "label", ColorFunctio
  */
 const FIELD_OPTIONS = { ...VECTOR_OPTIONS, FrameLabel: frameLabel, RegionFunction: regionFunction };
 
+/** An expression as MathJSON text, heads and all, for a lowering that reads its structure. */
+const mathJson = (node: Json): string => JSON.stringify(plainJson(node as never));
+
 /** A style option's value as written, for the lowering to read (`PlotStyle -> Opacity(0.5, Teal)`). */
 const written =
   (attribute: string) =>
-  (value: Json): Record<string, string> => ({ [attribute]: json(value) });
+  (value: Json): Record<string, string> => ({ [attribute]: mathJson(value) });
 
 /** `RegionPlot`'s options: the field options, and Wolfram's `PlotStyle` and `BoundaryStyle` for the fill and its edge. */
 const REGION_OPTIONS = { ...FIELD_OPTIONS, PlotStyle: written("plot-style"), BoundaryStyle: written("boundary-style") };
@@ -597,14 +603,62 @@ function scalingFunctionsOption(value: Json): Record<string, string> {
  * as `Show` does) and takes these rows' attributes from it, so each option keeps the name its
  * sampling code was written in. They are settings, not tags: the tag is `graphics-box`.
  */
+/** `Axes -> False` takes the axes away, and `Axes -> True` puts them on a head that has none by default. */
+const axesOption = (value: Json): Record<string, string> => {
+  const word = (strOf(value) ?? symOf(value))?.toLowerCase();
+  return word === "true" || word === "false" ? { axes: word } : {};
+};
+
+/**
+ * `PlotRange -> (y0, y1)` is the y window; `((x0, x1), (y0, y1))` both. `All` and `Automatic`, for
+ * the whole or for either pair, leave that window to the plot.
+ */
+const plotRange = (value: Json): Record<string, string> => {
+  const parts = tupleOf(value) ?? (headOf(value) === "List" ? opsOf(value) : undefined);
+  if (parts === undefined) return {};
+  const pair = (node: Json | undefined): string | undefined => {
+    const ends =
+      node === undefined ? undefined : (tupleOf(node) ?? (headOf(node) === "List" ? opsOf(node) : undefined));
+    return ends?.length === 2 ? ends.map(clean).join(",") : undefined;
+  };
+  const both = parts.length === 2 && parts.some((part) => pair(part) !== undefined || symOf(part) !== undefined);
+  const [x, y] = both ? [pair(parts[0]), pair(parts[1])] : [undefined, pair(value)];
+  return { ...(x !== undefined && { "plot-x-range": x }), ...(y !== undefined && { "plot-range": y }) };
+};
+
+/** `AspectRatio -> r`: the plot area's height over its width. `Automatic` is the head's own. */
+const aspectRatio = (value: Json): Record<string, string> => {
+  const text = symOf(value) === undefined ? clean(value) : undefined;
+  return text !== undefined && Number(text) > 0 ? { aspect: text } : {};
+};
+
+/** The frame's options every 2-D plot and `Graphics` read alike. */
+const FRAME_OPTIONS = {
+  Axes: axesOption,
+  Frame: "frame",
+  PlotLabel: "label",
+  GridLines: "grid",
+  PlotRange: plotRange,
+  AspectRatio: aspectRatio,
+} satisfies VisualSymbol["options"];
+
+/** A curve plot's `PlotStyle`, as written, for the lowering to read as directives. */
+const CURVE_OPTIONS = { ...FRAME_OPTIONS, PlotStyle: written("plot-style") } satisfies VisualSymbol["options"];
+
 export const PLOT_SETTINGS: readonly VisualSymbol[] = [
+  {
+    // `Graphics(primitives, options)`: the primitives as written, read with their directives by the lowering.
+    head: "Graphics",
+    tag: "graphics-box",
+    attributes: (ops) => ({ ...(ops[0] !== undefined && { primitives: mathJson(ops[0]) }) }),
+    options: { ...FRAME_OPTIONS, AxesLabel: axesLabel, FrameLabel: frameLabel },
+  },
   {
     head: "Plot",
     tag: "graphics-box",
     attributes: (ops) => oneVariable(ops, { value: "value", variable: "var", range: "domain" }),
     options: {
-      PlotLabel: "label",
-      GridLines: "grid",
+      ...CURVE_OPTIONS,
       PlotLegends: "legend",
       // `Filling -> True` / `ColorFunction -> "y"`: genuine Wolfram `Plot` options with
       // no kebab-cased match on the component's own attribute names (`fill`, `color-by`).
@@ -613,21 +667,7 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
       // `PlotPoints -> 240`: Wolfram's name for the initial sample count before adaptive
       // refinement -- the component calls the same thing `samples`.
       PlotPoints: "samples",
-      // `AxesLabel -> ("x", "y")`, or one label for the x axis.
-      AxesLabel: (value) => {
-        const parts = tupleOf(value) ?? [value];
-        const out: Record<string, string> = {};
-        if (parts[0] !== undefined) out["x-label"] = strOf(parts[0]) ?? epsil(parts[0]);
-        if (parts[1] !== undefined) out["y-label"] = strOf(parts[1]) ?? epsil(parts[1]);
-        return out;
-      },
-      // A range is `(a, b)` for y, or `((x0, x1), (y0, y1))`; the component takes the y pair.
-      PlotRange: (value): Record<string, string> => {
-        const parts = tupleOf(value);
-        if (parts === undefined) return {};
-        const y = tupleOf(parts[1]) ?? (parts.length === 2 && tupleOf(parts[0]) === undefined ? parts : undefined);
-        return y === undefined ? {} : { "plot-range": y.map(clean).join(",") };
-      },
+      AxesLabel: axesLabel,
       ScalingFunctions: scalingFunctionsOption,
     },
   },
@@ -638,12 +678,13 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
     tag: "graphics-box",
     fixed: { parametric: "true" },
     attributes: (ops) => oneVariable(ops, { value: "value", variable: "var", range: "domain" }),
-    options: { PlotPoints: "samples" },
+    options: { ...CURVE_OPTIONS, PlotPoints: "samples" },
   },
   {
     head: "PolarPlot",
     tag: "graphics-box",
     attributes: (ops) => oneVariable(ops, { value: "expr", variable: "tvar", range: "trange" }),
+    options: { PlotStyle: written("plot-style") },
   },
   {
     // `ListPolarPlot(points)`: explicit `(theta, r)` pairs, or bare radii spread evenly --
@@ -652,8 +693,8 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
     tag: "graphics-box",
     attributes: dataOnly,
   },
-  chart("ListPlot", "list"),
-  chart("ListLinePlot", "listline"),
+  chart("ListPlot", "list", CURVE_OPTIONS),
+  chart("ListLinePlot", "listline", CURVE_OPTIONS),
   {
     head: "VectorPlot",
     tag: "graphics-box",

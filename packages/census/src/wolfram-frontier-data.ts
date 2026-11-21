@@ -21,10 +21,6 @@ export interface FrontierEntry {
 
 export const FRONTIER: readonly FrontierEntry[] = [
   {
-    head: "Graphics",
-    uses: 782,
-  },
-  {
     head: "Directive",
     uses: 479,
   },
