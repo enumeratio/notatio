@@ -9,6 +9,7 @@ import { ensureOperationHeads } from "./operations.ts";
 import { ensureProtocols } from "./protocols.ts";
 
 export { type AlgebraFamily, declareAlgebra, ensureAlgebraHeads, type Product, registerProduct } from "./algebra.ts";
+export { conjugateComposition } from "./compositions.ts";
 export { compare, type Conformance, conform, type Member, member } from "./conform.ts";
 export {
   allCarrierNames,

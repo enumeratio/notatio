@@ -7,6 +7,7 @@ import type { Carrier } from "@notatio/structures";
 export const PARTITIONS_CARRIERS: readonly Carrier[] = [
   {
     name: "CorePartition",
+    readable: true,
     type: "core_partition",
     shape: "list<integer>",
     id: "core_partition",

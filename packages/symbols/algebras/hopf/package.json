@@ -35,6 +35,7 @@
   },
   "devDependencies": {
     "@cortex-js/compute-engine": "^0.187.1",
+    "@notatio/combinatorics": "workspace:*",
     "@notatio/config": "workspace:*",
     "@notatio/engine": "workspace:*",
     "@notatio/manifest": "workspace:*",
