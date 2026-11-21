@@ -729,19 +729,19 @@
   },
   "wedge": {
     "json": ["Wedge", "a", "b"],
-    "mathml": "<mrow><mi>a</mi><mo>∧</mo><mi>b</mi></mrow>"
+    "mathml": "<mrow><mi>a</mi><mo>⋀</mo><mi>b</mi></mrow>"
   },
   "wedge three": {
     "json": ["Wedge", "a", "b", "c"],
-    "mathml": "<mrow><mi>a</mi><mo>∧</mo><mi>b</mi><mo>∧</mo><mi>c</mi></mrow>"
+    "mathml": "<mrow><mi>a</mi><mo>⋀</mo><mi>b</mi><mo>⋀</mo><mi>c</mi></mrow>"
   },
   "vee": {
     "json": ["Vee", "a", "b", "algebra"],
-    "mathml": "<mrow><mi>a</mi><mo>∨</mo><mi>b</mi></mrow>"
+    "mathml": "<mrow><mi>a</mi><mo>⋁</mo><mi>b</mi></mrow>"
   },
   "wedge of sum": {
     "json": ["Wedge", ["Add", "a", 1], "b"],
-    "mathml": "<mrow><mrow><mo>(</mo><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow><mo>∧</mo><mi>b</mi></mrow>"
+    "mathml": "<mrow><mrow><mo>(</mo><mrow><mi>a</mi><mo>+</mo><mn>1</mn></mrow><mo>)</mo></mrow><mo>⋀</mo><mi>b</mi></mrow>"
   },
   "ordered juxtaposition": {
     "json": ["InvisibleOperator", "e_2", "e_1"],

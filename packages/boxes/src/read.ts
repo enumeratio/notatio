@@ -74,6 +74,7 @@ for (const [ascii, head] of [
 ] as const)
   RELATION_OF.set(ascii, head);
 
+const SET_HEADS: Record<string, string> = { "∪": "Union", "∩": "Intersection", "△": "SymmetricDifference" };
 const TIMES = new Set([INVISIBLE_TIMES, "⋅", "×", "*", "·", "∗"]);
 const isMinus = (t: unknown): boolean => t === "−" || t === "-";
 const DIVIDES = new Set(["/", "÷"]);
@@ -377,12 +378,12 @@ class Reader {
   }
 
   relation(): Json {
-    const operands = [this.symmetricDifference()];
+    const operands = [this.add()];
     const heads: string[] = [];
     for (let head = this.relationHead(); head !== undefined; head = this.relationHead()) {
       this.pos++;
       heads.push(head);
-      operands.push(this.symmetricDifference());
+      operands.push(this.add());
     }
     if (heads.length === 0) return operands[0]!;
     if (heads.every((h) => h === heads[0])) return [heads[0]!, ...operands] as Json;
@@ -392,13 +393,6 @@ class Reader {
   relationHead(): string | undefined {
     const t = this.peek();
     return typeof t === "string" ? RELATION_OF.get(t) : undefined;
-  }
-
-  /** `a △ b △ c`, one call: looser than a sum, tighter than a relation. */
-  symmetricDifference(): Json {
-    const operands = [this.add()];
-    while (this.eat("△")) operands.push(this.add());
-    return operands.length === 1 ? operands[0]! : (["SymmetricDifference", ...operands] as Json);
   }
 
   add(): Json {
@@ -420,13 +414,13 @@ class Reader {
   }
 
   /**
-   * `∪` and `∩` after `first`, between a sum and a product as in compute-engine. A run of one
+   * `∪`, `∩` and `△` after `first`, between a sum and a product as in compute-engine. A run of one
    * operator is one call (`a ∪ b ∪ c`); a different operator after it nests to the right, as
    * compute-engine reads `a ∪ b ∩ c` as `Union(a, Intersection(b, c))`.
    */
   setOperators(first: Json): Json {
     const glyph = this.peek();
-    if (glyph !== "∪" && glyph !== "∩") return first;
+    if (typeof glyph !== "string" || !(glyph in SET_HEADS)) return first;
     const operands = [first];
     while (this.eat(glyph)) {
       const next = this.multiply();
@@ -436,7 +430,21 @@ class Reader {
         break;
       }
     }
-    return [glyph === "∪" ? "Union" : "Intersection", ...operands] as Json;
+    return [SET_HEADS[glyph]!, ...operands] as Json;
+  }
+
+  /** `a ⋁ b`, the regressive product, left-nested; binds tighter than a product. */
+  vee(): Json {
+    let left = this.wedge();
+    while (this.eat("⋁")) left = ["Vee", left, this.wedge()] as Json;
+    return left;
+  }
+
+  /** `a ⋀ b ⋀ c`, one call: the outer product, tighter than `⋁`. */
+  wedge(): Json {
+    const operands = [this.setMinus()];
+    while (this.eat("⋀")) operands.push(this.setMinus());
+    return operands.length === 1 ? operands[0]! : (["Wedge", ...operands] as Json);
   }
 
   /** `a ∖ b ∖ c`, one call, binding tighter than a product. */
@@ -457,31 +465,31 @@ class Reader {
   }
 
   multiply(): Json {
-    let factors: Json[] = [this.setMinus()];
+    let factors: Json[] = [this.vee()];
     const fold = (): Json => (factors.length === 1 ? factors[0]! : (["Multiply", ...factors] as Json));
     for (;;) {
       const t = this.peek();
       if (typeof t === "string") {
         if (TIMES.has(t)) {
           this.pos++;
-          const next = this.setMinus();
+          const next = this.vee();
           const scientific = t === "×" && factors.length === 1 ? scientificNumber(factors[0]!, next) : undefined;
           factors = scientific === undefined ? [...factors, next] : [scientific];
           continue;
         }
         if (DIVIDES.has(t)) {
           this.pos++;
-          factors = [["Divide", fold(), this.setMinus()] as Json];
+          factors = [["Divide", fold(), this.vee()] as Json];
           continue;
         }
         if (t === "mod") {
           this.pos++;
-          factors = [["Mod", fold(), this.setMinus()] as Json];
+          factors = [["Mod", fold(), this.vee()] as Json];
           continue;
         }
       }
       if (!this.startsFactor(t)) break;
-      factors.push(this.setMinus());
+      factors.push(this.vee());
     }
     return fold();
   }

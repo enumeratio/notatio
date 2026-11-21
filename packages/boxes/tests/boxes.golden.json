@@ -1308,27 +1308,27 @@
     "ascii": "{x if x > 0}"
   },
   "wedge": {
-    "boxes": ["RowBox", ["a", "∧", "b"]],
-    "latex": "a∧b",
-    "text": "a ∧ b",
+    "boxes": ["RowBox", ["a", "⋀", "b"]],
+    "latex": "a\\wedge b",
+    "text": "a ⋀ b",
     "ascii": "a ^^ b"
   },
   "wedge three": {
-    "boxes": ["RowBox", ["a", "∧", "b", "∧", "c"]],
-    "latex": "a∧b∧c",
-    "text": "a ∧ b ∧ c",
+    "boxes": ["RowBox", ["a", "⋀", "b", "⋀", "c"]],
+    "latex": "a\\wedge b\\wedge c",
+    "text": "a ⋀ b ⋀ c",
     "ascii": "a ^^ b ^^ c"
   },
   "vee": {
-    "boxes": ["RowBox", ["a", "∨", "b"]],
-    "latex": "a∨b",
-    "text": "a ∨ b",
+    "boxes": ["RowBox", ["a", "⋁", "b"]],
+    "latex": "a\\vee b",
+    "text": "a ⋁ b",
     "ascii": "a vv b"
   },
   "wedge of sum": {
-    "boxes": ["RowBox", [["RowBox", ["(", ["RowBox", ["a", "+", "1"]], ")"]], "∧", "b"]],
-    "latex": "(a+1)∧b",
-    "text": "(a + 1) ∧ b",
+    "boxes": ["RowBox", [["RowBox", ["(", ["RowBox", ["a", "+", "1"]], ")"]], "⋀", "b"]],
+    "latex": "(a+1)\\wedge b",
+    "text": "(a + 1) ⋀ b",
     "ascii": "(a + 1) ^^ b"
   },
   "ordered juxtaposition": {
