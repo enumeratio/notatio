@@ -2,7 +2,7 @@
 // a kernel's display carries it with the other code forms.
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
-import { expect, test } from "vite-plus/test";
+import { expect, test, vi } from "vite-plus/test";
 import { codeForms } from "../src/code-forms.ts";
 import { display } from "../src/kernel-host.ts";
 
@@ -47,4 +47,11 @@ test("a portrait carries the kernels its expression calls and not the others", (
   expect(names).toContain("uncertain"); // the hatching reads it
   expect(names).not.toContain("cbesselJ");
   expect(names).not.toContain("hurwitz");
+});
+
+test("a head with no lowering is declined without a warning", () => {
+  const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+  for (const json of [["Factorization", 360], ["Divisors", 360], ["Pi"]]) display(ce, json);
+  expect(warn).not.toHaveBeenCalled();
+  warn.mockRestore();
 });

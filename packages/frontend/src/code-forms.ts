@@ -27,13 +27,29 @@ export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<Code
       // this target can't compile this expression
     }
   }
-  try {
-    const code = (compile(json as never, { engine: ce } as never) as { code?: unknown } | undefined)?.code;
-    if (typeof code === "string") out.javascript = code;
-  } catch {
-    // not compilable to JavaScript
-  }
+  const javascript = javascriptSource(ce, json);
+  if (javascript !== undefined) out.javascript = javascript;
   return out;
+}
+
+/** A decline of the compiler by design (a head with no lowering, or one that refuses), not a failure. */
+const isDecline = (error: unknown): boolean =>
+  error instanceof Error && /^(Unknown operator|no \w+ lowering|Could not compile)/.test(error.message);
+
+/**
+ * `json` compiled to JavaScript source, or undefined. A decline is expected here (a list or a held
+ * head like `Factorization` has no source) and stays silent: `fallback: false` keeps compute-engine
+ * from logging each one. Any other failure is still warned about.
+ */
+export function javascriptSource(ce: ComputeEngine, json: unknown): string | undefined {
+  try {
+    const code = (compile(json as never, { engine: ce, fallback: false } as never) as { code?: unknown } | undefined)
+      ?.code;
+    return typeof code === "string" ? code : undefined;
+  } catch (error) {
+    if (!isDecline(error)) console.warn("JavaScript code form failed:", error);
+    return undefined;
+  }
 }
 
 /**
