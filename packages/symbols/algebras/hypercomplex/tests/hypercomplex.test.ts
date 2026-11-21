@@ -65,8 +65,8 @@ test("compute-engine's i is a scalar coefficient, distinct from i_1", () => {
 test("j_k² = +1 and the split algebra has zero divisors", () => {
   sameLatex("j_1^2", 1);
   sameLatex("(1+j_1)(1-j_1)", 0); // 1 − j_1² = 0
-  sameLatex("\\operatorname{Norm}(3+4j_1)", -7); // a² − b², not a² + b²
-  sameLatex("\\operatorname{Norm}(1+j_1)", 0);
+  sameLatex("\\operatorname{AlgebraNorm}(3+4j_1)", -7); // a² − b², not a² + b²
+  sameLatex("\\operatorname{AlgebraNorm}(1+j_1)", 0);
   expect(ce.parse("\\frac{1}{1+j_1}").evaluate().operator).toBe("Divide"); // no inverse
 });
 
@@ -87,7 +87,7 @@ test("mixing families: i_1 j_1 is a fourth root of unity times a split unit", ()
 test("ε_k² = 0 — dual numbers", () => {
   sameLatex("\\epsilon_1^2", 0);
   sameLatex("(1+\\epsilon_1)(1-\\epsilon_1)", 1);
-  sameLatex("\\operatorname{Norm}(3+4\\epsilon_1)", 9); // a², the ε-part is invisible
+  sameLatex("\\operatorname{AlgebraNorm}(3+4\\epsilon_1)", 9); // a², the ε-part is invisible
   sameLatex("(2+\\epsilon_1)^{-1}", ["Subtract", ["Rational", 1, 2], ["Multiply", ["Rational", 1, 4], "epsilon_1"]]);
   sameLatex("\\epsilon_1\\epsilon_2", ["Multiply", "epsilon_1", "epsilon_2"]); // distinct: not 0
 });
@@ -211,7 +211,38 @@ test("explicit × still REFUSES two distinct anticommuting units rather than gue
   // `NonCommutativeMultiply` / ⊗ is the ordered product to write instead.
   expect(ce.parse("e_2 \\times e_1").evaluate().json).toEqual(["Multiply", "e_1", "e_2"]);
   expect(ce.box(["Multiply", "e_2", "e_1"]).evaluate().json).toEqual(["Multiply", "e_1", "e_2"]);
-  expect(ce.box(["Norm", ["Multiply", "e_1", "e_2"]]).evaluate().operator).toBe("Norm");
+  expect(ce.box(["AlgebraNorm", ["Multiply", "e_1", "e_2"]]).evaluate().operator).toBe("AlgebraNorm");
+});
+
+// ── AlgebraNorm on a compute-engine complex, and Norm left alone ────────────────
+
+/** det of multiplication by a + bi on ℝ² (basis 1, i): the matrix [[a, −b], [b, a]]. */
+const determinantOfMultiplication = (a: number, b: number): number => a * a + b * b;
+
+test("AlgebraNorm of a Gaussian integer is its determinant of multiplication, a² + b²", () => {
+  for (const [a, b] of [
+    [3, 4],
+    [1, 1],
+    [-2, 5],
+    [0, 7],
+  ] as const) {
+    same(["AlgebraNorm", ["Complex", a, b]], determinantOfMultiplication(a, b));
+  }
+  same(["AlgebraNorm", 5], 5); // a real literal: the norm over ℝ
+});
+
+test("AlgebraNorm agrees on evaluate and .N(), and stays inert on a symbol", () => {
+  expect(ce.box(["AlgebraNorm", ["Complex", 3, 4]]).N().re).toBeCloseTo(25);
+  expect(ce.box(["AlgebraNorm", ["Complex", 1.5, 2]]).N().re).toBeCloseTo(6.25);
+  expect(ce.box(["AlgebraNorm", "x"]).evaluate().operator).toBe("AlgebraNorm");
+  // A complex coefficient beside a generator has the ambient algebra ℂ[i_1], not what the blades say.
+  expect(ce.box(["AlgebraNorm", ["Add", ["Complex", 1, 1], "i_1"]]).evaluate().operator).toBe("AlgebraNorm");
+});
+
+test("Norm is compute-engine's, never the algebra norm", () => {
+  same(["Norm", ["Complex", 3, 4]], 5);
+  const onHypercomplex = ce.box(["Norm", ["Add", 3, ["Multiply", 4, "i_1"]]]).evaluate();
+  expect(onHypercomplex.json).not.toEqual(ce.number(25).json);
 });
 
 test("a blade's spelling survives compute-engine's commutative sort", () => {

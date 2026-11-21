@@ -28,6 +28,8 @@
     "ZeroDivisorCount on Poset"
   ],
   "untested": [
+    "AlgebraNorm on GaussianInteger",
+    "AlgebraNorm on Multicomplex",
     "Area on PythagoreanTriple",
     "Ascents on AscentSequence",
     "Collections on Text",
@@ -46,8 +48,6 @@
     "Inversions on PermutationCycles",
     "LargestPart on CorePartition",
     "Leaves on PlaneTree",
-    "Norm on GaussianInteger",
-    "Norm on Multicomplex",
     "Numerator on RationalNumber",
     "Peaks on ColoredMotzkinPath",
     "Peaks on KDyckPath",

@@ -181,6 +181,6 @@ global, not just bookkeeping per modulus.
 
 That is the direction, stated honestly as a direction: this page demonstrates the finite
 levels and the per-place criterion, and nothing here computes an adelic object. The
-pieces that would make it concrete — a `Norm` that names its ambient level, coefficients
+pieces that would make it concrete — a `AlgebraNorm` that names its ambient level, coefficients
 that live in ℤ/m rather than only mapping into it, and a per-place signature rather than
 one global square — are all still to build.

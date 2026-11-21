@@ -17,7 +17,7 @@ algebras, among them the quaternions.
 
 They are all the same construction with different dials, which is why one implementation
 covers them: `@notatio/hypercomplex` adds them to the shared engine so that ordinary
-arithmetic — `+ - × ÷`, integer powers, `Norm`, `Conjugate`, division — just works on
+arithmetic — `+ - × ÷`, integer powers, `AlgebraNorm`, `Conjugate`, division — just works on
 them, with exact coefficients.
 
 ## Hypercomplex units
@@ -38,7 +38,7 @@ across families too, as they must in a superalgebra.
 A generator is an ordinary subscripted symbol, so the **notation costs nothing** —
 compute-engine's LaTeX parser already reads `1 + 2i_1 - 3i_1i_2` as one sum over three
 basis units. What the package adds is the _algebra_: `+ - × ÷` and integer powers
-reduce to a canonical form, and `Norm`, `Conjugate` and division come along with it.
+reduce to a canonical form, and `AlgebraNorm`, `Conjugate` and division come along with it.
 
 Everything else is untouched: `x_1` is still a variable, `e` is still Euler's number,
 and compute-engine's own `i` is still its native complex unit.
@@ -91,15 +91,15 @@ For the Gaussians `z·conj(z)` is the norm. Above n = 1 **it is not even a scala
 <notatio-cell value="(1 + 2i_1 + 3i_2 + 4 * i_1 * i_2) * OverBar(1 + 2i_1 + 3i_2 + 4 * i_1 * i_2)" />
 </Story>
 
-So `Norm` is the **algebra norm**: the determinant of multiplication-by-z on the
+So `AlgebraNorm` is the **algebra norm**: the determinant of multiplication-by-z on the
 2ⁿ-dimensional space. It is computed through the tower ℂₙ = ℂₙ₋₁[iₙ]/(iₙ²+1), where
 `z = u + iₙ·v` gives `N(z) = N(u² + v²)` one level down — n squarings, not a
 2ⁿ × 2ⁿ elimination. At n = 1 it collapses to the Gaussian `a² + b²`.
 
 <Story title="The algebra norm">
-<template #description>25 = 3²+4². And Norm(1 + 2i_1 + 3i_1i_2) = 160 is the determinant of [1 −2 0 3; 2 1 −3 0; 0 −3 1 −2; 3 0 2 1].</template>
-<notatio-cell value="Norm(3 + 4i_1)" />
-<notatio-cell value="Norm(1 + 2i_1 + 3 * i_1 * i_2)" />
+<template #description>25 = 3²+4². And AlgebraNorm(1 + 2i_1 + 3i_1i_2) = 160 is the determinant of [1 −2 0 3; 2 1 −3 0; 0 −3 1 −2; 3 0 2 1].</template>
+<notatio-cell value="AlgebraNorm(3 + 4i_1)" />
+<notatio-cell value="AlgebraNorm(1 + 2i_1 + 3 * i_1 * i_2)" />
 </Story>
 
 ## Units, zero divisors, idempotents
@@ -116,7 +116,7 @@ An element is invertible exactly when its norm is — and division is exact.
 standing rather than answered with something false.
 
 <Story title="A zero divisor, and the idempotent beside it">
-<notatio-cell value="Norm(1 + i_1 * i_2)" />
+<notatio-cell value="AlgebraNorm(1 + i_1 * i_2)" />
 <notatio-cell value="(1 + i_1 * i_2) * (1 - i_1 * i_2)" />
 <notatio-cell value="1 / (1 + i_1 * i_2)" />
 <notatio-cell value="((1 + i_1 * i_2) / 2) ^ 2" />
@@ -130,7 +130,7 @@ two orthogonal idempotents that resolve the identity.
 
 <Story title="Split-complex arithmetic">
 <notatio-cell value="j_1 ^ 2" />
-<notatio-cell value="Norm(3 + 4j_1)" />
+<notatio-cell value="AlgebraNorm(3 + 4j_1)" />
 <notatio-cell value="(1 + j_1) * (1 - j_1)" />
 <notatio-cell value="(1 + j_1) / 2 * ((1 - j_1) / 2)" />
 </Story>
@@ -271,15 +271,15 @@ story behind it, is the subject of
 
 ## Things worth knowing
 
-**`Norm` depends on the ambient algebra.** It is taken over the subalgebra generated
+**`AlgebraNorm` depends on the ambient algebra.** It is taken over the subalgebra generated
 by the units that actually occur, and adjoining a generator _squares_ the determinant
 (`N` at level n+1 is `N` at level n, squared). So `N` is multiplicative on a fixed
 unit set — that is the theorem — but the two cells below are 2 and 2 while their
 product is 16, not 4.
 
 <Story title="The norm is relative to a level">
-<notatio-cell value="Norm(1 + i_1)" />
-<notatio-cell value="Norm((1 + i_1) * (1 + i_2))" />
+<notatio-cell value="AlgebraNorm(1 + i_1)" />
+<notatio-cell value="AlgebraNorm((1 + i_1) * (1 + i_2))" />
 </Story>
 
 **compute-engine's `i` stays a scalar.** It is a number literal, not a symbol, so it
@@ -339,6 +339,6 @@ one — is not reachable from outside today. Worth pursuing: the quaternions con
 2-sphere's worth of anticommuting square roots of −1, one per direction in 3-space,
 which is a genuinely unit-like way to think about them.
 
-**Not built yet.** A `Norm` that can name its ambient level rather than inferring it
+**Not built yet.** A `AlgebraNorm` that can name its ambient level rather than inferring it
 from the units present; a Clifford norm and reverse; and modular _coefficients_, so the
 algebra could run over ℤ/m directly instead of only mapping into it.
