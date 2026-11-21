@@ -19,22 +19,22 @@ declareGroupAlgebra(ce);
 
 ## Heads
 
-- **Groups** — [`CyclicGroup`](https://enumeratio.dev/reference/symbol/CyclicGroup),
-  [`DihedralGroup`](https://enumeratio.dev/reference/symbol/DihedralGroup),
-  [`PermutationGroup`](https://enumeratio.dev/reference/symbol/PermutationGroup),
-  [`AlternatingGroup`](https://enumeratio.dev/reference/symbol/AlternatingGroup),
-  [`GroupOrder`](https://enumeratio.dev/reference/symbol/GroupOrder),
-  [`GroupGenerators`](https://enumeratio.dev/reference/symbol/GroupGenerators),
-  [`GroupElements`](https://enumeratio.dev/reference/symbol/GroupElements)
-- **The algebra** — [`GroupBasis`](https://enumeratio.dev/reference/symbol/GroupBasis),
-  [`ClassSum`](https://enumeratio.dev/reference/symbol/ClassSum),
-  [`ConjugacyClasses`](https://enumeratio.dev/reference/symbol/ConjugacyClasses)
-- **Permutations** — [`Cycles`](https://enumeratio.dev/reference/symbol/Cycles),
-  [`PermutationCycles`](https://enumeratio.dev/reference/symbol/PermutationCycles),
-  [`PermutationList`](https://enumeratio.dev/reference/symbol/PermutationList),
-  [`PermutationReplace`](https://enumeratio.dev/reference/symbol/PermutationReplace),
-  [`Permute`](https://enumeratio.dev/reference/symbol/Permute),
-  [`InversePermutation`](https://enumeratio.dev/reference/symbol/InversePermutation)
+- **Groups** — [`CyclicGroup`](https://notatio.app/reference/symbol/CyclicGroup),
+  [`DihedralGroup`](https://notatio.app/reference/symbol/DihedralGroup),
+  [`PermutationGroup`](https://notatio.app/reference/symbol/PermutationGroup),
+  [`AlternatingGroup`](https://notatio.app/reference/symbol/AlternatingGroup),
+  [`GroupOrder`](https://notatio.app/reference/symbol/GroupOrder),
+  [`GroupGenerators`](https://notatio.app/reference/symbol/GroupGenerators),
+  [`GroupElements`](https://notatio.app/reference/symbol/GroupElements)
+- **The algebra** — [`GroupBasis`](https://notatio.app/reference/symbol/GroupBasis),
+  [`ClassSum`](https://notatio.app/reference/symbol/ClassSum),
+  [`ConjugacyClasses`](https://notatio.app/reference/symbol/ConjugacyClasses)
+- **Permutations** — [`Cycles`](https://notatio.app/reference/symbol/Cycles),
+  [`PermutationCycles`](https://notatio.app/reference/symbol/PermutationCycles),
+  [`PermutationList`](https://notatio.app/reference/symbol/PermutationList),
+  [`PermutationReplace`](https://notatio.app/reference/symbol/PermutationReplace),
+  [`Permute`](https://notatio.app/reference/symbol/Permute),
+  [`InversePermutation`](https://notatio.app/reference/symbol/InversePermutation)
 
 `src/group.ts` also exports the underlying group model (`directProduct`, `isAbelian`,
 `isCentral`, `conjugacyClasses`) used directly by [`@notatio/hecke`](../hecke/README.md) and

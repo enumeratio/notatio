@@ -319,7 +319,7 @@ const config = defineConfig({
   // (the raw markdown H1 is `{{ $params.name }}`, which VitePress can't read).
   buildEnd: (site: { outDir: string }) => {
     writeRedirects(site.outDir);
-    // The record schemas name `https://enumeratio.dev/schema/<file>` as their `$id`, so they are served there.
+    // The record schemas name `https://notatio.app/schema/<file>` as their `$id`, so they are served there.
     const schemas = resolve(pkgsDir, "entry/schema");
     if (existsSync(schemas)) cpSync(schemas, resolve(site.outDir, "schema"), { recursive: true });
     // Before the service worker, which caches them.

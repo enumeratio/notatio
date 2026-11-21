@@ -18,16 +18,16 @@ declareIncidence(ce);
 
 ## Heads
 
-- **Posets** — [`Chain`](https://enumeratio.dev/reference/symbol/Chain),
-  [`BooleanLattice`](https://enumeratio.dev/reference/symbol/BooleanLattice),
-  [`DivisorLattice`](https://enumeratio.dev/reference/symbol/DivisorLattice),
-  [`PosetElements`](https://enumeratio.dev/reference/symbol/PosetElements),
-  [`PosetInterval`](https://enumeratio.dev/reference/symbol/PosetInterval)
-- **The algebra** — [`IncidenceAlgebra`](https://enumeratio.dev/reference/symbol/IncidenceAlgebra),
-  [`PosetZeta`](https://enumeratio.dev/reference/symbol/PosetZeta),
-  [`PosetSumDown`](https://enumeratio.dev/reference/symbol/PosetSumDown)
-- **Möbius** — [`MoebiusFunction`](https://enumeratio.dev/reference/symbol/MoebiusFunction),
-  [`MoebiusInvert`](https://enumeratio.dev/reference/symbol/MoebiusInvert)
+- **Posets** — [`Chain`](https://notatio.app/reference/symbol/Chain),
+  [`BooleanLattice`](https://notatio.app/reference/symbol/BooleanLattice),
+  [`DivisorLattice`](https://notatio.app/reference/symbol/DivisorLattice),
+  [`PosetElements`](https://notatio.app/reference/symbol/PosetElements),
+  [`PosetInterval`](https://notatio.app/reference/symbol/PosetInterval)
+- **The algebra** — [`IncidenceAlgebra`](https://notatio.app/reference/symbol/IncidenceAlgebra),
+  [`PosetZeta`](https://notatio.app/reference/symbol/PosetZeta),
+  [`PosetSumDown`](https://notatio.app/reference/symbol/PosetSumDown)
+- **Möbius** — [`MoebiusFunction`](https://notatio.app/reference/symbol/MoebiusFunction),
+  [`MoebiusInvert`](https://notatio.app/reference/symbol/MoebiusInvert)
 
 `src/poset.ts` also exports the underlying `Poset` model directly — `matrixOf`, `zeta`,
 `moebius`, `convolve` — for computing on posets without going through compute-engine.

@@ -191,7 +191,7 @@ Higher degrees, and orders in general, are in
 
 ## Sweeping fields
 
-The [quadratic primes explorer](https://enumeratio.dev/explore/quadratic-primes/) has the
+The [quadratic primes explorer](https://notatio.app/explore/quadratic-primes/) has the
 same component, with a stepper and a random button to move through fields; any figure here goes
 full-window from its corner button.
 

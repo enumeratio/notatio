@@ -4,7 +4,7 @@ import { adhocId, adhocTitle, buildAdhocItem, buildProdLink } from "./adhoc.ts";
 describe("buildProdLink", () => {
   test("builds an absolute prod-host link, same form as a hand-authored `- link:`", () => {
     expect(buildProdLink("/reference/symbol/Arccos", "example-19")).toBe(
-      "https://enumeratio.dev/reference/symbol/Arccos#example-19",
+      "https://notatio.app/reference/symbol/Arccos#example-19",
     );
   });
 });
@@ -56,8 +56,8 @@ describe("buildAdhocItem", () => {
     expect(item.status).toBe("open");
     expect(item.feedback).toBe("");
     expect(item.title).toBe("Arccos · example-19");
-    expect(item.link).toBe("https://enumeratio.dev/reference/symbol/Arccos#example-19");
-    expect(item.bullets).toEqual([{ key: "link", value: "https://enumeratio.dev/reference/symbol/Arccos#example-19" }]);
+    expect(item.link).toBe("https://notatio.app/reference/symbol/Arccos#example-19");
+    expect(item.bullets).toEqual([{ key: "link", value: "https://notatio.app/reference/symbol/Arccos#example-19" }]);
     expect(item.id).toBe(adhocId("/reference/symbol/Arccos", "example-19"));
   });
 });

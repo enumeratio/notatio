@@ -9,7 +9,7 @@ import type { Registry } from "./registry.ts";
 import type { Description, Overload, Parameter, SymbolInfo } from "./types.ts";
 
 const ENGINE = "compute-engine";
-const SITE = "https://enumeratio.dev/reference/symbol/";
+const SITE = "https://notatio.app/reference/symbol/";
 
 const loaded = new Map<string, PackageModule>();
 

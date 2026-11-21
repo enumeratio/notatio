@@ -137,5 +137,5 @@ of the $n$-th permutation, and the combinatorial number system's digits _are_ th
 $n$-th k-subset. [Numeral systems](../../../arithmetic/numerals/docs/numeral-systems.md) makes that identification properly.
 
 Every family here is catalogued, with its order and its counting sequence, in the
-[symbol reference](https://enumeratio.dev/reference/symbol/). The pictures are [`Show`s of their frame layers](figure.md) and the slider is
-[`<Manipulate>`](https://enumeratio.dev/reference/component/Manipulate).
+[symbol reference](https://notatio.app/reference/symbol/). The pictures are [`Show`s of their frame layers](figure.md) and the slider is
+[`<Manipulate>`](https://notatio.app/reference/component/Manipulate).

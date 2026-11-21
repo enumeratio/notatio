@@ -4,10 +4,10 @@
 // -- see ReviewPanel.vue for how the result is used -- so this stays unit-testable
 // without mounting anything.
 
-const PROD_HOST = "enumeratio.dev";
-// `<sha7>.enumeratio.pages.dev` -- the per-commit Cloudflare Pages preview (see
+const PROD_HOST = "notatio.app";
+// `<sha7>.notatio.pages.dev` -- the per-commit Cloudflare Pages preview (see
 // AGENTS.md's CI-and-deployment section). A 7-hex-digit short SHA subdomain.
-const PREVIEW_HOST_RE = /^[0-9a-f]{7}\.enumeratio\.pages\.dev$/;
+const PREVIEW_HOST_RE = /^[0-9a-f]{7}\.notatio\.pages\.dev$/;
 // The dev server itself -- an absolute link naming it by host (rather than already
 // being a relative path) still resolves local; the port doesn't matter since we only
 // ever keep the path/search/hash and navigate the router of whatever's running now.
@@ -18,7 +18,7 @@ export type ResolvedReviewLink = { kind: "local"; path: string } | { kind: "exte
 /**
  * Resolve a backlog item's `link` for the review sidebar:
  * - a same-site path (already relative, or absolute with no host) navigates locally as-is.
- * - `https://enumeratio.dev/<path>`, `https://<sha7>.enumeratio.pages.dev/<path>` and a local
+ * - `https://notatio.app/<path>`, `https://<sha7>.notatio.pages.dev/<path>` and a local
  *   dev server (localhost/127.0.0.1/[::1], any port) rewrite to the local `<path>` (plus
  *   search/hash) -- these are origins we control, so the site itself can navigate there.
  * - anything else (github.com, other hosts, or an unparsable string) is left external. Those

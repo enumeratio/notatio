@@ -11,15 +11,15 @@ Node bundle never pulls in `Worker`/`self`.
 
 `declareEvaluation(ce)` declares three CE heads:
 
-- [`TimeConstrained`](https://enumeratio.dev/reference/symbol/TimeConstrained)`(expr, t, failexpr?)` —
+- [`TimeConstrained`](https://notatio.app/reference/symbol/TimeConstrained)`(expr, t, failexpr?)` —
   held evaluation of `expr` under a `t`-second deadline (`ce.withTimeLimit` plus a checkpoint
   every cooperative loop honors), returning `failexpr` (or `Aborted`) on timeout. Both the
   sync and async routes are covered.
-- [`MemoryConstrained`](https://enumeratio.dev/reference/symbol/MemoryConstrained)`(expr, bytes, failexpr?)` —
+- [`MemoryConstrained`](https://notatio.app/reference/symbol/MemoryConstrained)`(expr, bytes, failexpr?)` —
   in-process there is no way to cap a synchronous computation's heap, so this stays
   unevaluated and emits a message saying so; it is only real inside `evaluateIsolated`
   (`./node`), where the worker's own `resourceLimits` enforce it.
-- [`VerificationTest`](https://enumeratio.dev/reference/symbol/VerificationTest)`(input, expected?, SameTest -> f, TimeConstraint -> t, MemoryConstraint -> b, TestID -> "…")` —
+- [`VerificationTest`](https://notatio.app/reference/symbol/VerificationTest)`(input, expected?, SameTest -> f, TimeConstraint -> t, MemoryConstraint -> b, TestID -> "…")` —
   runs `input` under those constraints and compares it against `expected`, returning a
   `TestResultObject` (`Outcome`, `Input`, `ExpectedOutput`, `ActualOutput`,
   `AbsoluteTimeUsed`, optional `TestID`).

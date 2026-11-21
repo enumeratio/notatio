@@ -276,7 +276,7 @@ const REFERENCE_NAMES: JsonSchema = {
 /** `reference/<Head>/index.md`: the hand-written entry, all but its examples (https://github.com/enumeratio/notatio/wiki/Examples-as-Data §2). */
 export const REFERENCE_ENTRY_SCHEMA: JsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://enumeratio.dev/schema/reference-entry.schema.json",
+  $id: "https://notatio.app/schema/reference-entry.schema.json",
   title: "ReferenceEntry",
   description:
     "One compute-engine head's reference/<Head>/index.md: summary, signatures, details, " +
@@ -365,7 +365,7 @@ export const REFERENCE_ENTRY_SCHEMA: JsonSchema = {
 /** `reference/<Head>/examples.tsv`: the head's examples, in page order. */
 export const REFERENCE_EXAMPLES_SCHEMA: JsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://enumeratio.dev/schema/reference-examples.schema.json",
+  $id: "https://notatio.app/schema/reference-examples.schema.json",
   title: "ReferenceExamples",
   description: "One compute-engine head's reference/<Head>/examples.tsv: its examples, in page order.",
   type: "array",
@@ -389,7 +389,7 @@ const COMPONENT_STORY: JsonSchema = {
 /** `packages/components/reference/<Name>.stories.yaml`: one component's stories, in page order. */
 export const COMPONENT_STORIES_SCHEMA: JsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://enumeratio.dev/schema/component-stories.schema.json",
+  $id: "https://notatio.app/schema/component-stories.schema.json",
   title: "ComponentStories",
   description: "One component's <Name>.stories.yaml: its stories, in page order.",
   type: "array",
@@ -446,7 +446,7 @@ const PINNED_FORM: JsonSchema = { ...SYSTEM_IMPLEMENTATION, required: [] };
  */
 export const HEAD_IMPLEMENTATIONS_SCHEMA: JsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://enumeratio.dev/schema/head-implementations.schema.json",
+  $id: "https://notatio.app/schema/head-implementations.schema.json",
   title: "HeadImplementations",
   description:
     "One compute-engine head's implementations (reference/<Head>/examples.values.*.tsv, and " +
@@ -470,7 +470,7 @@ export const HEAD_IMPLEMENTATIONS_SCHEMA: JsonSchema = {
 /** A symbol's mappings (`mappings.json`): its references, bindings and implementations, for a library's targets. */
 export const SYMBOL_MAPPINGS_SCHEMA: JsonSchema = {
   $schema: "https://json-schema.org/draft/2020-12/schema",
-  $id: "https://enumeratio.dev/schema/symbol-mappings.schema.json",
+  $id: "https://notatio.app/schema/symbol-mappings.schema.json",
   title: "SymbolMappings",
   description:
     "What a library symbol is mapped to outside itself, for the targets the library tracks: " +

@@ -17,13 +17,13 @@ declareHecke(ce);
 
 ## Heads
 
-- [`HeckeAlgebra`](https://enumeratio.dev/reference/symbol/HeckeAlgebra) — the algebra itself,
+- [`HeckeAlgebra`](https://notatio.app/reference/symbol/HeckeAlgebra) — the algebra itself,
   parameterised by $n$ (and $q$, symbolic unless specialized)
-- [`HeckeT`](https://enumeratio.dev/reference/symbol/HeckeT) — the basis element $T_w$ for a
+- [`HeckeT`](https://notatio.app/reference/symbol/HeckeT) — the basis element $T_w$ for a
   permutation $w$
-- [`HeckeIdentity`](https://enumeratio.dev/reference/symbol/HeckeIdentity) — $T_e$, the identity
+- [`HeckeIdentity`](https://notatio.app/reference/symbol/HeckeIdentity) — $T_e$, the identity
   of the algebra
-- [`HeckeSpecialize`](https://enumeratio.dev/reference/symbol/HeckeSpecialize) — substitute a
+- [`HeckeSpecialize`](https://notatio.app/reference/symbol/HeckeSpecialize) — substitute a
   value for $q$
 
 `src/hecke.ts` exports the underlying `Element`/`Coefficients` model directly —

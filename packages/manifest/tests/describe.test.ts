@@ -31,7 +31,7 @@ test("a head we know: its summary, page, every overload, and the one it is decla
     name: "Sin",
     kind: "function",
     description: "The sine of x, in radians.",
-    url: "https://enumeratio.dev/reference/symbol/Sin",
+    url: "https://notatio.app/reference/symbol/Sin",
     signature: "(complex | quantity) -> number",
     params: ["x"],
     documented: ["analytic"],

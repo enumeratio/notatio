@@ -27,18 +27,18 @@ $GL_n(\hat{\mathbb{Q}})$ and back `ProfiniteDecomposition`.
 
 ## Heads
 
-**Values.** [`ProfiniteNumber`](https://enumeratio.dev/reference/symbol/ProfiniteNumber)
+**Values.** [`ProfiniteNumber`](https://notatio.app/reference/symbol/ProfiniteNumber)
 is the coset $x + m\hat{\mathbb{Z}}$; modulus 0 is exact. `ProfiniteNumber(list)` glues a
 list of `AdicNumeral` values back together by CRT.
-[`Adele`](https://enumeratio.dev/reference/symbol/Adele) pairs a real with a profinite
-number; [`Idele`](https://enumeratio.dev/reference/symbol/Idele) is a unit of the adèle
+[`Adele`](https://notatio.app/reference/symbol/Adele) pairs a real with a profinite
+number; [`Idele`](https://notatio.app/reference/symbol/Idele) is a unit of the adèle
 ring, principal everywhere except a named finite set of primes.
 
-**Matrices.** [`ProfiniteDecomposition`](https://enumeratio.dev/reference/symbol/ProfiniteDecomposition)
+**Matrices.** [`ProfiniteDecomposition`](https://notatio.app/reference/symbol/ProfiniteDecomposition)
 factors $m ∈ GL_n(\hat{\mathbb{Q}})$ as $b \cdot a$ with $b ∈ GL_n(\hat{\mathbb{Z}})$
 and $a ∈ GL_n^+(\mathbb{Q})$ upper triangular.
 
-**Visualization.** [`ProfinitePlot`](https://enumeratio.dev/reference/symbol/ProfinitePlot)
+**Visualization.** [`ProfinitePlot`](https://notatio.app/reference/symbol/ProfinitePlot)
 draws a profinite function $\hat{\mathbb{Z}} → \hat{\mathbb{Z}}$ as an `ArrayPlot`,
 residue classes laid out by factorial digits.
 

@@ -308,8 +308,8 @@ jobs:
               await github.rest.issues.create({ ...context.repo, title: TITLE, body, labels: ['bug', 'nightly-fixup'] })
             }
 
-  # Every build of every commit goes up as a Cloudflare Pages preview at <sha7>.enumeratio.pages.dev and <sha7>.notatio.pages.dev — PR pushes
-  # and main alike — and a push to main also deploys as production (enumeratio.dev and notatio.app). Direct upload of the artifact `site` made: no second
+  # Every build of every commit goes up as a Cloudflare Pages preview at <sha7>.notatio.pages.dev — PR pushes
+  # and main alike — and a push to main also deploys as production (notatio.app). Direct upload of the artifact `site` made: no second
   # site build, no CF build minutes. Same-repo only — fork PRs have no secrets. `--branch` is CF's one alias slot,
   # so it carries the sha; the commit message carries the PR number for preview-cleanup.yml to match on.
   preview:
@@ -344,36 +344,11 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: >
             pages deploy dist
-            --project-name=enumeratio
-            --branch=${{ steps.meta.outputs.sha7 }}
-            --commit-hash=${{ steps.meta.outputs.sha }}
-            --commit-message=${{ steps.meta.outputs.stamp }}
-      - name: Production (main)
-        if: steps.meta.outputs.deploy == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: >
-            pages deploy dist
-            --project-name=enumeratio
-            --branch=main
-            --commit-hash=${{ steps.meta.outputs.sha }}
-            --commit-message=${{ steps.meta.outputs.stamp }}
-      # The same build also serves notatio.app (project notatio), while both hosts carry one site.
-      - id: deploy_notatio
-        if: steps.meta.outputs.deploy == 'true'
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: >
-            pages deploy dist
             --project-name=notatio
             --branch=${{ steps.meta.outputs.sha7 }}
             --commit-hash=${{ steps.meta.outputs.sha }}
             --commit-message=${{ steps.meta.outputs.stamp }}
-      - name: Production notatio.app (main)
+      - name: Production (main)
         if: steps.meta.outputs.deploy == 'true' && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: cloudflare/wrangler-action@v3
         with:
@@ -390,17 +365,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ALIAS_URL: ${{ steps.deploy.outputs.pages-deployment-alias-url }}
-          NOTATIO_URL: ${{ steps.deploy_notatio.outputs.pages-deployment-alias-url }}
           SHA7: ${{ steps.meta.outputs.sha7 }}
           PR: ${{ github.event.pull_request.number }}
         run: |
-          alias="${ALIAS_URL:-https://$SHA7.enumeratio.pages.dev}"
-          notatio="${NOTATIO_URL:-https://$SHA7.notatio.pages.dev}"
-          echo "Preview ($SHA7): $alias · notatio: $notatio" >> "$GITHUB_STEP_SUMMARY"
+          alias="${ALIAS_URL:-https://$SHA7.notatio.pages.dev}"
+          echo "Preview ($SHA7): $alias" >> "$GITHUB_STEP_SUMMARY"
           [ -n "$PR" ] || exit 0
           # One sticky comment: its first two lines are ours, and anything below them (review links added by
-          # hand) survives a push. Both previews share the second line.
-          line="Preview ($SHA7): $alias · notatio: $notatio"
+          # hand) survives a push.
+          line="Preview ($SHA7): $alias"
           id=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \
             --jq '.[] | select(.body | startswith("<!-- cf-preview -->")) | .id' | tail -n1)
           if [ -n "$id" ]; then

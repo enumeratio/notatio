@@ -29,7 +29,7 @@ Some intro text.
 More intro, on its own paragraph.
 
 ### [ ] Numeric sets as indexed collections {#pr86-numeric-sets-indexed}
-- link: https://enumeratio.dev/reference/symbol/Primes
+- link: https://notatio.app/reference/symbol/Primes
 - pr: #86 · collections · open PR
 - check: What to look at and what a good answer looks like.
 - note: optional
@@ -41,20 +41,20 @@ Looks solid overall.
 Second paragraph of feedback.
 
 ### [x] Second item {#second-id}
-- link: https://enumeratio.dev/reference/symbol/Foo
+- link: https://notatio.app/reference/symbol/Foo
 - pr: #90 · analytic · merged
 - check: check this
 
 #### Feedback
 
 ### [!] Third item {#third-id}
-- link: https://enumeratio.dev/x
+- link: https://notatio.app/x
 - pr: #91 · misc · open PR
 - check: whatever
 - custom: an unknown bullet key
 
 ### [ ] Fourth item {#fourth-id}
-- link: https://enumeratio.dev/y
+- link: https://notatio.app/y
 - pr: #92 · misc · open PR
 - check: whatever else
 
@@ -184,8 +184,8 @@ describe("serializeItem / upsertItem", () => {
       id: "adhoc-new-item",
       title: "Arccos · example-19",
       status: "open" as const,
-      link: "https://enumeratio.dev/reference/symbol/Arccos#example-19",
-      bullets: [{ key: "link", value: "https://enumeratio.dev/reference/symbol/Arccos#example-19" }],
+      link: "https://notatio.app/reference/symbol/Arccos#example-19",
+      bullets: [{ key: "link", value: "https://notatio.app/reference/symbol/Arccos#example-19" }],
       feedback: "",
     };
     const result = upsertItem(FIXTURE, item);
@@ -194,7 +194,7 @@ describe("serializeItem / upsertItem", () => {
     expect(reparsed.items).toHaveLength(5);
     const appended = reparsed.items.at(-1)!;
     expect(appended.id).toBe("adhoc-new-item");
-    expect(appended.link).toBe("https://enumeratio.dev/reference/symbol/Arccos#example-19");
+    expect(appended.link).toBe("https://notatio.app/reference/symbol/Arccos#example-19");
     check("upsert-append", { raw: result.raw, item: result.item });
   });
 
@@ -203,7 +203,7 @@ describe("serializeItem / upsertItem", () => {
       id: "adhoc-first",
       title: "Guide · overview",
       status: "open" as const,
-      bullets: [{ key: "link", value: "https://enumeratio.dev/guide/#overview" }],
+      bullets: [{ key: "link", value: "https://notatio.app/guide/#overview" }],
       feedback: "",
     };
     const result = upsertItem("", item);

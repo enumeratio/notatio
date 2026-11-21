@@ -23,19 +23,19 @@ declareGeometric(ce);
 
 ## Heads
 
-- **Products** — [`Wedge`](https://enumeratio.dev/reference/symbol/Wedge) (outer),
-  [`LeftContraction`](https://enumeratio.dev/reference/symbol/LeftContraction) /
-  [`RightContraction`](https://enumeratio.dev/reference/symbol/RightContraction),
-  [`ScalarProduct`](https://enumeratio.dev/reference/symbol/ScalarProduct),
-  [`GeometricProduct`](https://enumeratio.dev/reference/symbol/GeometricProduct),
-  [`Sandwich`](https://enumeratio.dev/reference/symbol/Sandwich) (versor action)
-- **Grade** — [`Grade`](https://enumeratio.dev/reference/symbol/Grade),
-  [`GradePart`](https://enumeratio.dev/reference/symbol/GradePart),
-  [`GradeInvolution`](https://enumeratio.dev/reference/symbol/GradeInvolution)
-- **Duality** — [`Pseudoscalar`](https://enumeratio.dev/reference/symbol/Pseudoscalar),
-  [`Dual`](https://enumeratio.dev/reference/symbol/Dual)
-- **Reversal** — [`Reversion`](https://enumeratio.dev/reference/symbol/Reversion),
-  [`CliffordConjugate`](https://enumeratio.dev/reference/symbol/CliffordConjugate)
+- **Products** — [`Wedge`](https://notatio.app/reference/symbol/Wedge) (outer),
+  [`LeftContraction`](https://notatio.app/reference/symbol/LeftContraction) /
+  [`RightContraction`](https://notatio.app/reference/symbol/RightContraction),
+  [`ScalarProduct`](https://notatio.app/reference/symbol/ScalarProduct),
+  [`GeometricProduct`](https://notatio.app/reference/symbol/GeometricProduct),
+  [`Sandwich`](https://notatio.app/reference/symbol/Sandwich) (versor action)
+- **Grade** — [`Grade`](https://notatio.app/reference/symbol/Grade),
+  [`GradePart`](https://notatio.app/reference/symbol/GradePart),
+  [`GradeInvolution`](https://notatio.app/reference/symbol/GradeInvolution)
+- **Duality** — [`Pseudoscalar`](https://notatio.app/reference/symbol/Pseudoscalar),
+  [`Dual`](https://notatio.app/reference/symbol/Dual)
+- **Reversal** — [`Reversion`](https://notatio.app/reference/symbol/Reversion),
+  [`CliffordConjugate`](https://notatio.app/reference/symbol/CliffordConjugate)
 
 ## Usage
 
@@ -52,5 +52,5 @@ argument, so it folds over any number of operands.
 
 `Sandwich` and `Dual` are the two operations most worth reading the source for
 (`src/dual.ts`, `src/products.ts`) — the dual's sign depends on the ambient
-[`AlgebraSignature`](https://enumeratio.dev/reference/symbol/AlgebraSignature), and the sandwich is
+[`AlgebraSignature`](https://notatio.app/reference/symbol/AlgebraSignature), and the sandwich is
 how reflections and rotations are actually built from versors.

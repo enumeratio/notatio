@@ -24,18 +24,18 @@ that build on the multivector internals rather than just the declared heads.
 Every unit is fixed by what it squares to and whether it commutes — the whole family
 table is a 3×2 grid, `i_k` / `j_k` / `ε_k` (commuting) against Clifford's anticommuting
 generators. The named algebras package up common corners of that grid:
-[`Quaternions`](https://enumeratio.dev/reference/symbol/Quaternions) ($\mathrm{Cl}(0,2)$),
+[`Quaternions`](https://notatio.app/reference/symbol/Quaternions) ($\mathrm{Cl}(0,2)$),
 plus `BicomplexNumbers`, `TricomplexNumbers`, `SplitComplexNumbers` and `DualNumbers`.
 
 ## Heads
 
-- **Signature and structure** — [`AlgebraSignature`](https://enumeratio.dev/reference/symbol/AlgebraSignature),
-  [`Quaternions`](https://enumeratio.dev/reference/symbol/Quaternions),
-  [`SplitAlgebra`](https://enumeratio.dev/reference/symbol/SplitAlgebra),
-  [`DualAlgebra`](https://enumeratio.dev/reference/symbol/DualAlgebra),
-  [`MulticomplexAlgebra`](https://enumeratio.dev/reference/symbol/MulticomplexAlgebra)
-- **Arithmetic** — [`Expand`](https://enumeratio.dev/reference/symbol/Expand),
-  [`Norm`](https://enumeratio.dev/reference/symbol/Norm)
+- **Signature and structure** — [`AlgebraSignature`](https://notatio.app/reference/symbol/AlgebraSignature),
+  [`Quaternions`](https://notatio.app/reference/symbol/Quaternions),
+  [`SplitAlgebra`](https://notatio.app/reference/symbol/SplitAlgebra),
+  [`DualAlgebra`](https://notatio.app/reference/symbol/DualAlgebra),
+  [`MulticomplexAlgebra`](https://notatio.app/reference/symbol/MulticomplexAlgebra)
+- **Arithmetic** — [`Expand`](https://notatio.app/reference/symbol/Expand),
+  [`Norm`](https://notatio.app/reference/symbol/Norm)
 
 `src/modular.ts` also exports the number-theoretic side of the units mod $n$ —
 `imaginaryUnitsMod`, `splitUnitsMod`, `factorize` — used by the finite guide.

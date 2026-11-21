@@ -35,4 +35,4 @@ bindings:
 - `QuadraticIntegers(-1)` is [[GaussianIntegers]], answered with the Gaussian conventions
 - Primality holds in every ring: $x$ is prime when the ideal $(x)$ is prime. Most of these rings do not factor uniquely ($6 = 2 \cdot 3 = (1 + \sqrt{-5})(1 - \sqrt{-5})$ in $\mathbb{Z}[\sqrt{-5}]$), so `FactorInteger`, `Divisors` and the counting heads answer only where the class number is 1, and stay unevaluated elsewhere
 - An irreducible that is not prime is not composite either: `IsComposite(2, Over -> QuadraticIntegers(-5))` is `False`, and so is `IsPrime`
-- The guide [Quadratic integers](https://enumeratio.dev/docs/number-theory/quadratic-integers) draws these rings as lattices
+- The guide [Quadratic integers](https://notatio.app/docs/number-theory/quadratic-integers) draws these rings as lattices

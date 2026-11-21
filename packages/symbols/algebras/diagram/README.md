@@ -18,18 +18,18 @@ declareDiagrams(ce);
 
 ## Heads
 
-- **Algebras** — [`PartitionAlgebra`](https://enumeratio.dev/reference/symbol/PartitionAlgebra),
-  [`BrauerAlgebra`](https://enumeratio.dev/reference/symbol/BrauerAlgebra),
-  [`TemperleyLiebAlgebra`](https://enumeratio.dev/reference/symbol/TemperleyLiebAlgebra),
-  [`MotzkinAlgebra`](https://enumeratio.dev/reference/symbol/MotzkinAlgebra)
-- **Diagrams** — [`Diagram`](https://enumeratio.dev/reference/symbol/Diagram),
-  [`OrbitDiagram`](https://enumeratio.dev/reference/symbol/OrbitDiagram),
-  [`DiagramCoarsenings`](https://enumeratio.dev/reference/symbol/DiagramCoarsenings)
-- **Bases** — [`InDiagramBasis`](https://enumeratio.dev/reference/symbol/InDiagramBasis),
-  [`InOrbitBasis`](https://enumeratio.dev/reference/symbol/InOrbitBasis)
+- **Algebras** — [`PartitionAlgebra`](https://notatio.app/reference/symbol/PartitionAlgebra),
+  [`BrauerAlgebra`](https://notatio.app/reference/symbol/BrauerAlgebra),
+  [`TemperleyLiebAlgebra`](https://notatio.app/reference/symbol/TemperleyLiebAlgebra),
+  [`MotzkinAlgebra`](https://notatio.app/reference/symbol/MotzkinAlgebra)
+- **Diagrams** — [`Diagram`](https://notatio.app/reference/symbol/Diagram),
+  [`OrbitDiagram`](https://notatio.app/reference/symbol/OrbitDiagram),
+  [`DiagramCoarsenings`](https://notatio.app/reference/symbol/DiagramCoarsenings)
+- **Bases** — [`InDiagramBasis`](https://notatio.app/reference/symbol/InDiagramBasis),
+  [`InOrbitBasis`](https://notatio.app/reference/symbol/InOrbitBasis)
 
 `src/dimensions.ts` also exports the closed-form counts behind
-[`AlgebraDimension`](https://enumeratio.dev/reference/symbol/AlgebraDimension) — `bell`, `catalan`,
+[`AlgebraDimension`](https://notatio.app/reference/symbol/AlgebraDimension) — `bell`, `catalan`,
 `motzkin`, `rookCount` — and `src/orbit.ts` the coarsening machinery for `InOrbitBasis`.
 
 ## Usage

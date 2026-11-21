@@ -13,7 +13,7 @@ export const repoRoot = resolve(here, "../../..");
 const githubBlob = "https://github.com/enumeratio/notatio/blob/main/";
 // Package docs link the site absolutely, so the link also works on GitHub; served here, the
 // origin is dropped so it stays on whichever deployment is showing it.
-const siteOrigin = "https://enumeratio.dev";
+const siteOrigin = "https://notatio.app";
 
 export interface DocPage {
   /** Repo-relative path of the markdown file. */

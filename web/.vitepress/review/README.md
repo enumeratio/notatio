@@ -14,7 +14,7 @@ Each item:
 
 ```text
 ### [ ] Title {#anchor}
-- link: https://enumeratio.dev/<page>#<target>
+- link: https://notatio.app/<page>#<target>
 - pr: #123 · area · …
 - check: what to look at, and what it should show
 - note: optional
@@ -43,7 +43,7 @@ reference example already holds belongs there, not here.
    last item you had selected, or the first open one. On any other page, the **☰ Review** button
    bottom-right opens it; it starts collapsed on every page load.
 2. Pick an item (click, or `j` / `k`): the site navigates to its `link`, anchor included, and
-   outlines the target. Links on `enumeratio.dev` or a `<sha7>.enumeratio.pages.dev` preview
+   outlines the target. Links on `notatio.app` or a `<sha7>.notatio.pages.dev` preview
    open locally, so what you see is this checkout — an item whose PR hasn't merged 404s here;
    use its preview instead. Other hosts get an "Open in new tab" link.
 3. Type in **Feedback**; it autosaves into the item's `#### Feedback` section.

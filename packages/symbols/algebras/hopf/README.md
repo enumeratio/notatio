@@ -28,22 +28,22 @@ other:
 
 ## Heads
 
-- **NSym** — [`NSymAlgebra`](https://enumeratio.dev/reference/symbol/NSymAlgebra),
-  [`NSymH`](https://enumeratio.dev/reference/symbol/NSymH) (complete basis),
-  [`NSymR`](https://enumeratio.dev/reference/symbol/NSymR) (ribbon basis)
-- **QSym** — [`QSymAlgebra`](https://enumeratio.dev/reference/symbol/QSymAlgebra),
-  [`QSymM`](https://enumeratio.dev/reference/symbol/QSymM) (monomial basis),
-  [`QSymF`](https://enumeratio.dev/reference/symbol/QSymF) (fundamental basis)
-- **Structure** — [`Coproduct`](https://enumeratio.dev/reference/symbol/Coproduct),
-  [`Antipode`](https://enumeratio.dev/reference/symbol/Antipode),
-  [`Counit`](https://enumeratio.dev/reference/symbol/Counit),
-  [`HopfDegree`](https://enumeratio.dev/reference/symbol/HopfDegree),
-  [`HopfTensor`](https://enumeratio.dev/reference/symbol/HopfTensor)
-- **Basis conversion** — [`InCompleteBasis`](https://enumeratio.dev/reference/symbol/InCompleteBasis),
-  [`InRibbonBasis`](https://enumeratio.dev/reference/symbol/InRibbonBasis),
-  [`InMonomialBasis`](https://enumeratio.dev/reference/symbol/InMonomialBasis),
-  [`InFundamentalBasis`](https://enumeratio.dev/reference/symbol/InFundamentalBasis),
-  [`ConjugateComposition`](https://enumeratio.dev/reference/symbol/ConjugateComposition)
+- **NSym** — [`NSymAlgebra`](https://notatio.app/reference/symbol/NSymAlgebra),
+  [`NSymH`](https://notatio.app/reference/symbol/NSymH) (complete basis),
+  [`NSymR`](https://notatio.app/reference/symbol/NSymR) (ribbon basis)
+- **QSym** — [`QSymAlgebra`](https://notatio.app/reference/symbol/QSymAlgebra),
+  [`QSymM`](https://notatio.app/reference/symbol/QSymM) (monomial basis),
+  [`QSymF`](https://notatio.app/reference/symbol/QSymF) (fundamental basis)
+- **Structure** — [`Coproduct`](https://notatio.app/reference/symbol/Coproduct),
+  [`Antipode`](https://notatio.app/reference/symbol/Antipode),
+  [`Counit`](https://notatio.app/reference/symbol/Counit),
+  [`HopfDegree`](https://notatio.app/reference/symbol/HopfDegree),
+  [`HopfTensor`](https://notatio.app/reference/symbol/HopfTensor)
+- **Basis conversion** — [`InCompleteBasis`](https://notatio.app/reference/symbol/InCompleteBasis),
+  [`InRibbonBasis`](https://notatio.app/reference/symbol/InRibbonBasis),
+  [`InMonomialBasis`](https://notatio.app/reference/symbol/InMonomialBasis),
+  [`InFundamentalBasis`](https://notatio.app/reference/symbol/InFundamentalBasis),
+  [`ConjugateComposition`](https://notatio.app/reference/symbol/ConjugateComposition)
 
 `src/hopf.ts` also exports the underlying `Composition`/`Element`/`Tensor` model
 (`nsymProduct`, `qsymCoproduct`, `quasiShuffle`, `antipode`, …) for use without going

@@ -161,7 +161,7 @@ These are the same CRT channels the [hypercomplex
 page](../../../algebras/hypercomplex/docs/finite.md) uses to find split units: a residue numeral and a
 spectral sign vector are the same object, read for different purposes.
 
-Each digit is a residue class — a [`ResidueClass`](https://enumeratio.dev/reference/symbol/ResidueClass), an element of
+Each digit is a residue class — a [`ResidueClass`](https://notatio.app/reference/symbol/ResidueClass), an element of
 ℤ/mᵢ that arithmetic stays inside — and reading the numeral back is the Chinese remainder
 theorem applied to those classes.
 

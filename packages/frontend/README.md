@@ -53,7 +53,7 @@ sees the same tree. See
 ## Where to go next
 
 - [`components`](../components/README.md) — the Lit custom elements built on this package.
-- [`/reference/component/`](https://enumeratio.dev/reference/component/) — every drawing symbol as a component,
+- [`/reference/component/`](https://notatio.app/reference/component/) — every drawing symbol as a component,
   generated from these same sources.
 - [Vdom](https://github.com/enumeratio/notatio/wiki/Vdom) — the AST-as-vdom design, and the
   design behind the symbol/component map.
