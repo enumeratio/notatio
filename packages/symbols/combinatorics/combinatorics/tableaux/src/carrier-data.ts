@@ -39,6 +39,7 @@ export const TABLEAUX_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "SkewTableau",
+    readable: true,
     type: "skew_tableau",
     shape: "tuple<list<integer>, list<integer>, list<integer>>",
     id: "skew_tableau",

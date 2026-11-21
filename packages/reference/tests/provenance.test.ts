@@ -454,6 +454,9 @@ test("the Wolfram rename column is reflected from the transpiler, not copied", (
 const NOVEL = [
   "ColoredPermutation",
   "StirlingPermutation",
+  "PlaneTree",
+  "RootedLabeledTree",
+  "SkewTableau",
   "TernaryGrayCode",
   "DelannoyPath",
   "LukasiewiczPath",
