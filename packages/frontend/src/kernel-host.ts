@@ -7,12 +7,13 @@ import type { ComputeEngine, MathJsonExpression } from "@cortex-js/compute-engin
 import { makeBoxes, notationOf } from "@notatio/boxes";
 import { toAscii } from "@notatio/boxes/render";
 import type { KernelOptions, KernelSession, KernelSource } from "@notatio/evaluation";
-import { parseExpression } from "@notatio/formats/expression";
+import { parseExpression, rulesInCalls } from "@notatio/formats/expression";
 import { toInputForm } from "@notatio/formats/inputform";
 import { type CodeForm, codeForms } from "./code-forms.ts";
 import { type DisplayBoxes, displayBoxes } from "./display.ts";
 import { compilePlot, type PlotCompileSpec } from "./plot-compile.ts";
 import { AS_TYPED, typedLatex } from "./latex.ts";
+import { libraryOptionsOf } from "./library-options.ts";
 import { boundName } from "./reactive.ts";
 import { createRowsHost, type RowsRequest } from "./row-source.ts";
 import { renderingOf } from "./symbols.ts";
@@ -34,12 +35,18 @@ export interface Display {
 /** A cell's text as MathJSON: Epsil (`$…$` islands in LaTeX), LaTeX, or MathJSON itself. */
 export function readSource(ce: ComputeEngine, { text, format }: KernelSource, raw = false): unknown {
   if (format === "mathjson") return JSON.parse(text);
-  if (format === "latex") return ce.parse(text, raw ? AS_TYPED : undefined).json;
+  if (format === "latex") {
+    // `Name \\to v` on a head that declares `Name` is its option, a library's head included.
+    const json = structuredClone(ce.parse(text, raw ? AS_TYPED : undefined).json);
+    rulesInCalls(json, libraryOptionsOf);
+    return json;
+  }
   // A cell is a notebook line, so it may bind (`a := 5`) as well as compute.
   const { json, diagnostics } = parseExpression(text, {
     allow: ["Assign"],
     ce,
     parseLatex: (tex) => ce.parse(tex).json,
+    optionsOf: libraryOptionsOf,
   });
   const problem = diagnostics[0];
   // The range travels with the message, so an editor can mark where the problem is.
