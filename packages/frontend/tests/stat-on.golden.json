@@ -28,14 +28,14 @@
     "ZeroDivisorCount on Poset"
   ],
   "untested": [
+    "AlgebraNorm on GaussianInteger",
+    "AlgebraNorm on Multicomplex",
     "Area on PythagoreanTriple",
     "Collections on Text",
     "Contains on Text",
     "Denominator on RationalNumber",
     "DivisorSum on IntegerFactorization",
     "Inversions on PermutationCycles",
-    "Norm on GaussianInteger",
-    "Norm on Multicomplex",
     "Numerator on RationalNumber",
     "Traits on Text"
   ]
