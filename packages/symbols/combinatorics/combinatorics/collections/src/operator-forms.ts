@@ -1,4 +1,13 @@
-import { type Engine, type Expr, operandsOf, symbolNameOf, widenSignature, wrapOperator } from "@notatio/engine";
+import {
+  declareCompile,
+  type Engine,
+  type Expr,
+  nativeEvaluate,
+  operandsOf,
+  symbolNameOf,
+  widenSignature,
+  wrapOperator,
+} from "@notatio/engine";
 
 // Wolfram's operator forms: `Map[f][xs]` is `Map[f, xs]`. compute-engine boxes `Map(f)` with its
 // collection `missing`, so `Map(f)(xs)` evaluates to that error unless `Map(f)` is a valid call.
@@ -29,6 +38,15 @@ export function declareOperatorForms(ce: Engine): void {
   // callee of `Apply` before our hook runs, and flags the absent collection as `missing`.
   for (const head of Object.keys(FORMS)) {
     widenSignature(ce, head, `(${nativeSignature(ce, head)}) & ((any) -> any)`);
+    // A head with no handler of its own (`Map`, `Fold` and `Filter` are lazy collections) answers a
+    // one-operand call by staying unevaluated already, so a handler that only declines would add
+    // nothing but a call on every node: compute-engine stops treating a head with a handler as a lazy
+    // collection and evaluates its operands, which made every interpreted `Map`, `Fold` and `Filter`
+    // 2 to 3 times slower. The head still states that it does not compile.
+    if (nativeEvaluate(ce, head) === undefined) {
+      declareCompile(ce, head, undefined);
+      continue;
+    }
     wrapOperator(
       ce,
       [head],
