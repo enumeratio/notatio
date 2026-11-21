@@ -94,15 +94,22 @@ test("no collection handler reads the first operand's operands except through pa
 // Heads that match or rewrite an expression's tree as written stay outside partsOf, on the condition that
 // none answers at canonicalization: a lambda body is never rewritten before its parameters are bound. They
 // answer at evaluate, on evaluated operands. `parts-readers.test.ts` holds each against the lambda shapes.
-const TREE_HEADS: Record<string, string> = {
-  FreeQ: "matches the tree as written, at evaluate only",
-  MatchQ: "matches the tree as written, at evaluate only",
-  ReplaceAll: "rewrites the tree as written, at evaluate only",
-  Same: "compares evaluated operands, at evaluate only",
+// ReplaceAll's override lives with the other compute-engine patches; the rest are in the collections package.
+const EXPRESSION_OPS = join(COLLECTIONS, "expression-ops.ts");
+const TREE_HEADS: Record<string, { file: string; why: string }> = {
+  FreeQ: { file: EXPRESSION_OPS, why: "matches the tree as written, at evaluate only" },
+  MatchQ: { file: EXPRESSION_OPS, why: "matches the tree as written, at evaluate only" },
+  Same: { file: EXPRESSION_OPS, why: "compares evaluated operands, at evaluate only" },
+  ReplaceAll: {
+    file: join(CE_PATCHES, "compute-engine", "library", "replace-all.ts"),
+    why: "rewrites the tree as written; replaces only the native evaluate",
+  },
 };
 
 test("the tree-literal heads answer at evaluate, never at canonicalization", () => {
-  const source = readFileSync(join(COLLECTIONS, "expression-ops.ts"), "utf8");
-  expect(source).not.toMatch(/\.canonical\s*=|\bcanonical\s*:\s*\(/);
-  for (const head of Object.keys(TREE_HEADS)) expect(source).toContain(`"${head}"`);
+  for (const [head, { file }] of Object.entries(TREE_HEADS)) {
+    const source = readFileSync(file, "utf8");
+    expect(source, file).not.toMatch(/\.canonical\s*=|\bcanonical\s*:\s*\(/);
+    expect(source, file).toContain(`"${head}"`);
+  }
 });
