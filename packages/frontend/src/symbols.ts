@@ -887,7 +887,8 @@ export function plotOfText(text: string): { json: Json; settings: Record<string,
   const { json, errors } = parseExpression(text);
   if (errors.length > 0) return undefined;
   const plain = plainJson(json as never) as Json;
-  const settings = plotSettingsOf(plain);
+  // A `Show` of plots and graphics has no settings of its own: its layers carry theirs (`planeShowOf`).
+  const settings = plotSettingsOf(plain) ?? (planeShowOf(plain) && {});
   return settings && { json: plain, settings };
 }
 

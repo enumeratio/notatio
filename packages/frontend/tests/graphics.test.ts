@@ -7,7 +7,7 @@ import { colorOf } from "../src/graphics-rules.ts";
 import { plotBox } from "../src/plot-box.ts";
 import { graphicsBoxOfSettings, holdsPlaneShow, layerStylesOf, plotOptionsOf } from "../src/plot-lowering.ts";
 import { primitivesOf } from "../src/primitives.ts";
-import { planeShowOf, plotSettingsOf } from "../src/symbols.ts";
+import { planeShowOf, plotOfText, plotSettingsOf } from "../src/symbols.ts";
 
 const at = (x: unknown, y: unknown): unknown[] => ["Tuple", x, y];
 const rule = (name: string, value: unknown): unknown[] => ["Rule", name, value];
@@ -157,6 +157,12 @@ test("a Show of plots and graphics is of the plane: its layers' settings, and it
   expect(show.layers.map((layer) => layer.head)).toEqual(["Plot", "Graphics", "ListPlot"]);
   expect(show.frame).toEqual({ frame: "true", "plot-range": "-2,2" });
   expect(holdsPlaneShow("Show(Plot(Sin(x), (x, 0, 6)), Graphics(Point((1, 1))))")).toBe(true);
+  // The element's own reading of its text finds the same layers, as the page prints them.
+  const text =
+    "Show(\n  Plot([Sin(x), Cos(x)], (x, 0, 6.283), PlotStyle -> [Red, Blue],),\n  Graphics(Point((1, 1))),\n  Frame -> True,\n)";
+  expect(holdsPlaneShow(text)).toBe(true);
+  expect(planeShowOf(plotOfText(text)!.json)!.layers.map((layer) => layer.head)).toEqual(["Plot", "Graphics"]);
+  expect(plotOfText("Show(LatticeTiles(GaussianIntegers))")).toBeUndefined();
   // A figure's layers are not the plane's: that `Show` is drawn as before.
   expect(planeShowOf(["Show", ["LatticeTiles", "GaussianIntegers"]] as never)).toBeUndefined();
   expect(holdsPlaneShow("Show(LatticeTiles(GaussianIntegers))")).toBe(false);
