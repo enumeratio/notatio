@@ -1,0 +1,3 @@
+id	in
+four-vertices	list(vec![n(0), n(1), n(1), n(2)])
+constructor-example	list(vec![n(0), n(1), n(2), n(2), n(1)])

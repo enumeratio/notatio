@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+four-nodes	Basic		[PlaneTree, [List, 2, 1, 0, 0]]	[PlaneTree, [List, 2, 1, 0, 0]]	A root with two children, the first of which has one child
+constructor-example		test	[PlaneTree, [List, 2, 2, 0, 0, 0]]	[PlaneTree, [List, 2, 2, 0, 0, 0]]	The constructor on a tree of five nodes

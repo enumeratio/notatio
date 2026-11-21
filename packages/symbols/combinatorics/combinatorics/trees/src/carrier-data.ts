@@ -85,6 +85,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "PlaneTree",
+    readable: true,
     type: "plane_tree",
     shape: "list<integer>",
     id: "plane_tree",
@@ -110,6 +111,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "RootedLabeledTree",
+    readable: true,
     type: "rooted_labeled_tree",
     shape: "list<integer>",
     id: "rooted_labeled_tree",

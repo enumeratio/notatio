@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+four-vertices	Basic		[RootedLabeledTree, [List, 0, 1, 1, 2]]	[RootedLabeledTree, [List, 0, 1, 1, 2]]	Vertices 2 and 3 hang from the root and vertex 4 from vertex 2
+constructor-example		test	[RootedLabeledTree, [List, 0, 1, 2, 2, 1]]	[RootedLabeledTree, [List, 0, 1, 2, 2, 1]]	The constructor on a tree of five vertices
