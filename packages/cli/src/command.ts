@@ -12,7 +12,7 @@ import { completionScript, type Shell, SHELLS, SUBCOMMANDS } from "./completion.
 import { formatsTable } from "./core.ts";
 import { notationOf } from "@notatio/boxes";
 import { figureText } from "./figure.ts";
-import { sampledField, sampledPlot } from "./textual.ts";
+import { sampledField, sampledFigure } from "./textual.ts";
 import { isTable } from "./table.ts";
 import {
   type Form,
@@ -219,7 +219,7 @@ function figureOf({ session, expr }: Evaluated, host: HostOptions): string | und
       color: host.color,
       notation: notationOf(session.ce),
       evaluate: (json) => session.render(session.ce.box(json as never).evaluate()),
-      plot: (json) => sampledPlot(session, json),
+      figure: (json) => sampledFigure(session, json),
       field: (json) => sampledField(session, json),
     });
   } catch {

@@ -5,63 +5,94 @@
 
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { type Box, notationOf } from "@notatio/boxes";
-import { optionsOf } from "@notatio/formats";
 import {
+  CURVE_SPEC,
+  curvesOf,
+  type FigurePlan,
+  figurePlanOf,
   headOf,
-  numOf,
+  loadCompiled,
+  type LoadedPlot,
+  lonePlotOf,
   opsOf,
   plainJson,
+  type PlaneShow,
+  planeShowOf,
   plotSettingsOf,
+  type Primitive,
+  primitivesOf,
+  sampleNumber,
   strOf,
-  symOf,
   tupleOf,
   vectorOptionsOf,
   vectorPlotBox,
 } from "@notatio/frontend";
-import { compilePlot } from "@notatio/frontend/plot-compile";
+import { parseExpression } from "@notatio/formats/expression";
+import { compilePlot, systemHelpersOf } from "@notatio/frontend/plot-compile";
 import type { Drawn } from "./cell-layout.ts";
 import type { PlotPoint, Session } from "./engine.ts";
-import { figureText, plotText, type Sampled } from "./figure.ts";
+import { drawPlotBox } from "./cell-draw.ts";
+import { figureText } from "./figure.ts";
 
 type Json = Parameters<typeof headOf>[0];
 
-/** The points an `Epilog` draws: `Point((x, y))`, or a list with some in it. */
-function pointsOf(epilog: Json): PlotPoint[] {
-  if (epilog === undefined) return [];
-  if (headOf(epilog) === "Point") {
-    const [x, y] = tupleOf(opsOf(epilog)[0])?.map(numOf) ?? [];
-    return x === undefined || y === undefined ? [] : [{ x, y }];
-  }
-  return headOf(epilog) === "List" ? opsOf(epilog).flatMap(pointsOf) : [];
+/** A curve plot, or a `Show` of plots and graphics, read for the one sampler every host shares. */
+function planeFigureOf(json: Json): PlaneShow | undefined {
+  const plain = plainJson(json as never) as Json;
+  const head = headOf(plain);
+  if (head === "Show") return planeShowOf(plain as never);
+  const settings = head === undefined ? undefined : plotSettingsOf(plain as never);
+  // A plot of data and a lone `Graphics` lower whole, with no engine, by their own rules.
+  return settings?.["value"]?.trim() ? lonePlotOf(head!, settings) : undefined;
 }
 
-/** `Plot(f, (x, a, b))` read off: the body as notatio-ready MathJSON, its variable and range. */
-export function plotOf(
-  json: Json,
-): { body: Json; variable: string; from: number; to: number; marks: PlotPoint[] } | undefined {
-  if (headOf(json) !== "Plot") return undefined;
-  const [body, iterator] = opsOf(json);
-  const { options } = optionsOf(json as never);
-  if (body === undefined) return undefined;
-  const parts = tupleOf(iterator) ?? [];
-  const variable = symOf(parts[0]) ?? "x";
-  const from = numOf(parts[1]) ?? -5;
-  const to = numOf(parts[2]) ?? 5;
-  return { body, variable, from, to, marks: pointsOf(options.Epilog) };
+/** An `Epilog` or `Prolog` as written, read to primitives. */
+const marksOf = (written: string): Primitive[] | undefined => {
+  const { json, errors } = parseExpression(written);
+  return errors.length > 0 ? undefined : primitivesOf(plainJson(json as never) as never);
+};
+
+/** A figure's sources compiled by the session's engine; an item with no code is substituted and evaluated. */
+function loadedOf(session: Session, plan: FigurePlan): LoadedPlot[] {
+  const { ce } = session;
+  const runtime = {
+    sys: systemHelpersOf(ce as never),
+    evaluate: (item: { json: unknown }) => {
+      const expr = ce.box(item.json as never);
+      return (scope: Record<string, unknown>): number => {
+        const subs: Record<string, number> = {};
+        for (const name of expr.unknowns) if (typeof scope[name] === "number") subs[name] = scope[name];
+        return sampleNumber(expr.subs(subs).N().re);
+      };
+    },
+  };
+  return plan.sources.map((text) => {
+    const json = plainJson(parseExpression(text, { ce: ce as never }).json as never);
+    return loadCompiled(compilePlot(ce as never, json, CURVE_SPEC), runtime);
+  });
 }
 
-/** A `Plot` result sampled with the session, with its `Epilog` marks, if it is one. */
-export function sampledPlot(session: Session, json: Json): Sampled | undefined {
-  const plot = plotOf(json);
-  const points = samplePlot(session, json);
-  return plot === undefined || points === undefined ? undefined : { points, marks: plot.marks };
+/**
+ * A curve plot, or a `Show` of plots and graphics, as the `GraphicsBox` a terminal draws: sampled by
+ * the sampler the page uses, in the data's own extent.
+ */
+export function sampledFigure(session: Session, json: Json): Box | undefined {
+  const show = planeFigureOf(json);
+  if (show === undefined) return undefined;
+  const plan = figurePlanOf(show);
+  const box = plan.draw(loadedOf(session, plan), { marks: marksOf, tight: true });
+  return box === undefined || "unbound" in (box as object) ? undefined : (box as Box);
 }
 
-/** Sample a `Plot` result with the session, if it is one. */
+/** A `Plot`'s first curve as points, for a host that draws the picture itself. */
 export function samplePlot(session: Session, json: Json): PlotPoint[] | undefined {
-  const plot = plotOf(json);
-  if (plot === undefined) return undefined;
-  return session.sampleJson(plot.body, { variable: plot.variable, from: plot.from, to: plot.to });
+  const plain = plainJson(json as never) as Json;
+  const settings = headOf(plain) === "Plot" ? plotSettingsOf(plain as never) : undefined;
+  if (!settings?.["value"]?.trim()) return undefined;
+  const plan = figurePlanOf(lonePlotOf("Plot", settings)!);
+  const [loaded] = loadedOf(session, plan);
+  const curves = loaded && curvesOf(settings, loaded);
+  return curves && !("unbound" in curves) ? [...(curves.series[0]?.points ?? [])] : undefined;
 }
 
 /** Arrows and streamline seeds per side on cells, unless `N` says otherwise. */
@@ -124,11 +155,11 @@ export function drawnOf(session: Session, json: Json, width = 60, height = 12): 
   if (headOf(json) === "Labeled") {
     const [body, label] = opsOf(json);
     const caption = strOf(label);
-    if (body !== undefined && caption !== undefined && plotOf(body) !== undefined)
+    if (body !== undefined && caption !== undefined && planeFigureOf(body) !== undefined)
       return { text: `${textOf(session, body, width, height)}\n  ${caption}` };
   }
-  const sampled = sampledPlot(session, json);
-  if (sampled !== undefined) return { text: plotText(sampled, { width, height }) };
+  const plotted = sampledFigure(session, json);
+  if (plotted !== undefined) return { text: drawPlotBox(plotted as never, { width, height }) };
   const figure = figureText(json, {
     width,
     field: (field) => sampledField(session, field),
