@@ -16,11 +16,6 @@ signatures:
 names:
   wolframIdentity: true
 stub: engine
-catalog:
-  - system: findstat
-    identity: Mp00084
-    url: https://www.findstat.org/Mp00084
-    on: StandardTableau
 mapOn:
   - StandardTableau
 bindings:
