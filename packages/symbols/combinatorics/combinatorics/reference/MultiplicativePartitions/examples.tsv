@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-for-n-12	Basic		[MultiplicativePartitions, 12]	[List, [MultiplicativePartition, [List, 3, 2, 2]], [MultiplicativePartition, [List, 4, 3]], [MultiplicativePartition, [List, 6, 2]], [MultiplicativePartition, [List, 12]]]	$12 = 3 \cdot 2 \cdot 2 = 4 \cdot 3 = 6 \cdot 2 = 12$
+count-n-24	Basic		[Count, [MultiplicativePartitions, 24]]	7	A001055 at 24
+one	Properties		[MultiplicativePartitions, 1]	[List, [MultiplicativePartition, [List]]]	the empty product is the one factorization of 1
+a-member	Properties		[Element, [MultiplicativePartition, [List, 3, 2, 2]], [MultiplicativePartitions, 12]]	True	$3 \cdot 2 \cdot 2 = 12$
+not-nonincreasing	Properties		[Element, [MultiplicativePartition, [List, 2, 3]], [MultiplicativePartitions, 6]]	False	the order is forgotten, so the factors are listed largest first: $(3, 2)$
+factor-one	Properties		[Element, [MultiplicativePartition, [List, 6, 1]], [MultiplicativePartitions, 6]]	False	a factor is at least 2

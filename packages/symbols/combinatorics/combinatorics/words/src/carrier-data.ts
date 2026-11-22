@@ -7,6 +7,7 @@ import type { Carrier } from "@notatio/structures";
 export const WORDS_CARRIERS: readonly Carrier[] = [
   {
     name: "AscentSequence",
+    readable: true,
     type: "ascent_sequence",
     shape: "list<integer>",
     id: "ascent_sequence",

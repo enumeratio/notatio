@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+twelve	Basic		[MultiplicativePartition, [List, 3, 2, 2]]	[MultiplicativePartition, [List, 3, 2, 2]]	$3 \cdot 2 \cdot 2 = 12$, the factors from the largest down
+constructor-example		test	[MultiplicativePartition, [List, 6, 2]]	[MultiplicativePartition, [List, 6, 2]]	The constructor on another factorization of 12

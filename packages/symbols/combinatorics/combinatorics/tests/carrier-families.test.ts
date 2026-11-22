@@ -1,5 +1,6 @@
 // The families written for carriers that had only a type shape (KDyckPaths, RationalDyckPaths,
-// RookPlacements, HyperbinaryWords), each against an independent reading: every element listed by
+// RookPlacements, HyperbinaryWords, DecoratedPermutations, AscentSequences, MultiplicativePartitions,
+// OrderedFactorizations), each against an independent reading: every element listed by
 // brute force in the family's order, so count, unrank, rank and membership are all held to it.
 
 import { bareEngine } from "@notatio/engine/testing";
@@ -7,7 +8,11 @@ import { expect, test } from "vite-plus/test";
 import { epsilKernelOn } from "../collections/src/families/epsil.ts";
 import { dyckPaths } from "../lattice-paths/src/families/core.ts";
 import { kDyckPaths, rationalDyckPaths } from "../lattice-paths/src/families/slope-paths.ts";
+import { orderedFactorizations } from "../compositions/src/families/ordered-factorizations.ts";
+import { multiplicativePartitions } from "../partitions/src/families/multiplicative-partitions.ts";
+import { decoratedPermutations } from "../permutations/src/families/decorated-permutations.ts";
 import { rookPlacements } from "../permutations/src/families/rook-placements.ts";
+import { ascentSequences } from "../words/src/families/ascent-sequences.ts";
 import { hyperbinaryWords } from "../words/src/families/hyperbinary.ts";
 
 const ce = bareEngine();
@@ -178,4 +183,98 @@ test("HyperbinaryWords membership: wrong value, leading zero, digit 3", () => {
   expect(k.valid([3, 1], [7])).toBe(false);
   expect(k.valid([], [0])).toBe(true);
   expect(k.valid([0], [0])).toBe(false);
+});
+
+/** Every permutation of 1..n in lex order, then each fixed point −j before +j: the decorated permutations. */
+function decorated(n: number): number[][] {
+  const place = (row: number, used: readonly number[]): number[][] => {
+    if (row > n) return [[]];
+    const out: number[][] = [];
+    for (let u = 1; u <= n; u++) {
+      if (used.includes(u)) continue;
+      for (const e of u === row ? [-u, u] : [u])
+        for (const rest of place(row + 1, [...used, u])) out.push([e, ...rest]);
+    }
+    return out;
+  };
+  return place(1, []);
+}
+
+test("DecoratedPermutations(n): signed fixed points, sum of C(n, k) (n - k)! (A000522)", () => {
+  for (let n = 0; n <= 5; n++) holds(decoratedPermutations, [n], decorated(n));
+  expect([0, 1, 2, 3, 4, 5, 6, 7].map((n) => Number(kernel(decoratedPermutations).count([n])))).toEqual([
+    1, 2, 5, 16, 65, 326, 1957, 13700,
+  ]);
+});
+
+test("DecoratedPermutations membership: near misses are not members", () => {
+  const k = kernel(decoratedPermutations);
+  const want = new Set(decorated(3).map((w) => w.join()));
+  for (const w of words(3, [-3, -2, -1, 0, 1, 2, 3, 4])) expect(k.valid(w, [3])).toBe(want.has(w.join()));
+  expect(k.valid([1, 2], [3])).toBe(false);
+  expect(k.valid([-2, 1, 3], [3])).toBe(false); // a negative entry that is no fixed point
+});
+
+/** The ascent sequences of length n, lexicographically. */
+function ascentSeqs(n: number): number[][] {
+  const grow = (seq: number[], asc: number): number[][] =>
+    seq.length === n
+      ? [seq]
+      : Array.from({ length: asc + 2 }, (_, v) => v).flatMap((v) =>
+          grow([...seq, v], asc + (v > seq[seq.length - 1]! ? 1 : 0)),
+        );
+  return n === 0 ? [[]] : grow([0], 0);
+}
+
+test("AscentSequences(n): the Fishburn numbers (A022493)", () => {
+  for (let n = 0; n <= 6; n++) holds(ascentSequences, [n], ascentSeqs(n));
+  expect([0, 1, 2, 3, 4, 5, 6, 7, 8].map((n) => Number(kernel(ascentSequences).count([n])))).toEqual([
+    1, 1, 2, 5, 15, 53, 217, 1014, 5335,
+  ]);
+});
+
+test("AscentSequences membership: near misses are not members", () => {
+  const k = kernel(ascentSequences);
+  const want = new Set(ascentSeqs(4).map((w) => w.join()));
+  for (const w of words(4, [-1, 0, 1, 2, 3])) expect(k.valid(w, [4])).toBe(want.has(w.join()));
+  expect(k.valid([0, 1, 2], [4])).toBe(false);
+  expect(k.valid([], [0])).toBe(true);
+});
+
+/** The factorizations of n into factors above 1, as lists in lex order, with `ordered` or nonincreasing. */
+function factorizations(n: number, ordered: boolean): number[][] {
+  const go = (m: number, bound: number): number[][] =>
+    m === 1
+      ? [[]]
+      : Array.from({ length: Math.min(m, bound) - 1 }, (_, i) => i + 2)
+          .filter((f) => m % f === 0)
+          .flatMap((f) => go(m / f, ordered ? m : f).map((rest) => [f, ...rest]));
+  return n < 1 ? [] : go(n, n);
+}
+
+test("MultiplicativePartitions(n): unordered factorizations (A001055)", () => {
+  for (let n = 0; n <= 30; n++) holds(multiplicativePartitions, [n], factorizations(n, false));
+  expect([...Array(13).keys()].map((n) => Number(kernel(multiplicativePartitions).count([n])))).toEqual([
+    0, 1, 1, 1, 2, 1, 2, 1, 3, 2, 2, 1, 4,
+  ]);
+});
+
+test("OrderedFactorizations(n): ordered factorizations (A074206)", () => {
+  for (let n = 0; n <= 30; n++) holds(orderedFactorizations, [n], factorizations(n, true));
+  expect([...Array(13).keys()].map((n) => Number(kernel(orderedFactorizations).count([n])))).toEqual([
+    0, 1, 1, 1, 2, 1, 3, 1, 4, 2, 3, 1, 8,
+  ]);
+});
+
+test("Factorization membership: near misses are not members", () => {
+  const multiplicative = kernel(multiplicativePartitions);
+  const ordered = kernel(orderedFactorizations);
+  for (const w of words(3, [1, 2, 3, 4, 6, 12])) {
+    expect(multiplicative.valid(w, [12])).toBe(factorizations(12, false).some((f) => f.join() === w.join()));
+    expect(ordered.valid(w, [12])).toBe(factorizations(12, true).some((f) => f.join() === w.join()));
+  }
+  expect(multiplicative.valid([], [1])).toBe(true);
+  expect(multiplicative.valid([], [0])).toBe(false);
+  expect(multiplicative.valid([2, 3], [6])).toBe(false); // not nonincreasing
+  expect(ordered.valid([2, 3], [6])).toBe(true);
 });

@@ -7,7 +7,11 @@
       "maxSize": 6
     },
     "Arrangement": null,
-    "AscentSequence": null,
+    "AscentSequence": {
+      "collection": "AscentSequences",
+      "template": "AscentSequences({size})",
+      "maxSize": 6
+    },
     "BinaryTree": {
       "collection": "BinaryTrees",
       "template": "BinaryTrees({size})",
@@ -39,7 +43,11 @@
       "template": "PermutationsAsCycles({size})",
       "maxSize": 6
     },
-    "DecoratedPermutation": null,
+    "DecoratedPermutation": {
+      "collection": "DecoratedPermutations",
+      "template": "DecoratedPermutations({size})",
+      "maxSize": 6
+    },
     "DelannoyPath": {
       "collection": "DelannoyPaths",
       "template": "DelannoyPaths({size})",
@@ -119,7 +127,11 @@
       "maxSize": 6
     },
     "Multicomplex": null,
-    "MultiplicativePartition": null,
+    "MultiplicativePartition": {
+      "collection": "MultiplicativePartitions",
+      "template": "MultiplicativePartitions({size})",
+      "maxSize": 6
+    },
     "Multiset": null,
     "NonCrossingTree": {
       "collection": "NonCrossingTrees",
@@ -128,7 +140,11 @@
     },
     "Numeric": null,
     "OmegaOrdinal": null,
-    "OrderedFactorization": null,
+    "OrderedFactorization": {
+      "collection": "OrderedFactorizations",
+      "template": "OrderedFactorizations({size})",
+      "maxSize": 6
+    },
     "OrderedTree": {
       "collection": "OrderedTrees",
       "template": "OrderedTrees({size})",

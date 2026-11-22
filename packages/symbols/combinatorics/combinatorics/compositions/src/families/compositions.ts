@@ -12,6 +12,7 @@
 //
 // n = 0 always has exactly one (empty) composition, matching IntegerCompositions(0) in ./core.ts.
 import type { EpsilFamily, FastKernel } from "../../../collections/src/families/epsil.ts";
+import { orderedFactorizations } from "./ordered-factorizations.ts";
 import {
   binomialPastDoubles,
   carlitzExact,
@@ -295,4 +296,7 @@ export const entries: EpsilFamily[] = [
   { ...carlitzCompositions, fast: carlitzFast },
   palindromicCompositions,
   { ...zigzagCompositions, fast: zigzagFast },
+
+  // ── factorizations ──
+  orderedFactorizations,
 ];

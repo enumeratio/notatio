@@ -65,7 +65,19 @@
     "derived": true,
     "statistics": 4
   },
-  "AscentSequences": null,
+  "AscentSequences": {
+    "expr": "AscentSequences(4)",
+    "template": "AscentSequences({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "Associahedron": null,
   "AutomorphicNumbers": {
     "expr": "Take(AutomorphicNumbers, 20)",
@@ -342,7 +354,19 @@
     "statistics": 354
   },
   "Cyclohedron": null,
-  "DecoratedPermutations": null,
+  "DecoratedPermutations": {
+    "expr": "DecoratedPermutations(4)",
+    "template": "DecoratedPermutations({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "DeficientNumbers": {
     "expr": "Take(DeficientNumbers, 20)",
     "columns": ["DigitCount", "DigitSum", "DivisorSum"],
@@ -1027,7 +1051,19 @@
     "statistics": 2
   },
   "MulticomplexNumbers": null,
-  "MultiplicativePartitions": null,
+  "MultiplicativePartitions": {
+    "expr": "MultiplicativePartitions(4)",
+    "template": "MultiplicativePartitions({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "Multisets": {
     "expr": "Multisets(4, 2)",
     "template": "Multisets({size}, 2)",
@@ -1179,7 +1215,19 @@
     "statistics": 3
   },
   "OmegaOrdinals": null,
-  "OrderedFactorizations": null,
+  "OrderedFactorizations": {
+    "expr": "OrderedFactorizations(4)",
+    "template": "OrderedFactorizations({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "OrderedTrees": {
     "expr": "OrderedTrees(4)",
     "template": "OrderedTrees({size})",

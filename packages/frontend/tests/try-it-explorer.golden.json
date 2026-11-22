@@ -7,6 +7,10 @@
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "Arrangements(_size, 2)"
   },
+  "AscentSequences": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "AscentSequences(_n)"
+  },
   "BallotSequences": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "BallotSequences(_n)"
@@ -54,6 +58,10 @@
   "CyclicPermutations": {
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "CyclicPermutations(_size)"
+  },
+  "DecoratedPermutations": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "DecoratedPermutations(_n)"
   },
   "DelannoyPaths": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
@@ -191,6 +199,10 @@
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "MotzkinPathsByPeaks(_n, 2)"
   },
+  "MultiplicativePartitions": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "MultiplicativePartitions(_n)"
+  },
   "Multisets": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "Multisets(_n, 2)"
@@ -222,6 +234,10 @@
   "OddPartitions": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "OddPartitions(_n)"
+  },
+  "OrderedFactorizations": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "OrderedFactorizations(_n)"
   },
   "OrderedTrees": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
