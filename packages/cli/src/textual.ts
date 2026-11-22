@@ -5,7 +5,9 @@
 
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { type Box, notationOf } from "@notatio/boxes";
+import * as analytic from "@notatio/analytic";
 import {
+  analyticScopeOf,
   CURVE_SPEC,
   curvesOf,
   type FigurePlan,
@@ -52,11 +54,15 @@ const marksOf = (written: string): Primitive[] | undefined => {
   return errors.length > 0 ? undefined : primitivesOf(plainJson(json as never) as never);
 };
 
-/** A figure's sources compiled by the session's engine; an item with no code is substituted and evaluated. */
-function loadedOf(session: Session, plan: FigurePlan): LoadedPlot[] {
+/**
+ * A figure's sources compiled by the session's engine; an item with no code is substituted and
+ * evaluated. Undefined when a source does not parse.
+ */
+function loadedOf(session: Session, plan: FigurePlan): LoadedPlot[] | undefined {
   const { ce } = session;
   const runtime = {
     sys: systemHelpersOf(ce as never),
+    scope: analyticScopeOf(analytic),
     evaluate: (item: { json: unknown }) => {
       const expr = ce.box(item.json as never);
       return (scope: Record<string, unknown>): number => {
@@ -66,33 +72,45 @@ function loadedOf(session: Session, plan: FigurePlan): LoadedPlot[] {
       };
     },
   };
-  return plan.sources.map((text) => {
-    const json = plainJson(parseExpression(text, { ce: ce as never }).json as never);
-    return loadCompiled(compilePlot(ce as never, json, CURVE_SPEC), runtime);
-  });
+  const loaded: LoadedPlot[] = [];
+  for (const text of plan.sources) {
+    const { json, errors } = parseExpression(text, { ce: ce as never });
+    if (errors.length > 0) return undefined;
+    loaded.push(loadCompiled(compilePlot(ce as never, plainJson(json as never), CURVE_SPEC), runtime));
+  }
+  return loaded;
 }
 
 /**
  * A curve plot, or a `Show` of plots and graphics, as the `GraphicsBox` a terminal draws: sampled by
- * the sampler the page uses, in the data's own extent.
+ * the sampler the page uses, in the data's own extent. Undefined when it is none, or when it cannot
+ * be compiled or sampled: the result is then written as any other.
  */
 export function sampledFigure(session: Session, json: Json): Box | undefined {
-  const show = planeFigureOf(json);
-  if (show === undefined) return undefined;
-  const plan = figurePlanOf(show);
-  const box = plan.draw(loadedOf(session, plan), { marks: marksOf, tight: true });
-  return box === undefined || "unbound" in (box as object) ? undefined : (box as Box);
+  try {
+    const show = planeFigureOf(json);
+    if (show === undefined) return undefined;
+    const plan = figurePlanOf(show);
+    const loaded = loadedOf(session, plan);
+    const box = loaded && plan.draw(loaded, { marks: marksOf, tight: true });
+    return box === undefined || "unbound" in (box as object) ? undefined : (box as Box);
+  } catch {
+    return undefined;
+  }
 }
 
-/** A `Plot`'s first curve as points, for a host that draws the picture itself. */
+/** A `Plot`'s first curve as points, for a host that draws the picture itself; undefined as `sampledFigure` is. */
 export function samplePlot(session: Session, json: Json): PlotPoint[] | undefined {
-  const plain = plainJson(json as never) as Json;
-  const settings = headOf(plain) === "Plot" ? plotSettingsOf(plain as never) : undefined;
-  if (!settings?.["value"]?.trim()) return undefined;
-  const plan = figurePlanOf(lonePlotOf("Plot", settings)!);
-  const [loaded] = loadedOf(session, plan);
-  const curves = loaded && curvesOf(settings, loaded);
-  return curves && !("unbound" in curves) ? [...(curves.series[0]?.points ?? [])] : undefined;
+  try {
+    const plain = plainJson(json as never) as Json;
+    const settings = headOf(plain) === "Plot" ? plotSettingsOf(plain as never) : undefined;
+    if (!settings?.["value"]?.trim()) return undefined;
+    const loaded = loadedOf(session, figurePlanOf(lonePlotOf("Plot", settings)!));
+    const curves = loaded?.[0] && curvesOf(settings, loaded[0]);
+    return curves && !("unbound" in curves) ? [...(curves.series[0]?.points ?? [])] : undefined;
+  } catch {
+    return undefined;
+  }
 }
 
 /** Arrows and streamline seeds per side on cells, unless `N` says otherwise. */
