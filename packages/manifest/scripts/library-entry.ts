@@ -12,6 +12,7 @@
 
 import { ComputeEngine } from "@cortex-js/compute-engine";
 import { compile } from "@cortex-js/compute-engine/compile";
+import { ce0187Decline } from "@notatio/engine";
 import { type Declarable, declarationOf } from "../src/declaration.ts";
 import type { LibraryIndex } from "../src/libraries/format.ts";
 import { type Definition, type Example, pinnedHead, qualifiedNamesOf, withHeads } from "../src/registry.ts";
@@ -122,7 +123,10 @@ export async function entryOf(input: EntryInput): Promise<Entry> {
     if (attributes?.length || (defaults !== undefined && Object.keys(defaults).length > 0)) continue;
     let code: string | undefined;
     try {
-      const result = compile(ce.box(body as never) as never) as { success: boolean; code: string };
+      const boxed = ce.box(body as never);
+      // A shape of a wrong compiled answer (`ce0187Decline`) ships no compiled code.
+      if (ce0187Decline(boxed.json) !== undefined) continue;
+      const result = compile(boxed as never) as { success: boolean; code: string };
       if (result.success && !/\b_SYS\b|\b_\./.test(result.code)) code = result.code;
     } catch {
       code = undefined;

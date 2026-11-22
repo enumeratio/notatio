@@ -4,7 +4,7 @@
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { type MathJsonExpression, serializeEpsil } from "@cortex-js/compute-engine/epsil";
-import { collectMessages, type Message } from "@notatio/engine";
+import { ce0187Decline, collectMessages, type Message } from "@notatio/engine";
 import { normalizeInputForm, toInputForm } from "@notatio/formats/inputform";
 import { parseExpression } from "@notatio/formats/expression";
 import { boundName, elideResult, latexOf, substitutedForm } from "@notatio/frontend/core";
@@ -164,7 +164,9 @@ export async function codeSources(engine: ComputeEngine, json: unknown): Promise
       new () => { compileToSource(e: unknown): unknown }
     >;
     const expr = engine.box(json as Parameters<typeof engine.box>[0]);
-    for (const [form, targetName] of Object.entries(CODE_TARGETS)) {
+    // A shape of a wrong compiled answer (`ce0187Decline`) has no source in any form.
+    const declined = ce0187Decline(expr.json) !== undefined;
+    for (const [form, targetName] of declined ? [] : Object.entries(CODE_TARGETS)) {
       try {
         const src = new mod[targetName]().compileToSource(expr);
         if (typeof src === "string") out[form as CodeForm] = src;

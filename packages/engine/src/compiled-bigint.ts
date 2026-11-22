@@ -7,6 +7,7 @@
 
 import type { ComputeEngine, Expression } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { ce0187Decline } from "./ce-0187.ts";
 import { type CompiledRun, runtimeHelpers, selfContainedCode } from "./compiled.ts";
 
 class BigIntTarget extends JavaScriptTarget {
@@ -176,12 +177,13 @@ export function compileBigint(
     // Typed, so an `If` with a quotient in one branch has the same shape as the other: compute-engine
     // declines a conditional whose branch shapes differ.
     ce.declare("BigDivide", { signature: "(integer, integer) -> integer" } as never);
-    const result = new BigIntTarget().compile(
-      ce.box(lowered(expression) as never) as Expression,
-      {
-        functions: FUNCTIONS,
-      } as never,
-    ) as { success?: boolean; code?: string; preamble?: string };
+    const boxed = ce.box(lowered(expression) as never) as Expression;
+    if (ce0187Decline(boxed.json, types) !== undefined) return undefined;
+    const result = new BigIntTarget().compile(boxed, { functions: FUNCTIONS } as never) as {
+      success?: boolean;
+      code?: string;
+      preamble?: string;
+    };
     // Generated code guards an equality with `typeof x === 'number'`; here an integer is a bigint.
     const inner = selfContainedCode(result)
       ?.replaceAll("=== 'number'", "=== 'bigint'")

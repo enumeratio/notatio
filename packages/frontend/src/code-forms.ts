@@ -5,7 +5,7 @@
 
 import { type ComputeEngine, compile, type Expression, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine";
 import { emitComplexGLSL } from "@notatio/ce-patches/glsl-complex";
-import { isCompileDecline } from "@notatio/engine/compiled";
+import { ce0187Decline, isCompileDecline } from "@notatio/engine/compiled";
 import { portraitShader } from "./complex-plot.ts";
 import { computeShader } from "./gpu-eval.ts";
 import { toGlslFn } from "./plot-compile.ts";
@@ -20,6 +20,8 @@ export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<Code
   const expr = ce.box(json as never);
   const shader = gpuShader(expr);
   if (shader !== undefined) out.gpushader = shader;
+  // Source that would compute a wrong value is no source (`ce0187Decline`).
+  if (ce0187Decline(expr.json) !== undefined) return out;
   for (const [form, Target] of Object.entries(TARGETS)) {
     try {
       const source = (new Target() as unknown as { compileToSource(e: unknown): unknown }).compileToSource(expr);
@@ -40,6 +42,7 @@ export function codeForms(ce: ComputeEngine, json: unknown): Partial<Record<Code
  */
 export function javascriptSource(ce: ComputeEngine, json: unknown): string | undefined {
   try {
+    if (ce0187Decline(json) !== undefined) return undefined;
     const code = (compile(json as never, { engine: ce, fallback: false } as never) as { code?: unknown } | undefined)
       ?.code;
     return typeof code === "string" ? code : undefined;
