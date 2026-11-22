@@ -37,13 +37,6 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
     plural: "HyperbinaryWords",
   },
   {
-    name: "HypernumeraryWord",
-    type: "hypernumerary_word",
-    shape: "list<integer>",
-    id: "hypernumerary_word",
-    plural: "HypernumeraryWords",
-  },
-  {
     name: "ParkingFunction",
     readable: true,
     type: "parking_function",

@@ -66,7 +66,6 @@
       "maxSize": 6
     },
     "FactoradicNumeral": null,
-    "FiniteSetElement": null,
     "Finset": {
       "collection": "Subsets",
       "template": "Subsets({size})",
@@ -85,7 +84,6 @@
       "template": "HyperbinaryWords({size})",
       "maxSize": 6
     },
-    "HypernumeraryWord": null,
     "IncreasingBinaryTree": {
       "collection": "IncreasingBinaryTrees",
       "template": "IncreasingBinaryTrees({size})",
@@ -235,9 +233,6 @@
       "template": "SignedPermutations({size})",
       "maxSize": 6
     },
-    "SignedSetComposition": null,
-    "SignedSubset": null,
-    "Singleton": null,
     "SkewPartition": {
       "collection": "SkewPartitions",
       "template": "SkewPartitions({size})",
