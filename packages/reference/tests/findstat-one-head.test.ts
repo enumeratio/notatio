@@ -33,4 +33,13 @@ describe("a FindStat id has one head per carrier", () => {
     );
     expect(off).toEqual({});
   });
+
+  it("the matches name one head per id and carrier", () => {
+    const heads = new Map<string, Set<string>>();
+    for (const r of wanted()) heads.set(key(r.id, r.on), (heads.get(key(r.id, r.on)) ?? new Set()).add(r.head));
+    const shared = Object.fromEntries(
+      [...heads].filter(([, v]) => v.size > 1).map(([k, v]) => [k, [...v].toSorted()] as const),
+    );
+    expect(shared).toEqual({});
+  });
 });
