@@ -34,6 +34,8 @@ export interface CompiledItem {
   readonly label: string;
   /** The compiled source, when the target could compile it. */
   readonly code?: string;
+  /** Why it has no `code`, when its shape computes a wrong compiled answer (`ce0187Decline`): `ce-0187:<defect>: …`. */
+  readonly declined?: string;
   /** Its value, when it has no free names. */
   readonly value?: number;
   /** Its two values, when it's a pair of numbers (a data point). */
@@ -134,6 +136,11 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
     const [a, b] = ops.map(numeric);
     if (a !== undefined && b !== undefined) item.point = [a, b];
   }
+  const declined = ce0187Decline(e.json);
+  if (declined !== undefined) {
+    item.declined = declined;
+    return item;
+  }
   if (spec.target === "glsl") {
     const free = unknowns.filter((u) => !u.startsWith("_"));
     const [vx = free[0] ?? "x", vy = free.find((u) => u !== vx) ?? "y"] = spec.vars ?? [];
@@ -142,7 +149,6 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
     return item;
   }
   try {
-    if (ce0187Decline(e.json) !== undefined) return item;
     const r = new JavaScriptTarget().compile(e) as { success?: boolean; code?: string; preamble?: string };
     const code = r?.success ? selfContainedCode(r) : undefined;
     if (code !== undefined) item.code = code;

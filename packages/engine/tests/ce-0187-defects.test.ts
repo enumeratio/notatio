@@ -107,6 +107,94 @@ describe.skipIf(process.env.COMPUTE_ENGINE_MAIN === "1")(
           expect(interpreted(ce, ["Divide", 2, [head, "x"]], { x: 0.3 })).toBeCloseTo(2 * fn(0.3), 12);
         }
       });
+
+      test("Csch(x)^-1 is boxed as 1/Csch(x) and drops its reciprocal the same way", () => {
+        const ce = engine({ x: "real" });
+        for (const [head, fn, name] of [
+          ["Csch", Math.sinh, "sinh"],
+          ["Sech", Math.cosh, "cosh"],
+        ] as const) {
+          const power = ["Power", [head, "x"], -1];
+          expect(ce.box(power as never).json).toEqual(["Divide", 1, [head, "x"]]);
+          const compiled = js(power, ce);
+          expect(compiled.code).toBe(`1 / Math.${name}(_.x)`);
+          expect(compiled.run({ x: 0.3 } as never)).toBeCloseTo(1 / fn(0.3), 12);
+          expect(interpreted(ce, power, { x: 0.3 })).toBeCloseTo(fn(0.3), 12);
+        }
+      });
+
+      // The rest of the reciprocal family (BL-558): each head under a division and a power, JavaScript and GLSL, at
+      // in-domain points, against `.N()`. Only Csch and Sech (above) are wrong; the others are right at the pin.
+      const family = ["Sec", "Csc", "Cot", "Coth", "Arcsec", "Arccsc", "Arccot", "Arcoth", "Arcsch", "Arsech"] as const;
+      // Real-valued at both points, so the compiled value is a number and `.N()` is real.
+      const points: Record<string, readonly number[]> = {
+        Arcsec: [1.9, 2.5],
+        Arccsc: [1.9, 2.5],
+        Arcoth: [1.9, 2.5],
+        Arsech: [0.3, 0.7],
+      };
+      const shapes: Record<string, (f: unknown) => unknown> = {
+        "2/f": (f) => ["Divide", 2, f],
+        "f^2": (f) => ["Power", f, 2],
+        "f^-1": (f) => ["Power", f, -1],
+        "1/f^2": (f) => ["Divide", 1, ["Power", f, 2]],
+      };
+      const real = (value: unknown): number =>
+        typeof value === "number"
+          ? value
+          : (value as { re: number; im: number }).im === 0
+            ? (value as { re: number }).re
+            : NaN;
+
+      describe.each(family)("%s", (head) => {
+        test.each(Object.keys(shapes))("%s is right on JavaScript and GLSL", (shape) => {
+          const ce = engine({ x: "real" });
+          const expression = shapes[shape]!([head, "x"]);
+          const compiled = js(expression, ce);
+          const glsl = new GLSLTarget().compile(ce.box(expression as never));
+          expect(glsl.code).toBeTruthy();
+          for (const x of points[head] ?? [0.7, 1.9]) {
+            expect(real(compiled.run({ x } as never))).toBeCloseTo(interpreted(ce, expression, { x }), 9);
+          }
+          expect(findCe0187Defects(expression as never)).toEqual([]);
+        });
+      });
+
+      test("every shape that compiles wrong has a hit", () => {
+        const ce = engine({ x: "real" });
+        const csch = ["Csch", "x"];
+        for (const expression of [
+          ["Divide", -2, csch],
+          ["Negate", ["Divide", 2, csch]],
+          ["Multiply", 3, ["Power", csch, -1]],
+          ["Subtract", 1, ["Divide", 2, csch]],
+          ["Add", 1, ["Power", csch, -1]],
+          ["Divide", csch, 2],
+          ["Divide", 1, ["Add", csch, 1]],
+          ["Divide", 1, ["Multiply", 2, csch]],
+          ["Divide", 2, ["Sqrt", csch]],
+          ["Power", csch, 2],
+          ["Multiply", 2, csch],
+        ]) {
+          const wrong =
+            Math.abs(real(js(expression, ce).run({ x: 0.3 } as never)) - interpreted(ce, expression, { x: 0.3 })) >
+            1e-9;
+          const hit = findCe0187Defects(expression as never).some(
+            (h) => h.defect === CE_0187_DEFECTS.reciprocalHyperbolic,
+          );
+          expect(hit, JSON.stringify(expression)).toBe(wrong);
+        }
+      });
+
+      test("the scanner sees Csch and Sech under a division and a power of -1, and not the right shapes", () => {
+        const hit = (json: unknown): boolean =>
+          findCe0187Defects(json as never).some((h) => h.defect === CE_0187_DEFECTS.reciprocalHyperbolic);
+        expect(hit(["Divide", 2, ["Sech", "x"]])).toBe(true);
+        expect(hit(["Power", ["Csch", "x"], -1])).toBe(true);
+        expect(hit(["Multiply", 3, ["Power", ["Sech", "x"], -1]])).toBe(true);
+        expect(hit(["Power", ["Csch", "x"], -2])).toBe(false);
+        expect(hit(["Divide", ["Csch", "x"], 2])).toBe(false);
+      });
     });
 
     describe(CE_0187_DEFECTS.sqrtSquared, () => {
@@ -233,20 +321,21 @@ describe.skipIf(process.env.COMPUTE_ENGINE_MAIN === "1")(
         expect((js(expression, ce).run({} as never) as unknown[]).length).toBe(5000);
       });
 
-      test(`${CE_0187_DEFECTS.complexModeSqrt}: not reproduced; Sqrt at -4 is 2i in complex mode and NaN in strict mode`, () => {
+      // The next three came from compute-engine's plot sampling paths (broadcast, complex mode, declared ranges), which we don't use.
+      test(`${CE_0187_DEFECTS.complexModeSqrt}: not present at the pin on our compile routes; Sqrt at -4 is 2i in complex mode and NaN in strict mode`, () => {
         const ce = engine({ x: "real" });
         expect(js(["Sqrt", "x"], ce, { mode: "complex" }).run({ x: -4 } as never)).toEqual({ re: 0, im: 2 });
         expect(js(["Sqrt", "x"], ce).run({ x: -4 } as never)).toBeNaN();
       });
 
-      test(`${CE_0187_DEFECTS.complexInput}: not reproduced as a wrong value; z² + a of undeclared names throws on a complex input`, () => {
+      test(`${CE_0187_DEFECTS.complexInput}: not present at the pin on our compile routes; z² + a of undeclared names throws on a complex input, not a wrong value`, () => {
         const ce = engine();
         const compiled = js(["Add", ["Square", "z"], "a"], ce);
         expect(compiled.code).toBe("(_.z * _.z) + _.a");
         expect(() => compiled.run({ z: { re: 0, im: 2 }, a: 1 } as never)).toThrow(/complex/);
       });
 
-      test(`${CE_0187_DEFECTS.absRange}: not reproduced; Abs keeps its range through a declared range`, () => {
+      test(`${CE_0187_DEFECTS.absRange}: not present at the pin on our compile routes; Abs keeps its range through a declared range`, () => {
         const ce = engine({ x: "real<-5..3>" });
         expect(ce.box(["Abs", ["Subtract", "x", 1]] as never).type.toString()).toBe("real<0..6>");
         expect(ce.box(["Add", ["Abs", "x"], -6] as never).type.toString()).toBe("real<-6..-1>");
@@ -264,6 +353,9 @@ describe("the declines", () => {
     ["Multiply", 2, ["Abs", ["Block", ["Add", ["Square", "_x"], 1]]]],
     ["Function", ["Multiply", 2, ["Fract", "y"]], "y"],
     ["Divide", 2, ["Csch", "_x"]],
+    ["Divide", 2, ["Sech", "_x"]],
+    ["Power", ["Csch", "_x"], -1],
+    ["Multiply", 3, ["Power", ["Sech", "_x"], -1]],
     ["Power", ["Square", "_x"], "_k"],
     ["Function", ["LerchPhi", 0.3, "t", 2], "t"],
   ];
