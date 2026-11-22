@@ -11,7 +11,8 @@ export const CE_0187_DEFECTS = {
   /** A function lowered to an operator expression (or an `If` or `Typed` the types decide) is spliced
    *  unparenthesized into the operator around it: `2·Fract(y)` in a function body is `2 * y - Math.floor(y)`. */
   parentheses: "ce-0187:parentheses",
-  /** `Csch(x)` and `Sech(x)` in a denominator compile to `2 / Math.sinh(x)`, the reciprocal dropped. Found by the audit. */
+  /** `Csch(x)` and `Sech(x)` in a denominator (`Csch(x)^-1` too) compile to `2 / Math.sinh(x)`, the reciprocal dropped.
+   *  Found by the audit; Sec, Csc, Cot, Coth and the inverse reciprocals are right at the pin. */
   reciprocalHyperbolic: "ce-0187:reciprocal-hyperbolic",
   /** A negation, product or difference of `Sqrt(X)²`, and `Abs(Block(X))` under one, lose their parentheses. */
   sqrtSquared: "ce-0187:sqrt-squared",
@@ -162,6 +163,9 @@ const operandsOf = (node: Node): readonly unknown[] => {
 const isNumber = (node: Node): boolean =>
   typeof node === "number" || (node !== null && typeof node === "object" && "num" in (node as object));
 
+const isMinusOne = (node: Node): boolean =>
+  node === -1 || (node !== null && typeof node === "object" && (node as { num?: unknown }).num === "-1");
+
 const isEvenInteger = (node: Node): boolean => typeof node === "number" && Number.isInteger(node) && node % 2 === 0;
 
 /** `Sqrt(X)` squared: `Power(Sqrt(X), 2)`, `Square(Sqrt(X))`, or `Multiply(Sqrt(X), Sqrt(X))`. */
@@ -236,6 +240,9 @@ export function findCe0187Defects(json: Node, types: Readonly<Record<string, str
       add(CE_0187_DEFECTS.parentheses, path, `${head} in a function body under ${parent}`);
     if (parent === "Divide" && RECIPROCAL_HYPERBOLIC_HEADS.has(head) && path[path.length - 1] === 2)
       add(CE_0187_DEFECTS.reciprocalHyperbolic, path, `${head} in a denominator`);
+    // `Csch(x)^-1` is boxed as `1/Csch(x)`, so its denominator drops the reciprocal as well.
+    if (head === "Power" && RECIPROCAL_HYPERBOLIC_HEADS.has(headOf(ops[0]) ?? "") && isMinusOne(ops[1]))
+      add(CE_0187_DEFECTS.reciprocalHyperbolic, path, `${headOf(ops[0])} to the power -1`);
     if (under && head === "If") {
       const condition = ops[0];
       const names = [...namesIn(condition)];
