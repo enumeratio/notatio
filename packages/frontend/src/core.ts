@@ -53,6 +53,7 @@ export * from "./plot-color.ts";
 export * from "./plot.ts";
 export * from "./plot-box.ts";
 export * from "./plot-lowering.ts";
+export * from "./plot-sample.ts";
 export * from "./plot3d.ts";
 export * from "./polarplot.ts";
 export * from "./regionplot.ts";

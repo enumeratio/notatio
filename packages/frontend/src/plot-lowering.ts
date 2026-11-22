@@ -105,14 +105,15 @@ const PLANE_SHOW = new RegExp(`^\\s*Show\\s*\\(\\s*(?:${PLANE_LAYER_HEADS.join("
 /** Whether `value` is a `Show` of plots and graphics, drawn in one plot frame. */
 export const holdsPlaneShow = (value: string | undefined): boolean => PLANE_SHOW.test(value ?? "");
 
+/** Whether `value` is a plot or a chart the build can draw, a `Show` of plots included: a diagram, or a `Show` of tiles, is drawn live. */
+export const holdsPrerenderedPlot = (value: string | undefined): boolean =>
+  SAMPLED_VALUE.test(value ?? "") || holdsPlaneShow(value);
+
 /**
  * Whether `value` is a plot, a chart or a diagram (`Plot(…)`, `BarChart([…])`), or a `Show` of plots
  * and graphics, which `<graphics-box>` draws as one.
  */
 export const holdsPlot = (value: string | undefined): boolean => PLOT_VALUE.test(value ?? "") || holdsPlaneShow(value);
-
-/** Whether `value` is a plot or a chart the build can draw: a diagram, like a `Show`, is drawn live. */
-export const holdsPrerenderedPlot = (value: string | undefined): boolean => SAMPLED_VALUE.test(value ?? "");
 
 /** Plot settings, the attributes an expression's options lower to (`plotSettingsOf`). */
 export type PlotSettings = Readonly<Record<string, string>>;
@@ -317,6 +318,8 @@ export function plotOptionsOf(
     plotRange?: readonly [number, number];
     /** Each series' look, where the series come from several layers with a `PlotStyle` each. */
     styles?: readonly GraphicsLook[];
+    /** `PlotRangePadding -> None`, as a terminal draws: the window is the data's own extent. */
+    tight?: boolean;
   } = {},
 ): PlotOptions {
   return {

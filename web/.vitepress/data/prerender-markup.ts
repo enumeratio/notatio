@@ -5,23 +5,23 @@
 // picture at the starting values of the controls it reads.
 
 import { readFileSync } from "node:fs";
-import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { createKernel, type Kernel } from "@notatio/evaluation";
 import { parseExpression } from "@notatio/formats/expression";
-import { plotSettingsOf } from "@notatio/frontend/symbols";
+import { planeShowOf, plotSettingsOf } from "@notatio/frontend/symbols";
 import {
   chartBoxOfSettings,
+  CURVE_SPEC,
+  figurePlanOf,
+  loadCompiled,
+  lonePlotOf,
   parseControls,
   plainJson,
-  plotBoxOfSamples,
-  plotSeries,
+  primitivesOf,
   renderChart,
   renderPlot,
-  spanOf,
 } from "@notatio/frontend/core";
 import { NOTEBOOK_KERNEL } from "@notatio/frontend/kernel-host";
-import type { CompiledPlot } from "@notatio/frontend/plot-compile";
+import { type CompiledPlot, systemHelpersOf } from "@notatio/frontend/plot-compile";
 import { outMarkup, prerender } from "@notatio/frontend/prerender";
 import { libraryRegistry, registerLibraryNotation } from "../theme/libraries.ts";
 import { CATALOGUE } from "../theme/worker-catalogue.ts";
@@ -62,62 +62,63 @@ async function cellPreview(spec: MarkupSpec, session: string): Promise<string | 
   );
 }
 
-// compute-engine's helpers for compiled code, lent by a compiled function (as on the page).
-const systemHelpers = (ce: ComputeEngine): unknown =>
-  (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
+/** An `Epilog` or `Prolog` as written, read to primitives. */
+const marksOf = (written: string): ReturnType<typeof primitivesOf> | undefined => {
+  const { json, errors } = parseExpression(written);
+  return errors.length > 0 ? undefined : primitivesOf(plainJson(json as never) as never);
+};
 
+/**
+ * A plot's picture for the built page: a chart of data, or a curve plot, a `Graphics` or a `Show`
+ * of them drawn by the sampler the page itself uses (`figurePlanOf`), so the live element replaces
+ * the same picture. What the build can't draw it leaves live.
+ */
 async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
   const a = spec.attributes;
   const written = a["value"];
   if (written === undefined || Object.keys(a).some((name) => name.startsWith(":") || name.startsWith("v-")))
     return undefined;
-  // The expression's settings, as the element reads them; what the build can't draw it leaves live.
+  // The expression's settings, as the element reads them.
   const { json, errors } = parseExpression(written);
-  const settings = errors.length > 0 ? undefined : plotSettingsOf(plainJson(json as never) as never);
+  const plain = errors.length > 0 ? undefined : (plainJson(json as never) as never);
+  const settings = plain === undefined ? undefined : plotSettingsOf(plain);
   // A chart of data needs no kernel; one in a Manipulate may hold wildcards, so it stays live.
   const chart = settings === undefined || spec.manipulate.length > 0 ? undefined : chartBoxOfSettings(settings);
   if (chart !== undefined) return `<span class="graphics-box-plot">${renderChart(chart as never)}</span>`;
-  const text = settings?.["value"];
-  if (settings === undefined || text === undefined || settings["type"] !== undefined) return undefined;
-  if (settings["epilog"] || settings["prolog"]) return undefined;
+  const head = Array.isArray(plain) ? String((plain as unknown[])[0]) : "";
+  // A lone plot of data (`ListPlot`) is drawn live, as it was.
+  const show =
+    plain === undefined
+      ? undefined
+      : (planeShowOf(plain) ?? (settings?.["type"] === undefined && settings ? lonePlotOf(head, settings) : undefined));
+  if (show === undefined) return undefined;
+  const plan = figurePlanOf(show);
   const k = await pageKernel();
-  const answer = await k.evaluate({ source: { text, format: "epsil" }, compile: { target: "javascript", each: true } });
-  const plot = answer.compiled as CompiledPlot | undefined;
-  if (!answer.ok || plot === undefined || plot.items.some((item) => item.code === undefined)) return undefined;
-  // The wildcards start where a Manipulate's controls around it do.
-  const scope: Record<string, unknown> = {};
-  if (plot.items.some((item) => item.code!.includes("_.__"))) {
-    const m = await import("@notatio/analytic");
-    Object.assign(scope, {
-      __hz: m.hurwitzZetaReal,
-      __zg: m.zetaGeneralizedReal,
-      __lp: m.lerchPhiReal,
-      __pl: m.polyLogReal,
-    });
+  const sys = systemHelpersOf(k.ce as never);
+  const loaded = [];
+  for (const text of plan.sources) {
+    const answer = await k.evaluate({ source: { text, format: "epsil" }, compile: CURVE_SPEC });
+    const plot = answer.compiled as CompiledPlot | undefined;
+    // An item with no code is sampled by an engine, which the page has and this picture does not wait for.
+    if (!answer.ok || plot === undefined || plot.items.some((item) => item.code === undefined)) return undefined;
+    const scope: Record<string, unknown> = {};
+    if (plot.items.some((item) => item.code!.includes("_.__"))) {
+      const m = await import("@notatio/analytic");
+      Object.assign(scope, {
+        __hz: m.hurwitzZetaReal,
+        __zg: m.zetaGeneralizedReal,
+        __lp: m.lerchPhiReal,
+        __pl: m.polyLogReal,
+      });
+    }
+    loaded.push(loadCompiled(plot, { sys, scope }));
   }
-  for (const params of spec.manipulate) for (const c of parseControls(params)) scope[`_${c.name}`] = c.value;
-  const sys = systemHelpers(k.ce);
-  type Compiled = (s: unknown, v: unknown) => unknown;
-  // oxlint-disable-next-line no-implied-eval -- the kernel's compiled output
-  const compiled = (code: string): Compiled => new Function("_SYS", "_", `return (${code});`) as Compiled;
-  const fns = plot.items.map((item) => compiled(item.code!));
-  const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
-  const at =
-    (i: number) =>
-    (t: number): number => {
-      scope[variable] = t;
-      const v = fns[i]!(sys, scope);
-      return typeof v === "number" ? v : Number.NaN;
-    };
-  const series = plotSeries(plot.items, at, {
-    domain: spanOf(settings["domain"]) ?? [-6.283185, 6.283185],
-    samples: Number(settings["samples"]) || 200,
-    mode: settings["mode"],
-    adaptive: settings["adaptive"] !== "false",
-    parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
-  });
-  const { svg } = renderPlot(plotBoxOfSamples(settings, series) as never);
-  return `<span class="graphics-box-plot">${svg}</span>`;
+  // The wildcards start where a Manipulate's controls around it do.
+  const bindings: Record<string, unknown> = {};
+  for (const params of spec.manipulate) for (const c of parseControls(params)) bindings[`_${c.name}`] = c.value;
+  const box = plan.draw(loaded, { bindings, marks: marksOf });
+  if (box === undefined || "unbound" in (box as object)) return undefined;
+  return `<span class="graphics-box-plot">${renderPlot(box as never).svg}</span>`;
 }
 
 /** `html` with each of `page`'s marked elements rendered into its placeholder. */

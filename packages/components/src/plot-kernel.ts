@@ -4,24 +4,21 @@
 // samples the same code again rather than asking for new code.
 
 import type { CompiledItem, CompiledPlot, PlotCompileSpec } from "@notatio/frontend/plot-compile";
-import { loadBareEngine, loadEngineFor, parseFor } from "@notatio/frontend/core";
+import {
+  loadBareEngine,
+  loadCompiled,
+  type LoadedPlot,
+  loadEngineFor,
+  parseFor,
+  sampleNumber,
+  type Sampler,
+  type Scope,
+} from "@notatio/frontend/core";
 import { pageKernel, translate, WorkerUnavailableError } from "./kernel-client.ts";
 
 export type { CompiledItem, CompiledPlot, PlotCompileSpec };
 
-/** What a compiled function reads: the plot's variables, the wildcards, and its runtime. */
-export type Scope = Record<string, unknown>;
-
-/** One item, as a function of a scope; `NaN` where it has no real value. */
-export type Sampler = (scope: Scope) => number;
-
-/** A compiled plot with its items ready to sample, and the scope they read from. */
-export interface LoadedPlot {
-  readonly plot: CompiledPlot;
-  readonly samplers: readonly Sampler[];
-  /** A fresh scope for one sampling pass: the runtime the code calls, nothing else. */
-  scope(): Scope;
-}
+export type { LoadedPlot, Sampler, Scope };
 
 const compiled = new Map<string, Promise<CompiledPlot>>();
 const COMPILED_LIMIT = 64;
@@ -152,18 +149,6 @@ export async function readEpsil(text: string): Promise<unknown> {
   return parsed.errors.length > 0 ? undefined : parsed.json;
 }
 
-/** A sample's number: a real, or a complex value that is real up to rounding (a Hurwitz zeta of real arguments compiles to a complex kernel); `NaN` for any other. */
-const numberOf = (v: unknown): number => {
-  if (typeof v === "number") return v;
-  if (typeof v !== "object" || v === null) return Number.NaN;
-  const { re, im } = v as { re?: unknown; im?: unknown };
-  if (typeof re !== "number" || typeof im !== "number") return Number.NaN;
-  return Math.abs(im) <= REAL_TOLERANCE * Math.max(1, Math.abs(re)) ? re : Number.NaN;
-};
-
-/** How far a complex sample's imaginary part may stray from 0, relative to its size, and still read as real. */
-const REAL_TOLERANCE = 1e-12;
-
 /** An item with no compiled code, sampled by the page's engine: `subs`, then `N`, per sample. */
 async function engineSampler(item: CompiledItem): Promise<Sampler> {
   const ce = await loadEngineFor(item.json);
@@ -174,26 +159,25 @@ async function engineSampler(item: CompiledItem): Promise<Sampler> {
       const v = scope[name];
       if (typeof v === "number") subs[name] = ce.number(v);
     }
-    return numberOf(expr.subs(subs).N().re);
+    return sampleNumber(expr.subs(subs).N().re);
   };
 }
 
-/** `plot`'s items as samplers. */
+/** `plot`'s items as samplers: the page's helpers and its engine's fallback behind the shared loader. */
 export async function loadPlot(plot: CompiledPlot): Promise<LoadedPlot> {
   const codes = plot.items.map((item) => item.code ?? "");
-  const [sys, runtime] = await Promise.all([
+  const [sys, scope] = await Promise.all([
     codes.some((c) => c.includes("_SYS")) ? systemHelpers() : undefined,
     codes.some((c) => c.includes("_.__")) ? analyticRuntime() : ({} as Scope),
   ]);
-  const samplers = await Promise.all(
-    plot.items.map(async (item): Promise<Sampler> => {
-      if (item.code === undefined) return engineSampler(item);
-      // oxlint-disable-next-line no-implied-eval -- the code is the kernel's compiled output
-      const fn = new Function("_SYS", "_", `return (${item.code});`) as (sys: unknown, scope: Scope) => unknown;
-      return (scope) => numberOf(fn(sys, scope));
-    }),
+  // An item with no code is sampled by the page's engine, loaded only for it.
+  const fallback = new Map<CompiledItem, Sampler>();
+  await Promise.all(
+    plot.items
+      .filter((item) => item.code === undefined)
+      .map(async (item) => fallback.set(item, await engineSampler(item))),
   );
-  return { plot, samplers, scope: () => ({ ...runtime }) };
+  return loadCompiled(plot, { sys, scope, evaluate: (item) => fallback.get(item) ?? (() => Number.NaN) });
 }
 
 /** `text` compiled to JavaScript and ready to sample. */
