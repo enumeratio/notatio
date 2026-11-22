@@ -18,8 +18,8 @@ const engine = () => {
 test("the catalog is the measured shape, folded to names", () => {
   // Stats and maps are folded from (collection, stat) rows to NAMES with overload sets.
   // Pinned so that a change to the catalogue's shape is a reviewed change.
-  expect(COLLECTIONS.length).toBe(290);
-  expect(CARRIERS.length).toBe(95);
+  expect(COLLECTIONS.length).toBe(286);
+  expect(CARRIERS.length).toBe(90);
   // Folded to names: one row per stat name, however many carriers it is on.
   expect(new Set(STATS.map((s) => s.name)).size).toBe(STATS.length);
   expect(new Set(MAPS.map((m) => m.name)).size).toBe(MAPS.length);

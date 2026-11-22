@@ -25,8 +25,6 @@ references:
     identity: PermutationCycle
 names:
   wolframIdentity: true
-mapOn:
-  - Permutation
 bindings:
   - origin: mapped
     form: sage

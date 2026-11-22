@@ -6,13 +6,6 @@ import type { Carrier } from "@notatio/structures";
 
 export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
   {
-    name: "FiniteSetElement",
-    type: "finite_set_element",
-    shape: "tuple<integer, integer>",
-    id: "finite_set_element",
-    plural: "FiniteSetElements",
-  },
-  {
     name: "Finset",
     type: "finset",
     // Params first (n, then the element list) — `carrierParams`'s packing convention
@@ -64,27 +57,6 @@ export const SET_PARTITIONS_CARRIERS: readonly Carrier[] = [
     shape: "list<list<integer>>",
     id: "set_partition",
     plural: "SetPartitions",
-  },
-  {
-    name: "SignedSetComposition",
-    type: "signed_set_composition",
-    shape: "tuple<list<integer>, list<integer>>",
-    id: "signed_set_composition",
-    plural: "SignedSetCompositions",
-  },
-  {
-    name: "SignedSubset",
-    type: "signed_subset",
-    shape: "tuple<list<integer>, integer>",
-    id: "signed_subset",
-    plural: "SignedSubsets",
-  },
-  {
-    name: "Singleton",
-    type: "singleton",
-    shape: "integer",
-    id: "singleton",
-    plural: "Singletons",
   },
   {
     name: "Surjection",

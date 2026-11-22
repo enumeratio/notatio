@@ -1,0 +1,9 @@
+id	section	role	expr	expected	caption
+count-2-dyck-n-4	Basic		[Count, [KDyckPaths, 4, 2]]	55	$\frac{1}{9}\binom{12}{4}$ paths with 4 steps up by 2, A001764
+all-2-dyck-n-2	Basic		[KDyckPaths, 2, 2]	[List, [KDyckPath, [List, 1, 1, 0, 0, 0, 0]], [KDyckPath, [List, 1, 0, 1, 0, 0, 0]], [KDyckPath, [List, 1, 0, 0, 1, 0, 0]]]	the three 2-Dyck paths of semilength 2, the paths that go up first first
+count-3-dyck-n-3	Basic		[Count, [KDyckPaths, 3, 3]]	22	$\frac{1}{10}\binom{12}{3}$, A002293
+one-dyck-is-dyck	Properties		[Count, [KDyckPaths, 5, 1]]	42	$k = 1$ gives the Catalan numbers, the Dyck paths
+no-steps	Properties		[Count, [KDyckPaths, 0, 3]]	1	the empty path is the only path of semilength 0
+a-member	Properties		[Element, [KDyckPath, [List, 1, 0, 1, 0, 0, 0]], [KDyckPaths, 2, 2]]	True	up 2, down 1, up 2, down 3 stays above the ground
+a-dyck-path-is-not-2-dyck	Properties		[Element, [KDyckPath, [List, 1, 0, 1, 0]], [KDyckPaths, 2, 2]]	False	two steps up by 2 are not undone by two steps down
+dips-below-the-ground	Properties		[Element, [KDyckPath, [List, 0, 1, 1, 0, 0, 0]], [KDyckPaths, 2, 2]]	False	the first step goes down from the ground

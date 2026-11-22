@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-for-n-12	Basic		[OrderedFactorizations, 12]	[List, [OrderedFactorization, [List, 2, 2, 3]], [OrderedFactorization, [List, 2, 3, 2]], [OrderedFactorization, [List, 2, 6]], [OrderedFactorization, [List, 3, 2, 2]], [OrderedFactorization, [List, 3, 4]], [OrderedFactorization, [List, 4, 3]], [OrderedFactorization, [List, 6, 2]], [OrderedFactorization, [List, 12]]]	the eight ordered factorizations of 12
+count-n-24	Basic		[Count, [OrderedFactorizations, 24]]	20	A074206 at 24
+one	Properties		[OrderedFactorizations, 1]	[List, [OrderedFactorization, [List]]]	the empty product is the one factorization of 1
+a-member	Properties		[Element, [OrderedFactorization, [List, 2, 3, 2]], [OrderedFactorizations, 12]]	True	$2 \cdot 3 \cdot 2 = 12$
+wrong-product	Properties		[Element, [OrderedFactorization, [List, 2, 6, 2]], [OrderedFactorizations, 12]]	False	the product is 24
+factor-one	Properties		[Element, [OrderedFactorization, [List, 6, 1, 2]], [OrderedFactorizations, 12]]	False	a factor is at least 2

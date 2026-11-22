@@ -19,7 +19,13 @@
   },
   "AscentSequence": {
     "carrier": "AscentSequence",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "AscentSequences",
+    "template": "AscentSequences({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "BinaryTree": {
     "carrier": "BinaryTree",
@@ -98,7 +104,13 @@
   },
   "DecoratedPermutation": {
     "carrier": "DecoratedPermutation",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "DecoratedPermutations",
+    "template": "DecoratedPermutations({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "DelannoyPath": {
     "carrier": "DelannoyPath",
@@ -142,10 +154,6 @@
   },
   "FactoradicNumeral": {
     "carrier": "FactoradicNumeral",
-    "reason": "no collection of sized elements on this carrier"
-  },
-  "FiniteSetElement": {
-    "carrier": "FiniteSetElement",
     "reason": "no collection of sized elements on this carrier"
   },
   "Finset": {
@@ -193,11 +201,13 @@
   },
   "HyperbinaryWord": {
     "carrier": "HyperbinaryWord",
-    "reason": "no collection of sized elements on this carrier"
-  },
-  "HypernumeraryWord": {
-    "carrier": "HypernumeraryWord",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "HyperbinaryWords",
+    "template": "HyperbinaryWords({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "IncreasingBinaryTree": {
     "carrier": "IncreasingBinaryTree",
@@ -299,7 +309,13 @@
   },
   "MultiplicativePartition": {
     "carrier": "MultiplicativePartition",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "MultiplicativePartitions",
+    "template": "MultiplicativePartitions({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "Multiset": {
     "carrier": "Multiset",
@@ -326,7 +342,13 @@
   },
   "OrderedFactorization": {
     "carrier": "OrderedFactorization",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "OrderedFactorizations",
+    "template": "OrderedFactorizations({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "OrderedTree": {
     "carrier": "OrderedTree",
@@ -429,7 +451,13 @@
   },
   "RookPlacement": {
     "carrier": "RookPlacement",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "RookPlacements",
+    "template": "RookPlacements({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "RootedForest": {
     "carrier": "RootedForest",
@@ -518,18 +546,6 @@
       "start": 4
     },
     "glyph": "signed-permutation"
-  },
-  "SignedSetComposition": {
-    "carrier": "SignedSetComposition",
-    "reason": "no collection of sized elements on this carrier"
-  },
-  "SignedSubset": {
-    "carrier": "SignedSubset",
-    "reason": "no collection of sized elements on this carrier"
-  },
-  "Singleton": {
-    "carrier": "Singleton",
-    "reason": "no collection of sized elements on this carrier"
   },
   "SkewPartition": {
     "carrier": "SkewPartition",

@@ -7,6 +7,7 @@ import type { Carrier } from "@notatio/structures";
 export const WORDS_CARRIERS: readonly Carrier[] = [
   {
     name: "AscentSequence",
+    readable: true,
     type: "ascent_sequence",
     shape: "list<integer>",
     id: "ascent_sequence",
@@ -29,17 +30,11 @@ export const WORDS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "HyperbinaryWord",
+    readable: true,
     type: "hyperbinary_word",
     shape: "list<integer>",
     id: "hyperbinary_word",
     plural: "HyperbinaryWords",
-  },
-  {
-    name: "HypernumeraryWord",
-    type: "hypernumerary_word",
-    shape: "list<integer>",
-    id: "hypernumerary_word",
-    plural: "HypernumeraryWords",
   },
   {
     name: "ParkingFunction",

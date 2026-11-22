@@ -1,5 +1,5 @@
-id	in
-a-factorization-as-data	
-factorization-of-an-integer	factor_integer(n(360))
-factorization-of-a-prime	factor_integer(n(97))
-factorization-of-a-negative	factor_integer(n(-12))
+id	in	out	verdict
+a-factorization-as-data			
+factorization-of-an-integer	factor_integer(n(360))	[[2, 3], [3, 2], [5, 1]]	
+factorization-of-a-prime	factor_integer(n(97))	[[97, 1]]	
+factorization-of-a-negative	factor_integer(n(-12))	panic: a non-negative integer: the crate's parameter is unsigned	error

@@ -32,7 +32,6 @@ function signedSubsets(n: number): Face[] {
 
 export const HYPERCUBE: Polytope = polytope({
   name: "Hypercube",
-  faces: "signed_subset",
   title: "Hypercube",
   enumerate: (n) => (n === 0 ? [] : signedSubsets(n)),
   dimension: (signs) => signs.length - fixed(signs),

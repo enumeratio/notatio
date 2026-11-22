@@ -23,6 +23,7 @@ export const PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "MultiplicativePartition",
+    readable: true,
     type: "multiplicative_partition",
     shape: "list<integer>",
     id: "multiplicative_partition",

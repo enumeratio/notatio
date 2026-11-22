@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-for-n-4	Basic		[HyperbinaryWords, 4]	[List, [HyperbinaryWord, [List, 1, 0, 0]], [HyperbinaryWord, [List, 2, 0]], [HyperbinaryWord, [List, 1, 2]]]	$4 = 1 \cdot 4 = 2 \cdot 2 = 1 \cdot 2 + 2 \cdot 1$, by last digit
+count-n-10	Basic		[Count, [HyperbinaryWords, 10]]	5	Stern's diatomic sequence at 11, A002487
+zero	Properties		[HyperbinaryWords, 0]	[List, [HyperbinaryWord, [List]]]	the empty word is the one representation of 0
+a-member	Properties		[Element, [HyperbinaryWord, [List, 1, 2]], [HyperbinaryWords, 4]]	True	$1 \cdot 2 + 2 \cdot 1 = 4$
+wrong-value	Properties		[Element, [HyperbinaryWord, [List, 1, 2]], [HyperbinaryWords, 5]]	False	the digits $1, 2$ make 4, not 5
+leading-zero	Properties		[Element, [HyperbinaryWord, [List, 0, 1, 2]], [HyperbinaryWords, 4]]	False	a representation has no leading 0

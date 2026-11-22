@@ -19,7 +19,7 @@ signatures:
   - call: LargestOpener(partition)
     description: The largest of the blocks' smallest elements.
     library: enumeratio-combinatorics
-    type: (set_partition) -> number
+    type: ((perfect_matching) -> number) & ((set_partition) -> number)
 ---
 
 - Defined over `SetPartition` as an expression in `_x`, evaluated by compute-engine — the definition IS the implementation.

@@ -17,8 +17,6 @@ const UNRECORDED = new Set([
   "Factoradic",
   "PrimorialRadix",
   "Zeckendorf",
-  "HyperbinaryWords",
-  "HypernumeraryWords",
   // Hypercomplex algebras' names and the quaternion symbol.
   "BicomplexNumbers",
   "DualNumbers",
@@ -35,7 +33,6 @@ const UNRECORDED = new Set([
   "GlyphKinds",
   "PermutationInversions",
   "RootedLabeledTrees",
-  "Singletons",
   "SkewTableaux",
   // Wolfram spellings bound as symbols.
   "Aborted",

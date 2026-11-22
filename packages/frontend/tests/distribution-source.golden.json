@@ -7,7 +7,11 @@
       "maxSize": 6
     },
     "Arrangement": null,
-    "AscentSequence": null,
+    "AscentSequence": {
+      "collection": "AscentSequences",
+      "template": "AscentSequences({size})",
+      "maxSize": 6
+    },
     "BinaryTree": {
       "collection": "BinaryTrees",
       "template": "BinaryTrees({size})",
@@ -39,7 +43,11 @@
       "template": "PermutationsAsCycles({size})",
       "maxSize": 6
     },
-    "DecoratedPermutation": null,
+    "DecoratedPermutation": {
+      "collection": "DecoratedPermutations",
+      "template": "DecoratedPermutations({size})",
+      "maxSize": 6
+    },
     "DelannoyPath": {
       "collection": "DelannoyPaths",
       "template": "DelannoyPaths({size})",
@@ -58,7 +66,6 @@
       "maxSize": 6
     },
     "FactoradicNumeral": null,
-    "FiniteSetElement": null,
     "Finset": {
       "collection": "Subsets",
       "template": "Subsets({size})",
@@ -72,8 +79,11 @@
     "GelfandTsetlinPattern": null,
     "GlyphKind": null,
     "GoldbachPartition": null,
-    "HyperbinaryWord": null,
-    "HypernumeraryWord": null,
+    "HyperbinaryWord": {
+      "collection": "HyperbinaryWords",
+      "template": "HyperbinaryWords({size})",
+      "maxSize": 6
+    },
     "IncreasingBinaryTree": {
       "collection": "IncreasingBinaryTrees",
       "template": "IncreasingBinaryTrees({size})",
@@ -115,7 +125,11 @@
       "maxSize": 6
     },
     "Multicomplex": null,
-    "MultiplicativePartition": null,
+    "MultiplicativePartition": {
+      "collection": "MultiplicativePartitions",
+      "template": "MultiplicativePartitions({size})",
+      "maxSize": 6
+    },
     "Multiset": null,
     "NonCrossingTree": {
       "collection": "NonCrossingTrees",
@@ -124,7 +138,11 @@
     },
     "Numeric": null,
     "OmegaOrdinal": null,
-    "OrderedFactorization": null,
+    "OrderedFactorization": {
+      "collection": "OrderedFactorizations",
+      "template": "OrderedFactorizations({size})",
+      "maxSize": 6
+    },
     "OrderedTree": {
       "collection": "OrderedTrees",
       "template": "OrderedTrees({size})",
@@ -169,7 +187,11 @@
     "PythagoreanTriple": null,
     "RationalDyckPath": null,
     "RationalNumber": null,
-    "RookPlacement": null,
+    "RookPlacement": {
+      "collection": "RookPlacements",
+      "template": "RookPlacements({size})",
+      "maxSize": 6
+    },
     "RootedForest": {
       "collection": "RootedForests",
       "template": "RootedForests({size})",
@@ -211,9 +233,6 @@
       "template": "SignedPermutations({size})",
       "maxSize": 6
     },
-    "SignedSetComposition": null,
-    "SignedSubset": null,
-    "Singleton": null,
     "SkewPartition": {
       "collection": "SkewPartitions",
       "template": "SkewPartitions({size})",

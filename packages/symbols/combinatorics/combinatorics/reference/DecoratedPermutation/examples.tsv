@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+swap-and-fix	Basic		[DecoratedPermutation, [List, 2, 1, -3]]	[DecoratedPermutation, [List, 2, 1, -3]]	Swaps 1 and 2 and fixes 3 with the minus decoration
+constructor-example		test	[DecoratedPermutation, [List, -1, 3, 2]]	[DecoratedPermutation, [List, -1, 3, 2]]	The constructor on a permutation with one decorated fixed point

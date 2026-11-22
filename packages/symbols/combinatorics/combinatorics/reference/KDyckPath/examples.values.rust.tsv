@@ -1,0 +1,3 @@
+id	in
+up-twice	list(vec![n(1), n(0), n(1), n(0), n(0), n(0)])
+constructor-example	list(vec![n(1), n(1), n(0), n(0), n(0), n(0)])

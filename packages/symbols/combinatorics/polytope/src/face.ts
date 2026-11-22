@@ -14,8 +14,8 @@ export type Face = readonly number[];
 
 export interface Polytope {
   readonly name: string;
-  /** The carrier whose elements ARE the faces. */
-  readonly faces: string;
+  /** The carrier whose elements ARE the faces, when `faceName` reads it; a face prints as its coordinates otherwise. */
+  readonly faces?: string;
   readonly title: string;
   /** Faces of the order-n polytope, in the collection's own order. */
   readonly enumerate: (n: number) => Face[];

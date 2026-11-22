@@ -7,7 +7,7 @@ signatures:
   - call: Excedances(p)
     description: the excedance count of a one-line permutation $p$
     library: enumeratio-combinatorics
-    type: (permutation) -> integer
+    type: ((permutation) -> integer) & ((signed_permutation) -> integer)
 seeAlso:
   - Antiexcedances
   - Descents
@@ -25,7 +25,6 @@ catalog:
     url: https://www.findstat.org/St001864
     on: SignedPermutation
 statOn:
-  - DecoratedPermutation
   - Permutation
   - SignedPermutation
 ---

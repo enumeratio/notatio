@@ -7,7 +7,7 @@ signatures:
   - call: Inversions(p)
     description: the inversion count of a one-line permutation $p$
     library: enumeratio-combinatorics
-    type: (binary_word | composition | list | permutation) -> integer | number
+    type: ((arrangement) -> integer) & ((binary_word | composition | list | permutation) -> integer | number)
 seeAlso:
   - MajorIndex
   - Descents

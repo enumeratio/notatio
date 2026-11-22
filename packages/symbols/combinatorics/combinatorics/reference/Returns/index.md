@@ -9,9 +9,7 @@ catalog:
     url: https://www.findstat.org/St000011
     on: DyckPath
 statOn:
-  - ColoredMotzkinPath
   - DyckPath
-  - KDyckPath
 signatures:
   - call: Returns(path)
     description: Points where the path comes back to height 0.

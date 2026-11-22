@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+two-six	Basic		[OrderedFactorization, [List, 2, 6]]	[OrderedFactorization, [List, 2, 6]]	$2 \cdot 6 = 12$, in that order
+constructor-example		test	[OrderedFactorization, [List, 3, 2, 2]]	[OrderedFactorization, [List, 3, 2, 2]]	The constructor on another factorization of 12
