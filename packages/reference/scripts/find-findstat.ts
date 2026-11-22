@@ -29,6 +29,14 @@
 // `--heads A,B@Carrier` rematches just those statistics and carries every other row over from the
 // committed file (writing it, unlike `--only`); `--rename Old=New@Carrier` (repeatable) renames a
 // committed row in place first. Either way the file is what a full run writes.
+//
+// `--settle` rematches nothing: it re-decides the committed rows (no crawl or network), which is
+// how the file follows a change to the records.
+//
+// One head holds a FindStat id per carrier: a match of id X for head H on carrier C is left out
+// when another head's record holds X on C and H's does not (the same function under another
+// name). The records say which head that is; to give an id to another head, move it in the
+// records and `--settle`.
 
 import { readdirSync, readFileSync } from "node:fs";
 import { ComputeEngine } from "@cortex-js/compute-engine";
@@ -38,6 +46,7 @@ import {
   type FindStatMatch,
   findstat as existing,
 } from "../../symbols/combinatorics/combinatorics/findstat/src/findstat-data.ts";
+import { referenceData } from "../src/node.ts";
 import { assemble, parseHeads, parseRename, renamed, selected } from "./findstat-incremental.ts";
 
 const API = "https://www.findstat.org/api/StatisticsDatabase/";
@@ -46,6 +55,7 @@ const only = flag("--only")[0];
 const crawlDir = flag("--crawl")[0];
 const onlyCarriers = new Set(flag("--carrier"));
 const heads = parseHeads(flag("--heads"));
+const settle = process.argv.includes("--settle");
 
 // ── enumeration, per carrier, in FindStat's own spelling ─────────────────────────────────
 
@@ -446,6 +456,7 @@ const universe = ALL_STATISTICS.filter((d) => CARRIERS[d.on]);
 const rematch = (d: (typeof ALL_STATISTICS)[number]): boolean =>
   (!only || signatureOf(d) === only) &&
   (!onlyCarriers.size || onlyCarriers.has(d.on)) &&
+  !settle &&
   (!heads.size || selected(heads, d.head, d.on));
 
 const fresh = new Map<string, FindStatMatch | undefined>();
@@ -484,15 +495,41 @@ const previous = renamed(
   (row, to) => ({ ...row, head: to }),
   flag("--rename").map(parseRename),
 );
-const matches = assemble(universe, signatureOf, previous, rematch, (d) => fresh.get(signatureOf(d)));
+const decided = assemble(universe, signatureOf, previous, rematch, (d) => fresh.get(signatureOf(d)));
 // A head shared with another carrier (`Crossings` on a perfect matching) has a committed row but no
 // definition of its own on this one: carry the row over, after the last row of its carrier.
+// So does a head that is not a statistic definition (`Sum` on parking functions) but whose record holds the id.
 const heldHeads = new Set(ALL_STATISTICS.map((d) => d.head));
 const universeSignatures = new Set(universe.map(signatureOf));
+
+/** `"<id> on <carrier>"` to the heads whose record holds it. */
+const holders = new Map<string, Set<string>>();
+for (const entry of referenceData().entries)
+  for (const c of entry.catalog ?? [])
+    if (c.system === "findstat" && c.on !== undefined) {
+      const key = `${c.identity} on ${c.on}`;
+      holders.set(key, (holders.get(key) ?? new Set()).add(entry.name));
+    }
+const holds = (head: string, id: string, carrier: string): boolean =>
+  holders.get(`${id} on ${carrier}`)?.has(head) ?? false;
+const heldElsewhere = (head: string, id: string, carrier: string): boolean =>
+  (holders.get(`${id} on ${carrier}`)?.size ?? 0) > 0 && !holds(head, id, carrier);
+
+const carried = [...decided];
 for (const [signature, row] of previous) {
-  if (universeSignatures.has(signature) || !heldHeads.has(row.head)) continue;
-  matches.splice(matches.findLastIndex((m) => m.on === row.on) + 1, 0, row);
+  if (
+    universeSignatures.has(signature) ||
+    !(heldHeads.has(row.head) || row.findstat.some((id) => holds(row.head, id, row.on)))
+  )
+    continue;
+  // A carrier with no row yet goes last, so rows the sweep doesn't cover keep their committed order.
+  const after = carried.findLastIndex((m) => m.on === row.on);
+  carried.splice(after < 0 ? carried.length : after + 1, 0, row);
 }
+const matches = carried.flatMap((row) => {
+  const ids = row.findstat.filter((id) => !heldElsewhere(row.head, id, row.on));
+  return ids.length > 0 ? [{ ...row, findstat: ids }] : [];
+});
 
 if (!only) {
   await writeFormatted(

@@ -19,7 +19,6 @@ export const SAGE_STATS: Readonly<Record<string, Readonly<Record<string, string>
     Runs: "len(x.runs())",
     CycleCount: "len(x.to_cycles())",
     NontrivialCycles: "len(x.to_cycles(singletons=False))",
-    LargestCycleLength: "max(x.cycle_type())",
     LongestCycleLength: "max(x.cycle_type())",
     ShortestCycleLength: "min(x.cycle_type())",
     ConjugacyClassSize: "Partition(x.cycle_type()).conjugacy_class_size()",

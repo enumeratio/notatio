@@ -719,7 +719,6 @@ const NOVEL = [
   "KnotCurve",
   "LargestAreaSequenceEntry",
   "LargestBlock",
-  "LargestCycleLength",
   "LargestElementInFirstBlock",
   "LargestOpener",
   "LargestPart",

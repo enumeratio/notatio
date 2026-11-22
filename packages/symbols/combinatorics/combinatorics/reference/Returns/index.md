@@ -3,11 +3,6 @@ name: Returns
 domain: Dyck path statistics
 signature: Returns(path)
 summary: Points where the path comes back to height 0.
-catalog:
-  - system: findstat
-    identity: St000011
-    url: https://www.findstat.org/St000011
-    on: DyckPath
 statOn:
   - DyckPath
 signatures:

@@ -4,4 +4,4 @@
 // lets vitest run them on separate workers instead of serializing the whole group.
 import { checkAgainstEngine } from "./permutation-helpers.ts";
 
-checkAgainstEngine(["CycleCount", "ReflectionLength", "LargestCycleLength", "LongestCycleLength"]);
+checkAgainstEngine(["CycleCount", "ReflectionLength", "LongestCycleLength"]);

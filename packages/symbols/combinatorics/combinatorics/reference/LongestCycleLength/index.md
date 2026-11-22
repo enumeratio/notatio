@@ -2,7 +2,7 @@
 name: LongestCycleLength
 domain: Permutation statistics
 signature: LongestCycleLength(p)
-summary: The size of the largest cycle (the catalog's second spelling).
+summary: The size of the longest cycle.
 statOn:
   - Permutation
 signatures:

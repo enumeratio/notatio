@@ -100,13 +100,19 @@ const retiredCarriers: [string, string][] = [
   "SingletonSpecies",
 ].map((old): [string, string] => [`/reference/symbol/${old}`, "/reference/"]);
 
+// LargestCycleLength was the same statistic as LongestCycleLength (FindStat St000485), and is retired for it.
+const retiredStatistics: [string, string][] = [
+  ["/reference/symbol/LargestCycleLength", "/reference/symbol/LongestCycleLength"],
+  ["/reference/statistic/Permutation/LargestCycleLength", "/reference/statistic/Permutation/LongestCycleLength"],
+];
+
 /**
  * Every redirect, one rule per source. A source ending in `/` answers with and without it: a
  * directory page was served either way, and Pages does not match a rule across the slash.
  */
 export function redirects(): Redirect[] {
   const rules = new Map<string, string>();
-  for (const [from, to] of [...moved(), ...renamedSymbols, ...retiredStubs, ...retiredCarriers]) {
+  for (const [from, to] of [...moved(), ...renamedSymbols, ...retiredStubs, ...retiredCarriers, ...retiredStatistics]) {
     rules.set(from, to);
     if (from.length > 1 && from.endsWith("/")) rules.set(from.slice(0, -1), to);
   }
