@@ -45,9 +45,25 @@ const quietly = <T>(f: () => T): T | undefined => {
   }
 };
 
+const familyOf = new Map((allFamilies.filter(isEpsilFamily) as EpsilFamily[]).map((family) => [family.head, family]));
+
+/**
+ * Whether the compiled operation can ever run: one that reads the family's `_tables` runs only when the entry compiled
+ * the tables too. A count can compile while its table does not (the kernel then asks the interpreter, and the compiled
+ * count is never reached), and a walk that waits for every operation would not stop.
+ */
+const reachable = (head: string, key: string): boolean => {
+  const definition = (familyOf.get(head)?.epsil as Record<string, unknown> | undefined)?.[key];
+  return (
+    key === "tables" ||
+    !JSON.stringify(definition ?? null).includes('"_tables"') ||
+    typeof entries[head]?.tables === "function"
+  );
+};
+
 const operationsOf = (head: string): string[] =>
   Object.entries(entries[head] ?? {})
-    .filter(([, value]) => typeof value === "function")
+    .filter(([key, value]) => typeof value === "function" && reachable(head, key))
     .map(([key]) => `${head}.${key}`);
 
 test("compiled family operations raise no programming errors", () => {
