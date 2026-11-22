@@ -35,7 +35,6 @@
     "Contains on Text",
     "Denominator on RationalNumber",
     "DivisorSum on IntegerFactorization",
-    "Inversions on PermutationCycles",
     "Numerator on RationalNumber",
     "Traits on Text"
   ]

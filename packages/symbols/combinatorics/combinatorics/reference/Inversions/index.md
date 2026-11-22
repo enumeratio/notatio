@@ -35,7 +35,6 @@ statOn:
   - BinaryWord
   - IntegerComposition
   - Permutation
-  - PermutationCycles
 bindings:
   - origin: mapped
     form: combinatorica

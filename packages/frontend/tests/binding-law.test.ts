@@ -72,7 +72,9 @@ const isCatchAll = (t: unknown): boolean => {
 function accepts(record: ReferenceEntry, carrier: string): boolean {
   if (record.signatures?.some((s) => s.on?.includes(carrier))) return true;
   const type = typeOfCarrier.get(carrier);
-  if (type === undefined) return true; // not a declared carrier here; the catalog tests own that.
+  // A carrier other packages declare is a catalogCarrier record; any other name is no carrier
+  // (`PermutationCycles` is a head), so only an `on:` row could accept it.
+  if (type === undefined) return byName.get(carrier)?.catalogCarrier === true;
   const bound = ce.type(type);
   return firstArguments(record.name).some((t) => {
     if (isCatchAll(t)) return false;
