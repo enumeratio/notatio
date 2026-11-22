@@ -32,10 +32,16 @@ const PER_FAMILY = DEEP ? 60 : 6;
 const carrierByType = new Map(CARRIERS.map((carrier) => [carrier.type, carrier]));
 const carrierByName = new Map(CARRIERS.map((carrier) => [carrier.name, carrier]));
 
-/** Small elements of every family whose elements are values of `carrier`, as its contents. */
-const subjectsOf = (carrier: string): unknown[] => smallElements(ce, carrier, MAX_SIZE, PER_FAMILY, true);
-
 const ce = bareEngine();
+
+const sampled = new Map<string, unknown[]>();
+/** Small elements of every family whose elements are values of `carrier`, as its contents: taken once per carrier, since
+ *  each call enumerates every family afresh. */
+const subjectsOf = (carrier: string): unknown[] => {
+  let subjects = sampled.get(carrier);
+  if (subjects === undefined) sampled.set(carrier, (subjects = smallElements(ce, carrier, MAX_SIZE, PER_FAMILY, true)));
+  return subjects;
+};
 
 test("the build compiled maps", () => {
   expect(Object.keys(COMPILED_MAPS).length).toBeGreaterThan(0);
