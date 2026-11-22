@@ -5,15 +5,6 @@ import { describe, expect, it } from "vite-plus/test";
 import { referenceData } from "../src/node.ts";
 import { wanted } from "../scripts/findstat-catalog.ts";
 
-/** Ids still on a head the verdicts don't check, awaiting a ruling: `"<id> on <carrier>"` to its
- *  heads. A golden that only shrinks; never add a row. */
-const UNDECIDED: Readonly<Record<string, readonly string[]>> = {
-  // The verdicts check each head against the id, so these are aliases or equal-valued heads, not leftovers.
-  "St000011 on DyckPath": ["Returns", "TouchPointCount"],
-  "St000159 on IntegerPartition": ["ConjugateDistinctParts", "Corners", "DistinctParts"],
-  "St000485 on Permutation": ["LargestCycleLength", "LongestCycleLength"],
-};
-
 const key = (id: string, on: string) => `${id} on ${on}`;
 
 const carriers = new Map<string, Set<string>>();
@@ -25,11 +16,9 @@ for (const e of referenceData().entries)
     }
 
 describe("a FindStat id has one head per carrier", () => {
-  it("no id and carrier sits on two records, outside the pinned list", () => {
+  it("no id and carrier sits on two records", () => {
     const found = Object.fromEntries(
-      [...carriers]
-        .map(([k, heads]) => [k, [...heads].toSorted()] as const)
-        .filter(([k, heads]) => heads.length > 1 && heads.join() !== UNDECIDED[k]?.join()),
+      [...carriers].map(([k, heads]) => [k, [...heads].toSorted()] as const).filter(([, heads]) => heads.length > 1),
     );
     expect(found).toEqual({});
   });
@@ -40,13 +29,8 @@ describe("a FindStat id has one head per carrier", () => {
     const off = Object.fromEntries(
       [...checked]
         .map(([k, v]) => [k, [...(carriers.get(k) ?? [])].filter((h) => !v.has(h)).toSorted()] as const)
-        .filter(([k, extra]) => extra.length > 0 && UNDECIDED[k] === undefined),
+        .filter(([, extra]) => extra.length > 0),
     );
     expect(off).toEqual({});
-  });
-
-  it("the pinned list only holds live rows", () => {
-    const stale = Object.keys(UNDECIDED).filter((k) => (carriers.get(k)?.size ?? 0) < 2);
-    expect(stale).toEqual([]);
   });
 });

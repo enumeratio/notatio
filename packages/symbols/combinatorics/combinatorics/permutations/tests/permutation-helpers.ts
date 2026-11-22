@@ -159,7 +159,6 @@ export const EXPECTED: Record<string, (p: number[]) => number | number[]> = {
   StackSortable: (p) => (triples(p, (a, b, c) => c < a && a < b) === 0 ? 1 : 0),
   CycleCount: (p) => cycleLengths(p).length,
   ReflectionLength: (p) => p.length - cycleLengths(p).length,
-  LargestCycleLength: (p) => (p.length === 0 ? 0 : Math.max(...cycleLengths(p))),
   LongestCycleLength: (p) => (p.length === 0 ? 0 : Math.max(...cycleLengths(p))),
   DistinctCycleLengths: (p) => new Set(cycleLengths(p)).size,
   TwoCycleCount: (p) => cycleLengths(p).filter((l) => l === 2).length,

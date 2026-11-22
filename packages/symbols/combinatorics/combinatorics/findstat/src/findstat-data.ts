@@ -182,12 +182,6 @@ export const findstat: readonly FindStatMatch[] = [
     values: 873,
   },
   {
-    head: "LargestCycleLength",
-    on: "Permutation",
-    findstat: ["St000485"],
-    values: 1200,
-  },
-  {
     head: "LongestCycleLength",
     on: "Permutation",
     findstat: ["St000485"],
@@ -2156,22 +2150,10 @@ export const findstat: readonly FindStatMatch[] = [
     values: 804,
   },
   {
-    head: "ConjugateDistinctParts",
-    on: "IntegerPartition",
-    findstat: ["St000159"],
-    values: 272,
-  },
-  {
     head: "DurfeeSquare",
     on: "IntegerPartition",
     findstat: ["St000183"],
     values: 715,
-  },
-  {
-    head: "Corners",
-    on: "IntegerPartition",
-    findstat: ["St000159"],
-    values: 272,
   },
   {
     head: "IsSelfConjugate",
@@ -3294,12 +3276,6 @@ export const findstat: readonly FindStatMatch[] = [
     on: "DyckPath",
     findstat: ["St000024"],
     values: 1000,
-  },
-  {
-    head: "Returns",
-    on: "DyckPath",
-    findstat: ["St000011"],
-    values: 1758,
   },
   {
     head: "TouchPointCount",

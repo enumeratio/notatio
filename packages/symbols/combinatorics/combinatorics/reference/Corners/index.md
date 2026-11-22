@@ -3,11 +3,6 @@ name: Corners
 domain: Partition statistics
 signature: Corners(partition)
 summary: Corner cells — parts strictly larger than the next part (the last part always counts).
-catalog:
-  - system: findstat
-    identity: St000159
-    url: https://www.findstat.org/St000159
-    on: IntegerPartition
 statOn:
   - IntegerPartition
 signatures:

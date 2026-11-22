@@ -4243,12 +4243,7 @@ export const PERMUTATION_STATISTICS: readonly Definition[] = [
     "n minus the number of cycles — the minimum number of transpositions.",
     nonEmpty(subtract(length(), ["Count", cycleLeaders])),
   ),
-  stat("LargestCycleLength", "The size of the largest cycle.", nonEmpty(["Max", cycleLengths])),
-  stat(
-    "LongestCycleLength",
-    "The size of the largest cycle (the catalog's second spelling).",
-    nonEmpty(["Max", cycleLengths]),
-  ),
+  stat("LongestCycleLength", "The size of the longest cycle.", nonEmpty(["Max", cycleLengths])),
   stat(
     "DistinctCycleLengths",
     "How many distinct cycle sizes occur.",
