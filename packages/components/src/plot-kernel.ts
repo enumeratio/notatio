@@ -5,6 +5,8 @@
 
 import type { CompiledItem, CompiledPlot, PlotCompileSpec } from "@notatio/frontend/plot-compile";
 import {
+  analyticScopeOf,
+  callsAnalytic,
   loadBareEngine,
   loadCompiled,
   type LoadedPlot,
@@ -71,13 +73,7 @@ const systemHelpers = (): Promise<unknown> =>
 // The analytic kernels the JavaScript target emits calls to, read from the scope
 // (`_.__hz(…)`): loaded only for code that calls one.
 let analytic: Promise<Scope> | undefined;
-const analyticRuntime = (): Promise<Scope> =>
-  (analytic ??= import("@notatio/analytic").then((m) => ({
-    __hz: m.hurwitzZetaReal,
-    __zg: m.zetaGeneralizedReal,
-    __lp: m.lerchPhiReal,
-    __pl: m.polyLogReal,
-  })));
+const analyticRuntime = (): Promise<Scope> => (analytic ??= import("@notatio/analytic").then(analyticScopeOf));
 
 /** `text` (Epsil) evaluated numerically (`N`), as MathJSON: by the page's kernel, else the
  *  page's engine. */
@@ -168,7 +164,7 @@ export async function loadPlot(plot: CompiledPlot): Promise<LoadedPlot> {
   const codes = plot.items.map((item) => item.code ?? "");
   const [sys, scope] = await Promise.all([
     codes.some((c) => c.includes("_SYS")) ? systemHelpers() : undefined,
-    codes.some((c) => c.includes("_.__")) ? analyticRuntime() : ({} as Scope),
+    callsAnalytic(plot) ? analyticRuntime() : ({} as Scope),
   ]);
   // An item with no code is sampled by the page's engine, loaded only for it.
   const fallback = new Map<CompiledItem, Sampler>();

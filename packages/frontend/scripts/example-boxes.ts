@@ -24,7 +24,15 @@ import {
   vectorOptionsOf,
 } from "../src/plot-lowering.ts";
 import { PLOT_NOTATION } from "../src/plot-notation.ts";
-import { CURVE_SPEC, figurePlanOf, loadCompiled, lonePlotOf, type PlotRuntime } from "../src/plot-sample.ts";
+import * as analytic from "@notatio/analytic";
+import {
+  analyticScopeOf,
+  CURVE_SPEC,
+  figurePlanOf,
+  loadCompiled,
+  lonePlotOf,
+  type PlotRuntime,
+} from "../src/plot-sample.ts";
 import { type Primitive, primitivesOf } from "../src/primitives.ts";
 import { parseExpression } from "@notatio/formats/expression";
 import { polarPlotBox, samplePolar } from "../src/polarplot.ts";
@@ -187,7 +195,7 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
 }
 
 /** What compiled code calls, from an engine in this process. */
-const runtimeOf = (ce: ComputeEngine): PlotRuntime => ({ sys: systemHelpersOf(ce) });
+const runtimeOf = (ce: ComputeEngine): PlotRuntime => ({ sys: systemHelpersOf(ce), scope: analyticScopeOf(analytic) });
 
 /** An `Epilog` or `Prolog` as written, read to primitives. */
 const marksOf = (written: string): Primitive[] | undefined => {

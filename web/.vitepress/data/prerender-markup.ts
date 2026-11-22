@@ -9,6 +9,8 @@ import { createKernel, type Kernel } from "@notatio/evaluation";
 import { parseExpression } from "@notatio/formats/expression";
 import { planeShowOf, plotSettingsOf } from "@notatio/frontend/symbols";
 import {
+  analyticScopeOf,
+  callsAnalytic,
   chartBoxOfSettings,
   CURVE_SPEC,
   figurePlanOf,
@@ -101,16 +103,7 @@ async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
     const plot = answer.compiled as CompiledPlot | undefined;
     // An item with no code is sampled by an engine, which the page has and this picture does not wait for.
     if (!answer.ok || plot === undefined || plot.items.some((item) => item.code === undefined)) return undefined;
-    const scope: Record<string, unknown> = {};
-    if (plot.items.some((item) => item.code!.includes("_.__"))) {
-      const m = await import("@notatio/analytic");
-      Object.assign(scope, {
-        __hz: m.hurwitzZetaReal,
-        __zg: m.zetaGeneralizedReal,
-        __lp: m.lerchPhiReal,
-        __pl: m.polyLogReal,
-      });
-    }
+    const scope = callsAnalytic(plot) ? analyticScopeOf(await import("@notatio/analytic")) : {};
     loaded.push(loadCompiled(plot, { sys, scope }));
   }
   // The wildcards start where a Manipulate's controls around it do.

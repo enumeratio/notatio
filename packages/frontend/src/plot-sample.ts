@@ -44,6 +44,26 @@ export interface LoadedPlot {
   scope(): Scope;
 }
 
+/** Whether compiled code calls the analytic kernels, which it reads from its scope (`_.__hz(…)`). */
+export const callsAnalytic = (plot: CompiledPlot): boolean =>
+  plot.items.some((item) => item.code?.includes("_.__") === true);
+
+/**
+ * The analytic kernels as compiled code reads them from its scope, from `@notatio/analytic`'s
+ * module: every host hands the same names, however it loads the module.
+ */
+export const analyticScopeOf = (analytic: {
+  readonly hurwitzZetaReal: unknown;
+  readonly zetaGeneralizedReal: unknown;
+  readonly lerchPhiReal: unknown;
+  readonly polyLogReal: unknown;
+}): Scope => ({
+  __hz: analytic.hurwitzZetaReal,
+  __zg: analytic.zetaGeneralizedReal,
+  __lp: analytic.lerchPhiReal,
+  __pl: analytic.polyLogReal,
+});
+
 /** How a host compiles a curve plot's body: every element of a list on its own, to JavaScript. */
 export const CURVE_SPEC: PlotCompileSpec = { target: "javascript", each: true };
 
