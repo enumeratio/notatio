@@ -120,3 +120,13 @@ test("fields with one that has no shader have no unit", () => {
   });
   expect(plot.unit).toBeUndefined();
 });
+
+// compute-engine 0.187.1's compiled code loses the parentheses of `2·Abs(Block(x²+1))` on both targets
+// (`ce0187Decline`): the plot has no code, and the page samples the expression itself.
+test("an expression with the shape of a wrong compiled answer has no code, on JavaScript and GLSL", () => {
+  const shape = ["Multiply", 2, ["Abs", ["Block", ["Add", ["Square", "x"], 1]]]];
+  expect(compilePlot(ce, shape, { target: "javascript" }).items[0]!.code).toBeUndefined();
+  expect(compilePlot(ce, shape, { target: "glsl", vars: ["x", "y"] }).items[0]!.code).toBeUndefined();
+  const sound = compilePlot(ce, ["Multiply", 2, ["Add", ["Square", "x"], 1]], { target: "glsl", vars: ["x", "y"] });
+  expect(sound.items[0]!.code).toContain("plotFn");
+});

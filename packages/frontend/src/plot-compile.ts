@@ -4,7 +4,7 @@
 
 import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { canCompile, GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
-import { selfContainedCode } from "@notatio/engine/compiled";
+import { ce0187Decline, selfContainedCode } from "@notatio/engine/compiled";
 import { withGLSL } from "@notatio/analytic/shader";
 
 /** What to compile a plot's expression to. */
@@ -72,6 +72,8 @@ export function toGlslFn(expr: Expression, vx: string, vy: string): string | und
     // A form outside the GLSL fragment (`Random`, a matrix, a symbol with no numeric type) has no shader:
     // the plot takes its CPU path.
     if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
+    // A shape of a wrong compiled answer (`ce0187Decline`) is drawn by the CPU path too.
+    if (ce0187Decline(expr.json) !== undefined) return undefined;
     const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
     if (!r?.success || !r.code) return undefined;
     // A loop stops after 10,000 passes with NaN where the CPU path sums on: the plot declines to its
@@ -108,7 +110,7 @@ export function toGlslFields(
     const fields: string[] = [];
     const signature = [vx, vy, ...params].map((name) => `float ${name}`).join(", ");
     for (const [k, expr] of exprs.entries()) {
-      if (!canCompile(expr, { to: "glsl" }).ok) return undefined;
+      if (!canCompile(expr, { to: "glsl" }).ok || ce0187Decline(expr.json) !== undefined) return undefined;
       const r = new GLSLTarget().compile(expr) as { success?: boolean; code?: string; preamble?: string };
       if (!r?.success || !r.code) return undefined;
       // A capped loop yields NaN where the CPU path sums on (`toGlslFn`).
@@ -140,6 +142,7 @@ function compileItem(e: Expression, spec: PlotCompileSpec, unknowns: readonly st
     return item;
   }
   try {
+    if (ce0187Decline(e.json) !== undefined) return item;
     const r = new JavaScriptTarget().compile(e) as { success?: boolean; code?: string; preamble?: string };
     const code = r?.success ? selfContainedCode(r) : undefined;
     if (code !== undefined) item.code = code;

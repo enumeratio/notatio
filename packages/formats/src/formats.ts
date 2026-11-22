@@ -7,6 +7,7 @@ import type { Expression } from "@cortex-js/compute-engine";
 import { compile, GLSLTarget, PythonTarget } from "@cortex-js/compute-engine/compile";
 import { parseEpsil, serializeEpsil } from "@cortex-js/compute-engine/epsil";
 import { MATHJSON_MIME } from "@notatio/boxes/render";
+import { ce0187Decline } from "@notatio/engine";
 import { fromWolfram, toWolfram } from "@notatio/wolfram";
 import { toFullForm } from "./fullform.ts";
 import { toInputForm } from "./inputform.ts";
@@ -19,6 +20,13 @@ import { portableTeX } from "./tex.ts";
 import { type FormatOptions, type ImageValue, registerFileFormat } from "./registry.ts";
 
 const asExpr = (v: unknown): Expression => v as Expression;
+/** `v` for a compile target: an expression with a shape of a wrong compiled answer (`ce0187Decline`) has no source. */
+const asSource = (v: unknown): Expression => {
+  const expr = asExpr(v);
+  const reason = ce0187Decline(expr.json);
+  if (reason !== undefined) throw new Error(`no source: ${reason}`);
+  return expr;
+};
 const asSvg = (v: unknown): string => {
   if (typeof v !== "string") throw new Error("expected an SVG string");
   return v;
@@ -174,7 +182,7 @@ registerFileFormat({
   mimeTypes: ["text/x-python"],
   extensions: ["py"],
   binary: false,
-  encode: (v) => new PythonTarget().compileToSource(asExpr(v)),
+  encode: (v) => new PythonTarget().compileToSource(asSource(v)),
 });
 
 registerFileFormat({
@@ -183,7 +191,7 @@ registerFileFormat({
   mimeTypes: ["x-shader/x-fragment"],
   extensions: ["glsl", "frag"],
   binary: false,
-  encode: (v) => new GLSLTarget().compileToSource(asExpr(v)),
+  encode: (v) => new GLSLTarget().compileToSource(asSource(v)),
 });
 
 registerFileFormat({
@@ -192,7 +200,7 @@ registerFileFormat({
   mimeTypes: ["text/javascript", "application/javascript"],
   extensions: ["js", "mjs"],
   binary: false,
-  encode: (v) => compile(asExpr(v)).code,
+  encode: (v) => compile(asSource(v)).code,
 });
 
 registerFileFormat({

@@ -5,9 +5,20 @@
 
 import { type Expression, type ComputeEngine, version } from "@cortex-js/compute-engine";
 import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
+import { ce0187Decline } from "./ce-0187.ts";
 import { FastTarget } from "./compiled-target.ts";
 
 export type MathJSON = number | string | boolean | readonly MathJSON[] | { readonly [key: string]: unknown };
+
+export {
+  atPath,
+  ce0187Decline,
+  CE_0187_DECLINED,
+  CE_0187_DEFECTS,
+  type Ce0187Defect,
+  type Ce0187Hit,
+  findCe0187Defects,
+} from "./ce-0187.ts";
 export type Js = number | boolean | readonly Js[];
 
 /** A compiled definition: its free variables in, a plain JS value out. */
@@ -98,7 +109,8 @@ interface Compilation {
   readonly code: string;
 }
 
-/** Compile `expression` with each free variable typed; undefined when the compiler declines. */
+/** Compile `expression` with each free variable typed; undefined when the compiler declines, or when the expression
+ *  has the shape of a wrong answer of compute-engine 0.187.1's compiler (`ce0187Decline`) and is left to the interpreter. */
 export function compileTyped(
   ce: ComputeEngine,
   expression: unknown,
@@ -107,7 +119,9 @@ export function compileTyped(
   ce.pushScope();
   try {
     for (const [name, type] of Object.entries(types)) ce.declare(name, type);
-    const result = new FastTarget().compile(ce.box(expression as never) as Expression) as {
+    const boxed = ce.box(expression as never) as Expression;
+    if (ce0187Decline(boxed.json, types) !== undefined) return undefined;
+    const result = new FastTarget().compile(boxed) as {
       success?: boolean;
       run?: Compilation["run"];
       code?: string;
@@ -137,10 +151,11 @@ export function isCompileDecline(error: unknown): boolean {
 }
 
 /** `expr` compiled to a plain JS function of its free variables, or undefined when the compiler
- *  has no lowering for something in it. For a hot loop that would otherwise `subs` and `N` per
- *  point; the caller keeps the symbolic route as its fallback. */
+ *  has no lowering for something in it, or the expression has a shape `ce0187Decline` names. For a hot loop that
+ *  would otherwise `subs` and `N` per point; the caller keeps the symbolic route as its fallback. */
 export function compileExpression(expr: Expression): CompiledRun | undefined {
   try {
+    if (ce0187Decline(expr.canonical.json) !== undefined) return undefined;
     const result = new JavaScriptTarget().compile(expr.canonical) as { success?: boolean; run?: CompiledRun };
     return result.success === true && typeof result.run === "function" ? result.run : undefined;
   } catch {

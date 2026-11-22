@@ -299,6 +299,7 @@ export {
 export { applyFunction } from "./apply-function.ts";
 export { latexEntries, type LatexReader, type LatexRule, type LatexWriter } from "./latex.ts";
 export { onlyForIntegers, refusing } from "./compile-guards.ts";
+export { ce0187Decline, CE_0187_DEFECTS } from "./ce-0187.ts";
 export { type CompileStance, declareCompile, type HeadPatch, isExtension } from "./extend.ts";
 export { isNativeHead, nativeCanonical, nativeEvaluate, withAssumptions } from "./probe.ts";
 export { extendHead };
