@@ -11,10 +11,8 @@ catalog:
   - system: sage
     identity: sage.geometry.polyhedron.library.polytopes.cross_polytope(dim)
     url: https://doc.sagemath.org/html/en/reference/discrete_geometry/sage/geometry/polyhedron/library.html
-    note: their object is the geometric polyhedron (vertex/facet coordinate data) for one fixed dim; our collection is the full face lattice at ground n, enumerated via the order-isomorphic signed_subset carrier
-stub: carrier
+    note: their object is the geometric polyhedron (vertex/facet coordinate data) for one fixed dim; our collection is the full face lattice at ground n
 grades:
   - name: n
     role: axis
-carrier: SignedSubset
 ---

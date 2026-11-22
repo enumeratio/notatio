@@ -32,7 +32,6 @@ function signedSubsets(n: number): Face[] {
 
 export const CROSS_POLYTOPE: Polytope = polytope({
   name: "CrossPolytope",
-  faces: "signed_subset",
   title: "Cross-polytope",
   enumerate: (n) => (n === 0 ? [] : signedSubsets(n)),
   dimension: (signs) => (support(signs) === 0 ? signs.length : support(signs) - 1),

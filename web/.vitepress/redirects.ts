@@ -84,13 +84,29 @@ const retiredStubs: [string, string][] = Object.entries({
   NaturalNumbers: "NonNegativeIntegers",
 }).map(([old, head]) => [`/reference/symbol/${old}`, `/reference/symbol/${head}`]);
 
+// Stub carriers (and the stub families on them) retired with no meaning stated lead to the reference index.
+const retiredCarriers: [string, string][] = [
+  "FiniteSetElement",
+  "FiniteSetElements",
+  "Hypernumerary",
+  "HypernumeraryWord",
+  "HypernumeraryWords",
+  "SignedSetComposition",
+  "SignedSetCompositions",
+  "SignedSubset",
+  "SignedSubsets",
+  "Singleton",
+  "Singletons",
+  "SingletonSpecies",
+].map((old): [string, string] => [`/reference/symbol/${old}`, "/reference/"]);
+
 /**
  * Every redirect, one rule per source. A source ending in `/` answers with and without it: a
  * directory page was served either way, and Pages does not match a rule across the slash.
  */
 export function redirects(): Redirect[] {
   const rules = new Map<string, string>();
-  for (const [from, to] of [...moved(), ...renamedSymbols, ...retiredStubs]) {
+  for (const [from, to] of [...moved(), ...renamedSymbols, ...retiredStubs, ...retiredCarriers]) {
     rules.set(from, to);
     if (from.length > 1 && from.endsWith("/")) rules.set(from.slice(0, -1), to);
   }

@@ -156,10 +156,6 @@
     "carrier": "FactoradicNumeral",
     "reason": "no collection of sized elements on this carrier"
   },
-  "FiniteSetElement": {
-    "carrier": "FiniteSetElement",
-    "reason": "no collection of sized elements on this carrier"
-  },
   "Finset": {
     "carrier": "Finset",
     "collection": "Subsets",
@@ -212,10 +208,6 @@
       "max": 6,
       "start": 4
     }
-  },
-  "HypernumeraryWord": {
-    "carrier": "HypernumeraryWord",
-    "reason": "no collection of sized elements on this carrier"
   },
   "IncreasingBinaryTree": {
     "carrier": "IncreasingBinaryTree",
@@ -554,18 +546,6 @@
       "start": 4
     },
     "glyph": "signed-permutation"
-  },
-  "SignedSetComposition": {
-    "carrier": "SignedSetComposition",
-    "reason": "no collection of sized elements on this carrier"
-  },
-  "SignedSubset": {
-    "carrier": "SignedSubset",
-    "reason": "no collection of sized elements on this carrier"
-  },
-  "Singleton": {
-    "carrier": "Singleton",
-    "reason": "no collection of sized elements on this carrier"
   },
   "SkewPartition": {
     "carrier": "SkewPartition",

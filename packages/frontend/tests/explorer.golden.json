@@ -569,7 +569,6 @@
     "derived": false,
     "statistics": 44
   },
-  "FiniteSetElements": null,
   "Finsets": null,
   "FractionalNumbers": null,
   "FubiniNumbers": {
@@ -687,7 +686,6 @@
     "derived": true,
     "statistics": 0
   },
-  "Hypernumerary": null,
   "IdonealNumbers": {
     "expr": "Take(IdonealNumbers, 20)",
     "columns": ["DigitCount", "DigitSum", "DivisorSum"],
@@ -1827,8 +1825,6 @@
     "derived": true,
     "statistics": 38
   },
-  "SignedSetCompositions": null,
-  "SignedSubsets": null,
   "SimplePermutations": {
     "expr": "SimplePermutations(5)",
     "glyph": "permutation",
@@ -1837,7 +1833,6 @@
     "statistics": 354
   },
   "Simplex": null,
-  "SingletonSpecies": null,
   "SkewPartitions": {
     "expr": "SkewPartitions(4)",
     "columns": [],
