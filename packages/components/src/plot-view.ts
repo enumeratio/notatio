@@ -13,6 +13,7 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { type Box, type BoxNode, optionsOfBox } from "@notatio/boxes";
 import {
   chartBoxOfSettings,
+  curvesOf,
   debug,
   type Field2d,
   FIELD_PLOT_HEADS,
@@ -38,8 +39,6 @@ import {
   type PlotSeries,
   type PlotWindow,
   type PolarPlotOptions,
-  plotSeries,
-  plotSeriesIn,
   slideInterval,
   polarFrameOf,
   polarPlotBox,
@@ -330,41 +329,18 @@ export class PlotView {
     }
     const loaded = await plotFunctions(raw, { each: true });
     if (generation !== this.#generation) return undefined;
-    const { plot, samplers } = loaded;
-    // The Manipulate parameters fill the wildcard slots (`_a`); the plot variable is whatever
-    // free symbol remains.
-    const scope = loaded.scope();
-    Object.assign(scope, this.host.bindings);
-    const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
+    const curves = curvesOf(settings, loaded, this.host.bindings);
     // A symbol that is neither the plot variable nor bound would sample to nothing: say so.
-    const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
-    if (unbound.length > 0) {
+    if ("unbound" in curves) {
       this.#clear();
-      const names = unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
-      this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${unbound.length > 1 ? "have" : "has"} no value.</span>`;
+      const names = curves.unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
+      this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${curves.unbound.length > 1 ? "have" : "has"} no value.</span>`;
       this.host.requestUpdate();
       return undefined;
     }
-    // Each curve is code the kernel compiled, sampled per t: vastly faster than a subs()+N()
-    // per sample, so a 1000-point sweep or an animated slider stays smooth.
-    const at =
-      (k: number) =>
-      (t: number): number => {
-        scope[variable] = t;
-        return samplers[k]!(scope);
-      };
-    const options = {
-      domain: spanOf(settings["domain"]) ?? ([-6.283185, 6.283185] as const),
-      samples: Number(settings["samples"]) || 160,
-      mode: settings["mode"],
-      adaptive: settings["adaptive"] !== "false",
-      parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
-    };
-    return {
-      series: plotSeries(plot.items, at, options),
-      // A zoomed view asks the same compiled code again, over the window and at the pixels' density.
-      inWindow: (window) => plotSeriesIn(plot.items, at, options, window, this.#pixels()),
-    };
+    const { inWindow } = curves;
+    // A zoomed view asks the same compiled code again, over the window and at the pixels' density.
+    return { series: curves.series, ...(inWindow && { inWindow: (window) => inWindow(window, this.#pixels()) }) };
   }
 
   async #sample(settings: Readonly<Record<string, string>>, generation: number): Promise<void> {

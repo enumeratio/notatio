@@ -5,7 +5,6 @@
 // to hold to what a record says. Pixels never come into it.
 
 import type { ComputeEngine } from "@cortex-js/compute-engine";
-import { JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { type Box, type BoxNode, graphics3dOf, graphicsOf, makeBoxes, notationOf } from "@notatio/boxes";
 import type { BoxShape, MathJSON } from "@notatio/entry";
 import { graphics3dOptionsOf, gridAxis, gridSide, sampleGrids, surfaceDomains } from "../src/graphics-3d-lowering.ts";
@@ -14,22 +13,28 @@ import { unsampledGraphics3d } from "../src/graphics-3d-draw.ts";
 import { optionsOf } from "@notatio/formats";
 import { fieldSourcesOf, regionFunctionOf } from "../src/field-margin.ts";
 import { plainJson } from "../src/graphics-rules.ts";
-import { type CompiledItem, compilePlot } from "../src/plot-compile.ts";
+import { type CompiledItem, compilePlot, systemHelpersOf } from "../src/plot-compile.ts";
 import {
   FIELD_PLOT_HEADS,
   fieldAxes,
   fieldBoxOfGrids,
-  planeShowBox,
-  plotBoxOfSamples,
-  plotDataSeries,
   regionFunctionVars,
   spanOf,
   unsampledPlot,
   vectorOptionsOf,
 } from "../src/plot-lowering.ts";
 import { PLOT_NOTATION } from "../src/plot-notation.ts";
-import type { PlotSeries } from "../src/plot-box.ts";
-import { plotSeries } from "../src/plot.ts";
+import * as analytic from "@notatio/analytic";
+import {
+  analyticScopeOf,
+  CURVE_SPEC,
+  figurePlanOf,
+  loadCompiled,
+  lonePlotOf,
+  type PlotRuntime,
+} from "../src/plot-sample.ts";
+import { type Primitive, primitivesOf } from "../src/primitives.ts";
+import { parseExpression } from "@notatio/formats/expression";
 import { polarPlotBox, samplePolar } from "../src/polarplot.ts";
 import { FIGURE_NOTATION } from "../src/show-box.ts";
 import { complexFunction } from "../src/complex-eval.ts";
@@ -49,8 +54,6 @@ type Json = Parameters<typeof plainJson>[0];
 const on = (v: string | undefined): boolean => v !== undefined && v !== "" && v !== "false";
 
 /** compute-engine's helpers for compiled code, lent by a compiled function (as on the page). */
-const systemHelpers = (ce: ComputeEngine): unknown =>
-  (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS;
 
 /** What a compiled item reads: the plot's variables by name, and nothing else. */
 type Sampler = (scope: Readonly<Record<string, number>>) => number;
@@ -62,7 +65,7 @@ function samplers(
   vars?: readonly string[],
 ): { compiled: readonly CompiledItem[]; free: readonly string[]; items: readonly Sampler[] } {
   const plot = compilePlot(ce, json, { target: "javascript", each: true, ...(vars === undefined ? {} : { vars }) });
-  const sys = systemHelpers(ce);
+  const sys = systemHelpersOf(ce);
   const items = plot.items.map((item) => {
     if (item.code === undefined) throw new Error(`not compilable: ${JSON.stringify(item.json)}`);
     // oxlint-disable-next-line no-implied-eval -- the engine's compiled output
@@ -124,7 +127,6 @@ function sampledComplexSurface(ce: ComputeEngine, held: readonly unknown[]): Box
 /** A plot of an expression, sampled over its domain: the box a page draws once its kernel has answered. */
 function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
   const settings = plotSettingsOf(held as never)!;
-  if (settings["epilog"] || settings["prolog"]) throw new Error("an Epilog or Prolog is read by the page, not here");
   const body = held[1];
   if (FIELD_PLOT_HEADS.includes(String(held[0]))) {
     const head = String(held[0]);
@@ -170,7 +172,11 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
       options,
     );
   }
-  if (held[0] !== "PolarPlot") return plotBoxOfSamples(settings, curveSeries(ce, body, settings));
+  if (held[0] !== "PolarPlot") {
+    const figure = sampledFigure(ce, held);
+    if (figure === undefined) throw new Error(`nothing to draw of ${String(held[0])}`);
+    return figure;
+  }
   const { free, items } = samplers(ce, body);
   const variable = settings["var"] || settings["tvar"] || free[0] || "theta";
   const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
@@ -188,28 +194,32 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
   );
 }
 
-/** A curve plot's series: its expression compiled and sampled over its domain. */
-function curveSeries(ce: ComputeEngine, body: unknown, settings: Record<string, string>): PlotSeries[] {
-  const { compiled, free, items } = samplers(ce, body);
-  const variable = settings["var"] || free[0] || "x";
-  return plotSeries(compiled, (k) => (t) => items[k]!({ [variable]: t }), {
-    domain: spanOf(settings["domain"]) ?? [-6.283185, 6.283185],
-    samples: Number(settings["samples"]) || 160,
-    mode: settings["mode"],
-    adaptive: settings["adaptive"] !== "false",
-    parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
-  });
-}
+/** What compiled code calls, from an engine in this process. */
+const runtimeOf = (ce: ComputeEngine): PlotRuntime => ({ sys: systemHelpersOf(ce), scope: analyticScopeOf(analytic) });
 
-/** A `Show` of plots and graphics: each plot sampled as `sampled` samples one, in one frame. */
-function sampledShow(ce: ComputeEngine, held: readonly unknown[]): Box | undefined {
-  const show = planeShowOf(held as never);
-  if (show === undefined) return undefined;
-  const layers = held.slice(1).filter((op) => Array.isArray(op) && op[0] !== "Rule") as unknown[][];
-  return planeShowBox(
-    show,
-    (layer, index) => plotDataSeries(layer.settings) ?? curveSeries(ce, layers[index]![1], layer.settings),
+/** An `Epilog` or `Prolog` as written, read to primitives. */
+const marksOf = (written: string): Primitive[] | undefined => {
+  const { json, errors } = parseExpression(written);
+  return errors.length > 0 ? undefined : primitivesOf(plainJson(json as never) as never);
+};
+
+/**
+ * A curve plot, a `Graphics`, or a `Show` of them, drawn by the one sampler every host shares
+ * (`figurePlanOf`): each source compiled by `ce`, then sampled and composed as the page does.
+ */
+function sampledFigure(ce: ComputeEngine, held: readonly unknown[]): Box | undefined {
+  const head = String(held[0]);
+  const settings = head === "Show" ? undefined : plotSettingsOf(held as never);
+  const show = head === "Show" ? planeShowOf(held as never) : settings && lonePlotOf(head, settings);
+  if (!show) return undefined;
+  const plan = figurePlanOf(show);
+  const loaded = plan.sources.map((text) =>
+    loadCompiled(compilePlot(ce, plainJson(parseExpression(text, { ce }).json as never), CURVE_SPEC), runtimeOf(ce)),
   );
+  const box = plan.draw(loaded, { marks: marksOf });
+  if (box !== undefined && "unbound" in (box as object))
+    throw new Error(`no value for ${(box as { unbound: string[] }).unbound.join(", ")}`);
+  return box as Box | undefined;
 }
 
 /**
@@ -219,7 +229,7 @@ function sampledShow(ce: ComputeEngine, held: readonly unknown[]): Box | undefin
  */
 export function boxOfExample(ce: ComputeEngine, expr: MathJSON): Box {
   const value = plainJson(ce.box(expr as never).evaluate().json as Json);
-  const shown = Array.isArray(value) && value[0] === "Show" ? sampledShow(ce, value) : undefined;
+  const shown = Array.isArray(value) && value[0] === "Show" ? sampledFigure(ce, value) : undefined;
   if (shown !== undefined) return shown;
   const notation = { ...notationOf(ce), ...FIGURE_NOTATION, ...PLOT_NOTATION };
   const box = makeBoxes(value as never, notation);

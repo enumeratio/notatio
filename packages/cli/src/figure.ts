@@ -41,6 +41,8 @@ export interface Sampled {
 }
 
 export interface FigureOptions extends LayoutOptions {
+  /** A curve plot, or a `Show` of plots and graphics, sampled by the session: its `GraphicsBox`. */
+  readonly figure?: (json: Json) => Box | undefined;
   /** Samples a plot, which needs the session's engine; a plot is no figure without it. */
   readonly plot?: (json: Json) => Sampled | undefined;
   /** Samples a vector or stream plot, which needs the session's engine too; its `GraphicsBox`. */
@@ -64,6 +66,9 @@ export function plotText(sampled: Sampled, options: { width?: number; height?: n
 
 /** The result drawn on character cells, or undefined when it is no figure or layout (or none can be made of it). */
 export function figureText(json: Json, options: FigureOptions = {}): string | undefined {
+  const plotted = options.figure?.(json);
+  if (plotted !== undefined)
+    return drawPlotBox(plotted as BoxNode, { width: options.width, height: options.height, color: options.color });
   const sampled = options.plot?.(json);
   if (sampled !== undefined)
     return plotText(sampled, { width: options.width, height: options.height, color: options.color });

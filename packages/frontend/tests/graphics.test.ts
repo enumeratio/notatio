@@ -16,6 +16,15 @@ import {
   plotDataSeries,
   plotOptionsOf,
 } from "../src/plot-lowering.ts";
+import type { CompiledPlot } from "../src/plot-compile.ts";
+import {
+  curvesOf,
+  DEFAULT_DOMAIN,
+  figurePlanOf,
+  loadCompiled,
+  type LoadedPlot,
+  lonePlotOf,
+} from "../src/plot-sample.ts";
 import { primitivesOf } from "../src/primitives.ts";
 import {
   DRAWING_SYMBOLS,
@@ -263,4 +272,50 @@ test("a Show's plan: series in layer order with their styles, graphics under or 
   );
   expect(alone && "graphics" in alone).toBe(true);
   expect(planeShowBox(show, () => undefined)).toBeUndefined();
+});
+
+test("one sampler: a plot's figure from compiled code, whole and zoomed, and a name with no value", () => {
+  const compiled = (code: string, unknowns: string[]): CompiledPlot => ({
+    unknowns,
+    list: false,
+    items: [{ json: null, label: "f", code }],
+  });
+  const settings = plotSettingsOf(["Plot", ["Sin", "x"], at("x", 0), rule("Frame", "True")] as never)!;
+  const plan = figurePlanOf(lonePlotOf("Plot", settings)!);
+  expect(plan.sources).toHaveLength(1);
+  const sine = loadCompiled(compiled("Math.sin(_.x)", ["x"]));
+  const whole = optionsOfBox(plan.draw([sine]) as BoxNode);
+  expect(whole.Frame).toBe(true);
+  // No range given: the page's default, on every host.
+  expect((whole.PlotRange as number[][])[0]![0]).toBeCloseTo(DEFAULT_DOMAIN[0]);
+  const zoomed = optionsOfBox(plan.draw([sine], { window: { x: [0, 1], y: [0, 1] } }) as BoxNode);
+  expect(zoomed.PlotRange).toEqual([
+    [0, 1],
+    [0, 1],
+  ]);
+  // A wildcard is the view's; a free name that is neither the variable nor bound is reported.
+  const scaled = loadCompiled(compiled("_._a * _.x", ["_a", "x"]));
+  expect(curvesOf(settings, scaled, { _a: 2 })).toHaveProperty("series");
+  const stray = loadCompiled(compiled("_.k * _.x", ["k", "x"]));
+  expect(plan.draw([stray])).toEqual({ unbound: ["k"] });
+  // An item with no code takes the host's fallback, or has no value.
+  const bare: CompiledPlot = { unknowns: ["x"], list: false, items: [{ json: null, label: "g" }] };
+  expect(loadCompiled(bare).samplers[0]!({ x: 1 })).toBeNaN();
+  expect(loadCompiled(bare, { evaluate: () => () => 7 }).samplers[0]!({ x: 1 })).toBe(7);
+});
+
+test("one sampler: a Show's plots are its sources, in layer order, and data needs none", () => {
+  const show = planeShowOf([
+    "Show",
+    ["ListPlot", ["List", 1, 2, 3]],
+    ["Plot", ["Sin", "x"], at("x", 0)],
+    ["Graphics", ["Point", at(1, 1)]],
+    ["Plot", ["Cos", "x"], at("x", 0)],
+  ] as never)!;
+  const plan = figurePlanOf(show);
+  expect(plan.sources).toHaveLength(2);
+  const load = (code: string): LoadedPlot =>
+    loadCompiled({ unknowns: ["x"], list: false, items: [{ json: null, label: "f", code }] });
+  const box = plan.draw([load("Math.sin(_.x)"), load("Math.cos(_.x)")]) as BoxNode;
+  expect(marksOf(box).map((m) => m.prim[0])).toEqual(["PointBox", "LineBox", "LineBox", "PointBox"]);
 });

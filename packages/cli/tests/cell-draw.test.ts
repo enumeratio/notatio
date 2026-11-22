@@ -5,7 +5,7 @@ import { stripAnsi } from "../src/ansi.ts";
 import { runCommand } from "../src/command.ts";
 import { Session } from "../src/engine.ts";
 import { figureText, plotText } from "../src/figure.ts";
-import { sampledField, sampledPlot } from "../src/textual.ts";
+import { sampledField, sampledFigure } from "../src/textual.ts";
 
 // Not a head's value, so a golden of the drawing. Regenerate with `UPDATE_CELLS=1 vp test`.
 const GOLDEN = fileURLToPath(new URL("./cell-draw.golden.json", import.meta.url));
@@ -17,7 +17,7 @@ const session = new Session();
 const drawn = (input: string, color = false): string => {
   const text = figureText(session.evaluate(input).expr.json as never, {
     color,
-    plot: (json) => sampledPlot(session, json),
+    figure: (json) => sampledFigure(session, json),
     field: (json) => sampledField(session, json),
   });
   if (text === undefined) throw new Error(`no figure for ${input}`);

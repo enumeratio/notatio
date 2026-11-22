@@ -52,6 +52,18 @@ export interface CompiledPlot {
   readonly unit?: string;
 }
 
+/**
+ * compute-engine's helpers for compiled JavaScript (`_SYS`: integer powers, gamma, …), which come
+ * only with an engine: a compiled function carries them.
+ */
+export function systemHelpersOf(ce: ComputeEngine): unknown {
+  // One throwaway compile per engine: a terminal asks again for every figure it draws.
+  if (!helpers.has(ce))
+    helpers.set(ce, (new JavaScriptTarget().compile(ce.box(["Power", "x", 3])).run as unknown as { SYS: unknown }).SYS);
+  return helpers.get(ce);
+}
+const helpers = new WeakMap<ComputeEngine, unknown>();
+
 const LIST_HEADS = new Set(["List", "Set", "Tuple", "Sequence"]);
 
 // `ops` lives on compute-engine's narrowed function interface; read it structurally.
