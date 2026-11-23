@@ -319,3 +319,28 @@ test("one sampler: a Show's plots are its sources, in layer order, and data need
   const box = plan.draw([load("Math.sin(_.x)"), load("Math.cos(_.x)")]) as BoxNode;
   expect(marksOf(box).map((m) => m.prim[0])).toEqual(["PointBox", "LineBox", "LineBox", "PointBox"]);
 });
+
+test("an explicit PlotRange clips on every route; tight and the automatic window apply without one", () => {
+  const sine = loadCompiled({
+    unknowns: ["x"],
+    list: false,
+    items: [{ json: null, label: "f", code: "3 * Math.sin(_.x)" }],
+  });
+  const yRangeOf = (text: string, view?: Parameters<ReturnType<typeof figurePlanOf>["draw"]>[1]): number[] => {
+    const settings = plotOfText(text)!.settings;
+    const box = figurePlanOf(lonePlotOf("Plot", settings)!).draw([sine], view) as BoxNode;
+    return (optionsOfBox(box).PlotRange as number[][])[1]!;
+  };
+  const ranged = "Plot(3 * Sin(x), (x, -6, 6), PlotRange -> (-1, 1))";
+  // The page draws it, and a terminal (tight) draws the same window.
+  expect(yRangeOf(ranged)).toEqual([-1, 1]);
+  expect(yRangeOf(ranged, { tight: true })).toEqual([-1, 1]);
+  // Without a range, tight is the data extent and the page pads it.
+  const bare = "Plot(3 * Sin(x), (x, -6, 6))";
+  const [lo, hi] = yRangeOf(bare, { tight: true });
+  expect(hi!).toBeCloseTo(3, 1);
+  expect(lo!).toBeCloseTo(-3, 1);
+  expect(yRangeOf(bare)[1]!).toBeGreaterThan(hi!);
+  // `Automatic` leaves the window to the plot.
+  expect(yRangeOf("Plot(3 * Sin(x), (x, -6, 6), PlotRange -> Automatic)", { tight: true })).toEqual([lo, hi]);
+});

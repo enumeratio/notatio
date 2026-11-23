@@ -354,7 +354,11 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     : [Math.min(...txs), Math.max(...txs)];
   let tymin: number;
   let tymax: number;
-  if (opts.tight) {
+  // An explicit `PlotRange` clips, on every route; `tight` and the automatic window apply without one.
+  const given = opts.plotRange?.map((v) => Y.fwd(v));
+  if (given && given[0]! < given[1]!) {
+    [tymin, tymax] = given as [number, number];
+  } else if (opts.tight) {
     // Marks off the curve widen the window, so they are on the page rather than lost.
     const marked = [...(opts.epilog ?? []), ...(opts.prolog ?? [])].flatMap((p) =>
       p.kind === "point" ? p.points.map((q) => Y.fwd(q[1])) : [],
@@ -365,9 +369,6 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
       tymin -= 1;
       tymax += 1;
     }
-  } else if (opts.plotRange) {
-    [tymin, tymax] = [Y.fwd(opts.plotRange[0]), Y.fwd(opts.plotRange[1])];
-    if (!(tymin < tymax)) [tymin, tymax] = [Math.min(...tys), Math.max(...tys)];
   } else {
     const sorted = [...tys].toSorted((a, b) => a - b);
     const quantile = (p: number): number => {
