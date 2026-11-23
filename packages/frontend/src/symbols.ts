@@ -196,7 +196,10 @@ export function toJsonData(node: Json): unknown {
 
 const json = (node: Json): string => JSON.stringify(toJsonData(node));
 
-/** A real constant as a number: a literal, or arithmetic over `Pi` and `ExponentialE` (`2*Pi`); else undefined. */
+/**
+ * A real constant as a finite number: a literal, or arithmetic over `Pi`, `ExponentialE`, `Sqrt`,
+ * `Power`, `Exp` and rationals (`-Pi`, `Pi/2`, `Sqrt(2)`); else undefined (a symbol, a non-real, an overflow).
+ */
 function realOf(node: Json | undefined): number | undefined {
   if (node === undefined) return undefined;
   const n = numOf(node);
@@ -207,21 +210,34 @@ function realOf(node: Json | undefined): number | undefined {
   const ops = opsOf(node).map(realOf);
   if (ops.length === 0 || ops.some((v) => v === undefined)) return undefined;
   const [a, b] = ops as number[];
-  switch (headOf(node)) {
-    case "Negate":
-      return ops.length === 1 ? -a! : undefined;
-    case "Add":
-      return (ops as number[]).reduce((sum, v) => sum + v, 0);
-    case "Multiply":
-      return (ops as number[]).reduce((product, v) => product * v, 1);
-    case "Subtract":
-      return ops.length === 2 ? a! - b! : undefined;
-    case "Divide":
-      return ops.length === 2 && b !== 0 ? a! / b! : undefined;
-    default:
-      return undefined;
-  }
+  const value = ((): number | undefined => {
+    switch (headOf(node)) {
+      case "Negate":
+        return ops.length === 1 ? -a! : undefined;
+      case "Add":
+        return (ops as number[]).reduce((sum, v) => sum + v, 0);
+      case "Multiply":
+        return (ops as number[]).reduce((product, v) => product * v, 1);
+      case "Subtract":
+        return ops.length === 2 ? a! - b! : undefined;
+      case "Divide":
+      case "Rational":
+        return ops.length === 2 && b !== 0 ? a! / b! : undefined;
+      case "Sqrt":
+        return ops.length === 1 ? Math.sqrt(a!) : undefined;
+      case "Exp":
+        return ops.length === 1 ? Math.exp(a!) : undefined;
+      case "Power":
+        return ops.length === 2 ? a! ** b! : undefined;
+      default:
+        return undefined;
+    }
+  })();
+  return value !== undefined && Number.isFinite(value) ? value : undefined;
 }
+
+/** A real number as attribute text, without the binary noise of a computed one (`Pi/2`, `0.1 + 0.2`). */
+const numeral = (value: number): string => String(Number(value.toPrecision(12)));
 
 /** A range's end as the attribute text: a constant as its plain decimal (a reader of `domain` takes `Number`), else Epsil. */
 const endOf = (node: Json): string => {
@@ -492,6 +508,7 @@ const plotColorFunction = (value: Json): Record<string, string> => {
 
 /** `FrameLabel -> [x, y]`: the captions of a framed plot's two axes. */
 const frameLabel = (value: Json): Record<string, string> => {
+  if (headOf(value) === "Set") return {};
   const [x, y] = tupleOf(value) ?? (headOf(value) === "List" ? opsOf(value) : [value]);
   const text = (node: Json | undefined): string | undefined =>
     node === undefined ? undefined : (strOf(node) ?? epsil(node));
@@ -528,10 +545,11 @@ const FIELD_OPTIONS = { ...VECTOR_OPTIONS, FrameLabel: frameLabel, RegionFunctio
 /** An expression as MathJSON text, heads and all, for a lowering that reads its structure. */
 const mathJson = (node: Json): string => JSON.stringify(plainJson(node as never));
 
-/** A style option's value as written, for the lowering to read (`PlotStyle -> Opacity(0.5, Teal)`). */
+/** A style option's value as written, for the lowering to read (`PlotStyle -> Opacity(0.5, Teal)`); a brace set is no list of styles. */
 const written =
   (attribute: string) =>
-  (value: Json): Record<string, string> => ({ [attribute]: mathJson(value) });
+  (value: Json): Record<string, string> =>
+    headOf(value) === "Set" ? {} : { [attribute]: mathJson(value) };
 
 /** `RegionPlot`'s options: the field options, and Wolfram's `PlotStyle` and `BoundaryStyle` for the fill and its edge. */
 const REGION_OPTIONS = { ...FIELD_OPTIONS, PlotStyle: written("plot-style"), BoundaryStyle: written("boundary-style") };
@@ -609,33 +627,41 @@ const axesOption = (value: Json): Record<string, string> => {
   return word === "true" || word === "false" ? { axes: word } : {};
 };
 
-/** A list or tuple as written, or a brace set's operands in source order. */
-const sequenceOf = (node: Json | undefined): readonly Json[] | undefined =>
-  tupleOf(node) ?? (headOf(node) === "Set" ? opsOf(node) : undefined);
-
 /**
  * The two ends of a range: `(lo, hi)` as written, or a brace set read as its min and max (a set has
- * no order). A set that is not two real numbers (`{1, 1}` collapsed, a symbol) gives no ends.
+ * no order). Each end goes through `realOf`, so `-Pi` and `Sqrt(2)` are numbers; an end that is not
+ * a finite real (a symbol, `{1, 1}` collapsed) gives no range.
  */
 function rangeEnds(node: Json | undefined): string[] | undefined {
-  if (headOf(node) !== "Set") {
-    const ends = tupleOf(node);
-    return ends?.length === 2 ? ends.map(clean) : undefined;
-  }
-  const ends = opsOf(node).map(realOf);
-  if (ends.length !== 2 || ends.some((v) => v === undefined)) return undefined;
-  return (ends as number[]).toSorted((a, b) => a - b).map((v) => String(Number(v.toPrecision(12))));
+  const isSet = headOf(node) === "Set";
+  const ends = isSet ? opsOf(node) : tupleOf(node);
+  if (ends?.length !== 2) return undefined;
+  const values = ends.map(realOf);
+  if (values.some((v) => v === undefined)) return undefined;
+  return (isSet ? (values as number[]).toSorted((a, b) => a - b) : (values as number[])).map(numeral);
 }
 
+/** Whether a `PlotRange` entry leaves its window to the plot. */
+const leavesWindow = (node: Json | undefined): boolean => {
+  const word = symOf(node);
+  return word === "Automatic" || word === "All";
+};
+
 /**
- * `PlotRange -> (y0, y1)` is the y window; `((x0, x1), (y0, y1))` both, braces reading as brackets.
+ * `PlotRange -> (y0, y1)` is the y window; `((x0, x1), (y0, y1))` both. A brace pair is a range
+ * (`{y0, y1}`), but braces around the two windows are unordered, so they are not read.
  * `All` and `Automatic`, for the whole or for either pair, leave that window to the plot.
  */
 const plotRange = (value: Json): Record<string, string> => {
-  const parts = sequenceOf(value);
-  if (parts === undefined) return {};
+  // A brace set is sorted by the engine, so its elements' order is not the source's: an outer
+  // `{{x0, x1}, {y0, y1}}` can't say which window is which, and is left unread (reported by `lowerOptions`).
+  const parts = headOf(value) === "Set" ? undefined : tupleOf(value);
   const pair = (node: Json | undefined): string | undefined => rangeEnds(node)?.join(",");
-  const both = parts.length === 2 && parts.some((part) => pair(part) !== undefined || symOf(part) !== undefined);
+  if (parts === undefined) {
+    const y = pair(value);
+    return y === undefined ? {} : { "plot-range": y };
+  }
+  const both = parts.length === 2 && parts.some((part) => pair(part) !== undefined || leavesWindow(part));
   const [x, y] = both ? [pair(parts[0]), pair(parts[1])] : [undefined, pair(value)];
   return { ...(x !== undefined && { "plot-x-range": x }), ...(y !== undefined && { "plot-range": y }) };
 };
@@ -661,7 +687,7 @@ const gridLines = (value: Json): Record<string, string> => {
   if (pair?.length !== 2) return {};
   const spec = (node: Json): string => {
     const positions = entriesOf(node);
-    return positions ? positions.map(clean).join(",") : symOf(node) === "Automatic" ? "auto" : "";
+    return positions ? positions.map(positionOf).join(",") : symOf(node) === "Automatic" ? "auto" : "";
   };
   return { "grid-x": spec(pair[0]!), "grid-y": spec(pair[1]!) };
 };
@@ -670,10 +696,16 @@ const gridLines = (value: Json): Record<string, string> => {
 const ticksOption = (value: Json): Record<string, string> =>
   symOf(value) === "None" || symOf(value) === "False" ? { ticks: "false" } : {};
 
+/** A position as attribute text: a real constant as its number (`-Pi`), else as written. */
+const positionOf = (node: Json): string => {
+  const value = realOf(node);
+  return value === undefined ? clean(node) : numeral(value);
+};
+
 /** `AxesOrigin -> (x, y)`: where the axes cross. */
 const axesOrigin = (value: Json): Record<string, string> => {
   const at = entriesOf(value);
-  return at?.length === 2 ? { "axes-origin": at.map(clean).join(",") } : {};
+  return at?.length === 2 ? { "axes-origin": at.map(positionOf).join(",") } : {};
 };
 
 /** `PlotRangePadding -> None`, or the share of the range left clear around it. */
@@ -904,11 +936,20 @@ export function plotSettingsOf(expr: Json): Record<string, string> | undefined {
   const symbol = head === undefined ? undefined : SETTINGS_BY_HEAD.get(head);
   if (symbol === undefined) return undefined;
   const { ops, options } = optionsOf(expr);
-  const settings = { ...symbol.fixed, ...symbol.attributes(ops), ...lowerOptions(symbol, options).attributes };
+  const settings = { ...symbol.fixed, ...symbol.attributes(ops), ...settingsOf(lowerOptions(symbol, options)) };
   return head === "Chart" ? chosenType(settings) : settings;
 }
 
 export type { PlaneLayer };
+
+/** What a plot's (or a `Show`'s) options said that the lowering could not read, one message each. */
+export function optionIssuesOf(expr: Json): string[] {
+  const show = planeShowOf(expr);
+  const all = show
+    ? [...show.layers.map((layer) => layer.settings), show.frame]
+    : [plotSettingsOf(expr) ?? graphics3dSettingsOf(expr)];
+  return all.flatMap((settings) => settings?.[OPTION_ISSUES]?.split("\n") ?? []);
+}
 
 /**
  * A `Show` of plots and graphics: its layers in order, and the frame's settings its own options give
@@ -926,7 +967,7 @@ export function planeShowOf(expr: Json): PlaneShow | undefined {
   }
   if (layers.length === 0) return undefined;
   const rules = { options: { ...FRAME_OPTIONS, AxesLabel: axesLabel, FrameLabel: frameLabel } };
-  return { layers, frame: lowerOptions(rules, options).attributes };
+  return { layers, frame: settingsOf(lowerOptions(rules, options)) };
 }
 
 /**
@@ -951,7 +992,7 @@ export function graphics3dSettingsOf(expr: Json): Record<string, string> | undef
   const symbol = head === undefined || !GRAPHICS_3D_HEADS.includes(head) ? undefined : SETTINGS_BY_HEAD.get(head);
   if (symbol === undefined) return undefined;
   const { ops, options } = optionsOf(expr);
-  return { ...symbol.fixed, ...symbol.attributes(ops), ...lowerOptions(symbol, options).attributes };
+  return { ...symbol.fixed, ...symbol.attributes(ops), ...settingsOf(lowerOptions(symbol, options)) };
 }
 
 /** What `<graphics-3d-box value>` makes of its text: the expression as plain MathJSON and its settings, if it is a figure in space. */
@@ -1356,17 +1397,28 @@ function optionText(value: Json): string | undefined {
  * itself something that draws, a slotted child, since an attribute whose value is a
  * node IS a named child. Graphics primitives (`Epilog -> Point((0, 0))`) stay text:
  * the component parses them in its own coordinates.
+ *
+ * A brace set is unordered -- the engine sorts its elements -- so a rule that reads a position
+ * or a pair can't take one. A rule that reads nothing from a set leaves an `issues` entry that
+ * names the option, for a host to show; a set a rule does read (`PlotRange -> {-1, 1}`) is not one.
  */
 export function lowerOptions(
   symbol: Pick<VisualSymbol, "options"> | undefined,
   options: Readonly<Record<string, Json>>,
-): { attributes: Record<string, string>; children: Rendering[] } {
+): { attributes: Record<string, string>; children: Rendering[]; issues: string[] } {
   const attributes: Record<string, string> = {};
   const children: Rendering[] = [];
+  const issues: string[] = [];
   for (const [name, value] of Object.entries(options)) {
     const rule = symbol?.options?.[name];
     if (typeof rule === "function") {
-      Object.assign(attributes, rule(value));
+      const read = rule(value);
+      Object.assign(attributes, read);
+      if (headOf(value) === "Set" && Object.keys(read).length === 0) {
+        issues.push(
+          `${name} -> ${epsil(value)}: a brace set is unordered, so it is not read; write it as [...] or (...)`,
+        );
+      }
       continue;
     }
     const attr = rule ?? optionAttribute(name);
@@ -1378,8 +1430,17 @@ export function lowerOptions(
     const text = optionText(value);
     if (text !== undefined) attributes[attr] = text;
   }
-  return { attributes, children };
+  return { attributes, children, issues };
 }
+
+/** The settings' key for what `lowerOptions` could not read; its entries are joined with a newline. */
+export const OPTION_ISSUES = "option-issues";
+
+/** Lowered options as settings: the attributes, and any issues under `OPTION_ISSUES`. */
+const settingsOf = ({ attributes, issues }: ReturnType<typeof lowerOptions>): Record<string, string> => ({
+  ...attributes,
+  ...(issues.length > 0 && { [OPTION_ISSUES]: issues.join("\n") }),
+});
 
 /**
  * A symbol's options split by who reads them: the `lowerable` ones become attributes (through

@@ -206,6 +206,11 @@ holding its expression, options and all; on a component that takes them as attri
 are `plot-range`, or the name the component already has, and one whose value is something to
 draw, like `Epilog`, is carried the same way, as the Epsil it was.
 
+A range's ends are real constants: `PlotRange -> (-Pi, Pi)`, `Sqrt(2)`. Braces are a set, and a
+set is unordered, so `PlotRange -> {-1, 1}` reads as its min and max, while an option whose
+order matters (`AxesOrigin`, `GridLines`, `ScalingFunctions`, `FrameLabel`, the two windows of
+`PlotRange`) wants `[...]` or `(...)`; given braces, it is not read and the plot says so.
+
 <Story
   title="Options as rules, and as attributes">
 <template #description>
