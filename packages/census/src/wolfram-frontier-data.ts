@@ -33,10 +33,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
     uses: 278,
   },
   {
-    head: "ComplexContourPlot",
-    uses: 242,
-  },
-  {
     head: "NCache",
     uses: 224,
   },
@@ -214,10 +210,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
   },
   {
     head: "QuantityDistribution",
-    uses: 27,
-  },
-  {
-    head: "ReImPlot",
     uses: 27,
   },
   {
@@ -823,10 +815,6 @@ export const FRONTIER: readonly FrontierEntry[] = [
   {
     head: "ZTransform",
     uses: 9,
-  },
-  {
-    head: "AbsArgPlot",
-    uses: 8,
   },
   {
     head: "AlgebraicNumber",

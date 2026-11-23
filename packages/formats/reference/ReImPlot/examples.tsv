@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption	boxes
+exponential	Basic		[ReImPlot, [Exp, [Multiply, ImaginaryUnit, x]], [Tuple, x, 0, 6.283]]	[ReImPlot, [Exp, [Multiply, ImaginaryUnit, x]], [Tuple, x, 0, 6.283]]	The real and imaginary parts of e^(ix): cosine and sine	{head: GraphicsBox, marks: {LineBox: 2}, roles: {Series: 2}}
+square-root	Basic		[ReImPlot, [Sqrt, x], [Tuple, x, -4, 4]]	[ReImPlot, [Sqrt, x], [Tuple, x, -4, 4]]	A square root is real to the right of 0 and imaginary to the left	{head: GraphicsBox, marks: {LineBox: 2}, roles: {Series: 2}}

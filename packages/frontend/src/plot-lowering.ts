@@ -55,6 +55,9 @@ export const FIELD_PLOT_HEADS: readonly string[] = [
 export const PLOT_HEADS: readonly string[] = [
   "Graphics",
   "Plot",
+  "ReImPlot",
+  "AbsArgPlot",
+  "ComplexContourPlot",
   "ParametricPlot",
   "PolarPlot",
   "ListPolarPlot",

@@ -1,0 +1,3 @@
+id	in
+exponential	ReImPlot[Exp[Times[I, x]], List[x, 0, 6.283]]
+square-root	ReImPlot[Sqrt[x], List[x, -4, 4]]

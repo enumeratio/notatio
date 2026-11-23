@@ -77,6 +77,7 @@ export * from "./latex.ts";
 export * from "./presentation.ts";
 export * from "./environment.ts";
 export * from "./complex-plot.ts";
+export * from "./complex-parts.ts";
 export * from "./portrait-color.ts";
 export * from "./portrait-cpu.ts";
 export * from "./complex-plot-box.ts";

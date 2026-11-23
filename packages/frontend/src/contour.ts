@@ -354,6 +354,32 @@ export function implicitPlotBox(
   return graphics(marks, options);
 }
 
+/**
+ * The level curves of two grids on the same axes, each family in its own category color: the real
+ * and the imaginary part of a complex function (`ComplexContourPlot`). `levels` are each family's.
+ */
+export function complexContourBox(
+  re: Grid,
+  im: Grid,
+  xs: readonly number[],
+  ys: readonly number[],
+  levels: { readonly re: readonly number[]; readonly im: readonly number[] },
+  opts: ContourOptions = {},
+): Box {
+  const ny = re.length;
+  const nx = ny > 0 ? re[0]!.length : 0;
+  const ready = nx >= 2 && ny >= 2 && xs.length >= nx && ys.length >= ny && im.length === ny;
+  const options = fieldFrame(re, xs, ys, opts, ready);
+  if (!ready) return graphics([], options);
+  const [first, second] = categoryColors(plotPalette(opts), 2);
+  const family = (grid: Grid, at: readonly number[], color: string): Box[] =>
+    at.flatMap((level) => {
+      const curve = levelLine(grid, xs.slice(0, nx), ys.slice(0, ny), level, color);
+      return curve === undefined ? [] : [curve];
+    });
+  return graphics([...family(re, levels.re, first!), ...family(im, levels.im, second!)], options);
+}
+
 /** `contourPlotBox` drawn: the SVG a page, a build or an export shows. */
 export function contourSvg(
   grid: Grid,

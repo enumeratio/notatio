@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption	boxes
+square	Basic		[ComplexContourPlot, [Power, z, 2], [Tuple, z, [Complex, -2, -2], [Complex, 2, 2]]]	[ComplexContourPlot, [Power, z, 2], [Tuple, z, [Complex, -2, -2], [Complex, 2, 2]]]	The real and imaginary parts of z²: two families of hyperbolas, crossing at right angles	{head: GraphicsBox, roles: {Series: 22}, options: {PlotRange: [[-2, 2], [-2, 2]]}}

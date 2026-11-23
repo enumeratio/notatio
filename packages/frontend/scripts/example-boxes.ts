@@ -18,6 +18,7 @@ import {
   FIELD_PLOT_HEADS,
   fieldAxes,
   fieldBoxOfGrids,
+  plotBoxOfSamples,
   regionFunctionVars,
   spanOf,
   unsampledPlot,
@@ -38,6 +39,7 @@ import { parseExpression } from "@notatio/formats/expression";
 import { polarPlotBox, samplePolar } from "../src/polarplot.ts";
 import { FIGURE_NOTATION } from "../src/show-box.ts";
 import { complexFunction } from "../src/complex-eval.ts";
+import { COMPLEX_PART_HEADS, complexContourBoxOf, complexPartSeries } from "../src/complex-parts.ts";
 import { complexPlotBox, complexPlotOptionsOf } from "../src/complex-plot-box.ts";
 import {
   complexPlot3dSettingsOf,
@@ -228,6 +230,16 @@ function sampledFigure(ce: ComputeEngine, held: readonly unknown[]): Box | undef
  * expression sampled. A value that doesn't draw lowers to `makeBoxes`' text boxes, which a caller
  * tells by the head.
  */
+/** A plot of a complex function by its parts, sampled by the evaluator the page uses. */
+function sampledParts(ce: ComputeEngine, held: readonly unknown[]): Box {
+  const settings = plotSettingsOf(held as never)!;
+  const kind = settings["parts"];
+  const f = complexFunction(ce.box(held[1] as never).json, settings["var"] || (kind === "contours" ? "z" : "x"));
+  if (f === undefined) throw new Error(`no complex evaluator for ${String(held[0])}`);
+  if (kind === "contours") return complexContourBoxOf(f, settings).box;
+  return plotBoxOfSamples(settings, complexPartSeries(kind === "absarg" ? "absarg" : "reim", f, settings));
+}
+
 export function boxOfExample(ce: ComputeEngine, expr: MathJSON): Box {
   const value = plainJson(ce.box(expr as never).evaluate().json as Json);
   const shown = Array.isArray(value) && value[0] === "Show" ? sampledFigure(ce, value) : undefined;
@@ -236,6 +248,7 @@ export function boxOfExample(ce: ComputeEngine, expr: MathJSON): Box {
   const box = makeBoxes(value as never, notation);
   const held = unsampledPlot(box) as readonly unknown[] | undefined;
   if (held !== undefined && held[0] === "ComplexPlot") return sampledPortrait(ce, held);
+  if (held !== undefined && String(held[0]) in COMPLEX_PART_HEADS) return sampledParts(ce, held);
   if (held !== undefined && SAMPLED.has(String(held[0]))) return sampled(ce, held);
   const surface = unsampledGraphics3d(box) as readonly unknown[] | undefined;
   if (surface !== undefined && surface[0] === "ComplexPlot3D") return sampledComplexSurface(ce, surface);

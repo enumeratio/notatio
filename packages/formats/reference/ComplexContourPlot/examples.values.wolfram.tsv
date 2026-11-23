@@ -1,0 +1,2 @@
+id	in
+square	ComplexContourPlot[Power[z, 2], List[z, Complex[-2, -2], Complex[2, 2]]]
