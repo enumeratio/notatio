@@ -6,6 +6,7 @@ import type { Expression, ComputeEngine } from "@cortex-js/compute-engine";
 import { canCompile, GLSLTarget, JavaScriptTarget } from "@cortex-js/compute-engine/compile";
 import { ce0187Decline, selfContainedCode } from "@notatio/engine/compiled";
 import { withGLSL } from "@notatio/analytic/shader";
+import { interpretedSampler, type PlotRuntime, type Scope } from "./plot-sample.ts";
 
 /** What to compile a plot's expression to. */
 export interface PlotCompileSpec {
@@ -63,6 +64,16 @@ export function systemHelpersOf(ce: ComputeEngine): unknown {
   return helpers.get(ce);
 }
 const helpers = new WeakMap<ComputeEngine, unknown>();
+
+/**
+ * The runtime of a host with an engine in process: its compiled-code helpers, `scope` (the analytic
+ * kernels, where the plot calls them), and the engine itself for an item that has no code.
+ */
+export const engineRuntime = (ce: ComputeEngine, scope: Scope = {}): PlotRuntime => ({
+  sys: systemHelpersOf(ce),
+  scope,
+  evaluate: interpretedSampler(ce as never),
+});
 
 const LIST_HEADS = new Set(["List", "Set", "Tuple", "Sequence"]);
 

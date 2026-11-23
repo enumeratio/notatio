@@ -13,7 +13,6 @@ import {
   type FigurePlan,
   figurePlanOf,
   headOf,
-  interpretedSampler,
   loadCompiled,
   type LoadedPlot,
   lonePlotOf,
@@ -30,7 +29,7 @@ import {
   vectorPlotBox,
 } from "@notatio/frontend";
 import { parseExpression } from "@notatio/formats/expression";
-import { compilePlot, systemHelpersOf } from "@notatio/frontend/plot-compile";
+import { compilePlot, engineRuntime } from "@notatio/frontend/plot-compile";
 import type { Drawn } from "./cell-layout.ts";
 import type { PlotPoint, Session } from "./engine.ts";
 import { drawPlotBox } from "./cell-draw.ts";
@@ -60,11 +59,7 @@ const marksOf = (written: string): Primitive[] | undefined => {
  */
 function loadedOf(session: Session, plan: FigurePlan): LoadedPlot[] | undefined {
   const { ce } = session;
-  const runtime = {
-    sys: systemHelpersOf(ce as never),
-    scope: analyticScopeOf(analytic),
-    evaluate: interpretedSampler(ce as never),
-  };
+  const runtime = engineRuntime(ce as never, analyticScopeOf(analytic));
   const loaded: LoadedPlot[] = [];
   for (const text of plan.sources) {
     const { json, errors } = parseExpression(text, { ce: ce as never });

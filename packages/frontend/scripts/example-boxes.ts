@@ -13,7 +13,7 @@ import { unsampledGraphics3d } from "../src/graphics-3d-draw.ts";
 import { optionsOf } from "@notatio/formats";
 import { fieldSourcesOf, regionFunctionOf } from "../src/field-margin.ts";
 import { plainJson } from "../src/graphics-rules.ts";
-import { type CompiledItem, compilePlot, systemHelpersOf } from "../src/plot-compile.ts";
+import { type CompiledItem, compilePlot, engineRuntime, systemHelpersOf } from "../src/plot-compile.ts";
 import {
   FIELD_PLOT_HEADS,
   fieldAxes,
@@ -29,7 +29,6 @@ import {
   analyticScopeOf,
   CURVE_SPEC,
   figurePlanOf,
-  interpretedSampler,
   loadCompiled,
   lonePlotOf,
   type PlotRuntime,
@@ -196,11 +195,7 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
 }
 
 /** What compiled code calls, from an engine in this process. */
-const runtimeOf = (ce: ComputeEngine): PlotRuntime => ({
-  sys: systemHelpersOf(ce),
-  scope: analyticScopeOf(analytic),
-  evaluate: interpretedSampler(ce as never),
-});
+const runtimeOf = (ce: ComputeEngine): PlotRuntime => engineRuntime(ce, analyticScopeOf(analytic));
 
 /** An `Epilog` or `Prolog` as written, read to primitives. */
 const marksOf = (written: string): Primitive[] | undefined => {

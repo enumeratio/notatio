@@ -44,6 +44,13 @@ test("a declined item draws through the interpreter, and its points are the true
   expect(Array.isArray(box)).toBe(true);
 });
 
+test("an item the engine reads as invalid is not sampled, and the plot says so", () => {
+  const invalid = compilePlot(ce, ["Sin", "x", ["Error", "'unexpected-argument'", "'2'"]], CURVE_SPEC);
+  const loaded = loadCompiled(invalid, { evaluate: interpretedSampler(ce as never) });
+  expect(loaded.failed).toMatch(/cannot be interpreted/);
+  expect(curvesOf(settings, loaded)).toEqual({ failed: loaded.failed });
+});
+
 test("the reason reaches the debug log", async () => {
   vi.resetModules();
   vi.stubGlobal("localStorage", { getItem: () => "plot" });

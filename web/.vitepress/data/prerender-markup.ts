@@ -23,7 +23,7 @@ import {
   renderPlot,
 } from "@notatio/frontend/core";
 import { NOTEBOOK_KERNEL } from "@notatio/frontend/kernel-host";
-import { type CompiledPlot, systemHelpersOf } from "@notatio/frontend/plot-compile";
+import { type CompiledPlot, engineRuntime } from "@notatio/frontend/plot-compile";
 import { outMarkup, prerender } from "@notatio/frontend/prerender";
 import { libraryRegistry, registerLibraryNotation } from "../theme/libraries.ts";
 import { CATALOGUE } from "../theme/worker-catalogue.ts";
@@ -96,21 +96,24 @@ async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
   if (show === undefined) return undefined;
   const plan = figurePlanOf(show);
   const k = await pageKernel();
-  const sys = systemHelpersOf(k.ce as never);
   const loaded = [];
   for (const text of plan.sources) {
     const answer = await k.evaluate({ source: { text, format: "epsil" }, compile: CURVE_SPEC });
     const plot = answer.compiled as CompiledPlot | undefined;
-    // An item with no code is sampled by an engine, which the page has and this picture does not wait for.
-    if (!answer.ok || plot === undefined || plot.items.some((item) => item.code === undefined)) return undefined;
+    if (!answer.ok || plot === undefined) return undefined;
     const scope = callsAnalytic(plot) ? analyticScopeOf(await import("@notatio/analytic")) : {};
-    loaded.push(loadCompiled(plot, { sys, scope }));
+    // An item with no code is sampled by the kernel's engine, as the page does.
+    loaded.push(loadCompiled(plot, engineRuntime(k.ce as never, scope)));
   }
   // The wildcards start where a Manipulate's controls around it do.
   const bindings: Record<string, unknown> = {};
   for (const params of spec.manipulate) for (const c of parseControls(params)) bindings[`_${c.name}`] = c.value;
   const box = plan.draw(loaded, { bindings, marks: marksOf });
-  if (box === undefined || "unbound" in (box as object) || "failed" in (box as object)) return undefined;
+  if (box !== undefined && "failed" in (box as object)) {
+    console.warn(`[prerender] plot left live, no way to sample it: ${(box as { failed: string }).failed}`);
+    return undefined;
+  }
+  if (box === undefined || "unbound" in (box as object)) return undefined;
   return `<span class="graphics-box-plot">${renderPlot(box as never).svg}</span>`;
 }
 
