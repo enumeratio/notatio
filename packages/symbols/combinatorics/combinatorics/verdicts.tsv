@@ -853,6 +853,7 @@ compile-maps	Avoiding321Permutation@dyck_path	6c44111066c7452f81123214	841ba993e
 compile-maps	BarnabeiCastronuovo@dyck_path	b8b3589cdcd05bcbf605b4c4	5f42f7f09bb2166bbe7c1fb8	agrees	39.92
 compile-maps	BilleyJockuschStanleyPermutation@dyck_path	a7ba59efa9cb0627b9b459ec	f048ced4422ad92b3b4088d9	agrees	23
 compile-maps	BinarySearchTreeParentArray@permutation	3a07512997d57de792d4225c	4d08768b840d67d58526f8dd	agrees	4.92
+compile-maps	BinaryTree@dyck_path	17449e188ed5bd35706a5ba8	593a184443c4bbe6c991d711	agrees	1.96
 compile-maps	BinaryTree@ordered_tree (flat)	801e80a4585e10bcb4362f6a	a5fca2fa6e7fa9169a871958	agrees	0.47
 compile-maps	BinaryTreeParentArray@permutation	fd05f9dec4e1e609f33e67d0	f52840dd8541b006a37cddbb	agrees	3.72
 compile-maps	BinaryWord@dyck_path	efde8bd711ea186887629129	ff3c1c0ecea2ad03eda362cc	agrees	0.02
@@ -944,6 +945,7 @@ compile-maps	FoataInversionsToMajor@permutation	4fcb1b95a47f3855b27864c1	ef214c6
 compile-maps	FoataMajorToInversions@binary_word	c4ed802a05a7f6158bb39bed	3d97a5ebb4b20abff936fdf7	agrees	9.27
 compile-maps	FoataMajorToInversions@composition	d270b7e320199cd057150da7	667b42eb57b9884acc6879d1	agrees	2.31
 compile-maps	FoataMajorToInversions@permutation	f446bcc9cf48f091ae7a26a2	730eacba4d1cd1999cc3c86c	agrees	17.62
+compile-maps	FromPermutation@permutation	77b68485a337f6549f4a4bd5	eeaa0913f5a6c3926ede2352	agrees	19.12
 compile-maps	GelfandTsetlinCycle@gelfand_tsetlin_pattern	0e93d083079010650c500ea7	e343c346c245060dca99cc2d	agrees	9.63
 compile-maps	GelfandTsetlinPattern@semistandard_tableau	f6470f77e01133337617f301	5446b3500ee608020a6b2e9c	agrees	1.94
 compile-maps	GelfandTsetlinPattern@standard_tableau	cd32d80cdfd8da1ff89589a5	c1b5cdb296726207ce7cc9d4	agrees	1.43
@@ -987,6 +989,7 @@ compile-maps	InverseTableauPromotion@standard_tableau	92700aca2c17f3cd816ec5fc	8
 compile-maps	InverseToricPromotion@permutation	b53cfc4f133f7a618147294a	b37f6203036f82caed2ee4f8	agrees	1.28
 compile-maps	InverseWachsWhite@set_partition	dd4fdfb4a40139e809742baa	80b6d006c6e40f4520b8a894	agrees	12.04
 compile-maps	InverseWachsWhiteRho@set_partition	84b87e47620321fdaa114a19	e37daa87e09a00d5a8ba29ef	agrees	12.7
+compile-maps	InverseYip@set_partition	977c28fda907978badc0d9c9	8aa237c4369a4512f7748b67	agrees	35.84
 compile-maps	InverseZetaMap@dyck_path	ca19da428e3da15e67db218d	9239d5bddbec1a8de5816859	agrees	3.99
 compile-maps	InversionGraph@permutation	c59e5d87c9ff1dc660f56372	d5742602456504cc000e6dbd	agrees	3.27
 compile-maps	IsolatedVertexAddition@labeled_graph	64128022da8b125d49e701d2	21cead6c0f576d8b976512a8	agrees	0.52
@@ -1042,6 +1045,7 @@ compile-maps	PerfectMatching@dyck_path	8285acbb828864533aca2bdb	8e480f013bbf9351
 compile-maps	Permutation@cycle_decomposition	8ec4146bc0184202d115a686	6bcff49ac9151da4d0bc8488	agrees	4.78
 compile-maps	Permutation@perfect_matching	9ffdaf968391e4a62b32049d	4a4b0ca89faa54ab03547637	agrees	0.54
 compile-maps	Permutation@subexcedant_seq	30759beb9cc7b97279f21248	49c6cdc2250d593540392644	agrees	0.45
+compile-maps	PlanePartitionShape@plane_partition	be5efe04109183482aae1c1d	b432b18fbf61a67e2e2ad32f	agrees	0.05
 compile-maps	PositiveCycleType@signed_permutation	5a62dc27e449a6535966a84f	00abc2c533812aaa8d3d343c	agrees	15.13
 compile-maps	PrimeDyckPath@dyck_path	d3633b4e2a0c5256a262af9f	8da51ebfdce96e143070d53b	agrees	0.47
 compile-maps	Promotion@dyck_path	65f0c0285ee68d679518522a	32db8c159ae1e50ff6fa4843	agrees	9.99
@@ -1108,6 +1112,7 @@ compile-maps	TableauDescentWord@standard_tableau	6175110c7c630828bf375df4	a9eb48
 compile-maps	TableauPromotion@standard_tableau	7a13ed56b78bac7e5a2372bd	742a7b893a1569c74017fe83	agrees	9.25
 compile-maps	TableauShape@standard_tableau	c6b3d91ad95cecfca674d126	60c783e60d869d455b0b544b	agrees	0.15
 compile-maps	TableauWeight@semistandard_tableau	a137efe63c24a51bb5b5cfba	34b3cf8df4fbf3b67c8ccb7c	agrees	6.04
+compile-maps	TamariBinaryTree@dyck_path (composition)	dd48daa23a61807c23615a40	df95f0cbbb57b4b2baf8741f	agrees	2.33
 compile-maps	Tanimoto@permutation	d7edc627bde3f658976e7f35	6b69a683df008ad88d4aee56	agrees	0.47
 compile-maps	ThresholdGraph@composition	b4c6fd861b14f96561cafef9	643028e6c5a03265432ae7ba	agrees	5.06
 compile-maps	ToLehmerCode@permutation	80c71aa7756f486173cbc26d	fbdce8c096a177c14058d9e7	agrees	1.42
@@ -1119,6 +1124,7 @@ compile-maps	TransposeAlternatingSignMatrix@alternating_sign_matrix	41a1f1877ab7
 compile-maps	TransposeComposition@composition (composition)	f23567e956d056240edad77c	d6fc0135b5de94c0aa4f9b9e	agrees	0.89
 compile-maps	TransposePartition@core_partition	82f8211684cdecf619d8d51e	e4b958c537fb034cb6a817f6	agrees	0.2
 compile-maps	TransposePartition@integer_partition	33f5c629f99e104fe1b8b963	5a37441b0af07fa0f1dc6516	agrees	0.53
+compile-maps	TransposePlanePartition@plane_partition	8b12ddd5a83589b2edec785d	09745afed7bb5c4ec9f3488c	agrees	0.21
 compile-maps	TransposeSkewPartition@skew_partition	a88769c5e16f7d797e8d1952	94d65846347cc61f84e02bbb	agrees	0.14
 compile-maps	TransposeTableau@standard_tableau	43e30b8c656a56dd3750c1c9	60b0b0653ad548255af98eb3	agrees	0.64
 compile-maps	Twist@binary_word	aa347c780b695657e25cf29d	b9311688b42671f5f9eaf964	agrees	0.3

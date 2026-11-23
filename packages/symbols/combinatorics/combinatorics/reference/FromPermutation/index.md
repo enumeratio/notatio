@@ -13,4 +13,4 @@ signatures:
 ---
 
 - Takes a `Permutation` and returns a `IncreasingBinaryTree` — a typed map, so a wrong carrier is a type error rather than a wrong answer.
-- Paired with ToPermutation, whose overload set (IncreasingBinaryTree among others) names this map's codomain. The root is always 1: every permutation of [n] holds the value 1, and heap order puts the global minimum at the top regardless of which permutation it came from. Built by real recursion, the same [label, left, right] nesting IncreasingBinaryTrees' cartesianTree builds.
+- Paired with ToPermutation, whose overload set (IncreasingBinaryTree among others) names this map's codomain. The root is always 1: every permutation of [n] holds the value 1, and heap order puts the global minimum at the top regardless of which permutation it came from. The same [label, left, right] nesting IncreasingBinaryTrees' cartesianTree builds.
