@@ -93,12 +93,16 @@ export const sampleNumber = (v: unknown): number => {
 
 /**
  * An item sampled by `ce` itself, `subs` then `N` per sample: what a host runs for an item with no
- * compiled code, so the plot still draws what compiling declined.
+ * compiled code, so the plot still draws what compiling declined. None for an item `ce` reads as
+ * invalid (a wrong arity, a missing argument): it would sample to nothing.
  */
 export const interpretedSampler =
-  (ce: { box(json: never): { unknowns: readonly string[]; subs(s: never): { N(): { re: unknown } } } }) =>
-  (item: CompiledItem): Sampler => {
+  (ce: {
+    box(json: never): { isValid: boolean; unknowns: readonly string[]; subs(s: never): { N(): { re: unknown } } };
+  }) =>
+  (item: CompiledItem): Sampler | undefined => {
     const expr = ce.box(item.json as never);
+    if (!expr.isValid) return undefined;
     return (scope) => {
       const subs: Record<string, number> = {};
       for (const name of expr.unknowns) if (typeof scope[name] === "number") subs[name] = scope[name];
@@ -114,7 +118,7 @@ export function loadCompiled(plot: CompiledPlot, runtime: PlotRuntime = {}): Loa
       if (item.declined !== undefined) log("declined to compiled code", item.declined, item.label);
       const interpreted = runtime.evaluate?.(item);
       if (interpreted !== undefined) return interpreted;
-      failed ??= item.declined ?? `${item.label} has no compiled code and no interpreter`;
+      failed ??= item.declined ?? `${item.label} has no compiled code and cannot be interpreted`;
       log("no way to sample", item.label, failed);
       return () => Number.NaN;
     }
