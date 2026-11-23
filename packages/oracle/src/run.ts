@@ -855,6 +855,17 @@ def enumeratio_value(x):
     return "(" + repr(z.real) + ("+" if z.imag >= 0 else "-") + repr(abs(z.imag)) + "j)"
 `;
 
+/**
+ * What a Sage program starts from, stated so it does not depend on the launcher: `sage.all` is
+ * what `sage -c` evaluates in under `sage.cli` (a pip install) and, with `x` added, what the
+ * classic script's `sage.all_cmdline` gives (the official image). Without the explicit `x`, a
+ * pip install leaves `x` undefined and the image defines it.
+ */
+const SAGE_IMPORTS = `from sage.all import *
+from sage.calculus.predefined import x
+from sage.misc.sage_eval import sage_eval
+from sage.repl.preparse import preparse`;
+
 // Sage helpers for emits with no one-liner. The diagram algebras live over ZZ[delta], so a
 // product that closes a loop comes back with its power of delta, printed (like an Oscar
 // group-algebra element) as a basis → coefficient map for compareCombination. PowerModList(a, s/r, m): `Zmod(m)(a)` has no
@@ -1921,7 +1932,7 @@ export function preludeFor(system: System): Prelude {
     case "sage":
       return {
         binary: "sage",
-        preamble: `from sage.misc.sage_eval import sage_eval\nfrom sage.repl.preparse import preparse\n${SAGE_PREAMBLE}\n${PY_BROADCAST}`,
+        preamble: `${SAGE_IMPORTS}\n${SAGE_PREAMBLE}\n${PY_BROADCAST}`,
         evaluate: (src) => `eval(preparse(${src}), globals())`,
         printer: "enumeratio_value",
       };
@@ -2072,7 +2083,7 @@ function runBatch(system: System, sources: readonly string[], itemSeconds: numbe
       return runPython(
         sources,
         "sage",
-        `from sage.misc.sage_eval import sage_eval\nfrom sage.repl.preparse import preparse\n${SAGE_PREAMBLE}\n${PY_BROADCAST}`,
+        `${SAGE_IMPORTS}\n${SAGE_PREAMBLE}\n${PY_BROADCAST}`,
         "batch.sage",
         (src, ns) => `eval(preparse(${src}), ${ns})`,
         "enumeratio_value",

@@ -455,7 +455,7 @@ rational_reconstruction raw_getattr read_data real real_nth_root real_part
 reciprocal_trig_functions reduce reference regina region_plot register_unpickle_override
 regulator repr_lincomb reset reset_load_attach_path restore revolution_plot3d richcmp_method
 rising_factorial robinson_schensted_knuth robinson_schensted_knuth_inverse run_doctests
-running_total s sage sage0 sage0_version sage_eval sage_globals sage_input sage_wraps sageobj
+running_total sage sage0 sage0_version sage_eval sage_globals sage_input sage_wraps sageobj
 sample sandpiles save save_session scatter_plot schonheim scilab search_def search_doc
 search_src sec sech seed seq series_precision set_default_variable_name set_edit_template
 set_modsym_print_mode set_random_seed set_series_precision set_verbose set_verbose_files sgn sh

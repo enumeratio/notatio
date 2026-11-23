@@ -440,8 +440,8 @@ jobs:
           cache: pip
           cache-dependency-path: packages/oracle/python/requirements.txt
       - run: pip install -r packages/oracle/python/requirements.txt
-      # The SymPy helpers run in SymPy (the gate has none, so these skip there).
-      - run: pnpm --filter @notatio/oracle exec vp test run tests/symbolic.test.ts
+      # The SymPy helpers and the SymPy and mpmath reserved-names sets run in SymPy (the gate has none, so these skip there).
+      - run: pnpm --filter @notatio/oracle exec vp test run tests/symbolic.test.ts tests/reserved-names.test.ts
       - uses: ./.github/actions/oracle-drift
         with:
           system: mpmath
@@ -648,8 +648,8 @@ jobs:
           SH
           sudo chmod +x /usr/local/bin/sage
           sage --version
-      # The Sage helpers run in Sage (the gate has none, so these skip there).
-      - run: pnpm --filter @notatio/oracle exec vp test run tests/symbolic.test.ts
+      # The Sage helpers and the reserved-names set run in Sage (the gate has none, so these skip there).
+      - run: pnpm --filter @notatio/oracle exec vp test run tests/symbolic.test.ts tests/sage-helpers.test.ts tests/sage-wrapper.test.ts tests/reserved-names.test.ts
       - uses: ./.github/actions/oracle-drift
         with:
           system: sage
