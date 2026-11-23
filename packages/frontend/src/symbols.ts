@@ -561,8 +561,8 @@ const DENSITY_OPTIONS = {
   ...FIELD_OPTIONS,
   PlotLegends: (value: Json): Record<string, string> => ({ legend: isOff(value) ? "false" : "true" }),
   PlotRange: (value: Json): Record<string, string> => {
-    const parts = tupleOf(value);
-    return parts?.length === 2 ? { zrange: parts.map(clean).join(",") } : {};
+    const ends = rangeEnds(value);
+    return ends ? { zrange: ends.join(",") } : {};
   },
 };
 
@@ -609,18 +609,32 @@ const axesOption = (value: Json): Record<string, string> => {
   return word === "true" || word === "false" ? { axes: word } : {};
 };
 
+/** A list or tuple as written, or a brace set's operands in source order. */
+const sequenceOf = (node: Json | undefined): readonly Json[] | undefined =>
+  tupleOf(node) ?? (headOf(node) === "Set" ? opsOf(node) : undefined);
+
 /**
- * `PlotRange -> (y0, y1)` is the y window; `((x0, x1), (y0, y1))` both. `All` and `Automatic`, for
- * the whole or for either pair, leave that window to the plot.
+ * The two ends of a range: `(lo, hi)` as written, or a brace set read as its min and max (a set has
+ * no order). A set that is not two real numbers (`{1, 1}` collapsed, a symbol) gives no ends.
+ */
+function rangeEnds(node: Json | undefined): string[] | undefined {
+  if (headOf(node) !== "Set") {
+    const ends = tupleOf(node);
+    return ends?.length === 2 ? ends.map(clean) : undefined;
+  }
+  const ends = opsOf(node).map(realOf);
+  if (ends.length !== 2 || ends.some((v) => v === undefined)) return undefined;
+  return (ends as number[]).toSorted((a, b) => a - b).map((v) => String(Number(v.toPrecision(12))));
+}
+
+/**
+ * `PlotRange -> (y0, y1)` is the y window; `((x0, x1), (y0, y1))` both, braces reading as brackets.
+ * `All` and `Automatic`, for the whole or for either pair, leave that window to the plot.
  */
 const plotRange = (value: Json): Record<string, string> => {
-  const parts = tupleOf(value) ?? (headOf(value) === "List" ? opsOf(value) : undefined);
+  const parts = sequenceOf(value);
   if (parts === undefined) return {};
-  const pair = (node: Json | undefined): string | undefined => {
-    const ends =
-      node === undefined ? undefined : (tupleOf(node) ?? (headOf(node) === "List" ? opsOf(node) : undefined));
-    return ends?.length === 2 ? ends.map(clean).join(",") : undefined;
-  };
+  const pair = (node: Json | undefined): string | undefined => rangeEnds(node)?.join(",");
   const both = parts.length === 2 && parts.some((part) => pair(part) !== undefined || symOf(part) !== undefined);
   const [x, y] = both ? [pair(parts[0]), pair(parts[1])] : [undefined, pair(value)];
   return { ...(x !== undefined && { "plot-x-range": x }), ...(y !== undefined && { "plot-range": y }) };
