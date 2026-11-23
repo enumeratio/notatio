@@ -1656,6 +1656,12 @@ export const findstatMaps: readonly FindStatMapMatch[] = [
     findstat: [{ id: "Mp00311", rows: 1123, compared: 95, skipped: 0 }],
   },
   {
+    name: "TransposePlanePartition",
+    from: "PlanePartition",
+    to: "PlanePartition",
+    findstat: [{ id: "Mp00177", rows: 1123, compared: 95, skipped: 0 }],
+  },
+  {
     name: "CliqueSizePartition",
     from: "LabeledGraph",
     to: "IntegerPartition",

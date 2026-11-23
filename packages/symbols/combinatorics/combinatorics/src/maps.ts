@@ -100,6 +100,20 @@ export const HEAD_ROWS: readonly TableRow[] = [
     name: "TransposeTableau",
     returns: "standard_tableau",
   },
+  {
+    head: "Shape",
+    carrier: "PlanePartition",
+    via: "CombinatorialMap",
+    name: "PlanePartitionShape",
+    returns: "integer_partition",
+  },
+  {
+    head: "Transpose",
+    carrier: "PlanePartition",
+    via: "CombinatorialMap",
+    name: "TransposePlanePartition",
+    returns: "plane_partition",
+  },
 ];
 
 export const MAPS: readonly CombinatorialMap[] = [

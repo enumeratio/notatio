@@ -5766,3 +5766,7 @@ symbol	/reference/symbol/UncomplementedElementCount
 symbol	/reference/symbol/ZeroDivisorCount
 symbol	/reference/symbol/AlgebraNorm
 map	/reference/map/CorePartition/TransposePartition
+map	/reference/map/PlanePartition/PlanePartitionShape
+map	/reference/map/PlanePartition/TransposePlanePartition
+symbol	/reference/symbol/PlanePartitionShape
+symbol	/reference/symbol/TransposePlanePartition

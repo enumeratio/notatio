@@ -81,16 +81,20 @@ test("a shared statistic's bare head gives FindStat's value on each sample objec
 });
 
 // FindStat's map ids behind each head row, by (head, carrier): the shape of a tableau, of a semistandard tableau and
-// of a set partition, and the conjugate tableau.
-const MAP_IDS: Readonly<Record<string, string>> = {
+// of a set partition, the conjugate tableau, and the plane partition's transpose. A plane partition's support
+// shape has no FindStat map (`undefined`), so its row is held to the table only.
+const MAP_IDS: Readonly<Record<string, string | undefined>> = {
   "Shape@StandardTableau": "Mp00083",
   "Shape@SemistandardTableau": "Mp00077",
   "Shape@SetPartition": "Mp00079",
   "Transpose@StandardTableau": "Mp00084",
+  "Shape@PlanePartition": undefined,
+  "Transpose@PlanePartition": "Mp00177",
 };
 const TARGET: Readonly<Record<string, string>> = {
   integer_partition: "IntegerPartition",
   standard_tableau: "StandardTableau",
+  plane_partition: "PlanePartition",
 };
 
 test("a head row answers as its map does, and as FindStat's samples", () => {
@@ -98,9 +102,10 @@ test("a head row answers as its map does, and as FindStat's samples", () => {
     Object.keys(MAP_IDS).toSorted(),
   );
   for (const row of HEAD_ROWS) {
-    const id = MAP_IDS[`${row.head}@${row.carrier}`]!;
-    const samples = maps.items[id]?.sample ?? [];
-    expect(samples.length, id).toBeGreaterThan(3);
+    const id = MAP_IDS[`${row.head}@${row.carrier}`];
+    const samples: readonly (readonly [string, string])[] =
+      id === undefined ? [["[[2,1],[1]]", "[2,1]"]] : (maps.items[id]?.sample ?? []);
+    if (id !== undefined) expect(samples.length, id).toBeGreaterThan(3);
     for (const [from, to] of samples) {
       const subject = readObject(row.carrier, from);
       const expected = readObject(TARGET[row.returns]!, to);

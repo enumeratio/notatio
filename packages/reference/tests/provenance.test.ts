@@ -953,6 +953,8 @@ const NOVEL = [
   "TouchPointCount",
   "Tournaments",
   "TransposePartition",
+  "TransposePlanePartition",
+  "PlanePartitionShape",
   "TriCompositions",
   "TriStrings",
   "TriangularCompositions",

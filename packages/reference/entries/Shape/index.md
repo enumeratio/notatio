@@ -19,9 +19,10 @@ signatures:
   - call: Shape(value) -> tuple
     description: Return the shape tuple of an expression.
     library: enumeratio-combinatorics
-    type: ((semistandard_tableau) -> integer_partition) & ((set_partition) -> integer_partition) & ((standard_tableau) -> integer_partition)
+    type: ((plane_partition) -> integer_partition) & ((semistandard_tableau) -> integer_partition) & ((set_partition) -> integer_partition) & ((standard_tableau) -> integer_partition)
     overrides: enumeratio-evaluation
     on:
+      - PlanePartition
       - SemistandardTableau
       - SetPartition
       - StandardTableau
@@ -29,6 +30,7 @@ names:
   wolfram: Dimensions
 stub: engine
 mapOn:
+  - PlanePartition
   - SemistandardTableau
   - SetPartition
   - StandardTableau
