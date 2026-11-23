@@ -39,8 +39,9 @@ export const PARTITIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "TotalPartition",
+    readable: true,
     type: "total_partition",
-    shape: "list<integer>",
+    shape: "integer | list<any>",
     id: "total_partition",
     plural: "TotalPartitions",
   },

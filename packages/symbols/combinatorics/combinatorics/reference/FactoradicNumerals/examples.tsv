@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-3-digits	Basic		[FactoradicNumerals, 3]	[List, [FactoradicNumeral, [List, 1, 0, 0]], [FactoradicNumeral, [List, 1, 1, 0]], [FactoradicNumeral, [List, 2, 0, 0]], [FactoradicNumeral, [List, 2, 1, 0]]]	the values 2 to 5, in order
+count-5-digits	Basic		[Count, [FactoradicNumerals, 5]]	96	$5! - 4!$, the values 24 to 119
+six	Properties		[Element, [FactoradicNumeral, [List, 1, 0, 0, 0]], [FactoradicNumerals, 4]]	True	6 is written $1000$ in 4 digits
+zero	Properties		[FactoradicNumerals, 1]	[List, [FactoradicNumeral, [List, 0]]]	the numeral 0 is the one numeral of 1 digit
+leading-zero	Properties		[Element, [FactoradicNumeral, [List, 0, 1, 0]], [FactoradicNumerals, 3]]	False	a numeral has no leading 0 (that is 1, in 2 digits)
+digit-too-large	Properties		[Element, [FactoradicNumeral, [List, 3, 0, 0]], [FactoradicNumerals, 3]]	False	the digit at place 2 is at most 2

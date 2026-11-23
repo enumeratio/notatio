@@ -12,6 +12,8 @@ import { arrangements, evenPermutations, lehmerCodes, subexcedantSeqs } from "./
 import { kCyclePermutations } from "./core.ts";
 import { permutationsAsCycles } from "./cycles.ts";
 import { decoratedPermutations } from "./decorated-permutations.ts";
+import { affinePermutations } from "./affine-permutations.ts";
+import { factoradicNumerals } from "./factoradic-numerals.ts";
 import { rookPlacements } from "./rook-placements.ts";
 import {
   alternatingPermutations,
@@ -123,6 +125,8 @@ export const entries: (NumberKernel | EpsilFamily)[] = [
   subexcedantSeqs,
   decoratedPermutations,
   rookPlacements,
+  factoradicNumerals,
+  affinePermutations,
   alternatingPermutations,
   connectedPermutations,
   kCyclePermutations,

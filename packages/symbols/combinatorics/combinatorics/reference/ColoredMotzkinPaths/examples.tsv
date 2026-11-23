@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-length-2	Basic		[ColoredMotzkinPaths, 2]	[List, [ColoredMotzkinPath, [List, 1, -1]], [ColoredMotzkinPath, [List, 0, 0]], [ColoredMotzkinPath, [List, 0, 2]], [ColoredMotzkinPath, [List, 2, 0]], [ColoredMotzkinPath, [List, 2, 2]]]	one up-down pair, or two level steps of either color
+count-4	Basic		[Count, [ColoredMotzkinPaths, 4]]	42	$C_5$, A000108
+count-7	Basic		[Count, [ColoredMotzkinPaths, 7]]	1430	$C_8$
+empty	Properties		[Count, [ColoredMotzkinPaths, 0]]	1	the empty path
+a-member	Properties		[Element, [ColoredMotzkinPath, [List, 1, 2, -1]], [ColoredMotzkinPaths, 3]]	True	
+third-color	Properties		[Element, [ColoredMotzkinPath, [List, 1, 3, -1]], [ColoredMotzkinPaths, 3]]	False	only 0 and 2 are level steps

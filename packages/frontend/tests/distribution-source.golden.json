@@ -34,7 +34,11 @@
       "maxSize": 6
     },
     "CollatzTrajectory": null,
-    "ColoredMotzkinPath": null,
+    "ColoredMotzkinPath": {
+      "collection": "ColoredMotzkinPaths",
+      "template": "ColoredMotzkinPaths({size})",
+      "maxSize": 6
+    },
     "ColoredPermutation": null,
     "ContinuedFraction": null,
     "CorePartition": null,
@@ -53,7 +57,11 @@
       "template": "DelannoyPaths({size})",
       "maxSize": 6
     },
-    "Dissection": null,
+    "Dissection": {
+      "collection": "Dissections",
+      "template": "Dissections({size})",
+      "maxSize": 6
+    },
     "DyckPath": {
       "collection": "DyckPaths",
       "template": "DyckPaths({size})",
@@ -65,7 +73,11 @@
       "template": "Endofunctions({size})",
       "maxSize": 6
     },
-    "FactoradicNumeral": null,
+    "FactoradicNumeral": {
+      "collection": "FactoradicNumerals",
+      "template": "FactoradicNumerals({size})",
+      "maxSize": 6
+    },
     "Finset": {
       "collection": "Subsets",
       "template": "Subsets({size})",
@@ -275,7 +287,11 @@
       "maxSize": 6
     },
     "Text": null,
-    "TotalPartition": null,
+    "TotalPartition": {
+      "collection": "TotalPartitions",
+      "template": "TotalPartitions({size})",
+      "maxSize": 6
+    },
     "Tournament": {
       "collection": "Tournaments",
       "template": "Tournaments({size})",

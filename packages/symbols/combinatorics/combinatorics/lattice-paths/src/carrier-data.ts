@@ -7,8 +7,9 @@ import type { Carrier } from "@notatio/structures";
 export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   {
     name: "ColoredMotzkinPath",
+    readable: true,
     type: "colored_motzkin_path",
-    shape: "tuple<list<integer>, list<integer>>",
+    shape: "list<integer>",
     id: "colored_motzkin_path",
     plural: "ColoredMotzkinPaths",
   },
@@ -38,6 +39,7 @@ export const LATTICE_PATHS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "KMotzkinPath",
+    readable: true,
     type: "k_motzkin_path",
     shape: "list<integer>",
     id: "k_motzkin_path",

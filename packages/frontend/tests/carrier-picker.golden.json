@@ -78,7 +78,13 @@
   },
   "ColoredMotzkinPath": {
     "carrier": "ColoredMotzkinPath",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "ColoredMotzkinPaths",
+    "template": "ColoredMotzkinPaths({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "ColoredPermutation": {
     "carrier": "ColoredPermutation",
@@ -125,7 +131,13 @@
   },
   "Dissection": {
     "carrier": "Dissection",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "Dissections",
+    "template": "Dissections({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "DyckPath": {
     "carrier": "DyckPath",
@@ -154,7 +166,13 @@
   },
   "FactoradicNumeral": {
     "carrier": "FactoradicNumeral",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "FactoradicNumerals",
+    "template": "FactoradicNumerals({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "Finset": {
     "carrier": "Finset",
@@ -638,7 +656,13 @@
   },
   "TotalPartition": {
     "carrier": "TotalPartition",
-    "reason": "no collection of sized elements on this carrier"
+    "collection": "TotalPartitions",
+    "template": "TotalPartitions({size})",
+    "size": {
+      "min": 1,
+      "max": 6,
+      "start": 4
+    }
   },
   "Tournament": {
     "carrier": "Tournament",

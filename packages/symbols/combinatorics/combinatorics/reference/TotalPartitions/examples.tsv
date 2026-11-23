@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-3	Basic		[TotalPartitions, 3]	[List, [TotalPartition, [List, 0, 0, 0]], [TotalPartition, [List, 0, [List, 0, 0]]], [TotalPartition, [List, [List, 0, 0], 0]]]	$(a\,b\,c)$, $(a\,(b\,c))$, $((a\,b)\,c)$
+count-5	Basic		[Count, [TotalPartitions, 5]]	45	A001003(4)
+count-6	Basic		[Count, [TotalPartitions, 6]]	197	
+one-item	Properties		[TotalPartitions, 1]	[List, [TotalPartition, 0]]	a single item is not bracketed
+a-member	Properties		[Element, [TotalPartition, [List, [List, 0, 0], 0]], [TotalPartitions, 3]]	True	
+one-item-bracket	Properties		[Element, [TotalPartition, [List, [List, 0], 0]], [TotalPartitions, 2]]	False	a bracket holds two or more items

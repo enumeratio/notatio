@@ -1,0 +1,7 @@
+id	section	role	expr	expected	caption
+all-length-3-one-up	Basic		[KMotzkinPaths, 3, 1]	[List, [KMotzkinPath, [List, 1, 0, -1]], [KMotzkinPath, [List, 1, -1, 0]], [KMotzkinPath, [List, 0, 1, -1]]]	one up step with a level step anywhere else
+count-4-1	Basic		[Count, [KMotzkinPaths, 4, 1]]	6	$\binom{4}{2} C_1$, row 4 of A055151
+count-6-2	Basic		[Count, [KMotzkinPaths, 6, 2]]	30	$\binom{6}{4} C_2$
+no-ups	Properties		[Count, [KMotzkinPaths, 5, 0]]	1	only level steps
+a-member	Properties		[Element, [KMotzkinPath, [List, 1, 0, -1]], [KMotzkinPaths, 3, 1]]	True	
+wrong-ups	Properties		[Element, [KMotzkinPath, [List, 1, -1, 1, -1]], [KMotzkinPaths, 4, 1]]	False	two steps up
