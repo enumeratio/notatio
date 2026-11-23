@@ -876,6 +876,7 @@ compile-maps	ClockwiseTriangulationRotation@dyck_path	8f17845d2581c7fa80f7a7a5	a
 compile-maps	CodeComposition@binary_word	0b26af97ff518935a7019878	f782bb6a345d1f04b0eb614a	agrees	2.99
 compile-maps	CodeWord@composition	dac8fc3b5fda3573b8e329a0	949355dda8bf2c1b10a76747	agrees	0.18
 compile-maps	Complement@binary_word	f3663e6b25c18ca4125f4f88	c5ef2989deaf961e71abadb0	agrees	0.3
+compile-maps	Complement@composition	bea086faa05f17ad39493ce3	2c1dc29d0a7f14f12595d5d1	agrees	0.85
 compile-maps	Complement@parking_function	239050efa25a1da9f2786d8f	f829d439be39b2c49d062108	agrees	1.77
 compile-maps	Complement@permutation	6c5fd36b81ca979d11813483	b20c5bfa580c75ccb37a34f6	agrees	0.61
 compile-maps	Complement@set_composition	8c5f46f8427beecef66905d7	e922ce888da131c3ad600b0a	agrees	0.39
@@ -893,6 +894,7 @@ compile-maps	CoriLeBorgne@dyck_path	47bebed6d317ca2b9b5549e2	46291e4065a66ae92f5
 compile-maps	CounterclockwiseRotation@alternating_sign_matrix	ba5d9281b18162e6da142293	b2b3380b12cb7d49cac326d5	agrees	0.84
 compile-maps	CounterclockwiseTriangulationRotation@dyck_path	7366261540acac3fb3e90831	79cdd26e816b4976b705497e	agrees	1.17
 compile-maps	CutOutPartition@dyck_path	7681db2cbfaa83b3f939d587	8774fca79089a77f3e185035	agrees	1.45
+compile-maps	CutWord@composition	a70107210cd0d03b4a5c3a3e	8dd07eb99c33e107748d6f52	agrees	0.34
 compile-maps	CycleAsOneLineNotation@permutation	6f580d90b482a57acfa81650	02317f115aa56ab35d90f587	agrees	26.82
 compile-maps	CycleDecomposition@permutation	f95942af3155ade6a94857d7	a0bf9b61d8e600915c59aa3d	agrees	18.47
 compile-maps	CyclePartition@permutation	a3c22e0baedd47a86e3dbf23	3daccc8aea4a56cd7180a7b9	agrees	5.28
@@ -1108,6 +1110,7 @@ compile-maps	ToricPromotion@permutation	588fa432271ab5a7cb321ebb	54ec7062b33d272
 compile-maps	TouchComposition@dyck_path	e607c900d9922b4f2dc42a2c	c722873be4fc9650f54b221f	agrees	2.96
 compile-maps	TouchComposition@parking_function	6bcc2f86934f9798b5ba1485	a4eeb8f5fe5e922a949fd8b0	agrees	1.29
 compile-maps	TransposeAlternatingSignMatrix@alternating_sign_matrix	41a1f1877ab7b9b56b007142	fce8fa3eb26fb9c88a3d92f4	agrees	0.56
+compile-maps	TransposeComposition@composition (composition)	f23567e956d056240edad77c	d6fc0135b5de94c0aa4f9b9e	agrees	0.89
 compile-maps	TransposePartition@core_partition	82f8211684cdecf619d8d51e	e4b958c537fb034cb6a817f6	agrees	0.2
 compile-maps	TransposePartition@integer_partition	33f5c629f99e104fe1b8b963	5a37441b0af07fa0f1dc6516	agrees	0.53
 compile-maps	TransposeSkewPartition@skew_partition	a88769c5e16f7d797e8d1952	94d65846347cc61f84e02bbb	agrees	0.14

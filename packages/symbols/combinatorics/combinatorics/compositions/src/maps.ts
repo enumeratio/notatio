@@ -33,6 +33,11 @@ const partialSums = (parts: MathJSON): MathJSON => [
   ["Range", 1, ["Length", parts], 1],
 ];
 
+/** `body` with `sums`, the partial sums of `parts`, bound as a typed list: an untyped fold leaves the list's elements
+ *  unknown, so `Element(x, sums)` declines to compile. */
+const withPartialSums = (parts: MathJSON, body: MathJSON): MathJSON =>
+  bind("sums", partialSums(parts), body, "list<integer>");
+
 /** A composition's size, n: the sum of its parts. */
 const sizeOf = (parts: MathJSON): MathJSON => [
   "Fold",
@@ -45,16 +50,14 @@ const sizeOf = (parts: MathJSON): MathJSON => [
  *  after position n - j. `BinaryWords(n - 1)` through `IntegerComposition(word)` lists compositions in
  *  the order of these words, which is not `IntegerCompositions`' lex order. */
 const cutWordOf = (parts: MathJSON): MathJSON =>
-  // `bind` spreads a list across the function's parameters, so the partial sums are inlined.
   bind("cn", sizeOf(parts), [
     "If",
     // n = 1: the empty word, and no range to walk.
     ["Less", "cn", 2],
     ["List"],
-    forEach(
-      ["Range", 1, ["Subtract", "cn", 1], 1],
-      ["If", ["Element", ["Subtract", "cn", "j"], partialSums(parts)], 1, 0],
-      "j",
+    withPartialSums(
+      parts,
+      forEach(["Range", 1, ["Subtract", "cn", 1], 1], ["If", ["Element", ["Subtract", "cn", "j"], "sums"], 1, 0], "j"),
     ),
   ]);
 
@@ -67,16 +70,12 @@ const complementOf = (parts: MathJSON): MathJSON =>
     parts,
     bind(
       "bounds",
-      [
+      withPartialSums(parts, [
         "Join",
         ["List", 0],
-        [
-          "Filter",
-          ["Range", 1, ["Subtract", "cn", 1], 1],
-          ["Function", ["Not", ["Element", "k", partialSums(parts)]], "k"],
-        ],
+        ["Filter", ["Range", 1, ["Subtract", "cn", 1], 1], ["Function", ["Not", ["Element", "k", "sums"]], "k"]],
         ["List", "cn"],
-      ],
+      ]),
       forEach(
         ["Range", 1, ["Subtract", ["Length", "bounds"], 1], 1],
         ["Subtract", at(["Add", "q", 1], "bounds"), at("q", "bounds")],
