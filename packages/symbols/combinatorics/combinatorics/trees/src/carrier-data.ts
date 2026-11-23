@@ -24,6 +24,7 @@ export const TREES_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "Dissection",
+    readable: true,
     type: "dissection",
     shape: "tuple<list<integer>, integer>",
     id: "dissection",

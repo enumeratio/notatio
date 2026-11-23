@@ -7,7 +7,12 @@ import { bareEngine } from "@notatio/engine/testing";
 import { expect, test } from "vite-plus/test";
 import { epsilKernelOn } from "../collections/src/families/epsil.ts";
 import { dyckPaths } from "../lattice-paths/src/families/core.ts";
+import { kMotzkinPaths, coloredMotzkinPaths } from "../lattice-paths/src/families/motzkin-variants.ts";
 import { kDyckPaths, rationalDyckPaths } from "../lattice-paths/src/families/slope-paths.ts";
+import { dissections } from "../trees/src/families/dissections.ts";
+import { totalPartitions } from "../trees/src/families/total-partitions.ts";
+import { affinePermutations } from "../permutations/src/families/affine-permutations.ts";
+import { factoradicNumerals } from "../permutations/src/families/factoradic-numerals.ts";
 import { orderedFactorizations } from "../compositions/src/families/ordered-factorizations.ts";
 import { multiplicativePartitions } from "../partitions/src/families/multiplicative-partitions.ts";
 import { decoratedPermutations } from "../permutations/src/families/decorated-permutations.ts";
@@ -277,4 +282,273 @@ test("Factorization membership: near misses are not members", () => {
   expect(multiplicative.valid([], [0])).toBe(false);
   expect(multiplicative.valid([2, 3], [6])).toBe(false); // not nonincreasing
   expect(ordered.valid([2, 3], [6])).toBe(true);
+});
+
+/** The numbers of the Motzkin triangle, A055151, by length n and steps up k. */
+const motzkinTriangle: readonly (readonly number[])[] = [
+  [1],
+  [1],
+  [1, 1],
+  [1, 3],
+  [1, 6, 2],
+  [1, 10, 10],
+  [1, 15, 30, 5],
+  [1, 21, 70, 35],
+];
+
+/** The Motzkin words of `length` over `alphabet` (up 1 first, then the levels, then down −1) that
+ *  never go below 0 and end at 0, in the order of the alphabet. */
+const motzkinWords = (length: number, alphabet: readonly number[]): number[][] =>
+  words(length, alphabet).filter((w) => {
+    let y = 0;
+    for (const t of w) {
+      y += t === 1 ? 1 : t === -1 ? -1 : 0;
+      if (y < 0) return false;
+    }
+    return y === 0;
+  });
+
+test("KMotzkinPaths(n, k): Motzkin paths of length n with k steps up, the Motzkin triangle", () => {
+  for (let n = 0; n <= 7; n++) {
+    const all = motzkinWords(n, [1, 0, -1]);
+    for (let k = 0; k <= Math.floor(n / 2) + 1; k++) {
+      const expected = all.filter((w) => w.filter((t) => t === 1).length === k);
+      expect(expected.length).toBe(motzkinTriangle[n]![k] ?? 0);
+      if (n <= 6) holds(kMotzkinPaths, [n, k], expected);
+      else expect(kernel(kMotzkinPaths).count([n, k])).toBe(BigInt(expected.length));
+    }
+  }
+});
+
+test("KMotzkinPaths membership: wrong number of ups, below the ground, not closed", () => {
+  const k = kernel(kMotzkinPaths);
+  const want = new Set(
+    motzkinWords(5, [1, 0, -1])
+      .filter((w) => w.filter((t) => t === 1).length === 1)
+      .map(String),
+  );
+  for (const w of words(5, [1, 0, -1, 2])) expect(k.valid(w, [5, 1])).toBe(want.has(String(w)));
+});
+
+test("ColoredMotzkinPaths(n): level steps in two colors, the Catalan numbers C(n + 1)", () => {
+  const catalan = [1, 1, 2, 5, 14, 42, 132, 429, 1430];
+  for (let n = 0; n <= 6; n++) {
+    const expected = motzkinWords(n, [1, 0, 2, -1]);
+    expect(expected.length).toBe(catalan[n + 1]);
+    holds(coloredMotzkinPaths, [n], expected);
+  }
+  expect([7, 8].map((n) => Number(kernel(coloredMotzkinPaths).count([n])))).toEqual([1430, 4862]);
+});
+
+test("ColoredMotzkinPaths membership: a third color or a bad path is no member", () => {
+  const k = kernel(coloredMotzkinPaths);
+  const want = new Set(motzkinWords(4, [1, 0, 2, -1]).map(String));
+  for (const w of words(4, [1, 0, 2, -1, 3])) expect(k.valid(w, [4])).toBe(want.has(String(w)));
+});
+
+/** The factoradic numerals of n digits as `factoradic()` writes them: the digit at place k at most k,
+ *  no leading 0 but for the numeral 0, in order of value. */
+function factoradics(n: number): number[][] {
+  if (n === 0) return [];
+  const all = words(n, [...Array(n).keys()]).filter((w) => w.every((d, j) => d <= n - 1 - j));
+  return all.filter((w) => n === 1 || w[0] !== 0);
+}
+
+test("FactoradicNumerals(n): the numerals of n digits, n! - (n - 1)! of them from 2 digits", () => {
+  const factorial = (k: number): number => (k <= 1 ? 1 : k * factorial(k - 1));
+  for (let n = 0; n <= 5; n++) {
+    const expected = factoradics(n);
+    expect(expected.length).toBe(n === 0 ? 0 : n === 1 ? 1 : factorial(n) - factorial(n - 1));
+    // In the order of their values, which they read as in factoradic().
+    const values = expected.map((w) => w.reduce((v, d, j) => v + d * factorial(n - 1 - j), 0));
+    expect(values).toEqual(values.toSorted((a, b) => a - b));
+    if (n >= 1) holds(factoradicNumerals, [n], expected);
+    else expect(kernel(factoradicNumerals).count([0])).toBe(0n);
+  }
+  // 6 is written 1000: the four digits with value 6.
+  expect(kernel(factoradicNumerals).rank([1, 0, 0, 0], [4])).toBe(BigInt(6 - 6));
+  expect(kernel(factoradicNumerals).unrank([4], 0n)).toEqual([1, 0, 0, 0]);
+});
+
+test("FactoradicNumerals membership: a digit too large, a leading 0, the wrong length", () => {
+  const k = kernel(factoradicNumerals);
+  const want = new Set(factoradics(4).map(String));
+  for (const w of words(4, [0, 1, 2, 3, 4])) expect(k.valid(w, [4])).toBe(want.has(String(w)));
+  expect(k.valid([0], [1])).toBe(true);
+  expect(k.valid([0, 0], [2])).toBe(false);
+  expect(k.valid([1, 0, 0], [4])).toBe(false);
+});
+
+type Nested = 0 | Nested[];
+
+/** The bracketings of m leaves, in the order the families state: a bracket is a first item (a leaf or
+ *  a bracket, by size) then the rest of its items, the first item's size ascending. */
+function bracketings(m: number): Nested[] {
+  const item = (size: number): Nested[] => (size === 1 ? [0] : bracket(size));
+  const sequence = (size: number): Nested[][] =>
+    Array.from({ length: size }, (_, i) => i + 1).flatMap((h) =>
+      item(h).flatMap((first) => (h === size ? [[first]] : sequence(size - h).map((rest) => [first, ...rest]))),
+    );
+  const bracket = (size: number): Nested[] =>
+    Array.from({ length: size - 1 }, (_, i) => i + 1).flatMap((h) =>
+      item(h).flatMap((first) => sequence(size - h).map((rest) => [first, ...rest] as Nested)),
+    );
+  return m === 1 ? [0] : bracket(m);
+}
+
+/** The chords (a, b + 1) of the brackets over leaves a..b but the whole, in preorder. */
+function chordsOf(tree: Nested, leaves: number): number[] {
+  const out: number[] = [];
+  let seen = 0;
+  const walk = (t: Nested, isRoot: boolean): void => {
+    if (t === 0) {
+      seen++;
+      return;
+    }
+    const slot = out.length;
+    if (!isRoot) out.push(seen + 1, 0);
+    for (const child of t) walk(child, false);
+    if (!isRoot) out[slot + 1] = seen + 1;
+  };
+  walk(tree, true);
+  expect(seen).toBe(leaves);
+  return out;
+}
+
+/** The non-crossing sets of diagonals of the polygon with `sides` vertices, as sorted flat lists. */
+function dissectionSets(sides: number): number[][] {
+  const diagonals: [number, number][] = [];
+  for (let i = 1; i <= sides; i++)
+    for (let j = i + 2; j <= sides; j++) if (!(i === 1 && j === sides)) diagonals.push([i, j]);
+  const cross = ([a, b]: [number, number], [c, d]: [number, number]) =>
+    (a < c && c < b && b < d) || (c < a && a < d && d < b);
+  const out: number[][] = [];
+  for (let mask = 0; mask < 1 << diagonals.length; mask++) {
+    const chosen = diagonals.filter((_, k) => (mask >> k) & 1);
+    if (chosen.some((u, a) => chosen.some((v, c) => c > a && cross(u, v)))) continue;
+    chosen.sort((u, v) => u[0] - v[0] || v[1] - u[1]);
+    out.push(chosen.flat());
+  }
+  return out;
+}
+
+test("Dissections(n): the non-crossing diagonal sets of the (n + 2)-gon, A001003", () => {
+  const little = [1, 1, 3, 11, 45, 197, 903];
+  for (let n = 0; n <= 5; n++) {
+    const sets = dissectionSets(n + 2);
+    expect(sets.length).toBe(little[n]);
+    const k = kernel(dissections);
+    expect(k.count([n])).toBe(BigInt(sets.length));
+    const listed = Array.from({ length: sets.length }, (_, r) => k.unrank([n], BigInt(r)) as number[]);
+    expect(new Set(listed.map(String))).toEqual(new Set(sets.map(String)));
+    listed.forEach((element, r) => {
+      expect(k.rank(element, [n])).toBe(BigInt(r));
+      expect(k.valid(element, [n])).toBe(true);
+    });
+  }
+  expect([6, 7].map((n) => Number(kernel(dissections).count([n])))).toEqual([903, 4279]);
+});
+
+test("Dissections membership: crossing, out of order, a side or the whole are no members", () => {
+  const k = kernel(dissections);
+  expect(k.valid([1, 3, 2, 4], [2])).toBe(false); // crossing
+  expect(k.valid([1, 4], [2])).toBe(false); // the whole
+  expect(k.valid([1, 3], [3])).toBe(true);
+  expect(k.valid([1, 4, 1, 3], [3])).toBe(true);
+  expect(k.valid([1, 3, 1, 4], [3])).toBe(false);
+  expect(k.valid([1, 2], [3])).toBe(false); // a side
+  expect(k.valid([1, 5], [3])).toBe(false); // the whole
+  expect(k.valid([1, 3, 1, 3], [3])).toBe(false);
+  expect(k.valid([1], [3])).toBe(false);
+});
+
+test("TotalPartitions(n): the bracketings of n leaves, and Dissections(n - 1) by their chords", () => {
+  const little = [1, 1, 3, 11, 45, 197];
+  for (let n = 1; n <= 4; n++) {
+    const expected = bracketings(n);
+    expect(expected.length).toBe(little[n - 1]);
+    const k = kernel(totalPartitions);
+    const d = kernel(dissections);
+    expect(k.count([n])).toBe(BigInt(expected.length));
+    expected.forEach((element, r) => {
+      expect(k.unrank([n], BigInt(r))).toEqual(element);
+      expect(k.rank(element, [n])).toBe(BigInt(r));
+      expect(k.valid(element, [n])).toBe(true);
+      // The same order lists the dissections of the (n + 1)-gon.
+      expect(d.unrank([n - 1], BigInt(r))).toEqual(chordsOf(element, n));
+    });
+  }
+  // The larger fibers are slow to interpret: a spread of them.
+  for (const [n, total, ranks] of [
+    [5, 45, [0, 13, 44]],
+    [6, 197, [0, 1, 98, 196]],
+  ] as const) {
+    const all = bracketings(n);
+    expect(all.length).toBe(total);
+    for (const r of ranks) {
+      expect(kernel(totalPartitions).unrank([n], BigInt(r))).toEqual(all[r]);
+      expect(kernel(totalPartitions).rank(all[r], [n])).toBe(BigInt(r));
+    }
+  }
+});
+
+test("TotalPartitions membership: a bracket of one item, the wrong leaves, another size", () => {
+  const k = kernel(totalPartitions);
+  expect(k.valid([0, 0, 0], [3])).toBe(true);
+  expect(k.valid([[0, 0], 0], [3])).toBe(true);
+  expect(k.valid([[0, 0]], [3])).toBe(false);
+  expect(k.valid([[0], 0, 0], [3])).toBe(false);
+  expect(k.valid([0, 0], [3])).toBe(false);
+  expect(k.valid([0, [0, 0, 0]], [3])).toBe(false);
+  expect(k.valid([0, 1, 0], [3])).toBe(false);
+  expect(k.valid(0, [1])).toBe(true);
+  expect(k.valid([0, 0], [1])).toBe(false);
+  expect(k.valid(0, [2])).toBe(false);
+});
+
+/** The windows [w(1), …, w(n)] of the affine permutations of period n with |w(i) - i| ≤ r: distinct
+ *  residues mod n, sum n(n + 1)/2, in lex order. */
+function affineWindows(n: number, r: number, slack = 0): number[][] {
+  const mod = (a: number): number => ((a % n) + n) % n;
+  const all = (i: number): number[][] =>
+    i > n
+      ? [[]]
+      : Array.from({ length: 2 * (r + slack) + 1 }, (_, k) => i - r - slack + k).flatMap((w) =>
+          all(i + 1).map((rest) => [w, ...rest]),
+        );
+  return all(1).filter(
+    (w) =>
+      new Set(w.map(mod)).size === n &&
+      w.reduce((s, v) => s + v, 0) === (n * (n + 1)) / 2 &&
+      w.every((v, j) => Math.abs(v - (j + 1)) <= r),
+  );
+}
+
+test("AffinePermutations(n, r): windows of period n within radius r, by brute force", () => {
+  const counts: Record<string, number> = {};
+  for (let n = 1; n <= 4; n++)
+    for (let r = 0; r <= (n <= 3 ? 3 : 2); r++) {
+      const expected = affineWindows(n, r);
+      counts[`${n},${r}`] = expected.length;
+      holds(affinePermutations, [n, r], expected);
+    }
+  // The identity alone at radius 0; for n = 2 the windows (1 + a, 2 - a), 2r + 1 of them.
+  expect(counts["3,0"]).toBe(1);
+  expect([0, 1, 2, 3].map((r) => counts[`2,${r}`])).toEqual([1, 3, 5, 7]);
+  expect([0, 1, 2, 3].map((r) => counts[`1,${r}`])).toEqual([1, 1, 1, 1]);
+  // Radius n - 1 holds the finite symmetric group among them.
+  expect(counts["3,2"]).toBeGreaterThanOrEqual(6);
+});
+
+test("AffinePermutations membership: near misses are not members", () => {
+  const k = kernel(affinePermutations);
+  const want = new Set(affineWindows(3, 1).map(String));
+  for (const w of affineWindows(3, 2, 0)
+    .concat(affineWindows(3, 1, 1))
+    .concat([
+      [1, 1, 4],
+      [2, 2, 2],
+    ]))
+    expect(k.valid(w, [3, 1])).toBe(want.has(String(w)));
+  expect(k.valid([1, 2], [3, 1])).toBe(false);
 });

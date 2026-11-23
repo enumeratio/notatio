@@ -1,4 +1,8 @@
 {
+  "AffinePermutations": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "AffinePermutations(_n, 2)"
+  },
   "AlternatingPermutations": {
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "AlternatingPermutations(_size)"
@@ -43,6 +47,10 @@
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "CarlitzCompositions(_n)"
   },
+  "ColoredMotzkinPaths": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "ColoredMotzkinPaths(_n)"
+  },
   "CompositionsIntoKParts": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "CompositionsIntoKParts(_n, 2)"
@@ -71,6 +79,10 @@
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "Derangements(_size)"
   },
+  "Dissections": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "Dissections(_n)"
+  },
   "DistinctPartitions": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "DistinctPartitions(_n)"
@@ -90,6 +102,10 @@
   "EvenPermutations": {
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "EvenPermutations(_size)"
+  },
+  "FactoradicNumerals": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "FactoradicNumerals(_n)"
   },
   "FibStrings": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
@@ -150,6 +166,10 @@
   "KLyndonWords": {
     "params": "{{size, 4}, 1, 6, 1, Slider}",
     "value": "KLyndonWords(_size, 2)"
+  },
+  "KMotzkinPaths": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "KMotzkinPaths(_n, 2)"
   },
   "KNecklaces": {
     "params": "{{size, 4}, 1, 6, 1, Slider}",
@@ -374,6 +394,10 @@
   "TetraCompositions": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",
     "value": "TetraCompositions(_n)"
+  },
+  "TotalPartitions": {
+    "params": "{{n, 4}, 1, 6, 1, Slider}",
+    "value": "TotalPartitions(_n)"
   },
   "Tournaments": {
     "params": "{{n, 4}, 1, 6, 1, Slider}",

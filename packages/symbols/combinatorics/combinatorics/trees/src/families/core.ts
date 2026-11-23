@@ -11,7 +11,9 @@ import { catalanExact, fussCatalanExact } from "../../../collections/src/familie
 import type { NumberKernel } from "../../../collections/src/families/types.ts";
 import { binaryTreeParentArrays } from "./binary-tree-parents.ts";
 import { binaryTrees, fullKAryTrees } from "./kary-trees.ts";
+import { dissections } from "./dissections.ts";
 import { orderedTrees } from "./ordered-trees.ts";
+import { totalPartitions } from "./total-partitions.ts";
 import {
   BinaryTreeUnrank,
   BinaryTreeRank,
@@ -53,4 +55,6 @@ export const entries: (NumberKernel | EpsilFamily)[] = [
   { ...binaryTreeParentArrays, fastCount: ([n]) => catalanExact(n) },
   { ...fullKAryTrees, fast: fullKAryTreesFast },
   { ...orderedTrees, fast: orderedTreesFast },
+  dissections,
+  totalPartitions,
 ];

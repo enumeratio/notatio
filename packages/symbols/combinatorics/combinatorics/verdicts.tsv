@@ -193,6 +193,7 @@ compile-exact	YoungLatticeCoveringRelationCount@IntegerPartition	ec5552a2b7ec396
 compile-families	AbundantNumbers	e2d13701164085e95e4d3927	8762bc928527602c13a5c335	agrees	4.9
 compile-families	AchillesNumbers	61684caea02a7c8743e8757b	6fb579d9462d84fd18739cab	agrees	15.67
 compile-families	AdjacentTranspositionInvolutions	e24ad1db68dbda2051a63c5c	17aa1dd74e1bbeb6ff93c33d	agrees	0.49
+compile-families	AffinePermutations	c35f10b716a559ff5fc2ea8c	48a59466ee2f1b2cd5f4e9a4	agrees	26.55
 compile-families	AllOnes	b29b35b6e7689cd292824cc3	55196f63cf651b1547cf970c	agrees	0
 compile-families	AlternatingPermutations	c336c3c797d3c92ea96cb523	4d22cb1f52dfc08b4dc8db09	agrees	1.45
 compile-families	AlternatingSignMatrices	886ca3b1344418b00116782e	d21e56abe73135d936f2b6fd	agrees	2.63
@@ -220,6 +221,7 @@ compile-families	CenteredSquareNumbers	152b2adb09e78a60d7bde435	e7e2d30fcfc3090d
 compile-families	CenteredTriangularNumbers	0dddf87127af03ae274a2748	f95fb730ed3340e208f96865	agrees	0.43
 compile-families	CentralDelannoyNumbers	04c383d512663c7ad75a84df	e3cc002f0fff1b85fd65ff38	agrees	2.32
 compile-families	CograssmannianPermutations	13c3ab36369ebbdd471592a5	be72eb696dc18d7f55b44966	agrees	1.31
+compile-families	ColoredMotzkinPaths	d8e6cb827a373222beccedde	200070016eb483cc417a9547	agrees	1.28
 compile-families	ColoredPermutations	7829e46cbca6a9f5346ea30b	8393fe2e83088e7e2834f9cf	agrees	1.35
 compile-families	CompositionsIntoKParts	ec999a171bfc731266bd64ef	7c7f46cdf3d03af39960169f	agrees	1.02
 compile-families	ConnectedPermutations	8ef735158843758d19f1b535	8504f56ec26ea940578d7f8c	agrees	1.28
@@ -230,6 +232,7 @@ compile-families	DecoratedPermutations	32d0e7e8bd58c87a977eb90e	96d799e6c1125b80
 compile-families	DeficientNumbers	176ad7487cb6d93f796f49b2	8b92d261e5775d53f9b89c30	agrees	3.46
 compile-families	DelannoyPaths	4a439c5635214019c7acb93b	7363fec78883b3c7042048be	agrees	0.72
 compile-families	Derangements	80cdba80f8db1157b7ce166b	cbb6d375d79c3642e497db75	agrees	1.38
+compile-families	Dissections	2bfc80e6f73011bc87367313	555e01878dc15cdc539ae1e6	agrees	4.76
 compile-families	DistinctPartitions	a535502df96bb546c6d4e065	a910c4d836cda7736152fc12	agrees	0.48
 compile-families	DoubleFactorialNumbers	bb2feab8552998ba0e860d48	8e78329ecf9db3240f3814f9	agrees	0.79
 compile-families	DyadicCompositions	370fc8717262146b03868d51	0c80f503a3dafc8eb702a68f	agrees	1.41
@@ -240,6 +243,7 @@ compile-families	Endofunctions	e1636a1252a31e69374b0fd5	d3a0c8c3ddde2eb5f3f91bcc
 compile-families	EvenPermutations	773c64d905caf0f926af5d91	c204d17fcf86bcee4ed0a96a	agrees	0.34
 compile-families	EvenSubsets	0ddc9ce01f7219830a45210d	ae0aab4e567031bcfc71a77c	agrees	0.47
 compile-families	EvilNumbers	c12c10d68fcaac83804cc76a	54fc125545799dbc5cb752da	agrees	2.04
+compile-families	FactoradicNumerals	0fa5952463af6eda90d11354	48c4d716177f50060b9501b5	agrees	0.08
 compile-families	FactorialNumbers	7d55b377b0c2ac2a89f3e6b9	c940c7454c363fc9b01334d1	agrees	0.81
 compile-families	FibStrings	459116a2b8fbe71913e2c572	5063246aab35780150e6e213	agrees	0.16
 compile-families	FibonacciCompositions	321dd2fd1658b14ffbc3ff95	230d8446498af93a9368286e	agrees	0.64
@@ -270,6 +274,7 @@ compile-families	KDescentPermutations	03c1dca51d3895a6ab6aff87	ae91c87ad16dcd6e1
 compile-families	KDyckPaths	7f79fb6dfec612be3324aea3	3765f29dd3f52e08dc20441d	agrees	1.9
 compile-families	KFreeIntegers	eecf085ca30278a34820fb1f	d3b3e85e666bc57d804bfc73	agrees	11.19
 compile-families	KInversionPermutations	ecda59e8cdafcf15f5c488b6	cac5af4fdd8b197f8c782be7	agrees	4.61
+compile-families	KMotzkinPaths	57f1b687b95f73fea38907b9	9276aa6c6f4360a73b679039	agrees	1.7
 compile-families	KPermutations	b3da93e248228f91ae620439	5e974cf73cc09637deeebd51	agrees	1.65
 compile-families	KPermutations (BigInt)	f4723f1f470cbf50b9e93334	5e974cf73cc09637deeebd51	agrees	2.55
 compile-families	KSubsets	429985ae6f9b2976d6f04238	51f60adc1febbdfa28457cf1	agrees	0.88
@@ -398,6 +403,7 @@ compile-families	TernaryGrayCodes	16a8ee3e073c73d835d9487b	8d33e4e48353c07960c72
 compile-families	TetraCompositions	2ca221ca6836835e4b8bb355	1f185db19ffdb6fcdf952f4d	agrees	0.66
 compile-families	TetrahedralNumbers	127cda7df54bb1e90948f933	ad060a59633c6a50f17cc672	agrees	0.44
 compile-families	ThueMorseNumbers	fd1b6ddd967f97fd6a9efb6b	486581f8566b65bf72221b6d	agrees	0.62
+compile-families	TotalPartitions	6d9fbb5363ba5b2d7c6f43b2	090b9d88237c8edfdc9b3171	agrees	3.7
 compile-families	Tournaments	80acf617b7672870a48b60ee	c1d763b55845bf6691c85238	agrees	0.87
 compile-families	TriCompositions	45443a63721d1e867a093985	7a17fac09c5544aadf331b7e	agrees	0.87
 compile-families	TriStrings	ab5bf406e38f71a756769e3b	13abd11ccae7c5ef9d90e745	agrees	0.29

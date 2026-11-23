@@ -1,0 +1,8 @@
+id	section	role	expr	expected	caption
+all-period-2-radius-1	Basic		[AffinePermutations, 2, 1]	[List, [AffinePermutation, [List, 0, 3]], [AffinePermutation, [List, 1, 2]], [AffinePermutation, [List, 2, 1]]]	the windows $[1 + a, 2 - a]$ with $|a| \le 1$
+count-3-1	Basic		[Count, [AffinePermutations, 3, 1]]	4	by brute force over the windows with $|w(i) - i| \le 1$
+count-3-2	Basic		[Count, [AffinePermutations, 3, 2]]	13	
+radius-zero	Properties		[AffinePermutations, 3, 0]	[List, [AffinePermutation, [List, 1, 2, 3]]]	only the identity has radius 0
+a-member	Properties		[Element, [AffinePermutation, [List, 0, 3]], [AffinePermutations, 2, 1]]	True	$|0 - 1| = |3 - 2| = 1$
+too-far	Properties		[Element, [AffinePermutation, [List, -1, 4]], [AffinePermutations, 2, 1]]	False	radius 2
+not-a-bijection	Properties		[Element, [AffinePermutation, [List, 1, 3]], [AffinePermutations, 2, 1]]	False	the entries 1 and 3 have the same residue mod 2

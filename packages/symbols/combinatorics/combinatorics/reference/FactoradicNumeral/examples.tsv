@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+six	Basic		[FactoradicNumeral, [List, 1, 0, 0, 0]]	[FactoradicNumeral, [List, 1, 0, 0, 0]]	The digits $1, 0, 0, 0$ read $1 \cdot 3! = 6$
+constructor-example		test	[FactoradicNumeral, [List, 2, 1, 0]]	[FactoradicNumeral, [List, 2, 1, 0]]	The constructor on $2 \cdot 2! + 1 \cdot 1! = 5$

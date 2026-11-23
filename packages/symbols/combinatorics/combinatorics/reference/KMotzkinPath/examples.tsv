@@ -1,0 +1,3 @@
+id	section	role	expr	expected	caption
+up-along-down	Basic		[KMotzkinPath, [List, 1, 0, -1]]	[KMotzkinPath, [List, 1, 0, -1]]	One step up, so $k = 1$
+constructor-example		test	[KMotzkinPath, [List, 0, 1, -1, 0]]	[KMotzkinPath, [List, 0, 1, -1, 0]]	The constructor

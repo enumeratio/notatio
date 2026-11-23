@@ -7,6 +7,7 @@ import type { Carrier } from "@notatio/structures";
 export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   {
     name: "AffinePermutation",
+    readable: true,
     type: "affine_permutation",
     shape: "list<integer>",
     id: "affine_permutation",
@@ -45,6 +46,7 @@ export const PERMUTATIONS_CARRIERS: readonly Carrier[] = [
   },
   {
     name: "FactoradicNumeral",
+    readable: true,
     type: "factoradic_numeral",
     shape: "list<integer>",
     id: "factoradic_numeral",

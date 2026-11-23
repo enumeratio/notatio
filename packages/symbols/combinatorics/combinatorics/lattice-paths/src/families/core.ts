@@ -12,6 +12,7 @@
 import type { EpsilFamily, FastKernel } from "../../../collections/src/families/epsil.ts";
 import { motzkinExact, schroederExact } from "../../../collections/src/families/exact-recurrences.ts";
 import { equal, iff, less, lets, mul, quotient, sub } from "../../../collections/src/families/tables.ts";
+import { entries as motzkinVariantEntries } from "./motzkin-variants.ts";
 import { entries as slopeEntries } from "./slope-paths.ts";
 import { completionsOf, completionsTable, type Step, walkFamily } from "./walks.ts";
 
@@ -88,4 +89,4 @@ export const schroederPaths = tableWalk(
   [[24], [28]],
 );
 
-export const entries = [dyckPaths, motzkinPaths, schroederPaths, ...slopeEntries];
+export const entries = [dyckPaths, motzkinPaths, schroederPaths, ...slopeEntries, ...motzkinVariantEntries];

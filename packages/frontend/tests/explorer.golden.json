@@ -18,7 +18,19 @@
     "derived": false,
     "statistics": 353
   },
-  "AffinePermutations": null,
+  "AffinePermutations": {
+    "expr": "AffinePermutations(4, 2)",
+    "template": "AffinePermutations({size}, 2)",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "AllOnes": {
     "expr": "Take(AllOnes, 20)",
     "columns": [],
@@ -281,7 +293,19 @@
   },
   "CollatzTrajectories": null,
   "Collections": null,
-  "ColoredMotzkinPaths": null,
+  "ColoredMotzkinPaths": {
+    "expr": "ColoredMotzkinPaths(4)",
+    "template": "ColoredMotzkinPaths({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "CompositionsIntoKParts": {
     "expr": "CompositionsIntoKParts(4, 2)",
     "template": "CompositionsIntoKParts({size}, 2)",
@@ -401,7 +425,19 @@
     "derived": true,
     "statistics": 353
   },
-  "Dissections": null,
+  "Dissections": {
+    "expr": "Dissections(4)",
+    "template": "Dissections({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "DistinctPartitions": {
     "expr": "DistinctPartitions(4)",
     "template": "DistinctPartitions({size})",
@@ -497,7 +533,19 @@
     "derived": false,
     "statistics": 3
   },
-  "FactoradicNumerals": null,
+  "FactoradicNumerals": {
+    "expr": "FactoradicNumerals(4)",
+    "template": "FactoradicNumerals({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "FactorialNumbers": {
     "expr": "Take(FactorialNumbers, 20)",
     "columns": ["DigitCount", "DigitSum", "DivisorSum"],
@@ -836,7 +884,19 @@
     "derived": true,
     "statistics": 3
   },
-  "KMotzkinPaths": null,
+  "KMotzkinPaths": {
+    "expr": "KMotzkinPaths(4, 2)",
+    "template": "KMotzkinPaths({size}, 2)",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "KNecklaces": {
     "expr": "KNecklaces(4, 2)",
     "template": "KNecklaces({size}, 2)",
@@ -2081,7 +2141,19 @@
     "derived": false,
     "statistics": 3
   },
-  "TotalPartitions": null,
+  "TotalPartitions": {
+    "expr": "TotalPartitions(4)",
+    "template": "TotalPartitions({size})",
+    "size": {
+      "name": "n",
+      "min": 1,
+      "max": 6,
+      "start": 4
+    },
+    "columns": [],
+    "derived": true,
+    "statistics": 0
+  },
   "Tournaments": {
     "expr": "Tournaments(4)",
     "template": "Tournaments({size})",
