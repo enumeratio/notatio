@@ -43,6 +43,12 @@ node packages/oracle/scripts/setup.ts            # install every kernel (julia, 
 node packages/oracle/scripts/setup.ts julia      # just one
 ```
 
+Sage is not installed by `setup.ts`. CI uses the image in `.github/sage/Dockerfile`: Sage 10.9 plus
+the adeles package at the commit pinned there. A machine without Docker gets the same pair in user
+space: a conda-forge `sage=10.9` environment, then the pinned tarball through that environment's
+`python -m pip install` (a conda Sage has no `sage -pip`). The runner revives the `is_*` helpers
+Sage 10.9 removed. Without adeles the Sage lane still runs, but its `Adeles`/`Ideles`/`Qhat` rows error.
+
 Installs are the heaviest thing the oracles do (Oscar precompiles dozens of packages,
 mathlib's cache unpacks gigabytes) and never run in parallel — see `utils/src/bounded.ts` and
 `ORACLE_MEMORY_MB` for the watchdog's ceiling.
