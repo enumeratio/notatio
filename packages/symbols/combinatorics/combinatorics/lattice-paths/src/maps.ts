@@ -763,44 +763,54 @@ const binaryTreeBody: MathJSON = [
         "p",
       ),
     ],
-    // Read from the end, a node (2) takes the top two finished trees, the first on top. State: [height, the stack's
-    // cells from position 2].
+    // Read from the end, a node (2) takes the top two finished trees, the first on top. State: (the stack's height, the
+    // stack's cells), as a pair so the cells stay a list of trees.
     bind(
       "bt_end",
       [
         "Fold",
         [
           "Function",
-          // The accumulator is rebound typed: its cells are trees, not integers.
+          // The pair is rebound typed: its parts are an integer and a list of trees, not unknowns.
           bind(
-            "bt_stack",
-            "bt_s",
+            "bt_height",
+            ["At", "bt_s", 1],
             bind(
-              "bt_height",
-              at(1, "bt_stack"),
-              [
-                "ReplaceAt",
-                ["ReplaceAt", "bt_stack", 1, ["Add", ["Subtract", "bt_height", ["At", "bt_word", "j"]], 1]],
-                ["Add", ["Subtract", "bt_height", ["At", "bt_word", "j"]], 2],
+              "bt_stack",
+              ["At", "bt_s", 2],
+              bind(
+                "bt_top",
+                ["Add", ["Subtract", "bt_height", ["At", "bt_word", "j"]], 1],
                 [
-                  "If",
-                  ["Equal", ["At", "bt_word", "j"], 0],
-                  0,
-                  ["List", ["At", "bt_stack", ["Add", "bt_height", 1]], ["At", "bt_stack", "bt_height"]],
+                  "Tuple",
+                  "bt_top",
+                  // The branch is on the list, not the cell: a leaf (an integer) and a node (a list) would have two shapes.
+                  [
+                    "If",
+                    ["Equal", ["At", "bt_word", "j"], 0],
+                    ["ReplaceAt", "bt_stack", "bt_top", 0],
+                    [
+                      "ReplaceAt",
+                      "bt_stack",
+                      "bt_top",
+                      ["List", ["At", "bt_stack", "bt_height"], ["At", "bt_stack", ["Subtract", "bt_height", 1]]],
+                    ],
+                  ],
                 ],
-              ],
-              "integer",
+                "integer",
+              ),
+              ANY,
             ),
-            ANY,
+            "integer",
           ),
           "bt_s",
           "j",
         ],
-        ["Join", ["List", 0], forEach(["Range", 1, ["Length", "bt_word"], 1], 0, "z")],
+        ["Tuple", 0, forEach(["Range", 1, ["Length", "bt_word"], 1], 0, "z")],
         ["Range", ["Length", "bt_word"], 1, -1],
       ],
-      at(2, "bt_end"),
-      ANY,
+      at(1, at(2, "bt_end")),
+      "tuple<integer, list<any>>",
     ),
     "list<integer>",
   ),

@@ -1,8 +1,8 @@
-// Increasing binary tree from a permutation, by minimum-splitting recursion — the
+// Increasing binary tree from a permutation, by minimum-splitting — the
 // FromPermutation map (permutation -> increasing_binary_tree). This is the CARTESIAN TREE on
-// the permutation's values, min-heap ordered: recursively, the position of the smallest value
-// in the current range becomes the node, everything before it is the LEFT subtree (same
-// recursion), everything after it the RIGHT. Every permutation of [n] holds the value 1, so
+// the permutation's values, min-heap ordered: the position of the smallest value
+// in the current range becomes the node, everything before it is the LEFT subtree (the
+// same split), everything after it the RIGHT. Every permutation of [n] holds the value 1, so
 // the root is always labelled 1 — heap order puts the global minimum at the top regardless of
 // which permutation it came from.
 //
@@ -19,16 +19,11 @@
 // of its nearest smaller neighbour to the LEFT (L) and to the RIGHT (R) exists and is the
 // tighter bound — the one with the LARGER value, when both exist (permutation values are
 // distinct, so there is never a tie). `i` is L's RIGHT child (i lies to L's right) or R's LEFT
-// child (i lies to R's left). That still holds — it is what makes `childPositionOnSide` below a
-// plain fold rather than a search — but the tree ITSELF is now assembled with real recursion
-// (`recurse`/`self`, @notatio/structures — "a fold can't build a nested value; this can"),
-// walking down from the root position rather than building flat left/right arrays by value.
+// child (i lies to R's left). That is what makes `childPositionOnSide` below a plain fold rather
+// than a search; the tree itself is then assembled from the largest value down, each node
+// reading its children's finished cells, so nothing recurses and the definition compiles.
 
-import { recurse, self } from "../../src/recursion.ts";
-
-// `unknown`, not a strict recursive union: `recurse`/`self` (@notatio/structures) are typed
-// over `unknown` themselves, same as binary-tree.ts's own use of them.
-type MathJSON = unknown;
+import { bind, type MathJSON } from "../../src/map-helpers.ts";
 
 const at = (list: MathJSON, index: MathJSON): MathJSON => ["At", list, index];
 const count = (list: MathJSON): MathJSON => ["Count", list];
@@ -39,11 +34,6 @@ const overRange = (n: MathJSON, initial: MathJSON, step: MathJSON, accumulator: 
   initial,
   ["Range", 1, n, 1],
 ];
-
-/** `body` with `name` bound to `value` — a `let`, as a lambda applied to its argument. Same
- *  helper as map.ts / flat.ts: a sub-term read more than once (here, each of the two
- *  nearest-smaller scans) is computed once rather than rebuilt at every reference. */
-const bind = (name: string, value: MathJSON, body: MathJSON): MathJSON => ["Apply", ["Function", body, name], value];
 
 const WORD: MathJSON = "_raw";
 const SIZE: MathJSON = count(WORD);
@@ -116,17 +106,44 @@ const childPositionOnSide = (parentPosition: MathJSON, side: "left" | "right"): 
     "ci",
   );
 
-/** The node at position `p` — 0 (leaf) at position 0, otherwise `[val(p), left, right]`,
- *  recursing on the child POSITIONS `childPositionOnSide` finds. Real recursion
- *  (`recurse`/`self`), not a fold: assembling a nested value needs it. */
-const nodeAt = (p: MathJSON): MathJSON => [
-  "If",
-  ["Equal", p, 0],
-  0,
-  ["List", val(p), self(childPositionOnSide(p, "left")), self(childPositionOnSide(p, "right"))],
-];
-
-/** The whole tree: the node rooted at the position of value 1 — every permutation of [n] holds
- *  the value 1, and heap order puts the global minimum at the top regardless of which
- *  permutation it came from, so that position is always the root. */
-export const fromPermutationTree: MathJSON = recurse(nodeAt("p"), ["p"], posOf(1));
+/** The whole tree, built bottom-up: values from the largest down, each node `[value, left, right]` stored at its
+ *  position's cell, its children's cells (already built, a child being larger) read back. Cell 1 is the leaf 0, so
+ *  position `p` is cell `p + 1` and an absent child (position 0) reads the leaf with no branch: a leaf (an integer)
+ *  and a node (a list) in one `If` would have two shapes, which compiled code declines. The root is the position of
+ *  value 1: every permutation of [n] holds it, and heap order puts the global minimum at the top. */
+export const fromPermutationTree: MathJSON = bind(
+  "fp_cells",
+  [
+    "Fold",
+    [
+      "Function",
+      bind(
+        "fp_nodes",
+        "fp_acc",
+        bind(
+          "fp_p",
+          posOf("fp_v"),
+          [
+            "ReplaceAt",
+            "fp_nodes",
+            ["Add", "fp_p", 1],
+            [
+              "List",
+              "fp_v",
+              at("fp_nodes", ["Add", childPositionOnSide("fp_p", "left"), 1]),
+              at("fp_nodes", ["Add", childPositionOnSide("fp_p", "right"), 1]),
+            ],
+          ],
+          "integer",
+        ),
+        "list<any>",
+      ),
+      "fp_acc",
+      "fp_v",
+    ],
+    ["Map", ["Function", 0, "fp_z"], ["Range", 1, ["Add", SIZE, 1], 1]],
+    ["Range", SIZE, 1, -1],
+  ],
+  at("fp_cells", ["Add", posOf(1), 1]),
+  "list<any>",
+);

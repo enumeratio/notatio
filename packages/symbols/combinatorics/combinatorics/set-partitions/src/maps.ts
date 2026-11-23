@@ -1006,40 +1006,51 @@ export const SET_PARTITIONS_MAPS: readonly CombinatorialMap[] = [
               "Fold",
               [
                 "Function",
-                [
-                  "If",
-                  ["Equal", at("j", "rk_prv"), 0],
-                  ["Tuple", ["Join", ["At", "acc", 1], ["List", "j"]], ["At", "acc", 2]],
+                // The accumulator's two lists are rebound typed: the fold leaves them unknown to the compiler.
+                bind(
+                  "iy_ends",
+                  ["At", "acc", 1],
                   bind(
-                    "iy_row",
+                    "iy_rows",
+                    ["At", "acc", 2],
                     [
-                      "Min",
-                      [
-                        "Filter",
-                        ["Range", 1, elements, 1],
+                      "If",
+                      ["Equal", at("j", "rk_prv"), 0],
+                      ["Tuple", ["Join", "iy_ends", ["List", "j"]], "iy_rows"],
+                      bind(
+                        "iy_row",
                         [
-                          "Function",
+                          "Min",
                           [
-                            "LessEqual",
-                            at("j", "iy_degrees"),
+                            "Filter",
+                            ["Range", 1, elements, 1],
                             [
-                              "Add",
+                              "Function",
+                              [
+                                "LessEqual",
+                                at("j", "iy_degrees"),
+                                [
+                                  "Add",
+                                  "i",
+                                  ["Count", ["Filter", "iy_rows", ["Function", ["Greater", "r", "i"], "r"]]],
+                                ],
+                              ],
                               "i",
-                              ["Count", ["Filter", ["At", "acc", 2], ["Function", ["Greater", "r", "i"], "r"]]],
                             ],
                           ],
-                          "i",
                         ],
-                      ],
+                        [
+                          "Tuple",
+                          ["Join", "iy_ends", ["List", at("iy_row", "iy_ends")]],
+                          ["Join", "iy_rows", ["List", "iy_row"]],
+                        ],
+                        "integer",
+                      ),
                     ],
-                    [
-                      "Tuple",
-                      ["Join", ["At", "acc", 1], ["List", at("iy_row", ["At", "acc", 1])]],
-                      ["Join", ["At", "acc", 2], ["List", "iy_row"]],
-                    ],
-                    "integer",
+                    "list<integer>",
                   ),
-                ],
+                  "list<integer>",
+                ),
                 "acc",
                 "j",
               ],
