@@ -16,6 +16,7 @@ import {
   loadCompiled,
   type LoadedPlot,
   lonePlotOf,
+  optionIssuesOf,
   opsOf,
   plainJson,
   type PlaneShow,
@@ -165,7 +166,10 @@ export function drawnOf(session: Session, json: Json, width = 60, height = 12): 
       return { text: `${textOf(session, body, width, height)}\n  ${caption}` };
   }
   const plotted = sampledFigure(session, json);
-  if (plotted !== undefined) return { text: drawPlotBox(plotted as never, { width, height }) };
+  if (plotted !== undefined) {
+    const notes = optionIssuesOf(plainJson(json as never) as never).map((issue) => `\n  note: ${issue}`);
+    return { text: drawPlotBox(plotted as never, { width, height }) + notes.join("") };
+  }
   const figure = figureText(json, {
     width,
     field: (field) => sampledField(session, field),
