@@ -4,6 +4,7 @@
 // `Epilog` and `Prolog`, and a `Plot` or a `Show` of plots composed into one `GraphicsBox`.
 
 import type { Box } from "@notatio/boxes";
+import { debug } from "./debug.ts";
 import type { PlotSeries } from "./plot-box.ts";
 import type { CompiledItem, CompiledPlot, PlotCompileSpec } from "./plot-compile.ts";
 import {
@@ -20,6 +21,8 @@ import {
 import { type PlotWindow, plotSeries, plotSeriesIn } from "./plot.ts";
 import type { Primitive } from "./primitives.ts";
 
+const log = debug("plot");
+
 /** What a compiled function reads: the plot's variables, the wildcards, and its runtime. */
 export type Scope = Record<string, unknown>;
 
@@ -32,14 +35,19 @@ export interface PlotRuntime {
   readonly sys?: unknown;
   /** What the code reads from its scope besides variables: the analytic kernels (`__hz`, …). */
   readonly scope?: Scope;
-  /** An item compiling gave no code for, sampled the host's way; without one it has no value. */
-  readonly evaluate?: (item: CompiledItem) => Sampler;
+  /**
+   * An item compiling gave no code for (it declined, or `declined` says its compiled answer would be
+   * wrong), sampled the host's way. Without one, or when it gives none, the plot cannot draw the item.
+   */
+  readonly evaluate?: (item: CompiledItem) => Sampler | undefined;
 }
 
 /** A compiled plot with its items ready to sample, and the scope they read from. */
 export interface LoadedPlot {
   readonly plot: CompiledPlot;
   readonly samplers: readonly Sampler[];
+  /** Why an item cannot be sampled at all, when it has no code and the host has no way to sample it. */
+  readonly failed?: string;
   /** A fresh scope for one sampling pass: the runtime the code calls, nothing else. */
   scope(): Scope;
 }
@@ -83,15 +91,38 @@ export const sampleNumber = (v: unknown): number => {
   return Math.abs(im) <= REAL_TOLERANCE * Math.max(1, Math.abs(re)) ? re : Number.NaN;
 };
 
+/**
+ * An item sampled by `ce` itself, `subs` then `N` per sample: what a host runs for an item with no
+ * compiled code, so the plot still draws what compiling declined.
+ */
+export const interpretedSampler =
+  (ce: { box(json: never): { unknowns: readonly string[]; subs(s: never): { N(): { re: unknown } } } }) =>
+  (item: CompiledItem): Sampler => {
+    const expr = ce.box(item.json as never);
+    return (scope) => {
+      const subs: Record<string, number> = {};
+      for (const name of expr.unknowns) if (typeof scope[name] === "number") subs[name] = scope[name];
+      return sampleNumber(expr.subs(subs as never).N().re);
+    };
+  };
+
 /** `plot`'s items as samplers over `runtime`. */
 export function loadCompiled(plot: CompiledPlot, runtime: PlotRuntime = {}): LoadedPlot {
+  let failed: string | undefined;
   const samplers = plot.items.map((item): Sampler => {
-    if (item.code === undefined) return runtime.evaluate?.(item) ?? (() => Number.NaN);
+    if (item.code === undefined) {
+      if (item.declined !== undefined) log("declined to compiled code", item.declined, item.label);
+      const interpreted = runtime.evaluate?.(item);
+      if (interpreted !== undefined) return interpreted;
+      failed ??= item.declined ?? `${item.label} has no compiled code and no interpreter`;
+      log("no way to sample", item.label, failed);
+      return () => Number.NaN;
+    }
     // oxlint-disable-next-line no-implied-eval -- the code is the compiler's output
     const fn = new Function("_SYS", "_", `return (${item.code});`) as (sys: unknown, scope: Scope) => unknown;
     return (scope) => sampleNumber(fn(runtime.sys, scope));
   });
-  return { plot, samplers, scope: () => ({ ...runtime.scope }) };
+  return { plot, samplers, ...(failed !== undefined && { failed }), scope: () => ({ ...runtime.scope }) };
 }
 
 /** A curve plot's series over its whole domain, and again over a window a reader has zoomed to. */
@@ -109,13 +140,14 @@ export function curvesOf(
   settings: PlotSettings,
   loaded: LoadedPlot,
   bindings?: Readonly<Record<string, unknown>>,
-): Curves | { readonly unbound: string[] } {
+): Curves | { readonly unbound: string[] } | { readonly failed: string } {
   const { plot, samplers } = loaded;
   const scope = loaded.scope();
   Object.assign(scope, bindings);
   const variable = settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "x";
   const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
   if (unbound.length > 0) return { unbound };
+  if (loaded.failed !== undefined) return { failed: loaded.failed };
   const at =
     (k: number) =>
     (t: number): number => {
@@ -153,9 +185,13 @@ export interface FigurePlan {
   readonly sources: readonly string[];
   /**
    * The figure as a `GraphicsBox` from `loaded`, one per source in order. Undefined when a plot has
-   * nothing to draw; `unbound` when one names symbols with no value.
+   * nothing to draw; `unbound` when one names symbols with no value; `failed` when one has an item no
+   * host way could sample (`LoadedPlot.failed`).
    */
-  draw(loaded: readonly LoadedPlot[], view?: FigureView): Box | { readonly unbound: string[] } | undefined;
+  draw(
+    loaded: readonly LoadedPlot[],
+    view?: FigureView,
+  ): Box | { readonly unbound: string[] } | { readonly failed: string } | undefined;
 }
 
 /**
@@ -173,6 +209,7 @@ export function figurePlanOf(show: PlaneShow): FigurePlan {
     sources: sampled.map((index) => show.layers[index]!.settings["value"]!),
     draw(loaded, view = {}) {
       const unbound: string[] = [];
+      let failed: string | undefined;
       const own: { prolog: Primitive[]; epilog: Primitive[] } = { prolog: [], epilog: [] };
       const plan = planeShowPlan(show, (layer, index) => {
         for (const name of ["prolog", "epilog"] as const) {
@@ -184,6 +221,10 @@ export function figurePlanOf(show: PlaneShow): FigurePlan {
         const at = sampled.indexOf(index);
         if (at < 0 || loaded[at] === undefined) return undefined;
         const curves = curvesOf(layer.settings, loaded[at]!, view.bindings);
+        if ("failed" in curves) {
+          failed ??= curves.failed;
+          return [];
+        }
         if ("unbound" in curves) {
           unbound.push(...curves.unbound);
           return [];
@@ -191,6 +232,7 @@ export function figurePlanOf(show: PlaneShow): FigurePlan {
         return view.window !== undefined && curves.inWindow ? curves.inWindow(view.window, view.pixels) : curves.series;
       });
       if (unbound.length > 0) return { unbound: [...new Set(unbound)] };
+      if (failed !== undefined) return { failed };
       if (plan === undefined) return undefined;
       if ("graphics" in plan) return graphicsBoxOfSettings(plan.graphics, view.window);
       const w = view.window;

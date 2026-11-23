@@ -29,6 +29,7 @@ import {
   analyticScopeOf,
   CURVE_SPEC,
   figurePlanOf,
+  interpretedSampler,
   loadCompiled,
   lonePlotOf,
   type PlotRuntime,
@@ -195,7 +196,11 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
 }
 
 /** What compiled code calls, from an engine in this process. */
-const runtimeOf = (ce: ComputeEngine): PlotRuntime => ({ sys: systemHelpersOf(ce), scope: analyticScopeOf(analytic) });
+const runtimeOf = (ce: ComputeEngine): PlotRuntime => ({
+  sys: systemHelpersOf(ce),
+  scope: analyticScopeOf(analytic),
+  evaluate: interpretedSampler(ce as never),
+});
 
 /** An `Epilog` or `Prolog` as written, read to primitives. */
 const marksOf = (written: string): Primitive[] | undefined => {
@@ -219,6 +224,7 @@ function sampledFigure(ce: ComputeEngine, held: readonly unknown[]): Box | undef
   const box = plan.draw(loaded, { marks: marksOf });
   if (box !== undefined && "unbound" in (box as object))
     throw new Error(`no value for ${(box as { unbound: string[] }).unbound.join(", ")}`);
+  if (box !== undefined && "failed" in (box as object)) throw new Error((box as { failed: string }).failed);
   return box as Box | undefined;
 }
 

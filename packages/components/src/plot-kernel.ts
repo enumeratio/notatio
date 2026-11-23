@@ -10,9 +10,9 @@ import {
   loadBareEngine,
   loadCompiled,
   type LoadedPlot,
+  interpretedSampler,
   loadEngineFor,
   parseFor,
-  sampleNumber,
   type Sampler,
   type Scope,
 } from "@notatio/frontend/core";
@@ -145,18 +145,13 @@ export async function readEpsil(text: string): Promise<unknown> {
   return parsed.errors.length > 0 ? undefined : parsed.json;
 }
 
-/** An item with no compiled code, sampled by the page's engine: `subs`, then `N`, per sample. */
-async function engineSampler(item: CompiledItem): Promise<Sampler> {
-  const ce = await loadEngineFor(item.json);
-  const expr = ce.box(item.json as never);
-  return (scope) => {
-    const subs: Record<string, ReturnType<typeof ce.number>> = {};
-    for (const name of expr.unknowns) {
-      const v = scope[name];
-      if (typeof v === "number") subs[name] = ce.number(v);
-    }
-    return sampleNumber(expr.subs(subs).N().re);
-  };
+/** An item with no compiled code, sampled by the page's engine; none when the engine cannot be had. */
+async function engineSampler(item: CompiledItem): Promise<Sampler | undefined> {
+  try {
+    return interpretedSampler((await loadEngineFor(item.json)) as never)(item);
+  } catch {
+    return undefined;
+  }
 }
 
 /** `plot`'s items as samplers: the page's helpers and its engine's fallback behind the shared loader. */
@@ -167,13 +162,13 @@ export async function loadPlot(plot: CompiledPlot): Promise<LoadedPlot> {
     callsAnalytic(plot) ? analyticRuntime() : ({} as Scope),
   ]);
   // An item with no code is sampled by the page's engine, loaded only for it.
-  const fallback = new Map<CompiledItem, Sampler>();
+  const fallback = new Map<CompiledItem, Sampler | undefined>();
   await Promise.all(
     plot.items
       .filter((item) => item.code === undefined)
       .map(async (item) => fallback.set(item, await engineSampler(item))),
   );
-  return loadCompiled(plot, { sys, scope, evaluate: (item) => fallback.get(item) ?? (() => Number.NaN) });
+  return loadCompiled(plot, { sys, scope, evaluate: (item) => fallback.get(item) });
 }
 
 /** `text` compiled to JavaScript and ready to sample. */
