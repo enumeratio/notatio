@@ -26,3 +26,28 @@ test("a surface's two ranges read the same way", () => {
   expect(settings?.["x-domain"]).toBe("-3.1416,3.1416");
   expect(Number(settings?.["y-domain"]?.split(",")[0])).toBeCloseTo(-Math.PI, 12);
 });
+
+const rangeSettings = (option: string): Record<string, string | undefined> => {
+  const s = plotOfText(`Plot(Sin(x), (x, 0, 10), PlotRange -> ${option})`)?.settings ?? {};
+  return { x: s["plot-x-range"], y: s["plot-range"] };
+};
+
+test("PlotRange in braces reads as the same range in brackets, either order", () => {
+  const bracket = rangeSettings("[-1, 1]");
+  expect(bracket).toEqual({ x: undefined, y: "-1,1" });
+  expect(rangeSettings("{-1, 1}")).toEqual(bracket);
+  expect(rangeSettings("{1, -1}")).toEqual(bracket);
+});
+
+test("a nested brace pair is the x and y windows, mixed brackets alike", () => {
+  const nested = { x: "-1,1", y: "0,2" };
+  expect(rangeSettings("[[-1, 1], [0, 2]]")).toEqual(nested);
+  expect(rangeSettings("{{-1, 1}, {0, 2}}")).toEqual(nested);
+  expect(rangeSettings("{{1, -1}, [0, 2]}")).toEqual(nested);
+  expect(rangeSettings("{Automatic, {0, 2}}")).toEqual({ x: undefined, y: "0,2" });
+});
+
+test("a brace set that is not two numbers is no range, as a bad list is none", () => {
+  expect(rangeSettings("{a, b}")).toEqual({ x: undefined, y: undefined });
+  expect(rangeSettings("{1, 2, 3}")).toEqual({ x: undefined, y: undefined });
+});
