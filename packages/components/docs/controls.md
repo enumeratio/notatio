@@ -216,6 +216,16 @@ plot with a graphics primitive.
 <graphics-box value='Plot(Sin(x), (x, 0, 10), PlotRange -> (-1.5, 1.5), PlotLabel -> "sine", Epilog -> [Point((1.5, 1)), Line([(0, 0), (10, 0)])])' />
 </Story>
 
+A `Show` lays plots and graphics in one frame, `Prolog` and `Epilog` put marks under and over a
+plot, and a `Graphics` alone draws its primitives.
+
+<Story
+  title="Layers: a Show, marks around a plot, and a Graphics">
+<graphics-box value="Show(Plot(Sin(x), (x, 0, 10)), Plot(Cos(x), (x, 0, 10)))" />
+<graphics-box value='Plot(Sin(x), (x, 0, 10), Prolog -> [Line([(0, 0), (10, 0)])], Epilog -> [Point((1.5, 1))])' />
+<graphics-box value="Graphics([Circle((0, 0), 1), Point((0, 0))])" />
+</Story>
+
 ## Structure, not attributes
 
 A built component can also be written the way its expression reads: the arguments
