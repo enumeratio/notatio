@@ -2,6 +2,7 @@
 // argument, so a map's body stays one closed expression. A fold can't build a nested value;
 // this can. Calls are written as heads, not `Apply`: `Apply` threads over a list argument. Compare
 // with `Equal`, which compares lists whole; `Same` doesn't see a bound variable's value.
+// compute-engine's compiler declines a function passed as an argument, so a `recurse` runs interpreted.
 
 type MathJSON = unknown;
 

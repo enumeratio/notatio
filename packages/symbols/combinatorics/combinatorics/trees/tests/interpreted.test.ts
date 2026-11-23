@@ -5,8 +5,9 @@ import { COMPILED } from "../src/statistics.compiled.generated.js";
 // The definitions the JavaScript compiler does not lower, which run in the interpreter. A new
 // definition that lands here is slower than the rest, so it should be a deliberate addition;
 // one that starts compiling should leave the list. Every one reads a nested tree (a binary tree
-// is 0 or [left, right], an ordered tree the list of its children's trees), and the compiler
-// has no reader for a subtree of unknown depth yet; only the root's own children compile. A
+// is 0 or [left, right], an ordered tree the list of its children's trees). A recursion over one
+// is a `recurse`, which hands the function to itself as an argument, and compute-engine's
+// compiler declines a function value passed through a parameter, so it runs interpreted. A
 // binary-tree statistic with a `flat` expression compiles from the tree's parent array instead
 // (trees/src/flat.ts): Height, Leaves, UnaryNodes, BinaryNodes and RightChildCount. An ordered-tree
 // statistic with a `flat` expression compiles from the tree's Dyck word (trees/src/flat-ordered.ts).
