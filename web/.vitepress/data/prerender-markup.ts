@@ -110,7 +110,7 @@ async function plotPreview(spec: MarkupSpec): Promise<string | undefined> {
   const bindings: Record<string, unknown> = {};
   for (const params of spec.manipulate) for (const c of parseControls(params)) bindings[`_${c.name}`] = c.value;
   const box = plan.draw(loaded, { bindings, marks: marksOf });
-  if (box === undefined || "unbound" in (box as object)) return undefined;
+  if (box === undefined || "unbound" in (box as object) || "failed" in (box as object)) return undefined;
   return `<span class="graphics-box-plot">${renderPlot(box as never).svg}</span>`;
 }
 

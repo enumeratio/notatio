@@ -13,6 +13,7 @@ import {
   type FigurePlan,
   figurePlanOf,
   headOf,
+  interpretedSampler,
   loadCompiled,
   type LoadedPlot,
   lonePlotOf,
@@ -23,7 +24,6 @@ import {
   plotSettingsOf,
   type Primitive,
   primitivesOf,
-  sampleNumber,
   strOf,
   tupleOf,
   vectorOptionsOf,
@@ -63,14 +63,7 @@ function loadedOf(session: Session, plan: FigurePlan): LoadedPlot[] | undefined 
   const runtime = {
     sys: systemHelpersOf(ce as never),
     scope: analyticScopeOf(analytic),
-    evaluate: (item: { json: unknown }) => {
-      const expr = ce.box(item.json as never);
-      return (scope: Record<string, unknown>): number => {
-        const subs: Record<string, number> = {};
-        for (const name of expr.unknowns) if (typeof scope[name] === "number") subs[name] = scope[name];
-        return sampleNumber(expr.subs(subs).N().re);
-      };
-    },
+    evaluate: interpretedSampler(ce as never),
   };
   const loaded: LoadedPlot[] = [];
   for (const text of plan.sources) {
@@ -93,7 +86,7 @@ export function sampledFigure(session: Session, json: Json): Box | undefined {
     const plan = figurePlanOf(show);
     const loaded = loadedOf(session, plan);
     const box = loaded && plan.draw(loaded, { marks: marksOf, tight: true });
-    return box === undefined || "unbound" in (box as object) ? undefined : (box as Box);
+    return box === undefined || "unbound" in (box as object) || "failed" in (box as object) ? undefined : (box as Box);
   } catch {
     return undefined;
   }
@@ -107,7 +100,7 @@ export function samplePlot(session: Session, json: Json): PlotPoint[] | undefine
     if (!settings?.["value"]?.trim()) return undefined;
     const loaded = loadedOf(session, figurePlanOf(lonePlotOf("Plot", settings)!));
     const curves = loaded?.[0] && curvesOf(settings, loaded[0]);
-    return curves && !("unbound" in curves) ? [...(curves.series[0]?.points ?? [])] : undefined;
+    return curves && "series" in curves ? [...(curves.series[0]?.points ?? [])] : undefined;
   } catch {
     return undefined;
   }

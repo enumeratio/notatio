@@ -338,6 +338,14 @@ export class PlotView {
       this.host.requestUpdate();
       return undefined;
     }
+    // An item neither compiled nor interpreted would draw nothing: say why.
+    if ("failed" in curves) {
+      this.#clear();
+      const reason = curves.failed.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
+      this.#svg = `<span class="graphics-box-unbound" role="status">Could not draw this plot: ${reason}</span>`;
+      this.host.requestUpdate();
+      return undefined;
+    }
     const { inWindow } = curves;
     // A zoomed view asks the same compiled code again, over the window and at the pixels' density.
     return { series: curves.series, ...(inWindow && { inWindow: (window) => inWindow(window, this.#pixels()) }) };
