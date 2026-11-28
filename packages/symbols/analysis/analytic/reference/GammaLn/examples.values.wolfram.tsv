@@ -12,7 +12,7 @@ at-a-pole-of-gamma-compute-engine-gives-the-real	Log[Gamma[-1]]	Infinity		\log (
 complex-arguments-here-the-principal-ln-gamma-z	Log[Gamma[Complex[2.5, 3]]]	-1.4709546103488407 + 2.822615638260799*I		\log (\Gamma (2.5\, +3 i))	-1.47095+2.82262 i	
 a-huge-inexact-argument-should-still-evaluate	Log[Gamma[1.0*^1000]]	Overflow[]	Overflow[]	\log (\Gamma (1.00000000000000\times 10^{1000}))	\text{Overflow}[]	disagree
 threads-over-a-list-and-the-integer-points	Log[Gamma[List[1, 2, 3]]]	{0, 0, Log[2]}		\log (\Gamma (\{1,2,3\}))	\{0,0,\log (2)\}	
-uncertainty-propagation-through-ln-gamma-with	Log[Gamma[Around[1.2, 0.01]]]	Around[-0.0853740900033158, 0.002890398965921883]		\log (\Gamma (1.200\pm 0.010))	-0.0854\pm 0.0029	disagree
+uncertainty-propagation-through-ln-gamma-with	Log[Gamma[Around[1.2, 0.01]]]	Around[-0.0853740900033158, 0.002890398965921883]		\log (\Gamma (1.200\pm 0.010))	-0.0854\pm 0.0029	
 to-30-significant-digits-not-yet-the-last-digit	N[Log[Gamma[Rational[1, 3]]], 30]	0.9854206469277670691871740369779613917359212255016524526685`30.	0.985420646927767069187174036978	N\left[\log \left(\Gamma \left(\frac{1}{3}\right)\right),30\right]	0.985420646927767069187174036978	
 gammaln-neg-0-5-is-the-real-log-magnitude	Log[Gamma[-0.5]]	1.2655121234846454 + 3.141592653589793*I		\log (\Gamma (-0.5))	1.26551\, +3.14159 i	disagree
 used-to-get-ln-n-for-large-n-without-overflowing	(Log[Gamma[11]] == Log[Factorial[10]])	True		\log (\Gamma (11))=\log (10!)	\text{True}	

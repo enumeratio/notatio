@@ -8,7 +8,7 @@ complex-arguments	DirichletEta[Complex[3.5, 2.5]]	1.0001097278046978 + 0.0781289
 threads-elementwise-over-an-array	DirichletEta[List[List[Rational[1, 2], -1], List[0, Rational[1, 2]]]]	{{(1 - Sqrt[2])*Zeta[1/2], 1/4}, {1/2, (1 - Sqrt[2])*Zeta[1/2]}}		\eta \left(\left( \begin{array}{cc}  \frac{1}{2} & -1 \\  0 & \frac{1}{2} \\ \end{array} \right)\right)	\left( \begin{array}{cc}  \left(1-\sqrt{2}\right) \zeta \left(\frac{1}{2}\right) & \frac{1}{4} \\  \frac{1}{2} & \left(1-\sqrt{2}\right) \zeta \left(\frac{1}{2}\right) \\ \end{array} \right)	disagree
 eta-s-to-1-as-s-to-infty	DirichletEta[Infinity]	1		\eta (\infty )	1	
 interval-arithmetic-over-an-increasing-stretch	DirichletEta[Interval[List[1.5, 1.6]]]	Interval[{0.6611746044007166, 0.888852776691042}]		\eta (\text{Interval}[\{1.5,1.6\}])	\text{Interval}[\{0.661175,0.888853\}]	disagree
-uncertainty-propagation-eta-2-pm-0-01-0-82247-pm	DirichletEta[Around[2, 0.01]]	Around[0.8224670334241132, 0.0010131657816350448]		\eta (2\pm 0.010)	0.8225\pm 0.0010	disagree
+uncertainty-propagation-eta-2-pm-0-01-0-82247-pm	DirichletEta[Around[2, 0.01]]	Around[0.8224670334241132, 0.0010131657816350448]		\eta (2\pm 0.010)	0.8225\pm 0.0010	
 to-30-significant-digits-not-yet-the-last-digit	N[DirichletEta[Rational[1, 2]], 30]	0.604898643421630370247265914235955495116441135784744092421`30.	0.604898643421630370247265914236	N\left[\eta \left(\frac{1}{2}\right),30\right]	0.604898643421630370247265914236	
 nonpositive-integers-eta-n-2-n-1-1-b-n-1-n-1	DirichletEta[List[0, -1, -2, -3]]	{1/2, 1/4, 0, -1/8}		\eta (\{0,-1,-2,-3\})	\left\{\frac{1}{2},\frac{1}{4},0,-\frac{1}{8}\right\}	
 eta-4-frac-78-zeta-4-7-pi-4-720	DirichletEta[4]	(7*Pi^4)/720		\eta (4)	\frac{7 \pi ^4}{720}	

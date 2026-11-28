@@ -20,7 +20,7 @@ sec-pi-12-sqrt-6-sqrt-2	Sec[Divide[Pi, 12]]	Sqrt[2]*(-1 + Sqrt[3])		\sec \left(\
 sec-pi-5-sqrt-5-1	Sec[Divide[Pi, 5]]	-1 + Sqrt[5]		\sec \left(\frac{\pi }{5}\right)	\sqrt{5}-1	
 sec-pi-8-sqrt-4-2-sqrt-2	Sec[Divide[Pi, 8]]	Sec[Pi/8]		\sec \left(\frac{\pi }{8}\right)	\sec \left(\frac{\pi }{8}\right)	
 interval-arithmetic-the-image-of-pi-6-pi-3-is	Sec[Interval[List[Divide[Pi, 6], Divide[Pi, 3]]]]	Interval[{2/Sqrt[3], 2}]		\sec \left(\text{Interval}\left[\left\{\frac{\pi }{6},\frac{\pi }{3}\right\}\right]\right)	\text{Interval}\left[\left\{\frac{2}{\sqrt{3}},2\right\}\right]	
-uncertainty-propagation-sec-2-pm-0-01-approx-2	Sec[Around[2, 0.01]]	Around[-2.402997961722381, 0.0525064633769958]		\sec (2\pm 0.010)	-2.40\pm 0.05	disagree
+uncertainty-propagation-sec-2-pm-0-01-approx-2	Sec[Around[2, 0.01]]	Around[-2.402997961722381, 0.0525064633769958]		\sec (2\pm 0.010)	-2.40\pm 0.05	
 evenness-drops-the-sign-of-a-symbolic-argument	Sec[Minus[x]]	Sec[x]		\sec (-x)	\sec (x)	
 derivative-sec-x-tan-x	D[Sec[x], x]	Sec[x]*Tan[x]		\frac{\partial \sec (x)}{\partial x}	\tan (x) \sec (x)	
 antiderivative-ln-sec-x-tan-x	Integrate[Sec[x], x]	ArcCoth[Sin[x]]		\int \sec (x) \, dx	\coth ^{-1}(\sin (x))	inconclusive

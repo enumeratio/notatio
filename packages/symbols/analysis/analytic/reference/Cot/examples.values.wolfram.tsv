@@ -19,7 +19,7 @@ cot-pi-8-1-sqrt-2	Cot[Divide[Pi, 8]]	Cot[Pi/8]		\cot \left(\frac{\pi }{8}\right)
 cot-pi-12-2-sqrt-3	Cot[Divide[Pi, 12]]	2 + Sqrt[3]		\cot \left(\frac{\pi }{12}\right)	2+\sqrt{3}	
 cot-pi-over-5	Cot[Divide[Pi, 5]]	Sqrt[1 + 2/Sqrt[5]]		\cot \left(\frac{\pi }{5}\right)	\sqrt{1+\frac{2}{\sqrt{5}}}	
 an-interval-straddling-the-pole-at-0-maps-to-two	Cot[Interval[List[Minus[Divide[Pi, 4]], Divide[Pi, 4]]]]	Interval[{-Infinity, -1}, {1, Infinity}]		\cot \left(\text{Interval}\left[\left\{-\frac{\pi }{4},\frac{\pi }{4}\right\}\right]\right)	\text{Interval}[\{-\infty ,-1\},\{1,\infty \}]	disagree
-uncertainty-propagation-near-a-pole-grows-fast	Cot[Around[3, 0.01]]	Around[-7.015252551434534, 0.5021376836040874]		\cot (3\pm 0.010)	-7.0\pm 0.5	disagree
+uncertainty-propagation-near-a-pole-grows-fast	Cot[Around[3, 0.01]]	Around[-7.015252551434534, 0.5021376836040874]		\cot (3\pm 0.010)	-7.0\pm 0.5	
 oddness-pulls-the-sign-out-of-a-symbolic	Cot[Minus[x]]	-Cot[x]		\cot (-x)	-\cot (x)	
 derivative-csc-2-x	D[Cot[x], x]	-Csc[x]^2		\frac{\partial \cot (x)}{\partial x}	-\csc ^2(x)	
 antiderivative-ln-sin-x	Integrate[Cot[x], x]	Log[Sin[x]]		\int \cot (x) \, dx	\log (\sin (x))	inconclusive

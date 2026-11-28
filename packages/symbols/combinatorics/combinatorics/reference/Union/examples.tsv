@@ -9,7 +9,7 @@ union-keeps-numerically-close-values-apart		test	[Union, [List, 1, 1.0000000001]
 a-single-list-is-de-duplicated	Scope		[Union, [List, 1, 2, 1, 3, 6, 2, 2]]	[List, 1, 2, 3, 6]	A single list is de-duplicated					
 symbolic-elements-merged-across-three-lists	Scope		[Union, [List, a, b, a, c], [List, d, a, f, b], [List, c, a]]	[List, a, b, c, d, f]	Symbolic elements, merged across three lists					
 elements-can-themselves-be-lists-1-2-and-2-1	Scope		[Union, [List, [List, 1, 2], [List, 1, 2, 3]], [List, [List, 2, 1], [List, 1, 2]], [List, [List, 3, 2, 1], [List, 1, 2, 3]]]	[List, [List, 1, 2], [List, 2, 1], [List, 1, 2, 3], [List, 3, 2, 1]]	Elements can themselves be lists; $\{1, 2\}$ and $\{2, 1\}$ stay distinct					Same four elements, listed in a different order.
-with-no-arguments-the-union-is-empty	Scope		[Union]	EmptySet	With no arguments, the union is empty		Union()	EmptySet	shape	Same empty result; ours prints the canonical EmptySet symbol, Wolfram's Union[] returns a literal empty list.
+with-no-arguments-the-union-is-empty	Scope		[Union]	EmptySet	With no arguments, the union is empty		Union()	EmptySet		Same empty result; ours prints the canonical EmptySet symbol, Wolfram's Union[] returns a literal empty list.
 sets-in-a-set-out	Scope		[Union, [Set, 3, 1], [Set, 2, 3]]	[Set, 1, 2, 3]	Sets in, a set out					
 lists-in-a-sorted-list-out	Scope		[Union, [List, 3, 1, 3], [List, 2]]	[List, 1, 2, 3]	Lists in, a sorted de-duplicated list out, as in Wolfram					
 combining-the-divisors-of-10-and-15-into-one-set	Applications		[Union, [Divisors, 10], [Divisors, 15]]	[List, 1, 2, 3, 5, 10, 15]	Combining the divisors of 10 and 15 into one set					

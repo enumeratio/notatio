@@ -24,7 +24,7 @@ cos-2-pi-5-frac-sqrt-5-1-4	Cos[Times[Rational[2, 5], Pi]]	(-1 + Sqrt[5])/4		\cos
 cos-3-pi-5-frac-1-sqrt-5-4	Cos[Times[Rational[3, 5], Pi]]	(1 - Sqrt[5])/4		\cos \left(\frac{3}{5} \pi \right)	\frac{1}{4} \left(1-\sqrt{5}\right)	
 reduced-into-the-first-quadrant-by-symmetry	Cos[Times[Rational[11, 6], Pi]]	Sqrt[3]/2		\cos \left(\frac{11}{6} \pi \right)	\frac{\sqrt{3}}{2}	
 interval-arithmetic-the-image-of-pi-3-pi-2-is-0	Cos[Interval[List[Divide[Pi, 3], Divide[Pi, 2]]]]	Interval[{0, 1/2}]		\cos \left(\text{Interval}\left[\left\{\frac{\pi }{3},\frac{\pi }{2}\right\}\right]\right)	\text{Interval}\left[\left\{0,\frac{1}{2}\right\}\right]	
-uncertainty-propagation-cos-2-pm-0-01-approx-0	Cos[Around[2, 0.01]]	Around[-0.4161468365471424, 0.009092974268256818]		\cos (2\pm 0.010)	-0.416\pm 0.009	disagree
+uncertainty-propagation-cos-2-pm-0-01-approx-0	Cos[Around[2, 0.01]]	Around[-0.4161468365471424, 0.009092974268256818]		\cos (2\pm 0.010)	-0.416\pm 0.009	
 cos-infty-should-be-the-oscillation-range-1-1	Cos[Infinity]	Interval[{-1, 1}]		\cos (\infty )	\text{Interval}[\{-1,1\}]	disagree
 an-imaginary-argument-rewrites-to-cosh-cos-ix	Cos[Times[I, x]]	Cosh[x]		\cos (i x)	\cosh (x)	
 evenness-drops-the-sign-of-a-symbolic-argument	Cos[Minus[x]]	Cos[x]		\cos (-x)	\cos (x)	
