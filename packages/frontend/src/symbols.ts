@@ -7,6 +7,7 @@ import {
   paramsOf,
   type PlotChoice,
 } from "./infer-controls.ts";
+import { COMPLEX_PART_HEADS } from "./complex-parts.ts";
 import { CHART_HEADS, PLANE_LAYER_HEADS, type PlaneLayer, type PlaneShow, PLOT_HEADS } from "./plot-lowering.ts";
 import { GRAPHICS_3D_HEADS } from "./graphics-3d-lowering.ts";
 import { type MathJsonExpression } from "@cortex-js/compute-engine/epsil";
@@ -756,6 +757,31 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
       AxesLabel: axesLabel,
       ScalingFunctions: scalingFunctionsOption,
     },
+  },
+  ...(["ReImPlot", "AbsArgPlot"] as const).map((head): VisualSymbol => ({
+    // A complex-valued function of a real variable, by its parts: the real and imaginary part as
+    // two curves, or the modulus colored by the argument.
+    head,
+    tag: "graphics-box",
+    fixed: { parts: COMPLEX_PART_HEADS[head]!, ...(head === "ReImPlot" && { legend: "true" }) },
+    attributes: (ops) => oneVariable(ops, { value: "value", variable: "var", range: "domain" }),
+    options: { ...CURVE_OPTIONS, PlotLegends: "legend", PlotPoints: "samples", AxesLabel: axesLabel },
+  })),
+  {
+    // `ComplexContourPlot(f, (z, a + b i, c + d i))`: the level curves of the real and of the
+    // imaginary part of `f` over the rectangle its iterator's corners span.
+    head: "ComplexContourPlot",
+    tag: "graphics-box",
+    fixed: { parts: COMPLEX_PART_HEADS["ComplexContourPlot"]! },
+    attributes: (ops) => {
+      const { variable, rect } = complexIterator(ops[1]);
+      return {
+        ...(ops[0] !== undefined && { value: epsil(ops[0]) }),
+        ...(variable && { var: variable }),
+        ...(rect && { xrange: `${rect[0]},${rect[1]}`, yrange: `${rect[2]},${rect[3]}` }),
+      };
+    },
+    options: { PlotLabel: "label", FrameLabel: frameLabel, ColorFunction: colorFunction },
   },
   {
     // `ParametricPlot({fx, fy}, (t, tmin, tmax))`: Wolfram's own separate head for a

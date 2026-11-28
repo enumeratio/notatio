@@ -13,6 +13,8 @@ import { unsafeHTML } from "lit/directives/unsafe-html.js";
 import { type Box, type BoxNode, optionsOfBox } from "@notatio/boxes";
 import {
   chartBoxOfSettings,
+  complexContourBoxOf,
+  complexPartSeries,
   curvesOf,
   debug,
   type Field2d,
@@ -58,7 +60,7 @@ import {
   wheelZooms,
 } from "@notatio/frontend/core";
 import type { PlaneLayer } from "@notatio/frontend/symbols";
-import { compilePlotText, type LoadedPlot, plotFunctions, readEpsil } from "./plot-kernel.ts";
+import { canonicalOf, compilePlotText, type LoadedPlot, plotFunctions, readEpsil } from "./plot-kernel.ts";
 
 const log = debug("plot");
 
@@ -216,6 +218,7 @@ export class PlotView {
     const show = planeShowOf(plain);
     try {
       if (show !== undefined) await this.#layers(show, generation);
+      else if (settings["parts"] !== undefined) await this.#complexParts(settings, generation);
       else if (typeof head === "string" && POLAR.has(head)) await this.#polarize(head, settings, generation);
       else if (typeof head === "string" && FIELD.has(head)) await this.#vectorize(settings, generation);
       else if (typeof head === "string" && FIELD_PLOT_HEADS.includes(head))
@@ -237,6 +240,63 @@ export class PlotView {
     this.#xAt = () => Number.NaN;
     this.#svg = renderChart(box);
     this.#finish();
+  }
+
+  /**
+   * A complex-valued function drawn by its parts (`ReImPlot`, `AbsArgPlot`, `ComplexContourPlot`):
+   * its canonical form from the kernel, sampled by the engine-free complex evaluator.
+   */
+  async #complexParts(settings: Readonly<Record<string, string>>, generation: number): Promise<void> {
+    const raw = settings["value"]?.trim();
+    const kind = settings["parts"];
+    if (!raw) return this.#clear();
+    // The evaluator comes with the analytic kernels, so it is loaded only for these plots.
+    const [json, { complexFunction }] = await Promise.all([canonicalOf(raw), import("@notatio/frontend")]);
+    if (generation !== this.#generation) return;
+    const f = complexFunction(json, settings["var"] || (kind === "contours" ? "z" : "x"));
+    this.#unzoomable();
+    this.#polar = undefined;
+    if (f === undefined) {
+      // The evaluator reads a fixed set of heads; anything else has no figure here.
+      this.#clear();
+      this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: this function is outside what a complex plot evaluates.</span>`;
+      this.host.requestUpdate();
+      return;
+    }
+    if (kind === "contours") {
+      const whole = complexContourBoxOf(f, settings);
+      // A zoomed view keeps the whole plot's levels.
+      const drawIn = (window: PlotWindow | undefined): void => {
+        this.#box = (
+          window === undefined
+            ? whole.box
+            : complexContourBoxOf(
+                f,
+                { ...settings, xrange: window.x.join(","), ...(window.y && { yrange: window.y.join(",") }) },
+                whole.levels,
+              ).box
+        ) as BoxNode;
+        this.#draw();
+      };
+      this.#series = [];
+      this.#field = true;
+      this.#plane = true;
+      this.#home = this.#windowOf(whole.box as BoxNode);
+      this.#redo = drawIn;
+      return drawIn(this.#window);
+    }
+    const seriesIn = (window: PlotWindow | undefined): PlotSeries[] =>
+      complexPartSeries(kind === "absarg" ? "absarg" : "reim", f, settings, window, this.#pixels());
+    this.#series = seriesIn(undefined);
+    this.#redo = (window) => {
+      this.#series = seriesIn(window);
+      this.#rebuild();
+    };
+    this.#marked = await this.#readMarks(settings);
+    this.#styles = undefined;
+    this.#field = false;
+    this.#rebuild(true);
+    if (this.#window !== undefined) this.#redo(this.#window);
   }
 
   /** A `Graphics`: its primitives in a frame of their own, which the reader can zoom and pan. */

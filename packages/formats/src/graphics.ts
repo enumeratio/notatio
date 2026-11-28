@@ -106,6 +106,10 @@ export const GRAPHICS_HEADS: readonly string[] = [
   "VectorPlot",
   "StreamPlot",
   "ComplexPlot",
+  // A complex function by its parts: two curves, a curve colored by argument, two families of contours.
+  "ReImPlot",
+  "AbsArgPlot",
+  "ComplexContourPlot",
   "ComplexPlot3D",
   "ListPlot",
   "ListLinePlot",
@@ -211,7 +215,14 @@ export function declareHistogram(ce: ComputeEngine): void {
 }
 
 /** Graphics heads whose arguments are held as written, not canonicalised: see `declareGraphics`. */
-const HELD_GRAPHICS: ReadonlySet<string> = new Set(["Show", "Variable", "Graphics"]);
+const HELD_GRAPHICS: ReadonlySet<string> = new Set([
+  "Show",
+  "Variable",
+  "Graphics",
+  "ReImPlot",
+  "AbsArgPlot",
+  "ComplexContourPlot",
+]);
 
 /**
  * Left undeclared: structures' `Midpoint` of two points reads the type an undeclared `Point`

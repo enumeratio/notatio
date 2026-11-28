@@ -5770,3 +5770,6 @@ map	/reference/map/PlanePartition/PlanePartitionShape
 map	/reference/map/PlanePartition/TransposePlanePartition
 symbol	/reference/symbol/PlanePartitionShape
 symbol	/reference/symbol/TransposePlanePartition
+symbol	/reference/symbol/AbsArgPlot
+symbol	/reference/symbol/ComplexContourPlot
+symbol	/reference/symbol/ReImPlot

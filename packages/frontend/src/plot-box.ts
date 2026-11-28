@@ -40,6 +40,8 @@ const BG = "var(--notatio-bg, var(--vp-c-bg, #ffffff))";
 export interface PlotPoint {
   x: number;
   y: number;
+  /** The point's own color, where a curve is colored along its length (`AbsArgPlot`'s by argument). */
+  color?: string;
 }
 
 export interface PlotSeries {
@@ -473,7 +475,10 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
       return at + seg.length;
     }, 0);
     const pairColors: OptionValue[] = [];
-    if (opts.colorBy)
+    // A curve whose points carry colors is drawn in them, segment by segment.
+    const own = s.points.some((p) => p.color !== undefined);
+    if (own) for (const seg of segs) for (let i = 1; i < seg.length; i++) pairColors.push(seg[i]!.color ?? color);
+    else if (opts.colorBy)
       for (const seg of segs)
         for (let i = 1; i < seg.length; i++)
           pairColors.push(rampColor(palette, (rampAt(seg[i - 1]!) + rampAt(seg[i]!)) / 2));
@@ -482,7 +487,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
         line({
           Points: segs.flat().map((p) => [p.x, p.y]),
           ...(breaks.length > 0 && { Breaks: breaks }),
-          ...(opts.colorBy && { SegmentColors: pairColors }),
+          ...((own || opts.colorBy) && { SegmentColors: pairColors }),
         }),
         "Series",
         { EdgeForm: strokeOf(styled, color, CURVE_WIDTH) },

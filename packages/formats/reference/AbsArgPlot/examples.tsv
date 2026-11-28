@@ -1,0 +1,2 @@
+id	section	role	expr	expected	caption	boxes
+square-root	Basic		[AbsArgPlot, [Sqrt, x], [Tuple, x, -4, 4]]	[AbsArgPlot, [Sqrt, x], [Tuple, x, -4, 4]]	The modulus of a square root; the color turns where its argument does, at 0	{head: GraphicsBox, marks: {LineBox: 1}, roles: {Series: 1}}
