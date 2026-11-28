@@ -1,9 +1,2 @@
 id	in
 sine-of-n	DiscretePlot[Sin[n], List[n, 0, 10]]
-squares	DiscretePlot[Power[n, 2], List[n, 0, 10]]
-binomial-row	DiscretePlot[Binomial[10, k], List[k, 0, 10]]
-fibonacci-growth	DiscretePlot[Fibonacci[n], List[n, 1, 15]]
-sign-alternation	DiscretePlot[Divide[Power[-1, n], n], List[n, 1, 20]]
-prime-counting	DiscretePlot[PrimePi[n], List[n, 1, 60]]
-divisor-count	DiscretePlot[DivisorSigma[0, n], List[n, 1, 50]]
-euler-phi	

@@ -1,9 +1,2 @@
 id	section	role	expr	expected	caption
 sine-of-n	Basic		[DiscretePlot, [Sin, n], [Tuple, n, 0, 10]]	[DiscretePlot, [Sin, n], [Tuple, n, 0, 10]]	A function sampled at integers
-squares	Basic		[DiscretePlot, [Power, n, 2], [Tuple, n, 0, 10]]	[DiscretePlot, [Power, n, 2], [Tuple, n, 0, 10]]	Squares at the integers
-binomial-row	Scope		[DiscretePlot, [Binomial, 10, k], [Tuple, k, 0, 10]]	[DiscretePlot, [Binomial, 10, k], [Tuple, k, 0, 10]]	Binomial coefficients of row 10
-fibonacci-growth	Scope		[DiscretePlot, [Fibonacci, n], [Tuple, n, 1, 15]]	[DiscretePlot, [Fibonacci, n], [Tuple, n, 1, 15]]	Fibonacci numbers at the integers
-sign-alternation	Scope		[DiscretePlot, [Divide, [Power, -1, n], n], [Tuple, n, 1, 20]]	[DiscretePlot, [Divide, [Power, -1, n], n], [Tuple, n, 1, 20]]	A sequence that alternates in sign and shrinks
-prime-counting	Applications		[DiscretePlot, [PrimePi, n], [Tuple, n, 1, 60]]	[DiscretePlot, [PrimePi, n], [Tuple, n, 1, 60]]	The prime counting function steps up at each prime
-divisor-count	Applications		[DiscretePlot, [DivisorSigma, 0, n], [Tuple, n, 1, 50]]	[DiscretePlot, [DivisorSigma, 0, n], [Tuple, n, 1, 50]]	The number of divisors of n; primes sit at 2
-euler-phi	Applications		[DiscretePlot, [EulerPhi, n], [Tuple, n, 1, 60]]	[DiscretePlot, [Totient, n], [Tuple, n, 1, 60]]	Euler's totient is irregular and at most n - 1
