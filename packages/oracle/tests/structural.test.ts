@@ -10,6 +10,7 @@ import {
   type Leaf,
   reduce,
   scaled,
+  type Tree,
   symbolic,
   valuesOnly,
 } from "../src/structural.ts";
@@ -46,7 +47,9 @@ test("an unevaluated call disagrees with the value we computed", () => {
 
 test("numeric values still reduce, inside lists too", () => {
   const theirs = ["List", ["Rational", 1, 2], ["PowerMod", 2, -1, 4], 3] as MathJSON;
-  expect(reduce(theirs, valuesOnly(evaluateAll))).toEqual([0.5, symbolic(["PowerMod", 2, -1, 4]), 1]);
+  // The declined call keeps its head and its literal operands, so it is never the number ours computed.
+  expect(reduce(theirs, valuesOnly(evaluateAll))).toEqual([0.5, ["PowerMod", 2, -1, 4], 1]);
+  expect(compareTrees(1, reduce(["PowerMod", 2, -1, 4], valuesOnly(evaluateAll)))).toBe("disagree");
 });
 
 // KaryTree(5) (the default k=2 binary tree on 5 vertices: root 1, children 2 3, 2's children
@@ -313,4 +316,58 @@ test("a tiny value is held to its own digits; only a reference of exactly 0 keep
   expect(compareTrees({ re: 1.9e-55, im: 0 }, { re: 1.9e-55, im: 1.4e-55 })).toBe("disagree");
   expect(compareTrees(1e-16, 0)).toBe("agree");
   expect(compareTrees(0, 1e-16)).toBe("disagree");
+});
+
+// A call over numeric literals that evaluates to no number is a value container: `Around(6, 0.3)` is
+// its mean and its uncertainty. Its components compare under the numeric tolerance like bare numbers.
+describe("a numeric container compares by its components", () => {
+  const evaluateNumbers: (expr: MathJSON) => Leaf = (expr) =>
+    typeof expr === "number"
+      ? expr
+      : Array.isArray(expr) && expr[0] === "Rational"
+        ? (expr[1] as number) / (expr[2] as number)
+        : symbolic(expr);
+  const wolfram = (text: string): Tree => reduce(fromWolfram(text, { tags: true }) as MathJSON, evaluateNumbers);
+  const ours = (expr: MathJSON): Tree => reduce(expr, evaluateNumbers);
+
+  test("float noise in a component (the last bit) agrees", () => {
+    expect(compareTrees(ours(["Around", 6, 0.3]), wolfram("Around[6., 0.30000000000000004]"))).toBe("agree");
+    expect(
+      compareTrees(
+        ours(["Around", 1.744112480153778, 0.14289605814815756]),
+        wolfram("Around[1.7441124801537782, 0.14289605814815762]"),
+      ),
+    ).toBe("agree");
+  });
+
+  test("a component that differs by more than noise disagrees, as does a different head or arity", () => {
+    expect(compareTrees(ours(["Around", 6, 0.3]), wolfram("Around[6., 0.31]"))).toBe("disagree");
+    expect(compareTrees(ours(["Around", 6, 0.3]), wolfram("Around[6.1, 0.3]"))).toBe("disagree");
+    expect(compareTrees(ours(["Around", 6, 0.3]), wolfram("Measurement[6., 0.3]"))).toBe("disagree");
+    expect(compareTrees(ours(["Around", 6, 0.3]), wolfram("Around[6.]"))).toBe("disagree");
+  });
+
+  test("it is the shape of the call that matters, not its head: any call over literals", () => {
+    const third = wolfram("Frobnicate[1, 0.33333333333333337]");
+    expect(compareTrees(ours(["Frobnicate", 1, ["Rational", 1, 3]]), third)).toBe("agree");
+    expect(compareTrees(ours(["Frobnicate", 1, ["Rational", 1, 3]]), wolfram("Frobnicate[1, 0.4]"))).toBe("disagree");
+  });
+
+  test("a held call over a symbol is still compared as its text", () => {
+    expect(compareTrees(ours(["Around", "x", 0.3]), wolfram("Around[x, 0.30000000000000004]"))).toBe("disagree");
+    expect(compareTrees(ours(["Around", "x", 0.3]), wolfram("Around[x, 0.3]"))).toBe("agree");
+  });
+
+  test("a container is not the number its operands would give, nor a list of them", () => {
+    expect(compareTrees(ours(["Around", 6, 0.3]), 6)).toBe("disagree");
+    expect(compareTrees(ours(["Around", 6, 0.3]), wolfram("{6., 0.3}"))).toBe("disagree");
+  });
+
+  test("a bare machine number that is a real precision loss still disagrees", () => {
+    // N[Cos[7^60]]: Wolfram reduces the huge argument in machine precision, ours exactly.
+    expect(compareTrees(-0.9993044805340108, 0.93095983636225)).toBe("disagree");
+    // An interval whose endpoints Wolfram widens by far more than float noise.
+    const widened = wolfram("Interval[{0.9281455485615878, 1.0002822910901161}]");
+    expect(compareTrees(ours(["Interval", 0.9281455538507054, 1]), widened)).toBe("disagree");
+  });
 });

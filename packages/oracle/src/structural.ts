@@ -238,7 +238,40 @@ export function reduce(expr: MathJSON, evaluate: (expr: MathJSON) => Leaf): Tree
   // evaluator that only reads values (`symbolic`, `valuesOnly`) would leave them as text.
   if (expr === "True") return true;
   if (expr === "False") return false;
-  return evaluate(expr);
+  const value = evaluate(expr);
+  // A call over numeric literals that evaluates to no number is a value container (`Around(6, 0.3)`):
+  // its head and its components compare, each under the numeric tolerance. As text, the last bit of a
+  // component's float noise (0.3 against 0.30000000000000004) would read as a different value.
+  if (typeof value === "string" && Array.isArray(expr) && typeof expr[0] === "string" && !ARITHMETIC.has(expr[0])) {
+    const operands = expr.slice(1).map((operand) => literalValue(operand as MathJSON));
+    if (operands.length > 0 && operands.every((operand) => operand !== undefined))
+      return [expr[0], ...operands] as Tree;
+  }
+  return value;
+}
+
+/**
+ * A number written out (a literal, a `{ num }`, a ratio or a complex of them) as the leaf it denotes, read
+ * without the caller's evaluator: a literal is the same number on both sides, whatever either holds.
+ */
+function literalValue(expr: MathJSON): Leaf | undefined {
+  if (typeof expr === "number") return expr;
+  const tagged = taggedReal(expr);
+  if (tagged !== undefined) return tagged;
+  if (!Array.isArray(expr)) {
+    const text = (expr as { num?: unknown } | null)?.num;
+    if (typeof text !== "string") return undefined;
+    return Number.isFinite(Number(text)) ? Number(text) : scaled(text);
+  }
+  const operands = expr.slice(1).map((operand) => literalValue(operand as MathJSON));
+  const reals = operands.filter((operand): operand is number => typeof operand === "number");
+  if (reals.length !== operands.length) return undefined;
+  const [x, y] = reals;
+  if (expr[0] === "Negate" && reals.length === 1) return -(x as number);
+  if (expr[0] === "Rational" && reals.length === 2 && y !== 0) return (x as number) / (y as number);
+  if (expr[0] === "Complex" && reals.length === 2)
+    return y === 0 ? (x as number) : { re: x as number, im: y as number };
+  return undefined;
 }
 
 /** An edge, canonicalised to a comparable, order-free key: `min-max` for an undirected pair
