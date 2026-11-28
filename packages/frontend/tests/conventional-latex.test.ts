@@ -268,4 +268,17 @@ test("a rule is an arrow, as an option in a plotting head's call or anywhere", (
   expect(tex(["Rule", ["Rule", "a", "b"], "c"])).toBe("(a\\to b)\\to c");
   expect(tex(["Add", "a", ["Rule", "b", "c"]])).toBe("a+(b\\to c)");
   expect(tex(["Rule", "a"])).toBe("\\mathrm{Rule}(a)");
+  // A delayed rule is Wolfram's `:\to`, the same way.
+  expect(tex(["Plot", "x", ["Tuple", "x", 0, 1], ["RuleDelayed", "PlotLabel", "x"]])).toContain(
+    "\\mathrm{PlotLabel}:\\to x",
+  );
+});
+
+// Printing a rule as `\to` does not change what `\to` means when LaTeX is read: a limit's subscript and a type
+// arrow read as on a bare engine (the case a reading of `\to` as `Rule` broke).
+test("\\to still reads as compute-engine's To", () => {
+  for (const latex of ["\\lim_{x\\to 0}\\frac{\\sin x}{x}", "f: A \\to B", "x\\to 0"]) {
+    expect(ce.parse(latex).json, latex).toEqual(bare.parse(latex).json);
+  }
+  expect((ce.parse("\\lim_{x\\to 0}\\frac{\\sin x}{x}").json as unknown as unknown[])[0]).toBe("Limit");
 });

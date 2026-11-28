@@ -9,6 +9,10 @@ let injected = false;
 
 const CSS = `
 notatio-in, notatio-out, notatio-cell { display: block; }
+/* An In line wider than its column (KaTeX does not break a long call) scrolls inside its own box,
+   never the page: the box may shrink below its content and clips with a scrollbar. */
+notatio-in { min-width: 0; max-width: 100%; }
+notatio-in .notatio-static { display: block; min-width: 0; max-width: 100%; overflow-x: auto; overflow-y: hidden; }
 notatio-out[inline] { display: inline; }
 notatio-out[display] {
   display: block;
