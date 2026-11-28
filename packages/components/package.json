@@ -61,7 +61,8 @@
     "layer": "presentation",
     "extends": [],
     "reads": [
-      "@sources"
+      "@sources",
+      "../../web/.vitepress/theme/components/ReferencePage.vue"
     ]
   },
   "generated": [

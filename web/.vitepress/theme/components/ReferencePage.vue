@@ -712,10 +712,16 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
 }
 .ref-prerendered {
   display: grid;
-  grid-template-columns: max-content 1fr;
+  grid-template-columns: max-content minmax(0, 1fr);
   gap: 0.25rem 0.75rem;
   align-items: baseline;
   margin: 0.25rem 0;
+}
+/* A formula wider than the column scrolls in its own box, not the page (the live cell does the same). */
+.ref-prerendered > span:not(.ref-io-label) {
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 .ref-io-label {
   font-family: var(--font-code);
