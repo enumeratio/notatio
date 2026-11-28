@@ -392,6 +392,8 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     .filter((p) => Number.isFinite(X.fwd(p.x)))
     .map((p) => Y.fwd(p.y))
     .filter(Number.isFinite);
+  // Stems stand on the zero axis, so the window holds it.
+  if (opts.fill && series.some((s) => s.style === "points") && isLinear(opts.yScale)) tys.push(0);
   if (txs.length === 0 || tys.length === 0) return graphics([], options);
 
   let [txmin, txmax] = opts.xRange
@@ -423,7 +425,7 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
       return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (idx - lo);
     };
     // Samples of a curve trim a pole's spike; given data keeps its largest and smallest.
-    const [qLo, qHi] = series.every((s) => s.given) ? [0, 1] : [0.02, 0.98];
+    const [qLo, qHi] = series.every((s) => s.given || s.style === "points") ? [0, 1] : [0.02, 0.98];
     tymin = quantile(qLo);
     tymax = quantile(qHi);
     if (tymin === tymax) {

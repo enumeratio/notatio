@@ -84,6 +84,7 @@ function samplers(
 const SAMPLED: ReadonlySet<string> = new Set([
   "Plot",
   "ParametricPlot",
+  "DiscretePlot",
   "PolarPlot",
   "VectorPlot",
   "StreamPlot",

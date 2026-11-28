@@ -88,9 +88,9 @@ describe("the gallery's data", () => {
     expect(galleryOf(entries)[0]!.cards[0]!.drawn).toBe("Plot");
   });
 
-  it("leaves out DiscretePlot until its page draws it", () => {
-    expect(EXCLUDED_HEADS.has("DiscretePlot")).toBe(true);
-    expect(cards.filter((c) => c.head === "DiscretePlot" || c.drawn === "DiscretePlot")).toEqual([]);
+  it("shows DiscretePlot's examples, which its page draws as stems", () => {
+    expect(EXCLUDED_HEADS.size).toBe(0);
+    expect(cards.filter((c) => c.head === "DiscretePlot").length).toBeGreaterThan(0);
   });
 });
 

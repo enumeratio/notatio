@@ -101,7 +101,14 @@ const SAMPLED_VALUE = valueOf(
 );
 
 /** The heads a `Show` draws together in one plane: the curve plots, and `Graphics`. */
-export const PLANE_LAYER_HEADS: readonly string[] = ["Graphics", "Plot", "ParametricPlot", "ListPlot", "ListLinePlot"];
+export const PLANE_LAYER_HEADS: readonly string[] = [
+  "Graphics",
+  "Plot",
+  "ParametricPlot",
+  "ListPlot",
+  "ListLinePlot",
+  "DiscretePlot",
+];
 // A `Show` is of the plane when its first layer is; its other layers are a figure's (tiles, diagrams).
 const PLANE_SHOW = new RegExp(`^\\s*Show\\s*\\(\\s*(?:${PLANE_LAYER_HEADS.join("|")})\\s*\\(`);
 

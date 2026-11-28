@@ -77,6 +77,9 @@ const chartRule =
     if (settings === undefined) return undefined;
     const chart = chartBoxOfSettings(settings);
     if (chart !== undefined) return chart;
+    // A `DiscretePlot` of an expression is sampled at its integers by a host that can compile it.
+    if (head === "DiscretePlot" && settings["value"] !== undefined)
+      return unsampledBox(head, plainJson([head, ...args] as never));
     const series = plotDataSeries(settings);
     if (series !== undefined) return plotBox(series, plotOptionsOf(settings));
     return head === "ArrayPlot" ? FIGURE_NOTATION["ArrayPlot"]?.(args, ...rest) : undefined;

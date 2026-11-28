@@ -284,6 +284,38 @@ function oneVariable(
   return out;
 }
 
+/** The most integers a `DiscretePlot` samples (a plot samples at most as many points). */
+const DISCRETE_MAX = 1000;
+
+/**
+ * `DiscretePlot(f, (n, hi))`, `(n, lo, hi)` or `(n, lo, hi, step)`: `f` sampled at the integers of the
+ * iterator (from 1 when `lo` is left out) and drawn as stems, so it is a `Plot` sampled at those points
+ * (`samples`, `mode`, `fill`). A literal list is a chart of its values (`data`).
+ */
+function discreteAttributes(ops: readonly Json[]): Record<string, string> {
+  if (headOf(ops[0]) === "List") return { type: "discrete", data: json(ops[0]) };
+  const out: Record<string, string> = {};
+  if (ops[0] !== undefined) out["value"] = epsil(ops[0]);
+  const parts = tupleOf(ops[1]) ?? (headOf(ops[1]) === "Set" ? opsOf(ops[1]) : undefined);
+  const variable = symOf(parts?.[0]);
+  if (variable) out["var"] = variable;
+  if (parts === undefined) return out;
+  const [lo, hi, step] =
+    parts.length === 2
+      ? [1, realOf(parts[1]), 1]
+      : [realOf(parts[1]), realOf(parts[2]), parts[3] === undefined ? 1 : realOf(parts[3])];
+  if (lo === undefined || hi === undefined || step === undefined || !(step > 0) || hi < lo) return out;
+  const count = Math.min(DISCRETE_MAX, Math.floor((hi - lo) / step + 1e-9) + 1);
+  return {
+    ...out,
+    domain: `${lo},${lo + step * (count - 1)}`,
+    samples: String(Math.max(2, count)),
+    mode: "points",
+    adaptive: "false",
+    fill: "true",
+  };
+}
+
 /** Attributes for a function of two variables over two iterators. */
 function twoVariables(
   ops: readonly Json[],
@@ -890,7 +922,12 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
   chart("PieChart", "pie"),
   chart("BoxWhiskerChart", "box"),
   chart("ArrayPlot", "array", { ColorFunction: colorFunction }),
-  chart("DiscretePlot", "discrete"),
+  {
+    head: "DiscretePlot",
+    tag: "graphics-box",
+    attributes: discreteAttributes,
+    options: { PlotLabel: "label", PlotStyle: written("plot-style") },
+  },
   {
     // The family head: no `type`, so the chart is chosen from the data -- unless a second
     // argument names the member (`Chart(data, "pie")`).

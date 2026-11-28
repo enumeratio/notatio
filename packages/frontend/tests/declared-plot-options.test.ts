@@ -74,6 +74,10 @@ const PROBES: Readonly<Record<string, Probe>> = {
       ColorRules: "[IsUnit -> Red]",
     },
   },
+  DiscretePlot: {
+    call: "DiscretePlot(n^2, (n, 1, 5))",
+    options: { PlotLabel: '"title"', PlotStyle: "Red" },
+  },
   Chart: { call: "Chart([1, 3, 2])", options: { ColorFunction: '"Magma"' } },
 };
 
