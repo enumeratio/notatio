@@ -268,6 +268,10 @@ kernel, the network or hand curation stays committed.
   The tarball check (`tarball.yml`, nightly only; `tools/tarball-check`) packs every package, installs only the
   tarballs into a scratch app, and runs census's tests and the site build (`SITE_FROM_PACKAGES=1`,
   no `srcAliases`) from it; run it locally with `node tools/tarball-check/run.ts`.
+- **Contact sheets** (`ci.yml`'s `contact_sheets`, PRs only, advisory, `continue-on-error`): for each reference head
+  whose records the PR changed (at most 12), `tools/ci/contact-sheets/shoot.ts` opens the built page from the `site`
+  artifact and shoots every example in light, dark and at 400 px into one PNG per head (the `contact-sheets` artifact);
+  a failure to shoot goes in the step summary, never a red build, and nothing is compared to a golden.
 - **compute-engine main** (`ce-main.yml`, daily 07:20 UTC and `workflow_dispatch`, advisory): builds
   compute-engine's `main` (or `ce_ref`) from source, packs it, and each job swaps it in for the pin with a
   pnpm override written in the job (`.github/scripts/compute-engine-tarball.ts`; nothing committed changes),
