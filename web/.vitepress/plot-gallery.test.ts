@@ -9,14 +9,14 @@ import { resolve } from "node:path";
 import "@notatio/frontend";
 import { referenceData } from "@notatio/reference/node";
 import { describe, expect, it } from "vite-plus/test";
-import { draws, exampleHref, FAMILIES, familyOf, galleryOf } from "./data/plot-gallery.ts";
+import { EXCLUDED_HEADS, exampleHref, FAMILIES, familyOf, galleryOf, listed } from "./data/plot-gallery.ts";
 import { entries } from "./data/reference-node.ts";
 import { recordsRoot } from "./data/records-root.ts";
 
 // The records as the loader reads them, before the site assembles its stubs around them.
 const records = referenceData(recordsRoot).entries;
 const drawing = records.flatMap((entry) =>
-  entry.examples.filter(draws).map((example) => `${entry.name}/${example.id}`),
+  entry.examples.filter((example) => listed(entry, example)).map((example) => `${entry.name}/${example.id}`),
 );
 const cards = galleryOf(entries).flatMap((family) => family.cards);
 
@@ -64,6 +64,33 @@ describe("the gallery's data", () => {
     expect(familyOf("PieChart")).toBe("charts");
     expect(familyOf("Graphics")).toBe("graphics");
     expect(new Set(FAMILIES.map((f) => f.id)).size).toBe(FAMILIES.length);
+  });
+
+  it("groups ArrayPlot with the charts, and the fields are the contour, density and region plots", () => {
+    expect(familyOf("ArrayPlot")).toBe("charts");
+    const fields = galleryOf(entries).find((f) => f.id === "fields")!;
+    expect(new Set(fields.cards.map((c) => c.drawn))).toEqual(
+      new Set(["ContourPlot", "DensityPlot", "RegionPlot", "ListContourPlot", "ListDensityPlot"]),
+    );
+  });
+
+  it("orders each family by its stated heads, the rest after them by name", () => {
+    for (const family of galleryOf(entries)) {
+      const spec = FAMILIES.find((f) => f.id === family.id)!;
+      const stated = spec.heads as readonly string[];
+      const seen = family.cards.map((c) => c.drawn).filter((head, i, all) => all.indexOf(head) === i);
+      const inList = seen.filter((head) => stated.includes(head));
+      const after = seen.filter((head) => !stated.includes(head));
+      expect(seen, family.id).toEqual([...inList, ...after]);
+      expect(inList, family.id).toEqual(stated.filter((head) => inList.includes(head)));
+      expect(after, family.id).toEqual(after.toSorted((a, b) => a.localeCompare(b, "en")));
+    }
+    expect(galleryOf(entries)[0]!.cards[0]!.drawn).toBe("Plot");
+  });
+
+  it("leaves out DiscretePlot until its page draws it", () => {
+    expect(EXCLUDED_HEADS.has("DiscretePlot")).toBe(true);
+    expect(cards.filter((c) => c.head === "DiscretePlot" || c.drawn === "DiscretePlot")).toEqual([]);
   });
 });
 

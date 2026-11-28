@@ -124,7 +124,7 @@ onBeforeUnmount(() => stop?.());
 }
 .plot-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
   gap: 1rem;
 }
 .plot-card {
