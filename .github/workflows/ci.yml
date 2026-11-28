@@ -176,6 +176,48 @@ jobs:
           path: web/.vitepress/dist
           retention-days: 3
 
+  # Advisory (BL-632): a contact sheet per reference head the PR changed, each example in a light theme, a dark
+  # theme and at 400 px, shot from the `site` build's artifact. Never a required check and never red: the job
+  # and the script (tools/ci/contact-sheets/) both swallow failures, which land in the step summary.
+  contact_sheets:
+    name: contact sheets (advisory)
+    needs: site
+    if: ${{ !cancelled() && needs.site.result == 'success' && github.event_name == 'pull_request' }}
+    continue-on-error: true
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 12.3.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 26.13.0
+          cache: pnpm
+      - uses: actions/download-artifact@v4
+        with:
+          name: site-dist
+          path: site-dist
+      # Only the web package's own dependencies (Playwright); the script reads the built site, not the libraries.
+      - run: pnpm install --frozen-lockfile --filter @notatio/web
+      - run: pnpm --filter @notatio/web exec playwright install --with-deps chromium
+      - name: shoot the changed heads
+        env:
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          git fetch --no-tags --depth=1 origin "$PR_BASE"
+          xvfb-run -a node tools/ci/contact-sheets/shoot.ts --dist site-dist --out contact-sheets --base "$PR_BASE" || true
+          [ -f contact-sheets/summary.md ] && cat contact-sheets/summary.md >> "$GITHUB_STEP_SUMMARY"
+          exit 0
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: contact-sheets
+          path: contact-sheets
+          if-no-files-found: ignore
+          retention-days: 7
+
   # Branch protection names the required check `check + site build`; the work is in `check` and `site`.
   # A skipped `site` passes, but only when `changes` and `dist` themselves did not fail.
   build:
