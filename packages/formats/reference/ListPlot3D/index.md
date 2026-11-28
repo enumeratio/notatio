@@ -2,7 +2,7 @@
 name: ListPlot3D
 domain: Graphics
 signature: ListPlot3D(...)
-summary: Wolfram's own ListPlot3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: A surface through a grid of heights or a set of points.
 names:
   wolframIdentity: true
 options:
@@ -11,9 +11,12 @@ options:
   - PlotLabel
   - PlotLegends
   - ScalingFunctions
+  - Type
 signatures:
   - call: ListPlot3D(...)
-    description: Wolfram's own ListPlot3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: A surface through a grid of heights or a set of points.
     library: enumeratio-formats
     type: (any*) -> any
 ---
+
+`ListPlot3D(rows)` draws the surface through a matrix of heights, and a list of triples `(x, y, z)` is joined into a surface; `Type -> "points"` draws them as a scatter. `ColorFunction` names the gradient.

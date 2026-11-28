@@ -2,7 +2,7 @@
 name: BarChart3D
 domain: Graphics
 signature: BarChart3D(...)
-summary: Wolfram's own BarChart3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: A matrix as bars on a grid.
 names:
   wolframIdentity: true
 options:
@@ -13,7 +13,9 @@ options:
   - ScalingFunctions
 signatures:
   - call: BarChart3D(...)
-    description: Wolfram's own BarChart3D, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: A matrix as bars on a grid.
     library: enumeratio-formats
     type: (any*) -> any
 ---
+
+`BarChart3D(rows)` draws one bar for each entry of a matrix, and a flat list is a single row. `ColorFunction` names the gradient.

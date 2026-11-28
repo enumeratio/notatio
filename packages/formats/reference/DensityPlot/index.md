@@ -2,7 +2,7 @@
 name: DensityPlot
 domain: Graphics
 signature: DensityPlot(...)
-summary: Wolfram's own DensityPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: A function of two variables as a field of color.
 names:
   wolframIdentity: true
 options:
@@ -17,9 +17,9 @@ options:
   - YLabel
 signatures:
   - call: DensityPlot(...)
-    description: Wolfram's own DensityPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: A function of two variables as a field of color.
     library: enumeratio-formats
     type: (any*) -> any
 ---
 
-Draws as a `GraphicsBox` holding a `RasterBox`: one cell per sample, colored along the gradient by value (`ColorFunction`, `Reverse`). `PlotLegends -> True` adds a color bar, and `PlotRange -> (zmin, zmax)` pins the scale so several plots compare on one. `PlotPoints` is the samples per side, and `RegionFunction -> pred` leaves clear whatever lies outside the predicate.
+`DensityPlot(f, (x, a, b), (y, c, d))` colors each cell by the value of `f`. `ColorFunction` names the gradient, `PlotRange` pins the scale, `PlotLegends -> True` adds a color bar and `RegionFunction` leaves clear whatever lies outside a predicate.

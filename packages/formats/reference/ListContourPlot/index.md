@@ -2,7 +2,7 @@
 name: ListContourPlot
 domain: Graphics
 signature: ListContourPlot(...)
-summary: Wolfram's own ListContourPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: Contours of a grid of values.
 names:
   wolframIdentity: true
 options:
@@ -16,9 +16,9 @@ options:
   - YLabel
 signatures:
   - call: ListContourPlot(...)
-    description: Wolfram's own ListContourPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: Contours of a grid of values.
     library: enumeratio-formats
     type: (any*) -> any
 ---
 
-Contours of a grid of values, lowered whole: row 0 is the least y, at the bottom of the frame. Options as `ContourPlot`'s.
+`ListContourPlot(rows)` draws level curves through a matrix of numbers, row 0 at the bottom. It takes `ContourPlot`'s options for levels and shading.

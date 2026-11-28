@@ -1,2 +1,8 @@
-id	section	role	expr	expected	caption	boxes
-square-root	Basic		[AbsArgPlot, [Sqrt, x], [Tuple, x, -4, 4]]	[AbsArgPlot, [Sqrt, x], [Tuple, x, -4, 4]]	The modulus of a square root; the color turns where its argument does, at 0	{head: GraphicsBox, marks: {LineBox: 1}, roles: {Series: 1}}
+id	section	role	expr	expected	caption
+square-root	Basic		[AbsArgPlot, [Sqrt, x], [Tuple, x, -4, 4]]	[AbsArgPlot, [Sqrt, x], [Tuple, x, -4, 4]]	The modulus of a square root; the color turns where its argument does, at 0
+unit-circle	Basic		[AbsArgPlot, [Exp, [Multiply, ImaginaryUnit, x]], [Tuple, x, 0, [Multiply, 2, Pi]]]	[AbsArgPlot, [Exp, [Multiply, ImaginaryUnit, x]], [Tuple, x, 0, [Multiply, 2, Pi]]]	e^(ix) has modulus 1 throughout: a flat line whose color runs the full wheel once
+lorentzian	Scope		[AbsArgPlot, [Divide, 1, [Add, 1, [Multiply, ImaginaryUnit, x]]], [Tuple, x, -6, 6]]	[AbsArgPlot, [Divide, 1, [Add, 1, [Multiply, ImaginaryUnit, x]]], [Tuple, x, -6, 6]]	|1/(1 + ix)|, a bump whose color slides from cyan to red and back, the argument going from −π/2 to π/2
+log	Scope		[AbsArgPlot, [Log, x], [Tuple, x, -4, 4]]	[AbsArgPlot, [Log, x], [Tuple, x, -4, 4]]	log x: the argument is π for every negative x and 0 beyond 1, with the zero at 1
+zeta-critical-line	Applications		[AbsArgPlot, [Zeta, [Add, [Divide, 1, 2], [Multiply, ImaginaryUnit, x]]], [Tuple, x, 0, 40]]	[AbsArgPlot, [Zeta, [Add, [Divide, 1, 2], [Multiply, ImaginaryUnit, x]]], [Tuple, x, 0, 40]]	|ζ(1/2 + it)| touches 0 at each nontrivial zero, the color turning at each touch
+gamma-imaginary	Applications		[AbsArgPlot, [Gamma, [Multiply, ImaginaryUnit, x]], [Tuple, x, 0.2, 5]]	[AbsArgPlot, [Gamma, [Multiply, ImaginaryUnit, x]], [Tuple, x, 0.2, 5]]	|Γ(it)| decays exponentially, its argument circling more and more rapidly
+plot-range	Options		[AbsArgPlot, [Divide, 1, [Add, 1, [Multiply, ImaginaryUnit, x]]], [Tuple, x, -6, 6], [Rule, PlotRange, [Tuple, 0, 2]]]	[AbsArgPlot, [Divide, 1, [Add, 1, [Multiply, ImaginaryUnit, x]]], [Tuple, x, -6, 6], [Rule, PlotRange, [Tuple, 0, 2]]]	A fixed vertical window

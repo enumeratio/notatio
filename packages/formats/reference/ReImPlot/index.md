@@ -2,7 +2,7 @@
 name: ReImPlot
 domain: Graphics
 signature: ReImPlot(f, (x, xmin, xmax))
-summary: "Wolfram's ReImPlot, held inert: the real and the imaginary part of a complex-valued function of a real variable, as two curves."
+summary: The real and imaginary parts of a complex function of a real variable.
 names:
   wolframIdentity: true
 attributes:
@@ -28,11 +28,9 @@ seeAlso:
   - Plot
 signatures:
   - call: ReImPlot(f, (x, xmin, xmax))
-    description: "Wolfram's ReImPlot, held inert: the real and the imaginary part of a complex-valued function of a real variable, as two curves."
+    description: The real and imaginary parts of a complex function of a real variable.
     library: enumeratio-formats
     type: (any*) -> any
 ---
 
-The function is evaluated by the complex evaluator `ComplexPlot` uses, which reads the elementary functions, powers, `Gamma` and the zeta family; a function outside those draws nothing and says so.
-
-Draws as a `GraphicsBox` of two `LineBox`es, labeled `Re` and `Im`, sampled and zoomed as `Plot` is. The frame's options and `PlotStyle` are `Plot`'s.
+`ReImPlot(f, (x, a, b))` draws `Re f` and `Im f` as two curves. It evaluates the elementary functions, powers, `Gamma` and the zeta family, and takes `Plot`'s options.

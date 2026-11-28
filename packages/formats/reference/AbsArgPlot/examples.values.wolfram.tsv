@@ -1,2 +1,8 @@
 id	in
 square-root	AbsArgPlot[Sqrt[x], List[x, -4, 4]]
+unit-circle	AbsArgPlot[Exp[Times[I, x]], List[x, 0, Times[2, Pi]]]
+lorentzian	AbsArgPlot[Divide[1, Plus[1, Times[I, x]]], List[x, -6, 6]]
+log	AbsArgPlot[Log[10, x], List[x, -4, 4]]
+zeta-critical-line	AbsArgPlot[Zeta[Plus[Divide[1, 2], Times[I, x]]], List[x, 0, 40]]
+gamma-imaginary	AbsArgPlot[Gamma[Times[I, x]], List[x, 0.2, 5]]
+plot-range	AbsArgPlot[Divide[1, Plus[1, Times[I, x]]], List[x, -6, 6], Rule[PlotRange, List[0, 2]]]

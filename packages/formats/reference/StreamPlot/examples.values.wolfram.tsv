@@ -1,2 +1,10 @@
 id	in
 rotation	StreamPlot[List[Minus[y], x], List[x, -2, 2], List[y, -2, 2]]
+saddle	StreamPlot[List[x, Minus[y]], List[x, -2, 2], List[y, -2, 2]]
+spiral-sink	StreamPlot[List[Subtract[Minus[x], y], Subtract[x, y]], List[x, -2, 2], List[y, -2, 2]]
+source-and-sink	StreamPlot[List[Subtract[Divide[Subtract[x, 1], Plus[Power[Subtract[x, 1], 2], Power[y, 2]]], Divide[Plus[x, 1], Plus[Power[Plus[x, 1], 2], Power[y, 2]]]], Subtract[Divide[y, Plus[Power[Subtract[x, 1], 2], Power[y, 2]]], Divide[y, Plus[Power[Plus[x, 1], 2], Power[y, 2]]]]], List[x, -3, 3], List[y, -2, 2]]
+pendulum	StreamPlot[List[y, Minus[Sin[x]]], List[x, Times[-2, Pi], Times[2, Pi]], List[y, -3, 3]]
+van-der-pol	StreamPlot[List[y, Subtract[Times[Subtract[1, Power[x, 2]], y], x]], List[x, -3, 3], List[y, -3, 3]]
+predator-prey	StreamPlot[List[Times[x, Subtract[1, y]], Times[y, Subtract[x, 1]]], List[x, 0, 3], List[y, 0, 3]]
+color-function	StreamPlot[List[Sin[y], Cos[x]], List[x, Minus[Pi], Pi], List[y, Minus[Pi], Pi], Rule[ColorFunction, "Magma"]]
+labeled	StreamPlot[List[Minus[y], x], List[x, -2, 2], List[y, -2, 2], Rule[PlotLabel, "rotation"]]

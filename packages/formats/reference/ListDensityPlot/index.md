@@ -2,7 +2,7 @@
 name: ListDensityPlot
 domain: Graphics
 signature: ListDensityPlot(...)
-summary: Wolfram's own ListDensityPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: A grid of values as colored cells.
 names:
   wolframIdentity: true
 options:
@@ -16,9 +16,9 @@ options:
   - YLabel
 signatures:
   - call: ListDensityPlot(...)
-    description: Wolfram's own ListDensityPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: A grid of values as colored cells.
     library: enumeratio-formats
     type: (any*) -> any
 ---
 
-A grid of values as cells, lowered whole: row 0 is the least y, at the bottom of the frame. Options as `DensityPlot`'s.
+`ListDensityPlot(rows)` colors one cell per entry of a matrix, row 0 at the bottom. It takes `DensityPlot`'s options for the gradient, the scale and the color bar.
