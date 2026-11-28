@@ -460,6 +460,25 @@ const truth = (name: "True" | "False", trigger: string): Entry => ({
   serialize: () => `\\mathrm{${name}}`,
 });
 
+/** Precedence of `\to` in compute-engine's dictionary. */
+const ARROW_PRECEDENCE = 270;
+
+/** `a \to b`, right-associative: an option (`PlotRange \to (-6, 6)`) or a rule anywhere reads as the
+ *  arrow, not `\mathrm{Rule}(a, b)`. The reader takes `\to` as `To`, and a head that declares the
+ *  name as an option reads it as that `Rule` (`rulesInCalls`). A rule of other than two operands is the call. */
+const rule: Entry = {
+  name: "Rule",
+  kind: "infix",
+  precedence: ARROW_PRECEDENCE,
+  associativity: "right",
+  serialize: (serializer, expr) => {
+    const args = operands(expr);
+    if (args.length !== 2) return asCall(serializer, "Rule", args);
+    const [key, value] = args as [MathJsonExpression, MathJsonExpression];
+    return `${serializer.wrap(key, ARROW_PRECEDENCE + 1)}\\to ${serializer.wrap(value, ARROW_PRECEDENCE)}`;
+  },
+};
+
 /** The overrides, one per native head that needed one. */
 /** A name in a namespace, `a.b.c`, from its `Field` chain; undefined if a part isn't a name. */
 function dotted(json: MathJsonExpression | undefined): string | undefined {
@@ -492,6 +511,7 @@ const memberCall: Entry = {
 
 export const CONVENTIONAL_LATEX: readonly Entry[] = [
   memberCall,
+  rule,
   truth("True", "\\top"),
   truth("False", "\\bot"),
   operatorname("Erf", "erf"),

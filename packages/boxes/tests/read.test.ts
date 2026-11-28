@@ -524,3 +524,14 @@ test("a rule is written a → b, looser than logic and right-associative, and re
   ] as MathJsonExpression[])
     expect(roundTrip(json), JSON.stringify(json)).toBe("exact");
 });
+
+test("an option prints as an arrow in a plotting head's call, held or not", () => {
+  const shown = (json: MathJsonExpression) => toText(makeBoxes(json));
+  expect(shown(["Plot", ["Sin", "x"], ["Tuple", "x", 0, 1], ["Rule", "PlotRange", ["Tuple", -6, 6]]])).toBe(
+    "Plot(sin(x), (x, 0, 1), PlotRange → (−6, 6))",
+  );
+  expect(shown(["BarChart", ["List", 1, 2], ["Rule", "PlotRange", "All"]])).toBe("BarChart([1, 2], PlotRange → All)");
+  expect(shown(["Hold", ["Graphics", ["Circle"], ["Rule", "Axes", "True"]]])).toBe(
+    "Hold(Graphics(Circle(), Axes → ⊤))",
+  );
+});
