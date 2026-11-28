@@ -1921,7 +1921,6 @@ symbol	/reference/symbol/About
 symbol	/reference/symbol/AboveAverageDegreeVertexCount
 symbol	/reference/symbol/Abs
 symbol	/reference/symbol/AbsArg
-symbol	/reference/symbol/AbsArgPlot
 symbol	/reference/symbol/AbsoluteAdjacencyDeterminant
 symbol	/reference/symbol/AbsoluteDashing
 symbol	/reference/symbol/AbsoluteOrderCoverCount
@@ -2406,7 +2405,6 @@ symbol	/reference/symbol/CompleteHomogeneousSymmetricFunctionAtOne
 symbol	/reference/symbol/CompleteKaryTree
 symbol	/reference/symbol/CompleteOrderedTree
 symbol	/reference/symbol/Complex
-symbol	/reference/symbol/ComplexContourPlot
 symbol	/reference/symbol/ComplexExpand
 symbol	/reference/symbol/ComplexInfinity
 symbol	/reference/symbol/ComplexNumbers
@@ -4584,7 +4582,6 @@ symbol	/reference/symbol/RawBoxes
 symbol	/reference/symbol/RayleighDistribution
 symbol	/reference/symbol/Re
 symbol	/reference/symbol/ReIm
-symbol	/reference/symbol/ReImPlot
 symbol	/reference/symbol/ReadingTableau
 symbol	/reference/symbol/ReadingWord
 symbol	/reference/symbol/Real
@@ -5773,3 +5770,6 @@ map	/reference/map/PlanePartition/PlanePartitionShape
 map	/reference/map/PlanePartition/TransposePlanePartition
 symbol	/reference/symbol/PlanePartitionShape
 symbol	/reference/symbol/TransposePlanePartition
+symbol	/reference/symbol/AbsArgPlot
+symbol	/reference/symbol/ComplexContourPlot
+symbol	/reference/symbol/ReImPlot
