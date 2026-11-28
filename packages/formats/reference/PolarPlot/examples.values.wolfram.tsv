@@ -1,3 +1,11 @@
 id	in
 cardioid	PolarPlot[Plus[Cos[theta], 1]]
+lemniscate-polar	PolarPlot[Sqrt[Cos[Times[2, theta]]], List[theta, -0.785, 0.785]]
+archimedean	PolarPlot[theta, List[theta, 0, 12.566]]
+three-petal-rose	PolarPlot[Cos[Times[3, theta]], List[theta, 0, 6.283]]
+five-petal-rose	PolarPlot[Cos[Times[5, theta]], List[theta, 0, 6.283]]
+limacon	PolarPlot[Plus[1, Times[2, Cos[theta]]], List[theta, 0, 6.283]]
+logarithmic-spiral	PolarPlot[Exp[Divide[theta, 6]], List[theta, 0, 18.85]]
+negative-radius	PolarPlot[Sin[Divide[theta, 2]], List[theta, 0, 12.566]]
 four-petal-rose	PolarPlot[Cos[Times[2, theta]], List[Filled, True], List[enumeratio`Label, "r = cos 2θ"]]
+cardioid-filled	PolarPlot[Plus[1, Cos[theta]], List[theta, 0, 6.283], Rule[Filled, True]]

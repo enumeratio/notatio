@@ -1,3 +1,10 @@
 id	in
 labelled	BarChart[List[12, 19, 7, 15, 10], List[Labels, List["Mon", "Tue", "Wed", "Thu", "Fri"]], List[enumeratio`Label, "Daily commits"]]
 negative	BarChart[List[3, -2, 5, -1, 4]]
+squares-small	BarChart[List[1, 4, 9, 16, 25, 36, 49, 64]]
+binomial-row	BarChart[List[1, 8, 28, 56, 70, 56, 28, 8, 1]]
+zeros	BarChart[List[0, 3, 0, 5, 0, 2]]
+partition-counts	BarChart[List[1, 2, 3, 5, 7, 11, 15, 22, 30, 42]]
+catalan-small	BarChart[List[1, 1, 2, 5, 14, 42, 132]]
+titled-labels	BarChart[List[4, 7, 3], List[Labels, List["a", "b", "c"]], List[enumeratio`Label, "counts"]]
+negative-labels	BarChart[List[3, -2, 5, -1], List[Labels, List["a", "b", "c", "d"]]]

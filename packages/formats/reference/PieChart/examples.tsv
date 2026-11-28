@@ -1,2 +1,7 @@
 id	section	role	expr	expected	caption	boxes
 proportions	Basic		[PieChart, [List, 35, 25, 20, 20], [Tuple, Labels, [List, "'A'", "'B'", "'C'", "'D'"]]]	[PieChart, [List, 35, 25, 20, 20], [Tuple, Labels, [List, "'A'", "'B'", "'C'", "'D'"]]]	Proportions of a value list, with a legend	{head: GraphicsBox, marks: {DiskBox: 4}, roles: {Wedge: 4}, options: {ChartKind: Pie}}
+pie-four	Scope		[PieChart, [List, 1, 1, 1, 1]]	[PieChart, [List, 1, 1, 1, 1]]	Four equal quarters	{head: GraphicsBox, marks: {DiskBox: 4}, roles: {Wedge: 4}}
+pie-small-slice	Scope		[PieChart, [List, 95, 5]]	[PieChart, [List, 95, 5]]	A dominant wedge and a sliver	{head: GraphicsBox, marks: {DiskBox: 2}, roles: {Wedge: 2}}
+pie-six	Scope		[PieChart, [List, 30, 25, 20, 12, 8, 5], [Tuple, Labels, [List, "'a'", "'b'", "'c'", "'d'", "'e'", "'f'"]]]	[PieChart, [List, 30, 25, 20, 12, 8, 5], [Tuple, Labels, [List, "'a'", "'b'", "'c'", "'d'", "'e'", "'f'"]]]	Six labelled shares in descending order	{head: GraphicsBox, marks: {DiskBox: 6}, roles: {Wedge: 6}}
+two-halves	Scope		[PieChart, [List, 1, 1]]	[PieChart, [List, 1, 1]]	Equal halves	{head: GraphicsBox, marks: {DiskBox: 2}, roles: {Wedge: 2}}
+labelled-shares	Options		[PieChart, [List, 45, 30, 15, 10], [Tuple, Labels, [List, "'a'", "'b'", "'c'", "'d'"]], [Tuple, Label, "'share'"]]	[PieChart, [List, 45, 30, 15, 10], [Tuple, Labels, [List, "'a'", "'b'", "'c'", "'d'"]], [Tuple, Label, "'share'"]]	Labels name the wedges, Label titles the chart	{head: GraphicsBox, marks: {DiskBox: 4}, roles: {Wedge: 4}}

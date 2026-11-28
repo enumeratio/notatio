@@ -1,2 +1,7 @@
 id	in
 proportions	PieChart[List[35, 25, 20, 20], List[Labels, List["A", "B", "C", "D"]]]
+pie-four	PieChart[List[1, 1, 1, 1]]
+pie-small-slice	PieChart[List[95, 5]]
+pie-six	PieChart[List[30, 25, 20, 12, 8, 5], List[Labels, List["a", "b", "c", "d", "e", "f"]]]
+two-halves	PieChart[List[1, 1]]
+labelled-shares	PieChart[List[45, 30, 15, 10], List[Labels, List["a", "b", "c", "d"]], List[enumeratio`Label, "share"]]

@@ -1,3 +1,11 @@
 id	in	out	tex.in	tex.out
 list	Chart[List[1, 2, 3]]	Chart[{1, 2, 3}]	\text{Chart}(\{1,2,3\})	\text{Chart}(\{1,2,3\})
 pie	Chart[List[1, 2, 3], "pie"]	Chart[{1, 2, 3}, "pie"]	\text{Chart}(\{1,2,3\},\text{pie})	\text{Chart}(\{1,2,3\},\text{pie})
+auto-bar	Chart[List[3, 1, 4, 1, 5]]			
+auto-histogram	Chart[List[1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7]]			
+auto-array-three	Chart[List[List[1, 2, 3], List[4, 5, 6], List[7, 8, 9]]]			
+auto-pairs	Chart[List[List[1, 2], List[2, 1], List[3, 4]]]			
+auto-box	Chart[List[List[1, 2, 3, 4, 9], List[2, 3, 3, 4]]]			
+named-pie	Chart[List[3, 2, 1], "pie"]			
+named-histogram	Chart[List[1, 2, 2, 3, 3, 3], "histogram"]			
+named-bar-long	Chart[List[1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7], "bar"]			
