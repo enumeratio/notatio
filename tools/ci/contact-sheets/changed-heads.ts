@@ -4,8 +4,9 @@
 // for compute-engine's own heads), holding `index.md`, `examples.tsv` and each kernel's
 // `examples.values.<system>.tsv`. The site serves it at `/reference/symbol/<Head>/`.
 
-/** Most heads shot in one run; a change to more is reported as capped. */
-export const MAX_HEADS = 12;
+/** Most heads shot in one run; a change to more is reported as capped. An examples slice changes about fifteen
+ *  heads, and a WebGL head costs about a minute of SwiftShader frames on a runner (twelve took twelve minutes). */
+export const MAX_HEADS = 24;
 
 const RECORD_FILE =
   /^packages\/(?:[^/]+\/reference|reference\/entries)\/([^/]+)\/(?:index\.md|examples\.tsv|examples\.values\.[^/]+\.tsv)$/;

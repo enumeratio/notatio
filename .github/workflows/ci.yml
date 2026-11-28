@@ -185,7 +185,8 @@ jobs:
     if: ${{ !cancelled() && needs.site.result == 'success' && github.event_name == 'pull_request' }}
     continue-on-error: true
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    # MAX_HEADS (24) WebGL heads at about a minute each, with room.
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
