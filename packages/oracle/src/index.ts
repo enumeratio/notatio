@@ -44,9 +44,11 @@ export {
   compareCombination,
   compareCombinations,
   compareMachine,
+  compareHeldCall,
   comparePythonStructured,
   linearCombination,
   normalise,
+  parsePadic,
   parsePython,
   type Verdict,
 } from "./compare.ts";

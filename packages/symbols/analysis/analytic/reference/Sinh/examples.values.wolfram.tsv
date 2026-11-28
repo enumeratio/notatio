@@ -1,41 +1,41 @@
-id	in	out	shown	tex.in	tex.out	verdict
-n-sinh-0	N[Sinh[0]]	0.		N[\sinh (0)]	0.	
-n-sinh-1	N[Sinh[1]]	1.1752011936438014		N[\sinh (1)]	1.1752	
-sinh-0	Sinh[0]	0		\sinh (0)	0	
-a-float-argument-evaluates-directly-no-n-needed	Sinh[1.4]	1.9043015014515339		\sinh (1.4)	1.9043	
-series-sinh-x-x-0-10	Series[Sinh[x], List[x, 0, 10]]	SeriesData[x, 0, {1, 0, 1/6, 0, 1/120, 0, 1/5040, 0, 1/362880}, 1, 11, 1]		\text{Series}[\sinh (x),\{x,0,10\}]	x+\frac{x^3}{6}+\frac{x^5}{120}+\frac{x^7}{5040}+\frac{x^9}{362880}+O\left(x^{11}\right)	
-arbitrary-precision-via-n	N[Sinh[Rational[7, 5]]]	1.9043015014515339		N\left[\sinh \left(\frac{7}{5}\right)\right]	1.9043	
-evaluates-at-a-complex-argument	Sinh[Complex[2.5, 1]]	3.268939432079549 + 5.160143667579705*I		\sinh (2.5\, +i)	3.26894\, +5.16014 i	
-sinh-i-pi-2-i-sin-pi-2-i	Sinh[Times[I, Divide[Pi, 2]]]	I		\sinh \left(i \frac{\pi }{2}\right)	i	
-element-wise-over-a-matrix-of-imaginary	Sinh[List[List[Times[I, Divide[Times[1, Pi], 3]], Minus[Times[I, Divide[Times[1, Pi], 3]]]], List[0, Minus[Times[I, Divide[Times[1, Pi], 6]]]]]]	{{(I/2)*Sqrt[3], (-1/2*I)*Sqrt[3]}, {0, -1/2*I}}		\sinh \left(\left( \begin{array}{cc}  i \frac{1 \pi }{3} & -\left(i \frac{1 \pi }{3}\right) \\  0 & -\left(i \frac{1 \pi }{6}\right) \\ \end{array} \right)\right)	\left( \begin{array}{cc}  \frac{i \sqrt{3}}{2} & -\frac{i \sqrt{3}}{2} \\  0 & -\frac{i}{2} \\ \end{array} \right)	
-interval-arithmetic-sinh-is-increasing-so-sinh-0	Sinh[Interval[List[0, Log[3]]]]	Interval[{0, 4/3}]		\sinh (\text{Interval}[\{0,\log (3)\}])	\text{Interval}\left[\left\{0,\frac{4}{3}\right\}\right]	
-uncertainty-propagation-sinh-2-sqrt-3-pm-0-1	Sinh[Around[Divide[2, Sqrt[3]], 0.1]]	Around[1.428960581481576, 0.17441124801537783]		\sinh \left(\frac{2}{\sqrt{3}}\pm 0.10\right)	1.43\pm 0.17	disagree
-sinh-positiveinfinity	Sinh[Infinity]	Infinity		\sinh (\infty )	\infty	
-sinh-ln-2-frac-2-1-2-2-frac-34	Sinh[Log[2]]	3/4		\sinh (\log (2))	\frac{3}{4}	
-a-real-symbolic-argument-is-untouched	Sinh[x]	Sinh[x]		\sinh (x)	\sinh (x)	
-oddness-pulls-the-sign-out-of-a-symbolic	Sinh[Minus[x]]	-Sinh[x]		\sinh (-x)	-\sinh (x)	
-sinh-arsinh-x-x-for-every-x	Sinh[ArcSinh[x]]	x		\sinh \left(\sinh ^{-1}(x)\right)	x	
-sinh-arsinh-2-2-for-every-x	Sinh[ArcSinh[2]]	2		\sinh \left(\sinh ^{-1}(2)\right)	2	
-derivative-cosh-x	D[Sinh[x], x]	Cosh[x]		\frac{\partial \sinh (x)}{\partial x}	\cosh (x)	
-antiderivative	Integrate[Sinh[x], x]	Cosh[x]		\int \sinh (x) \, dx	\cosh (x)	
-taylor-series-about-0	Series[Sinh[x], List[x, 0, 5]]	SeriesData[x, 0, {1, 0, 1/6, 0, 1/120}, 1, 6, 1]		\text{Series}[\sinh (x),\{x,0,5\}]	x+\frac{x^3}{6}+\frac{x^5}{120}+O\left(x^6\right)	
-to-30-significant-digits-correctly-rounded	N[Sinh[1], 30]	1.1752011936438014568823818505956008151557179813340958702296`30.	1.17520119364380145688238185060	N[\sinh (1),30]	1.17520119364380145688238185060	
-n-decimalizes-sinh-i-pi-2-not-just-the-exact	N[Sinh[Times[I, Divide[Pi, 2]]]]	0. + 1.*I		N\left[\sinh \left(i \frac{\pi }{2}\right)\right]	0.\, +1. i	
-n-sinh-7-over-5-50	N[Sinh[Rational[7, 5]], 50]	1.90430150145153405514212382769742630955163868372129479120283226901463940858675`50.	1.9043015014515340551421238276974263095516386837213	N\left[\sinh \left(\frac{7}{5}\right),50\right]	1.9043015014515340551421238276974263095516386837213	
-sinh-1-over-5-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 5]], Pi]]	I*Sqrt[5/8 - Sqrt[5]/8]		\sinh ((\text{Rational}[1,5] i) \pi )	i \sqrt{\frac{5}{8}-\frac{\sqrt{5}}{8}}	
-sinh-1-over-24-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 24]], Pi]]	I*Sin[Pi/24]		\sinh ((\text{Rational}[1,24] i) \pi )	i \sin \left(\frac{\pi }{24}\right)	
-matrixfunction-function-sinh-1-1-list-list-1	MatrixFunction[Function[Sinh[Slot[1]]], List[List[Times[Complex[0, Rational[1, 3]], Pi], Times[Complex[0, Rational[-1, 3]], Pi]], List[0, Times[Complex[0, Rational[-1, 6]], Pi]]]]	{{(I/2)*Sqrt[3], -1/3*I - I/Sqrt[3]}, {0, -1/2*I}}		\text{MatrixFunction}\left[\sinh (\text{$\#$1})\&,\left( \begin{array}{cc}  (\text{Rational}[1,3] i) \pi  & (\text{Rational}[-1,3] i) \pi  \\  0 & (\text{Rational}[-1,6] i) \pi  \\ \end{array} \right)\right]	\left( \begin{array}{cc}  \frac{i \sqrt{3}}{2} & -\frac{i}{3}-\frac{i}{\sqrt{3}} \\  0 & -\frac{i}{2} \\ \end{array} \right)	
-odd-function-sinh-x-sinh-x	(Sinh[Minus[1]] == Minus[Sinh[1]])	True		\sinh (-1)=-\sinh (1)	\text{True}	
-definition-in-terms-of-exp-sinh-x-frac-e-x-e-x-2	(Sinh[1] == Divide[Subtract[Exp[1], Exp[Minus[1]]], 2])	True		\sinh (1)=\frac{\exp (1)-\exp (-1)}{2}	\text{True}	
-the-definition-sinh-x-frac-e-x-e-x-2	TrigToExp[Sinh[x]]	-1/2*1/E^x + E^x/2		\text{TrigToExp}[\sinh (x)]	\frac{e^x}{2}-\frac{e^{-x}}{2}	
-sinh-1-over-12-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 12]], Pi]]	((I/2)*(-1 + Sqrt[3]))/Sqrt[2]		\sinh ((\text{Rational}[1,12] i) \pi )	\frac{i \left(\sqrt{3}-1\right)}{2 \sqrt{2}}	
-sinh-1-over-10-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 10]], Pi]]	(I/4)*(-1 + Sqrt[5])		\sinh ((\text{Rational}[1,10] i) \pi )	\frac{1}{4} i \left(\sqrt{5}-1\right)	
-sinh-1-over-9-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 9]], Pi]]	I*Sin[Pi/9]		\sinh ((\text{Rational}[1,9] i) \pi )	i \sin \left(\frac{\pi }{9}\right)	
-sinh-1-over-8-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 8]], Pi]]	I*Sin[Pi/8]		\sinh ((\text{Rational}[1,8] i) \pi )	i \sin \left(\frac{\pi }{8}\right)	
-sinh-1-over-7-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 7]], Pi]]	I*Sin[Pi/7]		\sinh ((\text{Rational}[1,7] i) \pi )	i \sin \left(\frac{\pi }{7}\right)	
-sinh-1-over-6-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 6]], Pi]]	I/2		\sinh ((\text{Rational}[1,6] i) \pi )	\frac{i}{2}	
-sinh-2-over-9-times-i-times-pi	Sinh[Times[Complex[0, Rational[2, 9]], Pi]]	I*Sin[(2*Pi)/9]		\sinh ((\text{Rational}[2,9] i) \pi )	i \sin \left(\frac{2 \pi }{9}\right)	
-neg-2-times-2-times-sinh-1-over-2-pow-2-plus-2	Plus[Times[-2, Plus[Times[2, Power[Sinh[Rational[1, 2]], 2]], Times[2, Power[Sinh[Rational[1, 2]], 4]]], Power[Sinh[1], 2]], Power[Sinh[1], 4]]	-2*(2*Sinh[1/2]^2 + 2*Sinh[1/2]^4)*Sinh[1]^2 + Sinh[1]^4		-2 \left(2 \sinh ^2\left(\frac{1}{2}\right)+2 \sinh ^4\left(\frac{1}{2}\right)\right) \sinh ^2(1)+\sinh ^4(1)	\sinh ^4(1)-2 \left(2 \sinh ^4\left(\frac{1}{2}\right)+2 \sinh ^2\left(\frac{1}{2}\right)\right) \sinh ^2(1)	
-n-sinh-1-over-2-plus-cosh-1-over-2-pow-2	N[Power[Plus[Sinh[Rational[1, 2]], Cosh[Rational[1, 2]]], 2]]	2.7182818284590455		N\left[\left(\sinh \left(\frac{1}{2}\right)+\cosh \left(\frac{1}{2}\right)\right)^2\right]	2.71828	
-n-neg-sinh-1-over-2-plus-cosh-1-over-2-pow-2	N[Power[Plus[Minus[Sinh[Rational[1, 2]]], Cosh[Rational[1, 2]]], 2]]	0.36787944117144217		N\left[\left(-\sinh \left(\frac{1}{2}\right)+\cosh \left(\frac{1}{2}\right)\right)^2\right]	0.367879	
-n-sinh-1-pow-2	N[Power[Sinh[1], 2]]	1.3810978455418155		N\left[\sinh ^2(1)\right]	1.3811	
+id	in	out	shown	tex.in	tex.out
+n-sinh-0	N[Sinh[0]]	0.		N[\sinh (0)]	0.
+n-sinh-1	N[Sinh[1]]	1.1752011936438014		N[\sinh (1)]	1.1752
+sinh-0	Sinh[0]	0		\sinh (0)	0
+a-float-argument-evaluates-directly-no-n-needed	Sinh[1.4]	1.9043015014515339		\sinh (1.4)	1.9043
+series-sinh-x-x-0-10	Series[Sinh[x], List[x, 0, 10]]	SeriesData[x, 0, {1, 0, 1/6, 0, 1/120, 0, 1/5040, 0, 1/362880}, 1, 11, 1]		\text{Series}[\sinh (x),\{x,0,10\}]	x+\frac{x^3}{6}+\frac{x^5}{120}+\frac{x^7}{5040}+\frac{x^9}{362880}+O\left(x^{11}\right)
+arbitrary-precision-via-n	N[Sinh[Rational[7, 5]]]	1.9043015014515339		N\left[\sinh \left(\frac{7}{5}\right)\right]	1.9043
+evaluates-at-a-complex-argument	Sinh[Complex[2.5, 1]]	3.268939432079549 + 5.160143667579705*I		\sinh (2.5\, +i)	3.26894\, +5.16014 i
+sinh-i-pi-2-i-sin-pi-2-i	Sinh[Times[I, Divide[Pi, 2]]]	I		\sinh \left(i \frac{\pi }{2}\right)	i
+element-wise-over-a-matrix-of-imaginary	Sinh[List[List[Times[I, Divide[Times[1, Pi], 3]], Minus[Times[I, Divide[Times[1, Pi], 3]]]], List[0, Minus[Times[I, Divide[Times[1, Pi], 6]]]]]]	{{(I/2)*Sqrt[3], (-1/2*I)*Sqrt[3]}, {0, -1/2*I}}		\sinh \left(\left( \begin{array}{cc}  i \frac{1 \pi }{3} & -\left(i \frac{1 \pi }{3}\right) \\  0 & -\left(i \frac{1 \pi }{6}\right) \\ \end{array} \right)\right)	\left( \begin{array}{cc}  \frac{i \sqrt{3}}{2} & -\frac{i \sqrt{3}}{2} \\  0 & -\frac{i}{2} \\ \end{array} \right)
+interval-arithmetic-sinh-is-increasing-so-sinh-0	Sinh[Interval[List[0, Log[3]]]]	Interval[{0, 4/3}]		\sinh (\text{Interval}[\{0,\log (3)\}])	\text{Interval}\left[\left\{0,\frac{4}{3}\right\}\right]
+uncertainty-propagation-sinh-2-sqrt-3-pm-0-1	Sinh[Around[Divide[2, Sqrt[3]], 0.1]]	Around[1.428960581481576, 0.17441124801537783]		\sinh \left(\frac{2}{\sqrt{3}}\pm 0.10\right)	1.43\pm 0.17
+sinh-positiveinfinity	Sinh[Infinity]	Infinity		\sinh (\infty )	\infty
+sinh-ln-2-frac-2-1-2-2-frac-34	Sinh[Log[2]]	3/4		\sinh (\log (2))	\frac{3}{4}
+a-real-symbolic-argument-is-untouched	Sinh[x]	Sinh[x]		\sinh (x)	\sinh (x)
+oddness-pulls-the-sign-out-of-a-symbolic	Sinh[Minus[x]]	-Sinh[x]		\sinh (-x)	-\sinh (x)
+sinh-arsinh-x-x-for-every-x	Sinh[ArcSinh[x]]	x		\sinh \left(\sinh ^{-1}(x)\right)	x
+sinh-arsinh-2-2-for-every-x	Sinh[ArcSinh[2]]	2		\sinh \left(\sinh ^{-1}(2)\right)	2
+derivative-cosh-x	D[Sinh[x], x]	Cosh[x]		\frac{\partial \sinh (x)}{\partial x}	\cosh (x)
+antiderivative	Integrate[Sinh[x], x]	Cosh[x]		\int \sinh (x) \, dx	\cosh (x)
+taylor-series-about-0	Series[Sinh[x], List[x, 0, 5]]	SeriesData[x, 0, {1, 0, 1/6, 0, 1/120}, 1, 6, 1]		\text{Series}[\sinh (x),\{x,0,5\}]	x+\frac{x^3}{6}+\frac{x^5}{120}+O\left(x^6\right)
+to-30-significant-digits-correctly-rounded	N[Sinh[1], 30]	1.1752011936438014568823818505956008151557179813340958702296`30.	1.17520119364380145688238185060	N[\sinh (1),30]	1.17520119364380145688238185060
+n-decimalizes-sinh-i-pi-2-not-just-the-exact	N[Sinh[Times[I, Divide[Pi, 2]]]]	0. + 1.*I		N\left[\sinh \left(i \frac{\pi }{2}\right)\right]	0.\, +1. i
+n-sinh-7-over-5-50	N[Sinh[Rational[7, 5]], 50]	1.90430150145153405514212382769742630955163868372129479120283226901463940858675`50.	1.9043015014515340551421238276974263095516386837213	N\left[\sinh \left(\frac{7}{5}\right),50\right]	1.9043015014515340551421238276974263095516386837213
+sinh-1-over-5-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 5]], Pi]]	I*Sqrt[5/8 - Sqrt[5]/8]		\sinh ((\text{Rational}[1,5] i) \pi )	i \sqrt{\frac{5}{8}-\frac{\sqrt{5}}{8}}
+sinh-1-over-24-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 24]], Pi]]	I*Sin[Pi/24]		\sinh ((\text{Rational}[1,24] i) \pi )	i \sin \left(\frac{\pi }{24}\right)
+matrixfunction-function-sinh-1-1-list-list-1	MatrixFunction[Function[Sinh[Slot[1]]], List[List[Times[Complex[0, Rational[1, 3]], Pi], Times[Complex[0, Rational[-1, 3]], Pi]], List[0, Times[Complex[0, Rational[-1, 6]], Pi]]]]	{{(I/2)*Sqrt[3], -1/3*I - I/Sqrt[3]}, {0, -1/2*I}}		\text{MatrixFunction}\left[\sinh (\text{$\#$1})\&,\left( \begin{array}{cc}  (\text{Rational}[1,3] i) \pi  & (\text{Rational}[-1,3] i) \pi  \\  0 & (\text{Rational}[-1,6] i) \pi  \\ \end{array} \right)\right]	\left( \begin{array}{cc}  \frac{i \sqrt{3}}{2} & -\frac{i}{3}-\frac{i}{\sqrt{3}} \\  0 & -\frac{i}{2} \\ \end{array} \right)
+odd-function-sinh-x-sinh-x	(Sinh[Minus[1]] == Minus[Sinh[1]])	True		\sinh (-1)=-\sinh (1)	\text{True}
+definition-in-terms-of-exp-sinh-x-frac-e-x-e-x-2	(Sinh[1] == Divide[Subtract[Exp[1], Exp[Minus[1]]], 2])	True		\sinh (1)=\frac{\exp (1)-\exp (-1)}{2}	\text{True}
+the-definition-sinh-x-frac-e-x-e-x-2	TrigToExp[Sinh[x]]	-1/2*1/E^x + E^x/2		\text{TrigToExp}[\sinh (x)]	\frac{e^x}{2}-\frac{e^{-x}}{2}
+sinh-1-over-12-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 12]], Pi]]	((I/2)*(-1 + Sqrt[3]))/Sqrt[2]		\sinh ((\text{Rational}[1,12] i) \pi )	\frac{i \left(\sqrt{3}-1\right)}{2 \sqrt{2}}
+sinh-1-over-10-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 10]], Pi]]	(I/4)*(-1 + Sqrt[5])		\sinh ((\text{Rational}[1,10] i) \pi )	\frac{1}{4} i \left(\sqrt{5}-1\right)
+sinh-1-over-9-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 9]], Pi]]	I*Sin[Pi/9]		\sinh ((\text{Rational}[1,9] i) \pi )	i \sin \left(\frac{\pi }{9}\right)
+sinh-1-over-8-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 8]], Pi]]	I*Sin[Pi/8]		\sinh ((\text{Rational}[1,8] i) \pi )	i \sin \left(\frac{\pi }{8}\right)
+sinh-1-over-7-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 7]], Pi]]	I*Sin[Pi/7]		\sinh ((\text{Rational}[1,7] i) \pi )	i \sin \left(\frac{\pi }{7}\right)
+sinh-1-over-6-times-i-times-pi	Sinh[Times[Complex[0, Rational[1, 6]], Pi]]	I/2		\sinh ((\text{Rational}[1,6] i) \pi )	\frac{i}{2}
+sinh-2-over-9-times-i-times-pi	Sinh[Times[Complex[0, Rational[2, 9]], Pi]]	I*Sin[(2*Pi)/9]		\sinh ((\text{Rational}[2,9] i) \pi )	i \sin \left(\frac{2 \pi }{9}\right)
+neg-2-times-2-times-sinh-1-over-2-pow-2-plus-2	Plus[Times[-2, Plus[Times[2, Power[Sinh[Rational[1, 2]], 2]], Times[2, Power[Sinh[Rational[1, 2]], 4]]], Power[Sinh[1], 2]], Power[Sinh[1], 4]]	-2*(2*Sinh[1/2]^2 + 2*Sinh[1/2]^4)*Sinh[1]^2 + Sinh[1]^4		-2 \left(2 \sinh ^2\left(\frac{1}{2}\right)+2 \sinh ^4\left(\frac{1}{2}\right)\right) \sinh ^2(1)+\sinh ^4(1)	\sinh ^4(1)-2 \left(2 \sinh ^4\left(\frac{1}{2}\right)+2 \sinh ^2\left(\frac{1}{2}\right)\right) \sinh ^2(1)
+n-sinh-1-over-2-plus-cosh-1-over-2-pow-2	N[Power[Plus[Sinh[Rational[1, 2]], Cosh[Rational[1, 2]]], 2]]	2.7182818284590455		N\left[\left(\sinh \left(\frac{1}{2}\right)+\cosh \left(\frac{1}{2}\right)\right)^2\right]	2.71828
+n-neg-sinh-1-over-2-plus-cosh-1-over-2-pow-2	N[Power[Plus[Minus[Sinh[Rational[1, 2]]], Cosh[Rational[1, 2]]], 2]]	0.36787944117144217		N\left[\left(-\sinh \left(\frac{1}{2}\right)+\cosh \left(\frac{1}{2}\right)\right)^2\right]	0.367879
+n-sinh-1-pow-2	N[Power[Sinh[1], 2]]	1.3810978455418155		N\left[\sinh ^2(1)\right]	1.3811

@@ -23,7 +23,7 @@ zeta-neg-1-neg-1-adds-one-to-zeta-neg-1	hurwitz_zeta(-1, -1)	-13/12	disagree
 zeta-neg-3-neg-2-sums-shifted-terms	hurwitz_zeta(-3, -2)	-1079/120	disagree
 zeta-0-neg-1-keeps-the-zero-term	hurwitz_zeta(0, -1)	3/2	
 zeta-5-2-neg-1-is-one-plus-zeta	hurwitz_zeta((5/2), -1)	hurwitz_zeta(5/2, -1)	inconclusive
-zeta-5-2-neg-2-stays-symbolic	hurwitz_zeta((5/2), -2)	hurwitz_zeta(5/2, -2)	inconclusive
+zeta-5-2-neg-2-stays-symbolic	hurwitz_zeta((5/2), -2)	hurwitz_zeta(5/2, -2)	
 n-zeta-1-2-neg-1-converges-by-continuation	enumeratio_n(hurwitz_zeta((1/2), -1))	ValueError: Hurwitz zeta complex infinity	error
 n-zeta-neg-3-2-neg-1-matches-wolfram	enumeratio_n(hurwitz_zeta((-3/2), -1))	ValueError: Hurwitz zeta complex infinity	error
 n-zeta-i-neg-2-complex-s	enumeratio_n(hurwitz_zeta((0 + 1*I), -2))	ValueError: Hurwitz zeta complex infinity	error
