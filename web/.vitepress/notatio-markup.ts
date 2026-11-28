@@ -22,6 +22,7 @@ export const VUE_COMPONENTS: ReadonlySet<string> = new Set([
   "ReferencePage",
   "ReferenceIndex",
   "ReferenceCatalog",
+  "PlotGallery",
   "Story",
   "GlyphGallery",
   "LiveInput",

@@ -29,6 +29,7 @@ const ReferenceIndex = defineAsyncComponent(() => import("./components/Reference
 const ReferenceCatalog = defineAsyncComponent(() => import("./components/ReferenceCatalog.vue"));
 const FieldPage = defineAsyncComponent(() => import("./components/FieldPage.vue"));
 const ReferencePage = defineAsyncComponent(() => import("./components/ReferencePage.vue"));
+const PlotGallery = defineAsyncComponent(() => import("./components/PlotGallery.vue"));
 const Story = defineAsyncComponent(() => import("./components/Story.vue"));
 const CliReference = defineAsyncComponent(() => import("./components/CliReference.vue"));
 const SymbolRef = defineAsyncComponent(() => import("./components/Symbol.vue"));
@@ -49,6 +50,7 @@ export default {
     app.component("FieldPage", FieldPage);
     app.component("ReferenceIndex", ReferenceIndex);
     app.component("ReferenceCatalog", ReferenceCatalog);
+    app.component("PlotGallery", PlotGallery);
     app.component("Story", Story);
     app.component("GlyphGallery", GlyphGallery);
     app.component("LiveInput", LiveInput);

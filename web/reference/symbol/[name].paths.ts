@@ -14,6 +14,7 @@ import {
   prerenderExamples,
   restorePrerenderedHtml,
 } from "../../.vitepress/data/prerender.ts";
+import { headsWithCards } from "../../.vitepress/data/plot-gallery.ts";
 import { timed } from "../../.vitepress/data/timings.ts";
 
 /** The table a collection's page shows: its `enumerate:` filled in from what the record implies (the statistics on offer as names only). */
@@ -25,6 +26,7 @@ async function explorerFor(entry: ReferenceEntry, catalog: ExplorerCatalog) {
   return { ...page, statistics: candidates.map((c) => c.name) };
 }
 
+const galleryHeads = headsWithCards(entries);
 const carrierNames = new Set(entries.filter((e) => e.catalogCarrier).map((e) => e.name));
 
 /** Longest other-system output a page carries; a longer one (a million-element list) is cut. */
@@ -75,6 +77,7 @@ async function symbolPages() {
         maxSize: describeNow(entry.name).maxSize,
         optionValues: describeNow(entry.name).optionValues,
         functionView: functionViewFor(entry.name),
+        gallery: galleryHeads.has(entry.name),
       },
     });
   }
