@@ -2,7 +2,7 @@
 name: VectorPlot
 domain: Graphics
 signature: VectorPlot(...)
-summary: Wolfram's own VectorPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: A vector field as a grid of arrows.
 names:
   wolframIdentity: true
 options:
@@ -12,7 +12,9 @@ options:
   - YLabel
 signatures:
   - call: VectorPlot(...)
-    description: Wolfram's own VectorPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: A vector field as a grid of arrows.
     library: enumeratio-formats
     type: (any*) -> any
 ---
+
+`VectorPlot((fx, fy), (x, a, b), (y, c, d))` draws an arrow at each grid point pointing along the field there, colored by its length. `ColorFunction` names the gradient.

@@ -2,7 +2,7 @@
 name: StreamPlot
 domain: Graphics
 signature: StreamPlot(...)
-summary: Wolfram's own StreamPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+summary: The streamlines of a vector field.
 names:
   wolframIdentity: true
 options:
@@ -12,7 +12,9 @@ options:
   - YLabel
 signatures:
   - call: StreamPlot(...)
-    description: Wolfram's own StreamPlot, held inert -- the expression is what a worksheet or REPL draws, not something this library computes (see @notatio/formats/src/graphics.ts).
+    description: The streamlines of a vector field.
     library: enumeratio-formats
     type: (any*) -> any
 ---
+
+`StreamPlot((fx, fy), (x, a, b), (y, c, d))` draws curves that follow the field, with arrowheads showing the direction. `ColorFunction` names the gradient.

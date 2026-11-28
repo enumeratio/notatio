@@ -1,3 +1,13 @@
 id	in
-essential-singularity	
-rational-function	ComplexPlot[Divide[Subtract[Power[z, 3], 1], Plus[Power[z, 2], 1]], List[Extent, 4]]
+cubic-zeros	ComplexPlot[Subtract[Power[z, 3], 1], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+rational-function	ComplexPlot[Divide[Subtract[Power[z, 3], 1], Plus[Power[z, 2], 1]], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+quintic	ComplexPlot[Subtract[Power[z, 5], 1], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+mobius	ComplexPlot[Divide[Subtract[z, 1], Plus[z, 1]], List[z, Subtract[-3, Times[3, I]], Plus[3, Times[3, I]]]]
+joukowski	ComplexPlot[Plus[z, Divide[1, z]], List[z, Subtract[-3, Times[3, I]], Plus[3, Times[3, I]]]]
+blaschke	ComplexPlot[Divide[Times[z, Subtract[z, Divide[1, 2]]], Subtract[1, Divide[z, 2]]], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+gamma	ComplexPlot[Gamma[z], List[z, Subtract[-5, Times[3, I]], Plus[5, Times[3, I]]]]
+zeta-strip	ComplexPlot[Zeta[z], List[z, Subtract[-4, Times[20, I]], Plus[4, Times[20, I]]]]
+sqrt-branch	ComplexPlot[Sqrt[z], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+log-branch	ComplexPlot[Log[10, z], List[z, Subtract[-3, Times[3, I]], Plus[3, Times[3, I]]]]
+essential-singularity	ComplexPlot[Exp[Divide[1, z]], List[z, Subtract[-1, I], Plus[1, I]]]
+color-function	ComplexPlot[Subtract[Power[z, 3], 1], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]], Rule[ColorFunction, "Turbo"]]

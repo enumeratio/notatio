@@ -1,2 +1,11 @@
 id	in
 rotation	VectorPlot[List[Minus[y], x], List[x, -2, 2], List[y, -2, 2]]
+saddle	VectorPlot[List[x, Minus[y]], List[x, -2, 2], List[y, -2, 2]]
+source	VectorPlot[List[x, y], List[x, -2, 2], List[y, -2, 2]]
+spiral-sink	VectorPlot[List[Subtract[Minus[x], y], Subtract[x, y]], List[x, -2, 2], List[y, -2, 2]]
+dipole	VectorPlot[List[Subtract[Divide[Subtract[x, 1], Power[Plus[Power[Subtract[x, 1], 2], Power[y, 2]], Divide[3, 2]]], Divide[Plus[x, 1], Power[Plus[Power[Plus[x, 1], 2], Power[y, 2]], Divide[3, 2]]]], Subtract[Divide[y, Power[Plus[Power[Subtract[x, 1], 2], Power[y, 2]], Divide[3, 2]]], Divide[y, Power[Plus[Power[Plus[x, 1], 2], Power[y, 2]], Divide[3, 2]]]]], List[x, -3, 3], List[y, -2, 2]]
+pendulum	VectorPlot[List[y, Minus[Sin[x]]], List[x, Times[-2, Pi], Times[2, Pi]], List[y, -3, 3]]
+van-der-pol	VectorPlot[List[y, Subtract[Times[Subtract[1, Power[x, 2]], y], x]], List[x, -3, 3], List[y, -3, 3]]
+predator-prey	VectorPlot[List[Times[x, Subtract[1, y]], Times[y, Subtract[x, 1]]], List[x, 0, 3], List[y, 0, 3]]
+color-function	VectorPlot[List[Sin[y], Cos[x]], List[x, Minus[Pi], Pi], List[y, Minus[Pi], Pi], Rule[ColorFunction, "Magma"]]
+labeled	VectorPlot[List[Minus[y], x], List[x, -2, 2], List[y, -2, 2], Rule[PlotLabel, "rotation"], Rule[XLabel, "x"], Rule[YLabel, "y"]]

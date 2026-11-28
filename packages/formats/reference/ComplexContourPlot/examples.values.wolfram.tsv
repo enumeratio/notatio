@@ -1,2 +1,9 @@
 id	in
-square	ComplexContourPlot[Power[z, 2], List[z, Complex[-2, -2], Complex[2, 2]]]
+square	ComplexContourPlot[Power[z, 2], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+sine	ComplexContourPlot[Sin[z], List[z, Subtract[-4, Times[2, I]], Plus[4, Times[2, I]]]]
+reciprocal	ComplexContourPlot[Divide[1, z], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+mobius	ComplexContourPlot[Divide[Subtract[z, 1], Plus[z, 1]], List[z, Subtract[-3, Times[3, I]], Plus[3, Times[3, I]]]]
+exponential	ComplexContourPlot[Exp[z], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+cubic	ComplexContourPlot[Subtract[Power[z, 3], 1], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]]]
+contour-count	ComplexContourPlot[Power[z, 2], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]], Rule[Contours, 20]]
+labeled	ComplexContourPlot[Power[z, 2], List[z, Subtract[-2, Times[2, I]], Plus[2, Times[2, I]]], Rule[PlotLabel, "z^2"], Rule[FrameLabel, List["Re", "Im"]]]
