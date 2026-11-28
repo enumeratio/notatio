@@ -84,7 +84,8 @@ function serve(root: string): Promise<{ server: Server; origin: string }> {
   const server = createServer((request, response) => {
     try {
       const pathname = decodeURIComponent(new URL(request.url ?? "/", "http://localhost").pathname);
-      const target = normalize(join(base, pathname));
+      // A clean URL may end in a slash (`/reference/symbol/Plot/`) while the build wrote `Plot.html`.
+      const target = normalize(join(base, pathname)).replace(/[\\/]+$/, "");
       const candidates = [target, join(target, "index.html"), `${target}.html`];
       const file = target.startsWith(base + sep) || target === base ? candidates.find(isFile) : undefined;
       if (file === undefined) {
