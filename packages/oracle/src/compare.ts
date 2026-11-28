@@ -7,7 +7,9 @@
 
 import type { MathJSON } from "./emit.ts";
 import { agreementBound } from "./bound.ts";
-import { compareTrees, type Tree } from "./structural.ts";
+import { mappingFor } from "./mappings.ts";
+import { compareTrees, type Leaf, type Tree } from "./structural.ts";
+import type { System } from "./systems.ts";
 
 /** A number if the text denotes one — including Python complex and Wolfram real syntax, and
  * an exact rational as SymPy and Lean (`p/q`) or Julia (`p//q`) print it. */
@@ -257,11 +259,183 @@ export function parsePython(text: string): Tree | undefined {
   return result === FAIL || i !== s.length ? undefined : (result as Tree);
 }
 
+/**
+ * A p-adic number as Sage prints it, `2^2 + O(2^3)` or `1 + O(3)`, as `AdicNumeral(p, residue, precision)`:
+ * the integer the stored terms sum to, taken modulo `p^precision`, and the precision `n` of the
+ * `O(p^n)` that ends the print (`O(p)` is `n = 1`). Two numbers agree when prime, residue and precision do.
+ * `undefined` for text that is not such a sum.
+ */
+export function parsePadic(text: string): Tree | undefined {
+  const parts = text.trim().split(/\s*\+\s*/);
+  const tail = /^O\((\d+)(?:\^(\d+))?\)$/.exec(parts.pop() ?? "");
+  if (tail === null) return undefined;
+  const p = BigInt(tail[1] as string);
+  const precision = BigInt(tail[2] ?? 1);
+  if (p < 2n || precision > 10_000n) return undefined;
+  const modulus = p ** precision;
+  let sum = 0n;
+  for (const term of parts) {
+    // `c*p^k`, `p^k`, `p` or a bare `c`: the coefficient times the power of p.
+    const m = /^(?:(\d+)\*)?(?:(\d+)(?:\^(\d+))?)$/.exec(term);
+    if (m === null) return undefined;
+    const withCoefficient = m[1] !== undefined;
+    const coefficient = withCoefficient ? BigInt(m[1] as string) : undefined;
+    const base = BigInt(m[2] as string);
+    if (coefficient === undefined && m[3] === undefined) {
+      sum += base;
+    } else if (base === p) {
+      sum += (coefficient ?? 1n) * p ** BigInt(m[3] ?? 1);
+    } else {
+      return undefined;
+    }
+  }
+  const residue = ((sum % modulus) + modulus) % modulus;
+  const [pn, rn, nn] = [Number(p), Number(residue), Number(precision)];
+  return [pn, rn, nn].every(Number.isSafeInteger) ? ["AdicNumeral", pn, rn, nn] : undefined;
+}
+
+/**
+ * A number printed as a Python expression (`1/2*I*sqrt(3) + 1/2`) as a real or a complex: literals, `I`,
+ * `pi`, `e`, `sqrt`, `exp`, `log`, and `+ - * / ^`. `undefined` for anything else (a free symbol, a call).
+ */
+export function numericExpression(text: string): Leaf | undefined {
+  type C = readonly [number, number];
+  const s = text.replace(/\*\*/g, "^").replace(/\s+/g, "");
+  let i = 0;
+  const fail = Symbol("fail");
+  const mul = ([a, b]: C, [c, d]: C): C => [a * c - b * d, a * d + b * c];
+  const div = ([a, b]: C, [c, d]: C): C => {
+    const n = c * c + d * d;
+    return [(a * c + b * d) / n, (b * c - a * d) / n];
+  };
+  const exp = ([a, b]: C): C => [Math.exp(a) * Math.cos(b), Math.exp(a) * Math.sin(b)];
+  const log = ([a, b]: C): C => [Math.log(Math.hypot(a, b)), Math.atan2(b, a)];
+  const power = (x: C, y: C): C => {
+    if (x[0] === 0 && x[1] === 0) return [0, 0];
+    if (y[1] !== 0 || !Number.isInteger(y[0]) || Math.abs(y[0]) > 64) return exp(mul(y, log(x)));
+    const whole = Array.from({ length: Math.abs(y[0]) }).reduce<C>((acc) => mul(acc, x), [1, 0]);
+    return y[0] >= 0 ? whole : div([1, 0], whole);
+  };
+  const sum = (): C | typeof fail => {
+    let acc = product();
+    while (acc !== fail && (s[i] === "+" || s[i] === "-")) {
+      const sign = s[i++] === "-" ? -1 : 1;
+      const next = product();
+      if (next === fail) return fail;
+      acc = [acc[0] + sign * next[0], acc[1] + sign * next[1]];
+    }
+    return acc;
+  };
+  const product = (): C | typeof fail => {
+    let acc = unary();
+    while (acc !== fail && (s[i] === "*" || s[i] === "/")) {
+      const times = s[i++] === "*";
+      const next = unary();
+      if (next === fail) return fail;
+      acc = times ? mul(acc, next) : div(acc, next);
+    }
+    return acc;
+  };
+  const unary = (): C | typeof fail => {
+    if (s[i] === "-" || s[i] === "+") {
+      const sign = s[i++] === "-" ? -1 : 1;
+      const value = unary();
+      return value === fail ? fail : [sign * value[0], sign * value[1]];
+    }
+    const base = atom();
+    if (base === fail || s[i] !== "^") return base;
+    i++;
+    const exponent = unary();
+    return exponent === fail ? fail : power(base, exponent);
+  };
+  const atom = (): C | typeof fail => {
+    if (s[i] === "(") {
+      i++;
+      const inner = sum();
+      if (inner === fail || s[i++] !== ")") return fail;
+      return inner;
+    }
+    const number = /^(\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/.exec(s.slice(i));
+    if (number !== null) {
+      i += number[0].length;
+      return [Number(number[0]), 0];
+    }
+    const name = /^[A-Za-z_]\w*/.exec(s.slice(i));
+    if (name === null) return fail;
+    i += name[0].length;
+    if (name[0] === "I") return [0, 1];
+    if (name[0] === "pi") return [Math.PI, 0];
+    if (name[0] === "e") return [Math.E, 0];
+    if (s[i] !== "(") return fail;
+    i++;
+    const argument = sum();
+    if (argument === fail || s[i++] !== ")") return fail;
+    if (name[0] === "sqrt") return power(argument, [0.5, 0]);
+    if (name[0] === "exp") return exp(argument);
+    if (name[0] === "log") return log(argument);
+    return fail;
+  };
+  const value = sum();
+  if (value === fail || i !== s.length || !value.every(Number.isFinite)) return undefined;
+  return value[1] === 0 ? value[0] : { re: value[0], im: value[1] };
+}
+
+/** The top-level, comma-separated arguments of a printed call's `(...)`. */
+function callArguments(inside: string): string[] {
+  const out: string[] = [];
+  let depth = 0;
+  let start = 0;
+  for (let i = 0; i < inside.length; i++) {
+    const c = inside[i];
+    if (c === "(" || c === "[") depth++;
+    else if (c === ")" || c === "]") depth--;
+    else if (c === "," && depth === 0) {
+      out.push(inside.slice(start, i));
+      start = i + 1;
+    }
+  }
+  out.push(inside.slice(start));
+  return out;
+}
+
+/**
+ * Ours, a call held over numeric operands (`PolyLog(3, 1/2 + (sqrt 3)/2 i)`), against the same call held
+ * by the Python-family system and printed in its own spelling of the argument (`polylog(3, 1/2*I*sqrt(3) +
+ * 1/2)`). The system's name for the head is the one our mapping for `system` calls (a plain
+ * `name($1, …)` template); the operands compare as numbers. `"agree"` when every operand does and
+ * `undefined` for anything not read this way, so a disagreement is never decided here.
+ * `evaluate` reads one of our operands as a number.
+ */
+export function compareHeldCall(
+  system: System,
+  expected: MathJSON,
+  theirs: string,
+  evaluate: (expr: MathJSON) => Leaf,
+  tolerance = 1e-9,
+): Verdict | undefined {
+  if (!Array.isArray(expected) || typeof expected[0] !== "string" || expected.length < 2) return undefined;
+  const call = /^([A-Za-z_]\w*)\((.*)\)$/s.exec(theirs.trim());
+  if (call === null) return undefined;
+  const operands = expected.slice(1) as MathJSON[];
+  const template = mappingFor(expected[0], operands.length, [], system)?.emit[system];
+  const placeholders = operands.map((_, k) => `$${k + 1}`).join(", ");
+  if (template !== `${call[1]}(${placeholders})`) return undefined;
+  const given = callArguments(call[2] as string);
+  if (given.length !== operands.length) return undefined;
+  for (const [k, operand] of operands.entries()) {
+    const mine = evaluate(operand);
+    const theirsLeaf = numericExpression(given[k] as string);
+    if (typeof mine === "string" || typeof mine === "boolean" || theirsLeaf === undefined) return undefined;
+    if (compareTrees(mine, theirsLeaf, tolerance) !== "agree") return undefined;
+  }
+  return "agree";
+}
+
 /** `compare`, but for a Python-family system's answer against our reduced tree, when a
  * shape difference (a tuple where we have a list) is the only thing text comparison would
  * catch as a false disagreement. `undefined` when `theirs` doesn't parse as a literal. */
 export function comparePythonStructured(ours: Tree, theirs: string, tolerance = 1e-9): Verdict | undefined {
-  const theirsTree = parsePython(theirs);
+  const theirsTree = parsePython(theirs) ?? parsePadic(theirs);
   return theirsTree === undefined ? undefined : compareTrees(ours, theirsTree, tolerance);
 }
 

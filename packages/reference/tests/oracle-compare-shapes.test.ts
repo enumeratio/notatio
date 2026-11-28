@@ -96,6 +96,38 @@ test.each(EMPTY)("%s: the empty list is the empty set", (id) => {
   expect(judged("wolfram", id)).toBe("agree");
 });
 
+// Sage's p-adic print (residue and precision) and its spelling of a held call's argument.
+const SAGE_SAME = [
+  "ProfiniteNumber/projecting-to-q-2",
+  "ProfiniteNumber/projecting-to-q-3",
+  "PolyLog/polylog-3-exponentiale-pow-1-over-3-times-i",
+  "PolyLog/polylog-3-exponentiale-pow-2-over-3-times-i",
+  "PolyLog/polylog-3-exponentiale-pow-neg-1-over-3-times-i",
+  // The same held call, Sage's name for the head.
+  "ErfInv/outside-its-real-domain-1-1-compute-engine",
+  "Zeta/zeta-5-2-neg-2-stays-symbolic",
+  "StieltjesGamma/no-closed-form-past-gamma-0-stays-symbolic-until",
+  "StieltjesGamma/orders-past-30-stay-unevaluated-even-under-n-the",
+];
+
+test.each(SAGE_SAME)("%s: Sage's printing of the same value agrees", (id) => {
+  expect(judged("sage", id)).toBe("agree");
+});
+
+// Where Sage spells a different function or holds a different call, the rows keep their verdict.
+const SAGE_STILL = [
+  // psi(1, x) is the trigamma, which only a function table could say.
+  "Digamma/psi-x-is-the-trigamma-psi-1-x",
+  // gamma(nu, a/t) is a free symbolic argument.
+  "LaplaceTransform/laplacetransform-gamma-nu-a-times-1-over-t-t-s",
+  // Sage answers a p-adic with no digits where ours holds the call.
+  "ProfiniteNumber/5-doesn-t-divide-the-modulus-so-nothing-is-known",
+];
+
+test.each(SAGE_STILL)("%s: stays a disagreement", (id) => {
+  expect(judged("sage", id)).toBe("disagree");
+});
+
 // CenteredInterval's FullForm is its packed ball representation, whose encoding is not documented
 // well enough to read as a value: these rows keep their disagreement until a kernel decodes them.
 const PACKED = [
