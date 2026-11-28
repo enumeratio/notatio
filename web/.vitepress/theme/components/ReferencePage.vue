@@ -47,6 +47,8 @@ const props = defineProps<{
   };
   /** The Epsil behind a statistic or family, printed as InputForm (data/definitions.ts). */
   definitions?: readonly { label: string; source: string }[];
+  /** The head has an example in the plot gallery (`headsWithCards`, derived at build). */
+  gallery?: boolean;
 }>();
 
 interface Overload {
@@ -455,6 +457,10 @@ const testCount = computed(() => (entry.value?.examples ?? []).filter((ex) => ex
             ><code>{{ drawnAs }}</code></a
           ></span
         >
+      </template>
+      <template v-if="gallery">
+        <span class="sep">·</span>
+        <a href="/explore/plots/">all plots</a>
       </template>
     </p>
 

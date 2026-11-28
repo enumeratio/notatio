@@ -25,6 +25,9 @@ made in prose, it links back.
 - [**Complex bases**](/explore/complex-bases/) — numbers written in a Gaussian or Eisenstein
   base, every numeral a tile: the twindragon, the Gosper island, and systems of your own.
 
+- [**All plots**](/explore/plots/) — every drawing in the reference on one page, grouped by
+  family, each linking to its example.
+
 ## How these are built
 
 Every dial on these pages is a `<notatio-manipulate>` wrapped around a plotting
