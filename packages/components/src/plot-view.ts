@@ -192,7 +192,7 @@ export class PlotView {
   async recompute(): Promise<void> {
     const generation = ++this.#generation;
     const text = this.host.value.trim();
-    const { plotOfText, planeShowOf } = await import("@notatio/frontend/symbols");
+    const { plotOfText, planeShowOf, optionIssuesOf } = await import("@notatio/frontend/symbols");
     const plot = plotOfText(text);
     if (generation !== this.#generation) return;
     if (plot === undefined) return this.#clear();
@@ -203,6 +203,12 @@ export class PlotView {
     }
     this.#text = text;
     this.#settings = settings;
+    // An option the lowering could not read is said, not silently dropped.
+    const issues = optionIssuesOf(plain);
+    if (issues.length > 0) {
+      log("option not read", issues);
+      this.host.setAttribute("data-option-issues", issues.join("; "));
+    } else this.host.removeAttribute("data-option-issues");
     this.#reset();
     if (settings["layout"] !== undefined) return this.#diagramize(settings);
     const head = Array.isArray(plain) ? plain[0] : undefined;
