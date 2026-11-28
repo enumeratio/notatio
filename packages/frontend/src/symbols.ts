@@ -27,6 +27,7 @@ import { renderBox } from "./box-render.ts";
 import { fieldSourcesOf, regionFunctionOf } from "./field-margin.ts";
 import { plainJson } from "./graphics-rules.ts";
 import { GRADIENTS } from "./palettes.ts";
+import { type Primitive, primitivesOf } from "./primitives.ts";
 import type { ScaleName } from "./scales.ts";
 import {
   clean,
@@ -491,9 +492,19 @@ const gradientName = (value: Json): string | undefined => {
   return GRADIENTS.find((g) => g.name === wanted)?.name;
 };
 
+/** The option an unread value leaves: nothing in the settings, and a sentence for `optionIssuesOf`. */
+const unread = (name: string, value: Json, why: string): Record<string, string> => ({
+  [OPTION_ISSUES]: `${name} -> ${epsil(value)}: ${why}`,
+});
+
+/** A gradient name this value is not: `ColorFunction -> "Rainbow"` is said, not drawn as another gradient. */
+const noGradient = (value: Json): Record<string, string> =>
+  unread("ColorFunction", value, `no gradient of that name; the names are ${GRADIENTS.map((g) => g.name).join(", ")}`);
+
 const colorFunction = (value: Json): Record<string, string> => {
   const gradient = gradientName(value);
-  return gradient === undefined ? {} : { gradient };
+  if (gradient !== undefined) return { gradient };
+  return typeof (strOf(value) ?? symOf(value)) === "string" ? noGradient(value) : {};
 };
 
 /**
@@ -504,7 +515,8 @@ const plotColorFunction = (value: Json): Record<string, string> => {
   const axis = (strOf(value) ?? symOf(value))?.toLowerCase();
   if (axis === "x" || axis === "y") return { "color-by": axis };
   const gradient = gradientName(value);
-  return gradient === undefined ? {} : { "color-by": "x", gradient };
+  if (gradient !== undefined) return { "color-by": "x", gradient };
+  return typeof (strOf(value) ?? symOf(value)) === "string" ? noGradient(value) : {};
 };
 
 /** `FrameLabel -> [x, y]`: the captions of a framed plot's two axes. */
@@ -603,6 +615,8 @@ function scalingFunctionName(value: Json): ScaleName | undefined {
  * `Plot` with this option, Wolfram's own idiom) or `-> ("Log", "Log")` (a pair, x then y).
  */
 function scalingFunctionsOption(value: Json): Record<string, string> {
+  // A brace set is unordered and is reported by `lowerOptions`; no second word on it here.
+  if (headOf(value) === "Set") return {};
   const pair = tupleOf(value);
   const out: Record<string, string> = {};
   if (pair !== undefined) {
@@ -610,10 +624,13 @@ function scalingFunctionsOption(value: Json): Record<string, string> {
     const y = scalingFunctionName(pair[1]);
     if (x) out["x-scale"] = x;
     if (y) out["y-scale"] = y;
+    if (!x || !y)
+      return { ...out, ...unread("ScalingFunctions", value, "a scale is one of Linear, Log, Log10, Log2, Sqrt") };
     return out;
   }
   const y = scalingFunctionName(value);
   if (y) out["y-scale"] = y;
+  else return unread("ScalingFunctions", value, "a scale is one of Linear, Log, Log10, Log2, Sqrt");
   return out;
 }
 
@@ -669,6 +686,7 @@ const plotRange = (value: Json): Record<string, string> => {
 
 /** `AspectRatio -> r`: the plot area's height over its width. `Automatic` is the head's own. */
 const aspectRatio = (value: Json): Record<string, string> => {
+  if (symOf(value) === "Automatic") return { aspect: "auto" };
   const text = symOf(value) === undefined ? clean(value) : undefined;
   return text !== undefined && Number(text) > 0 ? { aspect: text } : {};
 };
@@ -684,6 +702,7 @@ const entriesOf = (value: Json): readonly Json[] | undefined =>
 const gridLines = (value: Json): Record<string, string> => {
   const word = symOf(value) ?? strOf(value);
   if (word === "True" || word === "Automatic" || word === "true") return { grid: "true" };
+  if (word === "None" || word === "False" || word === "false") return { grid: "false" };
   const pair = entriesOf(value);
   if (pair?.length !== 2) return {};
   const spec = (node: Json): string => {
@@ -731,6 +750,14 @@ const FRAME_OPTIONS = {
 
 /** A curve plot's `PlotStyle`, as written, for the lowering to read as directives. */
 const CURVE_OPTIONS = { ...FRAME_OPTIONS, PlotStyle: written("plot-style") } satisfies VisualSymbol["options"];
+
+/** What a plot of a list reads besides the curve options: its captions, its fill to the axis and its scales. */
+const LIST_OPTIONS = {
+  ...CURVE_OPTIONS,
+  AxesLabel: axesLabel,
+  Filling: "fill",
+  ScalingFunctions: scalingFunctionsOption,
+} satisfies VisualSymbol["options"];
 
 export const PLOT_SETTINGS: readonly VisualSymbol[] = [
   {
@@ -790,13 +817,13 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
     tag: "graphics-box",
     fixed: { parametric: "true" },
     attributes: (ops) => oneVariable(ops, { value: "value", variable: "var", range: "domain" }),
-    options: { ...CURVE_OPTIONS, PlotPoints: "samples" },
+    options: { ...CURVE_OPTIONS, PlotPoints: "samples", AxesLabel: axesLabel },
   },
   {
     head: "PolarPlot",
     tag: "graphics-box",
     attributes: (ops) => oneVariable(ops, { value: "expr", variable: "tvar", range: "trange" }),
-    options: { PlotStyle: written("plot-style") },
+    options: { PlotStyle: written("plot-style"), PlotLabel: "label", PlotPoints: "n" },
   },
   {
     // `ListPolarPlot(points)`: explicit `(theta, r)` pairs, or bare radii spread evenly --
@@ -805,8 +832,8 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
     tag: "graphics-box",
     attributes: dataOnly,
   },
-  chart("ListPlot", "list", CURVE_OPTIONS),
-  chart("ListLinePlot", "listline", CURVE_OPTIONS),
+  chart("ListPlot", "list", LIST_OPTIONS),
+  chart("ListLinePlot", "listline", LIST_OPTIONS),
   {
     head: "VectorPlot",
     tag: "graphics-box",
@@ -858,7 +885,7 @@ export const PLOT_SETTINGS: readonly VisualSymbol[] = [
       Clock: (value) => ({ clock: isOff(value) ? "false" : "true" }),
     },
   },
-  chart("BarChart", "bar"),
+  chart("BarChart", "bar", { ColorFunction: colorFunction, GridLines: gridLines, PlotLabel: "label" }),
   chart("Histogram", "histogram"),
   chart("PieChart", "pie"),
   chart("BoxWhiskerChart", "box"),
@@ -963,7 +990,40 @@ export function plotSettingsOf(expr: Json): Record<string, string> | undefined {
   if (symbol === undefined) return undefined;
   const { ops, options } = optionsOf(expr);
   const settings = { ...symbol.fixed, ...symbol.attributes(ops), ...settingsOf(lowerOptions(symbol, options)) };
+  if (head === "ArrayPlot") return withTileIssues(settings, options);
   return head === "Chart" ? chosenType(settings) : settings;
+}
+
+/** The options of an `ArrayPlot` that rule, mix and bound the tiles of a table, which a matrix of numbers has none of. */
+const TILE_OPTIONS = ["ColorRules", "ColorMixing", "BoundaryStyle"] as const;
+
+/**
+ * `settings` with an issue for each tile option an `ArrayPlot` of a literal matrix was given: the
+ * matrix is drawn by its values and `ColorFunction`, so they are said, not drawn.
+ */
+function withTileIssues(
+  settings: Record<string, string>,
+  options: Readonly<Record<string, Json>>,
+): Record<string, string> {
+  let data: unknown;
+  try {
+    data = JSON.parse(settings["data"] ?? "null");
+  } catch {
+    return settings;
+  }
+  if (!Array.isArray(data) || !data.every(Array.isArray)) return settings;
+  const said = TILE_OPTIONS.filter((name) => options[name] !== undefined).map((name) =>
+    unread(name, options[name]!, "a matrix of numbers has no tiles to rule, mix or bound; it takes ColorFunction"),
+  );
+  if (said.length === 0) return settings;
+  const issues = [settings[OPTION_ISSUES], ...said.map((s) => s[OPTION_ISSUES])].filter(Boolean);
+  return { ...settings, [OPTION_ISSUES]: issues.join("\n") };
+}
+
+/** An `Epilog` or `Prolog` as written (Epsil), read to the primitives it draws; undefined when it does not read. */
+export function marksOfText(written: string): readonly Primitive[] | undefined {
+  const { json, errors } = parseExpression(written);
+  return errors.length > 0 ? undefined : primitivesOf(plainJson(json as never) as never);
 }
 
 export type { PlaneLayer };
@@ -1438,7 +1498,8 @@ export function lowerOptions(
   for (const [name, value] of Object.entries(options)) {
     const rule = symbol?.options?.[name];
     if (typeof rule === "function") {
-      const read = rule(value);
+      const { [OPTION_ISSUES]: own, ...read } = rule(value);
+      if (own !== undefined) issues.push(own);
       Object.assign(attributes, read);
       if (headOf(value) === "Set" && Object.keys(read).length === 0) {
         issues.push(

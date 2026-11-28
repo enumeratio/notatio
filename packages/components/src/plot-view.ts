@@ -40,12 +40,14 @@ import {
   plotDataSeries,
   type PlotSeries,
   type PlotWindow,
-  type PolarPlotOptions,
+  type PolarCurves,
+  type PolarPoint,
   slideInterval,
   polarFrameOf,
-  polarPlotBox,
+  polarBoxOfSettings,
+  polarCurvesOf,
+  polarListOf,
   polarPlotBoxSvg,
-  polarPointsOf,
   primitivesOf,
   regionFunctionVars,
   type Primitive,
@@ -381,6 +383,21 @@ export class PlotView {
   }
 
   /**
+   * Say why nothing is drawn: a symbol that is neither the plot variable nor bound would sample to
+   * nothing, and an item neither compiled nor interpreted has no samples.
+   */
+  #say(why: { readonly unbound: string[] } | { readonly failed: string }): void {
+    this.#clear();
+    const escape = (text: string): string =>
+      text.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
+    this.#svg =
+      "unbound" in why
+        ? `<span class="graphics-box-unbound" role="status">Nothing to plot: ${why.unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ")} ${why.unbound.length > 1 ? "have" : "has"} no value.</span>`
+        : `<span class="graphics-box-unbound" role="status">Could not draw this plot: ${escape(why.failed)}</span>`;
+    this.host.requestUpdate();
+  }
+
+  /**
    * A curve plot's series over its whole domain, and over a window when they are sampled from an
    * expression. Undefined when there is nothing to draw, or a newer plot has taken over; the view
    * then says why, or is left to the newer one.
@@ -396,20 +413,8 @@ export class PlotView {
     const loaded = await plotFunctions(raw, { each: true });
     if (generation !== this.#generation) return undefined;
     const curves = curvesOf(settings, loaded, this.host.bindings);
-    // A symbol that is neither the plot variable nor bound would sample to nothing: say so.
-    if ("unbound" in curves) {
-      this.#clear();
-      const names = curves.unbound.map((u) => `<code>${u.replace(/[^\w$]/g, "")}</code>`).join(", ");
-      this.#svg = `<span class="graphics-box-unbound" role="status">Nothing to plot: ${names} ${curves.unbound.length > 1 ? "have" : "has"} no value.</span>`;
-      this.host.requestUpdate();
-      return undefined;
-    }
-    // An item neither compiled nor interpreted would draw nothing: say why.
-    if ("failed" in curves) {
-      this.#clear();
-      const reason = curves.failed.replace(/[&<>]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]!);
-      this.#svg = `<span class="graphics-box-unbound" role="status">Could not draw this plot: ${reason}</span>`;
-      this.host.requestUpdate();
+    if ("unbound" in curves || "failed" in curves) {
+      this.#say(curves);
       return undefined;
     }
     const { inWindow } = curves;
@@ -508,57 +513,49 @@ export class PlotView {
   }
 
   async #polarize(head: string, settings: Readonly<Record<string, string>>, generation: number): Promise<void> {
-    const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
-    const view: PolarPlotOptions = {
-      axes: settings["axes"] !== "false",
-      closed: on(settings["closed"]),
-      filled: on(settings["filled"]),
-      markers: on(settings["markers"]),
-      max: Number(settings["max"]) > 0 ? Number(settings["max"]) : undefined,
-      title: settings["label"] || undefined,
-    };
-    let points;
-    let sample: ((t: number) => number) | undefined;
+    let whole: PolarPoint[][];
+    let notes: readonly string[] = [];
+    let radii: PolarCurves["radii"] | undefined;
+    let range: readonly [number, number] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
     if (head === "ListPolarPlot") {
       this.#unzoomable();
-      let data: unknown;
-      try {
-        data = JSON.parse(settings["data"] ?? "null");
-      } catch {
-        data = undefined;
-      }
-      points = polarPointsOf(data, t0, t1) ?? [];
-      view.markers = settings["markers"] !== "false";
+      const listed = polarListOf(settings);
+      whole = listed.curves;
+      notes = listed.notes;
     } else {
       const raw = settings["expr"]?.trim();
       if (!raw) return this.#clear();
-      const loaded = await plotFunctions(raw);
+      const loaded = await plotFunctions(raw, { each: true });
       if (generation !== this.#generation) return;
-      const scope = loaded.scope();
-      Object.assign(scope, this.host.bindings);
-      const variable = settings["tvar"] || loaded.plot.unknowns.find((u) => !u.startsWith("_")) || "theta";
-      sample = (t: number): number => {
-        scope[variable] = t;
-        return loaded.samplers[0]!(scope);
-      };
-      points = samplePolar(sample, t0, t1, Math.max(2, Math.min(2000, Number(settings["n"]) || 240)));
+      const curves = polarCurvesOf(settings, loaded, this.host.bindings);
+      if ("unbound" in curves || "failed" in curves) return this.#say(curves);
+      radii = curves.radii;
+      range = curves.range;
+      whole = radii.map((radius) => samplePolar(radius, range[0], range[1], curves.count));
     }
+    const markers = head === "ListPolarPlot" ? { markers: settings["markers"] !== "false" } : {};
     this.#field = false;
     this.#box = undefined;
     this.#frame = undefined;
-    const whole = points;
     const drawPolar = (window: PlotWindow | undefined): void => {
       const zoomed = window && {
         center: [(window.x[0] + window.x[1]) / 2, (window.y![0] + window.y![1]) / 2] as const,
         half: (window.x[1] - window.x[0]) / 2,
       };
-      const shown = zoomed && sample ? samplePolarIn(sample, t0, t1, zoomed, this.#pixels()) : whole;
-      this.#polar = polarPlotBox(shown, { ...view, ...(zoomed && { window: zoomed }) }) as BoxNode;
+      const shown =
+        zoomed && radii
+          ? radii.map((radius) => samplePolarIn(radius, range[0], range[1], zoomed, this.#pixels()))
+          : whole;
+      this.#polar = polarBoxOfSettings(settings, shown, {
+        ...markers,
+        notes,
+        ...(zoomed && { window: zoomed }),
+      }) as BoxNode;
       this.#svg = polarPlotBoxSvg(this.#polar);
     };
     drawPolar(undefined);
     this.#home = this.#windowOf(this.#polar);
-    if (sample) {
+    if (radii) {
       this.#redo = (window) => {
         drawPolar(window);
         this.#finish();

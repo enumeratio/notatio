@@ -23,7 +23,17 @@ import {
   style,
   tag,
 } from "@notatio/boxes";
-import { label, niceTicks, optionEdges, optionNumbers, optionPoints, plotItems, solidEdge } from "./plot-box.ts";
+import {
+  label,
+  niceTicks,
+  NOTE_LINE,
+  noteLines,
+  optionEdges,
+  optionNumbers,
+  optionPoints,
+  plotItems,
+  solidEdge,
+} from "./plot-box.ts";
 import { categoryColors, type ColorOptions, plotPalette, rampColor } from "./plot-color.ts";
 import { svg } from "./svg-draw.ts";
 import type { DisplayList, GraphicsPrimitive, MarkItem } from "./tiles-canvas.ts";
@@ -67,6 +77,10 @@ export interface ChartOptions extends ColorOptions {
   title?: string;
   /** Category labels where the chart shows them (ChartLabels). */
   labels?: readonly string[];
+  /** `GridLines -> None` is `false`: a bar chart's faint rules at its y ticks are drawn unless it says no. */
+  grid?: boolean | undefined;
+  /** What the chart's data held that it did not draw, said under it (`chartNotes`). */
+  notes?: readonly string[];
 }
 
 const WIDTH = 340;
@@ -99,6 +113,8 @@ interface Frame {
   readonly axis?: readonly [number, number];
   /** `Frame`: a border round the plot area. */
   readonly frame?: boolean;
+  /** What was not drawn, one line each under the figure. */
+  readonly notes?: readonly string[];
   /** `PlotLegends` and `LegendPosition`: a swatch and a name each, from a data point down. */
   readonly legend?: {
     readonly at: readonly [number, number];
@@ -112,13 +128,16 @@ const stroke = (color: string, width: number, opacity = 1): OptionValue => [[col
 const item = (prim: Box, role: string, look: Options): Box => style(tag(prim, role), look);
 
 function chartBoxOf(frame: Frame, marks: readonly Box[]): Box {
+  const notes = noteLines(frame.notes);
+  const space = NOTE_LINE * notes.length;
   const options: Record<string, OptionValue> = {
     ChartKind: KINDS[frame.kind].option,
-    ImageSize: [...frame.size],
+    ImageSize: [frame.size[0], frame.size[1] + space],
     ImagePadding: [
       [frame.pad[0], frame.pad[1]],
-      [frame.pad[2], frame.pad[3]],
+      [frame.pad[2] + space, frame.pad[3]],
     ],
+    ...(notes.length > 0 && { Notes: notes }),
     ...(frame.range && { PlotRange: frame.range.map((r) => [...r]) }),
     ...(frame.title && { PlotLabel: frame.title }),
     ...(frame.ticks && { Ticks: frame.ticks.map((ts) => ts.map((t): OptionValue => [...t])) }),
@@ -152,35 +171,60 @@ const slotTicks = (labels: readonly string[] | undefined, n: number): Tick[] =>
 export interface BarChartOptions extends ChartOptions {}
 
 /** Vertical bars for a value list, from a zero baseline (negative values dip below it). */
-export function barChartBox(values: readonly number[], opts: BarChartOptions = {}): Box {
+export function barChartBox(
+  values: readonly number[] | readonly (readonly number[])[],
+  opts: BarChartOptions = {},
+): Box {
   const mT = marginTop(Boolean(opts.title));
   const mB = opts.labels?.length ? 28 : 18;
-  const frame = { kind: "bar", size: sizeOf(opts), pad: [M_LEFT, M_RIGHT, mB, mT], title: opts.title } as const;
-  const finite = values.filter(Number.isFinite);
+  const frame = {
+    kind: "bar",
+    size: sizeOf(opts),
+    pad: [M_LEFT, M_RIGHT, mB, mT],
+    title: opts.title,
+    ...(opts.notes && { notes: opts.notes }),
+  } as const;
+  // A list of lists is a group of bars for each list (Wolfram's grouped layout); a flat list is a bar per slot.
+  const groups: readonly (readonly number[])[] = values.every(Array.isArray)
+    ? (values as readonly (readonly number[])[])
+    : (values as readonly number[]).map((v) => [v]);
+  const finite = groups.flat().filter(Number.isFinite);
   if (finite.length === 0) return chartBoxOf(frame, []);
   const [lo, hi] = padded(Math.min(0, ...finite), Math.max(0, ...finite), 0.06);
-  const [color] = categoryColors(plotPalette(opts), 1);
-  const bars = values.flatMap((v, i) =>
-    Number.isFinite(v)
-      ? [
-          item(
-            rectangle({ Min: [i + BAR_GAP / 2, Math.min(0, v)], Max: [i + 1 - BAR_GAP / 2, Math.max(0, v)] }),
-            "Bar",
-            { FaceForm: color! },
-          ),
-        ]
-      : [],
+  const palette = plotPalette(opts);
+  const size = Math.max(...groups.map((g) => g.length));
+  const colors = categoryColors(palette, size);
+  const [dataLo, dataHi] = [Math.min(...finite), Math.max(...finite)];
+  // A named `ColorFunction` colors each bar by its value along the gradient; otherwise a bar takes its place's color.
+  const colorOf = (v: number, j: number): string =>
+    opts.gradient !== undefined ? rampColor(palette, (v - dataLo) / (dataHi - dataLo || 1)) : colors[j]!;
+  const width = (1 - BAR_GAP) / size;
+  const bars = groups.flatMap((group, g) =>
+    group.flatMap((v, j) =>
+      Number.isFinite(v)
+        ? [
+            item(
+              rectangle({
+                Min: [g + BAR_GAP / 2 + j * width, Math.min(0, v)],
+                Max: [g + 1 - BAR_GAP / 2 - (size - 1 - j) * width, Math.max(0, v)],
+              }),
+              "Bar",
+              { FaceForm: colorOf(v, j) },
+            ),
+          ]
+        : [],
+    ),
   );
   const yTicks = niceTicks(lo, hi);
   return chartBoxOf(
     {
       ...frame,
       range: [
-        [0, values.length],
+        [0, groups.length],
         [lo, hi],
       ],
-      ticks: [slotTicks(opts.labels, values.length), labeled(yTicks)],
-      grid: yTicks,
+      ticks: [slotTicks(opts.labels, groups.length), labeled(yTicks)],
+      ...(opts.grid !== false && { grid: yTicks }),
       axis: [0, 0],
     },
     bars,
@@ -204,6 +248,7 @@ export function histogramBox(values: readonly number[], opts: HistogramOptions =
     size: sizeOf(opts),
     pad: [M_LEFT, M_RIGHT, 22, marginTop(Boolean(opts.title))],
     title: opts.title,
+    ...(opts.notes && { notes: opts.notes }),
   } as const;
   const finite = values.filter(Number.isFinite);
   if (finite.length === 0) return chartBoxOf(frame, []);
@@ -252,7 +297,13 @@ export function pieChartBox(values: readonly number[], opts: PieChartOptions = {
   const r = Math.min(cx - 10, (H - mT) / 2 - 10, W / 2 - 10);
   // The window is the plot area at r px to the unit, so a wedge of radius 1 is a circle on the page.
   const half = (H - mT) / 2 / r;
-  const frame = { kind: "pie", size: [W, H], pad: [0, 0, 0, mT], title: opts.title } as const;
+  const frame = {
+    kind: "pie",
+    size: [W, H],
+    pad: [0, 0, 0, mT],
+    title: opts.title,
+    ...(opts.notes && { notes: opts.notes }),
+  } as const;
   const entries = values.map((v, i) => ({ v, i })).filter((e) => Number.isFinite(e.v) && e.v > 0);
   const total = entries.reduce((a, e) => a + e.v, 0);
   if (entries.length === 0 || total <= 0 || r <= 0) return chartBoxOf(frame, []);
@@ -327,6 +378,7 @@ export function boxWhiskerChartBox(series: readonly (readonly number[])[], opts:
     size: [W, H],
     pad: [M_LEFT, M_RIGHT, mB, marginTop(Boolean(opts.title))],
     title: opts.title,
+    ...(opts.notes && { notes: opts.notes }),
   } as const;
   const summaries = series.map(fiveNumberSummary);
   const found = summaries.filter((s): s is FiveNumberSummary => s !== undefined);
@@ -417,7 +469,16 @@ export function arrayPlotBox(matrix: readonly (readonly number[])[], opts: Array
   const rows = matrix.length;
   const cols = rows > 0 ? Math.max(...matrix.map((r) => r.length)) : 0;
   if (rows === 0 || cols === 0)
-    return chartBoxOf({ kind: "array", size: [W, opts.height ?? HEIGHT], pad: [0, 0, 0, mT], title: opts.title }, []);
+    return chartBoxOf(
+      {
+        kind: "array",
+        size: [W, opts.height ?? HEIGHT],
+        pad: [0, 0, 0, mT],
+        title: opts.title,
+        ...(opts.notes && { notes: opts.notes }),
+      },
+      [],
+    );
 
   const flat = matrix.flat().filter(Number.isFinite);
   const lo = flat.length ? Math.min(...flat) : 0;
@@ -457,6 +518,7 @@ export function arrayPlotBox(matrix: readonly (readonly number[])[], opts: Array
       size: [W, H],
       pad: [x0, W - x0 - plotW, m, mT],
       title: opts.title,
+      ...(opts.notes && { notes: opts.notes }),
       range: [
         [0, cols],
         [0, rows],
@@ -476,6 +538,7 @@ export function discretePlotBox(values: readonly number[], opts: DiscretePlotOpt
     size: sizeOf(opts),
     pad: [M_LEFT, M_RIGHT, 18, marginTop(Boolean(opts.title))],
     title: opts.title,
+    ...(opts.notes && { notes: opts.notes }),
   } as const;
   const finite = values.filter(Number.isFinite);
   if (finite.length === 0) return chartBoxOf(frame, []);
@@ -518,6 +581,13 @@ export function chartValues(data: unknown): number[] {
   return Array.isArray(data) ? data.filter(isNumber) : [];
 }
 
+/** A bar chart's bars: one group per list when `data` is a list of lists, else a flat number list. */
+export function chartGroups(data: unknown): number[] | number[][] {
+  return Array.isArray(data) && data.length > 0 && data.every(Array.isArray)
+    ? (data as unknown[][]).map(chartValues)
+    : chartValues(data);
+}
+
 /** One series per row for BoxWhiskerChart: a flat number list is a single series. */
 export function chartSeries(data: unknown): number[][] {
   if (!Array.isArray(data)) return [];
@@ -537,21 +607,86 @@ export interface ChartBoxOptions extends ChartOptions {
   bins?: number | undefined;
 }
 
+/** A number list read as a chart reads it: the finite numbers, and how many entries were not. */
+const numbersOf = (entries: readonly unknown[]): { values: number[]; dropped: number } => {
+  const values = entries.filter(isNumber);
+  return { values, dropped: entries.length - values.length };
+};
+
+/** The head each chart kind is written as, for what a note says. */
+const HEADS: Readonly<Record<ChartKind, string>> = {
+  bar: "BarChart",
+  histogram: "Histogram",
+  pie: "PieChart",
+  box: "BoxWhiskerChart",
+  array: "ArrayPlot",
+  discrete: "DiscretePlot",
+};
+
+/** `n` entries that are not numbers, as one sentence. */
+const droppedNote = (dropped: number): string[] =>
+  dropped === 0
+    ? []
+    : [
+        dropped === 1
+          ? "1 entry is not a number, so it is not drawn."
+          : `${dropped} entries are not numbers, so they are not drawn.`,
+      ];
+
+/**
+ * What `data` holds that the chart `kind` does not draw, one sentence each: entries that are not
+ * numbers, data that is no list (a `DiscretePlot` of an expression takes no samples), and lists given
+ * to a chart that takes one.
+ */
+export function chartNotes(kind: ChartKind, data: unknown): string[] {
+  if (!Array.isArray(data))
+    return [
+      kind === "discrete"
+        ? "DiscretePlot takes a list of values; an expression is not sampled here, so nothing is drawn."
+        : "There is no list of data to draw.",
+    ];
+  if (data.length === 0) return ["There is no data to draw."];
+  const nested = data.filter(Array.isArray);
+  switch (kind) {
+    case "bar": {
+      const groups = nested.length === data.length ? (data as unknown[][]) : [data];
+      return droppedNote(groups.reduce((n, g) => n + numbersOf(g).dropped, 0));
+    }
+    case "box": {
+      const series = nested.length === data.length ? (data as unknown[][]) : [data];
+      return droppedNote(series.reduce((n, g) => n + numbersOf(g).dropped, 0));
+    }
+    case "array": {
+      const rows = data.filter((e) => !Array.isArray(e)).length;
+      const cells = nested.reduce<number>((n, row) => n + numbersOf(row as unknown[]).dropped, 0);
+      return [
+        ...(rows > 0 ? [`${rows} of ${data.length} rows are not lists, so they are not drawn.`] : []),
+        ...(cells > 0 ? [`${cells} cells are not numbers, so they are not drawn.`] : []),
+      ];
+    }
+    default:
+      return nested.length > 0
+        ? [`${HEADS[kind]} takes one list of numbers; it was given lists, so nothing is drawn.`]
+        : droppedNote(numbersOf(data).dropped);
+  }
+}
+
 /** The chart `kind` of `data` (a JSON value, as the `data` attribute holds it) as a `GraphicsBox`. */
 export function chartBox(kind: ChartKind, data: unknown, opts: ChartBoxOptions = {}): Box {
+  const noted = { ...opts, notes: [...(opts.notes ?? []), ...chartNotes(kind, data)] };
   switch (kind) {
     case "bar":
-      return barChartBox(chartValues(data), opts);
+      return barChartBox(chartGroups(data), noted);
     case "histogram":
-      return histogramBox(chartValues(data), opts);
+      return histogramBox(chartValues(data), noted);
     case "pie":
-      return pieChartBox(chartValues(data), opts);
+      return pieChartBox(chartValues(data), noted);
     case "box":
-      return boxWhiskerChartBox(chartSeries(data), opts);
+      return boxWhiskerChartBox(chartSeries(data), noted);
     case "array":
-      return arrayPlotBox(chartMatrix(data), opts);
+      return arrayPlotBox(chartMatrix(data), noted);
     default:
-      return discretePlotBox(chartValues(data), opts);
+      return discretePlotBox(chartValues(data), noted);
   }
 }
 
@@ -615,8 +750,13 @@ export function drawChart(box: BoxNode): ChartDrawing {
     size: [W, H],
     name: KINDS[kind].name,
   });
+  const notes = noteLines(o.Notes);
   const title = (): void => {
     if (typeof o.PlotLabel === "string") text(W / 2, 14, "middle", o.PlotLabel, 12);
+    // What the chart did not draw, in small type at the foot of the figure.
+    notes.forEach((note, k) =>
+      text(6, H - 3 - NOTE_LINE * (notes.length - 1 - k), "start", note, 9, { opacity: 0.75 }),
+    );
   };
   const range = Array.isArray(o.PlotRange) ? (o.PlotRange as number[][]) : undefined;
   if (!range) {

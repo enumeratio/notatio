@@ -1,7 +1,10 @@
 id	in
 index-vs-value	ListPlot[List[3, 1, 4, 1, 5, 9, 2, 6]]
 explicit-pairs	ListPlot[List[List[1, 1], List[2, 4], List[3, 9], List[4, 16], List[5, 25]]]
+two-datasets	ListPlot[List[List[List[1, 1], List[2, 4], List[3, 9], List[4, 16]], List[List[1, 1], List[2, 2], List[3, 3], List[4, 4]]]]
 primes-pairs	ListPlot[List[List[1, 2], List[2, 3], List[3, 5], List[4, 7], List[5, 11], List[6, 13], List[7, 17], List[8, 19], List[9, 23], List[10, 29], List[11, 31], List[12, 37]]]
 residues	ListPlot[List[List[1, 1], List[2, 4], List[3, 9], List[4, 5], List[5, 3], List[6, 3], List[7, 5], List[8, 9], List[9, 4], List[10, 1], List[11, 0], List[12, 1], List[13, 4], List[14, 9], List[15, 5], List[16, 3], List[17, 3], List[18, 5], List[19, 9], List[20, 4]]]
 pairs-grid-title	ListPlot[List[List[1, 1], List[2, 4], List[3, 9], List[4, 16], List[5, 25]], Rule[GridLines, True], Plot[enumeratio`Label, "squares"]]
 pairs-style	ListPlot[List[List[1, 1], List[2, 4], List[3, 9], List[4, 16], List[5, 25]], Rule[PlotStyle, Red]]
+pairs-log	ListPlot[List[List[1, 2], List[2, 4], List[3, 8], List[4, 16], List[5, 32], List[6, 64]], Rule[ScalingFunctions, "Log"]]
+pairs-filled	ListPlot[List[List[1, 1], List[2, 1], List[3, 2], List[4, 3], List[5, 5], List[6, 8]], Rule[Filling, True]]

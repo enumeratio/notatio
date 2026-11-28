@@ -26,7 +26,7 @@ import {
 } from "./plot-box.ts";
 import { categoryColors, plotPalette } from "./plot-color.ts";
 import { type Primitive, primitivesOf } from "./primitives.ts";
-import type { PolarPoint } from "./polarplot.ts";
+import { type PolarPlotOptions, type PolarPoint, polarPlotBox } from "./polarplot.ts";
 import {
   BOUNDARY_WIDTH,
   maskGrid,
@@ -143,6 +143,7 @@ export function chartBoxOfSettings(settings: PlotSettings): Box | undefined {
     gradient: settings["gradient"],
     discrete: settings["discrete"],
     reverse: on(settings["reverse"]),
+    ...(settings["grid"] === "false" && { grid: false }),
   };
   return chartBox(kind, data, options);
 }
@@ -310,6 +311,18 @@ export function graphicsBoxOfSettings(
   return graphicsMarksBox(primitives, { ...options, plotRange: [window.x, window.y], aspect: plotH / plotW });
 }
 
+/**
+ * `AspectRatio` as the plot box reads it: a number, `equal` for `Automatic` (true scale), and for a
+ * parametric curve, which Wolfram draws at true scale, `equal` when the option is left out.
+ */
+function aspectOf(settings: PlotSettings): Pick<PlotOptions, "aspect"> {
+  const written = settings["aspect"];
+  if (written === "auto") return { aspect: "equal" };
+  const ratio = Number(written);
+  if (ratio > 0) return { aspect: ratio };
+  return settings["parametric"] === "true" ? { aspect: "equal" } : {};
+}
+
 /** What a plot's settings say about how to draw it: the chrome, the scales, the colors. */
 export function plotOptionsOf(
   settings: PlotSettings,
@@ -334,6 +347,7 @@ export function plotOptionsOf(
     plotRange: spanOf(settings["plot-range"]),
     xRange: spanOf(settings["plot-x-range"]),
     ...chromeOf(settings),
+    ...aspectOf(settings),
     fill: on(settings["fill"]),
     legend: on(settings["legend"]),
     xLabel: settings["x-label"] || undefined,
@@ -370,15 +384,54 @@ export function vectorOptionsOf(settings: PlotSettings): {
   };
 }
 
+const isPair = (e: unknown): boolean => Array.isArray(e) && e.length === 2 && e.every(isNumber);
+
+/** `entries` as points: a number is its value against its place, a pair or an `{x, y}` is the point; the rest is counted. */
+function pointsOfEntries(entries: readonly unknown[]): { points: PlotPoint[]; dropped: number } {
+  const points: PlotPoint[] = [];
+  let dropped = 0;
+  entries.forEach((e, x) => {
+    if (isNumber(e)) points.push({ x, y: e });
+    else if (isPair(e)) points.push({ x: (e as number[])[0]!, y: (e as number[])[1]! });
+    else if (e && typeof e === "object" && isNumber((e as PlotPoint).x) && isNumber((e as PlotPoint).y))
+      points.push(e as PlotPoint);
+    else dropped++;
+  });
+  return { points, dropped };
+}
+
+/**
+ * A plot of data's series. A list of numbers, of pairs or of `{x, y}` is one series; a list of lists
+ * that are not all pairs is one series per list (`[[1, 2, 3], [2, 3, 5]]`). An entry that is neither a
+ * number nor a pair is not drawn, and the series says how many (`notes`), so nothing is lost silently.
+ */
+export function seriesOfData(data: unknown, style: "points" | "line"): PlotSeries[] {
+  if (!Array.isArray(data) || data.length === 0)
+    return [{ points: [], style, given: true, notes: ["There is no data to draw."] }];
+  const lists = data.every(Array.isArray) && !data.every(isPair);
+  const groups = lists ? (data as unknown[][]) : [data];
+  const read = groups.map(pointsOfEntries);
+  const dropped = read.reduce((n, r) => n + r.dropped, 0);
+  const notes =
+    dropped === 0
+      ? []
+      : [
+          dropped === 1
+            ? "1 entry is not a number or a pair, so it is not drawn."
+            : `${dropped} entries are not numbers or pairs, so they are not drawn.`,
+        ];
+  return read.map((r, k) => ({ points: r.points, style, given: true, ...(k === 0 && notes.length > 0 && { notes }) }));
+}
+
 /** The series of a plot of data (`ListPlot`, `ListLinePlot`); undefined for a plot of an expression. */
 export function plotDataSeries(settings: PlotSettings): PlotSeries[] | undefined {
   const type = settings["type"];
   if (type !== "list" && type !== "listline") return undefined;
+  const style = type === "list" ? "points" : "line";
   try {
-    const points = pointsOfData(JSON.parse(settings["data"] ?? "null"));
-    return [{ points, style: type === "list" ? "points" : "line" }];
+    return seriesOfData(JSON.parse(settings["data"] ?? "null"), style);
   } catch {
-    return [];
+    return [{ points: [], style, notes: ["The data could not be read, so nothing is drawn."] }];
   }
 }
 
@@ -397,6 +450,68 @@ export function polarPointsOf(data: unknown, t0: number, t1: number): PolarPoint
     return (data as number[]).map((r, i) => ({ theta: n > 1 ? t0 + ((t1 - t0) * i) / (n - 1) : t0, r }));
   }
   return undefined;
+}
+
+/** A list of lists is several curves unless every list is an (angle, radius) pair, which is one curve of points. */
+const isPolarPair = (e: unknown): boolean => Array.isArray(e) && e.length === 2 && e.every(isNumber);
+
+/**
+ * A `ListPolarPlot`'s curves: its data as one curve, or one per list when it is a list of lists; a
+ * list that is neither `[[θ, r], …]` nor radii is not drawn, and a note says so.
+ */
+export function polarListOf(settings: PlotSettings): { curves: PolarPoint[][]; notes: string[] } {
+  const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
+  const data = jsonOf(settings["data"]);
+  if (!Array.isArray(data) || data.length === 0) return { curves: [], notes: ["There is no data to draw."] };
+  const groups = data.every(Array.isArray) && !data.every(isPolarPair) ? (data as unknown[]) : [data];
+  const read = groups.map((group) => polarPointsOf(group, t0, t1));
+  const lost = read.filter((points) => points === undefined).length;
+  return {
+    curves: read.filter((points): points is PolarPoint[] => points !== undefined),
+    notes:
+      lost > 0
+        ? [`${lost} of ${groups.length} lists are not (angle, radius) pairs or radii, so they are not drawn.`]
+        : [],
+  };
+}
+
+/** What a polar plot's settings say about how it is drawn: the grid, the path, the markers, the title and the looks. */
+export function polarOptionsOf(settings: PlotSettings): PolarPlotOptions {
+  return {
+    axes: settings["axes"] !== "false",
+    closed: on(settings["closed"]),
+    filled: on(settings["filled"]),
+    markers: on(settings["markers"]),
+    max: Number(settings["max"]) > 0 ? Number(settings["max"]) : undefined,
+    title: settings["label"] || undefined,
+    styles: plotStylesOf(settings["plot-style"]),
+  };
+}
+
+/** Samples a polar plot takes over its angle, `PlotPoints` when it gives them: at most `POLAR_MAX_SAMPLES`. */
+export const polarSampleCount = (settings: PlotSettings): number =>
+  Math.max(2, Math.min(POLAR_MAX_SAMPLES, Math.round(Number(settings["n"]) || POLAR_SAMPLES)));
+const [POLAR_SAMPLES, POLAR_MAX_SAMPLES] = [240, 2000];
+
+/**
+ * A polar plot of `curves` as a `GraphicsBox`, from its settings. A curve with no real value over its
+ * range is not drawn, and a note under the plot says which.
+ */
+export function polarBoxOfSettings(
+  settings: PlotSettings,
+  curves: readonly (readonly PolarPoint[])[],
+  extra: PolarPlotOptions & { notes?: readonly string[] } = {},
+): Box {
+  const empty = curves.flatMap((points, k) => (points.some((p) => Number.isFinite(p.r)) ? [] : [k + 1]));
+  const notes = [
+    ...(extra.notes ?? []),
+    ...(empty.length > 0
+      ? [
+          `${empty.length > 1 ? "Curves" : "Curve"} ${empty.join(", ")} ${empty.length > 1 ? "have" : "has"} no real value over the range, so not drawn.`,
+        ]
+      : []),
+  ];
+  return polarPlotBox(curves, { ...polarOptionsOf(settings), ...extra, notes });
 }
 
 /** Whether a `GraphicsBox` is a plot still to be sampled, and the expression it holds. */

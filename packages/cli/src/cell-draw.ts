@@ -5,7 +5,16 @@
 // text out. Selection and hover are the web's; the marks' own colors are kept where the terminal has color.
 
 import { type Box, type BoxNode, graphicsOf, isNode, optionsOfBox, type Options } from "@notatio/boxes";
-import { arrowhead, complexOf, isChartBox, isDiagramBox, isPlotBox, pinnedBox, plotItems } from "@notatio/frontend";
+import {
+  arrowhead,
+  complexOf,
+  isChartBox,
+  isDiagramBox,
+  isPlotBox,
+  noteLines,
+  pinnedBox,
+  plotItems,
+} from "@notatio/frontend";
 
 type Point = readonly number[];
 
@@ -382,6 +391,16 @@ function gutterLabel(v: number, width: number): string {
  * `Epilog` points as `●`, the y extremes in a gutter and the x extremes under the axis.
  */
 export function drawPlotBox(box: BoxNode, options: CellOptions = {}): string {
+  return withNotes(box, drawPlotCells(box, options));
+}
+
+/** `text` and, under it, what the figure says it did not draw (`Notes`), one `note:` line each. */
+function withNotes(box: BoxNode, text: string): string {
+  const notes = noteLines(optionsOfBox(box).Notes);
+  return notes.length === 0 ? text : `${text}\n${notes.map((note) => `note: ${note}`).join("\n")}`;
+}
+
+function drawPlotCells(box: BoxNode, options: CellOptions): string {
   // The gutter and the axis come out of the width the drawing may take.
   const [width, height] = [Math.max(4, (options.width ?? 60) - GUTTER - 2), Math.max(2, options.height ?? 12)];
   const range = optionsOfBox(box).PlotRange;
@@ -551,6 +570,10 @@ export function drawDiagramBox(box: BoxNode, options: CellOptions = {}): string 
 
 /** A chart's `GraphicsBox` on character cells: its marks on braille in data coordinates, under its title. */
 export function drawChartBox(box: BoxNode, options: CellOptions = {}): string {
+  return withNotes(box, drawChartCells(box, options));
+}
+
+function drawChartCells(box: BoxNode, options: CellOptions): string {
   const marks = chartMarks(box);
   const o = optionsOfBox(box);
   const range = Array.isArray(o.PlotRange) ? (o.PlotRange as number[][]) : undefined;
@@ -591,5 +614,6 @@ export function drawGraphicsBox(box: Box, options: CellOptions = {}): string {
   const ruled =
     shapes.length > 0 && shapes.every((m) => m.shape.head === "Polygon" && rectangleOf(m.shape.points) !== undefined);
   const cells = ruled ? drawRuled(marks) : drawBraille(marks, width, height);
-  return cells.width === 0 ? "(nothing to draw)" : cells.toString(options.color ?? false);
+  const text = cells.width === 0 ? "(nothing to draw)" : cells.toString(options.color ?? false);
+  return drawing === undefined ? text : withNotes(drawing, text);
 }

@@ -49,6 +49,11 @@ export interface CompiledPlot {
   /** Whether the expression was a list split into its elements (`each`). */
   readonly list: boolean;
   readonly items: readonly CompiledItem[];
+  /**
+   * A list whose elements are themselves lists (`[(x1(t), y1(t)), (x2(t), y2(t))]`), each element's
+   * components compiled on their own: the curves of a parametric plot of several. Absent otherwise.
+   */
+  readonly curves?: readonly (readonly CompiledItem[])[];
   /** `fields`: the items as one GLSL unit, when every one compiled. */
   readonly unit?: string;
 }
@@ -212,7 +217,17 @@ function compileIn(ce: ComputeEngine, json: unknown, spec: PlotCompileSpec): Com
   const unknowns = [...expr.unknowns].toSorted();
   const list = spec.each === true && LIST_HEADS.has(expr.operator) && (opsOf(expr)?.length ?? 0) > 0;
   const items = list ? [...(opsOf(expr) ?? [])] : [expr];
-  const compiled = { unknowns, list, items: items.map((e) => compileItem(e, spec, unknowns)) };
+  const parts = list ? items.map((e) => (LIST_HEADS.has(e.operator) ? opsOf(e) : undefined)) : [];
+  const curves =
+    spec.target === "javascript" && parts.length > 0 && parts.every((p) => p !== undefined && p.length > 0)
+      ? parts.map((p) => p!.map((e) => compileItem(e, spec, unknowns)))
+      : undefined;
+  const compiled = {
+    unknowns,
+    list,
+    items: items.map((e) => compileItem(e, spec, unknowns)),
+    ...(curves && { curves }),
+  };
   if (spec.target !== "glsl" || spec.fields !== true) return compiled;
   const params = spec.params ?? [];
   const free = unknowns.filter((u) => !u.startsWith("_") && !params.includes(u));

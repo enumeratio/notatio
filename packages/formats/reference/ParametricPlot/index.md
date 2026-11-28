@@ -8,6 +8,7 @@ names:
 options:
   - AspectRatio
   - Axes
+  - AxesLabel
   - AxesOrigin
   - Epilog
   - Frame

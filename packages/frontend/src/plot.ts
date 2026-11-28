@@ -164,6 +164,10 @@ export interface SeriesOptions {
   readonly parametric?: boolean;
 }
 
+/** What a parametric plot says of a body that is not `(x(t), y(t))`: it draws nothing and names why. */
+const notPair = (count: number): string =>
+  `A parametric curve is (x(t), y(t)); this has ${count} component${count === 1 ? "" : "s"}, so nothing is drawn.`;
+
 /**
  * The series `<Plot>` draws: `items` sampled over the domain by `at(k)`, item `k` as a
  * function of the plot variable. A pair of items is a parametric curve when asked; items that
@@ -179,7 +183,8 @@ export function plotSeries(
   const ts = Array.from({ length: count }, (_, i) => lo + ((hi - lo) * i) / (count - 1));
   const style = options.mode === "points" ? "points" : "line";
   const useAdaptive = options.adaptive !== false && style === "line";
-  if (options.parametric === true && items.length === 2) {
+  if (options.parametric === true && items.length !== 2) return [{ points: [], notes: [notPair(items.length)] }];
+  if (options.parametric === true) {
     // (x(t), y(t)) traced over the domain in t; refined by planar bend.
     const fxn = at(0);
     const fyn = at(1);
@@ -302,7 +307,11 @@ export function plotSeriesIn(
   window?: PlotWindow,
   pixels = 340,
 ): PlotSeries[] {
-  if (window === undefined || (items.length > 0 && items.every((item) => item.point !== undefined)))
+  if (
+    window === undefined ||
+    (options.parametric === true && items.length !== 2) ||
+    (items.length > 0 && items.every((item) => item.point !== undefined))
+  )
     return plotSeries(items, at, options);
   const [lo, hi] = options.domain;
   const style = options.mode === "points" ? "points" : "line";

@@ -7,6 +7,8 @@ names:
   wolframIdentity: true
 options:
   - Filled
+  - PlotLabel
+  - PlotPoints
   - PlotStyle
 optionValues:
   Filled:
