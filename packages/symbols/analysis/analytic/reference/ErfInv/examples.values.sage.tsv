@@ -29,5 +29,5 @@ erfinv-0-1
 erfinv-1-0			
 solve-erfinv-x-pow-3-plus-2-times-erfinv-x-eq-1			
 attributes-erfinv			
-outside-its-real-domain-1-1-compute-engine	erfinv(2)	erfinv(2)	disagree
+outside-its-real-domain-1-1-compute-engine	erfinv(2)	erfinv(2)	
 blows-up-near-the-boundary-erfinv-0-9999-is	erfinv(0.9999)	2.75106390571208	
