@@ -251,3 +251,21 @@ test("`|…|` and `\\vert…\\vert` read as Count by the operand's type, else Ab
   }
   expect(typed.box("q", { form: "raw" }).type.toString()).toBe("unknown");
 });
+
+test("a rule is an arrow, as an option in a plotting head's call or anywhere", () => {
+  const tex = (json: unknown) => ce.box(json as never, { form: "raw" }).latex;
+  expect(tex(["Plot", ["Sin", "x"], ["Tuple", "x", 0, 1], ["Rule", "PlotRange", ["Tuple", -6, 6]]])).toBe(
+    "\\mathrm{Plot}(\\sin(x), (x,0,1), \\mathrm{PlotRange}\\to (-6,6))",
+  );
+  expect(tex(["BarChart", ["List", 1, 2], ["Rule", "PlotRange", "All"]])).toContain(
+    "\\mathrm{PlotRange}\\to \\mathrm{All}",
+  );
+  expect(tex(["Hold", ["Graphics", ["Circle"], ["Rule", "Axes", "True"]]])).toContain(
+    "\\mathrm{Axes}\\to \\mathrm{True}",
+  );
+  // Right-associative, and a left rule or a rule among a sum's terms is fenced.
+  expect(tex(["Rule", "a", ["Rule", "b", "c"]])).toBe("a\\to b\\to c");
+  expect(tex(["Rule", ["Rule", "a", "b"], "c"])).toBe("(a\\to b)\\to c");
+  expect(tex(["Add", "a", ["Rule", "b", "c"]])).toBe("a+(b\\to c)");
+  expect(tex(["Rule", "a"])).toBe("\\mathrm{Rule}(a)");
+});
