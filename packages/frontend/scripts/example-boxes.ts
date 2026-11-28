@@ -20,7 +20,6 @@ import {
   fieldBoxOfGrids,
   plotBoxOfSamples,
   regionFunctionVars,
-  spanOf,
   unsampledPlot,
   vectorOptionsOf,
 } from "../src/plot-lowering.ts";
@@ -33,10 +32,11 @@ import {
   loadCompiled,
   lonePlotOf,
   type PlotRuntime,
+  polarBoxOfCurves,
+  polarCurvesOf,
 } from "../src/plot-sample.ts";
 import { type Primitive, primitivesOf } from "../src/primitives.ts";
 import { parseExpression } from "@notatio/formats/expression";
-import { polarPlotBox, samplePolar } from "../src/polarplot.ts";
 import { FIGURE_NOTATION } from "../src/show-box.ts";
 import { complexFunction } from "../src/complex-eval.ts";
 import { COMPLEX_PART_HEADS, complexContourBoxOf, complexPartSeries } from "../src/complex-parts.ts";
@@ -84,6 +84,7 @@ function samplers(
 const SAMPLED: ReadonlySet<string> = new Set([
   "Plot",
   "ParametricPlot",
+  "DiscretePlot",
   "PolarPlot",
   "VectorPlot",
   "StreamPlot",
@@ -179,21 +180,11 @@ function sampled(ce: ComputeEngine, held: readonly unknown[]): Box {
     if (figure === undefined) throw new Error(`nothing to draw of ${String(held[0])}`);
     return figure;
   }
-  const { free, items } = samplers(ce, body);
-  const variable = settings["var"] || settings["tvar"] || free[0] || "theta";
-  const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
-  const n = Math.max(2, Math.min(2000, Number(settings["n"]) || 240));
-  return polarPlotBox(
-    samplePolar((t) => items[0]!({ [variable]: t }), t0, t1, n),
-    {
-      axes: settings["axes"] !== "false",
-      closed: on(settings["closed"]),
-      filled: on(settings["filled"]),
-      markers: on(settings["markers"]),
-      max: Number(settings["max"]) > 0 ? Number(settings["max"]) : undefined,
-      title: settings["label"] || undefined,
-    },
-  );
+  const loaded = loadCompiled(compilePlot(ce, plainJson(body as never), CURVE_SPEC), runtimeOf(ce));
+  const curves = polarCurvesOf(settings, loaded);
+  if ("unbound" in curves) throw new Error(`no value for ${curves.unbound.join(", ")}`);
+  if ("failed" in curves) throw new Error(curves.failed);
+  return polarBoxOfCurves(settings, curves);
 }
 
 /** What compiled code calls, from an engine in this process. */

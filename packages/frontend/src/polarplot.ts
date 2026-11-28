@@ -20,7 +20,9 @@ import {
   tag,
 } from "@notatio/boxes";
 import type { Edge } from "./graphics-rules.ts";
-import { label, type PlotFrame } from "./plot-box.ts";
+import type { GraphicsLook } from "./directives.ts";
+import { label, lookStroke, NOTE_LINE, noteLines, type PlotFrame } from "./plot-box.ts";
+import { categoryColors, plotPalette } from "./plot-color.ts";
 import { budgeted, runsThrough, samplesFor } from "./plot.ts";
 import { svg } from "./svg-draw.ts";
 import type { DisplayList, GraphicsPrimitive, MarkItem } from "./tiles-canvas.ts";
@@ -72,6 +74,10 @@ export interface PolarPlotOptions {
   /** Explicit outer radius; otherwise the largest sampled |r|. */
   max?: number;
   title?: string;
+  /** `PlotStyle`: each curve's look in order, cycled; what a look leaves out is the curve's own. */
+  styles?: readonly GraphicsLook[];
+  /** What the plot did not draw, said under it. */
+  notes?: readonly string[];
   /** A zoomed view: the square of the plane shown (it clips what lies past it). Overrides the outer radius. */
   window?: PolarWindow;
 }
@@ -130,31 +136,10 @@ function ringStep(max: number): number {
   return (norm >= 5 ? 5 : norm >= 2 ? 2 : 1) * mag;
 }
 
-const edge = (color: string, width: number, opacity = 1): OptionValue => [[color, width, opacity, []]];
 const isFinitePoint = (p: PolarPoint): boolean => Number.isFinite(p.r) && Number.isFinite(p.theta);
 
-/**
- * Polar `points` as a `GraphicsBox` (Wolfram's `PolarPlot`, or `ListPolarPlot` with `markers`).
- * Non-finite radii break the path into subpaths.
- */
-export function polarPlotBox(points: readonly PolarPoint[], opts: PolarPlotOptions = {}): Box {
-  const finite = points.filter(isFinitePoint);
-  const rMax = opts.max && opts.max > 0 ? opts.max : finite.reduce((m, p) => Math.max(m, Math.abs(p.r)), 0) || 1;
-  const options: Record<string, OptionValue> = {
-    ImageSize: [opts.width ?? SIZE, opts.height ?? SIZE],
-    ViewKind: "fixed",
-    PolarAxes: opts.axes !== false,
-    ...(opts.title && { PlotLabel: opts.title }),
-  };
-  if (finite.length === 0 && !opts.window) return graphics([], options);
-  const { center = [0, 0], half = rMax } = opts.window ?? {};
-  options["PlotRange"] = [
-    [center[0] - half, center[0] + half],
-    [center[1] - half, center[1] + half],
-  ];
-  if (opts.window) options["Clipped"] = true;
-  if (finite.length === 0) return graphics([], options);
-
+/** The runs of finite points in `points`: a non-finite one ends a run. */
+function finiteRuns(points: readonly PolarPoint[]): PolarPoint[][] {
   const runs: PolarPoint[][] = [];
   let run: PolarPoint[] = [];
   for (const p of points) {
@@ -165,28 +150,70 @@ export function polarPlotBox(points: readonly PolarPoint[], opts: PolarPlotOptio
     }
   }
   if (run.length > 0) runs.push(run);
+  return runs;
+}
+
+/**
+ * Polar curves as a `GraphicsBox` (Wolfram's `PolarPlot`, or `ListPolarPlot` with `markers`): `curves`
+ * is one list of points or several, each its own mark in its own color. Non-finite radii break a
+ * path into subpaths, and every curve shares the one outer radius.
+ */
+export function polarPlotBox(
+  curves: readonly PolarPoint[] | readonly (readonly PolarPoint[])[],
+  opts: PolarPlotOptions = {},
+): Box {
+  const each: readonly (readonly PolarPoint[])[] = Array.isArray(curves[0])
+    ? (curves as readonly (readonly PolarPoint[])[])
+    : [curves as readonly PolarPoint[]];
+  const finite = each.flatMap((points) => points.filter(isFinitePoint));
+  const rMax = opts.max && opts.max > 0 ? opts.max : finite.reduce((m, p) => Math.max(m, Math.abs(p.r)), 0) || 1;
+  const notes = noteLines(opts.notes);
+  const options: Record<string, OptionValue> = {
+    ImageSize: [opts.width ?? SIZE, (opts.height ?? SIZE) + NOTE_LINE * notes.length],
+    ViewKind: "fixed",
+    PolarAxes: opts.axes !== false,
+    ...(opts.title && { PlotLabel: opts.title }),
+    ...(notes.length > 0 && { Notes: notes }),
+  };
+  if (finite.length === 0 && !opts.window) return graphics([], options);
+  const { center = [0, 0], half = rMax } = opts.window ?? {};
+  options["PlotRange"] = [
+    [center[0] - half, center[0] + half],
+    [center[1] - half, center[1] + half],
+  ];
+  if (opts.window) options["Clipped"] = true;
+  if (finite.length === 0) return graphics([], options);
 
   const xy = (p: PolarPoint): number[] => {
     const c = polarToCartesian(p.theta, p.r);
     return [c.x, c.y];
   };
+  // One curve keeps the accent; several take the palette's categories, and a `PlotStyle` over either.
+  const palette = categoryColors(plotPalette(), each.length);
   const items: Box[] = [];
-  if (opts.filled)
-    for (const seg of runs)
-      items.push(style(tag(polygon({ Points: seg.map(xy) }), "Fill"), { FaceForm: ACCENT, Opacity: 0.18 }));
-  const breaks: number[] = [];
-  const closing = opts.closed || opts.filled;
-  const drawn = runs.map((seg, k) => (closing && k === runs.length - 1 ? [...seg, seg[0]!] : seg));
-  drawn.reduce((at, seg) => {
-    if (at > 0) breaks.push(at);
-    return at + seg.length;
-  }, 0);
-  items.push(
-    style(tag(line({ Points: drawn.flat().map(xy), ...(breaks.length > 0 && { Breaks: breaks }) }), "Series"), {
-      EdgeForm: edge(ACCENT, CURVE_WIDTH),
-    }),
-  );
-  if (opts.markers) items.push(style(tag(point({ Points: finite.map(xy) }), "Series"), { FaceForm: ACCENT }));
+  each.forEach((points, k) => {
+    const look = opts.styles?.length ? opts.styles[k % opts.styles.length]! : {};
+    const ink = look.color ?? (each.length === 1 ? ACCENT : palette[k]!);
+    const runs = finiteRuns(points);
+    if (opts.filled)
+      for (const seg of runs)
+        items.push(style(tag(polygon({ Points: seg.map(xy) }), "Fill"), { FaceForm: ink, Opacity: 0.18 }));
+    const breaks: number[] = [];
+    const closing = opts.closed || opts.filled;
+    const drawn = runs.map((seg, j) => (closing && j === runs.length - 1 ? [...seg, seg[0]!] : seg));
+    drawn.reduce((at, seg) => {
+      if (at > 0) breaks.push(at);
+      return at + seg.length;
+    }, 0);
+    const stroke = lookStroke(look, ink, CURVE_WIDTH);
+    items.push(
+      style(tag(line({ Points: drawn.flat().map(xy), ...(breaks.length > 0 && { Breaks: breaks }) }), "Series"), {
+        EdgeForm: stroke,
+      }),
+    );
+    if (opts.markers)
+      items.push(style(tag(point({ Points: points.filter(isFinitePoint).map(xy) }), "Series"), { FaceForm: ink }));
+  });
   return graphics(items, options);
 }
 
@@ -205,7 +232,8 @@ const solid = (color: string, width: number, opacity: number): Edge => ({ color,
 function polarGeometry(o: Options): { W: number; H: number; cx: number; cy: number; R: number } {
   const [W, H] = (numbers(o.ImageSize) ?? [SIZE, SIZE]) as [number, number];
   const top = typeof o.PlotLabel === "string" ? 26 : PAD;
-  return { W, H, cx: W / 2, cy: top + (H - top - PAD) / 2, R: Math.min(W / 2 - PAD, (H - top - PAD) / 2) };
+  const bottom = PAD + NOTE_LINE * noteLines(o.Notes).length;
+  return { W, H, cx: W / 2, cy: top + (H - top - bottom) / 2, R: Math.min(W / 2 - PAD, (H - top - bottom) / 2) };
 }
 
 /** The plane a polar plot box shows and how it maps to the SVG (y down), for a pointer to read. */
@@ -282,9 +310,17 @@ export function polarPlotBoxSvg(box: BoxNode): string {
       else if (prim[0] === "LineBox") {
         const breaks = numbers(p.Breaks);
         const e = Array.isArray(look.EdgeForm) ? look.EdgeForm[0] : undefined;
+        const [ink, width, opacity, dashing] = Array.isArray(e) ? e : [];
         push(
           { head: "Line", points: pts.map(px), ...(breaks && { breaks }) },
-          { edges: [solid(Array.isArray(e) ? String(e[0]) : ACCENT, CURVE_WIDTH, 1)] },
+          {
+            edges: [
+              {
+                ...solid(typeof ink === "string" ? ink : ACCENT, Number(width) || CURVE_WIDTH, Number(opacity ?? 1)),
+                dashing: numbers(dashing) ?? [],
+              },
+            ],
+          },
         );
       } else if (prim[0] === "PointBox")
         for (const q of pts)
@@ -296,6 +332,19 @@ export function polarPlotBoxSvg(box: BoxNode): string {
       { head: "Text", text: o.PlotLabel, size: 12, at: at(W / 2, 14), look: { anchor: "middle" } },
       { color: FG, edges: [] },
     );
+  const notes = noteLines(o.Notes);
+  notes.forEach((note, k) =>
+    push(
+      {
+        head: "Text",
+        text: note,
+        size: 9,
+        at: at(6, H - 3 - NOTE_LINE * (notes.length - 1 - k)),
+        look: { anchor: "start", opacity: 0.75 },
+      },
+      { color: FG, edges: [] },
+    ),
+  );
   const list: DisplayList = { kind: "marks", view: "fixed", marks, links: [], complete: true };
   return svg(
     list,

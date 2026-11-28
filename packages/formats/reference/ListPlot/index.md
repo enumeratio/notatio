@@ -8,8 +8,10 @@ names:
 options:
   - AspectRatio
   - Axes
+  - AxesLabel
   - AxesOrigin
   - Epilog
+  - Filling
   - Frame
   - GridLines
   - PlotLabel
@@ -17,6 +19,7 @@ options:
   - PlotRangePadding
   - PlotStyle
   - Prolog
+  - ScalingFunctions
   - Ticks
 signatures:
   - call: ListPlot(...)

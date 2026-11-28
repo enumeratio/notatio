@@ -16,9 +16,12 @@ import {
   plotBoxOfSamples,
   plotDataSeries,
   type PlotSettings,
+  polarBoxOfSettings,
+  polarSampleCount,
   spanOf,
 } from "./plot-lowering.ts";
-import { type PlotWindow, plotSeries, plotSeriesIn } from "./plot.ts";
+import { type PolarPoint, samplePolar } from "./polarplot.ts";
+import { type PlotWindow, plotSeriesIn } from "./plot.ts";
 import type { Primitive } from "./primitives.ts";
 
 const log = debug("plot");
@@ -46,6 +49,8 @@ export interface PlotRuntime {
 export interface LoadedPlot {
   readonly plot: CompiledPlot;
   readonly samplers: readonly Sampler[];
+  /** The samplers of `plot.curves`, curve by curve and component by component. */
+  readonly curveSamplers?: readonly (readonly Sampler[])[];
   /** Why an item cannot be sampled at all, when it has no code and the host has no way to sample it. */
   readonly failed?: string;
   /** A fresh scope for one sampling pass: the runtime the code calls, nothing else. */
@@ -113,7 +118,7 @@ export const interpretedSampler =
 /** `plot`'s items as samplers over `runtime`. */
 export function loadCompiled(plot: CompiledPlot, runtime: PlotRuntime = {}): LoadedPlot {
   let failed: string | undefined;
-  const samplers = plot.items.map((item): Sampler => {
+  const samplerOf = (item: CompiledItem): Sampler => {
     if (item.code === undefined) {
       if (item.declined !== undefined) log("declined to compiled code", item.declined, item.label);
       const interpreted = runtime.evaluate?.(item);
@@ -125,8 +130,16 @@ export function loadCompiled(plot: CompiledPlot, runtime: PlotRuntime = {}): Loa
     // oxlint-disable-next-line no-implied-eval -- the code is the compiler's output
     const fn = new Function("_SYS", "_", `return (${item.code});`) as (sys: unknown, scope: Scope) => unknown;
     return (scope) => sampleNumber(fn(runtime.sys, scope));
-  });
-  return { plot, samplers, ...(failed !== undefined && { failed }), scope: () => ({ ...runtime.scope }) };
+  };
+  const samplers = plot.items.map(samplerOf);
+  const curveSamplers = plot.curves?.map((curve) => curve.map(samplerOf));
+  return {
+    plot,
+    samplers,
+    ...(curveSamplers && { curveSamplers }),
+    ...(failed !== undefined && { failed }),
+    scope: () => ({ ...runtime.scope }),
+  };
 }
 
 /** A curve plot's series over its whole domain, and again over a window a reader has zoomed to. */
@@ -152,11 +165,12 @@ export function curvesOf(
   const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
   if (unbound.length > 0) return { unbound };
   if (loaded.failed !== undefined) return { failed: loaded.failed };
-  const at =
+  const atOf =
+    (fns: readonly Sampler[]) =>
     (k: number) =>
     (t: number): number => {
       scope[variable] = t;
-      return samplers[k]!(scope);
+      return fns[k]!(scope);
     };
   const options = {
     domain: spanOf(settings["domain"]) ?? DEFAULT_DOMAIN,
@@ -165,11 +179,57 @@ export function curvesOf(
     adaptive: settings["adaptive"] !== "false",
     parametric: settings["parametric"] !== undefined && settings["parametric"] !== "false",
   };
+  // Several parametric curves are drawn one after the other, each from its own pair of components.
+  const several = options.parametric && plot.curves !== undefined && loaded.curveSamplers !== undefined;
+  const drawn = (window?: PlotWindow, pixels?: number): PlotSeries[] =>
+    several
+      ? plot.curves!.flatMap((items, c) =>
+          plotSeriesIn(items, atOf(loaded.curveSamplers![c]!), options, window, pixels),
+        )
+      : plotSeriesIn(plot.items, atOf(samplers), options, window, pixels);
+  return { series: drawn(), inWindow: (window, pixels) => drawn(window, pixels) };
+}
+
+/** A polar plot's curves: each radius as a function of the angle, over the angles it covers. */
+export interface PolarCurves {
+  readonly radii: readonly ((theta: number) => number)[];
+  readonly range: readonly [number, number];
+  /** Samples a curve takes over the whole range. */
+  readonly count: number;
+}
+
+/**
+ * A polar plot's radii from its compiled body (a list is one curve per element): the variable the plot
+ * names or the free symbol left, `unbound` for symbols that are neither, as `curvesOf` reports them.
+ */
+export function polarCurvesOf(
+  settings: PlotSettings,
+  loaded: LoadedPlot,
+  bindings?: Readonly<Record<string, unknown>>,
+): PolarCurves | { readonly unbound: string[] } | { readonly failed: string } {
+  const { plot, samplers } = loaded;
+  const scope = loaded.scope();
+  Object.assign(scope, bindings);
+  const variable = settings["tvar"] || settings["var"] || plot.unknowns.find((u) => !u.startsWith("_")) || "theta";
+  const unbound = plot.unknowns.filter((u) => !u.startsWith("_") && u !== variable && !(u in scope));
+  if (unbound.length > 0) return { unbound };
+  if (loaded.failed !== undefined) return { failed: loaded.failed };
   return {
-    series: plotSeries(plot.items, at, options),
-    inWindow: (window, pixels) => plotSeriesIn(plot.items, at, options, window, pixels),
+    radii: samplers.map((radius) => (theta: number): number => {
+      scope[variable] = theta;
+      return radius(scope);
+    }),
+    range: spanOf(settings["trange"]) ?? [0, 2 * Math.PI],
+    count: polarSampleCount(settings),
   };
 }
+
+/** A polar plot of an expression as a `GraphicsBox`, every curve sampled over the whole range. */
+export const polarBoxOfCurves = (settings: PlotSettings, { radii, range, count }: PolarCurves): Box =>
+  polarBoxOfSettings(
+    settings,
+    radii.map((radius): PolarPoint[] => samplePolar(radius, range[0], range[1], count)),
+  );
 
 /** How a figure is looked at: the wildcards' values, a zoomed window, and what reads its marks. */
 export interface FigureView {

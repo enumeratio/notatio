@@ -50,7 +50,34 @@ export interface PlotSeries {
   style?: "line" | "points";
   /** Optional name shown in the hover readout. */
   label?: string;
+  /** What the series' source held that it did not draw, one sentence each; the plot says so under itself. */
+  notes?: readonly string[];
+  /** The points are given data, not samples of a curve: the window holds every one (no pole to trim). */
+  given?: boolean;
 }
+
+/** The height one line of a `Notes` caption takes under a plot, in px. */
+export const NOTE_LINE = 11;
+
+/** The most characters a caption line holds at 9 px in the narrowest figure (a 260 px polar plot). */
+const NOTE_WIDTH = 42;
+
+/** `notes` as the lines a drawer writes under a figure: each wrapped at word breaks, at most three lines in all. */
+export const noteLines = (value: unknown): string[] => {
+  const lines: string[] = [];
+  for (const note of Array.isArray(value) ? value : []) {
+    if (typeof note !== "string") continue;
+    let line = "";
+    for (const word of note.split(/\s+/).filter(Boolean)) {
+      if (line !== "" && line.length + 1 + word.length > NOTE_WIDTH) {
+        lines.push(line);
+        line = word;
+      } else line = line === "" ? word : `${line} ${word}`;
+    }
+    if (line !== "") lines.push(line);
+  }
+  return lines.slice(0, 3);
+};
 
 /** One direction's grid lines: where they are, at nice positions (`Automatic`), or none. */
 export type GridSpec = readonly number[] | "Automatic" | null;
@@ -103,6 +130,12 @@ export interface PlotOptions extends ColorOptions {
   padding?: number;
   /** `PlotStyle`: each series' look in order, cycled; what a look leaves out is the series' own. */
   styles?: readonly GraphicsLook[];
+  /**
+   * `AspectRatio`: the plot area's height over its width, or `equal` for one unit of x as long as one
+   * of y (Wolfram's `Automatic`; a `ParametricPlot`'s default). The window widens to keep the shape in
+   * `ASPECT_MIN`..`ASPECT_MAX`.
+   */
+  aspect?: number | "equal";
 }
 
 /**
@@ -330,10 +363,20 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
   const points = series.flatMap((s) => s.points);
   const X = scale(opts.xScale);
   const Y = scale(opts.yScale);
+  const notes = noteLines(series.flatMap((s) => s.notes ?? []));
+  const noteSpace = NOTE_LINE * notes.length;
+  const sizeFor = (aspect?: number): [number, number] => {
+    const width = opts.width ?? WIDTH;
+    const height =
+      opts.height ??
+      (aspect === undefined ? HEIGHT : fieldImageSize({ width, titled: Boolean(opts.title) }, aspect)[1]);
+    return [width, height + noteSpace];
+  };
   const options: Record<string, OptionValue> = {
-    ImageSize: [opts.width ?? WIDTH, opts.height ?? HEIGHT],
+    ImageSize: sizeFor(typeof opts.aspect === "number" && opts.aspect > 0 ? opts.aspect : undefined),
     Axes: opts.axes !== false,
     ...(opts.frame && { Frame: true }),
+    ...(notes.length > 0 && { Notes: notes }),
     ScalingFunctions: [opts.xScale ?? "linear", opts.yScale ?? "linear"],
     ViewKind: "fixed",
     ...chromeOptions(opts),
@@ -349,9 +392,11 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     .filter((p) => Number.isFinite(X.fwd(p.x)))
     .map((p) => Y.fwd(p.y))
     .filter(Number.isFinite);
+  // Stems stand on the zero axis, so the window holds it.
+  if (opts.fill && series.some((s) => s.style === "points") && isLinear(opts.yScale)) tys.push(0);
   if (txs.length === 0 || tys.length === 0) return graphics([], options);
 
-  const [txmin, txmax] = opts.xRange
+  let [txmin, txmax] = opts.xRange
     ? [X.fwd(opts.xRange[0]), X.fwd(opts.xRange[1])]
     : [Math.min(...txs), Math.max(...txs)];
   let tymin: number;
@@ -379,8 +424,10 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
       const hi = Math.ceil(idx);
       return sorted[lo]! + (sorted[hi]! - sorted[lo]!) * (idx - lo);
     };
-    tymin = quantile(0.02);
-    tymax = quantile(0.98);
+    // Samples of a curve trim a pole's spike; given data keeps its largest and smallest.
+    const [qLo, qHi] = series.every((s) => s.given || s.style === "points") ? [0, 1] : [0.02, 0.98];
+    tymin = quantile(qLo);
+    tymax = quantile(qHi);
     if (tymin === tymax) {
       tymin = Math.min(...tys);
       tymax = Math.max(...tys);
@@ -392,6 +439,17 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     const pad = (tymax - tymin) * (opts.padding ?? RANGE_PADDING);
     tymin -= pad;
     tymax += pad;
+  }
+  if (opts.aspect === "equal" && isLinear(opts.xScale) && isLinear(opts.yScale)) {
+    // True scale: the shorter axis widens where the figure's shape is past what a plot is drawn at.
+    const widen = (lo: number, hi: number, to: number): [number, number] => [
+      (lo + hi) / 2 - to / 2,
+      (lo + hi) / 2 + to / 2,
+    ];
+    const [dx, dy] = [txmax - txmin || 1, tymax - tymin || 1];
+    if (dy / dx < ASPECT_MIN) [tymin, tymax] = widen(tymin, tymax, dx * ASPECT_MIN);
+    else if (dy / dx > ASPECT_MAX) [txmin, txmax] = widen(txmin, txmax, dy / ASPECT_MAX);
+    options["ImageSize"] = sizeFor((tymax - tymin) / (txmax - txmin));
   }
   const span = tymax - tymin;
   options["PlotRange"] = [
@@ -441,6 +499,21 @@ export function plotBox(input: readonly PlotPoint[] | readonly PlotSeries[], opt
     seriesColors[k] = color;
     if (s.style === "points") {
       const dots = s.points.filter(visible);
+      // `Filling` on dots: a stem from each down to the baseline.
+      if (opts.fill && dots.length > 0)
+        fills.push(
+          item(
+            line({
+              Points: dots.flatMap((p) => [
+                [p.x, baseline],
+                [p.x, p.y],
+              ]),
+              Breaks: dots.slice(1).map((_, i) => 2 * (i + 1)),
+            }),
+            "Fill",
+            { EdgeForm: stroke(color, 1, 0.45) },
+          ),
+        );
       curves.push(
         item(
           point({
@@ -688,7 +761,8 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
   const titled = typeof o.PlotLabel === "string";
   const mT = marginTop(titled);
   const bar = barLegendOf(o.BarLegend);
-  const [mL, mR, mB] = [M_LEFT, bar ? M_RIGHT_BAR : M_RIGHT, M_BOTTOM];
+  const notes = noteLines(o.Notes);
+  const [mL, mR, mB] = [M_LEFT, bar ? M_RIGHT_BAR : M_RIGHT, M_BOTTOM + NOTE_LINE * notes.length];
   const plotW = W - mL - mR;
   const plotH = H - mT - mB;
   const clip = [mL - 3, mT, plotW + 6, plotH] as const;
@@ -706,13 +780,19 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
     size = 10,
     extra: object = {},
   ): void => push({ head: "Text", text: s, size, at: at(x, y), look: { anchor, ...extra } }, { color: FG, edges: [] });
-  const done = (xAt: (px: number) => number, frame?: PlotFrame): PlotDrawing => ({
-    list: { kind: "marks", view: "fixed", marks, links: [], complete: true },
-    size: [W, H],
-    clip,
-    xAt,
-    ...(frame && { frame }),
-  });
+  // What the plot did not draw, said in small type under it.
+  const done = (xAt: (px: number) => number, frame?: PlotFrame): PlotDrawing => {
+    notes.forEach((note, k) =>
+      text(6, H - 3 - NOTE_LINE * (notes.length - 1 - k), "start", note, 9, { opacity: 0.75 }),
+    );
+    return {
+      list: { kind: "marks", view: "fixed", marks, links: [], complete: true },
+      size: [W, H],
+      clip,
+      xAt,
+      ...(frame && { frame }),
+    };
+  };
   const range = Array.isArray(o.PlotRange) ? (o.PlotRange as number[][]) : undefined;
   if (!range) {
     if (titled) text(W / 2, 14, "middle", o.PlotLabel as string, 12);
@@ -864,8 +944,8 @@ export function drawPlot(box: BoxNode, hover?: number): PlotDrawing {
     }
     const tick = { opacity: 0.6, mono: true };
     if (o.Ticks !== false) {
-      text(mL, H - 6, "start", label(X.inv(txmin)), 10, tick);
-      text(W - mR, H - 6, "end", label(X.inv(txmax)), 10, tick);
+      text(mL, H - mB + 16, "start", label(X.inv(txmin)), 10, tick);
+      text(W - mR, H - mB + 16, "end", label(X.inv(txmax)), 10, tick);
       text(mL - 4, mT + 6, "end", label(Y.inv(tymax)), 10, tick);
       text(mL - 4, H - mB, "end", label(Y.inv(tymin)), 10, tick);
     }
@@ -965,4 +1045,10 @@ export function linePlotSvg(input: readonly PlotPoint[] | readonly PlotSeries[],
 }
 
 // What a chart's drawer reads from its boxes the same way.
-export { edgesOf as optionEdges, numbers as optionNumbers, pointList as optionPoints, solid as solidEdge };
+export {
+  edgesOf as optionEdges,
+  strokeOf as lookStroke,
+  numbers as optionNumbers,
+  pointList as optionPoints,
+  solid as solidEdge,
+};

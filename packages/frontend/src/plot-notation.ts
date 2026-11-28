@@ -18,16 +18,33 @@ import {
   PLOT_HEADS,
   plotDataSeries,
   plotOptionsOf,
-  polarPointsOf,
-  spanOf,
+  polarBoxOfSettings,
+  polarListOf,
   unsampledBox,
 } from "./plot-lowering.ts";
-import { polarPlotBox } from "./polarplot.ts";
 import { FIGURE_NOTATION } from "./show-box.ts";
 import { barBoxOfSettings, GRAPHICS_3D_HEADS, listBoxOfSettings, literalCurveBox } from "./graphics-3d-lowering.ts";
 import { unsampledGraphics3dBox } from "./graphics-3d-box.ts";
 import { complexPlotOptionsOf, unsampledComplexPlotBox } from "./complex-plot-box.ts";
-import { complexPlot3dSettingsOf, complexPlotSettingsOf, plotSettingsOf, graphics3dSettingsOf } from "./symbols.ts";
+import type { Primitive } from "./primitives.ts";
+import {
+  complexPlot3dSettingsOf,
+  complexPlotSettingsOf,
+  graphics3dSettingsOf,
+  marksOfText,
+  plotSettingsOf,
+} from "./symbols.ts";
+
+/** A plot's `Epilog` and `Prolog`, read to the marks drawn over and under its curves. */
+function marksOf(settings: Readonly<Record<string, string>>): { epilog?: Primitive[]; prolog?: Primitive[] } {
+  const read = (name: string): Primitive[] | undefined => {
+    const written = settings[name]?.trim();
+    const marks = written ? marksOfText(written) : undefined;
+    return marks && [...marks];
+  };
+  const [epilog, prolog] = [read("epilog"), read("prolog")];
+  return { ...(epilog && { epilog }), ...(prolog && { prolog }) };
+}
 
 const plotRule =
   (head: string): NotationRule =>
@@ -38,20 +55,15 @@ const plotRule =
     const diagram = diagramBoxOf(settings);
     if (diagram !== undefined) return diagram;
     if (head === "ListPolarPlot") {
-      const [t0, t1] = spanOf(settings["trange"]) ?? [0, 2 * Math.PI];
-      let data: unknown;
-      try {
-        data = JSON.parse(settings["data"] ?? "null");
-      } catch {
-        data = undefined;
-      }
-      const points = polarPointsOf(data, t0, t1);
-      return polarPlotBox(points ?? [], { markers: true });
+      const { curves, notes } = polarListOf(settings);
+      return polarBoxOfSettings({ markers: "true", ...settings }, curves, { notes });
     }
     if (head === "Graphics") return graphicsBoxOfSettings(settings) ?? unsampledBox(head, expr);
     if (FIELD_PLOT_HEADS.includes(head)) return fieldBoxOfData(head, settings) ?? unsampledBox(head, expr);
     const series = plotDataSeries(settings);
-    return series === undefined ? unsampledBox(head, expr) : plotBox(series, plotOptionsOf(settings));
+    return series === undefined
+      ? unsampledBox(head, expr)
+      : plotBox(series, plotOptionsOf(settings, marksOf(settings)));
   };
 
 /**
@@ -65,6 +77,9 @@ const chartRule =
     if (settings === undefined) return undefined;
     const chart = chartBoxOfSettings(settings);
     if (chart !== undefined) return chart;
+    // A `DiscretePlot` of an expression is sampled at its integers by a host that can compile it.
+    if (head === "DiscretePlot" && settings["value"] !== undefined)
+      return unsampledBox(head, plainJson([head, ...args] as never));
     const series = plotDataSeries(settings);
     if (series !== undefined) return plotBox(series, plotOptionsOf(settings));
     return head === "ArrayPlot" ? FIGURE_NOTATION["ArrayPlot"]?.(args, ...rest) : undefined;

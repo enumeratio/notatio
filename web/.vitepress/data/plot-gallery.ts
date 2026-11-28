@@ -24,7 +24,7 @@ export const FAMILIES = [
   {
     id: "curves",
     title: "Curves",
-    heads: ["Plot", "ParametricPlot", "PolarPlot", "ListPlot", "ListLinePlot", "ListPolarPlot"],
+    heads: ["Plot", "ParametricPlot", "PolarPlot", "ListPlot", "ListLinePlot", "ListPolarPlot", "DiscretePlot"],
   },
   {
     id: "fields",
@@ -48,11 +48,8 @@ export type FamilyId = (typeof FAMILIES)[number]["id"];
 export const familyOf = (head: string): FamilyId =>
   FAMILIES.find((family) => (family.heads as readonly string[]).includes(head))?.id ?? "graphics";
 
-/**
- * Heads left out although their examples are pictures. DiscretePlot: its page draws it empty (a known
- * page defect, BL-628 slice 5), so a card would show a blank plot; it returns when the head draws.
- */
-export const EXCLUDED_HEADS: ReadonlySet<string> = new Set(["DiscretePlot"]);
+/** Heads left out although their examples are pictures; none now. */
+export const EXCLUDED_HEADS: ReadonlySet<string> = new Set();
 
 /** Whether the example's value is a picture and the reference page shows it. */
 export function draws(example: ReferenceExample): boolean {

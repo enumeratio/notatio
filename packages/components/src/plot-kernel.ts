@@ -164,7 +164,7 @@ export async function loadPlot(plot: CompiledPlot): Promise<LoadedPlot> {
   // An item with no code is sampled by the page's engine, loaded only for it.
   const fallback = new Map<CompiledItem, Sampler | undefined>();
   await Promise.all(
-    plot.items
+    [...plot.items, ...(plot.curves?.flat() ?? [])]
       .filter((item) => item.code === undefined)
       .map(async (item) => fallback.set(item, await engineSampler(item))),
   );
