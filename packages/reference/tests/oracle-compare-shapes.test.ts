@@ -19,7 +19,7 @@ function judged(system: "wolfram" | "sage", id: string): string {
   return verdictOf(
     system,
     example.expected as never,
-    { value: row.out, ...(row.shown === undefined ? {} : { shown: row.shown }) },
+    { value: row.out, numeric: row.out, ...(row.shown === undefined ? {} : { shown: row.shown }) },
     row.tolerance,
     asksForDigits(example.expr as never),
     example.expr as never,
@@ -59,4 +59,26 @@ const REAL = [
 
 test.each(REAL)("%s: a precision difference beyond float noise still disagrees", (id) => {
   expect(judged("wolfram", id)).toBe("disagree");
+});
+
+// Wolfram answers an array as a SparseArray object; ours is the dense list of the same entries.
+const SPARSE = [
+  "AdjacencyMatrix/a-directed-edge-is-asymmetric",
+  "AdjacencyMatrix/adjacency-matrix-of-k4",
+  "IncidenceMatrix/incidence-matrix-of-a-mixed-graph",
+  "SparseArray/sparsearray-custom-default",
+  "SparseArray/sparsearray-infers-dims",
+  "SparseArray/sparsearray-list-list-1-0-0-list-1-2-0-list-1-2",
+  "WeightedAdjacencyMatrix/an-undirected-loop-counts-once",
+  "WeightedAdjacencyMatrix/directed-weight-is-one-way",
+  "WeightedAdjacencyMatrix/float-weights-sum-as-floats",
+  "WeightedAdjacencyMatrix/no-edgeweight-falls-back-to-adjacencymatrix",
+  "WeightedAdjacencyMatrix/self-loop-weight-sits-on-the-diagonal",
+  "WeightedAdjacencyMatrix/two-weighted-edges",
+  "Most/most-sparsearray-range-1-100",
+  "Rest/rest-sparsearray-range-1-100",
+];
+
+test.each(SPARSE)("%s: the SparseArray answer agrees with the dense list", (id) => {
+  expect(judged("wolfram", id)).toBe("agree");
 });

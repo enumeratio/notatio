@@ -6,6 +6,7 @@ import type { MathJSON } from "../src/emit.ts";
 import {
   type Approximate,
   compareTrees,
+  denseOfSparse,
   isNumericValue,
   type Leaf,
   reduce,
@@ -316,6 +317,51 @@ test("a tiny value is held to its own digits; only a reference of exactly 0 keep
   expect(compareTrees({ re: 1.9e-55, im: 0 }, { re: 1.9e-55, im: 1.4e-55 })).toBe("disagree");
   expect(compareTrees(1e-16, 0)).toBe("agree");
   expect(compareTrees(0, 1e-16)).toBe("disagree");
+});
+
+// Wolfram answers an array as a `SparseArray` object; ours is the dense nested list of its entries.
+describe("a SparseArray is the dense array it stands for", () => {
+  const evaluateNumbers: (expr: MathJSON) => Leaf = (expr) =>
+    typeof expr === "number"
+      ? expr
+      : Array.isArray(expr) && expr[0] === "Rational"
+        ? (expr[1] as number) / (expr[2] as number)
+        : symbolic(expr);
+  const wolfram = (text: string): Tree => reduce(fromWolfram(text, { tags: true }) as MathJSON, evaluateNumbers);
+  const ours = (expr: MathJSON): Tree => reduce(expr, evaluateNumbers);
+
+  test("a matrix, a vector with its own default and a rank 3 array read back as nested lists", () => {
+    const matrix = "SparseArray[Automatic, {2, 2}, 0, {1, {{0, 1, 2}, {{1}, {2}}}, {5, 7}}]";
+    expect(compareTrees(ours(["List", ["List", 5, 0], ["List", 0, 7]]), wolfram(matrix))).toBe("agree");
+    const vector = "SparseArray[Automatic, {3}, -1, {1, {{0, 1}, {{2}}}, {9}}]";
+    expect(compareTrees(ours(["List", -1, 9, -1]), wolfram(vector))).toBe("agree");
+    const cube = "SparseArray[Automatic, {2, 2, 2}, 0, {1, {{0, 1, 2}, {{1, 2}, {2, 1}}}, {4, 6}}]";
+    const dense = ["List", ["List", ["List", 0, 4], ["List", 0, 0]], ["List", ["List", 0, 0], ["List", 6, 0]]];
+    expect(compareTrees(ours(dense as MathJSON), wolfram(cube))).toBe("agree");
+  });
+
+  test("exact entries are entries, not a nested list: a ratio is a number", () => {
+    const half = "SparseArray[Automatic, {2, 2}, 0, {1, {{0, 1, 2}, {{2}, {1}}}, {Rational[1, 2], Rational[1, 2]}}]";
+    const mine = ["List", ["List", 0, ["Rational", 1, 2]], ["List", ["Rational", 1, 2], 0]] as MathJSON;
+    expect(compareTrees(ours(mine), wolfram(half))).toBe("agree");
+  });
+
+  test("a different entry, place or size still disagrees", () => {
+    const matrix = wolfram("SparseArray[Automatic, {2, 2}, 0, {1, {{0, 1, 2}, {{1}, {2}}}, {5, 7}}]");
+    expect(compareTrees(ours(["List", ["List", 5, 0], ["List", 0, 8]]), matrix)).toBe("disagree");
+    expect(compareTrees(ours(["List", ["List", 5, 0], ["List", 7, 0]]), matrix)).toBe("disagree");
+    expect(compareTrees(ours(["List", ["List", 5, 0, 0], ["List", 0, 7, 0]]), matrix)).toBe("disagree");
+  });
+
+  test("a shape that is not a stored array is left as it is", () => {
+    expect(denseOfSparse(["SparseArray", ["List", ["Rule", 2, 9]], 3, -1] as MathJSON)).toBeUndefined();
+    // A pattern array keeps no values to read.
+    const pattern = fromWolfram("SparseArray[Automatic, {2, 2}, 0, {1, {{0, 1, 2}, {{1}, {2}}}, Pattern}]") as MathJSON;
+    expect(denseOfSparse(pattern)).toBeUndefined();
+    // Too large to write out.
+    const huge = fromWolfram("SparseArray[Automatic, {100000, 100000}, 0, {1, {{0, 0}, {}}, {}}]") as MathJSON;
+    expect(denseOfSparse(huge)).toBeUndefined();
+  });
 });
 
 // A call over numeric literals that evaluates to no number is a value container: `Around(6, 0.3)` is

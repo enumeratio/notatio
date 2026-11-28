@@ -230,6 +230,10 @@ export function reduce(expr: MathJSON, evaluate: (expr: MathJSON) => Leaf): Tree
   if (Array.isArray(expr) && expr[0] === "Graph" && expr.length >= 3) {
     return reduceGraph(expr[1] as MathJSON, expr[2] as MathJSON, evaluate);
   }
+  // Wolfram answers an array as `SparseArray[Automatic, dims, default, {1, {rowPtr, indices}, values}]`:
+  // the dense array it stands for (`Normal`) is what ours writes as nested lists.
+  const dense = denseOfSparse(expr);
+  if (dense !== undefined) return reduce(dense, evaluate);
   // A real that states its own precision or accuracy is compared within it.
   const tagged = taggedReal(expr);
   if (tagged !== undefined) return tagged;
@@ -272,6 +276,58 @@ function literalValue(expr: MathJSON): Leaf | undefined {
   if (expr[0] === "Complex" && reals.length === 2)
     return y === 0 ? (x as number) : { re: x as number, im: y as number };
   return undefined;
+}
+
+/** The most entries of a dense array read from a `SparseArray`: a sparse one may stand for far more than any answer prints. */
+const DENSE_LIMIT = 100_000;
+
+/**
+ * A `SparseArray[Automatic, dims, default, {1, {rowPtr, indices}, values}]` (the compressed-row form
+ * Wolfram's FullForm gives) as the nested `List`s of its entries: `default` wherever no value is stored.
+ * `rowPtr` has one entry per row of the first dimension (a vector has the single row `{0, count}`), and
+ * each stored value's `indices` give its place in the remaining dimensions. `undefined` for any other
+ * shape, a pattern array (`values` not a list) or an array too large to write out.
+ */
+export function denseOfSparse(expr: MathJSON): MathJSON | undefined {
+  if (!Array.isArray(expr) || expr[0] !== "SparseArray" || expr.length !== 5 || expr[1] !== "Automatic") {
+    return undefined;
+  }
+  const [, , dimsList, fill, structure] = expr as [unknown, unknown, MathJSON, MathJSON, MathJSON];
+  const items = (list: MathJSON | undefined): MathJSON[] | undefined =>
+    Array.isArray(list) && list[0] === "List" ? (list.slice(1) as MathJSON[]) : undefined;
+  const dims = items(dimsList);
+  const parts = items(structure);
+  if (dims === undefined || !dims.every((d): d is number => Number.isInteger(d) && (d as number) >= 0))
+    return undefined;
+  if (dims.length === 0 || dims.reduce((a, d) => a * (d as number), 1) > DENSE_LIMIT) return undefined;
+  const csr = items(parts?.[1]);
+  const rowPtr = items(csr?.[0]);
+  const indices = items(csr?.[1]);
+  const values = items(parts?.[2]);
+  if (parts === undefined || parts[0] !== 1 || rowPtr === undefined || indices === undefined || values === undefined) {
+    return undefined;
+  }
+  if (indices.length !== values.length || !rowPtr.every((p): p is number => Number.isInteger(p))) return undefined;
+  const sizes = dims as number[];
+  const rank = sizes.length;
+  const stored = new Map<string, MathJSON>();
+  // A vector's one row stands for the whole first dimension; otherwise row r is index r + 1 of it.
+  const rows = rank === 1 ? 1 : (sizes[0] as number);
+  if (rowPtr.length !== rows + 1) return undefined;
+  for (let row = 0; row < rows; row++) {
+    for (let k = rowPtr[row] as number; k < (rowPtr[row + 1] as number); k++) {
+      const rest = items(indices[k]);
+      if (rest === undefined || !rest.every((i): i is number => Number.isInteger(i))) return undefined;
+      const at = rank === 1 ? (rest as number[]) : [row + 1, ...(rest as number[])];
+      if (at.length !== rank || at.some((i, d) => i < 1 || i > (sizes[d] as number))) return undefined;
+      stored.set(at.join(","), values[k] as MathJSON);
+    }
+  }
+  const nest = (at: readonly number[]): MathJSON =>
+    at.length === rank
+      ? (stored.get(at.join(",")) ?? fill)
+      : (["List", ...Array.from({ length: sizes[at.length] as number }, (_, i) => nest([...at, i + 1]))] as MathJSON);
+  return nest([]);
 }
 
 /** An edge, canonicalised to a comparable, order-free key: `min-max` for an undirected pair

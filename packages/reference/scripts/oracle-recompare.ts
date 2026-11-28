@@ -40,7 +40,7 @@ for (const head of referenceData().heads) {
       const judged = await verdicts.verdict(
         system as never,
         example.expected as never,
-        { value: row.out, ...(row.shown === undefined ? {} : { shown: row.shown }) },
+        { value: row.out, numeric: row.out, ...(row.shown === undefined ? {} : { shown: row.shown }) },
         row.tolerance,
         asksForDigits(example.expr as never),
         example.expr as never,
