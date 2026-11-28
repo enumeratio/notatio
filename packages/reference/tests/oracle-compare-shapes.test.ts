@@ -82,3 +82,29 @@ const SPARSE = [
 test.each(SPARSE)("%s: the SparseArray answer agrees with the dense list", (id) => {
   expect(judged("wolfram", id)).toBe("agree");
 });
+
+// Wolfram has no set type, so its empty set is `{}`; ours is `EmptySet`.
+const EMPTY = [
+  "Union/with-no-arguments-the-union-is-empty",
+  "Intersection/disjoint-collections-intersect-to-the-special",
+  "Intersection/intersection-list-a-b-c-list-d-exponentiale-f",
+  "SetMinus/a-setminus-a-varnothing",
+  "SetMinus/setminus-is-not-commutative-b-setminus-a-can",
+];
+
+test.each(EMPTY)("%s: the empty list is the empty set", (id) => {
+  expect(judged("wolfram", id)).toBe("agree");
+});
+
+// CenteredInterval's FullForm is its packed ball representation, whose encoding is not documented
+// well enough to read as a value: these rows keep their disagreement until a kernel decodes them.
+const PACKED = [
+  "CenteredInterval/an-exact-factor-scales-center-and-radius",
+  "CenteredInterval/centers-add-and-radii-add",
+  "CenteredInterval/converts-an-interval-to-center-radius-form",
+  "CenteredInterval/radii-add-under-subtraction-too",
+];
+
+test.each(PACKED)("%s: the packed representation stays a disagreement", (id) => {
+  expect(judged("wolfram", id)).toBe("disagree");
+});

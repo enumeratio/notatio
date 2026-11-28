@@ -242,6 +242,9 @@ export function reduce(expr: MathJSON, evaluate: (expr: MathJSON) => Leaf): Tree
   // evaluator that only reads values (`symbolic`, `valuesOnly`) would leave them as text.
   if (expr === "True") return true;
   if (expr === "False") return false;
+  // Wolfram has no set type: the empty set is the empty list it answers (`Union[]`, a disjoint
+  // `Intersection`), the same value ours names `EmptySet`. A `Set` already reads as its elements.
+  if (expr === "EmptySet") return [];
   const value = evaluate(expr);
   // A call over numeric literals that evaluates to no number is a value container (`Around(6, 0.3)`):
   // its head and its components compare, each under the numeric tolerance. As text, the last bit of a

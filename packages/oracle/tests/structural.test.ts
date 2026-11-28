@@ -319,6 +319,26 @@ test("a tiny value is held to its own digits; only a reference of exactly 0 keep
   expect(compareTrees(0, 1e-16)).toBe("disagree");
 });
 
+// Wolfram's sets are lists, so its empty set is `{}`, where ours is the symbol `EmptySet`.
+describe("the empty set is the empty list", () => {
+  const wolfram = (text: string): Tree => reduce(fromWolfram(text) as MathJSON, symbolic);
+  const ours = (expr: MathJSON): Tree => reduce(expr, symbolic);
+
+  test("EmptySet agrees with {} and with an empty Set, whichever side writes which", () => {
+    expect(compareTrees(ours("EmptySet"), wolfram("{}"))).toBe("agree");
+    expect(compareTrees(ours("EmptySet"), wolfram("EmptySet"))).toBe("agree");
+    expect(compareTrees(ours(["Set"]), ours("EmptySet"))).toBe("agree");
+    expect(compareTrees(ours(["List"]), wolfram("EmptySet"))).toBe("agree");
+  });
+
+  test("it disagrees with anything that has an element", () => {
+    expect(compareTrees(ours("EmptySet"), wolfram("{0}"))).toBe("disagree");
+    expect(compareTrees(ours("EmptySet"), wolfram("{{}}"))).toBe("disagree");
+    expect(compareTrees(ours("EmptySet"), wolfram("Null"))).toBe("disagree");
+    expect(compareTrees(ours("EmptySet"), wolfram("0"))).toBe("disagree");
+  });
+});
+
 // Wolfram answers an array as a `SparseArray` object; ours is the dense nested list of its entries.
 describe("a SparseArray is the dense array it stands for", () => {
   const evaluateNumbers: (expr: MathJSON) => Leaf = (expr) =>
