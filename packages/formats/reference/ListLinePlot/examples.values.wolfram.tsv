@@ -1,2 +1,7 @@
 id	in
 connected	ListLinePlot[List[3, 1, 4, 1, 5, 9, 2, 6]]
+pairs-line	ListLinePlot[List[List[0, 0], List[1, 1], List[3, 2], List[4, 5]]]
+step-pairs	ListLinePlot[List[List[0, 0], List[1, 1], List[1, 0], List[2, 1], List[2, 0], List[3, 1]]]
+harmonic-pairs	ListLinePlot[List[List[1, 1], List[2, 1.5], List[3, 1.8333], List[4, 2.0833], List[5, 2.2833], List[6, 2.45], List[7, 2.5929], List[8, 2.7179], List[9, 2.829], List[10, 2.929]]]
+pairs-grid	ListLinePlot[List[List[0, 0], List[1, 1], List[2, 0], List[3, 2], List[4, 0]], Rule[GridLines, True]]
+pairs-style	ListLinePlot[List[List[0, 0], List[1, 1], List[2, 0], List[3, 2], List[4, 0]], Rule[PlotStyle, Red]]

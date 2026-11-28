@@ -1,2 +1,8 @@
 id	in
 lissajous	ParametricPlot[List[Sin[Times[3, t]], Sin[Times[4, t]]], List[t, 0, 6.283], List[PlotPoints, 400]]
+figure-eight	ParametricPlot[List[Cos[t], Times[Sin[t], Cos[t]]], List[t, 0, 6.283]]
+lissajous-three-two	ParametricPlot[List[Sin[Times[3, t]], Sin[Times[2, t]]], List[t, 0, 6.283], Rule[PlotPoints, 300]]
+lissajous-five-four	ParametricPlot[List[Sin[Times[5, t]], Sin[Times[4, t]]], List[t, 0, 6.283], Rule[PlotPoints, 400]]
+cubic-graph	ParametricPlot[List[t, Subtract[Power[t, 3], Times[3, t]]], List[t, -2.2, 2.2]]
+lissajous-style	ParametricPlot[List[Sin[Times[3, t]], Sin[Times[2, t]]], List[t, 0, 6.283], Rule[PlotStyle, Red]]
+lissajous-label	ParametricPlot[List[Sin[Times[3, t]], Sin[Times[2, t]]], List[t, 0, 6.283], Plot[enumeratio`Label, "3:2"]]

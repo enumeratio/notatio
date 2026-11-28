@@ -1,3 +1,11 @@
-id	section	role	expr	expected	caption
-list	Basic		[Chart, [List, 1, 2, 3]]	[Chart, [List, 1, 2, 3]]	held inert: it evaluates to itself, and is drawn by the element
-pie	Basic		[Chart, [List, 1, 2, 3], "'pie'"]	[Chart, [List, 1, 2, 3], "'pie'"]	a second argument names the kind of chart; still inert
+id	section	role	expr	expected	caption	boxes
+list	Basic		[Chart, [List, 1, 2, 3]]	[Chart, [List, 1, 2, 3]]	held inert: it evaluates to itself, and is drawn by the element	
+pie	Basic		[Chart, [List, 1, 2, 3], "'pie'"]	[Chart, [List, 1, 2, 3], "'pie'"]	a second argument names the kind of chart; still inert	
+auto-bar	Basic		[Chart, [List, 3, 1, 4, 1, 5]]	[Chart, [List, 3, 1, 4, 1, 5]]	A short list of numbers charts as bars	{head: GraphicsBox, marks: {RectangleBox: 5}, roles: {Bar: 5}}
+auto-histogram	Basic		[Chart, [List, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7]]	[Chart, [List, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7]]	A long list charts as a histogram	{head: GraphicsBox, marks: {RectangleBox: 5}, roles: {Bar: 5}}
+auto-array-three	Basic		[Chart, [List, [List, 1, 2, 3], [List, 4, 5, 6], [List, 7, 8, 9]]]	[Chart, [List, [List, 1, 2, 3], [List, 4, 5, 6], [List, 7, 8, 9]]]	A matrix with more than two columns charts as an array plot	{head: GraphicsBox, marks: {RectangleBox: 9}, roles: {Cell: 9}}
+auto-pairs	Basic		[Chart, [List, [Tuple, 1, 2], [Tuple, 2, 1], [Tuple, 3, 4]]]	[Chart, [List, [Tuple, 1, 2], [Tuple, 2, 1], [Tuple, 3, 4]]]	Pairs chart as points, so a two-column matrix is read as pairs	{head: GraphicsBox, marks: {PointBox: 1}, roles: {Series: 1}}
+auto-box	Basic		[Chart, [List, [List, 1, 2, 3, 4, 9], [List, 2, 3, 3, 4]]]	[Chart, [List, [List, 1, 2, 3, 4, 9], [List, 2, 3, 3, 4]]]	Rows of unequal length are box-whisker series	{head: GraphicsBox, marks: {LineBox: 8, RectangleBox: 2}, roles: {Whisker: 2, Cap: 4, Box: 2, Median: 2}}
+named-pie	Scope		[Chart, [List, 3, 2, 1], "'pie'"]	[Chart, [List, 3, 2, 1], "'pie'"]	A second argument names the kind of chart	{head: GraphicsBox, marks: {DiskBox: 3}, roles: {Wedge: 3}}
+named-histogram	Scope		[Chart, [List, 1, 2, 2, 3, 3, 3], "'histogram'"]	[Chart, [List, 1, 2, 2, 3, 3, 3], "'histogram'"]	A named kind overrides the guess; Sturges' rule leaves an empty bin here	{head: GraphicsBox, marks: {RectangleBox: 4}, roles: {Bar: 4}}
+named-bar-long	Scope		[Chart, [List, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7], "'bar'"]	[Chart, [List, 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 6, 6, 7], "'bar'"]	A long list is a histogram unless told otherwise	{head: GraphicsBox, marks: {RectangleBox: 16}, roles: {Bar: 16}}
